@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رف — صفحة المحل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  :root {
+    --bg: #F5F2EC;
+    --bg2: #EDE8DC;
+    --card: #FFFFFF;
+    --gold: #C9A84C;
+    --gold2: #A07828;
+    --black: #0A0A0A;
+    --text: #0A0A0A;
+    --text2: #555;
+    --text3: #888;
+    --border: #D8D3C8;
+    --green: #2E7D32;
+    --green-bg: #E8F5E9;
+    --red: #C62828;
+    --red-bg: #FFEBEE;
+    --r: 8px;
+    --rl: 12px;
+    --font: 'Tajawal', sans-serif;
+    --fdisplay: 'Playfair Display', serif;
+    --fen: 'DM Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(245,242,236,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(201,168,76,0.3);
+    padding: 0 40px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .nav-logo { font-family: var(--fdisplay); font-size: 28px; font-weight: 900; color: var(--gold); text-decoration: none; }
+  .nav-logo span { color: var(--text); font-size: 11px; font-family: var(--fen); font-weight: 300; letter-spacing: 3px; display: block; margin-top: -6px; }
+  .nav-links { display: flex; align-items: center; gap: 8px; }
+  .nav-link { color: var(--text3); text-decoration: none; font-size: 14px; padding: 6px 12px; border-radius: var(--r); transition: color .2s; }
+  .nav-link:hover { color: var(--text); }
+  .nav-actions { display: flex; align-items: center; gap: 8px; }
+  .btn-ghost { padding: 8px 16px; border: 1px solid var(--border); border-radius: var(--r); background: transparent; color: var(--text2); font-family: var(--font); font-size: 13px; cursor: pointer; transition: all .2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-gold { padding: 8px 20px; border: none; border-radius: var(--r); background: var(--gold); color: var(--black); font-family: var(--font); font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-gold:hover { background: var(--gold2); }
+  .nav-ico { width: 40px; height: 40px; border: 1px solid var(--border); border-radius: var(--r); display: flex; align-items: center; justify-content: center; color: var(--text3); cursor: pointer; background: transparent; font-size: 18px; position: relative; transition: all .2s; }
+  .nav-ico:hover { border-color: var(--gold); color: var(--gold); }
+  .cart-badge { position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; background: var(--gold); border-radius: 50%; font-size: 10px; color: var(--black); font-weight: 700; display: flex; align-items: center; justify-content: center; }
+
+  /* BREADCRUMB */
+  .breadcrumb { padding: 14px 40px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text3); border-bottom: 1px solid var(--border); background: var(--card); }
+  .breadcrumb a { color: var(--text3); text-decoration: none; transition: color .2s; }
+  .breadcrumb a:hover { color: var(--gold); }
+
+  /* STORE HERO */
+  .store-hero {
+    background: var(--black);
+    position: relative; overflow: hidden;
+    height: 220px;
+  }
+  .hero-pattern {
+    position: absolute; inset: 0;
+    background-image: linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+  .hero-glow {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(201,168,76,0.08) 0%, transparent 70%);
+  }
+  .store-hero-content {
+    position: relative; z-index: 2;
+    max-width: 1200px; margin: 0 auto;
+    padding: 0 40px;
+    height: 100%; display: flex; align-items: flex-end;
+    padding-bottom: 0;
+  }
+  .store-avatar-wrap {
+    position: relative; margin-bottom: -40px;
+  }
+  .store-avatar {
+    width: 100px; height: 100px;
+    background: var(--bg2);
+    border: 3px solid var(--gold);
+    border-radius: var(--rl);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px; color: var(--gold);
+  }
+  .store-verified-badge {
+    position: absolute; bottom: -6px; right: -6px;
+    width: 24px; height: 24px;
+    background: var(--gold); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: var(--black);
+    border: 2px solid var(--black);
+  }
+  .store-hero-info { padding: 0 20px 16px; flex: 1; }
+  .store-hero-name { font-family: var(--fdisplay); font-size: 28px; font-weight: 700; color: #F5F2EC; margin-bottom: 6px; }
+  .store-hero-meta { display: flex; align-items: center; gap: 14px; }
+  .store-hero-tag { font-size: 12px; color: var(--gold); background: rgba(201,168,76,0.15); padding: 3px 10px; border-radius: 20px; border: 0.5px solid rgba(201,168,76,0.3); }
+  .store-hero-stat { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #888; }
+  .store-hero-stat i { font-size: 14px; }
+  .store-hero-actions { display: flex; align-items: flex-end; gap: 10px; padding-bottom: 20px; }
+  .btn-follow { padding: 10px 20px; border: 1px solid rgba(201,168,76,0.5); border-radius: var(--r); background: transparent; color: var(--gold); font-family: var(--font); font-size: 13px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 6px; }
+  .btn-follow:hover { background: rgba(201,168,76,0.1); }
+  .btn-share { width: 40px; height: 40px; border: 1px solid #333; border-radius: var(--r); background: transparent; color: #888; font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+  .btn-share:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* STORE INFO BAR */
+  .store-info-bar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 0 40px;
+    max-width: 100%;
+  }
+  .store-info-inner {
+    max-width: 1200px; margin: 0 auto;
+    padding: 52px 0 16px;
+    display: flex; align-items: flex-start; gap: 32px;
+  }
+  .store-desc { flex: 1; font-size: 14px; color: var(--text2); line-height: 1.7; max-width: 500px; }
+  .store-stats { display: flex; gap: 28px; }
+  .store-stat { text-align: center; }
+  .store-stat-num { font-size: 22px; font-weight: 700; color: var(--text); font-family: var(--fen); }
+  .store-stat-lbl { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .store-hours { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .status-open { color: var(--green); background: var(--green-bg); padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+  .status-closed { color: var(--red); background: var(--red-bg); padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+  .hours-text { font-size: 12px; color: var(--text3); }
+
+  /* SOCIAL ROW */
+  .social-row { display: flex; gap: 8px; margin-top: 10px; }
+  .social-btn { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: var(--r); display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 15px; cursor: pointer; transition: all .2s; text-decoration: none; }
+  .social-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* STORE NAV TABS */
+  .store-tabs {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 64px; z-index: 50;
+  }
+  .store-tabs-inner {
+    max-width: 1200px; margin: 0 auto;
+    padding: 0 40px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .tabs-row { display: flex; }
+  .store-tab { padding: 14px 18px; font-size: 14px; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all .2s; font-weight: 500; }
+  .store-tab.on { color: var(--text); border-bottom-color: var(--gold); }
+  .store-tab:hover { color: var(--text); }
+
+  /* FILTER BAR */
+  .filter-bar {
+    max-width: 1200px; margin: 24px auto 0;
+    padding: 0 40px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .search-mini {
+    display: flex; align-items: center; gap: 0;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--r); overflow: hidden; transition: border-color .2s;
+    flex: 1; max-width: 320px;
+  }
+  .search-mini:focus-within { border-color: var(--gold); }
+  .search-mini i { padding: 0 12px; color: var(--text3); font-size: 16px; }
+  .search-mini input { flex: 1; border: none; outline: none; background: transparent; font-family: var(--font); font-size: 14px; color: var(--text); padding: 10px 0; }
+  .search-mini input::placeholder { color: var(--text3); }
+  .filter-chip { padding: 7px 16px; border: 1px solid var(--border); border-radius: 20px; background: transparent; color: var(--text3); font-family: var(--font); font-size: 13px; cursor: pointer; transition: all .2s; }
+  .filter-chip:hover, .filter-chip.on { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.06); }
+  .sort-select { padding: 8px 14px; border: 1px solid var(--border); border-radius: var(--r); background: var(--card); color: var(--text2); font-family: var(--font); font-size: 13px; cursor: pointer; outline: none; margin-right: auto; }
+
+  /* PRODUCTS GRID */
+  .products-section { max-width: 1200px; margin: 24px auto 60px; padding: 0 40px; }
+  .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+  .product-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; cursor: pointer; transition: all .25s; position: relative; }
+  .product-card:hover { border-color: rgba(201,168,76,0.5); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+  .product-img { height: 220px; background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 48px; color: var(--bg); position: relative; }
+  .product-img i { color: var(--border); }
+  .product-wish { position: absolute; top: 10px; left: 10px; width: 30px; height: 30px; background: rgba(245,242,236,0.85); border: none; border-radius: 50%; color: var(--text3); cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+  .product-wish:hover { color: #E05555; }
+  .product-sale { position: absolute; top: 10px; right: 10px; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; background: #E05555; color: white; }
+  .product-info { padding: 14px; }
+  .product-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 8px; line-height: 1.4; }
+  .product-bottom { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .product-price { font-size: 16px; font-weight: 700; color: var(--gold); }
+  .product-price-old { font-size: 12px; color: var(--text3); text-decoration: line-through; margin-right: 5px; }
+  .product-rating { display: flex; align-items: center; gap: 3px; font-size: 12px; color: var(--text3); }
+  .product-rating i { color: var(--gold); font-size: 12px; }
+  .add-cart { width: 100%; padding: 9px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); color: var(--text); font-family: var(--font); font-size: 13px; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .add-cart:hover { background: var(--gold); color: var(--black); border-color: var(--gold); font-weight: 700; }
+
+  /* POLICY SECTION */
+  .policy-section { max-width: 1200px; margin: 0 auto 60px; padding: 0 40px; display: none; }
+  .policy-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  .policy-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--rl); padding: 24px; }
+  .policy-icon { font-size: 28px; color: var(--gold); margin-bottom: 12px; }
+  .policy-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .policy-text { font-size: 13px; color: var(--text2); line-height: 1.7; }
+
+  /* REVIEWS SECTION */
+  .reviews-section { max-width: 1200px; margin: 0 auto 60px; padding: 0 40px; display: none; }
+
+  /* CLOSED BANNER */
+  .closed-banner {
+    background: var(--red-bg); border: 1px solid rgba(198,40,40,0.2);
+    border-radius: var(--rl); padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+    margin: 24px auto 0; max-width: 1200px; padding-left: 40px; padding-right: 40px;
+    display: none;
+  }
+  .closed-banner i { color: var(--red); font-size: 20px; }
+  .closed-banner-text { font-size: 14px; color: var(--red); font-weight: 500; }
+  .closed-banner-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  /* FOOTER */
+  footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 24px 40px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text3); }
+
+  @media (max-width: 768px) {
+    nav { padding: 0 16px; }
+    .store-hero-content { padding: 0 16px; }
+    .store-info-inner { flex-direction: column; padding: 52px 16px 16px; gap: 16px; }
+    .store-tabs-inner { padding: 0 16px; }
+    .filter-bar { padding: 0 16px; }
+    .products-section { padding: 0 16px; }
+    .products-grid { grid-template-columns: repeat(2,1fr); }
+    .store-stats { gap: 16px; }
+    .policy-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-actions">
+    <button class="nav-ico"><i class="ti ti-shopping-cart"></i><span class="cart-badge">3</span></button>
+    <button class="nav-ico"><i class="ti ti-heart"></i></button>
+    <a href="#" class="btn-ghost"><i class="ti ti-user"></i> تسجيل الدخول</a>
+    <a href="#" class="btn-gold">إنشاء حساب</a>
+  </div>
+  <div class="nav-links">
+    <a href="#" class="nav-link">المحلات</a>
+    <a href="#" class="nav-link">العروض</a>
+    <a href="#" class="nav-link">الترندات</a>
+  </div>
+  <a href="#" class="nav-logo">رف<span>RAF MARKETPLACE</span></a>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="#">الرئيسية</a>
+  <i class="ti ti-chevron-left"></i>
+  <a href="#">المحلات</a>
+  <i class="ti ti-chevron-left"></i>
+  <span style="color:var(--text);">Casa Mode</span>
+</div>
+
+<!-- STORE HERO -->
+<div class="store-hero">
+  <div class="hero-pattern"></div>
+  <div class="hero-glow"></div>
+  <div class="store-hero-content">
+    <div class="store-avatar-wrap">
+      <div class="store-avatar"><i class="ti ti-hanger"></i></div>
+      <div class="store-verified-badge"><i class="ti ti-check"></i></div>
+    </div>
+    <div class="store-hero-info">
+      <div class="store-hero-name">Casa Mode</div>
+      <div class="store-hero-meta">
+        <span class="store-hero-tag">ملابس وأزياء</span>
+        <div class="store-hero-stat"><i class="ti ti-star-filled" style="color:var(--gold);"></i> 4.9</div>
+        <div class="store-hero-stat"><i class="ti ti-shopping-bag"></i> 1,284 طلب</div>
+        <div class="store-hero-stat"><i class="ti ti-users"></i> 3.2K متابع</div>
+      </div>
+    </div>
+    <div class="store-hero-actions">
+      <button class="btn-follow"><i class="ti ti-heart"></i> تابع المحل</button>
+      <button class="btn-share"><i class="ti ti-share"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- STORE INFO BAR -->
+<div class="store-info-bar">
+  <div class="store-info-inner">
+    <div>
+      <p class="store-desc">متجر Casa Mode للملابس والأزياء العصرية — نقدم أحدث صيحات الموضة بجودة عالية وأسعار منافسة. نخدم الكويت منذ 2019.</p>
+      <div class="social-row">
+        <a class="social-btn" title="إنستغرام"><i class="ti ti-brand-instagram"></i></a>
+        <a class="social-btn" title="تيك توك"><i class="ti ti-brand-tiktok"></i></a>
+        <a class="social-btn" title="واتساب"><i class="ti ti-brand-whatsapp"></i></a>
+        <a class="social-btn" title="تويتر"><i class="ti ti-brand-x"></i></a>
+      </div>
+    </div>
+    <div class="store-stats">
+      <div class="store-stat">
+        <div class="store-stat-num">284</div>
+        <div class="store-stat-lbl">منتج</div>
+      </div>
+      <div class="store-stat">
+        <div class="store-stat-num">4.9</div>
+        <div class="store-stat-lbl">تقييم</div>
+      </div>
+      <div class="store-stat">
+        <div class="store-stat-num">98%</div>
+        <div class="store-stat-lbl">رضا العملاء</div>
+      </div>
+    </div>
+    <div style="min-width:180px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span class="status-open"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مفتوح الآن</span>
+        <span class="hours-text">يغلق الساعة 11م</span>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">السبت – الخميس: 10ص – 11م</div>
+      <div style="font-size:12px;color:var(--text3);">الجمعة: 2م – 11م</div>
+    </div>
+  </div>
+</div>
+
+<!-- STORE TABS -->
+<div class="store-tabs">
+  <div class="store-tabs-inner">
+    <div class="tabs-row">
+      <div class="store-tab on" onclick="switchTab('products', this)">المنتجات</div>
+      <div class="store-tab" onclick="switchTab('reviews', this)">التقييمات (128)</div>
+      <div class="store-tab" onclick="switchTab('policy', this)">سياسة الإرجاع</div>
+    </div>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar" id="filter-bar">
+  <div class="search-mini">
+    <i class="ti ti-search"></i>
+    <input type="text" placeholder="ابحث في المنتجات...">
+  </div>
+  <button class="filter-chip on" onclick="filterCat(this)">الكل</button>
+  <button class="filter-chip" onclick="filterCat(this)">قمصان</button>
+  <button class="filter-chip" onclick="filterCat(this)">بناطيل</button>
+  <button class="filter-chip" onclick="filterCat(this)">فساتين</button>
+  <button class="filter-chip" onclick="filterCat(this)">عروض</button>
+  <select class="sort-select">
+    <option>الأكثر مبيعاً</option>
+    <option>الأحدث</option>
+    <option>السعر: الأقل</option>
+    <option>السعر: الأعلى</option>
+    <option>الأعلى تقييماً</option>
+  </select>
+</div>
+
+<!-- PRODUCTS SECTION -->
+<div class="products-section" id="tab-products">
+  <div class="products-grid">
+
+    <div class="product-card">
+      <div class="product-img">
+        <i class="ti ti-shirt"></i>
+        <button class="product-wish"><i class="ti ti-heart"></i></button>
+        <span class="product-sale">-20%</span>
+      </div>
+      <div class="product-info">
+        <div class="product-name">قميص أوفرسايز كلاسيك</div>
+        <div class="product-bottom">
+          <div><span class="product-price-old">15.000</span><span class="product-price">12.000 د.ك</span></div>
+          <div class="product-rating"><i class="ti ti-star-filled"></i> 4.8</div>
+        </div>
+        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img"><i class="ti ti-shirt"></i><button class="product-wish"><i class="ti ti-heart"></i></button></div>
+      <div class="product-info">
+        <div class="product-name">قميص لينن بريميوم</div>
+        <div class="product-bottom">
+          <div><span class="product-price">18.000 د.ك</span></div>
+          <div class="product-rating"><i class="ti ti-star-filled"></i> 4.7</div>
+        </div>
+        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">
+        <i class="ti ti-shirt"></i>
+        <button class="product-wish"><i class="ti ti-heart"></i></button>
+        <span class="product-sale">-15%</span>
+      </div>
+      <div class="product-info">
+        <div class="product-name">بنطلون كاجوال واسع</div>
+        <div class="product-bottom">
+          <div><span class="product-price-old">22.000</span><span class="product-price">18.700 د.ك</span></div>
+          <div class="product-rating"><i class="ti ti-star-filled"></i> 4.9</div>
+        </div>
+        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img"><i class="ti ti-shirt"></i><button class="product-wish"><i class="ti ti-heart"></i></button></div>
+      <div class="product-info">
+        <div class="product-name">هودي أوفرسايز فاخر</div>
+        <div class="product-bottom">
+          <div><span class="product-price">25.000 د.ك</span></div>
+          <div class="product-rating"><i class="ti ti-star-filled"></i> 4.6</div>
+        </div>
+        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img"><i class="ti ti-shirt"></i><button class="product-wish"><i class="ti ti-heart"></i></button></div>
+      <div class="product-info">
+        <div class="product-name">تيشيرت بيسك كلاسيك</div>
+        <div class="product-bottom">
+          <div><span class="product-price">8.500 د.ك</span></div>
+          <div class="product-rating"><i class="ti ti-star-filled"></i> 4.8</div>
+        </div>
+        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">
+        <i class="ti ti-shirt"></i>
+        <button class="product-wish"><i class="ti ti-heart"></i></button>
+        <span class="product-sale">جديد</span>
+      </div>
+      <div class="product-info">
+        <div class="product-name">جاكيت شتوي خفيف</div>
+        <div class="product-bottom">
+          <div><span class="product-price">45.000 د.ك</span></div>
+          <div class="product-rating"><i class="ti ti-star-filled"></i> 5.0</div>
+        </div>
+        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img"><i class="ti ti-shirt"></i><button class="product-wish"><i class="ti ti-heart"></i></button></div>
+      <div class="product-info">
+        <div class="product-name">شورت رياضي كوول</div>
+        <div class="product-bottom">
+          <div><span class="product-price">14.000 د.ك</span></div>
+          <div class="product-rating"><i class="ti ti-star-filled"></i> 4.5</div>
+        </div>
+        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">
+        <i class="ti ti-shirt"></i>
+        <button class="product-wish"><i class="ti ti-heart"></i></button>
+        <span class="product-sale">-10%</span>
+      </div>
+      <div class="product-info">
+        <div class="product-name">قميص بولو فاخر</div>
+        <div class="product-bottom">
+          <div><span class="product-price-old">24.000</span><span class="product-price">21.600 د.ك</span></div>
+          <div class="product-rating"><i class="ti ti-star-filled"></i> 4.7</div>
+        </div>
+        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LOAD MORE -->
+  <div style="text-align:center;margin-top:32px;">
+    <button style="padding:12px 36px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:14px;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">
+      عرض المزيد (276 منتج)
+    </button>
+  </div>
+</div>
+
+<!-- REVIEWS SECTION -->
+<div class="reviews-section" id="tab-reviews" style="display:none;">
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:32px;text-align:center;color:var(--text3);">
+    <i class="ti ti-star" style="font-size:40px;color:var(--gold);margin-bottom:12px;display:block;"></i>
+    <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;">128 تقييم</div>
+    <div style="font-size:14px;">متوسط التقييم: <strong style="color:var(--gold);">4.9 / 5</strong></div>
+  </div>
+</div>
+
+<!-- POLICY SECTION -->
+<div class="policy-section" id="tab-policy" style="display:none;">
+  <div class="policy-grid">
+    <div class="policy-card">
+      <div class="policy-icon"><i class="ti ti-refresh"></i></div>
+      <div class="policy-title">سياسة الإرجاع</div>
+      <div class="policy-text">يمكن إرجاع المنتج خلال 7 أيام من تاريخ الاستلام بشرط أن يكون بحالته الأصلية وغير مستخدم مع الكرت والتاغ.</div>
+    </div>
+    <div class="policy-card">
+      <div class="policy-icon"><i class="ti ti-exchange"></i></div>
+      <div class="policy-title">الاستبدال</div>
+      <div class="policy-text">استبدال مجاني في حال وجود عيب مصنعي أو خطأ في الطلب. يتم التواصل مع دعم رف لتنسيق عملية الاستبدال.</div>
+    </div>
+    <div class="policy-card">
+      <div class="policy-icon"><i class="ti ti-headset"></i></div>
+      <div class="policy-title">الدعم والمساعدة</div>
+      <div class="policy-text">لأي استفسار أو شكوى تواصل مع دعم رف مباشرة وسيتم الرد خلال 24 ساعة من أيام العمل.</div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div>جميع الحقوق محفوظة © 2026 رف</div>
+  <a href="#" style="font-family:var(--fdisplay);font-size:20px;font-weight:900;color:var(--gold);text-decoration:none;">رف</a>
+</footer>
+
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.store-tab').forEach(t => t.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('tab-products').style.display = id === 'products' ? 'block' : 'none';
+    document.getElementById('tab-reviews').style.display = id === 'reviews' ? 'block' : 'none';
+    document.getElementById('tab-policy').style.display = id === 'policy' ? 'block' : 'none';
+    document.getElementById('filter-bar').style.display = id === 'products' ? 'flex' : 'none';
+  }
+
+  function filterCat(btn) {
+    document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+  }
+
+  document.querySelectorAll('.product-wish').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const i = btn.querySelector('i');
+      if (i.classList.contains('ti-heart')) {
+        i.classList.replace('ti-heart', 'ti-heart-filled');
+        btn.style.color = '#E05555';
+      } else {
+        i.classList.replace('ti-heart-filled', 'ti-heart');
+        btn.style.color = '';
+      }
+    });
+  });
+</script>
+</body>
+</html>

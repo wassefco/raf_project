@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رف — تسجيل الدخول</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  :root {
+    --bg: #F5F2EC;
+    --bg2: #EDE8DC;
+    --card: #FFFFFF;
+    --gold: #C9A84C;
+    --gold2: #A07828;
+    --black: #0A0A0A;
+    --text: #0A0A0A;
+    --text2: #555;
+    --text3: #888;
+    --border: #D8D3C8;
+    --r: 8px;
+    --rl: 16px;
+    --font: 'Tajawal', sans-serif;
+    --fdisplay: 'Playfair Display', serif;
+    --fen: 'DM Sans', sans-serif;
+    --green: #2E7D32;
+    --green-bg: #E8F5E9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    display: flex;
+  }
+
+  /* LEFT PANEL — DECORATIVE */
+  .left-panel {
+    width: 44%;
+    background: var(--black);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 48px;
+  }
+  .panel-pattern {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.05) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .panel-glow {
+    position: absolute;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .panel-content { position: relative; z-index: 2; text-align: center; }
+  .panel-logo {
+    font-family: var(--fdisplay);
+    font-size: 72px; font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .panel-logo-en {
+    font-family: var(--fen);
+    font-size: 11px; font-weight: 300;
+    color: #333; letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-bottom: 48px;
+  }
+  .panel-divider {
+    width: 40px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 0 auto 32px;
+  }
+  .panel-title {
+    font-family: var(--fdisplay);
+    font-size: 24px; font-weight: 700;
+    color: #F5F2EC; margin-bottom: 12px;
+    line-height: 1.3;
+  }
+  .panel-sub {
+    font-size: 14px; color: #555;
+    line-height: 1.8; max-width: 280px;
+  }
+  .panel-features { margin-top: 48px; display: flex; flex-direction: column; gap: 16px; }
+  .panel-feat {
+    display: flex; align-items: center; gap: 14px;
+    text-align: right;
+  }
+  .feat-ico {
+    width: 36px; height: 36px; border-radius: var(--r);
+    background: rgba(201,168,76,0.1);
+    border: 0.5px solid rgba(201,168,76,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px; color: var(--gold); flex-shrink: 0;
+  }
+  .feat-text { font-size: 13px; color: #666; }
+  .feat-title { font-size: 13px; font-weight: 500; color: #CCC; margin-bottom: 2px; }
+
+  /* RIGHT PANEL — FORM */
+  .right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 48px;
+    overflow-y: auto;
+  }
+  .form-box { width: 100%; max-width: 420px; }
+
+  .form-header { margin-bottom: 32px; }
+  .form-title { font-family: var(--fdisplay); font-size: 28px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .form-sub { font-size: 14px; color: var(--text3); line-height: 1.6; }
+
+  /* METHOD TABS */
+  .method-tabs {
+    display: grid; grid-template-columns: repeat(3,1fr);
+    gap: 8px; margin-bottom: 28px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--rl);
+    padding: 5px;
+  }
+  .method-tab {
+    padding: 10px 8px;
+    border-radius: 10px;
+    border: none; background: transparent;
+    color: var(--text3); font-family: var(--font);
+    font-size: 13px; cursor: pointer;
+    transition: all .2s;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 5px;
+  }
+  .method-tab i { font-size: 20px; }
+  .method-tab.on {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+  .method-tab.on i { color: var(--gold); }
+
+  /* FORM FIELDS */
+  .field { margin-bottom: 18px; }
+  .field-label { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 7px; display: block; }
+  .field-input {
+    width: 100%; padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    background: var(--card);
+    color: var(--text); font-family: var(--font);
+    font-size: 14px; outline: none;
+    transition: border-color .2s;
+    display: flex; align-items: center;
+  }
+  .field-input:focus { border-color: var(--gold); }
+  .field-input::placeholder { color: var(--text3); }
+  .input-wrap { position: relative; }
+  .input-wrap input { padding-right: 44px; }
+  .input-prefix {
+    position: absolute; right: 14px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px; color: var(--text3);
+  }
+
+  /* OTP FIELD */
+  .otp-wrap { display: flex; gap: 10px; }
+  .otp-input {
+    flex: 1; padding: 14px 0;
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    background: var(--card);
+    color: var(--text); font-family: var(--fen);
+    font-size: 22px; font-weight: 700;
+    text-align: center; outline: none;
+    transition: border-color .2s;
+    width: 56px;
+  }
+  .otp-input:focus { border-color: var(--gold); }
+
+  /* SEND BTN */
+  .send-otp {
+    width: 100%; padding: 13px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--r); color: var(--text2);
+    font-family: var(--font); font-size: 14px;
+    cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-bottom: 18px;
+  }
+  .send-otp:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* MAIN BTN */
+  .btn-main {
+    width: 100%; padding: 14px;
+    background: var(--gold); border: none;
+    border-radius: var(--r); color: var(--black);
+    font-family: var(--font); font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-bottom: 20px;
+  }
+  .btn-main:hover { background: var(--gold2); }
+
+  /* DIVIDER */
+  .or-divider {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 20px; color: var(--text3); font-size: 12px;
+  }
+  .or-divider::before, .or-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* SOCIAL BTNS */
+  .social-btns { display: flex; gap: 10px; margin-bottom: 28px; }
+  .social-login {
+    flex: 1; padding: 12px;
+    border: 1px solid var(--border); border-radius: var(--r);
+    background: var(--card); cursor: pointer;
+    transition: all .2s; font-family: var(--font);
+    font-size: 13px; color: var(--text2);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .social-login:hover { border-color: var(--gold); color: var(--text); }
+  .social-login i { font-size: 18px; }
+
+  /* TERMS */
+  .terms-text { font-size: 12px; color: var(--text3); text-align: center; line-height: 1.7; }
+  .terms-text a { color: var(--gold); text-decoration: none; }
+  .terms-text a:hover { text-decoration: underline; }
+
+  /* BACK LINK */
+  .back-link {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--text3);
+    text-decoration: none; margin-bottom: 32px;
+    transition: color .2s;
+  }
+  .back-link:hover { color: var(--gold); }
+
+  /* STEP INDICATOR */
+  .steps { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; }
+  .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: all .3s; }
+  .step-dot.on { background: var(--gold); width: 24px; border-radius: 4px; }
+  .step-label { font-size: 12px; color: var(--text3); margin-right: auto; }
+
+  /* PANEL CONTENT SWITCH */
+  .form-panel { display: none; }
+  .form-panel.on { display: block; }
+
+  @media (max-width: 768px) {
+    .left-panel { display: none; }
+    .right-panel { padding: 32px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <div class="panel-pattern"></div>
+  <div class="panel-glow"></div>
+  <div class="panel-content">
+    <div class="panel-logo">رف</div>
+    <div class="panel-logo-en">Ruph Marketplace</div>
+    <div class="panel-divider"></div>
+    <div class="panel-title">أفضل المحلات الكويتية في مكان واحد</div>
+    <p class="panel-sub">تسوّق من محلات الملابس والأحذية والاكسسوارات والهواتف بسهولة وأمان.</p>
+    <div class="panel-features">
+      <div class="panel-feat">
+        <div class="feat-ico"><i class="ti ti-truck" aria-hidden="true"></i></div>
+        <div>
+          <div class="feat-title">توصيل سريع</div>
+          <div class="feat-text">لجميع مناطق الكويت</div>
+        </div>
+      </div>
+      <div class="panel-feat">
+        <div class="feat-ico"><i class="ti ti-shield-check" aria-hidden="true"></i></div>
+        <div>
+          <div class="feat-title">تسوق آمن</div>
+          <div class="feat-text">دفع عند الاستلام أو K-Net</div>
+        </div>
+      </div>
+      <div class="panel-feat">
+        <div class="feat-ico"><i class="ti ti-refresh" aria-hidden="true"></i></div>
+        <div>
+          <div class="feat-title">إرجاع مجاني</div>
+          <div class="feat-text">خلال 7 أيام من الاستلام</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <div class="form-box">
+
+    <a href="#" class="back-link"><i class="ti ti-arrow-right"></i> العودة للتسوق</a>
+
+    <div class="form-header">
+      <div class="form-title">أهلاً بك في رف</div>
+      <div class="form-sub">سجّل دخولك أو أنشئ حساباً جديداً للمتابعة</div>
+    </div>
+
+    <!-- STEP INDICATOR -->
+    <div class="steps">
+      <div class="step-dot on" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+      <span class="step-label" id="step-label">الخطوة 1 من 2</span>
+    </div>
+
+    <!-- STEP 1: METHOD SELECTION -->
+    <div class="form-panel on" id="step1">
+
+      <!-- METHOD TABS -->
+      <div class="method-tabs">
+        <button class="method-tab on" onclick="selectMethod(this, 'whatsapp')">
+          <i class="ti ti-brand-whatsapp"></i>
+          واتساب
+        </button>
+        <button class="method-tab" onclick="selectMethod(this, 'email')">
+          <i class="ti ti-mail"></i>
+          البريد
+        </button>
+        <button class="method-tab" onclick="selectMethod(this, 'sms')">
+          <i class="ti ti-device-mobile"></i>
+          SMS
+        </button>
+      </div>
+
+      <!-- WHATSAPP PANEL -->
+      <div id="method-whatsapp">
+        <div class="field">
+          <label class="field-label">رقم الواتساب</label>
+          <div class="input-wrap">
+            <input type="tel" class="field-input" placeholder="XXXXXXXX" style="padding-right:80px;direction:ltr;text-align:right;">
+            <span class="input-prefix" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--text2);">
+              🇰🇼 +965
+            </span>
+          </div>
+        </div>
+        <button class="btn-main" onclick="goStep2()">
+          <i class="ti ti-brand-whatsapp"></i>
+          إرسال رمز واتساب
+        </button>
+      </div>
+
+      <!-- EMAIL PANEL -->
+      <div id="method-email" style="display:none;">
+        <div class="field">
+          <label class="field-label">البريد الإلكتروني</label>
+          <div class="input-wrap">
+            <input type="email" class="field-input" placeholder="example@email.com" style="direction:ltr;text-align:right;padding-right:44px;">
+            <span class="input-prefix"><i class="ti ti-mail"></i></span>
+          </div>
+        </div>
+        <button class="btn-main" onclick="goStep2()">
+          <i class="ti ti-send"></i>
+          إرسال رمز التحقق
+        </button>
+      </div>
+
+      <!-- SMS PANEL -->
+      <div id="method-sms" style="display:none;">
+        <div class="field">
+          <label class="field-label">رقم الجوال</label>
+          <div class="input-wrap">
+            <input type="tel" class="field-input" placeholder="XXXXXXXX" style="padding-right:80px;direction:ltr;text-align:right;">
+            <span class="input-prefix" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--text2);">
+              🇰🇼 +965
+            </span>
+          </div>
+        </div>
+        <button class="btn-main" onclick="goStep2()">
+          <i class="ti ti-message"></i>
+          إرسال رمز SMS
+        </button>
+      </div>
+
+      <div class="or-divider">أو سجّل بـ</div>
+
+      <div class="social-btns">
+        <button class="social-login">
+          <i class="ti ti-brand-google" style="color:#EA4335;"></i>
+          Google
+        </button>
+        <button class="social-login">
+          <i class="ti ti-brand-apple"></i>
+          Apple
+        </button>
+      </div>
+
+      <div class="terms-text">
+        بتسجيل الدخول أنت توافق على
+        <a href="#">شروط الاستخدام</a> و
+        <a href="#">سياسة الخصوصية</a>
+      </div>
+
+    </div>
+
+    <!-- STEP 2: OTP VERIFICATION -->
+    <div class="form-panel" id="step2">
+
+      <div style="text-align:center;margin-bottom:28px;">
+        <div style="width:64px;height:64px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--gold);margin:0 auto 16px;">
+          <i class="ti ti-brand-whatsapp" id="otp-icon"></i>
+        </div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:6px;">أدخل رمز التحقق</div>
+        <div style="font-size:13px;color:var(--text3);" id="otp-desc">تم إرسال رمز مكون من 6 أرقام إلى واتساب رقم +965 XXXXXXXX</div>
+      </div>
+
+      <div class="field">
+        <div class="otp-wrap" style="direction:ltr;">
+          <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this, 1)">
+          <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this, 2)">
+          <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this, 3)">
+          <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this, 4)">
+          <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this, 5)">
+          <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this, 6)">
+        </div>
+      </div>
+
+      <button class="btn-main" style="margin-top:8px;">
+        <i class="ti ti-check"></i>
+        تأكيد الدخول
+      </button>
+
+      <div style="text-align:center;margin-bottom:20px;">
+        <span style="font-size:13px;color:var(--text3);">لم يصلك الرمز؟ </span>
+        <a href="#" style="font-size:13px;color:var(--gold);text-decoration:none;" onclick="return false;">إعادة الإرسال (59s)</a>
+      </div>
+
+      <button onclick="goStep1()" style="width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">
+        <i class="ti ti-arrow-right"></i> تغيير طريقة التحقق
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let currentMethod = 'whatsapp';
+
+  function selectMethod(btn, method) {
+    document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('on'));
+    btn.classList.add('on');
+    currentMethod = method;
+    ['whatsapp','email','sms'].forEach(m => {
+      document.getElementById('method-' + m).style.display = m === method ? 'block' : 'none';
+    });
+  }
+
+  function goStep2() {
+    document.getElementById('step1').classList.remove('on');
+    document.getElementById('step2').classList.add('on');
+    document.getElementById('dot1').classList.remove('on');
+    document.getElementById('dot2').classList.add('on');
+    document.getElementById('step-label').textContent = 'الخطوة 2 من 2';
+    const icons = { whatsapp: 'ti-brand-whatsapp', email: 'ti-mail', sms: 'ti-device-mobile' };
+    document.getElementById('otp-icon').className = 'ti ' + icons[currentMethod];
+    document.querySelector('.otp-input').focus();
+  }
+
+  function goStep1() {
+    document.getElementById('step2').classList.remove('on');
+    document.getElementById('step1').classList.add('on');
+    document.getElementById('dot2').classList.remove('on');
+    document.getElementById('dot1').classList.add('on');
+    document.getElementById('step-label').textContent = 'الخطوة 1 من 2';
+  }
+
+  function moveOtp(input, index) {
+    if (input.value.length === 1 && index < 6) {
+      document.querySelectorAll('.otp-input')[index].focus();
+    }
+  }
+</script>
+</body>
+</html>

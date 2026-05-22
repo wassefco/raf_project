@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رف — لوحة التوصيل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;
+  --sb:#0A0A0A;--sb2:#1A1A1A;
+  --gold:#C9A84C;--gold2:#A07828;
+  --text:#0A0A0A;--text2:#555;--text3:#888;
+  --border:#D8D3C8;
+  --green:#2E7D32;--green-bg:#E8F5E9;
+  --red:#C62828;--red-bg:#FFEBEE;
+  --blue:#1565C0;--blue-bg:#E3F2FD;
+  --amber:#E65100;--amber-bg:#FFF3E0;
+  --r:8px;--rl:12px;
+  --font:'Tajawal',sans-serif;
+  --fen:'DM Sans',sans-serif;
+}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex;flex-direction:column;}
+
+/* MODE SWITCHER */
+.mode-bar{background:var(--sb);padding:0;display:flex;align-items:center;height:44px;flex-shrink:0;}
+.mode-btn{padding:0 24px;height:100%;border:none;background:transparent;color:#555;font-family:var(--font);font-size:13px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:7px;border-bottom:2px solid transparent;}
+.mode-btn i{font-size:16px;}
+.mode-btn.on{color:var(--gold);border-bottom-color:var(--gold);background:rgba(201,168,76,.06);}
+.mode-btn:hover{color:#DDD;}
+
+/* PANELS */
+.mode-panel{display:none;flex:1;overflow:hidden;}
+.mode-panel.on{display:flex;}
+
+/* SIDEBAR */
+.sb{width:220px;min-width:220px;background:var(--sb);border-left:1px solid var(--sb2);display:flex;flex-direction:column;height:100%;overflow-y:auto;}
+.sb::-webkit-scrollbar{width:3px;}
+.sb::-webkit-scrollbar-thumb{background:#222;}
+.sb-logo{padding:18px 16px;border-bottom:1px solid var(--sb2);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.sb-mark{width:34px;height:34px;background:var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:17px;font-weight:900;color:#000;flex-shrink:0;}
+.sb-title{font-size:14px;font-weight:700;color:#F5F2EC;}
+.sb-sub{font-size:9px;color:#444;font-family:var(--fen);letter-spacing:2px;}
+.sb-sec{padding:14px 14px 4px;font-size:9px;color:#2A2A2A;letter-spacing:2px;text-transform:uppercase;font-family:var(--fen);}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 14px;margin:1px 8px;border-radius:var(--r);color:#888;cursor:pointer;font-size:13px;transition:all .15s;}
+.sb-item:hover{background:#111;color:#CCC;}
+.sb-item.on{background:rgba(201,168,76,.1);color:var(--gold);border:0.5px solid rgba(201,168,76,.2);}
+.sb-item i{font-size:17px;flex-shrink:0;}
+.sb-n{margin-right:auto;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700;}
+.sb-n.r{background:var(--red-bg);color:var(--red);}
+.sb-n.g{background:rgba(201,168,76,.15);color:var(--gold2);}
+.sb-foot{margin-top:auto;padding:14px 12px;border-top:1px solid var(--sb2);flex-shrink:0;}
+.sb-user{display:flex;align-items:center;gap:9px;padding:10px 12px;background:#111;border-radius:var(--r);}
+.sb-av{width:32px;height:32px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000;flex-shrink:0;}
+.sb-un{font-size:12px;font-weight:500;color:#DDD;}
+.sb-ur{font-size:10px;color:#444;}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+.top{height:56px;flex-shrink:0;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;}
+.top-t{font-size:15px;font-weight:700;}
+.top-b{font-size:12px;color:var(--text3);margin-right:6px;}
+.top-act{margin-right:auto;display:flex;gap:8px;align-items:center;}
+.btn{display:flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--r);font-family:var(--font);font-size:12px;cursor:pointer;border:none;transition:all .15s;}
+.btn-p{background:var(--gold);color:#000;font-weight:700;}
+.btn-p:hover{background:var(--gold2);}
+.btn-g{background:transparent;border:1px solid var(--border);color:var(--text2);}
+.btn-g:hover{border-color:var(--gold);color:var(--gold);}
+.ico{width:34px;height:34px;border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;background:transparent;font-size:16px;position:relative;transition:all .2s;}
+.ico:hover{border-color:var(--gold);color:var(--gold);}
+.dot{position:absolute;top:-3px;right:-3px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid var(--card);}
+
+.cnt{flex:1;overflow-y:auto;padding:24px;}
+.cnt::-webkit-scrollbar{width:5px;}
+.cnt::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* SEC PANELS */
+.sec-panel{display:none;}
+.sec-panel.on{display:block;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.s-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:18px;}
+.s-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.s-ico{width:38px;height:38px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:19px;}
+.s-chg{font-size:11px;font-weight:500;display:flex;align-items:center;gap:2px;padding:3px 7px;border-radius:20px;}
+.up{color:var(--green);background:var(--green-bg);}
+.dn{color:var(--red);background:var(--red-bg);}
+.s-num{font-size:26px;font-weight:700;font-family:var(--fen);}
+.s-lbl{font-size:12px;color:var(--text3);margin-top:3px;}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px;}
+.c-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.c-title{font-size:13px;font-weight:700;}
+.c-act{font-size:12px;color:var(--gold);cursor:pointer;}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;}
+thead th{padding:10px 14px;text-align:right;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;background:var(--bg2);border-bottom:1px solid var(--border);}
+tbody tr{border-bottom:1px solid var(--border);transition:background .12s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--bg);}
+tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middle;}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.b-g{background:var(--green-bg);color:var(--green);}
+.b-r{background:var(--red-bg);color:var(--red);}
+.b-a{background:var(--amber-bg);color:var(--amber);}
+.b-b{background:var(--blue-bg);color:var(--blue);}
+.b-gold{background:rgba(201,168,76,.12);color:var(--gold2);}
+
+/* ORDER ROW */
+.o-row{display:flex;align-items:center;gap:8px;}
+.o-img{width:32px;height:32px;border-radius:var(--r);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text3);flex-shrink:0;}
+.o-n{font-size:12px;font-weight:500;}
+.o-s{font-size:10px;color:var(--text3);}
+
+/* DRIVER PROFILE */
+.drv-profile-header{display:flex;align-items:center;gap:20px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:16px;}
+.drv-profile-av{width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--black);flex-shrink:0;}
+.drv-profile-name{font-size:20px;font-weight:700;}
+.drv-profile-meta{font-size:13px;color:var(--text3);margin-top:4px;}
+.drv-profile-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px;}
+
+.driver-card{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border);}
+.driver-card:last-child{border-bottom:none;}
+.d-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--black);flex-shrink:0;}
+.d-name{font-size:13px;font-weight:700;}
+.d-meta{font-size:11px;color:var(--text3);margin-top:2px;}
+.d-orders{font-size:11px;color:var(--text2);margin-top:3px;}
+.d-actions{margin-right:auto;display:flex;gap:8px;align-items:center;}
+
+/* AVAILABLE ORDER CARD — DRIVER VIEW */
+.avail-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px;margin-bottom:12px;display:flex;align-items:flex-start;gap:14px;transition:all .2s;}
+.avail-card:hover{border-color:var(--gold);box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.avail-num{font-size:14px;font-weight:700;}
+.avail-store{font-size:12px;color:var(--gold2);margin-top:2px;}
+.avail-addr{font-size:12px;color:var(--text2);margin-top:6px;display:flex;align-items:flex-start;gap:5px;}
+.avail-addr i{font-size:14px;color:var(--text3);margin-top:1px;flex-shrink:0;}
+.avail-items{font-size:12px;color:var(--text3);margin-top:4px;}
+.accept-btn{padding:10px 20px;background:var(--gold);border:none;border-radius:var(--r);color:var(--black);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.accept-btn:hover{background:var(--gold2);}
+.accept-btn.taken{background:var(--bg2);color:var(--text3);cursor:not-allowed;}
+
+/* MY ORDER CARD — DRIVER */
+.my-order{background:var(--card);border:1px solid var(--gold);border-radius:var(--rl);padding:18px 20px;margin-bottom:16px;}
+.my-order-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.status-flow{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.sf-step{font-size:12px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);color:var(--text3);cursor:pointer;transition:all .2s;background:transparent;font-family:var(--font);}
+.sf-step.on{background:var(--gold);color:var(--black);border-color:var(--gold);font-weight:700;}
+.sf-step.done{background:var(--green-bg);color:var(--green);border-color:var(--green);}
+.client-info{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);}
+.c-av{width:34px;height:34px;border-radius:50%;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--blue);}
+.c-name{font-size:13px;font-weight:500;}
+.c-addr{font-size:11px;color:var(--text3);}
+.wa-btn{margin-right:auto;padding:7px 14px;background:var(--green-bg);color:var(--green);border:none;border-radius:var(--r);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);padding:0 18px;}
+.tab{padding:10px 14px;font-size:12px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+.tab.on{color:var(--text);border-bottom-color:var(--gold);font-weight:700;}
+
+/* PAGINATION */
+.t-foot{padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text3);}
+.pgs{display:flex;gap:3px;}
+.pg{width:26px;height:26px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.pg.on,.pg:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08);}
+
+/* PROGRESS */
+.prog-row{padding:10px 18px;border-bottom:1px solid var(--border);}
+.prog-row:last-child{border-bottom:none;}
+.prog-h{display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;}
+.prog-t{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;}
+.prog-f{height:100%;background:var(--gold);border-radius:3px;}
+
+.two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px;}
+</style>
+</head>
+<body>
+
+<!-- MODE SWITCHER -->
+<div class="mode-bar">
+  <button class="mode-btn on" onclick="switchMode('supervisor')">
+    <i class="ti ti-shield"></i> لوحة مشرف التوصيل
+  </button>
+  <button class="mode-btn" onclick="switchMode('driver')">
+    <i class="ti ti-motorbike"></i> لوحة السائق
+  </button>
+</div>
+
+<!-- ===== SUPERVISOR MODE ===== -->
+<div class="mode-panel on" id="mode-supervisor">
+
+  <aside class="sb">
+    <div class="sb-logo">
+      <div class="sb-mark">ر</div>
+      <div><div class="sb-title">Ruph</div><div class="sb-sub">DELIVERY</div></div>
+    </div>
+    <div class="sb-sec">الرئيسية</div>
+    <div class="sb-item on" onclick="switchSec('sup-dashboard',this,'sup')"><i class="ti ti-layout-dashboard"></i> لوحة التحكم</div>
+    <div class="sb-item" onclick="switchSec('sup-orders',this,'sup')"><i class="ti ti-shopping-cart"></i> الطلبات <span class="sb-n r">8</span></div>
+    <div class="sb-sec">السائقون</div>
+    <div class="sb-item" onclick="switchSec('sup-drivers',this,'sup')"><i class="ti ti-users"></i> السائقون</div>
+    <div class="sb-item" onclick="switchSec('sup-reports',this,'sup')"><i class="ti ti-chart-bar"></i> التقارير</div>
+    <div class="sb-foot">
+      <div class="sb-user">
+        <div class="sb-av" style="background:var(--blue-bg);color:var(--blue);">م</div>
+        <div><div class="sb-un">مشرف التوصيل</div><div class="sb-ur">Express Delivery</div></div>
+        <i class="ti ti-logout" style="margin-right:auto;color:#333;font-size:16px;cursor:pointer;"></i>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <div>
+        <div class="top-t" id="sup-top-title">لوحة التحكم</div>
+        <div class="top-b">مشرف التوصيل</div>
+      </div>
+      <div class="top-act">
+        <button class="btn btn-p" onclick="switchSec('sup-drivers',null,'sup')"><i class="ti ti-user-plus"></i> إضافة سائق</button>
+        <button class="ico"><i class="ti ti-bell"></i><span class="dot"></span></button>
+      </div>
+    </header>
+
+    <div class="cnt">
+
+      <!-- SUP DASHBOARD -->
+      <div class="sec-panel on" id="sec-sup-dashboard">
+        <div class="stats">
+          <div class="s-card">
+            <div class="s-head"><div class="s-ico" style="background:var(--amber-bg);color:var(--amber);"><i class="ti ti-clock"></i></div><span class="badge b-a">جديد</span></div>
+            <div class="s-num">8</div><div class="s-lbl">طلبات بانتظار سائق</div>
+          </div>
+          <div class="s-card">
+            <div class="s-head"><div class="s-ico" style="background:var(--blue-bg);color:var(--blue);"><i class="ti ti-truck"></i></div><span class="badge b-b">جارٍ</span></div>
+            <div class="s-num">12</div><div class="s-lbl">طلبات قيد التوصيل</div>
+          </div>
+          <div class="s-card">
+            <div class="s-head"><div class="s-ico" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-check"></i></div><div class="s-chg up"><i class="ti ti-arrow-up"></i>6%</div></div>
+            <div class="s-num">284</div><div class="s-lbl">مكتمل اليوم</div>
+          </div>
+          <div class="s-card">
+            <div class="s-head"><div class="s-ico" style="background:rgba(201,168,76,.12);color:var(--gold2);"><i class="ti ti-motorbike"></i></div><span class="badge b-g">نشط</span></div>
+            <div class="s-num">7</div><div class="s-lbl">سائقون نشطون</div>
+          </div>
+        </div>
+
+          <div class="card">
+          <div class="c-head"><div class="c-title">طلبات بانتظار تعيين سائق</div><span class="badge b-a">8</span></div>
+          <table>
+            <colgroup><col style="width:30%;"><col style="width:22%;"><col style="width:22%;"><col style="width:26%;"></colgroup>
+            <thead><tr><th>الطلب</th><th>المتجر</th><th>المنطقة</th><th>تعيين سائق</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="o-row"><div class="o-img"><i class="ti ti-shopping-bag"></i></div><div><div class="o-n">#ORD-1290</div><div class="o-s">محمد العنزي</div></div></div></td>
+                <td style="color:var(--text2);font-size:12px;">Casa Mode</td>
+                <td style="font-size:12px;color:var(--text2);">حولي</td>
+                <td><select style="padding:5px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);font-family:var(--font);font-size:11px;outline:none;cursor:pointer;"><option>— اختر سائق —</option><option>خالد - حولي</option><option>أحمد - السالمية</option><option>علي - الجهراء</option></select></td>
+              </tr>
+              <tr>
+                <td><div class="o-row"><div class="o-img"><i class="ti ti-shopping-bag"></i></div><div><div class="o-n">#ORD-1289</div><div class="o-s">نورة الرشيدي</div></div></div></td>
+                <td style="color:var(--text2);font-size:12px;">TechZone</td>
+                <td style="font-size:12px;color:var(--text2);">السالمية</td>
+                <td><select style="padding:5px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);font-family:var(--font);font-size:11px;outline:none;cursor:pointer;"><option>— اختر سائق —</option><option>خالد - حولي</option><option>أحمد - السالمية</option><option>علي - الجهراء</option></select></td>
+              </tr>
+              <tr>
+                <td><div class="o-row"><div class="o-img"><i class="ti ti-shopping-bag"></i></div><div><div class="o-n">#ORD-1288</div><div class="o-s">فهد المطيري</div></div></div></td>
+                <td style="color:var(--text2);font-size:12px;">Sole & Co</td>
+                <td style="font-size:12px;color:var(--text2);">الجهراء</td>
+                <td><select style="padding:5px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);font-family:var(--font);font-size:11px;outline:none;cursor:pointer;"><option>— اختر سائق —</option><option>خالد - حولي</option><option>أحمد - السالمية</option><option>علي - الجهراء</option></select></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="c-head"><div class="c-title">السائقون النشطون</div><span class="badge b-g">7 نشط</span></div>
+          <div class="driver-card">
+            <div class="d-av" style="background:#E3F2FD;color:var(--blue);">خ</div>
+            <div><div class="d-name">خالد السائق</div><div class="d-orders">3 طلبات اليوم</div></div>
+            <div class="d-actions"><span class="badge b-b"><i class="ti ti-truck"></i> قيد التوصيل</span></div>
+          </div>
+          <div class="driver-card">
+            <div class="d-av" style="background:var(--green-bg);color:var(--green);">أ</div>
+            <div><div class="d-name">أحمد السائق</div><div class="d-orders">5 طلبات اليوم</div></div>
+            <div class="d-actions"><span class="badge b-g"><i class="ti ti-check"></i> متاح</span></div>
+          </div>
+          <div class="driver-card">
+            <div class="d-av" style="background:var(--amber-bg);color:var(--amber);">ع</div>
+            <div><div class="d-name">علي السائق</div><div class="d-orders">2 طلبات اليوم</div></div>
+            <div class="d-actions"><span class="badge b-b"><i class="ti ti-truck"></i> قيد التوصيل</span></div>
+          </div>
+          <div class="driver-card">
+            <div class="d-av" style="background:var(--bg2);color:var(--text3);">م</div>
+            <div><div class="d-name">محمد السائق</div><div class="d-orders">0 طلبات اليوم</div></div>
+            <div class="d-actions"><span class="badge" style="background:var(--bg2);color:var(--text3);">غير نشط</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUP ORDERS -->
+      <div class="sec-panel" id="sec-sup-orders">
+        <div class="card">
+          <div class="c-head"><div class="c-title">كل الطلبات</div></div>
+          <div class="tabs">
+            <div class="tab on">الكل</div>
+            <div class="tab">بانتظار سائق <span style="background:var(--amber-bg);color:var(--amber);padding:1px 6px;border-radius:10px;font-size:10px;margin-right:4px;">8</span></div>
+            <div class="tab">قيد التوصيل</div>
+            <div class="tab">مكتمل</div>
+            <div class="tab">مرتجع</div>
+          </div>
+          <table>
+            <colgroup><col style="width:24%;"><col style="width:16%;"><col style="width:16%;"><col style="width:18%;"><col style="width:16%;"><col style="width:10%;"></colgroup>
+            <thead><tr><th>الطلب</th><th>المتجر</th><th>السائق</th><th>الحالة</th><th>الوقت</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><div class="o-row"><div class="o-img"><i class="ti ti-shopping-bag"></i></div><div><div class="o-n">#ORD-1290</div><div class="o-s">محمد العنزي — حولي</div></div></div></td><td style="font-size:12px;color:var(--text2);">Casa Mode</td><td style="font-size:12px;color:var(--text3);">— غير معين</td><td><span class="badge b-a"><i class="ti ti-clock"></i> انتظار</span></td><td style="font-size:11px;color:var(--text3);">منذ 5د</td><td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td></tr>
+              <tr><td><div class="o-row"><div class="o-img"><i class="ti ti-shopping-bag"></i></div><div><div class="o-n">#ORD-1285</div><div class="o-s">نورة الرشيدي — السالمية</div></div></div></td><td style="font-size:12px;color:var(--text2);">TechZone</td><td style="font-size:12px;">خالد السائق</td><td><span class="badge b-b"><i class="ti ti-truck"></i> توصيل</span></td><td style="font-size:11px;color:var(--text3);">منذ 20د</td><td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td></tr>
+              <tr><td><div class="o-row"><div class="o-img"><i class="ti ti-shopping-bag"></i></div><div><div class="o-n">#ORD-1280</div><div class="o-s">فهد المطيري — الفروانية</div></div></div></td><td style="font-size:12px;color:var(--text2);">Casa Mode</td><td style="font-size:12px;">أحمد السائق</td><td><span class="badge b-g"><i class="ti ti-check"></i> مكتمل</span></td><td style="font-size:11px;color:var(--text3);">منذ ساعة</td><td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td></tr>
+            </tbody>
+          </table>
+          <div class="t-foot"><span>عرض 3 من 304 طلب</span><div class="pgs"><button class="pg"><i class="ti ti-chevron-right" style="font-size:11px;"></i></button><button class="pg on">1</button><button class="pg">2</button><button class="pg">3</button><button class="pg"><i class="ti ti-chevron-left" style="font-size:11px;"></i></button></div></div>
+        </div>
+      </div>
+
+      <!-- SUP DRIVERS -->
+      <div class="sec-panel" id="sec-sup-drivers">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="c-head"><div class="c-title">إضافة سائق جديد</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:20px;">
+            <div><label style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;display:block;">الاسم الكامل</label><input type="text" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;outline:none;" placeholder="اسم السائق"></div>
+            <div><label style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;display:block;">رقم الواتساب</label><input type="text" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;outline:none;direction:ltr;text-align:right;" placeholder="+965 XXXX XXXX"></div>
+            <div><label style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;display:block;">نوع السائق</label><select style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);font-family:var(--font);font-size:13px;outline:none;"><option>شركة خارجية</option><option>سائق حر</option></select></div>
+            <div><label style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;display:block;">المنطقة الجغرافية</label><input type="text" style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;outline:none;" placeholder="حولي، السالمية..."></div>
+          </div>
+          <div style="padding:0 20px 20px;"><button class="btn btn-p"><i class="ti ti-user-plus"></i> إضافة السائق</button></div>
+        </div>
+        <div class="card">
+          <div class="c-head"><div class="c-title">قائمة السائقين</div><span class="badge b-g">9 سائق</span></div>
+          <table>
+            <colgroup><col style="width:28%;"><col style="width:16%;"><col style="width:16%;"><col style="width:18%;"><col style="width:15%;"><col style="width:7%;"></colgroup>
+            <thead><tr><th>السائق</th><th>النوع</th><th>المنطقة</th><th>الحالة</th><th>طلبات اليوم</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><div class="o-row"><div class="d-av" style="width:32px;height:32px;background:#E3F2FD;color:var(--blue);font-size:13px;border-radius:50%;display:flex;align-items:center;justify-content:center;">خ</div><div><div class="o-n">خالد السائق</div><div class="o-s">+965 9XXX XXXX</div></div></div></td><td style="font-size:12px;color:var(--text2);">شركة</td><td style="font-size:12px;color:var(--text2);">حولي</td><td><span class="badge b-b"><i class="ti ti-truck"></i> قيد التوصيل</span></td><td style="font-weight:700;font-family:var(--fen);">3</td><td><button class="btn btn-g" style="font-size:11px;padding:5px 10px;" onclick="switchSec('sup-driver-profile',null,'sup')"><i class="ti ti-eye" style="font-size:12px;"></i> عرض</button></td></tr>
+              <tr><td><div class="o-row"><div class="d-av" style="width:32px;height:32px;background:var(--green-bg);color:var(--green);font-size:13px;border-radius:50%;display:flex;align-items:center;justify-content:center;">أ</div><div><div class="o-n">أحمد السائق</div><div class="o-s">+965 9XXX XXXX</div></div></div></td><td style="font-size:12px;color:var(--text2);">حر</td><td style="font-size:12px;color:var(--text2);">السالمية</td><td><span class="badge b-g"><i class="ti ti-check"></i> متاح</span></td><td style="font-weight:700;font-family:var(--fen);">5</td><td><button class="btn btn-g" style="font-size:11px;padding:5px 10px;" onclick="switchSec('sup-driver-profile',null,'sup')"><i class="ti ti-eye" style="font-size:12px;"></i> عرض</button></td></tr>
+              <tr><td><div class="o-row"><div class="d-av" style="width:32px;height:32px;background:var(--amber-bg);color:var(--amber);font-size:13px;border-radius:50%;display:flex;align-items:center;justify-content:center;">ع</div><div><div class="o-n">علي السائق</div><div class="o-s">+965 9XXX XXXX</div></div></div></td><td style="font-size:12px;color:var(--text2);">شركة</td><td style="font-size:12px;color:var(--text2);">الجهراء</td><td><span class="badge b-b"><i class="ti ti-truck"></i> قيد التوصيل</span></td><td style="font-weight:700;font-family:var(--fen);">2</td><td><button class="btn btn-g" style="font-size:11px;padding:5px 10px;" onclick="switchSec('sup-driver-profile',null,'sup')"><i class="ti ti-eye" style="font-size:12px;"></i> عرض</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SUP DRIVER PROFILE -->
+      <div class="sec-panel" id="sec-sup-driver-profile">
+        <div style="margin-bottom:16px;">
+          <button onclick="switchSec('sup-drivers',null,'sup')" style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text3);background:transparent;border:none;cursor:pointer;font-family:var(--font);transition:color .2s;" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--text3)'">
+            <i class="ti ti-arrow-right"></i> رجوع لقائمة السائقين
+          </button>
+        </div>
+
+        <div class="drv-profile-header">
+          <div class="drv-profile-av" style="background:#E3F2FD;color:var(--blue);">خ</div>
+          <div style="flex:1;">
+            <div class="drv-profile-name">خالد السائق</div>
+            <div class="drv-profile-meta">+965 9XXX XXXX · حولي · شركة خارجية</div>
+            <div style="margin-top:8px;display:flex;gap:8px;">
+              <span class="badge b-b"><i class="ti ti-truck"></i> قيد التوصيل</span>
+              <span class="badge b-g">سائق نشط</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-g"><i class="ti ti-brand-whatsapp"></i> تواصل</button>
+            <button class="btn btn-g" style="color:var(--red);border-color:var(--red-bg);"><i class="ti ti-user-off"></i> إيقاف</button>
+          </div>
+        </div>
+
+        <div class="drv-profile-stats">
+          <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-check"></i></div></div><div class="s-num">3</div><div class="s-lbl">مكتمل اليوم</div></div>
+          <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--blue-bg);color:var(--blue);"><i class="ti ti-calendar"></i></div></div><div class="s-num">84</div><div class="s-lbl">إجمالي الشهر</div></div>
+          <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--amber-bg);color:var(--amber);"><i class="ti ti-star"></i></div></div><div class="s-num">4.8</div><div class="s-lbl">التقييم</div></div>
+          <div class="s-card"><div class="s-head"><div class="s-ico" style="background:rgba(201,168,76,.12);color:var(--gold2);"><i class="ti ti-clock"></i></div></div><div class="s-num">24د</div><div class="s-lbl">متوسط التوصيل</div></div>
+        </div>
+
+        <div class="card" style="margin-bottom:16px;">
+          <div class="c-head"><div class="c-title">الطلب الحالي</div><span class="badge b-b"><i class="ti ti-truck"></i> قيد التوصيل</span></div>
+          <div style="padding:16px 18px;display:flex;align-items:center;gap:14px;">
+            <div class="o-img" style="width:40px;height:40px;"><i class="ti ti-shopping-bag"></i></div>
+            <div>
+              <div style="font-size:13px;font-weight:700;">#ORD-1284 — Casa Mode</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:3px;"><i class="ti ti-map-pin" style="font-size:12px;"></i> حولي، شارع الأمير، بناية 12</div>
+            </div>
+            <button class="btn btn-g" style="margin-right:auto;" onclick="switchSec('sup-orders',null,'sup')"><i class="ti ti-eye"></i> عرض الطلب</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="c-head"><div class="c-title">سجل التوصيل</div></div>
+          <table>
+            <colgroup><col style="width:28%;"><col style="width:20%;"><col style="width:20%;"><col style="width:18%;"><col style="width:14%;"></colgroup>
+            <thead><tr><th>الطلب</th><th>المتجر</th><th>المنطقة</th><th>الحالة</th><th>الوقت</th></tr></thead>
+            <tbody>
+              <tr><td><div class="o-n">#ORD-1284</div></td><td style="font-size:12px;color:var(--text2);">Casa Mode</td><td style="font-size:12px;color:var(--text2);">حولي</td><td><span class="badge b-b"><i class="ti ti-truck"></i> جارٍ</span></td><td style="font-size:11px;color:var(--text3);">منذ 20د</td></tr>
+              <tr><td><div class="o-n">#ORD-1279</div></td><td style="font-size:12px;color:var(--text2);">TechZone</td><td style="font-size:12px;color:var(--text2);">السالمية</td><td><span class="badge b-g"><i class="ti ti-check"></i> مكتمل</span></td><td style="font-size:11px;color:var(--text3);">اليوم 1:10م</td></tr>
+              <tr><td><div class="o-n">#ORD-1270</div></td><td style="font-size:12px;color:var(--text2);">Casa Mode</td><td style="font-size:12px;color:var(--text2);">الفروانية</td><td><span class="badge b-g"><i class="ti ti-check"></i> مكتمل</span></td><td style="font-size:11px;color:var(--text3);">اليوم 11:30ص</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SUP REPORTS -->
+      <div class="sec-panel" id="sec-sup-reports">
+        <div class="stats">
+          <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-check"></i></div><div class="s-chg up"><i class="ti ti-arrow-up"></i>8%</div></div><div class="s-num">284</div><div class="s-lbl">توصيل ناجح اليوم</div></div>
+          <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--red-bg);color:var(--red);"><i class="ti ti-x"></i></div></div><div class="s-num">4</div><div class="s-lbl">مرتجعات اليوم</div></div>
+          <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--blue-bg);color:var(--blue);"><i class="ti ti-clock"></i></div></div><div class="s-num">28د</div><div class="s-lbl">متوسط وقت التوصيل</div></div>
+          <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--amber-bg);color:var(--amber);"><i class="ti ti-star"></i></div></div><div class="s-num">4.7</div><div class="s-lbl">تقييم التوصيل</div></div>
+        </div>
+        <div class="card">
+          <div class="c-head"><div class="c-title">أداء السائقين</div></div>
+          <div class="prog-row"><div class="prog-h"><span>أحمد السائق</span><span style="color:var(--gold);font-weight:700;">5 طلبات</span></div><div class="prog-t"><div class="prog-f" style="width:100%;"></div></div></div>
+          <div class="prog-row"><div class="prog-h"><span>خالد السائق</span><span style="color:var(--gold);font-weight:700;">3 طلبات</span></div><div class="prog-t"><div class="prog-f" style="width:60%;"></div></div></div>
+          <div class="prog-row"><div class="prog-h"><span>علي السائق</span><span style="color:var(--gold);font-weight:700;">2 طلبات</span></div><div class="prog-t"><div class="prog-f" style="width:40%;"></div></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ===== DRIVER MODE ===== -->
+<div class="mode-panel" id="mode-driver">
+
+  <aside class="sb">
+    <div class="sb-logo">
+      <div class="sb-mark">ر</div>
+      <div><div class="sb-title">Ruph</div><div class="sb-sub">DRIVER</div></div>
+    </div>
+    <div class="sb-sec">طلباتي</div>
+    <div class="sb-item on" onclick="switchSec('drv-available',this,'drv')"><i class="ti ti-package"></i> الطلبات المتاحة <span class="sb-n r">4</span></div>
+    <div class="sb-item" onclick="switchSec('drv-active',this,'drv')"><i class="ti ti-truck"></i> طلبي الحالي</div>
+    <div class="sb-item" onclick="switchSec('drv-history',this,'drv')"><i class="ti ti-history"></i> سجل التوصيل</div>
+    <div class="sb-foot">
+      <div class="sb-user">
+        <div class="sb-av" style="background:var(--blue-bg);color:var(--blue);">خ</div>
+        <div><div class="sb-un">خالد السائق</div><div class="sb-ur">سائق نشط</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="top">
+      <div>
+        <div class="top-t" id="drv-top-title">الطلبات المتاحة</div>
+        <div class="top-b">خالد السائق</div>
+      </div>
+      <div class="top-act">
+        <span class="badge b-g" style="font-size:12px;padding:6px 12px;"><i class="ti ti-circle-filled" style="font-size:8px;"></i> نشط</span>
+        <button class="ico"><i class="ti ti-bell"></i><span class="dot"></span></button>
+      </div>
+    </header>
+
+    <div class="cnt">
+
+      <!-- AVAILABLE ORDERS -->
+      <div class="sec-panel on" id="sec-drv-available">
+        <div style="margin-bottom:16px;padding:12px 16px;background:var(--amber-bg);border:1px solid rgba(230,81,0,.15);border-radius:var(--rl);display:flex;align-items:center;gap:10px;font-size:13px;color:var(--amber);">
+          <i class="ti ti-info-circle" style="font-size:18px;flex-shrink:0;"></i>
+          اضغط "استلم الطلب" لأخذ طلب — سيُقفل فوراً ولن يظهر للسائقين الآخرين
+        </div>
+
+        <div class="avail-card">
+          <div style="flex:1;">
+            <div class="avail-num">#ORD-1290</div>
+            <div class="avail-store">Casa Mode</div>
+            <div class="avail-addr"><i class="ti ti-map-pin"></i>حولي، شارع الأمير، بناية 12</div>
+            <div class="avail-items">قميص أوفرسايز كلاسيك × 1 — 12.000 د.ك</div>
+          </div>
+          <button class="accept-btn" onclick="acceptOrder(this)"><i class="ti ti-hand-stop"></i> استلم الطلب</button>
+        </div>
+
+        <div class="avail-card">
+          <div style="flex:1;">
+            <div class="avail-num">#ORD-1289</div>
+            <div class="avail-store">TechZone</div>
+            <div class="avail-addr"><i class="ti ti-map-pin"></i>السالمية، شارع الخليج، بناية 5</div>
+            <div class="avail-items">iPhone 16 Pro × 1 — 189.000 د.ك</div>
+          </div>
+          <button class="accept-btn" onclick="acceptOrder(this)"><i class="ti ti-hand-stop"></i> استلم الطلب</button>
+        </div>
+
+        <div class="avail-card" style="opacity:.5;">
+          <div style="flex:1;">
+            <div class="avail-num">#ORD-1288</div>
+            <div class="avail-store">Sole & Co</div>
+            <div class="avail-addr"><i class="ti ti-map-pin"></i>الجهراء، المنطقة الصناعية</div>
+            <div class="avail-items">حذاء رياضي × 1 — 28.500 د.ك</div>
+          </div>
+          <button class="accept-btn taken" disabled><i class="ti ti-lock"></i> محجوز</button>
+        </div>
+
+        <div class="avail-card">
+          <div style="flex:1;">
+            <div class="avail-num">#ORD-1287</div>
+            <div class="avail-store">Luxe Accessories</div>
+            <div class="avail-addr"><i class="ti ti-map-pin"></i>الرميثية، شارع 14</div>
+            <div class="avail-items">نظارة شمسية × 2 — 70.000 د.ك</div>
+          </div>
+          <button class="accept-btn" onclick="acceptOrder(this)"><i class="ti ti-hand-stop"></i> استلم الطلب</button>
+        </div>
+      </div>
+
+      <!-- ACTIVE ORDER -->
+      <div class="sec-panel" id="sec-drv-active">
+        <div class="my-order">
+          <div class="my-order-head">
+            <div>
+              <div style="font-size:15px;font-weight:700;">#ORD-1284</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:2px;">Casa Mode — قميص أوفرسايز × 1</div>
+            </div>
+            <span class="badge b-b"><i class="ti ti-truck"></i> قيد التوصيل</span>
+          </div>
+
+          <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">تحديث الحالة</div>
+          <div class="status-flow">
+            <button class="sf-step done">✓ استلمت</button>
+            <i class="ti ti-arrow-left" style="color:var(--text3);font-size:14px;"></i>
+            <button class="sf-step on">قيد التوصيل</button>
+            <i class="ti ti-arrow-left" style="color:var(--text3);font-size:14px;"></i>
+            <button class="sf-step" onclick="updateStatus(this)">تم التوصيل</button>
+            <i class="ti ti-arrow-left" style="color:var(--text3);font-size:14px;"></i>
+            <button class="sf-step" onclick="updateStatus(this)" style="color:var(--red);">مرتجع</button>
+          </div>
+
+          <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">معلومات العميل</div>
+          <div class="client-info">
+            <div class="c-av"><i class="ti ti-user"></i></div>
+            <div>
+              <div class="c-name">محمد العنزي</div>
+              <div class="c-addr"><i class="ti ti-map-pin" style="font-size:11px;"></i> حولي، شارع الأمير، بناية 12، شقة 4</div>
+            </div>
+            <button class="wa-btn"><i class="ti ti-brand-whatsapp"></i> واتساب</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="sec-panel" id="sec-drv-history">
+        <div class="stats">
+          <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-check"></i></div></div><div class="s-num">3</div><div class="s-lbl">مكتمل اليوم</div></div>
+          <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--blue-bg);color:var(--blue);"><i class="ti ti-calendar"></i></div></div><div class="s-num">84</div><div class="s-lbl">إجمالي هذا الشهر</div></div>
+          <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--amber-bg);color:var(--amber);"><i class="ti ti-star"></i></div></div><div class="s-num">4.8</div><div class="s-lbl">تقييمي</div></div>
+          <div class="s-card"><div class="s-head"><div class="s-ico" style="background:rgba(201,168,76,.12);color:var(--gold2);"><i class="ti ti-clock"></i></div></div><div class="s-num">24د</div><div class="s-lbl">متوسط التوصيل</div></div>
+        </div>
+        <div class="card">
+          <div class="c-head"><div class="c-title">سجل توصيلاتي</div></div>
+          <table>
+            <thead><tr><th>الطلب</th><th>المتجر</th><th>المنطقة</th><th>الحالة</th><th>الوقت</th></tr></thead>
+            <tbody>
+              <tr><td><div class="o-n">#ORD-1284</div></td><td style="font-size:12px;color:var(--text2);">Casa Mode</td><td style="font-size:12px;color:var(--text2);">حولي</td><td><span class="badge b-b"><i class="ti ti-truck"></i> جارٍ</span></td><td style="font-size:11px;color:var(--text3);">منذ 20د</td></tr>
+              <tr><td><div class="o-n">#ORD-1279</div></td><td style="font-size:12px;color:var(--text2);">TechZone</td><td style="font-size:12px;color:var(--text2);">السالمية</td><td><span class="badge b-g"><i class="ti ti-check"></i> مكتمل</span></td><td style="font-size:11px;color:var(--text3);">اليوم 1:10م</td></tr>
+              <tr><td><div class="o-n">#ORD-1270</div></td><td style="font-size:12px;color:var(--text2);">Casa Mode</td><td style="font-size:12px;color:var(--text2);">الفروانية</td><td><span class="badge b-g"><i class="ti ti-check"></i> مكتمل</span></td><td style="font-size:11px;color:var(--text3);">اليوم 11:30ص</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Mode switch
+  function switchMode(mode) {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('on'));
+    document.querySelectorAll('.mode-panel').forEach(p => p.classList.remove('on'));
+    document.querySelector(`.mode-btn[onclick="switchMode('${mode}')"]`).classList.add('on');
+    document.getElementById('mode-' + mode).classList.add('on');
+  }
+
+  // Section switch
+  const supTitles = {'sup-dashboard':'لوحة التحكم','sup-orders':'الطلبات','sup-drivers':'السائقون','sup-reports':'التقارير','sup-driver-profile':'ملف السائق'};
+  const drvTitles = {'drv-available':'الطلبات المتاحة','drv-active':'طلبي الحالي','drv-history':'سجل التوصيل'};
+
+  function switchSec(id, item, mode) {
+    const prefix = mode === 'sup' ? 'sup' : 'drv';
+    document.querySelectorAll(`#mode-${mode === 'sup' ? 'supervisor' : 'driver'} .sec-panel`).forEach(p => p.classList.remove('on'));
+    document.getElementById('sec-' + id).classList.add('on');
+    if (item) {
+      document.querySelectorAll(`#mode-${mode === 'sup' ? 'supervisor' : 'driver'} .sb-item`).forEach(i => i.classList.remove('on'));
+      item.classList.add('on');
+    }
+    const titles = mode === 'sup' ? supTitles : drvTitles;
+    const titleEl = document.getElementById(prefix + '-top-title');
+    if (titleEl && titles[id]) titleEl.textContent = titles[id];
+  }
+
+  // Accept order
+  function acceptOrder(btn) {
+    btn.innerHTML = '<i class="ti ti-check"></i> تم الاستلام';
+    btn.classList.add('taken');
+    btn.disabled = true;
+    btn.closest('.avail-card').style.opacity = '.5';
+  }
+
+  // Update status
+  function updateStatus(btn) {
+    document.querySelectorAll('.sf-step').forEach(s => {
+      s.classList.remove('on');
+      s.style.color = '';
+    });
+    btn.classList.add('on');
+  }
+
+  // Tabs
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', function() {
+      const p = this.closest('.tabs');
+      p.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+      this.classList.add('on');
+    });
+  });
+</script>
+</body>
+</html>

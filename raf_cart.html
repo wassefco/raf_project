@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رف — السلة والدفع</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;
+  --gold:#C9A84C;--gold2:#A07828;
+  --black:#0A0A0A;--text:#0A0A0A;--text2:#555;--text3:#888;
+  --border:#D8D3C8;
+  --green:#2E7D32;--green-bg:#E8F5E9;
+  --red:#C62828;--red-bg:#FFEBEE;
+  --r:8px;--rl:12px;
+  --font:'Tajawal',sans-serif;
+  --fdisplay:'Playfair Display',serif;
+  --fen:'DM Sans',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);}
+
+/* NAV */
+nav{background:rgba(245,242,236,.97);border-bottom:1px solid rgba(201,168,76,.3);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:var(--fdisplay);font-size:28px;font-weight:900;color:var(--gold);text-decoration:none;}
+.nav-logo span{color:var(--text);font-size:11px;font-family:var(--fen);font-weight:300;letter-spacing:3px;display:block;margin-top:-6px;}
+.btn-ghost{padding:8px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+
+/* BREADCRUMB */
+.breadcrumb{padding:14px 40px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3);border-bottom:1px solid var(--border);background:var(--card);}
+.breadcrumb a{color:var(--text3);text-decoration:none;}
+.breadcrumb a:hover{color:var(--gold);}
+
+/* LAYOUT */
+.layout{max-width:680px;margin:0 auto;padding:32px 40px;}
+
+/* SECTION */
+.section{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px;}
+.sec-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.sec-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;}
+.sec-title i{font-size:19px;color:var(--gold);}
+
+/* CART ITEMS */
+.cart-item{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;gap:14px;align-items:flex-start;}
+.cart-item:last-child{border-bottom:none;}
+.item-img{width:72px;height:72px;border-radius:var(--r);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--border);flex-shrink:0;}
+.item-info{flex:1;}
+.item-store{font-size:11px;color:var(--gold2);margin-bottom:3px;}
+.item-name{font-size:14px;font-weight:500;margin-bottom:4px;}
+.item-meta{font-size:12px;color:var(--text3);margin-bottom:10px;}
+.item-bot{display:flex;align-items:center;gap:10px;}
+.qty-row{display:flex;align-items:center;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
+.qty-btn{width:32px;height:32px;border:none;background:var(--bg2);color:var(--text2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background .15s;}
+.qty-btn:hover{background:var(--gold);color:var(--black);}
+.qty-num{width:38px;height:32px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border-right:1px solid var(--border);border-left:1px solid var(--border);}
+.rm-btn{padding:5px 10px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text3);font-size:12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px;font-family:var(--font);}
+.rm-btn:hover{border-color:var(--red);color:var(--red);}
+.item-price{font-size:16px;font-weight:700;color:var(--gold);flex-shrink:0;font-family:var(--fen);align-self:center;}
+
+/* FORM FIELDS */
+.form-body{padding:20px;}
+.field{margin-bottom:16px;}
+.field:last-child{margin-bottom:0;}
+.field-lbl{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:7px;display:block;}
+.select-field{width:100%;padding:11px 16px;border:1px solid var(--border);border-radius:var(--r);background:var(--card);color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color .2s;cursor:pointer;appearance:auto;}
+.select-field:focus{border-color:var(--gold);}
+.addr-detail{margin-top:8px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);font-size:13px;color:var(--text2);line-height:1.7;display:none;}
+.addr-detail.show{display:block;}
+
+/* COUPON */
+.coupon-row{display:flex;gap:8px;}
+.coupon-input{flex:1;padding:11px 16px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color .2s;}
+.coupon-input:focus{border-color:var(--gold);}
+.coupon-input::placeholder{color:var(--text3);}
+.coupon-btn{padding:11px 20px;background:var(--black);color:var(--bg);border:none;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.coupon-btn:hover{background:var(--gold);color:var(--black);}
+.coupon-ok{display:none;align-items:center;gap:8px;padding:10px 14px;background:var(--green-bg);border:1px solid rgba(46,125,50,.15);border-radius:var(--r);margin-top:10px;font-size:13px;color:var(--green);}
+.coupon-ok.show{display:flex;}
+
+/* PAYMENT */
+.pay-options{padding:16px 20px;display:flex;flex-direction:column;gap:10px;}
+.pay-opt{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .2s;}
+.pay-opt:hover{border-color:var(--gold);}
+.pay-opt.on{border-color:var(--gold);background:rgba(201,168,76,.04);}
+.pay-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.pay-opt.on .pay-radio{border-color:var(--gold);background:var(--gold);}
+.pay-opt.on .pay-radio::after{content:'';width:6px;height:6px;border-radius:50%;background:white;}
+.pay-ico{width:40px;height:28px;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text2);flex-shrink:0;}
+.pay-name{font-size:14px;font-weight:500;}
+.pay-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+.later-btns{display:flex;gap:7px;margin-top:7px;}
+.later-btn{padding:5px 13px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text3);cursor:pointer;background:transparent;font-family:var(--font);transition:all .15s;}
+.later-btn.on,.later-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.06);}
+
+/* CONFIRM BTN */
+.confirm-row{padding:16px 20px;border-top:1px solid var(--border);}
+.btn-confirm{width:100%;padding:14px;background:var(--gold);border:none;border-radius:var(--r);color:var(--black);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-confirm:hover{background:var(--gold2);}
+
+/* SUMMARY */
+.summary{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;position:sticky;top:84px;}
+.sum-head{padding:16px 20px;border-bottom:1px solid var(--border);}
+.sum-title{font-size:15px;font-weight:700;}
+.sum-items{padding:16px 20px;border-bottom:1px solid var(--border);}
+.sum-item{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.sum-item:last-child{margin-bottom:0;}
+.sum-img{width:44px;height:44px;border-radius:var(--r);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--border);flex-shrink:0;}
+.sum-name{font-size:12px;font-weight:500;flex:1;line-height:1.4;}
+.sum-meta{font-size:11px;color:var(--text3);margin-top:2px;}
+.sum-price{font-size:13px;font-weight:700;color:var(--gold);font-family:var(--fen);}
+.sum-calc{padding:16px 20px;border-bottom:1px solid var(--border);}
+.calc-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:8px;}
+.calc-row:last-child{margin-bottom:0;}
+.calc-discount{color:var(--green);}
+.calc-total{font-size:16px;font-weight:700;color:var(--text);padding-top:12px;margin-top:4px;border-top:1px solid var(--border);display:flex;justify-content:space-between;}
+.calc-total span:last-child{color:var(--gold);}
+.sum-btn-wrap{padding:16px 20px;}
+.btn-sum{width:100%;padding:14px;background:var(--black);border:none;border-radius:var(--r);color:var(--bg);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-sum:hover{background:var(--gold);color:var(--black);}
+.secure{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;font-size:11px;color:var(--text3);}
+
+/* SUCCESS */
+.success-wrap{display:none;max-width:500px;margin:60px auto;padding:0 40px;}
+.success-box{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:48px 32px;text-align:center;}
+.success-ico{width:72px;height:72px;border-radius:50%;background:var(--green-bg);display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--green);margin:0 auto 20px;}
+.success-title{font-family:var(--fdisplay);font-size:26px;font-weight:700;margin-bottom:8px;}
+.success-sub{font-size:14px;color:var(--text3);margin-bottom:24px;line-height:1.7;}
+.success-num{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px 20px;margin-bottom:24px;font-size:14px;}
+.success-btns{display:flex;gap:10px;}
+.success-btns button{flex:1;padding:12px;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.sbtn-p{background:var(--gold);border:none;color:var(--black);}
+.sbtn-p:hover{background:var(--gold2);}
+.sbtn-g{background:transparent;border:1px solid var(--border);color:var(--text2);}
+.sbtn-g:hover{border-color:var(--gold);color:var(--gold);}
+
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text3);margin-top:40px;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <button class="btn-ghost"><i class="ti ti-arrow-right"></i> متابعة التسوق</button>
+  <a href="#" class="nav-logo">رف<span>RAF MARKETPLACE</span></a>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb" id="breadcrumb">
+  <a href="#">الرئيسية</a>
+  <i class="ti ti-chevron-left"></i>
+  <span style="color:var(--text);">السلة والدفع</span>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout" id="main-layout">
+
+  <div>
+
+    <!-- 1. CART ITEMS -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-title"><i class="ti ti-shopping-cart"></i> السلة</div>
+        <span style="font-size:12px;color:var(--text3);">3 منتجات</span>
+      </div>
+      <div class="cart-item">
+        <div class="item-img"><i class="ti ti-shirt"></i></div>
+        <div class="item-info">
+          <div class="item-store">Casa Mode</div>
+          <div class="item-name">قميص أوفرسايز كلاسيك</div>
+          <div class="item-meta">مقاس M — لون أبيض</div>
+          <div class="item-bot">
+            <div class="qty-row">
+              <button class="qty-btn" onclick="chQty(this,-1)"><i class="ti ti-minus" style="font-size:12px;"></i></button>
+              <div class="qty-num">1</div>
+              <button class="qty-btn" onclick="chQty(this,1)"><i class="ti ti-plus" style="font-size:12px;"></i></button>
+            </div>
+            <button class="rm-btn"><i class="ti ti-trash" style="font-size:12px;"></i> حذف</button>
+          </div>
+        </div>
+        <div class="item-price">12.000</div>
+      </div>
+      <div class="cart-item">
+        <div class="item-img"><i class="ti ti-shoe"></i></div>
+        <div class="item-info">
+          <div class="item-store">Sole & Co</div>
+          <div class="item-name">حذاء رياضي Air Comfort</div>
+          <div class="item-meta">مقاس 42 — لون أسود</div>
+          <div class="item-bot">
+            <div class="qty-row">
+              <button class="qty-btn" onclick="chQty(this,-1)"><i class="ti ti-minus" style="font-size:12px;"></i></button>
+              <div class="qty-num">1</div>
+              <button class="qty-btn" onclick="chQty(this,1)"><i class="ti ti-plus" style="font-size:12px;"></i></button>
+            </div>
+            <button class="rm-btn"><i class="ti ti-trash" style="font-size:12px;"></i> حذف</button>
+          </div>
+        </div>
+        <div class="item-price">28.500</div>
+      </div>
+      <div class="cart-item">
+        <div class="item-img"><i class="ti ti-sunglasses"></i></div>
+        <div class="item-info">
+          <div class="item-store">Luxe Accessories</div>
+          <div class="item-name">نظارة شمسية Ray Luxe</div>
+          <div class="item-meta">لون ذهبي</div>
+          <div class="item-bot">
+            <div class="qty-row">
+              <button class="qty-btn" onclick="chQty(this,-1)"><i class="ti ti-minus" style="font-size:12px;"></i></button>
+              <div class="qty-num">1</div>
+              <button class="qty-btn" onclick="chQty(this,1)"><i class="ti ti-plus" style="font-size:12px;"></i></button>
+            </div>
+            <button class="rm-btn"><i class="ti ti-trash" style="font-size:12px;"></i> حذف</button>
+          </div>
+        </div>
+        <div class="item-price">35.000</div>
+      </div>
+    </div>
+
+    <!-- 2. ADDRESS -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-title"><i class="ti ti-map-pin"></i> عنوان التوصيل</div>
+      </div>
+      <div class="form-body">
+        <div class="field">
+          <label class="field-lbl">اختر العنوان</label>
+          <select class="select-field" onchange="showAddr(this)">
+            <option value="">— اختر عنواناً —</option>
+            <option value="home">🏠 المنزل — حولي، شارع الأمير، بناية 12، شقة 4</option>
+            <option value="work">💼 العمل — شرق، برج X، الطابق 8</option>
+            <option value="new">+ إضافة عنوان جديد</option>
+          </select>
+          <div class="addr-detail" id="addr-detail"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. COUPON -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-title"><i class="ti ti-discount"></i> كوبون الخصم</div>
+        <span style="font-size:12px;color:var(--text3);">اختياري</span>
+      </div>
+      <div class="form-body">
+        <div class="coupon-row">
+          <input type="text" class="coupon-input" placeholder="أدخل رمز الكوبون" id="couponInput">
+          <button class="coupon-btn" onclick="applyCoupon()">تطبيق</button>
+        </div>
+        <div class="coupon-ok" id="couponOk">
+          <i class="ti ti-circle-check" style="font-size:18px;"></i>
+          تم تطبيق الكوبون — خصم 10% على الطلب
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. INVOICE DETAILS -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-title"><i class="ti ti-receipt"></i> تفاصيل الفاتورة</div>
+      </div>
+      <div class="form-body">
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;">
+            <span style="color:var(--text2);">المجموع (3 منتجات)</span>
+            <span style="font-weight:500;font-family:var(--fen);">75.500 د.ك</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;">
+            <span style="color:var(--text3);">التوصيل</span>
+            <span style="color:var(--green);font-weight:500;">مجاني</span>
+          </div>
+          <div id="inv-disc-row" style="display:none;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;">
+            <span style="color:var(--green);">خصم الكوبون</span>
+            <span style="color:var(--green);font-weight:500;">- 7.550 د.ك</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:14px 0;font-size:16px;font-weight:700;">
+            <span>الإجمالي</span>
+            <span style="color:var(--gold);font-family:var(--fen);" id="inv-total">75.500 د.ك</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. PAYMENT -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-title"><i class="ti ti-credit-card"></i> طريقة الدفع</div>
+      </div>
+      <div class="pay-options">
+        <div class="pay-opt on" onclick="selPay(this)">
+          <div class="pay-radio"></div>
+          <div class="pay-ico"><i class="ti ti-cash"></i></div>
+          <div>
+            <div class="pay-name">الدفع عند الاستلام</div>
+            <div class="pay-sub">نقداً لدى وصول الطلب</div>
+          </div>
+        </div>
+        <div class="pay-opt" onclick="selPay(this)">
+          <div class="pay-radio"></div>
+          <div class="pay-ico" style="background:#1B4F8A;border-color:#1B4F8A;">
+            <span style="font-size:11px;font-weight:800;color:white;font-family:var(--fen);">K</span>
+          </div>
+          <div>
+            <div class="pay-name">K-Net</div>
+            <div class="pay-sub">بطاقة الدفع الكويتية</div>
+          </div>
+        </div>
+        <div class="pay-opt" onclick="selPay(this)">
+          <div class="pay-radio"></div>
+          <div class="pay-ico"><i class="ti ti-calendar-due"></i></div>
+          <div style="flex:1;">
+            <div class="pay-name">اشتري الآن وادفع لاحقاً</div>
+            <div class="pay-sub">قسّم دفعتك بدون فوائد</div>
+            <div class="later-btns">
+              <button class="later-btn on" onclick="selLater(this,event)">Tabby</button>
+              <button class="later-btn" onclick="selLater(this,event)">Tamara</button>
+              <button class="later-btn" onclick="selLater(this,event)">Taly</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. CONFIRM BTN -->
+    <div class="section">
+      <div class="confirm-row">
+        <button class="btn-confirm" onclick="confirmOrder()">
+          <i class="ti ti-lock"></i> تأكيد الطلب — 75.500 د.ك
+        </button>
+        <div class="secure" style="margin-top:12px;">
+          <i class="ti ti-shield-check" style="color:var(--green);"></i>
+          دفع آمن ومحمي
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+</div>
+
+<!-- SUCCESS -->
+<div class="success-wrap" id="success">
+  <div class="success-box">
+    <div class="success-ico"><i class="ti ti-check"></i></div>
+    <div class="success-title">تم تأكيد طلبك!</div>
+    <p class="success-sub">شكراً لك — سيتم تجهيز طلبك وإرسال تحديثات عبر واتساب.</p>
+    <div class="success-num">
+      رقم الطلب: <strong>#ORD-1285</strong><br>
+      <span style="font-size:12px;color:var(--text3);margin-top:4px;display:block;">الإجمالي: 75.500 د.ك — الدفع عند الاستلام</span>
+    </div>
+    <div class="success-btns">
+      <button class="sbtn-p">تتبع الطلب</button>
+      <button class="sbtn-g">متابعة التسوق</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div>جميع الحقوق محفوظة © 2026 رف</div>
+  <a href="#" style="font-family:var(--fdisplay);font-size:20px;font-weight:900;color:var(--gold);text-decoration:none;">رف</a>
+</footer>
+
+<script>
+  function chQty(btn, d) {
+    const n = btn.closest('.qty-row').querySelector('.qty-num');
+    let v = parseInt(n.textContent) + d;
+    if (v < 1) v = 1;
+    n.textContent = v;
+  }
+
+  function showAddr(sel) {
+    const detail = document.getElementById('addr-detail');
+    const map = {
+      home: 'حولي، شارع الأمير، بناية 12، شقة 4\n+965 9XXX XXXX',
+      work: 'شرق، برج X، الطابق 8\n+965 9XXX XXXX',
+      new: ''
+    };
+    if (sel.value && sel.value !== 'new') {
+      detail.textContent = map[sel.value];
+      detail.classList.add('show');
+    } else {
+      detail.classList.remove('show');
+    }
+  }
+
+  function applyCoupon() {
+    const v = document.getElementById('couponInput').value.trim();
+    if (v) {
+      document.getElementById('couponOk').classList.add('show');
+      document.getElementById('disc-row').style.display = 'flex';
+      document.getElementById('inv-disc-row').style.display = 'flex';
+      document.getElementById('total').textContent = '67.950 د.ك';
+      document.getElementById('inv-total').textContent = '67.950 د.ك';
+      document.querySelector('.btn-confirm').innerHTML = '<i class="ti ti-lock"></i> تأكيد الطلب — 67.950 د.ك';
+    }
+  }
+
+  function selPay(el) {
+    document.querySelectorAll('.pay-opt').forEach(p => p.classList.remove('on'));
+    el.classList.add('on');
+  }
+
+  function selLater(btn, e) {
+    e.stopPropagation();
+    document.querySelectorAll('.later-btn').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on');
+  }
+
+  function confirmOrder() {
+    document.getElementById('main-layout').style.display = 'none';
+    document.getElementById('breadcrumb').style.display = 'none';
+    document.getElementById('success').style.display = 'block';
+    window.scrollTo(0, 0);
+  }
+</script>
+</body>
+</html>

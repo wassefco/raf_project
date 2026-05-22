@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رف — لوحة التاجر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;
+  --sb:#0A0A0A;--sb2:#1A1A1A;--sb3:#888;
+  --gold:#C9A84C;--gold2:#A07828;
+  --text:#0A0A0A;--text2:#555;--text3:#888;
+  --border:#D8D3C8;
+  --green:#2E7D32;--green-bg:#E8F5E9;
+  --red:#C62828;--red-bg:#FFEBEE;
+  --blue:#1565C0;--blue-bg:#E3F2FD;
+  --amber:#E65100;--amber-bg:#FFF3E0;
+  --r:8px;--rl:12px;
+  --font:'Tajawal',sans-serif;
+  --fen:'DM Sans',sans-serif;
+}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex;}
+
+/* SIDEBAR */
+.sb{width:220px;min-width:220px;background:var(--sb);border-left:1px solid var(--sb2);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+.sb::-webkit-scrollbar{width:3px;}
+.sb::-webkit-scrollbar-thumb{background:#222;}
+.sb-logo{padding:20px 16px;border-bottom:1px solid var(--sb2);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.sb-mark{width:34px;height:34px;background:var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:17px;font-weight:900;color:#000;flex-shrink:0;}
+.sb-title{font-size:14px;font-weight:700;color:#F5F2EC;}
+.sb-sub{font-size:9px;color:#444;font-family:var(--fen);letter-spacing:2px;}
+.sb-store{padding:14px 16px;border-bottom:1px solid var(--sb2);display:flex;align-items:center;gap:10px;}
+.sb-store-ico{width:36px;height:36px;border-radius:var(--r);background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--gold);flex-shrink:0;}
+.sb-store-name{font-size:13px;font-weight:700;color:#DDD;}
+.sb-store-pkg{font-size:10px;color:var(--gold);background:rgba(201,168,76,.1);padding:2px 7px;border-radius:10px;display:inline-block;margin-top:2px;}
+.sb-sec{padding:14px 14px 4px;font-size:9px;color:#2A2A2A;letter-spacing:2px;text-transform:uppercase;font-family:var(--fen);}
+.sb-item{display:flex;align-items:center;gap:9px;padding:9px 14px;margin:1px 8px;border-radius:var(--r);color:var(--sb3);cursor:pointer;font-size:13px;transition:all .15s;text-decoration:none;}
+.sb-item:hover{background:#111;color:#CCC;}
+.sb-item.on{background:rgba(201,168,76,.1);color:var(--gold);border:0.5px solid rgba(201,168,76,.2);}
+.sb-item i{font-size:17px;flex-shrink:0;}
+.sb-n{margin-right:auto;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700;}
+.sb-n.r{background:var(--red-bg);color:var(--red);}
+.sb-n.g{background:rgba(201,168,76,.15);color:var(--gold2);}
+.sb-foot{margin-top:auto;padding:14px 12px;border-top:1px solid var(--sb2);flex-shrink:0;}
+.sb-user{display:flex;align-items:center;gap:9px;padding:10px 12px;background:#111;border-radius:var(--r);}
+.sb-av{width:32px;height:32px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000;flex-shrink:0;}
+.sb-un{font-size:12px;font-weight:500;color:#DDD;}
+.sb-ur{font-size:10px;color:#444;}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
+
+/* TOPBAR */
+.top{height:58px;flex-shrink:0;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;}
+.top-t{font-size:16px;font-weight:700;}
+.top-b{font-size:12px;color:var(--text3);margin-right:6px;}
+.top-act{margin-right:auto;display:flex;gap:8px;align-items:center;}
+.btn{display:flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--r);font-family:var(--font);font-size:12px;cursor:pointer;border:none;transition:all .15s;}
+.btn-p{background:var(--gold);color:#000;font-weight:700;}
+.btn-p:hover{background:var(--gold2);}
+.btn-g{background:transparent;border:1px solid var(--border);color:var(--text2);}
+.btn-g:hover{border-color:var(--gold);color:var(--gold);}
+.ico{width:34px;height:34px;border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;background:transparent;font-size:16px;position:relative;transition:all .2s;}
+.ico:hover{border-color:var(--gold);color:var(--gold);}
+.dot{position:absolute;top:-3px;right:-3px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid var(--card);}
+
+/* CONTENT */
+.cnt{flex:1;overflow-y:auto;padding:24px;}
+.cnt::-webkit-scrollbar{width:5px;}
+.cnt::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* SECTION PANELS */
+.sec-panel{display:none;}
+.sec-panel.on{display:block;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.s-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:18px;}
+.s-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.s-ico{width:38px;height:38px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:19px;}
+.s-chg{font-size:11px;font-weight:500;display:flex;align-items:center;gap:2px;padding:3px 7px;border-radius:20px;}
+.up{color:var(--green);background:var(--green-bg);}
+.dn{color:var(--red);background:var(--red-bg);}
+.s-num{font-size:26px;font-weight:700;font-family:var(--fen);}
+.s-lbl{font-size:12px;color:var(--text3);margin-top:3px;}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px;}
+.c-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.c-title{font-size:13px;font-weight:700;}
+.c-act{font-size:12px;color:var(--gold);cursor:pointer;text-decoration:none;}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;}
+thead th{padding:10px 14px;text-align:right;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;background:var(--bg2);border-bottom:1px solid var(--border);}
+tbody tr{border-bottom:1px solid var(--border);transition:background .12s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:var(--bg);}
+tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middle;}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;}
+.b-g{background:var(--green-bg);color:var(--green);}
+.b-r{background:var(--red-bg);color:var(--red);}
+.b-a{background:var(--amber-bg);color:var(--amber);}
+.b-b{background:var(--blue-bg);color:var(--blue);}
+.b-gold{background:rgba(201,168,76,.12);color:var(--gold2);}
+
+/* PRODUCT ROW */
+.p-row{display:flex;align-items:center;gap:10px;}
+.p-img{width:36px;height:36px;border-radius:var(--r);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text3);flex-shrink:0;}
+.p-name{font-size:13px;font-weight:500;}
+.p-cat{font-size:11px;color:var(--text3);}
+
+/* STOCK BAR */
+.stock-bar{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;width:80px;}
+.stock-fill{height:100%;border-radius:3px;}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:20px;}
+.form-grid.full{grid-template-columns:1fr;}
+.field-lbl{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;display:block;}
+.field-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .2s;}
+.field-input:focus{border-color:var(--gold);}
+.field-input::placeholder{color:var(--text3);}
+.field-select{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;outline:none;cursor:pointer;}
+.upload-box{border:1.5px dashed var(--border);border-radius:var(--r);padding:28px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);}
+.upload-box:hover{border-color:var(--gold);}
+.upload-box i{font-size:28px;color:var(--text3);display:block;margin-bottom:8px;}
+.upload-box span{font-size:13px;color:var(--text3);}
+.upload-note{font-size:11px;color:var(--text3);margin-top:4px;}
+.form-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-start;}
+
+/* TOGGLE */
+.toggle{width:44px;height:24px;background:var(--border);border-radius:12px;cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0;}
+.toggle.on{background:var(--gold);}
+.toggle::after{content:'';position:absolute;top:3px;right:3px;width:18px;height:18px;background:white;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle.on::after{transform:translateX(-20px);}
+
+/* SETTINGS ROWS */
+.set-row{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);}
+.set-row:last-child{border-bottom:none;}
+.set-ico{width:36px;height:36px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;margin-left:12px;}
+.set-lbl{font-size:13px;font-weight:500;}
+.set-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.set-act{margin-right:auto;}
+
+/* PAGINATION */
+.t-foot{padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text3);}
+.pgs{display:flex;gap:3px;}
+.pg{width:26px;height:26px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.pg.on,.pg:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08);}
+
+/* TABS */
+.tabs{display:flex;border-bottom:1px solid var(--border);padding:0 18px;}
+.tab{padding:10px 14px;font-size:12px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
+.tab.on{color:var(--text);border-bottom-color:var(--gold);font-weight:700;}
+
+/* COUPON CARD */
+.coup-item{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border);}
+.coup-item:last-child{border-bottom:none;}
+.coup-code{font-size:14px;font-weight:700;font-family:var(--fen);color:var(--gold);letter-spacing:1px;}
+.coup-meta{font-size:12px;color:var(--text3);margin-top:3px;}
+
+/* PROGRESS */
+.prog-row{padding:10px 18px;border-bottom:1px solid var(--border);}
+.prog-row:last-child{border-bottom:none;}
+.prog-h{display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;}
+.prog-t{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;}
+.prog-f{height:100%;background:var(--gold);border-radius:3px;}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:16px;}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sb">
+  <div class="sb-logo">
+    <div class="sb-mark">ر</div>
+    <div><div class="sb-title">Ruph</div><div class="sb-sub">MERCHANT</div></div>
+  </div>
+  <div class="sb-store">
+    <div class="sb-store-ico"><i class="ti ti-hanger"></i></div>
+    <div>
+      <div class="sb-store-name">Casa Mode</div>
+      <span class="sb-store-pkg">باقة بريميوم</span>
+    </div>
+  </div>
+
+  <div class="sb-sec">الرئيسية</div>
+  <a class="sb-item on" onclick="switchSec('dashboard',this)"><i class="ti ti-layout-dashboard"></i> لوحة التحكم</a>
+  <a class="sb-item" onclick="switchSec('orders',this)"><i class="ti ti-shopping-cart"></i> الطلبات <span class="sb-n r">5</span></a>
+
+  <div class="sb-sec">المتجر</div>
+  <a class="sb-item" onclick="switchSec('products',this)"><i class="ti ti-tag"></i> المنتجات</a>
+  <a class="sb-item" onclick="switchSec('inventory',this)"><i class="ti ti-box"></i> المخزون <span class="sb-n r">3</span></a>
+  <a class="sb-item" onclick="switchSec('coupons',this)"><i class="ti ti-discount"></i> الكوبونات</a>
+
+  <div class="sb-sec">التحليلات</div>
+  <a class="sb-item" onclick="switchSec('reports',this)"><i class="ti ti-chart-bar"></i> التقارير</a>
+
+  <div class="sb-sec">الإعدادات</div>
+  <a class="sb-item" onclick="switchSec('settings',this)"><i class="ti ti-settings"></i> إعدادات المتجر</a>
+
+  <div class="sb-foot">
+    <div class="sb-user">
+      <div class="sb-av">ع</div>
+      <div><div class="sb-un">علي التاجر</div><div class="sb-ur">مالك المتجر</div></div>
+      <i class="ti ti-logout" style="margin-right:auto;color:#333;font-size:16px;cursor:pointer;"></i>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <header class="top">
+    <div>
+      <div class="top-t" id="top-title">لوحة التحكم</div>
+      <div class="top-b">Casa Mode</div>
+    </div>
+    <div class="top-act">
+      <button class="btn btn-g"><i class="ti ti-download"></i> تصدير</button>
+      <button class="btn btn-p" onclick="switchSec('products',document.querySelector('.sb-item:nth-child(7)'))"><i class="ti ti-plus"></i> منتج جديد</button>
+      <button class="ico" style="margin-right:6px;"><i class="ti ti-bell"></i><span class="dot"></span></button>
+    </div>
+  </header>
+
+  <div class="cnt">
+
+    <!-- DASHBOARD -->
+    <div class="sec-panel on" id="sec-dashboard">
+
+      <div class="stats">
+        <div class="s-card">
+          <div class="s-head">
+            <div class="s-ico" style="background:var(--blue-bg);color:var(--blue);"><i class="ti ti-shopping-cart"></i></div>
+            <div class="s-chg up"><i class="ti ti-arrow-up"></i>18%</div>
+          </div>
+          <div class="s-num">284</div>
+          <div class="s-lbl">طلب هذا الشهر</div>
+        </div>
+        <div class="s-card">
+          <div class="s-head">
+            <div class="s-ico" style="background:rgba(201,168,76,.12);color:var(--gold2);"><i class="ti ti-cash"></i></div>
+            <div class="s-chg up"><i class="ti ti-arrow-up"></i>12%</div>
+          </div>
+          <div class="s-num">3,420</div>
+          <div class="s-lbl">المبيعات (د.ك)</div>
+        </div>
+        <div class="s-card">
+          <div class="s-head">
+            <div class="s-ico" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-tag"></i></div>
+            <div class="s-chg up"><i class="ti ti-arrow-up"></i>8</div>
+          </div>
+          <div class="s-num">142</div>
+          <div class="s-lbl">منتج نشط</div>
+        </div>
+        <div class="s-card">
+          <div class="s-head">
+            <div class="s-ico" style="background:var(--amber-bg);color:var(--amber);"><i class="ti ti-star"></i></div>
+            <div class="s-chg up"><i class="ti ti-arrow-up"></i>0.2</div>
+          </div>
+          <div class="s-num">4.9</div>
+          <div class="s-lbl">متوسط التقييم</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="c-head"><div class="c-title">أفضل المنتجات</div></div>
+          <div class="prog-row"><div class="prog-h"><span>قميص أوفرسايز</span><span style="color:var(--gold);font-weight:700;">84</span></div><div class="prog-t"><div class="prog-f" style="width:90%;"></div></div></div>
+          <div class="prog-row"><div class="prog-h"><span>بنطلون كاجوال</span><span style="color:var(--gold);font-weight:700;">62</span></div><div class="prog-t"><div class="prog-f" style="width:68%;"></div></div></div>
+          <div class="prog-row"><div class="prog-h"><span>هودي أوفرسايز</span><span style="color:var(--gold);font-weight:700;">48</span></div><div class="prog-t"><div class="prog-f" style="width:52%;"></div></div></div>
+        </div>
+
+        <div class="card">
+          <div class="c-head"><div class="c-title">حالة المتجر</div></div>
+          <div style="padding:16px 18px;display:flex;align-items:center;justify-content:space-between;">
+            <div><div style="font-size:13px;font-weight:500;">مفتوح الآن</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">يغلق الساعة 11م</div></div>
+            <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="c-head"><div class="c-title">آخر الطلبات</div><a class="c-act" onclick="switchSec('orders',null)">عرض الكل</a></div>
+        <table>
+          <colgroup><col style="width:30%;"><col style="width:22%;"><col style="width:16%;"><col style="width:18%;"><col style="width:7%;"></colgroup>
+          <thead><tr><th>الطلب</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th><th></th></tr></thead>
+          <tbody>
+            <tr>
+              <td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">#1284</div><div class="p-cat">محمد العنزي</div></div></div></td>
+              <td style="font-weight:700;color:var(--gold);font-family:var(--fen);">24.500</td>
+              <td><span class="badge b-b"><i class="ti ti-truck"></i> توصيل</span></td>
+              <td style="font-size:11px;color:var(--text3);">اليوم</td>
+              <td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td>
+            </tr>
+            <tr>
+              <td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">#1283</div><div class="p-cat">نورة الرشيدي</div></div></div></td>
+              <td style="font-weight:700;color:var(--gold);font-family:var(--fen);">18.000</td>
+              <td><span class="badge b-g"><i class="ti ti-check"></i> مكتمل</span></td>
+              <td style="font-size:11px;color:var(--text3);">أمس</td>
+              <td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td>
+            </tr>
+            <tr>
+              <td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">#1282</div><div class="p-cat">فهد المطيري</div></div></div></td>
+              <td style="font-weight:700;color:var(--gold);font-family:var(--fen);">35.000</td>
+              <td><span class="badge b-a"><i class="ti ti-clock"></i> تجهيز</span></td>
+              <td style="font-size:11px;color:var(--text3);">أمس</td>
+              <td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="sec-panel" id="sec-orders">
+      <div class="card">
+        <div class="c-head"><div class="c-title">الطلبات</div><span style="font-size:12px;color:var(--text3);">284 طلب هذا الشهر</span></div>
+        <div class="tabs">
+          <div class="tab on">الكل</div>
+          <div class="tab">جديد <span style="background:var(--red-bg);color:var(--red);padding:1px 6px;border-radius:10px;font-size:10px;margin-right:4px;">5</span></div>
+          <div class="tab">قيد التوصيل</div>
+          <div class="tab">مكتمل</div>
+          <div class="tab">ملغي</div>
+        </div>
+        <table>
+          <colgroup><col style="width:28%;"><col style="width:20%;"><col style="width:16%;"><col style="width:16%;"><col style="width:13%;"><col style="width:7%;"></colgroup>
+          <thead><tr><th>الطلب</th><th>المنتجات</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th><th></th></tr></thead>
+          <tbody>
+            <tr><td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">#ORD-1284</div><div class="p-cat">محمد العنزي</div></div></div></td><td style="color:var(--text2);">قميص أوفرسايز × 1</td><td style="font-weight:700;color:var(--gold);font-family:var(--fen);">12.000</td><td><span class="badge b-b"><i class="ti ti-truck"></i> توصيل</span></td><td style="font-size:11px;color:var(--text3);">اليوم 2:30م</td><td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td></tr>
+            <tr><td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">#ORD-1283</div><div class="p-cat">نورة الرشيدي</div></div></div></td><td style="color:var(--text2);">قميص لينن × 1</td><td style="font-weight:700;color:var(--gold);font-family:var(--fen);">18.000</td><td><span class="badge b-g"><i class="ti ti-check"></i> مكتمل</span></td><td style="font-size:11px;color:var(--text3);">أمس 1:10م</td><td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td></tr>
+            <tr><td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">#ORD-1282</div><div class="p-cat">فهد المطيري</div></div></div></td><td style="color:var(--text2);">بنطلون × 1</td><td style="font-weight:700;color:var(--gold);font-family:var(--fen);">22.000</td><td><span class="badge b-a"><i class="ti ti-clock"></i> تجهيز</span></td><td style="font-size:11px;color:var(--text3);">أمس 11:45ص</td><td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td></tr>
+            <tr><td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">#ORD-1281</div><div class="p-cat">سارة العتيبي</div></div></div></td><td style="color:var(--text2);">هودي × 2</td><td style="font-weight:700;color:var(--gold);font-family:var(--fen);">50.000</td><td><span class="badge b-r"><i class="ti ti-x"></i> ملغي</span></td><td style="font-size:11px;color:var(--text3);">3 أيام</td><td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td></tr>
+          </tbody>
+        </table>
+        <div class="t-foot"><span>عرض 4 من 284 طلب</span><div class="pgs"><button class="pg"><i class="ti ti-chevron-right" style="font-size:11px;"></i></button><button class="pg on">1</button><button class="pg">2</button><button class="pg">3</button><button class="pg"><i class="ti ti-chevron-left" style="font-size:11px;"></i></button></div></div>
+      </div>
+    </div>
+
+    <!-- PRODUCTS -->
+    <div class="sec-panel" id="sec-products">
+      <div class="card" style="margin-bottom:16px;">
+        <div class="c-head"><div class="c-title">إضافة منتج جديد</div><span class="badge b-gold">142 / 200 منتج</span></div>
+        <div class="form-grid">
+          <div><label class="field-lbl">اسم المنتج</label><input type="text" class="field-input" placeholder="مثال: قميص أوفرسايز كلاسيك"></div>
+          <div><label class="field-lbl">الفئة</label><select class="field-select"><option>قمصان</option><option>بناطيل</option><option>فساتين</option><option>هودي</option></select></div>
+          <div><label class="field-lbl">السعر (د.ك)</label><input type="number" class="field-input" placeholder="0.000"></div>
+          <div><label class="field-lbl">سعر قبل الخصم (اختياري)</label><input type="number" class="field-input" placeholder="0.000"></div>
+          <div><label class="field-lbl">المقاسات المتاحة</label><input type="text" class="field-input" placeholder="XS, S, M, L, XL"></div>
+          <div><label class="field-lbl">الألوان المتاحة</label><input type="text" class="field-input" placeholder="أسود، أبيض، بيج"></div>
+        </div>
+        <div style="padding:0 20px 20px;">
+          <label class="field-lbl">الوصف</label>
+          <textarea class="field-input" rows="3" placeholder="وصف المنتج..." style="resize:none;"></textarea>
+        </div>
+        <div style="padding:0 20px 20px;">
+          <label class="field-lbl">الصور والفيديو</label>
+          <div class="upload-box">
+            <i class="ti ti-cloud-upload"></i>
+            <span>اسحب الصور هنا أو اضغط للرفع</span>
+            <div class="upload-note">تنتظر موافقة الإدارة قبل النشر · PNG, JPG, MP4 · حد أقصى 10MB</div>
+          </div>
+        </div>
+        <div class="form-footer">
+          <button class="btn btn-p"><i class="ti ti-send"></i> إرسال للمراجعة</button>
+          <button class="btn btn-g">حفظ مسودة</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div class="sec-panel" id="sec-inventory">
+      <div class="card">
+        <div class="c-head">
+          <div class="c-title">إدارة المخزون</div>
+          <span class="badge b-r">3 منتجات تحتاج تحديث</span>
+        </div>
+        <table>
+          <colgroup><col style="width:35%;"><col style="width:15%;"><col style="width:20%;"><col style="width:15%;"><col style="width:15%;"></colgroup>
+          <thead><tr><th>المنتج</th><th>الكمية</th><th>المخزون</th><th>الحالة</th><th>إجراء</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">قميص أوفرسايز كلاسيك</div><div class="p-cat">S, M, L</div></div></div></td>
+              <td style="font-weight:700;font-family:var(--fen);">24</td>
+              <td><div class="stock-bar"><div class="stock-fill" style="width:80%;background:var(--green);"></div></div></td>
+              <td><span class="badge b-g">متوفر</span></td>
+              <td><button class="btn btn-g" style="font-size:11px;padding:5px 10px;"><i class="ti ti-edit" style="font-size:12px;"></i> تحديث</button></td>
+            </tr>
+            <tr>
+              <td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">بنطلون كاجوال واسع</div><div class="p-cat">M, L, XL</div></div></div></td>
+              <td style="font-weight:700;font-family:var(--fen);color:var(--amber);">4</td>
+              <td><div class="stock-bar"><div class="stock-fill" style="width:15%;background:var(--amber);"></div></div></td>
+              <td><span class="badge b-a">منخفض</span></td>
+              <td><button class="btn btn-p" style="font-size:11px;padding:5px 10px;"><i class="ti ti-edit" style="font-size:12px;"></i> تحديث</button></td>
+            </tr>
+            <tr>
+              <td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">هودي أوفرسايز</div><div class="p-cat">S, M</div></div></div></td>
+              <td style="font-weight:700;font-family:var(--fen);color:var(--red);">0</td>
+              <td><div class="stock-bar"><div class="stock-fill" style="width:0%;background:var(--red);"></div></div></td>
+              <td><span class="badge b-r">نفد</span></td>
+              <td><button class="btn btn-p" style="font-size:11px;padding:5px 10px;"><i class="ti ti-edit" style="font-size:12px;"></i> تحديث</button></td>
+            </tr>
+            <tr>
+              <td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">قميص لينن بريميوم</div><div class="p-cat">S, M, L, XL</div></div></div></td>
+              <td style="font-weight:700;font-family:var(--fen);">18</td>
+              <td><div class="stock-bar"><div class="stock-fill" style="width:60%;background:var(--green);"></div></div></td>
+              <td><span class="badge b-g">متوفر</span></td>
+              <td><button class="btn btn-g" style="font-size:11px;padding:5px 10px;"><i class="ti ti-edit" style="font-size:12px;"></i> تحديث</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- COUPONS -->
+    <div class="sec-panel" id="sec-coupons">
+      <div class="card" style="margin-bottom:16px;">
+        <div class="c-head"><div class="c-title">إنشاء كوبون جديد</div></div>
+        <div class="form-grid">
+          <div><label class="field-lbl">رمز الكوبون</label><input type="text" class="field-input" placeholder="مثال: CASA20"></div>
+          <div><label class="field-lbl">نسبة الخصم %</label><input type="number" class="field-input" placeholder="10"></div>
+          <div><label class="field-lbl">تاريخ البداية</label><input type="date" class="field-input"></div>
+          <div><label class="field-lbl">تاريخ الانتهاء</label><input type="date" class="field-input"></div>
+        </div>
+        <div class="form-footer">
+          <button class="btn btn-p"><i class="ti ti-plus"></i> إنشاء الكوبون</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="c-head"><div class="c-title">الكوبونات الحالية</div></div>
+        <div class="coup-item">
+          <div style="flex:1;"><div class="coup-code">CASA20</div><div class="coup-meta">خصم 20% · ينتهي 31 مايو · استُخدم 14 مرة</div></div>
+          <span class="badge b-g">نشط</span>
+          <button class="toggle on" onclick="this.classList.toggle('on')" style="margin-right:10px;"></button>
+        </div>
+        <div class="coup-item">
+          <div style="flex:1;"><div class="coup-code">WELCOME10</div><div class="coup-meta">خصم 10% · ينتهي 30 يونيو · استُخدم 32 مرة</div></div>
+          <span class="badge b-g">نشط</span>
+          <button class="toggle on" onclick="this.classList.toggle('on')" style="margin-right:10px;"></button>
+        </div>
+        <div class="coup-item">
+          <div style="flex:1;"><div class="coup-code">EID50</div><div class="coup-meta">خصم 50% · انتهى · استُخدم 88 مرة</div></div>
+          <span class="badge b-r">منتهي</span>
+          <button class="toggle" onclick="this.classList.toggle('on')" style="margin-right:10px;"></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="sec-panel" id="sec-reports">
+      <div class="stats">
+        <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--blue-bg);color:var(--blue);"><i class="ti ti-shopping-cart"></i></div><div class="s-chg up"><i class="ti ti-arrow-up"></i>18%</div></div><div class="s-num">284</div><div class="s-lbl">الطلبات الشهر</div></div>
+        <div class="s-card"><div class="s-head"><div class="s-ico" style="background:rgba(201,168,76,.12);color:var(--gold2);"><i class="ti ti-cash"></i></div><div class="s-chg up"><i class="ti ti-arrow-up"></i>12%</div></div><div class="s-num">3,420</div><div class="s-lbl">المبيعات (د.ك)</div></div>
+        <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--red-bg);color:var(--red);"><i class="ti ti-percentage"></i></div><div class="s-chg dn"><i class="ti ti-arrow-down"></i>2%</div></div><div class="s-num">342</div><div class="s-lbl">العمولة (د.ك)</div></div>
+        <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-eye"></i></div><div class="s-chg up"><i class="ti ti-arrow-up"></i>34%</div></div><div class="s-num">8,240</div><div class="s-lbl">مشاهدات الصفحة</div></div>
+      </div>
+      <div class="card">
+        <div class="c-head"><div class="c-title">أداء الكوبونات</div></div>
+        <div class="prog-row"><div class="prog-h"><span>CASA20</span><span style="color:var(--gold);font-weight:700;">14 استخدام</span></div><div class="prog-t"><div class="prog-f" style="width:25%;"></div></div></div>
+        <div class="prog-row"><div class="prog-h"><span>WELCOME10</span><span style="color:var(--gold);font-weight:700;">32 استخدام</span></div><div class="prog-t"><div class="prog-f" style="width:58%;"></div></div></div>
+        <div class="prog-row"><div class="prog-h"><span>EID50</span><span style="color:var(--gold);font-weight:700;">88 استخدام</span></div><div class="prog-t"><div class="prog-f" style="width:100%;"></div></div></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="sec-panel" id="sec-settings">
+      <div class="card" style="margin-bottom:16px;">
+        <div class="c-head"><div class="c-title">معلومات المتجر</div></div>
+        <div class="form-grid">
+          <div><label class="field-lbl">اسم المتجر</label><input type="text" class="field-input" value="Casa Mode"></div>
+          <div><label class="field-lbl">رقم التواصل</label><input type="text" class="field-input" value="+965 9XXX XXXX" style="direction:ltr;text-align:right;"></div>
+        </div>
+        <div style="padding:0 20px 20px;"><label class="field-lbl">وصف المتجر</label><textarea class="field-input" rows="3" style="resize:none;">متجر Casa Mode للملابس والأزياء العصرية...</textarea></div>
+        <div style="padding:0 20px 20px;">
+          <label class="field-lbl">روابط السوشيال ميديا</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <input type="text" class="field-input" placeholder="Instagram @username">
+            <input type="text" class="field-input" placeholder="TikTok @username">
+          </div>
+        </div>
+        <div class="form-footer"><button class="btn btn-p"><i class="ti ti-device-floppy"></i> حفظ التغييرات</button></div>
+      </div>
+
+      <div class="card">
+        <div class="c-head"><div class="c-title">إعدادات التشغيل</div></div>
+        <div class="set-row">
+          <div class="set-ico" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-door-enter"></i></div>
+          <div><div class="set-lbl">حالة المتجر</div><div class="set-sub">مفتوح — يغلق 11م</div></div>
+          <button class="toggle on set-act" onclick="this.classList.toggle('on')"></button>
+        </div>
+        <div class="set-row">
+          <div class="set-ico" style="background:var(--amber-bg);color:var(--amber);"><i class="ti ti-bell"></i></div>
+          <div><div class="set-lbl">إشعارات الطلبات الجديدة</div><div class="set-sub">إشعار فوري عند كل طلب</div></div>
+          <button class="toggle on set-act" onclick="this.classList.toggle('on')"></button>
+        </div>
+        <div class="set-row">
+          <div class="set-ico" style="background:var(--blue-bg);color:var(--blue);"><i class="ti ti-box"></i></div>
+          <div><div class="set-lbl">تنبيه انخفاض المخزون</div><div class="set-sub">عند وصول الكمية لـ 5 قطع</div></div>
+          <button class="toggle on set-act" onclick="this.classList.toggle('on')"></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const titles = {dashboard:'لوحة التحكم',orders:'الطلبات',products:'إضافة منتج',inventory:'المخزون',coupons:'الكوبونات',reports:'التقارير',settings:'إعدادات المتجر'};
+
+  function switchSec(id, item) {
+    document.querySelectorAll('.sec-panel').forEach(p => p.classList.remove('on'));
+    document.getElementById('sec-' + id).classList.add('on');
+    if (item) { document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('on')); item.classList.add('on'); }
+    document.getElementById('top-title').textContent = titles[id] || '';
+  }
+
+  document.querySelectorAll('.tab').forEach(t => {
+    t.addEventListener('click', function() {
+      const p = this.closest('.tabs');
+      p.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+      this.classList.add('on');
+    });
+  });
+</script>
+</body>
+</html>

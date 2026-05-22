@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رف — تطبيق السائق</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;
+  --gold:#C9A84C;--gold2:#A07828;
+  --text:#0A0A0A;--text2:#555;--text3:#888;
+  --border:#D8D3C8;
+  --green:#2E7D32;--green-bg:#E8F5E9;
+  --red:#C62828;--red-bg:#FFEBEE;
+  --blue:#1565C0;--blue-bg:#E3F2FD;
+  --amber:#E65100;--amber-bg:#FFF3E0;
+  --r:12px;--rl:16px;
+  --font:'Tajawal',sans-serif;
+  --fen:'DM Sans',sans-serif;
+}
+html,body{height:100%;background:#1A1A1A;display:flex;align-items:center;justify-content:center;font-family:var(--font);}
+
+/* PHONE FRAME */
+.phone{width:390px;height:844px;background:var(--bg);border-radius:44px;overflow:hidden;position:relative;box-shadow:0 40px 80px rgba(0,0,0,0.6);display:flex;flex-direction:column;}
+
+/* STATUS BAR */
+.status-bar{height:44px;background:var(--card);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;}
+.status-time{font-size:15px;font-weight:700;font-family:var(--fen);}
+.status-icons{display:flex;align-items:center;gap:6px;font-size:14px;}
+
+/* HEADER */
+.header{background:var(--card);border-bottom:1px solid var(--border);padding:12px 20px;flex-shrink:0;}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.driver-info{display:flex;align-items:center;gap:10px;}
+.driver-av{width:38px;height:38px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#000;}
+.driver-name{font-size:14px;font-weight:700;}
+.driver-status{font-size:11px;margin-top:2px;}
+.status-toggle{display:flex;align-items:center;gap:8px;}
+.toggle-lbl{font-size:12px;color:var(--text3);}
+.toggle{width:48px;height:26px;background:var(--gold);border-radius:13px;cursor:pointer;position:relative;border:none;transition:background .2s;}
+.toggle::after{content:'';position:absolute;top:3px;right:3px;width:20px;height:20px;background:white;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.header-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.h-stat{background:var(--bg);border-radius:var(--r);padding:8px 10px;text-align:center;}
+.h-stat-num{font-size:18px;font-weight:700;font-family:var(--fen);color:var(--text);}
+.h-stat-lbl{font-size:10px;color:var(--text3);margin-top:2px;}
+
+/* TABS */
+.tabs{display:flex;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0;}
+.tab{flex:1;padding:12px 0;text-align:center;font-size:13px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;font-weight:500;}
+.tab.on{color:var(--text);border-bottom-color:var(--gold);font-weight:700;}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:16px;}
+.content::-webkit-scrollbar{display:none;}
+
+/* ALERT */
+.alert{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--amber-bg);border:1px solid rgba(230,81,0,.15);border-radius:var(--r);margin-bottom:14px;font-size:12px;color:var(--amber);}
+.alert i{font-size:17px;flex-shrink:0;}
+
+/* ORDER CARD */
+.order-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:12px;overflow:hidden;transition:all .2s;}
+.order-card:hover{border-color:var(--gold);box-shadow:0 4px 16px rgba(0,0,0,.06);}
+.order-card.taken{opacity:.5;}
+.oc-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.oc-num{font-size:14px;font-weight:700;}
+.oc-store{font-size:11px;color:var(--gold2);margin-top:2px;}
+.oc-body{padding:14px 16px;}
+.oc-addr{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text2);margin-bottom:8px;}
+.oc-addr i{font-size:16px;color:var(--text3);flex-shrink:0;margin-top:1px;}
+.oc-items{font-size:12px;color:var(--text3);margin-bottom:12px;}
+.oc-foot{display:flex;gap:8px;}
+.btn-accept{flex:1;padding:12px;background:var(--gold);border:none;border-radius:var(--r);color:#000;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.btn-accept:hover{background:var(--gold2);}
+.btn-accept.taken{background:var(--bg2);color:var(--text3);cursor:not-allowed;}
+.btn-locked{padding:12px 16px;background:var(--red-bg);border:none;border-radius:var(--r);color:var(--red);font-size:13px;cursor:not-allowed;display:flex;align-items:center;gap:4px;}
+
+/* ACTIVE ORDER */
+.active-order{background:var(--card);border:2px solid var(--gold);border-radius:var(--rl);margin-bottom:12px;overflow:hidden;}
+.ao-head{background:var(--gold);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;}
+.ao-title{font-size:14px;font-weight:700;color:#000;}
+.ao-sub{font-size:11px;color:rgba(0,0,0,.6);margin-top:2px;}
+.ao-body{padding:16px;}
+.ao-steps{display:flex;align-items:center;gap:0;margin-bottom:16px;overflow-x:auto;}
+.ao-step{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;position:relative;z-index:1;}
+.ao-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid var(--border);background:var(--card);color:var(--text3);transition:all .3s;}
+.ao-dot.done{background:var(--green);border-color:var(--green);color:white;}
+.ao-dot.active{background:var(--gold);border-color:var(--gold);color:#000;font-weight:700;}
+.ao-lbl{font-size:9px;color:var(--text3);text-align:center;}
+.ao-lbl.done{color:var(--green);}
+.ao-lbl.active{color:var(--gold);font-weight:700;}
+.ao-line{position:absolute;top:14px;right:50%;left:-50%;height:2px;background:var(--border);z-index:0;}
+.ao-line.done{background:var(--green);}
+.client-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;}
+.client-row{display:flex;align-items:center;gap:10px;}
+.client-av{width:36px;height:36px;border-radius:50%;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--blue);flex-shrink:0;}
+.client-name{font-size:13px;font-weight:700;}
+.client-addr{font-size:11px;color:var(--text3);margin-top:2px;}
+.wa-btn{margin-right:auto;padding:8px 14px;background:var(--green-bg);color:var(--green);border:none;border-radius:var(--r);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.status-btns{display:flex;flex-direction:column;gap:8px;}
+.btn-status{width:100%;padding:13px;border:none;border-radius:var(--r);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-delivered{background:var(--green);color:white;}
+.btn-delivered:hover{background:#1B5E20;}
+.btn-return{background:var(--red-bg);color:var(--red);border:1px solid rgba(198,40,40,.2);}
+.btn-return:hover{background:var(--red);color:white;}
+
+/* HISTORY CARDS */
+.hist-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+.hist-ico{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.hist-num{font-size:13px;font-weight:700;}
+.hist-meta{font-size:11px;color:var(--text3);margin-top:2px;}
+.hist-badge{margin-right:auto;}
+
+/* BOTTOM NAV */
+.bottom-nav{height:70px;background:var(--card);border-top:1px solid var(--border);display:flex;align-items:center;flex-shrink:0;padding-bottom:8px;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:8px 0;transition:all .15s;}
+.nav-item i{font-size:22px;color:var(--text3);}
+.nav-item span{font-size:10px;color:var(--text3);}
+.nav-item.on i{color:var(--gold);}
+.nav-item.on span{color:var(--gold);font-weight:700;}
+.nav-badge{position:relative;}
+.nav-badge::after{content:'4';position:absolute;top:-4px;right:-8px;width:16px;height:16px;background:var(--red);border-radius:50%;font-size:9px;color:white;font-weight:700;display:flex;align-items:center;justify-content:center;}
+
+/* PANELS */
+.panel{display:none;}
+.panel.on{display:block;}
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="status-time">9:41</div>
+    <div class="status-icons">
+      <i class="ti ti-wifi"></i>
+      <i class="ti ti-signal-4g"></i>
+      <i class="ti ti-battery-3"></i>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="driver-info">
+        <div class="driver-av">خ</div>
+        <div>
+          <div class="driver-name">خالد السائق</div>
+          <div class="driver-status" style="color:var(--green);">● نشط الآن</div>
+        </div>
+      </div>
+      <div class="status-toggle">
+        <span class="toggle-lbl">نشط</span>
+        <button class="toggle" onclick="this.classList.toggle('off');this.style.background=this.classList.contains('off')?'var(--border)':'var(--gold)'"></button>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="h-stat">
+        <div class="h-stat-num" style="color:var(--gold);">3</div>
+        <div class="h-stat-lbl">اليوم</div>
+      </div>
+      <div class="h-stat">
+        <div class="h-stat-num">84</div>
+        <div class="h-stat-lbl">الشهر</div>
+      </div>
+      <div class="h-stat">
+        <div class="h-stat-num" style="color:var(--green);">4.8 ★</div>
+        <div class="h-stat-lbl">تقييمي</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab on" onclick="switchTab('available', this)">
+      المتاحة
+      <span style="background:var(--red-bg);color:var(--red);padding:1px 5px;border-radius:8px;font-size:10px;margin-right:3px;">3</span>
+    </div>
+    <div class="tab" onclick="switchTab('active', this)">طلبي الحالي</div>
+    <div class="tab" onclick="switchTab('history', this)">سجلي</div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- AVAILABLE ORDERS -->
+    <div class="panel on" id="tab-available">
+      <div class="alert">
+        <i class="ti ti-info-circle"></i>
+        اضغط "استلم" لأخذ طلب — يُقفل فوراً للآخرين
+      </div>
+
+      <!-- ORDER 1 -->
+      <div class="order-card" id="ord1">
+        <div class="oc-head">
+          <div>
+            <div class="oc-num">#ORD-1290</div>
+            <div class="oc-store">Casa Mode</div>
+          </div>
+          <span style="background:var(--amber-bg);color:var(--amber);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">منذ 2د</span>
+        </div>
+        <div class="oc-body">
+          <div class="oc-addr"><i class="ti ti-map-pin"></i>حولي، شارع الأمير، بناية 12، شقة 4</div>
+          <div class="oc-items">قميص أوفرسايز كلاسيك × 1 — الدفع عند الاستلام</div>
+          <div class="oc-foot">
+            <button class="btn-accept" onclick="acceptOrder('ord1', this)">
+              <i class="ti ti-hand-stop"></i> استلم الطلب
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ORDER 2 — LOCKED -->
+      <div class="order-card taken">
+        <div class="oc-head">
+          <div>
+            <div class="oc-num">#ORD-1289</div>
+            <div class="oc-store">TechZone</div>
+          </div>
+          <span style="background:var(--red-bg);color:var(--red);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;"><i class="ti ti-lock" style="font-size:11px;"></i> محجوز</span>
+        </div>
+        <div class="oc-body">
+          <div class="oc-addr"><i class="ti ti-map-pin"></i>السالمية، شارع الخليج، بناية 5</div>
+          <div class="oc-items">iPhone 16 Pro × 1 — الدفع عند الاستلام</div>
+          <div class="oc-foot">
+            <button class="btn-accept taken" disabled><i class="ti ti-lock"></i> تم استلامه من سائق آخر</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ORDER 3 -->
+      <div class="order-card" id="ord3">
+        <div class="oc-head">
+          <div>
+            <div class="oc-num">#ORD-1287</div>
+            <div class="oc-store">Luxe Accessories</div>
+          </div>
+          <span style="background:var(--amber-bg);color:var(--amber);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;">منذ 8د</span>
+        </div>
+        <div class="oc-body">
+          <div class="oc-addr"><i class="ti ti-map-pin"></i>الرميثية، شارع 14، بناية 7</div>
+          <div class="oc-items">نظارة شمسية × 2 — الدفع عند الاستلام</div>
+          <div class="oc-foot">
+            <button class="btn-accept" onclick="acceptOrder('ord3', this)">
+              <i class="ti ti-hand-stop"></i> استلم الطلب
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVE ORDER -->
+    <div class="panel" id="tab-active">
+      <div class="active-order">
+        <div class="ao-head">
+          <div>
+            <div class="ao-title">#ORD-1284 — Casa Mode</div>
+            <div class="ao-sub">قميص أوفرسايز كلاسيك × 1</div>
+          </div>
+          <i class="ti ti-truck" style="font-size:22px;color:#000;"></i>
+        </div>
+        <div class="ao-body">
+
+          <!-- TRACKING STEPS -->
+          <div class="ao-steps">
+            <div class="ao-step">
+              <div class="ao-dot done"><i class="ti ti-check" style="font-size:12px;"></i></div>
+              <div class="ao-lbl done">استلمت</div>
+            </div>
+            <div class="ao-step">
+              <div class="ao-line done"></div>
+              <div class="ao-dot active"><i class="ti ti-truck" style="font-size:12px;"></i></div>
+              <div class="ao-lbl active">قيد التوصيل</div>
+            </div>
+            <div class="ao-step">
+              <div class="ao-line"></div>
+              <div class="ao-dot"><i class="ti ti-home" style="font-size:12px;"></i></div>
+              <div class="ao-lbl">تم التوصيل</div>
+            </div>
+          </div>
+
+          <!-- CLIENT INFO -->
+          <div class="client-box">
+            <div class="client-row">
+              <div class="client-av"><i class="ti ti-user"></i></div>
+              <div>
+                <div class="client-name">محمد العنزي</div>
+                <div class="client-addr"><i class="ti ti-map-pin" style="font-size:10px;"></i> حولي، شارع الأمير، بناية 12، شقة 4</div>
+              </div>
+              <button class="wa-btn"><i class="ti ti-brand-whatsapp"></i> واتساب</button>
+            </div>
+          </div>
+
+          <!-- STATUS BTNS -->
+          <div class="status-btns">
+            <button class="btn-status btn-delivered" onclick="markDelivered()">
+              <i class="ti ti-check"></i> تم التوصيل
+            </button>
+            <button class="btn-status btn-return">
+              <i class="ti ti-arrow-back-up"></i> إبلاغ عن مرتجع
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="panel" id="tab-history">
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div class="h-stat" style="border:1px solid var(--border);border-radius:var(--r);">
+          <div class="h-stat-num" style="color:var(--green);">3</div>
+          <div class="h-stat-lbl">مكتمل اليوم</div>
+        </div>
+        <div class="h-stat" style="border:1px solid var(--border);border-radius:var(--r);">
+          <div class="h-stat-num">24د</div>
+          <div class="h-stat-lbl">متوسط التوصيل</div>
+        </div>
+      </div>
+
+      <div class="hist-card">
+        <div class="hist-ico" style="background:var(--blue-bg);color:var(--blue);"><i class="ti ti-truck"></i></div>
+        <div>
+          <div class="hist-num">#ORD-1284</div>
+          <div class="hist-meta">Casa Mode · حولي · منذ 20د</div>
+        </div>
+        <div class="hist-badge"><span style="background:var(--blue-bg);color:var(--blue);padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;">جارٍ</span></div>
+      </div>
+
+      <div class="hist-card">
+        <div class="hist-ico" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-check"></i></div>
+        <div>
+          <div class="hist-num">#ORD-1279</div>
+          <div class="hist-meta">TechZone · السالمية · 1:10م</div>
+        </div>
+        <div class="hist-badge"><span style="background:var(--green-bg);color:var(--green);padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;">مكتمل</span></div>
+      </div>
+
+      <div class="hist-card">
+        <div class="hist-ico" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-check"></i></div>
+        <div>
+          <div class="hist-num">#ORD-1270</div>
+          <div class="hist-meta">Casa Mode · الفروانية · 11:30ص</div>
+        </div>
+        <div class="hist-badge"><span style="background:var(--green-bg);color:var(--green);padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;">مكتمل</span></div>
+      </div>
+
+      <div class="hist-card">
+        <div class="hist-ico" style="background:var(--red-bg);color:var(--red);"><i class="ti ti-arrow-back-up"></i></div>
+        <div>
+          <div class="hist-num">#ORD-1260</div>
+          <div class="hist-meta">Sole & Co · الجهراء · أمس 3:00م</div>
+        </div>
+        <div class="hist-badge"><span style="background:var(--red-bg);color:var(--red);padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;">مرتجع</span></div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item on" onclick="switchNav(this,'available')">
+      <div class="nav-badge"><i class="ti ti-package"></i></div>
+      <span>الطلبات</span>
+    </div>
+    <div class="nav-item" onclick="switchNav(this,'active')">
+      <i class="ti ti-truck"></i>
+      <span>الحالي</span>
+    </div>
+    <div class="nav-item" onclick="switchNav(this,'history')">
+      <i class="ti ti-history"></i>
+      <span>سجلي</span>
+    </div>
+    <div class="nav-item" onclick="switchNav(this,'profile')">
+      <i class="ti ti-user"></i>
+      <span>حسابي</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function switchTab(id, tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+    tab.classList.add('on');
+    document.getElementById('tab-' + id).classList.add('on');
+  }
+
+  function switchNav(item, id) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('on'));
+    item.classList.add('on');
+    const tabMap = {available:'available', active:'active', history:'history'};
+    if (tabMap[id]) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+      const tabs = document.querySelectorAll('.tab');
+      const idx = {available:0, active:1, history:2};
+      if (tabs[idx[id]]) tabs[idx[id]].classList.add('on');
+      const panel = document.getElementById('tab-' + id);
+      if (panel) panel.classList.add('on');
+    }
+  }
+
+  function acceptOrder(id, btn) {
+    const card = document.getElementById(id);
+    btn.innerHTML = '<i class="ti ti-check"></i> تم الاستلام — في الطريق';
+    btn.classList.add('taken');
+    btn.disabled = true;
+    card.classList.add('taken');
+    setTimeout(() => {
+      card.style.display = 'none';
+    }, 1500);
+  }
+
+  function markDelivered() {
+    const dots = document.querySelectorAll('.ao-dot');
+    const lbls = document.querySelectorAll('.ao-lbl');
+    const lines = document.querySelectorAll('.ao-line');
+    dots[1].classList.remove('active'); dots[1].classList.add('done');
+    dots[1].innerHTML = '<i class="ti ti-check" style="font-size:12px;"></i>';
+    dots[2].classList.add('active');
+    dots[2].innerHTML = '<i class="ti ti-check" style="font-size:12px;"></i>';
+    lbls[1].classList.remove('active'); lbls[1].classList.add('done');
+    lbls[2].classList.add('active');
+    lines[1].classList.add('done');
+  }
+</script>
+</body>
+</html>
