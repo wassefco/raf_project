@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رف — جميع المحلات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{--bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;--gold:#C9A84C;--gold2:#A07828;--black:#0A0A0A;--text:#0A0A0A;--text2:#555;--text3:#888;--border:#D8D3C8;--r:8px;--rl:12px;--font:'Tajawal',sans-serif;--fdisplay:'Playfair Display',serif;--fen:'DM Sans',sans-serif;--green:#2E7D32;--green-bg:#E8F5E9;--red:#C62828;--red-bg:#FFEBEE;--amber:#E65100;--amber-bg:#FFF3E0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;}
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.3);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.nav-logo{font-family:var(--fdisplay);font-size:28px;font-weight:900;color:var(--gold);text-decoration:none;}
+.nav-logo span{color:var(--text);font-size:11px;font-family:var(--fen);font-weight:300;letter-spacing:3px;display:block;margin-top:-6px;}
+.nav-links{display:flex;align-items:center;gap:4px;}
+.nav-link{color:var(--text3);text-decoration:none;font-size:14px;padding:6px 12px;border-radius:var(--r);transition:color .2s;}
+.nav-link:hover{color:var(--text);}
+.nav-link.on{color:var(--gold);font-weight:700;}
+.nav-actions{display:flex;align-items:center;gap:8px;}
+.btn-ghost{padding:8px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.btn-gold{padding:8px 20px;border:none;border-radius:var(--r);background:var(--gold);color:var(--black);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-gold:hover{background:var(--gold2);}
+.nav-ico{width:40px;height:40px;border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;background:transparent;font-size:18px;position:relative;transition:all .2s;}
+.nav-ico:hover{border-color:var(--gold);color:var(--gold);}
+.cart-badge{position:absolute;top:-6px;left:-6px;width:18px;height:18px;background:var(--gold);color:var(--black);border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--fen);}
+/* PAGE HEADER */
+.page-header{background:var(--black);padding:40px;}
+.page-header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;}
+.page-title{font-size:30px;font-weight:700;color:#F5F2EC;}
+.page-title span{color:var(--gold);}
+.page-sub{font-size:14px;color:#888;margin-top:6px;}
+.stat-pills{display:flex;gap:14px;}
+.stat-pill{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);border-radius:var(--rl);padding:12px 20px;text-align:center;}
+.stat-pill-num{font-size:24px;font-weight:900;color:var(--gold);font-family:var(--fen);}
+.stat-pill-lbl{font-size:11px;color:#888;margin-top:2px;}
+/* BREADCRUMB */
+.breadcrumb{padding:12px 40px;font-size:13px;color:var(--text3);display:flex;align-items:center;gap:6px;background:var(--bg2);border-bottom:1px solid var(--border);}
+.breadcrumb a{color:var(--text3);text-decoration:none;transition:color .2s;}
+.breadcrumb a:hover{color:var(--gold);}
+/* MAIN */
+.main{max-width:1200px;margin:0 auto;padding:32px 40px;}
+/* SEARCH + FILTER */
+.search-bar{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px 20px;margin-bottom:20px;flex-wrap:wrap;}
+.search-inp{flex:1;min-width:240px;display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:9px 14px;}
+.search-inp input{border:none;background:transparent;font-family:var(--font);font-size:14px;color:var(--text);outline:none;flex:1;}
+.f-select{padding:9px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);font-family:var(--font);font-size:13px;color:var(--text2);cursor:pointer;outline:none;}
+.f-select:focus{border-color:var(--gold);}
+/* FILTER CHIPS */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.chip{padding:6px 14px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text2);cursor:pointer;transition:all .15s;background:var(--card);}
+.chip:hover{border-color:var(--gold);color:var(--gold);}
+.chip.on{background:var(--gold);border-color:var(--gold);color:var(--black);font-weight:700;}
+/* VIEW TOGGLE */
+.view-toggle{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:3px;}
+.vt-btn{padding:6px 10px;border-radius:5px;border:none;background:transparent;color:var(--text3);cursor:pointer;transition:all .15s;font-size:16px;}
+.vt-btn.on{background:var(--card);color:var(--gold);box-shadow:0 1px 4px rgba(0,0,0,.08);}
+/* RESULTS BAR */
+.results-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.results-count{font-size:13px;color:var(--text3);}
+/* STORES GRID */
+.stores-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px;}
+.stores-grid.list-view{grid-template-columns:1fr;gap:12px;}
+/* STORE CARD */
+.store-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
+.store-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.08);}
+.store-num{position:absolute;top:10px;left:10px;background:rgba(10,10,10,.65);color:#fff;font-family:var(--fen);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;backdrop-filter:blur(4px);z-index:1;}
+.store-img{height:130px;background:linear-gradient(135deg,var(--bg2),var(--border));display:flex;align-items:center;justify-content:center;font-size:44px;color:var(--gold);position:relative;}
+.store-badge{position:absolute;top:10px;right:10px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;}
+.badge-premium{background:var(--gold);color:var(--black);}
+.badge-featured{background:rgba(201,168,76,.15);color:var(--gold);border:1px solid rgba(201,168,76,.3);}
+.badge-closed{background:rgba(10,10,10,.5);color:#aaa;}
+.verified-ico{position:absolute;bottom:10px;right:10px;width:22px;height:22px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--black);}
+.store-body{padding:16px;}
+.store-name{font-size:15px;font-weight:700;margin-bottom:4px;}
+.store-cat-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.store-cat{font-size:12px;color:var(--text3);}
+.store-rating{font-size:12px;color:var(--gold);display:flex;align-items:center;gap:3px;}
+.store-footer{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);}
+.store-status-open{color:var(--green);font-weight:700;display:flex;align-items:center;gap:4px;}
+.store-status-closed{color:var(--red);font-weight:700;display:flex;align-items:center;gap:4px;}
+/* LIST VIEW CARD */
+.stores-grid.list-view .store-card{display:flex;align-items:center;}
+.stores-grid.list-view .store-img{height:80px;width:100px;min-width:100px;flex-shrink:0;}
+.stores-grid.list-view .store-body{flex:1;padding:12px 16px;}
+.stores-grid.list-view .store-num{top:8px;left:8px;}
+/* FOOTER */
+footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto 40px;}
+.footer-logo{font-family:var(--fdisplay);font-size:32px;font-weight:900;color:var(--gold);text-decoration:none;display:block;margin-bottom:12px;}
+.footer-desc{font-size:13px;color:#555;line-height:1.7;}
+.footer-col-title{font-size:13px;font-weight:700;color:#ccc;margin-bottom:16px;letter-spacing:1px;}
+.footer-link{display:block;font-size:13px;color:#555;text-decoration:none;margin-bottom:10px;transition:color .2s;}
+.footer-link:hover{color:var(--gold);}
+.footer-bottom{border-top:1px solid #1a1a1a;padding-top:24px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#444;max-width:1200px;margin:0 auto;}
+@media(max-width:900px){nav{padding:0 16px;}.nav-links{display:none;}.main{padding:20px 16px;}.page-header{padding:28px 16px;}.page-header-inner{flex-direction:column;align-items:flex-start;gap:14px;}.footer-grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-actions">
+    <button class="nav-ico" onclick="window.location='raf_cart.html'"><i class="ti ti-shopping-cart"></i><span class="cart-badge" id="cartBadge">0</span></button>
+    <button class="nav-ico" onclick="window.location='raf_wishlist.html'"><i class="ti ti-heart"></i></button>
+    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> تسجيل الدخول</a>
+    <a href="raf_login.html" class="btn-gold">إنشاء حساب</a>
+  </div>
+  <div class="nav-links">
+    <a href="raf_stores.html" class="nav-link on">المحلات</a>
+    <a href="raf_offers.html" class="nav-link">العروض</a>
+    <a href="raf_trending.html" class="nav-link">الترندات</a>
+    <a href="raf_used.html" class="nav-link">المستعملات</a>
+    <a href="raf_auctions.html" class="nav-link">المزادات</a>
+  </div>
+  <a href="raf_homepage.html" class="nav-logo">رف<span>RAF MARKETPLACE</span></a>
+</nav>
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <div class="page-title">جميع <span>المحلات</span></div>
+      <div class="page-sub">تصفح أفضل المتاجر المحلية في الكويت</div>
+    </div>
+    <div class="stat-pills">
+      <div class="stat-pill"><div class="stat-pill-num">128</div><div class="stat-pill-lbl">متجر نشط</div></div>
+      <div class="stat-pill"><div class="stat-pill-num">4,800+</div><div class="stat-pill-lbl">منتج</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="breadcrumb">
+  <a href="raf_homepage.html">الرئيسية</a>
+  <i class="ti ti-chevron-left"></i>
+  <span style="color:var(--text);">جميع المحلات</span>
+</div>
+
+<div class="main">
+  <div class="search-bar">
+    <div class="search-inp" style="flex:1;">
+      <i class="ti ti-search" style="color:var(--text3);"></i>
+      <input type="text" placeholder="ابحث بالاسم أو رقم المحل (#001)..." oninput="filterStores(this.value)">
+    </div>
+    <select class="f-select" onchange="filterByStatus(this.value)">
+      <option value="">الحالة</option>
+      <option value="open">مفتوح الآن</option>
+      <option value="closed">مغلق</option>
+    </select>
+    <select class="f-select" onchange="filterByPkg(this.value)">
+      <option value="">الباقة</option>
+      <option value="premium">بريميوم</option>
+      <option value="featured">مميز</option>
+      <option value="free">مجاني</option>
+    </select>
+    <select class="f-select" onchange="sortStores(this.value)">
+      <option>الترتيب</option>
+      <option>الأعلى تقييماً</option>
+      <option>الأحدث</option>
+      <option>الأكثر مبيعاً</option>
+    </select>
+    <div class="view-toggle">
+      <button class="vt-btn on" onclick="setView('grid',this)" title="شبكة"><i class="ti ti-layout-grid"></i></button>
+      <button class="vt-btn" onclick="setView('list',this)" title="قائمة"><i class="ti ti-layout-list"></i></button>
+    </div>
+  </div>
+
+  <div class="chips" id="catChips">
+    <div class="chip on" onclick="filterCat('',this)">الكل <span style="color:var(--text3);font-weight:400;">(128)</span></div>
+    <div class="chip" onclick="filterCat('ملابس',this)">ملابس <span style="color:var(--text3);font-weight:400;">(42)</span></div>
+    <div class="chip" onclick="filterCat('أحذية',this)">أحذية <span style="color:var(--text3);font-weight:400;">(18)</span></div>
+    <div class="chip" onclick="filterCat('إلكترونيات',this)">إلكترونيات <span style="color:var(--text3);font-weight:400;">(15)</span></div>
+    <div class="chip" onclick="filterCat('اكسسوارات',this)">اكسسوارات <span style="color:var(--text3);font-weight:400;">(22)</span></div>
+    <div class="chip" onclick="filterCat('هواتف',this)">هواتف <span style="color:var(--text3);font-weight:400;">(9)</span></div>
+    <div class="chip" onclick="filterCat('قرطاسية',this)">قرطاسية <span style="color:var(--text3);font-weight:400;">(7)</span></div>
+    <div class="chip" onclick="filterCat('أخرى',this)">أخرى <span style="color:var(--text3);font-weight:400;">(15)</span></div>
+  </div>
+
+  <div class="results-bar">
+    <span class="results-count" id="resultsCount">128 محل</span>
+  </div>
+
+  <div class="stores-grid" id="storesGrid">
+    <div class="store-card" onclick="window.location='raf_store.html'">
+      <span class="store-num">#001</span>
+      <div class="store-img"><i class="ti ti-hanger"></i><span class="store-badge badge-premium">بريميوم</span><div class="verified-ico"><i class="ti ti-check"></i></div></div>
+      <div class="store-body">
+        <div class="store-name">Casa Mode</div>
+        <div class="store-cat-row"><span class="store-cat">ملابس</span><span class="store-rating"><i class="ti ti-star-filled"></i> 4.9</span></div>
+        <div class="store-footer"><span class="store-status-open"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مفتوح</span><span>284 منتج</span><span>3.2K متابع</span></div>
+      </div>
+    </div>
+    <div class="store-card" onclick="window.location='raf_store.html'">
+      <span class="store-num">#002</span>
+      <div class="store-img"><i class="ti ti-shoe"></i><span class="store-badge badge-featured">مميز</span></div>
+      <div class="store-body">
+        <div class="store-name">Sole & Co</div>
+        <div class="store-cat-row"><span class="store-cat">أحذية</span><span class="store-rating"><i class="ti ti-star-filled"></i> 4.7</span></div>
+        <div class="store-footer"><span class="store-status-open"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مفتوح</span><span>128 منتج</span><span>1.8K متابع</span></div>
+      </div>
+    </div>
+    <div class="store-card" onclick="window.location='raf_store.html'">
+      <span class="store-num">#003</span>
+      <div class="store-img"><i class="ti ti-device-mobile"></i><span class="store-badge badge-premium">بريميوم</span><div class="verified-ico"><i class="ti ti-check"></i></div></div>
+      <div class="store-body">
+        <div class="store-name">TechZone</div>
+        <div class="store-cat-row"><span class="store-cat">هواتف · إلكترونيات</span><span class="store-rating"><i class="ti ti-star-filled"></i> 4.8</span></div>
+        <div class="store-footer"><span class="store-status-open"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مفتوح</span><span>96 منتج</span><span>2.4K متابع</span></div>
+      </div>
+    </div>
+    <div class="store-card" onclick="window.location='raf_store.html'">
+      <span class="store-num">#004</span>
+      <div class="store-img"><i class="ti ti-sunglasses"></i><span class="store-badge badge-featured">مميز</span></div>
+      <div class="store-body">
+        <div class="store-name">Luxe Accessories</div>
+        <div class="store-cat-row"><span class="store-cat">اكسسوارات</span><span class="store-rating"><i class="ti ti-star-filled"></i> 4.6</span></div>
+        <div class="store-footer"><span class="store-status-open"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مفتوح</span><span>74 منتج</span><span>980 متابع</span></div>
+      </div>
+    </div>
+    <div class="store-card" onclick="window.location='raf_store.html'">
+      <span class="store-num">#005</span>
+      <div class="store-img" style="opacity:.6;"><i class="ti ti-shirt"></i><span class="store-badge badge-closed">مغلق</span></div>
+      <div class="store-body">
+        <div class="store-name" style="color:var(--text3);">Urban Thread</div>
+        <div class="store-cat-row"><span class="store-cat">ملابس</span><span class="store-rating"><i class="ti ti-star-filled"></i> 4.5</span></div>
+        <div class="store-footer"><span class="store-status-closed"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مغلق</span><span>62 منتج</span><span>542 متابع</span></div>
+      </div>
+    </div>
+    <div class="store-card" onclick="window.location='raf_store.html'">
+      <span class="store-num">#006</span>
+      <div class="store-img"><i class="ti ti-diamond"></i><span class="store-badge badge-premium">بريميوم</span><div class="verified-ico"><i class="ti ti-check"></i></div></div>
+      <div class="store-body">
+        <div class="store-name">Glam Store</div>
+        <div class="store-cat-row"><span class="store-cat">اكسسوارات · مجوهرات</span><span class="store-rating"><i class="ti ti-star-filled"></i> 4.9</span></div>
+        <div class="store-footer"><span class="store-status-open"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مفتوح</span><span>112 منتج</span><span>4.1K متابع</span></div>
+      </div>
+    </div>
+    <div class="store-card" onclick="window.location='raf_store.html'">
+      <span class="store-num">#007</span>
+      <div class="store-img"><i class="ti ti-pencil"></i></div>
+      <div class="store-body">
+        <div class="store-name">Sketch Corner</div>
+        <div class="store-cat-row"><span class="store-cat">قرطاسية · فنون</span><span class="store-rating"><i class="ti ti-star-filled"></i> 4.4</span></div>
+        <div class="store-footer"><span class="store-status-open"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مفتوح</span><span>48 منتج</span><span>310 متابع</span></div>
+      </div>
+    </div>
+    <div class="store-card" onclick="window.location='raf_store.html'">
+      <span class="store-num">#008</span>
+      <div class="store-img"><i class="ti ti-watch"></i><span class="store-badge badge-featured">مميز</span></div>
+      <div class="store-body">
+        <div class="store-name">Time Craft</div>
+        <div class="store-cat-row"><span class="store-cat">ساعات</span><span class="store-rating"><i class="ti ti-star-filled"></i> 4.7</span></div>
+        <div class="store-footer"><span class="store-status-open"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مفتوح</span><span>36 منتج</span><span>1.2K متابع</span></div>
+      </div>
+    </div>
+    <div class="store-card" onclick="window.location='raf_store.html'">
+      <span class="store-num">#009</span>
+      <div class="store-img"><i class="ti ti-shirt-sport"></i></div>
+      <div class="store-body">
+        <div class="store-name">SportHub KW</div>
+        <div class="store-cat-row"><span class="store-cat">ملابس رياضية</span><span class="store-rating"><i class="ti ti-star-filled"></i> 4.6</span></div>
+        <div class="store-footer"><span class="store-status-open"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مفتوح</span><span>88 منتج</span><span>2.0K متابع</span></div>
+      </div>
+    </div>
+    <div class="store-card" onclick="window.location='raf_store.html'">
+      <span class="store-num">#010</span>
+      <div class="store-img"><i class="ti ti-perfume"></i><span class="store-badge badge-featured">مميز</span><div class="verified-ico"><i class="ti ti-check"></i></div></div>
+      <div class="store-body">
+        <div class="store-name">Aura Scents</div>
+        <div class="store-cat-row"><span class="store-cat">عطور</span><span class="store-rating"><i class="ti ti-star-filled"></i> 4.8</span></div>
+        <div class="store-footer"><span class="store-status-open"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مفتوح</span><span>52 منتج</span><span>1.6K متابع</span></div>
+      </div>
+    </div>
+    <div class="store-card" onclick="window.location='raf_store.html'">
+      <span class="store-num">#011</span>
+      <div class="store-img"><i class="ti ti-backpack"></i></div>
+      <div class="store-body">
+        <div class="store-name">Bag Republic</div>
+        <div class="store-cat-row"><span class="store-cat">حقائب · اكسسوارات</span><span class="store-rating"><i class="ti ti-star-filled"></i> 4.5</span></div>
+        <div class="store-footer"><span class="store-status-closed"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مغلق</span><span>44 منتج</span><span>720 متابع</span></div>
+      </div>
+    </div>
+    <div class="store-card" onclick="window.location='raf_store.html'">
+      <span class="store-num">#012</span>
+      <div class="store-img"><i class="ti ti-headphones"></i><span class="store-badge badge-premium">بريميوم</span></div>
+      <div class="store-body">
+        <div class="store-name">Sound Elite</div>
+        <div class="store-cat-row"><span class="store-cat">إلكترونيات · صوتيات</span><span class="store-rating"><i class="ti ti-star-filled"></i> 4.7</span></div>
+        <div class="store-footer"><span class="store-status-open"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مفتوح</span><span>68 منتج</span><span>890 متابع</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div><a href="raf_homepage.html" class="footer-logo">رف</a><div class="footer-desc">منصة التسوق المحلي الأولى في الكويت.</div></div>
+    <div>
+      <div class="footer-col-title">روابط سريعة</div>
+      <a href="raf_homepage.html" class="footer-link">الصفحة الرئيسية</a>
+      <a href="raf_stores.html" class="footer-link">المحلات</a>
+      <a href="raf_offers.html" class="footer-link">العروض</a>
+      <a href="raf_trending.html" class="footer-link">الترندات</a>
+    </div>
+    <div>
+      <div class="footer-col-title">المساعدة</div>
+      <a href="#" class="footer-link">كيف تطلب</a>
+      <a href="raf_tracking.html" class="footer-link">تتبع طلبك</a>
+      <a href="#" class="footer-link">تواصل معنا</a>
+    </div>
+    <div>
+      <div class="footer-col-title">للتجار والسائقين</div>
+      <a href="raf_login_staff.html" class="footer-link">لوحة التاجر</a>
+      <a href="raf_join_driver.html" class="footer-link">انضم كسائق</a>
+      <a href="raf_login_staff.html" class="footer-link">لوحة الإدارة</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>جميع الحقوق محفوظة © 2026 رف</div>
+    <div style="display:flex;gap:16px;"><a href="#" class="footer-link" style="margin:0;">سياسة الخصوصية</a><a href="#" class="footer-link" style="margin:0;">الشروط والأحكام</a></div>
+  </div>
+</footer>
+<script>
+function setView(type, btn) {
+  document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  const grid = document.getElementById('storesGrid');
+  grid.classList.toggle('list-view', type === 'list');
+}
+function filterCat(cat, el) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+}
+function filterStores(q) {}
+function filterByStatus(v) {}
+function filterByPkg(v) {}
+function sortStores(v) {}
+// Cart badge
+const cc = JSON.parse(localStorage.getItem('raf_cart')||'{}');
+const ct = Object.values(cc).reduce((s,i)=>s+(i.qty||1),0);
+document.getElementById('cartBadge').textContent = ct || 0;
+</script>
+</body>
+</html>

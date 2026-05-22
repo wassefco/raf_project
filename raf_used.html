@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رف — سوق المستعملات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root {
+  --bg: #F5F2EC; --bg2: #EDE8DC; --card: #FFFFFF;
+  --gold: #C9A84C; --gold2: #A07828;
+  --black: #0A0A0A; --text: #0A0A0A; --text2: #555; --text3: #888;
+  --border: #D8D3C8; --r: 8px; --rl: 12px;
+  --font: 'Tajawal', sans-serif; --fdisplay: 'Playfair Display', serif; --fen: 'DM Sans', sans-serif;
+  --green: #2E7D32; --green-bg: #E8F5E9;
+  --red: #C62828; --red-bg: #FFEBEE;
+  --amber: #E65100; --amber-bg: #FFF3E0;
+  --blue: #1565C0; --blue-bg: #E3F2FD;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); min-height: 100vh; }
+
+/* NAV */
+nav { position: sticky; top: 0; z-index: 100; background: rgba(245,242,236,.97); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(201,168,76,.3); padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.nav-logo { font-family: var(--fdisplay); font-size: 28px; font-weight: 900; color: var(--gold); text-decoration: none; }
+.nav-logo span { color: var(--text); font-size: 11px; font-family: var(--fen); font-weight: 300; letter-spacing: 3px; display: block; margin-top: -6px; }
+.nav-links { display: flex; align-items: center; gap: 4px; }
+.nav-link { color: var(--text3); text-decoration: none; font-size: 14px; padding: 6px 12px; border-radius: var(--r); transition: color .2s; }
+.nav-link:hover { color: var(--text); }
+.nav-link.on { color: var(--gold); font-weight: 700; }
+.nav-actions { display: flex; align-items: center; gap: 8px; }
+.btn-ghost { padding: 8px 16px; border: 1px solid var(--border); border-radius: var(--r); background: transparent; color: var(--text2); font-family: var(--font); font-size: 13px; cursor: pointer; transition: all .2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.btn-gold { padding: 8px 20px; border: none; border-radius: var(--r); background: var(--gold); color: var(--black); font-family: var(--font); font-size: 13px; font-weight: 700; cursor: pointer; transition: all .2s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; }
+.btn-gold:hover { background: var(--gold2); }
+.nav-ico { width: 40px; height: 40px; border: 1px solid var(--border); border-radius: var(--r); display: flex; align-items: center; justify-content: center; color: var(--text3); cursor: pointer; background: transparent; font-size: 18px; position: relative; transition: all .2s; }
+.nav-ico:hover { border-color: var(--gold); color: var(--gold); }
+.cart-badge { position: absolute; top: -6px; left: -6px; width: 18px; height: 18px; background: var(--gold); color: var(--black); border-radius: 50%; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; font-family: var(--fen); }
+
+/* PAGE HEADER */
+.page-header { background: var(--black); padding: 48px 40px; }
+.page-header-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+.page-title { font-size: 32px; font-weight: 700; color: #F5F2EC; }
+.page-title span { color: var(--gold); }
+.page-sub { font-size: 14px; color: #888; margin-top: 6px; }
+.stat-pills { display: flex; gap: 16px; }
+.stat-pill { background: rgba(201,168,76,.1); border: 1px solid rgba(201,168,76,.3); border-radius: var(--rl); padding: 14px 22px; text-align: center; }
+.stat-pill-num { font-size: 26px; font-weight: 900; color: var(--gold); font-family: var(--fen); }
+.stat-pill-lbl { font-size: 11px; color: #888; margin-top: 2px; }
+
+/* BREADCRUMB */
+.breadcrumb { padding: 12px 40px; font-size: 13px; color: var(--text3); display: flex; align-items: center; gap: 6px; background: var(--bg2); border-bottom: 1px solid var(--border); max-width: 100%; }
+.breadcrumb a { color: var(--text3); text-decoration: none; transition: color .2s; }
+.breadcrumb a:hover { color: var(--gold); }
+
+/* SUB NAV */
+.sub-nav { background: var(--card); border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; align-items: center; justify-content: space-between; }
+.sub-tabs { display: flex; }
+.sub-tab { padding: 16px 20px; font-size: 13px; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all .15s; display: flex; align-items: center; gap: 6px; }
+.sub-tab:hover { color: var(--text); }
+.sub-tab.on { color: var(--gold); border-bottom-color: var(--gold); font-weight: 700; }
+
+/* MAIN */
+.main { max-width: 1200px; margin: 0 auto; padding: 32px 40px; }
+.view { display: none; }
+.view.on { display: block; }
+
+/* SEARCH BAR */
+.search-bar { display: flex; gap: 12px; align-items: center; background: var(--card); border: 1px solid var(--border); border-radius: var(--rl); padding: 16px 20px; margin-bottom: 20px; flex-wrap: wrap; }
+.search-inp-wrap { flex: 1; min-width: 220px; display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--r); padding: 9px 14px; }
+.search-inp-wrap input { border: none; background: transparent; font-family: var(--font); font-size: 14px; color: var(--text); outline: none; flex: 1; }
+.search-inp-wrap i { color: var(--text3); font-size: 16px; }
+.f-select { padding: 9px 14px; border: 1px solid var(--border); border-radius: var(--r); background: var(--bg); font-family: var(--font); font-size: 13px; color: var(--text2); cursor: pointer; outline: none; }
+.f-select:focus { border-color: var(--gold); }
+
+/* CHIPS */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+.chip { padding: 6px 14px; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; color: var(--text2); cursor: pointer; transition: all .15s; background: var(--card); }
+.chip:hover { border-color: var(--gold); color: var(--gold); }
+.chip.on { background: var(--gold); border-color: var(--gold); color: var(--black); font-weight: 700; }
+
+/* GRID */
+.listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+.listing-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; cursor: pointer; transition: all .2s; }
+.listing-card:hover { border-color: var(--gold); transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,.08); }
+.listing-img { height: 200px; background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 56px; color: var(--border); position: relative; }
+.cond-badge { position: absolute; top: 10px; right: 10px; padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+.cond-new { background: var(--green-bg); color: var(--green); }
+.cond-vg { background: var(--blue-bg); color: var(--blue); }
+.cond-good { background: var(--amber-bg); color: var(--amber); }
+.listing-body { padding: 16px; }
+.listing-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.listing-cat { font-size: 12px; color: var(--text3); margin-bottom: 10px; display: flex; align-items: center; gap: 4px; }
+.listing-meta { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.listing-price { font-size: 20px; font-weight: 900; color: var(--gold); font-family: var(--fen); }
+.listing-kd { font-size: 12px; color: var(--text3); }
+.listing-area { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 3px; }
+.listing-seller { display: flex; align-items: center; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+.sav { width: 28px; height: 28px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--black); flex-shrink: 0; }
+.sav-name { font-size: 12px; color: var(--text2); }
+.sav-time { font-size: 11px; color: var(--text3); margin-right: auto; }
+
+/* DETAIL */
+.detail-back { display: inline-flex; align-items: center; gap: 6px; color: var(--text3); font-size: 13px; cursor: pointer; margin-bottom: 24px; transition: color .2s; }
+.detail-back:hover { color: var(--gold); }
+.detail-grid { display: grid; grid-template-columns: 1fr 380px; gap: 32px; align-items: start; }
+.gallery-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; }
+.gallery-main { height: 400px; background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 96px; color: var(--border); }
+.gallery-thumbs { display: flex; gap: 8px; padding: 12px; }
+.thumb { width: 72px; height: 72px; background: var(--bg2); border-radius: var(--r); border: 2px solid transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--border); transition: border .15s; }
+.thumb.on { border-color: var(--gold); }
+.desc-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--rl); padding: 20px; margin-top: 16px; }
+.desc-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
+.desc-body { font-size: 14px; color: var(--text2); line-height: 1.8; }
+.info-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--rl); padding: 24px; margin-bottom: 14px; }
+.info-name { font-size: 20px; font-weight: 700; margin-bottom: 8px; line-height: 1.4; }
+.info-price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 16px; }
+.info-price { font-size: 36px; font-weight: 900; color: var(--gold); font-family: var(--fen); }
+.info-price-kd { font-size: 16px; color: var(--text3); }
+.info-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.info-tag { padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+.btn-buy { width: 100%; padding: 14px; background: var(--gold); color: var(--black); border: none; border-radius: var(--r); font-family: var(--font); font-size: 16px; font-weight: 700; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
+.btn-buy:hover { background: var(--gold2); }
+.btn-outline { width: 100%; padding: 12px; background: transparent; color: var(--text); border: 1px solid var(--border); border-radius: var(--r); font-family: var(--font); font-size: 14px; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+.btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+.seller-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--rl); padding: 18px; margin-bottom: 14px; }
+.seller-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.sav-lg { width: 48px; height: 48px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: var(--black); flex-shrink: 0; }
+.seller-name2 { font-size: 15px; font-weight: 700; }
+.seller-meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.safety-box { background: rgba(201,168,76,.06); border: 1px solid rgba(201,168,76,.2); border-radius: var(--r); padding: 14px; font-size: 12px; color: var(--text2); line-height: 1.7; }
+.safety-box strong { color: var(--gold); display: block; margin-bottom: 4px; }
+
+/* CREATE FORM */
+.form-wrap { max-width: 800px; margin: 0 auto; }
+.form-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--rl); padding: 28px; margin-bottom: 20px; }
+.form-sec-title { font-size: 15px; font-weight: 700; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.form-sec-title i { color: var(--gold); }
+.form-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.fg { margin-bottom: 16px; }
+.fg:last-child { margin-bottom: 0; }
+label.lbl { font-size: 13px; font-weight: 700; display: block; margin-bottom: 6px; }
+label.lbl span { color: var(--red); }
+.fi { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--r); background: var(--bg); font-family: var(--font); font-size: 14px; color: var(--text); outline: none; transition: border .2s; }
+.fi:focus { border-color: var(--gold); }
+.fa { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--r); background: var(--bg); font-family: var(--font); font-size: 14px; color: var(--text); outline: none; resize: vertical; min-height: 120px; transition: border .2s; }
+.fa:focus { border-color: var(--gold); }
+.fs { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: var(--r); background: var(--bg); font-family: var(--font); font-size: 14px; color: var(--text); outline: none; cursor: pointer; }
+.fs:focus { border-color: var(--gold); }
+.cond-row { display: flex; gap: 10px; }
+.cond-opt { flex: 1; padding: 14px 10px; border: 1px solid var(--border); border-radius: var(--r); text-align: center; cursor: pointer; transition: all .15s; }
+.cond-opt:hover, .cond-opt.on { border-color: var(--gold); background: rgba(201,168,76,.06); }
+.cond-opt-em { font-size: 22px; margin-bottom: 4px; }
+.cond-opt-n { font-size: 12px; font-weight: 700; }
+.cond-opt-s { font-size: 10px; color: var(--text3); margin-top: 2px; }
+.upload-box { border: 2px dashed var(--border); border-radius: var(--r); padding: 32px; text-align: center; cursor: pointer; transition: all .2s; background: var(--bg); }
+.upload-box:hover { border-color: var(--gold); background: rgba(201,168,76,.04); }
+.upload-box i { font-size: 40px; color: var(--text3); margin-bottom: 8px; display: block; }
+.upload-box p { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.upload-box small { font-size: 12px; color: var(--text3); }
+.plan-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.plan-card { border: 1px solid var(--border); border-radius: var(--r); padding: 18px; cursor: pointer; transition: all .15s; }
+.plan-card:hover, .plan-card.on { border-color: var(--gold); background: rgba(201,168,76,.05); }
+.plan-name { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.plan-price { font-size: 22px; font-weight: 900; color: var(--gold); font-family: var(--fen); }
+.plan-price span { font-size: 12px; color: var(--text3); font-family: var(--font); font-weight: 400; }
+.plan-desc { font-size: 11px; color: var(--text3); margin-top: 4px; }
+.plan-badge { display: inline-block; margin-top: 8px; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; background: var(--gold); color: var(--black); }
+.form-actions { display: flex; gap: 12px; justify-content: flex-end; }
+
+/* MY LISTINGS */
+.ml-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 24px; }
+.ml-stat { background: var(--card); border: 1px solid var(--border); border-radius: var(--rl); padding: 18px 20px; }
+.ml-stat-num { font-size: 26px; font-weight: 900; font-family: var(--fen); margin-bottom: 2px; }
+.ml-stat-lbl { font-size: 12px; color: var(--text3); }
+.table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; }
+.table-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.table-head-title { font-size: 14px; font-weight: 700; }
+table { width: 100%; border-collapse: collapse; }
+th { padding: 11px 16px; font-size: 12px; font-weight: 700; color: var(--text3); text-align: right; border-bottom: 1px solid var(--border); background: var(--bg); }
+td { padding: 12px 16px; font-size: 13px; color: var(--text2); border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+.badge { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+.b-pend { background: var(--amber-bg); color: var(--amber); }
+.b-active { background: var(--green-bg); color: var(--green); }
+.b-sold { background: var(--blue-bg); color: var(--blue); }
+.b-rej { background: var(--red-bg); color: var(--red); }
+.ico-btn { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: var(--r); background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text3); transition: all .15s; }
+.ico-btn:hover { border-color: var(--gold); color: var(--gold); }
+.ico-btn.del:hover { border-color: var(--red); color: var(--red); }
+.t-acts { display: flex; gap: 6px; }
+.p-cell { display: flex; align-items: center; gap: 10px; }
+.p-cell-img { width: 44px; height: 44px; background: var(--bg2); border-radius: var(--r); display: flex; align-items: center; justify-content: center; font-size: 18px; color: var(--text3); flex-shrink: 0; }
+.p-cell-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.p-cell-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+/* FOOTER */
+footer { background: var(--black); color: #888; padding: 48px 40px 24px; margin-top: 80px; }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; max-width: 1200px; margin: 0 auto 40px; }
+.footer-logo { font-family: var(--fdisplay); font-size: 32px; font-weight: 900; color: var(--gold); text-decoration: none; display: block; margin-bottom: 12px; }
+.footer-desc { font-size: 13px; color: #555; line-height: 1.7; }
+.footer-col-title { font-size: 13px; font-weight: 700; color: #ccc; margin-bottom: 16px; letter-spacing: 1px; }
+.footer-link { display: block; font-size: 13px; color: #555; text-decoration: none; margin-bottom: 10px; transition: color .2s; }
+.footer-link:hover { color: var(--gold); }
+.footer-bottom { border-top: 1px solid #1a1a1a; padding-top: 24px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #444; max-width: 1200px; margin: 0 auto; }
+
+@media (max-width: 900px) {
+  nav { padding: 0 16px; }
+  .nav-links { display: none; }
+  .page-header { padding: 32px 16px; }
+  .page-header-inner { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .main { padding: 20px 16px; }
+  .breadcrumb { padding: 12px 16px; }
+  .sub-nav { padding: 0 16px; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .form-grid2 { grid-template-columns: 1fr; }
+  .plan-grid { grid-template-columns: 1fr; }
+  .ml-stats { grid-template-columns: 1fr 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-actions">
+    <button class="nav-ico" onclick="window.location='raf_cart.html'">
+      <i class="ti ti-shopping-cart"></i>
+      <span class="cart-badge">3</span>
+    </button>
+    <button class="nav-ico" onclick="window.location='raf_account.html'"><i class="ti ti-heart"></i></button>
+    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> تسجيل الدخول</a>
+    <a href="raf_login.html" class="btn-gold">إنشاء حساب</a>
+  </div>
+  <div class="nav-links">
+    <a href="raf_store.html" class="nav-link">المحلات</a>
+    <a href="#" class="nav-link">العروض</a>
+    <a href="#" class="nav-link">الترندات</a>
+    <a href="raf_used.html" class="nav-link on">المستعملات</a>
+    <a href="raf_auctions.html" class="nav-link">المزادات</a>
+  </div>
+  <a href="raf_homepage.html" class="nav-logo">رف<span>RAF MARKETPLACE</span></a>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <div class="page-title">سوق <span>المستعملات</span></div>
+      <div class="page-sub">بع واشترِ المنتجات المستعملة مع توصيل آمن عبر رف</div>
+    </div>
+    <div class="stat-pills">
+      <div class="stat-pill">
+        <div class="stat-pill-num">1,240</div>
+        <div class="stat-pill-lbl">إعلان نشط</div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-num">328</div>
+        <div class="stat-pill-lbl">بيع هذا الشهر</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="raf_homepage.html">الرئيسية</a>
+  <i class="ti ti-chevron-left"></i>
+  <span style="color:var(--text);">سوق المستعملات</span>
+</div>
+
+<!-- SUB NAV -->
+<div class="sub-nav">
+  <div class="sub-tabs">
+    <div class="sub-tab on" onclick="switchView('browse',this)"><i class="ti ti-layout-grid"></i> تصفح الإعلانات</div>
+    <div class="sub-tab" onclick="switchView('my',this)"><i class="ti ti-clipboard-list"></i> إعلاناتي</div>
+    <div class="sub-tab" onclick="switchView('create',this)"><i class="ti ti-plus"></i> أضف إعلان</div>
+  </div>
+  <span style="font-size:12px;color:var(--text3);padding-left:16px;">1,240 إعلان متاح</span>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- ===== BROWSE ===== -->
+  <div class="view on" id="view-browse">
+    <div class="search-bar">
+      <div class="search-inp-wrap">
+        <i class="ti ti-search"></i>
+        <input type="text" placeholder="ابحث عن منتج مستعمل...">
+      </div>
+      <select class="f-select">
+        <option>الفئة</option>
+        <option>ملابس</option><option>أحذية</option><option>إلكترونيات</option>
+        <option>أثاث</option><option>سيارات</option><option>أخرى</option>
+      </select>
+      <select class="f-select">
+        <option>الحالة</option>
+        <option>كالجديد</option><option>جيد جداً</option><option>جيد</option>
+      </select>
+      <select class="f-select">
+        <option>المنطقة</option>
+        <option>حولي</option><option>السالمية</option><option>الرميثية</option>
+        <option>الفروانية</option><option>مبارك الكبير</option><option>الأحمدي</option><option>الجهراء</option>
+      </select>
+      <select class="f-select">
+        <option>الترتيب</option>
+        <option>الأحدث</option><option>السعر: الأقل</option><option>السعر: الأعلى</option>
+      </select>
+    </div>
+    <div class="chips">
+      <div class="chip on">الكل</div>
+      <div class="chip">ملابس</div><div class="chip">إلكترونيات</div>
+      <div class="chip">أحذية</div><div class="chip">أثاث</div>
+      <div class="chip">سيارات</div><div class="chip">أخرى</div>
+    </div>
+    <div class="listings-grid">
+      <div class="listing-card" onclick="switchView('detail',null)">
+        <div class="listing-img"><i class="ti ti-device-mobile"></i><span class="cond-badge cond-new">كالجديد</span></div>
+        <div class="listing-body">
+          <div class="listing-title">iPhone 14 Pro — 256GB</div>
+          <div class="listing-cat"><i class="ti ti-device-mobile"></i> إلكترونيات</div>
+          <div class="listing-meta">
+            <div><span class="listing-price">145.000</span> <span class="listing-kd">د.ك</span></div>
+            <div class="listing-area"><i class="ti ti-map-pin"></i> حولي</div>
+          </div>
+          <div class="listing-seller">
+            <div class="sav">م</div><div class="sav-name">محمد العنزي</div><div class="sav-time">منذ يومين</div>
+          </div>
+        </div>
+      </div>
+      <div class="listing-card" onclick="switchView('detail',null)">
+        <div class="listing-img"><i class="ti ti-shirt"></i><span class="cond-badge cond-vg">جيد جداً</span></div>
+        <div class="listing-body">
+          <div class="listing-title">جاكيت جلد أسود — مقاس L</div>
+          <div class="listing-cat"><i class="ti ti-shirt"></i> ملابس</div>
+          <div class="listing-meta">
+            <div><span class="listing-price">18.500</span> <span class="listing-kd">د.ك</span></div>
+            <div class="listing-area"><i class="ti ti-map-pin"></i> السالمية</div>
+          </div>
+          <div class="listing-seller">
+            <div class="sav">ن</div><div class="sav-name">نورة الرشيدي</div><div class="sav-time">منذ 3 أيام</div>
+          </div>
+        </div>
+      </div>
+      <div class="listing-card" onclick="switchView('detail',null)">
+        <div class="listing-img"><i class="ti ti-sofa"></i><span class="cond-badge cond-good">جيد</span></div>
+        <div class="listing-body">
+          <div class="listing-title">كنبة 3 مقاعد بيج</div>
+          <div class="listing-cat"><i class="ti ti-sofa"></i> أثاث</div>
+          <div class="listing-meta">
+            <div><span class="listing-price">85.000</span> <span class="listing-kd">د.ك</span></div>
+            <div class="listing-area"><i class="ti ti-map-pin"></i> الرميثية</div>
+          </div>
+          <div class="listing-seller">
+            <div class="sav">ف</div><div class="sav-name">فهد المطيري</div><div class="sav-time">منذ أسبوع</div>
+          </div>
+        </div>
+      </div>
+      <div class="listing-card" onclick="switchView('detail',null)">
+        <div class="listing-img"><i class="ti ti-camera"></i><span class="cond-badge cond-new">كالجديد</span></div>
+        <div class="listing-body">
+          <div class="listing-title">Sony A7III + عدسة 35mm</div>
+          <div class="listing-cat"><i class="ti ti-camera"></i> إلكترونيات</div>
+          <div class="listing-meta">
+            <div><span class="listing-price">320.000</span> <span class="listing-kd">د.ك</span></div>
+            <div class="listing-area"><i class="ti ti-map-pin"></i> الفروانية</div>
+          </div>
+          <div class="listing-seller">
+            <div class="sav">س</div><div class="sav-name">سارة العتيبي</div><div class="sav-time">اليوم</div>
+          </div>
+        </div>
+      </div>
+      <div class="listing-card" onclick="switchView('detail',null)">
+        <div class="listing-img"><i class="ti ti-shoe"></i><span class="cond-badge cond-vg">جيد جداً</span></div>
+        <div class="listing-body">
+          <div class="listing-title">Nike Air Max 270 — مقاس 43</div>
+          <div class="listing-cat"><i class="ti ti-shoe"></i> أحذية</div>
+          <div class="listing-meta">
+            <div><span class="listing-price">22.000</span> <span class="listing-kd">د.ك</span></div>
+            <div class="listing-area"><i class="ti ti-map-pin"></i> مبارك الكبير</div>
+          </div>
+          <div class="listing-seller">
+            <div class="sav">ع</div><div class="sav-name">علي الخالدي</div><div class="sav-time">منذ 4 أيام</div>
+          </div>
+        </div>
+      </div>
+      <div class="listing-card" onclick="switchView('detail',null)">
+        <div class="listing-img"><i class="ti ti-device-laptop"></i><span class="cond-badge cond-good">جيد</span></div>
+        <div class="listing-body">
+          <div class="listing-title">MacBook Pro M1 Pro — 16GB</div>
+          <div class="listing-cat"><i class="ti ti-device-laptop"></i> إلكترونيات</div>
+          <div class="listing-meta">
+            <div><span class="listing-price">280.000</span> <span class="listing-kd">د.ك</span></div>
+            <div class="listing-area"><i class="ti ti-map-pin"></i> الأحمدي</div>
+          </div>
+          <div class="listing-seller">
+            <div class="sav">ل</div><div class="sav-name">لطيفة العنزي</div><div class="sav-time">منذ 5 أيام</div>
+          </div>
+        </div>
+      </div>
+      <div class="listing-card" onclick="switchView('detail',null)">
+        <div class="listing-img"><i class="ti ti-watch"></i><span class="cond-badge cond-new">كالجديد</span></div>
+        <div class="listing-body">
+          <div class="listing-title">Apple Watch Series 8</div>
+          <div class="listing-cat"><i class="ti ti-watch"></i> إلكترونيات</div>
+          <div class="listing-meta">
+            <div><span class="listing-price">48.000</span> <span class="listing-kd">د.ك</span></div>
+            <div class="listing-area"><i class="ti ti-map-pin"></i> حولي</div>
+          </div>
+          <div class="listing-seller">
+            <div class="sav">خ</div><div class="sav-name">خالد البدر</div><div class="sav-time">منذ يوم</div>
+          </div>
+        </div>
+      </div>
+      <div class="listing-card" onclick="switchView('detail',null)">
+        <div class="listing-img"><i class="ti ti-armchair"></i><span class="cond-badge cond-vg">جيد جداً</span></div>
+        <div class="listing-body">
+          <div class="listing-title">مكتب خشب مع كرسي مريح</div>
+          <div class="listing-cat"><i class="ti ti-armchair"></i> أثاث</div>
+          <div class="listing-meta">
+            <div><span class="listing-price">55.000</span> <span class="listing-kd">د.ك</span></div>
+            <div class="listing-area"><i class="ti ti-map-pin"></i> الجهراء</div>
+          </div>
+          <div class="listing-seller">
+            <div class="sav">م</div><div class="sav-name">منى الصباح</div><div class="sav-time">منذ 6 أيام</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DETAIL ===== -->
+  <div class="view" id="view-detail">
+    <div class="detail-back" onclick="switchView('browse',document.querySelector('.sub-tab'))">
+      <i class="ti ti-arrow-right"></i> العودة للإعلانات
+    </div>
+    <div class="detail-grid">
+      <div>
+        <div class="gallery-card">
+          <div class="gallery-main"><i class="ti ti-device-mobile"></i></div>
+          <div class="gallery-thumbs">
+            <div class="thumb on"><i class="ti ti-device-mobile"></i></div>
+            <div class="thumb"><i class="ti ti-device-mobile"></i></div>
+            <div class="thumb"><i class="ti ti-device-mobile"></i></div>
+            <div class="thumb"><i class="ti ti-player-play" style="color:var(--gold);"></i></div>
+          </div>
+        </div>
+        <div class="desc-card">
+          <div class="desc-title">وصف المنتج</div>
+          <div class="desc-body">iPhone 14 Pro بحالة ممتازة كالجديد. مستخدم 6 أشهر فقط، لا يوجد أي خدش. البطارية 98%. يأتي مع الشاحن الأصلي، الكفر، والكرتونة الأصلية. تم شراؤه من الكويت. السعر غير قابل للنقاش.</div>
+        </div>
+      </div>
+      <div>
+        <div class="info-card">
+          <div class="info-name">iPhone 14 Pro — 256GB</div>
+          <div class="info-price-row">
+            <span class="info-price">145.000</span>
+            <span class="info-price-kd">د.ك</span>
+          </div>
+          <div class="info-tags">
+            <span class="info-tag cond-new"><i class="ti ti-star-filled" style="font-size:10px;"></i> كالجديد</span>
+            <span class="info-tag" style="background:var(--bg2);color:var(--text2);"><i class="ti ti-map-pin" style="font-size:10px;"></i> حولي</span>
+            <span class="info-tag" style="background:var(--bg2);color:var(--text2);"><i class="ti ti-device-mobile" style="font-size:10px;"></i> إلكترونيات</span>
+          </div>
+          <button class="btn-buy" onclick="alert('سيتم إضافة المنتج لسلة التسوق وتسليمه عبر رف')">
+            <i class="ti ti-shopping-cart"></i> شراء الآن
+          </button>
+          <button class="btn-outline"><i class="ti ti-message"></i> تواصل مع البائع</button>
+        </div>
+        <div class="seller-card">
+          <div class="seller-head">
+            <div class="sav-lg">م</div>
+            <div>
+              <div class="seller-name2">محمد العنزي</div>
+              <div class="seller-meta"><i class="ti ti-star-filled" style="color:var(--gold);font-size:11px;"></i> 4.8 · 12 بيعة سابقة</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--text3);display:flex;gap:12px;">
+            <span><i class="ti ti-calendar"></i> عضو منذ 2023</span>
+            <span><i class="ti ti-map-pin"></i> حولي</span>
+          </div>
+        </div>
+        <div class="safety-box">
+          <strong><i class="ti ti-shield-check"></i> التوصيل الآمن عبر رف</strong>
+          عند الشراء يتم التوصيل عبر نظام رف المضمون. لا تتواصل خارج المنصة.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== CREATE ===== -->
+  <div class="view" id="view-create">
+    <div class="form-wrap">
+      <div class="form-card">
+        <div class="form-sec-title"><i class="ti ti-credit-card"></i> اختر باقة النشر</div>
+        <div class="plan-grid">
+          <div class="plan-card on" onclick="selPlan(this)">
+            <div class="plan-name">إعلان واحد</div>
+            <div class="plan-price">0.500 <span>د.ك</span></div>
+            <div class="plan-desc">رسوم لمرة واحدة</div>
+          </div>
+          <div class="plan-card" onclick="selPlan(this)">
+            <div class="plan-name">اشتراك شهري</div>
+            <div class="plan-price">3.000 <span>د.ك/شهر</span></div>
+            <div class="plan-desc">حتى 10 إعلانات في الشهر</div>
+            <div class="plan-badge">الأكثر طلباً</div>
+          </div>
+          <div class="plan-card" onclick="selPlan(this)">
+            <div class="plan-name">غير محدود</div>
+            <div class="plan-price">7.000 <span>د.ك/شهر</span></div>
+            <div class="plan-desc">إعلانات غير محدودة شهرياً</div>
+          </div>
+        </div>
+      </div>
+      <div class="form-card">
+        <div class="form-sec-title"><i class="ti ti-info-circle"></i> معلومات المنتج</div>
+        <div class="fg">
+          <label class="lbl">عنوان الإعلان <span>*</span></label>
+          <input type="text" class="fi" placeholder="مثال: iPhone 14 Pro 256GB بحالة ممتازة">
+        </div>
+        <div class="form-grid2">
+          <div class="fg">
+            <label class="lbl">الفئة <span>*</span></label>
+            <select class="fs"><option>اختر الفئة</option><option>ملابس</option><option>أحذية</option><option>إلكترونيات</option><option>أثاث</option><option>سيارات</option><option>أخرى</option></select>
+          </div>
+          <div class="fg">
+            <label class="lbl">المنطقة <span>*</span></label>
+            <select class="fs"><option>اختر المنطقة</option><option>حولي</option><option>السالمية</option><option>الرميثية</option><option>الفروانية</option><option>مبارك الكبير</option><option>الأحمدي</option><option>الجهراء</option></select>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="lbl">حالة المنتج <span>*</span></label>
+          <div class="cond-row">
+            <div class="cond-opt" onclick="selCond(this)"><div class="cond-opt-em">⭐</div><div class="cond-opt-n">كالجديد</div><div class="cond-opt-s">لم يُستخدم تقريباً</div></div>
+            <div class="cond-opt on" onclick="selCond(this)"><div class="cond-opt-em">✅</div><div class="cond-opt-n">جيد جداً</div><div class="cond-opt-s">آثار استخدام بسيطة</div></div>
+            <div class="cond-opt" onclick="selCond(this)"><div class="cond-opt-em">👌</div><div class="cond-opt-n">جيد</div><div class="cond-opt-s">يعمل بشكل طبيعي</div></div>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="lbl">السعر (د.ك) <span>*</span></label>
+          <input type="number" class="fi" placeholder="0.000" style="direction:ltr;text-align:right;" step="0.001">
+        </div>
+        <div class="fg">
+          <label class="lbl">وصف المنتج <span>*</span></label>
+          <textarea class="fa" placeholder="اكتب وصفاً دقيقاً للمنتج..."></textarea>
+        </div>
+      </div>
+      <div class="form-card">
+        <div class="form-sec-title"><i class="ti ti-photo"></i> الصور والفيديو</div>
+        <div class="fg">
+          <label class="lbl">الصور <span>*</span> <span style="color:var(--text3);font-weight:400;">(حتى 10 صور)</span></label>
+          <div class="upload-box" onclick="alert('رفع الصور')">
+            <i class="ti ti-photo-up"></i>
+            <p>اسحب الصور أو اضغط للرفع</p>
+            <small>PNG, JPG · حتى 10MB لكل صورة · حتى 10 صور</small>
+          </div>
+        </div>
+        <div class="fg">
+          <label class="lbl">فيديو <span style="color:var(--text3);font-weight:400;">(اختياري)</span></label>
+          <div class="upload-box" onclick="alert('رفع الفيديو')">
+            <i class="ti ti-video-plus"></i>
+            <p>ارفع فيديو قصير للمنتج</p>
+            <small>MP4 · حتى 50MB</small>
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-ghost" onclick="switchView('browse',document.querySelector('.sub-tab'))">إلغاء</button>
+        <button class="btn-gold" style="padding:12px 32px;font-size:15px;" onclick="alert('سيتم مراجعة إعلانك من قِبل الإدارة قبل النشر')">
+          <i class="ti ti-send"></i> نشر الإعلان
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MY LISTINGS ===== -->
+  <div class="view" id="view-my">
+    <div class="ml-stats">
+      <div class="ml-stat"><div class="ml-stat-num" style="color:var(--blue);">4</div><div class="ml-stat-lbl">إعلانات نشطة</div></div>
+      <div class="ml-stat"><div class="ml-stat-num" style="color:var(--amber);">1</div><div class="ml-stat-lbl">قيد المراجعة</div></div>
+      <div class="ml-stat"><div class="ml-stat-num" style="color:var(--green);">8</div><div class="ml-stat-lbl">مباعة</div></div>
+      <div class="ml-stat"><div class="ml-stat-num" style="color:var(--gold);">284.000</div><div class="ml-stat-lbl">إجمالي المبيعات (د.ك)</div></div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-head">
+        <div class="table-head-title">إعلاناتي</div>
+        <button class="btn-gold" style="font-size:13px;" onclick="switchView('create',document.querySelectorAll('.sub-tab')[2])">
+          <i class="ti ti-plus"></i> إعلان جديد
+        </button>
+      </div>
+      <table>
+        <thead><tr><th>المنتج</th><th>السعر</th><th>الحالة</th><th>المشاهدات</th><th>التاريخ</th><th></th></tr></thead>
+        <tbody>
+          <tr>
+            <td><div class="p-cell"><div class="p-cell-img"><i class="ti ti-device-mobile"></i></div><div><div class="p-cell-name">iPhone 13 — 128GB</div><div class="p-cell-sub">إلكترونيات · حولي</div></div></div></td>
+            <td style="font-weight:700;color:var(--gold);font-family:var(--fen);">95.000 د.ك</td>
+            <td><span class="badge b-active"><i class="ti ti-check"></i> نشط</span></td>
+            <td>142</td>
+            <td style="font-size:11px;color:var(--text3);">منذ أسبوع</td>
+            <td><div class="t-acts"><button class="ico-btn"><i class="ti ti-edit" style="font-size:14px;"></i></button><button class="ico-btn del"><i class="ti ti-trash" style="font-size:14px;"></i></button></div></td>
+          </tr>
+          <tr>
+            <td><div class="p-cell"><div class="p-cell-img"><i class="ti ti-shirt"></i></div><div><div class="p-cell-name">تيشيرت Supreme أصلي</div><div class="p-cell-sub">ملابس · السالمية</div></div></div></td>
+            <td style="font-weight:700;color:var(--gold);font-family:var(--fen);">12.000 د.ك</td>
+            <td><span class="badge b-pend"><i class="ti ti-clock"></i> قيد المراجعة</span></td>
+            <td>—</td>
+            <td style="font-size:11px;color:var(--text3);">اليوم</td>
+            <td><div class="t-acts"><button class="ico-btn"><i class="ti ti-edit" style="font-size:14px;"></i></button><button class="ico-btn del"><i class="ti ti-trash" style="font-size:14px;"></i></button></div></td>
+          </tr>
+          <tr>
+            <td><div class="p-cell"><div class="p-cell-img"><i class="ti ti-headphones"></i></div><div><div class="p-cell-name">AirPods Pro 2</div><div class="p-cell-sub">إلكترونيات · حولي</div></div></div></td>
+            <td style="font-weight:700;color:var(--gold);font-family:var(--fen);">32.000 د.ك</td>
+            <td><span class="badge b-active"><i class="ti ti-check"></i> نشط</span></td>
+            <td>87</td>
+            <td style="font-size:11px;color:var(--text3);">منذ 3 أيام</td>
+            <td><div class="t-acts"><button class="ico-btn"><i class="ti ti-edit" style="font-size:14px;"></i></button><button class="ico-btn del"><i class="ti ti-trash" style="font-size:14px;"></i></button></div></td>
+          </tr>
+          <tr>
+            <td><div class="p-cell"><div class="p-cell-img"><i class="ti ti-camera"></i></div><div><div class="p-cell-name">Canon 6D Mark II</div><div class="p-cell-sub">إلكترونيات · الفروانية</div></div></div></td>
+            <td style="font-weight:700;color:var(--blue);font-family:var(--fen);">145.000 د.ك</td>
+            <td><span class="badge b-sold"><i class="ti ti-check-circle"></i> مباعة</span></td>
+            <td>312</td>
+            <td style="font-size:11px;color:var(--text3);">منذ شهر</td>
+            <td><div class="t-acts"><button class="ico-btn" disabled style="opacity:.4;"><i class="ti ti-edit" style="font-size:14px;"></i></button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <a href="raf_homepage.html" class="footer-logo">رف</a>
+      <div class="footer-desc">منصة التسوق المحلي الأولى في الكويت — متاجر، مستعملات، ومزادات في مكان واحد.</div>
+    </div>
+    <div>
+      <div class="footer-col-title">روابط سريعة</div>
+      <a href="raf_homepage.html" class="footer-link">الصفحة الرئيسية</a>
+      <a href="raf_store.html" class="footer-link">المحلات</a>
+      <a href="raf_used.html" class="footer-link">المستعملات</a>
+      <a href="raf_auctions.html" class="footer-link">المزادات</a>
+    </div>
+    <div>
+      <div class="footer-col-title">المساعدة</div>
+      <a href="#" class="footer-link">كيف تبيع</a>
+      <a href="#" class="footer-link">سياسة الإرجاع</a>
+      <a href="#" class="footer-link">تواصل معنا</a>
+      <a href="#" class="footer-link">الأسئلة الشائعة</a>
+    </div>
+    <div>
+      <div class="footer-col-title">لوحات التحكم</div>
+      <a href="raf_merchant.html" class="footer-link">لوحة التاجر</a>
+      <a href="raf_admin.html" class="footer-link">لوحة الإدارة</a>
+      <a href="raf_delivery.html" class="footer-link">لوحة التوصيل</a>
+      <a href="raf_login.html" class="footer-link">تسجيل الدخول</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>جميع الحقوق محفوظة © 2026 رف</div>
+    <div style="display:flex;gap:16px;">
+      <a href="#" class="footer-link" style="margin:0;">سياسة الخصوصية</a>
+      <a href="#" class="footer-link" style="margin:0;">الشروط والأحكام</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function switchView(name, tab) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
+  document.getElementById('view-' + name).classList.add('on');
+  if (tab) {
+    document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('on'));
+    tab.classList.add('on');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.querySelectorAll('.chip').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
+    c.classList.add('on');
+  });
+});
+document.querySelectorAll('.thumb').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.thumb').forEach(x => x.classList.remove('on'));
+    t.classList.add('on');
+  });
+});
+function selPlan(el) { document.querySelectorAll('.plan-card').forEach(p => p.classList.remove('on')); el.classList.add('on'); }
+function selCond(el) { document.querySelectorAll('.cond-opt').forEach(c => c.classList.remove('on')); el.classList.add('on'); }
+</script>
+</body>
+</html>

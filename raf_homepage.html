@@ -560,25 +560,27 @@
 <!-- NAV -->
 <nav>
   <div class="nav-actions">
-    <button class="nav-icon" title="السلة">
+    <button class="nav-icon" title="السلة" onclick="window.location='raf_cart.html'">
       <i class="ti ti-shopping-cart"></i>
       <span class="cart-badge">3</span>
     </button>
-    <button class="nav-icon" title="المفضلة"><i class="ti ti-heart"></i></button>
-    <a href="#" class="btn-ghost"><i class="ti ti-user"></i> تسجيل الدخول</a>
-    <a href="#" class="btn-gold">إنشاء حساب</a>
+    <button class="nav-icon" title="حسابي" onclick="window.location='raf_account.html'"><i class="ti ti-heart"></i></button>
+    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> تسجيل الدخول</a>
+    <a href="raf_login.html" class="btn-gold">إنشاء حساب</a>
   </div>
 
   <div class="nav-links">
-    <a href="#" class="nav-link">المحلات</a>
+    <a href="raf_store.html" class="nav-link">المحلات</a>
     <a href="#" class="nav-link">العروض</a>
     <a href="#" class="nav-link">الترندات</a>
     <a href="#" class="nav-link">الجديد</a>
+    <a href="raf_used.html" class="nav-link">المستعمل</a>
+    <a href="raf_auctions.html" class="nav-link">المزادات</a>
   </div>
 
-  <a href="#" class="nav-logo">
+  <a href="raf_homepage.html" class="nav-logo">
     رف
-    <span>RAF MARKETPLACE</span>
+    <span>RUPH MARKETPLACE</span>
   </a>
 </nav>
 
@@ -592,11 +594,11 @@
       كل ما تبحث عنه<br>في <em>مكان واحد</em>
     </h1>
     <p class="hero-sub">
-      اكتشف أفضل المحلات والماركات الكويتية — ملابس، أحذية، اكسسوارات وهواتف.
+اكتشف أفضل المحلات و المتاجر  — ملابس، أحذية، اكسسوارات، هواتف وغيرها من المنتجات المميزة في مكان واحد.
     </p>
     <div class="hero-actions">
-      <button class="btn-hero">تسوّق الآن</button>
-      <button class="btn-hero-ghost">استعرض المحلات</button>
+      <button class="btn-hero" onclick="window.location='raf_store.html'">تسوّق الآن</button>
+      <button class="btn-hero-ghost" onclick="window.location='raf_store.html'">استعرض المحلات</button>
     </div>
   </div>
   <div class="hero-visual">
@@ -649,6 +651,7 @@
       <button class="filter-chip">عروض</button>
       <button class="filter-chip">الأعلى تقييماً</button>
       <button class="filter-chip">مفتوح الآن</button>
+      <button class="filter-chip">قرطاسية</button>
     </div>
   </div>
 </div>
@@ -660,11 +663,11 @@
       <div class="section-title">
         المحلات المميزة <span>✦</span>
       </div>
-      <a href="#" class="section-link">عرض الكل <i class="ti ti-arrow-left"></i></a>
+      <a href="raf_store.html" class="section-link">عرض الكل <i class="ti ti-arrow-left"></i></a>
     </div>
     <div class="stores-row">
       <!-- Store 1 - Premium -->
-      <div class="store-card">
+      <div class="store-card" onclick="window.location='raf_store.html'">
         <div class="store-img">
           <i class="ti ti-hanger" style="font-size:40px;"></i>
           <span class="store-badge">مميز</span>
@@ -678,7 +681,7 @@
         </div>
       </div>
       <!-- Store 2 -->
-      <div class="store-card">
+      <div class="store-card" onclick="window.location='raf_store.html'">
         <div class="store-img">
           <i class="ti ti-shoe" style="font-size:40px;"></i>
           <span class="store-badge">مميز</span>
@@ -692,7 +695,7 @@
         </div>
       </div>
       <!-- Store 3 -->
-      <div class="store-card">
+      <div class="store-card" onclick="window.location='raf_store.html'">
         <div class="store-img">
           <i class="ti ti-device-mobile" style="font-size:40px;"></i>
         </div>
@@ -705,7 +708,7 @@
         </div>
       </div>
       <!-- Store 4 -->
-      <div class="store-card">
+      <div class="store-card" onclick="window.location='raf_store.html'">
         <div class="store-img">
           <i class="ti ti-sunglasses" style="font-size:40px;"></i>
         </div>
@@ -718,7 +721,7 @@
         </div>
       </div>
       <!-- Store 5 - Closed -->
-      <div class="store-card">
+      <div class="store-card" onclick="window.location='raf_store.html'">
         <div class="store-img" style="opacity:0.5;">
           <i class="ti ti-shirt" style="font-size:40px;"></i>
           <span class="store-badge closed">مغلق</span>
@@ -732,7 +735,7 @@
         </div>
       </div>
       <!-- Store 6 -->
-      <div class="store-card">
+      <div class="store-card" onclick="window.location='raf_store.html'">
         <div class="store-img">
           <i class="ti ti-diamond" style="font-size:40px;"></i>
           <span class="store-badge">مميز</span>
@@ -764,7 +767,7 @@
     <div class="products-grid">
 
       <!-- Product 1 -->
-      <div class="product-card">
+      <div class="product-card" onclick="window.location='raf_product.html'">
         <div class="product-img">
           <i class="ti ti-shirt product-img-icon"></i>
           <button class="product-wishlist"><i class="ti ti-heart"></i></button>
@@ -780,14 +783,14 @@
             </div>
             <div class="product-rating"><i class="ti ti-star-filled" style="color:var(--gold); font-size:11px;"></i> 4.8</div>
           </div>
-          <button class="add-to-cart" onclick="openModal()">
+          <button class="add-to-cart" onclick="event.stopPropagation(); openModal()">
             <i class="ti ti-plus"></i> أضف للسلة
           </button>
         </div>
       </div>
 
       <!-- Product 2 -->
-      <div class="product-card">
+      <div class="product-card" onclick="window.location='raf_product.html'">
         <div class="product-img">
           <i class="ti ti-shoe product-img-icon"></i>
           <button class="product-wishlist"><i class="ti ti-heart"></i></button>
@@ -799,14 +802,14 @@
             <div><span class="product-price">28.500 د.ك</span></div>
             <div class="product-rating"><i class="ti ti-star-filled" style="color:var(--gold); font-size:11px;"></i> 4.7</div>
           </div>
-          <button class="add-to-cart" onclick="openModal()">
+          <button class="add-to-cart" onclick="event.stopPropagation(); openModal()">
             <i class="ti ti-plus"></i> أضف للسلة
           </button>
         </div>
       </div>
 
       <!-- Product 3 -->
-      <div class="product-card">
+      <div class="product-card" onclick="window.location='raf_product.html'">
         <div class="product-img">
           <i class="ti ti-device-mobile product-img-icon"></i>
           <button class="product-wishlist"><i class="ti ti-heart"></i></button>
@@ -819,14 +822,14 @@
             <div><span class="product-price">189.000 د.ك</span></div>
             <div class="product-rating"><i class="ti ti-star-filled" style="color:var(--gold); font-size:11px;"></i> 5.0</div>
           </div>
-          <button class="add-to-cart" onclick="openModal()">
+          <button class="add-to-cart" onclick="event.stopPropagation(); openModal()">
             <i class="ti ti-plus"></i> أضف للسلة
           </button>
         </div>
       </div>
 
       <!-- Product 4 -->
-      <div class="product-card">
+      <div class="product-card" onclick="window.location='raf_product.html'">
         <div class="product-img">
           <i class="ti ti-sunglasses product-img-icon"></i>
           <button class="product-wishlist"><i class="ti ti-heart"></i></button>
@@ -838,14 +841,14 @@
             <div><span class="product-price">35.000 د.ك</span></div>
             <div class="product-rating"><i class="ti ti-star-filled" style="color:var(--gold); font-size:11px;"></i> 4.6</div>
           </div>
-          <button class="add-to-cart" onclick="openModal()">
+          <button class="add-to-cart" onclick="event.stopPropagation(); openModal()">
             <i class="ti ti-plus"></i> أضف للسلة
           </button>
         </div>
       </div>
 
       <!-- Product 5 -->
-      <div class="product-card">
+      <div class="product-card" onclick="window.location='raf_product.html'">
         <div class="product-img">
           <i class="ti ti-backpack product-img-icon"></i>
           <button class="product-wishlist"><i class="ti ti-heart"></i></button>
@@ -861,14 +864,14 @@
             </div>
             <div class="product-rating"><i class="ti ti-star-filled" style="color:var(--gold); font-size:11px;"></i> 4.9</div>
           </div>
-          <button class="add-to-cart" onclick="openModal()">
+          <button class="add-to-cart" onclick="event.stopPropagation(); openModal()">
             <i class="ti ti-plus"></i> أضف للسلة
           </button>
         </div>
       </div>
 
       <!-- Product 6 -->
-      <div class="product-card">
+      <div class="product-card" onclick="window.location='raf_product.html'">
         <div class="product-img">
           <i class="ti ti-watch product-img-icon"></i>
           <button class="product-wishlist"><i class="ti ti-heart"></i></button>
@@ -880,7 +883,7 @@
             <div><span class="product-price">75.000 د.ك</span></div>
             <div class="product-rating"><i class="ti ti-star-filled" style="color:var(--gold); font-size:11px;"></i> 4.8</div>
           </div>
-          <button class="add-to-cart" onclick="openModal()">
+          <button class="add-to-cart" onclick="event.stopPropagation(); openModal()">
             <i class="ti ti-plus"></i> أضف للسلة
           </button>
         </div>
@@ -899,10 +902,10 @@
     </div>
     <div>
       <div class="footer-col-title">روابط سريعة</div>
-      <a href="#" class="footer-link">الصفحة الرئيسية</a>
-      <a href="#" class="footer-link">المحلات</a>
-      <a href="#" class="footer-link">العروض</a>
-      <a href="#" class="footer-link">الترندات</a>
+      <a href="raf_homepage.html" class="footer-link">الصفحة الرئيسية</a>
+      <a href="raf_store.html" class="footer-link">المحلات</a>
+      <a href="raf_used.html" class="footer-link">المستعملات</a>
+      <a href="raf_auctions.html" class="footer-link">المزادات</a>
     </div>
     <div>
       <div class="footer-col-title">المساعدة</div>
@@ -912,10 +915,11 @@
       <a href="#" class="footer-link">الأسئلة الشائعة</a>
     </div>
     <div>
-      <div class="footer-col-title">للتجار</div>
+      <div class="footer-col-title">الأعمال</div>
       <a href="#" class="footer-link">انضم كتاجر</a>
       <a href="#" class="footer-link">الباقات</a>
       <a href="#" class="footer-link">لوحة التاجر</a>
+      <a href="#" class="footer-link">انضم كسائق</a>
     </div>
   </div>
   <div class="footer-bottom">

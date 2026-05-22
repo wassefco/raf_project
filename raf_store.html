@@ -241,24 +241,26 @@
 <!-- NAV -->
 <nav>
   <div class="nav-actions">
-    <button class="nav-ico"><i class="ti ti-shopping-cart"></i><span class="cart-badge">3</span></button>
-    <button class="nav-ico"><i class="ti ti-heart"></i></button>
-    <a href="#" class="btn-ghost"><i class="ti ti-user"></i> تسجيل الدخول</a>
-    <a href="#" class="btn-gold">إنشاء حساب</a>
+    <button class="nav-ico" onclick="window.location='raf_cart.html'"><i class="ti ti-shopping-cart"></i><span class="cart-badge">3</span></button>
+    <button class="nav-ico" onclick="window.location='raf_account.html'"><i class="ti ti-heart"></i></button>
+    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> تسجيل الدخول</a>
+    <a href="raf_login.html" class="btn-gold">إنشاء حساب</a>
   </div>
   <div class="nav-links">
-    <a href="#" class="nav-link">المحلات</a>
+    <a href="raf_store.html" class="nav-link">المحلات</a>
     <a href="#" class="nav-link">العروض</a>
     <a href="#" class="nav-link">الترندات</a>
+    <a href="raf_used.html" class="nav-link">المستعملات</a>
+    <a href="raf_auctions.html" class="nav-link">المزادات</a>
   </div>
-  <a href="#" class="nav-logo">رف<span>RAF MARKETPLACE</span></a>
+  <a href="raf_homepage.html" class="nav-logo">رف<span>RAF MARKETPLACE</span></a>
 </nav>
 
 <!-- BREADCRUMB -->
 <div class="breadcrumb">
-  <a href="#">الرئيسية</a>
+  <a href="raf_homepage.html">الرئيسية</a>
   <i class="ti ti-chevron-left"></i>
-  <a href="#">المحلات</a>
+  <a href="raf_store.html">المحلات</a>
   <i class="ti ti-chevron-left"></i>
   <span style="color:var(--text);">Casa Mode</span>
 </div>
@@ -360,7 +362,7 @@
 <div class="products-section" id="tab-products">
   <div class="products-grid">
 
-    <div class="product-card">
+    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
       <div class="product-img">
         <i class="ti ti-shirt"></i>
         <button class="product-wish"><i class="ti ti-heart"></i></button>
@@ -372,11 +374,11 @@
           <div><span class="product-price-old">15.000</span><span class="product-price">12.000 د.ك</span></div>
           <div class="product-rating"><i class="ti ti-star-filled"></i> 4.8</div>
         </div>
-        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
       </div>
     </div>
 
-    <div class="product-card">
+    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
       <div class="product-img"><i class="ti ti-shirt"></i><button class="product-wish"><i class="ti ti-heart"></i></button></div>
       <div class="product-info">
         <div class="product-name">قميص لينن بريميوم</div>
@@ -384,11 +386,11 @@
           <div><span class="product-price">18.000 د.ك</span></div>
           <div class="product-rating"><i class="ti ti-star-filled"></i> 4.7</div>
         </div>
-        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
       </div>
     </div>
 
-    <div class="product-card">
+    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
       <div class="product-img">
         <i class="ti ti-shirt"></i>
         <button class="product-wish"><i class="ti ti-heart"></i></button>
@@ -400,11 +402,11 @@
           <div><span class="product-price-old">22.000</span><span class="product-price">18.700 د.ك</span></div>
           <div class="product-rating"><i class="ti ti-star-filled"></i> 4.9</div>
         </div>
-        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
       </div>
     </div>
 
-    <div class="product-card">
+    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
       <div class="product-img"><i class="ti ti-shirt"></i><button class="product-wish"><i class="ti ti-heart"></i></button></div>
       <div class="product-info">
         <div class="product-name">هودي أوفرسايز فاخر</div>
@@ -412,11 +414,11 @@
           <div><span class="product-price">25.000 د.ك</span></div>
           <div class="product-rating"><i class="ti ti-star-filled"></i> 4.6</div>
         </div>
-        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
       </div>
     </div>
 
-    <div class="product-card">
+    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
       <div class="product-img"><i class="ti ti-shirt"></i><button class="product-wish"><i class="ti ti-heart"></i></button></div>
       <div class="product-info">
         <div class="product-name">تيشيرت بيسك كلاسيك</div>
@@ -424,11 +426,11 @@
           <div><span class="product-price">8.500 د.ك</span></div>
           <div class="product-rating"><i class="ti ti-star-filled"></i> 4.8</div>
         </div>
-        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
       </div>
     </div>
 
-    <div class="product-card">
+    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
       <div class="product-img">
         <i class="ti ti-shirt"></i>
         <button class="product-wish"><i class="ti ti-heart"></i></button>
@@ -440,11 +442,11 @@
           <div><span class="product-price">45.000 د.ك</span></div>
           <div class="product-rating"><i class="ti ti-star-filled"></i> 5.0</div>
         </div>
-        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
       </div>
     </div>
 
-    <div class="product-card">
+    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
       <div class="product-img"><i class="ti ti-shirt"></i><button class="product-wish"><i class="ti ti-heart"></i></button></div>
       <div class="product-info">
         <div class="product-name">شورت رياضي كوول</div>
@@ -452,11 +454,11 @@
           <div><span class="product-price">14.000 د.ك</span></div>
           <div class="product-rating"><i class="ti ti-star-filled"></i> 4.5</div>
         </div>
-        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
       </div>
     </div>
 
-    <div class="product-card">
+    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
       <div class="product-img">
         <i class="ti ti-shirt"></i>
         <button class="product-wish"><i class="ti ti-heart"></i></button>
@@ -468,7 +470,7 @@
           <div><span class="product-price-old">24.000</span><span class="product-price">21.600 د.ك</span></div>
           <div class="product-rating"><i class="ti ti-star-filled"></i> 4.7</div>
         </div>
-        <button class="add-cart"><i class="ti ti-plus"></i> أضف للسلة</button>
+        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
       </div>
     </div>
 

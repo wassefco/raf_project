@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رف — تتبع الطلب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{--bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;--gold:#C9A84C;--gold2:#A07828;--black:#0A0A0A;--text:#0A0A0A;--text2:#555;--text3:#888;--border:#D8D3C8;--r:8px;--rl:12px;--font:'Tajawal',sans-serif;--fdisplay:'Playfair Display',serif;--fen:'DM Sans',sans-serif;--green:#2E7D32;--green-bg:#E8F5E9;--red:#C62828;--red-bg:#FFEBEE;--amber:#E65100;--amber-bg:#FFF3E0;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;}
+nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.3);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.nav-logo{font-family:var(--fdisplay);font-size:28px;font-weight:900;color:var(--gold);text-decoration:none;}
+.nav-logo span{color:var(--text);font-size:11px;font-family:var(--fen);font-weight:300;letter-spacing:3px;display:block;margin-top:-6px;}
+.nav-actions{display:flex;align-items:center;gap:8px;}
+.btn-ghost{padding:8px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.nav-ico{width:40px;height:40px;border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;background:transparent;font-size:18px;position:relative;transition:all .2s;text-decoration:none;}
+.nav-ico:hover{border-color:var(--gold);color:var(--gold);}
+.cart-badge{position:absolute;top:-6px;left:-6px;width:18px;height:18px;background:var(--gold);color:var(--black);border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--fen);}
+.breadcrumb{padding:12px 40px;font-size:13px;color:var(--text3);display:flex;align-items:center;gap:6px;background:var(--bg2);border-bottom:1px solid var(--border);}
+.breadcrumb a{color:var(--text3);text-decoration:none;transition:color .2s;}
+.breadcrumb a:hover{color:var(--gold);}
+.main{max-width:800px;margin:0 auto;padding:32px 40px;}
+.search-order{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:20px 24px;margin-bottom:24px;}
+.so-title{font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.so-title i{color:var(--gold);}
+.so-row{display:flex;gap:10px;}
+.so-inp{flex:1;padding:11px 16px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text);outline:none;transition:border-color .2s;}
+.so-inp:focus{border-color:var(--gold);}
+.so-inp::placeholder{color:var(--text3);}
+.so-btn{padding:11px 22px;background:var(--gold);border:none;border-radius:var(--r);color:var(--black);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.so-btn:hover{background:var(--gold2);}
+.order-header{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:20px 24px;margin-bottom:16px;}
+.order-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px;}
+.order-id{font-size:22px;font-weight:900;font-family:var(--fen);}
+.order-id-lbl{font-size:12px;color:var(--text3);font-family:var(--font);font-weight:400;display:block;margin-bottom:2px;}
+.status-chip{padding:6px 16px;border-radius:20px;font-size:13px;font-weight:700;display:inline-flex;align-items:center;gap:6px;}
+.s-preparing{background:var(--amber-bg);color:var(--amber);}
+.s-delivered{background:var(--green-bg);color:var(--green);}
+.s-shipping{background:rgba(33,150,243,.1);color:#1565C0;}
+.order-meta{display:flex;gap:20px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--border);}
+.meta-item{font-size:13px;color:var(--text3);display:flex;align-items:center;gap:6px;}
+.meta-item b{color:var(--text);}
+.eta-card{background:linear-gradient(135deg,var(--black),#1a1a1a);border:1px solid rgba(201,168,76,.3);border-radius:var(--rl);padding:20px 24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:14px;}
+.eta-label{font-size:13px;color:#888;}
+.eta-time{font-size:26px;font-weight:900;color:var(--gold);font-family:var(--fen);margin-top:4px;}
+.eta-note{font-size:12px;color:#555;margin-top:2px;}
+.eta-pulse{width:56px;height:56px;border-radius:50%;border:2px solid rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--gold);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(201,168,76,.4);}50%{box-shadow:0 0 0 10px rgba(201,168,76,0);}}
+.timeline-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:24px;margin-bottom:16px;}
+.tl-title{font-size:15px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+.tl-title i{color:var(--gold);}
+.tl-step{display:flex;gap:16px;align-items:flex-start;}
+.tl-left{display:flex;flex-direction:column;align-items:center;min-width:40px;}
+.tl-ico{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;border:2px solid var(--border);color:var(--text3);background:var(--bg);}
+.tl-ico.done{background:var(--green-bg);border-color:var(--green);color:var(--green);}
+.tl-ico.active{background:var(--gold);border-color:var(--gold);color:var(--black);animation:pulse 2s infinite;}
+.tl-ico.pending{opacity:.35;}
+.tl-line{width:2px;flex:1;min-height:36px;background:var(--border);margin:4px 0;}
+.tl-line.done{background:var(--green);}
+.tl-content{padding:8px 0 32px;}
+.tl-step-name{font-size:15px;font-weight:700;margin-bottom:3px;}
+.tl-step-name.done{color:var(--green);}
+.tl-step-name.active{color:var(--gold);}
+.tl-step-name.pending{color:var(--text3);}
+.tl-step-time{font-size:12px;color:var(--text3);font-family:var(--fen);}
+.tl-step-note{font-size:13px;color:var(--text2);margin-top:4px;}
+.driver-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:18px 24px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.driver-info{display:flex;align-items:center;gap:14px;}
+.driver-avatar{width:52px;height:52px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--gold);border:2px solid var(--border);}
+.driver-name{font-size:15px;font-weight:700;}
+.driver-meta{font-size:13px;color:var(--text3);margin-top:2px;display:flex;align-items:center;gap:8px;}
+.driver-plate{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:4px 12px;font-size:12px;font-family:var(--fen);margin-top:6px;display:inline-block;}
+.rating-badge{color:var(--gold);display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;}
+.btn-call{padding:10px 20px;border:1px solid var(--green);border-radius:var(--r);background:var(--green-bg);color:var(--green);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.btn-call:hover{background:var(--green);color:#fff;}
+.map-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:16px;overflow:hidden;}
+.map-placeholder{height:220px;background:linear-gradient(135deg,var(--bg2) 0%,var(--border) 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
+.map-placeholder i{font-size:48px;color:var(--gold);opacity:.4;}
+.map-label{font-size:13px;color:var(--text3);}
+.items-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px;}
+.items-head{padding:14px 20px;border-bottom:1px solid var(--border);font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.items-head i{color:var(--gold);}
+.oi-row{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);}
+.oi-row:last-child{border-bottom:none;}
+.oi-img{width:52px;height:52px;border-radius:var(--r);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--text3);flex-shrink:0;}
+.oi-info{flex:1;}
+.oi-store{font-size:11px;color:var(--gold2);margin-bottom:2px;}
+.oi-name{font-size:13px;font-weight:500;}
+.oi-meta{font-size:12px;color:var(--text3);margin-top:2px;}
+.oi-price{font-size:14px;font-weight:700;color:var(--gold);font-family:var(--fen);}
+footer{background:var(--black);color:#888;padding:32px 40px;margin-top:48px;}
+.footer-simple{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#444;max-width:800px;margin:0 auto;}
+.fl{color:#444;text-decoration:none;transition:color .2s;}
+.fl:hover{color:var(--gold);}
+@media(max-width:700px){nav{padding:0 16px;}.main{padding:20px 16px;}.breadcrumb{padding:10px 16px;}.order-top{flex-direction:column;align-items:flex-start;}.eta-card{flex-direction:column;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-actions">
+    <a href="raf_cart.html" class="nav-ico"><i class="ti ti-shopping-cart"></i><span class="cart-badge" id="cartBadge">0</span></a>
+    <a href="raf_account.html" class="btn-ghost"><i class="ti ti-user"></i> حسابي</a>
+  </div>
+  <a href="raf_homepage.html" class="nav-logo">رف<span>RAF MARKETPLACE</span></a>
+</nav>
+
+<div class="breadcrumb">
+  <a href="raf_homepage.html">الرئيسية</a>
+  <i class="ti ti-chevron-left"></i>
+  <a href="raf_account.html">حسابي</a>
+  <i class="ti ti-chevron-left"></i>
+  <span style="color:var(--text);">تتبع الطلب</span>
+</div>
+
+<div class="main">
+
+  <div class="search-order">
+    <div class="so-title"><i class="ti ti-search"></i> ابحث برقم الطلب</div>
+    <div class="so-row">
+      <input type="text" class="so-inp" placeholder="مثال: ORD-2026-10482" id="orderSearch" value="ORD-2026-10482">
+      <button class="so-btn" onclick="trackOrder()"><i class="ti ti-map-pin" style="margin-left:6px;"></i> تتبع</button>
+    </div>
+  </div>
+
+  <div class="order-header">
+    <div class="order-top">
+      <div>
+        <div class="order-id"><span class="order-id-lbl">رقم الطلب</span>ORD-2026-10482</div>
+      </div>
+      <span class="status-chip s-preparing"><i class="ti ti-clock"></i> جاري التحضير</span>
+    </div>
+    <div class="order-meta">
+      <div class="meta-item"><i class="ti ti-calendar"></i> <span>23 مايو 2026 — <b>10:30 ص</b></span></div>
+      <div class="meta-item"><i class="ti ti-map-pin"></i> <span>حولي، شارع الأمير</span></div>
+      <div class="meta-item"><i class="ti ti-building-store"></i> <span>Casa Mode</span></div>
+    </div>
+  </div>
+
+  <div class="eta-card">
+    <div>
+      <div class="eta-label">الوقت المتوقع للتوصيل</div>
+      <div class="eta-time">اليوم — 12:00 ظهراً</div>
+      <div class="eta-note">الطلب في مرحلة التحضير حالياً</div>
+    </div>
+    <div class="eta-pulse"><i class="ti ti-clock"></i></div>
+  </div>
+
+  <div class="timeline-card">
+    <div class="tl-title"><i class="ti ti-timeline"></i> مراحل الطلب</div>
+    <div>
+      <div class="tl-step">
+        <div class="tl-left"><div class="tl-ico done"><i class="ti ti-check"></i></div><div class="tl-line done"></div></div>
+        <div class="tl-content">
+          <div class="tl-step-name done">تم استلام الطلب</div>
+          <div class="tl-step-time">23 مايو 2026 — 10:30 ص</div>
+          <div class="tl-step-note">تم استلام طلبك وتأكيد الدفع بنجاح.</div>
+        </div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-left"><div class="tl-ico done"><i class="ti ti-check"></i></div><div class="tl-line done"></div></div>
+        <div class="tl-content">
+          <div class="tl-step-name done">تأكيد المتجر</div>
+          <div class="tl-step-time">23 مايو 2026 — 10:45 ص</div>
+          <div class="tl-step-note">Casa Mode قبل طلبك وبدأ التجهيز.</div>
+        </div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-left"><div class="tl-ico active"><i class="ti ti-package"></i></div><div class="tl-line"></div></div>
+        <div class="tl-content">
+          <div class="tl-step-name active">جاري التحضير</div>
+          <div class="tl-step-time">23 مايو 2026 — 11:00 ص</div>
+          <div class="tl-step-note">يتم الآن تجهيز وتعبئة منتجاتك.</div>
+        </div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-left"><div class="tl-ico pending"><i class="ti ti-truck"></i></div><div class="tl-line"></div></div>
+        <div class="tl-content">
+          <div class="tl-step-name pending">في الطريق إليك</div>
+          <div class="tl-step-time">—</div>
+          <div class="tl-step-note">سيتم التحديث عند انطلاق السائق.</div>
+        </div>
+      </div>
+      <div class="tl-step">
+        <div class="tl-left"><div class="tl-ico pending"><i class="ti ti-circle-check"></i></div></div>
+        <div class="tl-content" style="padding-bottom:0;">
+          <div class="tl-step-name pending">تم التوصيل</div>
+          <div class="tl-step-time">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="driver-card">
+    <div class="driver-info">
+      <div class="driver-avatar"><i class="ti ti-user"></i></div>
+      <div>
+        <div class="driver-name">خالد العنزي</div>
+        <div class="driver-meta">
+          <span class="rating-badge"><i class="ti ti-star-filled" style="font-size:11px;"></i> 4.8</span>
+          <span>•</span>
+          <span>238 توصيلة</span>
+        </div>
+        <span class="driver-plate">KWT • 45 B 2291</span>
+      </div>
+    </div>
+    <button class="btn-call" onclick="alert('جاري الاتصال بالسائق...')"><i class="ti ti-phone"></i> اتصال</button>
+  </div>
+
+  <div class="map-card">
+    <div class="map-placeholder">
+      <i class="ti ti-map-2"></i>
+      <div class="map-label">خريطة التتبع — ستظهر عند انطلاق السائق</div>
+    </div>
+  </div>
+
+  <div class="items-card">
+    <div class="items-head"><i class="ti ti-shopping-bag"></i> منتجات الطلب</div>
+    <div class="oi-row">
+      <div class="oi-img"><i class="ti ti-shirt"></i></div>
+      <div class="oi-info">
+        <div class="oi-store">Casa Mode</div>
+        <div class="oi-name">قميص أوفرسايز كلاسيك</div>
+        <div class="oi-meta">مقاس M — لون أبيض · الكمية: 1</div>
+      </div>
+      <div class="oi-price">12.000</div>
+    </div>
+    <div class="oi-row">
+      <div class="oi-img"><i class="ti ti-backpack"></i></div>
+      <div class="oi-info">
+        <div class="oi-store">Casa Mode</div>
+        <div class="oi-name">حقيبة يد جلد طبيعي</div>
+        <div class="oi-meta">لون أسود · الكمية: 1</div>
+      </div>
+      <div class="oi-price">35.700</div>
+    </div>
+    <div style="padding:14px 20px;background:var(--bg);border-top:2px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:13px;color:var(--text3);">الإجمالي (2 منتجات)</span>
+      <span style="font-size:16px;font-weight:900;color:var(--gold);font-family:var(--fen);">49.700 د.ك</span>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-simple">
+    <div>جميع الحقوق محفوظة © 2026 رف</div>
+    <div style="display:flex;gap:16px;">
+      <a href="raf_homepage.html" class="fl">الرئيسية</a>
+      <a href="raf_account.html" class="fl">حسابي</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function updateBadge(){
+  const t=Object.values(JSON.parse(localStorage.getItem('raf_cart')||'{}')).reduce((s,i)=>s+(i.qty||0),0);
+  const b=document.getElementById('cartBadge');if(b)b.textContent=t||'0';
+}
+window.addEventListener('DOMContentLoaded',updateBadge);
+function trackOrder(){const v=document.getElementById('orderSearch').value.trim();if(!v)return;}
+</script>
+</body>
+</html>

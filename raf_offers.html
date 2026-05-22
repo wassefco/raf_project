@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رف — العروض والخصومات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{--bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;--gold:#C9A84C;--gold2:#A07828;--black:#0A0A0A;--text:#0A0A0A;--text2:#555;--text3:#888;--border:#D8D3C8;--r:8px;--rl:12px;--font:'Tajawal',sans-serif;--fdisplay:'Playfair Display',serif;--fen:'DM Sans',sans-serif;--green:#2E7D32;--green-bg:#E8F5E9;--red:#C62828;--red-bg:#FFEBEE;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;}
+nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.3);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.nav-logo{font-family:var(--fdisplay);font-size:28px;font-weight:900;color:var(--gold);text-decoration:none;}
+.nav-logo span{color:var(--text);font-size:11px;font-family:var(--fen);font-weight:300;letter-spacing:3px;display:block;margin-top:-6px;}
+.nav-links{display:flex;align-items:center;gap:4px;}
+.nav-link{color:var(--text3);text-decoration:none;font-size:14px;padding:6px 12px;border-radius:var(--r);transition:color .2s;}
+.nav-link:hover,.nav-link.on{color:var(--gold);}
+.nav-link.on{font-weight:700;}
+.nav-actions{display:flex;align-items:center;gap:8px;}
+.btn-ghost{padding:8px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.btn-gold{padding:8px 20px;border:none;border-radius:var(--r);background:var(--gold);color:var(--black);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-gold:hover{background:var(--gold2);}
+.nav-ico{width:40px;height:40px;border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;background:transparent;font-size:18px;position:relative;transition:all .2s;}
+.nav-ico:hover{border-color:var(--gold);color:var(--gold);}
+.cart-badge{position:absolute;top:-6px;left:-6px;width:18px;height:18px;background:var(--gold);color:var(--black);border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--fen);}
+/* FLASH BANNER */
+.flash-banner{background:linear-gradient(135deg,var(--black),#1a1a1a);border-bottom:1px solid rgba(201,168,76,.3);padding:14px 40px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.flash-left{display:flex;align-items:center;gap:14px;}
+.flash-ico{font-size:28px;color:var(--gold);}
+.flash-title{font-size:18px;font-weight:900;color:#eee;}
+.flash-sub{font-size:12px;color:#666;margin-top:2px;}
+.flash-timer{display:flex;gap:8px;align-items:center;}
+.ft-block{background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);border-radius:var(--r);padding:6px 12px;text-align:center;min-width:50px;}
+.ft-num{font-size:20px;font-weight:900;color:var(--gold);font-family:var(--fen);}
+.ft-lbl{font-size:9px;color:#666;margin-top:1px;}
+.ft-sep{font-size:20px;font-weight:900;color:rgba(201,168,76,.5);}
+/* BREADCRUMB */
+.breadcrumb{padding:12px 40px;font-size:13px;color:var(--text3);display:flex;align-items:center;gap:6px;background:var(--bg2);border-bottom:1px solid var(--border);}
+.breadcrumb a{color:var(--text3);text-decoration:none;transition:color .2s;}
+.breadcrumb a:hover{color:var(--gold);}
+/* MAIN */
+.main{max-width:1200px;margin:0 auto;padding:32px 40px;}
+/* FILTER BAR */
+.filter-bar{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px 20px;margin-bottom:20px;flex-wrap:wrap;}
+.search-inp{flex:1;min-width:220px;display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:9px 14px;}
+.search-inp input{border:none;background:transparent;font-family:var(--font);font-size:14px;color:var(--text);outline:none;flex:1;}
+.f-select{padding:9px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);font-family:var(--font);font-size:13px;color:var(--text2);cursor:pointer;outline:none;}
+.f-select:focus{border-color:var(--gold);}
+/* CHIPS */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.chip{padding:6px 14px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text2);cursor:pointer;transition:all .15s;background:var(--card);}
+.chip:hover{border-color:var(--gold);color:var(--gold);}
+.chip.on{background:var(--gold);border-color:var(--gold);color:var(--black);font-weight:700;}
+.results-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.results-count{font-size:13px;color:var(--text3);}
+/* PRODUCT GRID */
+.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;}
+/* PRODUCT CARD */
+.prod-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
+.prod-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.08);}
+.prod-img{height:200px;background:linear-gradient(135deg,var(--bg2),var(--border));display:flex;align-items:center;justify-content:center;font-size:56px;color:var(--gold);position:relative;}
+.disc-badge{position:absolute;top:10px;right:10px;background:var(--red);color:#fff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;font-family:var(--fen);}
+.prod-num{position:absolute;top:10px;left:10px;background:rgba(10,10,10,.65);color:#fff;padding:2px 8px;border-radius:20px;font-family:var(--fen);font-size:10px;font-weight:700;backdrop-filter:blur(4px);}
+.wishlist-btn{position:absolute;bottom:10px;left:10px;width:32px;height:32px;border-radius:50%;background:rgba(245,242,236,.9);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text3);transition:all .2s;}
+.wishlist-btn:hover,.wishlist-btn.on{color:#E05555;}
+.prod-body{padding:14px;}
+.prod-name{font-size:14px;font-weight:700;margin-bottom:3px;line-height:1.4;}
+.prod-store{font-size:12px;color:var(--gold2);margin-bottom:8px;display:flex;align-items:center;gap:4px;}
+.prod-rating{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text3);margin-bottom:10px;}
+.prod-rating i{color:var(--gold);font-size:11px;}
+.prod-price-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.price-old{font-size:12px;color:var(--text3);text-decoration:line-through;font-family:var(--fen);}
+.price-new{font-size:16px;font-weight:900;color:var(--gold);font-family:var(--fen);}
+.disc-pct{font-size:11px;background:var(--red-bg);color:var(--red);padding:2px 7px;border-radius:4px;font-weight:700;}
+/* CART BTNS */
+.cart-btn-wrap{width:100%;}
+.add-cart-btn{width:100%;padding:9px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
+.add-cart-btn:hover{border-color:var(--gold);color:var(--gold);}
+.qty-ctrl{display:flex;align-items:center;gap:4px;width:100%;}
+.qty-btn{width:32px;height:32px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;}
+.qty-btn:hover{border-color:var(--gold);color:var(--gold);}
+.qty-num{flex:1;text-align:center;font-weight:700;font-family:var(--fen);font-size:14px;}
+.qty-del{width:32px;height:32px;border:1px solid var(--red-bg);border-radius:var(--r);background:var(--red-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--red);transition:all .2s;}
+.qty-del:hover{background:var(--red);color:#fff;}
+/* OFFER TIMER on card */
+.card-timer{display:flex;align-items:center;gap:6px;margin-bottom:10px;font-size:11px;color:var(--text3);}
+.ct-seg{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-family:var(--fen);font-weight:700;font-size:11px;color:var(--text);}
+/* FOOTER */
+footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto 40px;}
+.footer-logo{font-family:var(--fdisplay);font-size:32px;font-weight:900;color:var(--gold);text-decoration:none;display:block;margin-bottom:12px;}
+.footer-desc{font-size:13px;color:#555;line-height:1.7;}
+.footer-col-title{font-size:13px;font-weight:700;color:#ccc;margin-bottom:16px;letter-spacing:1px;}
+.footer-link{display:block;font-size:13px;color:#555;text-decoration:none;margin-bottom:10px;transition:color .2s;}
+.footer-link:hover{color:var(--gold);}
+.footer-bottom{border-top:1px solid #1a1a1a;padding-top:24px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#444;max-width:1200px;margin:0 auto;}
+@media(max-width:900px){nav{padding:0 16px;}.nav-links{display:none;}.main{padding:20px 16px;}.flash-banner{padding:12px 16px;flex-direction:column;align-items:flex-start;}.breadcrumb{padding:10px 16px;}.footer-grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-actions">
+    <button class="nav-ico" onclick="window.location='raf_cart.html'"><i class="ti ti-shopping-cart"></i><span class="cart-badge" id="cartBadge">0</span></button>
+    <button class="nav-ico" onclick="window.location='raf_wishlist.html'"><i class="ti ti-heart"></i></button>
+    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> تسجيل الدخول</a>
+    <a href="raf_login.html" class="btn-gold">إنشاء حساب</a>
+  </div>
+  <div class="nav-links">
+    <a href="raf_stores.html" class="nav-link">المحلات</a>
+    <a href="raf_offers.html" class="nav-link on">العروض</a>
+    <a href="raf_trending.html" class="nav-link">الترندات</a>
+    <a href="raf_used.html" class="nav-link">المستعملات</a>
+    <a href="raf_auctions.html" class="nav-link">المزادات</a>
+  </div>
+  <a href="raf_homepage.html" class="nav-logo">رف<span>RAF MARKETPLACE</span></a>
+</nav>
+
+<!-- FLASH SALE BANNER -->
+<div class="flash-banner">
+  <div class="flash-left">
+    <div class="flash-ico"><i class="ti ti-bolt"></i></div>
+    <div>
+      <div class="flash-title">تخفيضات رف الكبرى ⚡</div>
+      <div class="flash-sub">خصومات حصرية لفترة محدودة — لا تفوّت الفرصة!</div>
+    </div>
+  </div>
+  <div class="flash-timer">
+    <div class="ft-block"><div class="ft-num" id="timerH">04</div><div class="ft-lbl">ساعة</div></div>
+    <div class="ft-sep">:</div>
+    <div class="ft-block"><div class="ft-num" id="timerM">27</div><div class="ft-lbl">دقيقة</div></div>
+    <div class="ft-sep">:</div>
+    <div class="ft-block"><div class="ft-num" id="timerS">13</div><div class="ft-lbl">ثانية</div></div>
+  </div>
+</div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="raf_homepage.html">الرئيسية</a>
+  <i class="ti ti-chevron-left"></i>
+  <span style="color:var(--text);">العروض والخصومات</span>
+</div>
+
+<div class="main">
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <div class="search-inp" style="flex:1;">
+      <i class="ti ti-search" style="color:var(--text3);"></i>
+      <input type="text" placeholder="ابحث بالاسم أو رقم المنتج (P-001)..." oninput="filterProds(this.value)" id="prodSearch">
+    </div>
+    <select class="f-select" onchange="filterStore(this.value)">
+      <option value="">كل المحلات</option>
+      <option>Casa Mode</option>
+      <option>Sole & Co</option>
+      <option>TechZone</option>
+      <option>Luxe Accessories</option>
+      <option>Glam Store</option>
+    </select>
+    <select class="f-select" id="discFilter" onchange="filterDisc(this.value)">
+      <option value="">نسبة الخصم</option>
+      <option value="10">10% فأكثر</option>
+      <option value="20">20% فأكثر</option>
+      <option value="30">30% فأكثر</option>
+      <option value="50">50% فأكثر</option>
+    </select>
+    <select class="f-select" onchange="sortProds(this.value)">
+      <option>الترتيب</option>
+      <option>الأعلى خصماً</option>
+      <option>الأقل سعراً</option>
+      <option>الأعلى تقييماً</option>
+    </select>
+  </div>
+
+  <!-- CATEGORY CHIPS -->
+  <div class="chips" id="catChips">
+    <div class="chip on" onclick="filterCat('',this)">الكل <span style="color:inherit;opacity:.6;">(86)</span></div>
+    <div class="chip" onclick="filterCat('ملابس',this)">ملابس <span style="opacity:.6;">(32)</span></div>
+    <div class="chip" onclick="filterCat('أحذية',this)">أحذية <span style="opacity:.6;">(14)</span></div>
+    <div class="chip" onclick="filterCat('إلكترونيات',this)">إلكترونيات <span style="opacity:.6;">(11)</span></div>
+    <div class="chip" onclick="filterCat('اكسسوارات',this)">اكسسوارات <span style="opacity:.6;">(19)</span></div>
+    <div class="chip" onclick="filterCat('حقائب',this)">حقائب <span style="opacity:.6;">(10)</span></div>
+  </div>
+
+  <div class="results-bar">
+    <span class="results-count" id="resultsCount">86 عرض</span>
+  </div>
+
+  <!-- PRODUCTS GRID -->
+  <div class="prod-grid" id="prodGrid">
+
+    <!-- P-001 -->
+    <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-img">
+        <i class="ti ti-shirt"></i>
+        <span class="disc-badge">-30%</span>
+        <span class="prod-num">P-001</span>
+        <button class="wishlist-btn" onclick="event.stopPropagation();toggleWish(this)"><i class="ti ti-heart"></i></button>
+      </div>
+      <div class="prod-body">
+        <div class="prod-name">قميص أوفرسايز كلاسيك</div>
+        <div class="prod-store"><i class="ti ti-building-store" style="font-size:11px;"></i> Casa Mode</div>
+        <div class="prod-rating"><i class="ti ti-star-filled"></i> 4.8 <span style="color:var(--text3);">(124)</span></div>
+        <div class="card-timer"><i class="ti ti-clock" style="font-size:11px;"></i> <span class="ct-seg" id="ct1h">04</span>:<span class="ct-seg" id="ct1m">27</span>:<span class="ct-seg" id="ct1s">13</span></div>
+        <div class="prod-price-row">
+          <span class="price-old">17.000</span>
+          <span class="price-new">12.000 د.ك</span>
+          <span class="disc-pct">-30%</span>
+        </div>
+        <div class="cart-btn-wrap" data-pid="P-001" data-name="قميص أوفرسايز كلاسيك" data-price="12.000">
+          <button class="add-cart-btn" onclick="event.stopPropagation();addC('P-001','قميص أوفرسايز كلاسيك','12.000')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- P-002 -->
+    <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-img">
+        <i class="ti ti-shoe"></i>
+        <span class="disc-badge">-25%</span>
+        <span class="prod-num">P-002</span>
+        <button class="wishlist-btn" onclick="event.stopPropagation();toggleWish(this)"><i class="ti ti-heart"></i></button>
+      </div>
+      <div class="prod-body">
+        <div class="prod-name">حذاء رياضي Air Comfort</div>
+        <div class="prod-store"><i class="ti ti-building-store" style="font-size:11px;"></i> Sole & Co</div>
+        <div class="prod-rating"><i class="ti ti-star-filled"></i> 4.7 <span style="color:var(--text3);">(89)</span></div>
+        <div class="card-timer"><i class="ti ti-clock" style="font-size:11px;"></i> <span class="ct-seg">04</span>:<span class="ct-seg">27</span>:<span class="ct-seg">13</span></div>
+        <div class="prod-price-row">
+          <span class="price-old">38.000</span>
+          <span class="price-new">28.500 د.ك</span>
+          <span class="disc-pct">-25%</span>
+        </div>
+        <div class="cart-btn-wrap" data-pid="P-002" data-name="حذاء رياضي Air Comfort" data-price="28.500">
+          <button class="add-cart-btn" onclick="event.stopPropagation();addC('P-002','حذاء رياضي Air Comfort','28.500')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- P-003 -->
+    <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-img" style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#7c83f5;">
+        <i class="ti ti-device-mobile"></i>
+        <span class="disc-badge">-15%</span>
+        <span class="prod-num">P-003</span>
+        <button class="wishlist-btn" onclick="event.stopPropagation();toggleWish(this)"><i class="ti ti-heart"></i></button>
+      </div>
+      <div class="prod-body">
+        <div class="prod-name">iPhone 16 Pro — 256GB</div>
+        <div class="prod-store"><i class="ti ti-building-store" style="font-size:11px;"></i> TechZone</div>
+        <div class="prod-rating"><i class="ti ti-star-filled"></i> 5.0 <span style="color:var(--text3);">(210)</span></div>
+        <div class="card-timer"><i class="ti ti-clock" style="font-size:11px;"></i> <span class="ct-seg">04</span>:<span class="ct-seg">27</span>:<span class="ct-seg">13</span></div>
+        <div class="prod-price-row">
+          <span class="price-old">220.000</span>
+          <span class="price-new">189.000 د.ك</span>
+          <span class="disc-pct">-15%</span>
+        </div>
+        <div class="cart-btn-wrap" data-pid="P-003" data-name="iPhone 16 Pro" data-price="189.000">
+          <button class="add-cart-btn" onclick="event.stopPropagation();addC('P-003','iPhone 16 Pro','189.000')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- P-004 -->
+    <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-img">
+        <i class="ti ti-sunglasses"></i>
+        <span class="disc-badge">-40%</span>
+        <span class="prod-num">P-004</span>
+        <button class="wishlist-btn" onclick="event.stopPropagation();toggleWish(this)"><i class="ti ti-heart"></i></button>
+      </div>
+      <div class="prod-body">
+        <div class="prod-name">نظارة شمسية Ray Luxe</div>
+        <div class="prod-store"><i class="ti ti-building-store" style="font-size:11px;"></i> Luxe Accessories</div>
+        <div class="prod-rating"><i class="ti ti-star-filled"></i> 4.6 <span style="color:var(--text3);">(67)</span></div>
+        <div class="card-timer"><i class="ti ti-clock" style="font-size:11px;"></i> <span class="ct-seg">04</span>:<span class="ct-seg">27</span>:<span class="ct-seg">13</span></div>
+        <div class="prod-price-row">
+          <span class="price-old">58.000</span>
+          <span class="price-new">35.000 د.ك</span>
+          <span class="disc-pct">-40%</span>
+        </div>
+        <div class="cart-btn-wrap" data-pid="P-004" data-name="نظارة شمسية Ray Luxe" data-price="35.000">
+          <button class="add-cart-btn" onclick="event.stopPropagation();addC('P-004','نظارة شمسية Ray Luxe','35.000')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- P-005 -->
+    <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-img">
+        <i class="ti ti-backpack"></i>
+        <span class="disc-badge">-15%</span>
+        <span class="prod-num">P-005</span>
+        <button class="wishlist-btn" onclick="event.stopPropagation();toggleWish(this)"><i class="ti ti-heart"></i></button>
+      </div>
+      <div class="prod-body">
+        <div class="prod-name">حقيبة يد جلد طبيعي</div>
+        <div class="prod-store"><i class="ti ti-building-store" style="font-size:11px;"></i> Casa Mode</div>
+        <div class="prod-rating"><i class="ti ti-star-filled"></i> 4.9 <span style="color:var(--text3);">(152)</span></div>
+        <div class="card-timer"><i class="ti ti-clock" style="font-size:11px;"></i> <span class="ct-seg">04</span>:<span class="ct-seg">27</span>:<span class="ct-seg">13</span></div>
+        <div class="prod-price-row">
+          <span class="price-old">42.000</span>
+          <span class="price-new">35.700 د.ك</span>
+          <span class="disc-pct">-15%</span>
+        </div>
+        <div class="cart-btn-wrap" data-pid="P-005" data-name="حقيبة يد جلد طبيعي" data-price="35.700">
+          <button class="add-cart-btn" onclick="event.stopPropagation();addC('P-005','حقيبة يد جلد طبيعي','35.700')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- P-006 -->
+    <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-img">
+        <i class="ti ti-watch"></i>
+        <span class="disc-badge">-20%</span>
+        <span class="prod-num">P-006</span>
+        <button class="wishlist-btn" onclick="event.stopPropagation();toggleWish(this)"><i class="ti ti-heart"></i></button>
+      </div>
+      <div class="prod-body">
+        <div class="prod-name">ساعة ذكية Premium</div>
+        <div class="prod-store"><i class="ti ti-building-store" style="font-size:11px;"></i> Glam Store</div>
+        <div class="prod-rating"><i class="ti ti-star-filled"></i> 4.8 <span style="color:var(--text3);">(98)</span></div>
+        <div class="card-timer"><i class="ti ti-clock" style="font-size:11px;"></i> <span class="ct-seg">04</span>:<span class="ct-seg">27</span>:<span class="ct-seg">13</span></div>
+        <div class="prod-price-row">
+          <span class="price-old">94.000</span>
+          <span class="price-new">75.000 د.ك</span>
+          <span class="disc-pct">-20%</span>
+        </div>
+        <div class="cart-btn-wrap" data-pid="P-006" data-name="ساعة ذكية Premium" data-price="75.000">
+          <button class="add-cart-btn" onclick="event.stopPropagation();addC('P-006','ساعة ذكية Premium','75.000')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- P-007 -->
+    <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-img">
+        <i class="ti ti-hanger"></i>
+        <span class="disc-badge">-50%</span>
+        <span class="prod-num">P-007</span>
+        <button class="wishlist-btn" onclick="event.stopPropagation();toggleWish(this)"><i class="ti ti-heart"></i></button>
+      </div>
+      <div class="prod-body">
+        <div class="prod-name">فستان سهرة بولدر</div>
+        <div class="prod-store"><i class="ti ti-building-store" style="font-size:11px;"></i> Casa Mode</div>
+        <div class="prod-rating"><i class="ti ti-star-filled"></i> 4.7 <span style="color:var(--text3);">(44)</span></div>
+        <div class="card-timer"><i class="ti ti-clock" style="font-size:11px;"></i> <span class="ct-seg">04</span>:<span class="ct-seg">27</span>:<span class="ct-seg">13</span></div>
+        <div class="prod-price-row">
+          <span class="price-old">60.000</span>
+          <span class="price-new">30.000 د.ك</span>
+          <span class="disc-pct">-50%</span>
+        </div>
+        <div class="cart-btn-wrap" data-pid="P-007" data-name="فستان سهرة بولدر" data-price="30.000">
+          <button class="add-cart-btn" onclick="event.stopPropagation();addC('P-007','فستان سهرة بولدر','30.000')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- P-008 -->
+    <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-img">
+        <i class="ti ti-headphones"></i>
+        <span class="disc-badge">-35%</span>
+        <span class="prod-num">P-008</span>
+        <button class="wishlist-btn" onclick="event.stopPropagation();toggleWish(this)"><i class="ti ti-heart"></i></button>
+      </div>
+      <div class="prod-body">
+        <div class="prod-name">سماعة Sony WH-1000XM5</div>
+        <div class="prod-store"><i class="ti ti-building-store" style="font-size:11px;"></i> TechZone</div>
+        <div class="prod-rating"><i class="ti ti-star-filled"></i> 4.9 <span style="color:var(--text3);">(201)</span></div>
+        <div class="card-timer"><i class="ti ti-clock" style="font-size:11px;"></i> <span class="ct-seg">04</span>:<span class="ct-seg">27</span>:<span class="ct-seg">13</span></div>
+        <div class="prod-price-row">
+          <span class="price-old">55.000</span>
+          <span class="price-new">35.750 د.ك</span>
+          <span class="disc-pct">-35%</span>
+        </div>
+        <div class="cart-btn-wrap" data-pid="P-008" data-name="سماعة Sony WH-1000XM5" data-price="35.750">
+          <button class="add-cart-btn" onclick="event.stopPropagation();addC('P-008','سماعة Sony WH-1000XM5','35.750')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /prod-grid -->
+
+</div><!-- /main -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <a href="raf_homepage.html" class="footer-logo">رف</a>
+      <div class="footer-desc">منصة التسوق المحلي الأولى في الكويت — أفضل العروض من أفضل المحلات.</div>
+    </div>
+    <div>
+      <div class="footer-col-title">روابط سريعة</div>
+      <a href="raf_homepage.html" class="footer-link">الرئيسية</a>
+      <a href="raf_stores.html" class="footer-link">المحلات</a>
+      <a href="raf_used.html" class="footer-link">المستعملات</a>
+      <a href="raf_auctions.html" class="footer-link">المزادات</a>
+    </div>
+    <div>
+      <div class="footer-col-title">المساعدة</div>
+      <a href="#" class="footer-link">كيف تطلب</a>
+      <a href="#" class="footer-link">سياسة الإرجاع</a>
+      <a href="#" class="footer-link">تواصل معنا</a>
+    </div>
+    <div>
+      <div class="footer-col-title">الأعمال</div>
+      <a href="raf_merchant.html" class="footer-link">لوحة التاجر</a>
+      <a href="raf_login_staff.html" class="footer-link">دخول الموظفين</a>
+      <a href="raf_join_driver.html" class="footer-link">انضم كسائق</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>جميع الحقوق محفوظة © 2026 رف</div>
+    <div style="display:flex;gap:16px;">
+      <a href="#" class="footer-link" style="margin:0;">سياسة الخصوصية</a>
+      <a href="#" class="footer-link" style="margin:0;">الشروط والأحكام</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ===== CART STATE ===== */
+const CK='raf_cart';
+function getCart(){return JSON.parse(localStorage.getItem(CK)||'{}');}
+function saveCart(c){localStorage.setItem(CK,JSON.stringify(c));updateBadge();}
+function updateBadge(){
+  const t=Object.values(getCart()).reduce((s,i)=>s+(i.qty||0),0);
+  document.querySelectorAll('#cartBadge,.cart-badge').forEach(b=>b.textContent=t||'0');
+}
+function qtyHTML(id,qty,name,price){
+  return `<div class="qty-ctrl">
+    <button class="qty-btn" onclick="event.stopPropagation();chQ('${id}',-1,'${encodeURIComponent(name)}','${price}',this)"><i class="ti ti-minus"></i></button>
+    <span class="qty-num">${qty}</span>
+    <button class="qty-btn" onclick="event.stopPropagation();chQ('${id}',1,'${encodeURIComponent(name)}','${price}',this)"><i class="ti ti-plus"></i></button>
+    <button class="qty-del" onclick="event.stopPropagation();delI('${id}','${encodeURIComponent(name)}','${price}',this)"><i class="ti ti-trash"></i></button>
+  </div>`;}
+function addBtnHTML(id,name,price){return `<button class="add-cart-btn" onclick="event.stopPropagation();addC('${id}','${name}','${price}')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>`;}
+function addC(id,name,price){
+  const cart=getCart();if(!cart[id])cart[id]={name:decodeURIComponent(name),price:parseFloat(price),qty:0};
+  cart[id].qty++;saveCart(cart);
+  const w=document.querySelector(`[data-pid="${id}"]`);if(w)w.innerHTML=qtyHTML(id,cart[id].qty,name,price);
+}
+function chQ(id,d,name,price,btn){
+  const cart=getCart();if(!cart[id])return;cart[id].qty+=d;
+  if(cart[id].qty<=0){delete cart[id];saveCart(cart);const w=btn.closest('[data-pid]');if(w)w.innerHTML=addBtnHTML(id,decodeURIComponent(name),price);return;}
+  saveCart(cart);btn.closest('.qty-ctrl').querySelector('.qty-num').textContent=cart[id].qty;
+}
+function delI(id,name,price,btn){
+  const cart=getCart();delete cart[id];saveCart(cart);
+  const w=btn.closest('[data-pid]');if(w)w.innerHTML=addBtnHTML(id,decodeURIComponent(name),price);
+}
+function initCartBtns(){
+  const cart=getCart();
+  document.querySelectorAll('[data-pid]').forEach(w=>{
+    const id=w.dataset.pid,name=w.dataset.name,price=w.dataset.price;
+    if(cart[id])w.innerHTML=qtyHTML(id,cart[id].qty,encodeURIComponent(name),price);
+  });
+}
+/* ===== FILTERS ===== */
+function filterCat(cat,el){
+  document.querySelectorAll('#catChips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+}
+function filterProds(q){}
+function filterStore(s){}
+function filterDisc(d){}
+function sortProds(s){}
+/* ===== WISHLIST ===== */
+function toggleWish(btn){
+  const ico=btn.querySelector('i');
+  if(ico.className.includes('ti-heart-filled')){ico.className='ti ti-heart';btn.classList.remove('on');}
+  else{ico.className='ti ti-heart-filled';btn.classList.add('on');}
+}
+/* ===== COUNTDOWN ===== */
+let totalSecs = 4*3600+27*60+13;
+function tick(){
+  if(totalSecs<=0)return;totalSecs--;
+  const h=Math.floor(totalSecs/3600),m=Math.floor((totalSecs%3600)/60),s=totalSecs%60;
+  const pad=n=>String(n).padStart(2,'0');
+  document.querySelectorAll('.ft-num,#timerH').forEach((el,i)=>{if(i===0)el.textContent=pad(h);});
+  document.querySelectorAll('.ft-num,#timerM').forEach((el,i)=>{if(i===1)el.textContent=pad(m);});
+  document.querySelectorAll('.ft-num,#timerS').forEach((el,i)=>{if(i===2)el.textContent=pad(s);});
+  const all=document.querySelectorAll('.ft-num');if(all[0])all[0].textContent=pad(h);if(all[1])all[1].textContent=pad(m);if(all[2])all[2].textContent=pad(s);
+  document.querySelectorAll('.ct-seg').forEach((el,i)=>{const g=i%3;if(g===0)el.textContent=pad(h);else if(g===1)el.textContent=pad(m);else el.textContent=pad(s);});
+}
+setInterval(tick,1000);
+window.addEventListener('DOMContentLoaded',()=>{initCartBtns();updateBadge();});
+</script>
+</body>
+</html>

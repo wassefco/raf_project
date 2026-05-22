@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رف — انضم كسائق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{--bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;--gold:#C9A84C;--gold2:#A07828;--black:#0A0A0A;--text:#0A0A0A;--text2:#555;--text3:#888;--border:#D8D3C8;--r:8px;--rl:12px;--font:'Tajawal',sans-serif;--fdisplay:'Playfair Display',serif;--fen:'DM Sans',sans-serif;--green:#2E7D32;--green-bg:#E8F5E9;--red:#C62828;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;}
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.3);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.nav-logo{font-family:var(--fdisplay);font-size:28px;font-weight:900;color:var(--gold);text-decoration:none;}
+.nav-logo span{color:var(--text);font-size:11px;font-family:var(--fen);font-weight:300;letter-spacing:3px;display:block;margin-top:-6px;}
+.btn-ghost{padding:8px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+/* HERO HEADER */
+.hero{background:var(--black);padding:56px 40px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.05) 1px,transparent 1px);background-size:40px 40px;}
+.hero-ico{width:72px;height:72px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--gold);margin:0 auto 20px;position:relative;z-index:1;}
+.hero-title{font-size:32px;font-weight:900;color:#F5F2EC;position:relative;z-index:1;}
+.hero-title span{color:var(--gold);}
+.hero-sub{font-size:15px;color:#666;margin-top:10px;max-width:500px;margin-inline:auto;line-height:1.7;position:relative;z-index:1;}
+.perks{display:flex;justify-content:center;gap:24px;margin-top:28px;flex-wrap:wrap;position:relative;z-index:1;}
+.perk{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.15);border-radius:var(--r);padding:12px 20px;text-align:center;}
+.perk-num{font-size:22px;font-weight:900;color:var(--gold);font-family:var(--fen);}
+.perk-lbl{font-size:12px;color:#666;margin-top:3px;}
+/* PROGRESS */
+.progress-wrap{max-width:680px;margin:32px auto 0;padding:0 40px;}
+.steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:28px;}
+.step-item{display:flex;flex-direction:column;align-items:center;flex:1;}
+.step-ico{width:36px;height:36px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--text3);background:var(--card);transition:all .3s;font-family:var(--fen);}
+.step-item.done .step-ico{background:var(--green);border-color:var(--green);color:#fff;}
+.step-item.act .step-ico{background:var(--gold);border-color:var(--gold);color:var(--black);}
+.step-lbl{font-size:11px;color:var(--text3);margin-top:6px;text-align:center;}
+.step-item.act .step-lbl{color:var(--gold);font-weight:700;}
+.step-item.done .step-lbl{color:var(--green);}
+.step-line{flex:1;height:2px;background:var(--border);margin-bottom:22px;transition:background .3s;}
+.step-line.done{background:var(--green);}
+/* FORM CARD */
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;max-width:680px;margin:0 auto;margin-bottom:40px;}
+.form-card-head{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.form-card-head i{font-size:20px;color:var(--gold);}
+.form-card-title{font-size:15px;font-weight:700;}
+.form-card-sub{font-size:13px;color:var(--text3);margin-top:2px;}
+.form-body{padding:24px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.field{margin-bottom:16px;}
+.field:last-child{margin-bottom:0;}
+.field-lbl{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:7px;display:block;}
+.field-lbl .req{color:var(--red);margin-right:2px;}
+.field-inp{width:100%;padding:11px 16px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color .2s;appearance:auto;}
+.field-inp:focus{border-color:var(--gold);background:var(--card);}
+.field-inp::placeholder{color:var(--text3);}
+select.field-inp{cursor:pointer;}
+/* UPLOAD ZONE */
+.upload-zone{border:2px dashed var(--border);border-radius:var(--r);padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.upload-zone:hover,.upload-zone.over{border-color:var(--gold);background:rgba(201,168,76,.04);}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.upload-ico{font-size:28px;color:var(--text3);margin-bottom:8px;}
+.upload-title{font-size:14px;font-weight:500;margin-bottom:4px;}
+.upload-sub{font-size:12px;color:var(--text3);}
+.upload-done{display:none;align-items:center;gap:8px;padding:10px 14px;background:var(--green-bg);border:1px solid rgba(46,125,50,.2);border-radius:var(--r);margin-top:10px;font-size:13px;color:var(--green);}
+.upload-done.show{display:flex;}
+/* AGREEMENT */
+.agree-wrap{display:flex;align-items:flex-start;gap:12px;padding:16px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border);cursor:pointer;}
+.agree-chk{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.agree-wrap.on .agree-chk{background:var(--gold);border-color:var(--gold);color:var(--black);}
+.agree-text{font-size:13px;color:var(--text2);line-height:1.6;}
+.agree-text a{color:var(--gold);text-decoration:none;}
+/* NAVIGATION BUTTONS */
+.btn-row{display:flex;gap:10px;margin-top:20px;}
+.btn-next{flex:1;padding:13px;background:var(--gold);border:none;border-radius:var(--r);color:var(--black);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-next:hover{background:var(--gold2);}
+.btn-prev{padding:13px 20px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;}
+.btn-prev:hover{border-color:var(--gold);color:var(--gold);}
+/* SUCCESS */
+.success-wrap{max-width:500px;margin:40px auto;padding:0 40px;text-align:center;display:none;}
+.success-ico{width:80px;height:80px;border-radius:50%;background:var(--green-bg);display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--green);margin:0 auto 24px;}
+.success-title{font-family:var(--fdisplay);font-size:28px;font-weight:700;margin-bottom:10px;}
+.success-sub{font-size:15px;color:var(--text3);line-height:1.7;margin-bottom:24px;}
+.success-ref{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px 20px;font-size:14px;margin-bottom:24px;}
+.success-ref b{color:var(--gold);font-family:var(--fen);}
+/* FOOTER */
+footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
+.footer-bottom-simple{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#444;max-width:680px;margin:0 auto;}
+.footer-link{color:#444;text-decoration:none;transition:color .2s;}
+.footer-link:hover{color:var(--gold);}
+@media(max-width:700px){nav{padding:0 16px;}.hero{padding:40px 16px;}.progress-wrap{padding:0 16px;}.form-body{padding:16px;}.row2{grid-template-columns:1fr;}.perks{gap:10px;}.success-wrap{padding:0 16px;}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a href="raf_homepage.html" class="btn-ghost"><i class="ti ti-arrow-right"></i> رجوع</a>
+  </div>
+  <a href="raf_homepage.html" class="nav-logo">رف<span>RAF MARKETPLACE</span></a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-ico"><i class="ti ti-steering-wheel"></i></div>
+  <div class="hero-title">انضم إلى فريق سائقي <span>رف</span></div>
+  <div class="hero-sub">اكسب دخلاً ثابتاً بجدول مرن — انضم إلى مئات السائقين الذين يوصلون البضائع يومياً في الكويت.</div>
+  <div class="perks">
+    <div class="perk"><div class="perk-num">+250</div><div class="perk-lbl">سائق نشط</div></div>
+    <div class="perk"><div class="perk-num">500+</div><div class="perk-lbl">طلب يومي</div></div>
+    <div class="perk"><div class="perk-num">مرن</div><div class="perk-lbl">جدول عمل حر</div></div>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap">
+  <div class="steps" id="stepsBar">
+    <div class="step-item act" id="stp1">
+      <div class="step-ico">1</div>
+      <div class="step-lbl">البيانات الشخصية</div>
+    </div>
+    <div class="step-line" id="ln1"></div>
+    <div class="step-item" id="stp2">
+      <div class="step-ico">2</div>
+      <div class="step-lbl">بيانات المركبة</div>
+    </div>
+    <div class="step-line" id="ln2"></div>
+    <div class="step-item" id="stp3">
+      <div class="step-ico">3</div>
+      <div class="step-lbl">المستندات</div>
+    </div>
+    <div class="step-line" id="ln3"></div>
+    <div class="step-item" id="stp4">
+      <div class="step-ico">4</div>
+      <div class="step-lbl">التأكيد</div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 1: PERSONAL INFO -->
+<div id="step1" class="form-card">
+  <div class="form-card-head">
+    <i class="ti ti-user-circle"></i>
+    <div>
+      <div class="form-card-title">البيانات الشخصية</div>
+      <div class="form-card-sub">أدخل معلوماتك الشخصية بدقة</div>
+    </div>
+  </div>
+  <div class="form-body">
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">الاسم الأول <span class="req">*</span></label>
+        <input type="text" class="field-inp" placeholder="محمد">
+      </div>
+      <div class="field">
+        <label class="field-lbl">الاسم الأخير <span class="req">*</span></label>
+        <input type="text" class="field-inp" placeholder="الكندري">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">رقم الهاتف <span class="req">*</span></label>
+        <input type="tel" class="field-inp" placeholder="5X XXX XXXX" dir="ltr">
+      </div>
+      <div class="field">
+        <label class="field-lbl">البريد الإلكتروني <span class="req">*</span></label>
+        <input type="email" class="field-inp" placeholder="example@email.com" dir="ltr">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">الرقم المدني <span class="req">*</span></label>
+        <input type="text" class="field-inp" placeholder="XXXXXXXXXXX" dir="ltr" maxlength="12">
+      </div>
+      <div class="field">
+        <label class="field-lbl">الجنسية <span class="req">*</span></label>
+        <select class="field-inp">
+          <option value="">— اختر —</option>
+          <option>كويتي</option>
+          <option>سعودي</option>
+          <option>مصري</option>
+          <option>هندي</option>
+          <option>باكستاني</option>
+          <option>أخرى</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-lbl">منطقة السكن <span class="req">*</span></label>
+      <select class="field-inp">
+        <option value="">— اختر المنطقة —</option>
+        <option>حولي</option><option>الفروانية</option><option>العاصمة</option>
+        <option>الأحمدي</option><option>الجهراء</option><option>مبارك الكبير</option>
+      </select>
+    </div>
+    <div class="btn-row">
+      <button class="btn-next" onclick="goStep(2)">التالي — بيانات المركبة <i class="ti ti-arrow-left"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2: VEHICLE INFO -->
+<div id="step2" class="form-card" style="display:none;">
+  <div class="form-card-head">
+    <i class="ti ti-car"></i>
+    <div>
+      <div class="form-card-title">بيانات المركبة</div>
+      <div class="form-card-sub">معلومات السيارة المستخدمة في التوصيل</div>
+    </div>
+  </div>
+  <div class="form-body">
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">نوع المركبة <span class="req">*</span></label>
+        <select class="field-inp">
+          <option value="">— اختر —</option>
+          <option>سيارة</option>
+          <option>دراجة نارية</option>
+          <option>بيك أب</option>
+          <option>فان</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-lbl">الماركة <span class="req">*</span></label>
+        <input type="text" class="field-inp" placeholder="Toyota, Honda...">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">الموديل <span class="req">*</span></label>
+        <input type="text" class="field-inp" placeholder="Camry, Civic...">
+      </div>
+      <div class="field">
+        <label class="field-lbl">سنة الصنع <span class="req">*</span></label>
+        <select class="field-inp">
+          <option value="">— السنة —</option>
+          <option>2024</option><option>2023</option><option>2022</option><option>2021</option>
+          <option>2020</option><option>2019</option><option>2018</option><option>2017</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">رقم اللوحة <span class="req">*</span></label>
+        <input type="text" class="field-inp" placeholder="X X X X X" dir="ltr">
+      </div>
+      <div class="field">
+        <label class="field-lbl">لون السيارة</label>
+        <input type="text" class="field-inp" placeholder="أبيض، أسود...">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-prev" onclick="goStep(1)"><i class="ti ti-arrow-right"></i> السابق</button>
+      <button class="btn-next" onclick="goStep(3)">التالي — المستندات <i class="ti ti-arrow-left"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3: DOCUMENTS -->
+<div id="step3" class="form-card" style="display:none;">
+  <div class="form-card-head">
+    <i class="ti ti-files"></i>
+    <div>
+      <div class="form-card-title">رفع المستندات</div>
+      <div class="form-card-sub">يجب رفع جميع المستندات لإتمام الطلب</div>
+    </div>
+  </div>
+  <div class="form-body">
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">البطاقة المدنية <span class="req">*</span></label>
+        <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
+          <input type="file" accept="image/*,application/pdf" onchange="markUpload(this,'id-done')">
+          <div class="upload-ico"><i class="ti ti-id-badge-2"></i></div>
+          <div class="upload-title">رفع البطاقة المدنية</div>
+          <div class="upload-sub">JPG أو PNG أو PDF — حد 5 ميغا</div>
+        </div>
+        <div class="upload-done" id="id-done"><i class="ti ti-check-circle"></i> تم رفع الملف</div>
+      </div>
+      <div class="field">
+        <label class="field-lbl">رخصة القيادة <span class="req">*</span></label>
+        <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
+          <input type="file" accept="image/*,application/pdf" onchange="markUpload(this,'lic-done')">
+          <div class="upload-ico"><i class="ti ti-license"></i></div>
+          <div class="upload-title">رفع رخصة القيادة</div>
+          <div class="upload-sub">JPG أو PNG أو PDF — حد 5 ميغا</div>
+        </div>
+        <div class="upload-done" id="lic-done"><i class="ti ti-check-circle"></i> تم رفع الملف</div>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">استمارة السيارة <span class="req">*</span></label>
+        <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
+          <input type="file" accept="image/*,application/pdf" onchange="markUpload(this,'reg-done')">
+          <div class="upload-ico"><i class="ti ti-file-certificate"></i></div>
+          <div class="upload-title">رفع الاستمارة</div>
+          <div class="upload-sub">JPG أو PNG أو PDF — حد 5 ميغا</div>
+        </div>
+        <div class="upload-done" id="reg-done"><i class="ti ti-check-circle"></i> تم رفع الملف</div>
+      </div>
+      <div class="field">
+        <label class="field-lbl">صورة شخصية <span class="req">*</span></label>
+        <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
+          <input type="file" accept="image/*" onchange="markUpload(this,'photo-done')">
+          <div class="upload-ico"><i class="ti ti-user-circle"></i></div>
+          <div class="upload-title">رفع صورة شخصية</div>
+          <div class="upload-sub">JPG أو PNG — حد 3 ميغا</div>
+        </div>
+        <div class="upload-done" id="photo-done"><i class="ti ti-check-circle"></i> تم رفع الملف</div>
+      </div>
+    </div>
+    <div class="field" style="margin-top:8px;">
+      <div class="agree-wrap" onclick="toggleAgree(this)" id="agreeWrap">
+        <div class="agree-chk" id="agreeChk"></div>
+        <div class="agree-text">
+          أوافق على <a href="#" onclick="return false;">شروط وأحكام</a> انضمام السائقين إلى منصة رف، وأقر بصحة جميع البيانات والمستندات المقدمة.
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-prev" onclick="goStep(2)"><i class="ti ti-arrow-right"></i> السابق</button>
+      <button class="btn-next" onclick="submitApp()"><i class="ti ti-send"></i> إرسال الطلب</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-wrap" id="successWrap">
+  <div class="success-ico"><i class="ti ti-circle-check"></i></div>
+  <div class="success-title">تم إرسال طلبك!</div>
+  <div class="success-sub">شكراً لاهتمامك بالانضمام إلى فريق رف. سيقوم فريقنا بمراجعة بياناتك والتواصل معك خلال 2-3 أيام عمل.</div>
+  <div class="success-ref">رقم الطلب: <b id="refNum">DR-2026-00XXX</b></div>
+  <a href="raf_homepage.html" class="btn-next" style="text-decoration:none;justify-content:center;">
+    <i class="ti ti-home"></i> العودة للرئيسية
+  </a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-bottom-simple">
+    <div>جميع الحقوق محفوظة © 2026 رف</div>
+    <div style="display:flex;gap:16px;">
+      <a href="#" class="footer-link">سياسة الخصوصية</a>
+      <a href="#" class="footer-link">الشروط والأحكام</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+let agreed = false;
+let curStep = 1;
+
+function goStep(n) {
+  document.getElementById('step' + curStep).style.display = 'none';
+  curStep = n;
+  document.getElementById('step' + n).style.display = 'block';
+  document.getElementById('step' + n).scrollIntoView({behavior:'smooth',block:'start'});
+  updateProgress(n);
+}
+
+function updateProgress(n) {
+  for (let i = 1; i <= 4; i++) {
+    const stp = document.getElementById('stp' + i);
+    stp.className = 'step-item';
+    if (i < n) stp.classList.add('done');
+    else if (i === n) stp.classList.add('act');
+    if (i < 4) {
+      const ln = document.getElementById('ln' + i);
+      ln.className = 'step-line' + (i < n ? ' done' : '');
+    }
+  }
+}
+
+function markUpload(inp, doneId) {
+  if (inp.files && inp.files[0]) {
+    document.getElementById(doneId).classList.add('show');
+  }
+}
+
+function toggleAgree(wrap) {
+  agreed = !agreed;
+  wrap.classList.toggle('on', agreed);
+}
+
+function submitApp() {
+  if (!agreed) {
+    alert('الرجاء الموافقة على الشروط والأحكام');
+    return;
+  }
+  document.getElementById('step3').style.display = 'none';
+  const refNum = 'DR-2026-' + String(Math.floor(Math.random() * 90000) + 10000);
+  document.getElementById('refNum').textContent = refNum;
+  document.getElementById('successWrap').style.display = 'block';
+  updateProgress(4);
+  document.getElementById('successWrap').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>
