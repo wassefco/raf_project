@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -144,6 +144,31 @@
     font-weight: 700; display: flex; align-items: center; justify-content: center;
   }
 
+  /* LANGUAGE SWITCHER */
+  .lang-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--gray-3);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--gray-4);
+    font-family: var(--font-en);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .lang-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .lang-btn .lang-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: inline-block;
+  }
+
   /* HERO BANNER */
   .hero {
     height: 520px; position: relative;
@@ -153,13 +178,13 @@
   }
   .hero-bg {
     position: absolute; inset: 0;
-    background: 
+    background:
       radial-gradient(ellipse 60% 80% at 20% 50%, rgba(201,168,76,0.15) 0%, transparent 70%),
       radial-gradient(ellipse 40% 60% at 80% 30%, rgba(201,168,76,0.10) 0%, transparent 70%);
   }
   .hero-grid {
     position: absolute; inset: 0;
-    background-image: 
+    background-image:
       linear-gradient(rgba(201,168,76,0.08) 1px, transparent 1px),
       linear-gradient(90deg, rgba(201,168,76,0.08) 1px, transparent 1px);
     background-size: 60px 60px;
@@ -199,7 +224,7 @@
   .btn-hero:hover { background: var(--gold-light); transform: translateY(-1px); }
   .btn-hero-ghost {
     padding: 14px 32px; background: transparent;
-    color: var(--white); border: 1px solid rgba(255,255,255,0.2);
+    color: var(--white); border: 1px solid rgba(10,10,10,0.2);
     border-radius: var(--radius); font-family: var(--font-ar);
     font-size: 15px; cursor: pointer; transition: all 0.2s;
   }
@@ -304,14 +329,13 @@
   }
   .section-link:hover { gap: 8px; }
 
-  /* STORES ROW */
-  .stores-row {
-    display: flex; gap: 16px; overflow-x: auto;
-    padding-bottom: 8px; scrollbar-width: none;
+  /* STORES GRID */
+  .stores-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
   }
-  .stores-row::-webkit-scrollbar { display: none; }
   .store-card {
-    flex-shrink: 0; width: 200px;
     background: var(--gray-1);
     border: 1px solid var(--gray-2);
     border-radius: var(--radius-lg);
@@ -319,17 +343,30 @@
     cursor: pointer;
     transition: all 0.25s;
     position: relative;
+    text-decoration: none;
+    display: block;
   }
   .store-card:hover {
     border-color: var(--gold-dim);
     transform: translateY(-4px);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.18);
   }
+  /* Gold accent line at top on hover */
+  .store-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transition: transform 0.25s ease;
+    z-index: 2;
+  }
+  .store-card:hover::before { transform: scaleX(1); }
   .store-img {
-    height: 120px;
+    height: 150px;
     background: linear-gradient(160deg, var(--gray-2), var(--gray-3));
     display: flex; align-items: center; justify-content: center;
-    font-size: 36px; color: var(--gold-dim);
+    font-size: 44px; color: var(--gold-dim);
     position: relative;
   }
   .store-badge {
@@ -341,11 +378,23 @@
   .store-badge.closed {
     background: var(--gray-3); color: var(--gray-4);
   }
-  .store-info { padding: 14px; }
-  .store-name { font-size: 14px; font-weight: 700; color: var(--white-pure); margin-bottom: 6px; }
+  /* Store number badge */
+  .store-num {
+    position: absolute; bottom: 8px; left: 8px;
+    padding: 2px 7px; border-radius: 4px;
+    font-size: 10px; font-weight: 700; font-family: var(--font-en);
+    background: rgba(10,10,10,0.65); color: rgba(245,242,236,0.9);
+    letter-spacing: 0.5px;
+  }
+  .store-info { padding: 16px; }
+  .store-name { font-size: 15px; font-weight: 700; color: var(--white-pure); margin-bottom: 8px; }
   .store-meta { display: flex; align-items: center; justify-content: space-between; }
   .store-rating { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--gold); }
-  .store-cat { font-size: 11px; color: var(--gray-4); }
+  .store-cat {
+    font-size: 11px; color: var(--gray-4);
+    background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.15);
+    padding: 2px 8px; border-radius: 20px;
+  }
 
   /* PRODUCTS GRID */
   .products-grid {
@@ -375,21 +424,33 @@
     position: relative; overflow: hidden;
   }
   .product-img-icon { font-size: 48px; color: var(--gray-3); }
+
+  /* Product number badge — top left */
+  .prod-num {
+    position: absolute; top: 10px; left: 10px;
+    padding: 3px 8px; border-radius: 4px;
+    font-size: 10px; font-weight: 700; font-family: var(--font-en);
+    background: rgba(10,10,10,0.65); color: rgba(245,242,236,0.9);
+    letter-spacing: 0.5px; z-index: 1;
+  }
+  /* Wishlist button — bottom left */
   .product-wishlist {
-    position: absolute; top: 12px; left: 12px;
+    position: absolute; bottom: 12px; left: 12px;
     width: 32px; height: 32px;
-    background: rgba(245,242,236,0.8); border: none;
+    background: rgba(245,242,236,0.85); border: none;
     border-radius: 50%; color: var(--gray-4);
     cursor: pointer; font-size: 16px;
     display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
+    transition: all 0.2s; z-index: 1;
   }
   .product-wishlist:hover { color: #E05555; }
+  /* Discount tag — top right */
   .product-tag {
     position: absolute; top: 12px; right: 12px;
     padding: 3px 8px; border-radius: 4px;
     font-size: 10px; font-weight: 700;
     background: #E05555; color: white;
+    z-index: 1;
   }
   .product-info { padding: 16px; }
   .product-store { font-size: 11px; color: var(--gold-dim); margin-bottom: 4px; }
@@ -400,61 +461,51 @@
   .product-price { font-size: 16px; font-weight: 700; color: var(--gold); }
   .product-price-old { font-size: 12px; color: var(--gray-4); text-decoration: line-through; margin-right: 6px; }
   .product-rating { display: flex; align-items: center; gap: 3px; font-size: 12px; color: var(--gray-4); }
+
+  /* Cart button states */
+  .cart-btn-wrap { margin-top: 12px; }
   .add-to-cart {
     width: 100%; padding: 10px;
     background: var(--gray-2); border: 1px solid var(--gray-3);
     border-radius: var(--radius); color: var(--white);
     font-family: var(--font-ar); font-size: 13px; font-weight: 500;
-    cursor: pointer; transition: all 0.2s; margin-top: 12px;
+    cursor: pointer; transition: all 0.2s;
     display: flex; align-items: center; justify-content: center; gap: 6px;
   }
   .add-to-cart:hover {
     background: var(--gold); color: var(--black);
     border-color: var(--gold);
   }
-
-  /* MINI MODAL */
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(245,242,236,0.7);
-    z-index: 500;
+  .qty-row {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .qty-ctrl {
+    flex: 1; display: flex; align-items: center; justify-content: space-between;
+    background: var(--gray-2); border: 1px solid var(--gold);
+    border-radius: var(--radius); overflow: hidden;
+    height: 38px;
+  }
+  .qty-btn {
+    width: 36px; height: 100%;
+    background: transparent; border: none;
+    color: var(--gold); font-size: 16px; font-weight: 700;
+    cursor: pointer; transition: background 0.15s;
     display: flex; align-items: center; justify-content: center;
-    display: none;
   }
-  .modal-overlay.open { display: flex; }
-  .modal-box {
-    background: var(--gray-1); border: 1px solid var(--gray-2);
-    border-radius: var(--radius-lg); width: min(400px, 90vw);
-    padding: 24px; position: relative;
-    animation: slideUp 0.25s ease;
+  .qty-btn:hover { background: rgba(201,168,76,0.15); }
+  .qty-num {
+    font-size: 14px; font-weight: 700; color: var(--white);
+    font-family: var(--font-en); min-width: 24px; text-align: center;
   }
-  .modal-title { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
-  .modal-close {
-    position: absolute; top: 16px; left: 16px;
-    background: none; border: none; color: var(--gray-4);
-    font-size: 20px; cursor: pointer;
+  .qty-del {
+    width: 36px; height: 38px;
+    background: transparent; border: 1px solid #E05555;
+    border-radius: var(--radius); color: #E05555;
+    cursor: pointer; font-size: 15px; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
   }
-  .option-group { margin-bottom: 20px; }
-  .option-label { font-size: 12px; color: var(--gray-4); margin-bottom: 10px; letter-spacing: 1px; text-transform: uppercase; }
-  .options-row { display: flex; gap: 8px; flex-wrap: wrap; }
-  .option-btn {
-    padding: 8px 16px; border: 1px solid var(--gray-3);
-    border-radius: var(--radius); background: transparent;
-    color: var(--white); font-family: var(--font-ar);
-    font-size: 13px; cursor: pointer; transition: all 0.2s;
-  }
-  .option-btn:hover, .option-btn.selected {
-    border-color: var(--gold); color: var(--gold);
-    background: rgba(201,168,76,0.1);
-  }
-  .modal-add-btn {
-    width: 100%; padding: 12px; background: var(--gold);
-    border: none; border-radius: var(--radius);
-    color: var(--black); font-family: var(--font-ar);
-    font-size: 15px; font-weight: 700; cursor: pointer;
-    transition: background 0.2s;
-  }
-  .modal-add-btn:hover { background: var(--gold-light); }
+  .qty-del:hover { background: #E05555; color: white; }
 
   /* FOOTER */
   footer {
@@ -500,6 +551,13 @@
     color: var(--gold); font-size: 12px; margin-left: 12px;
   }
 
+  /* EN mode overrides */
+  html[lang="en"] body { font-family: var(--font-en); }
+  html[lang="en"] .nav-logo { letter-spacing: 0; }
+
+  @media (max-width: 960px) {
+    .stores-grid { grid-template-columns: repeat(2, 1fr); }
+  }
   @media (max-width: 768px) {
     .hero { height: auto; padding: 60px 0 40px; }
     .hero-visual { display: none; }
@@ -508,75 +566,50 @@
     .nav-links { display: none; }
     .footer-grid { grid-template-columns: 1fr 1fr; }
     .products-grid { grid-template-columns: repeat(2, 1fr); }
+    .stores-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   }
 </style>
 </head>
 <body>
 
 <!-- POPUP -->
-<div class="popup-overlay" id="popup">
+<div class="popup-overlay" id="popup" style="display:none;">
   <div class="popup-box">
     <button class="popup-close" onclick="closePopup()"><i class="ti ti-x"></i></button>
     <div class="popup-img">
       ✦ عروض حصرية ✦
     </div>
     <div class="popup-content">
-      <div class="popup-title">خصم 20% على أول طلب</div>
-      <div class="popup-sub">سجّل الآن واستمتع بخصم حصري على أول طلب من أي متجر على منصة رف.</div>
-      <button class="popup-btn">استفد من العرض الآن</button>
+      <div class="popup-title" data-ar="خصم 20% على أول طلب" data-en="20% Off Your First Order">خصم 20% على أول طلب</div>
+      <div class="popup-sub" data-ar="سجّل الآن واستمتع بخصم حصري على أول طلب من أي متجر على منصة رف." data-en="Sign up now and enjoy an exclusive discount on your first order from any store on Raf.">سجّل الآن واستمتع بخصم حصري على أول طلب من أي متجر على منصة رف.</div>
+      <button class="popup-btn" data-ar="استفد من العرض الآن" data-en="Claim Offer Now">استفد من العرض الآن</button>
     </div>
-  </div>
-</div>
-
-<!-- MINI MODAL -->
-<div class="modal-overlay" id="cartModal">
-  <div class="modal-box">
-    <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
-    <div class="modal-title">اختر المواصفات</div>
-    <div class="option-group">
-      <div class="option-label">المقاس</div>
-      <div class="options-row">
-        <button class="option-btn" onclick="selectOpt(this)">XS</button>
-        <button class="option-btn selected" onclick="selectOpt(this)">S</button>
-        <button class="option-btn" onclick="selectOpt(this)">M</button>
-        <button class="option-btn" onclick="selectOpt(this)">L</button>
-        <button class="option-btn" onclick="selectOpt(this)">XL</button>
-      </div>
-    </div>
-    <div class="option-group">
-      <div class="option-label">اللون</div>
-      <div class="options-row">
-        <button class="option-btn" onclick="selectOpt(this)">أسود</button>
-        <button class="option-btn selected" onclick="selectOpt(this)">أبيض</button>
-        <button class="option-btn" onclick="selectOpt(this)">بيج</button>
-      </div>
-    </div>
-    <button class="modal-add-btn" onclick="addToCart()">
-      <i class="ti ti-shopping-cart" style="margin-left:6px;"></i> إضافة للسلة
-    </button>
   </div>
 </div>
 
 <!-- NAV -->
 <nav>
   <div class="nav-actions">
+    <button class="lang-btn" id="langBtn" onclick="toggleLang()" title="Switch language">
+      <span class="lang-dot"></span>
+      <span id="langLabel">EN</span>
+    </button>
     <button class="nav-icon" title="السلة" onclick="window.location='raf_cart.html'">
       <i class="ti ti-shopping-cart"></i>
-      <span class="cart-badge">3</span>
+      <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
     </button>
-    <button class="nav-icon" title="حسابي" onclick="window.location='raf_wishlist.html'
-    "><i class="ti ti-heart"></i></button>
-    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> تسجيل الدخول</a>
-    <a href="raf_login.html" class="btn-gold">إنشاء حساب</a>
+    <button class="nav-icon" title="قائمة الأمنيات" onclick="window.location='raf_wishlist.html'"><i class="ti ti-heart"></i></button>
+    <a href="raf_login.html" class="btn-ghost" data-ar="تسجيل الدخول" data-en="Sign In"><i class="ti ti-user"></i> <span data-ar="تسجيل الدخول" data-en="Sign In">تسجيل الدخول</span></a>
+    <a href="raf_login.html" class="btn-gold" data-ar="إنشاء حساب" data-en="Sign Up"><span data-ar="إنشاء حساب" data-en="Sign Up">إنشاء حساب</span></a>
   </div>
 
   <div class="nav-links">
-    <a href="raf_storespage.html" class="nav-link">المحلات</a>
-    <a href="#" class="nav-link">العروض</a>
-    <a href="#" class="nav-link">الترندات</a>
-    <a href="#" class="nav-link">الجديد</a>
-    <a href="raf_used.html" class="nav-link">المستعمل</a>
-    <a href="raf_auctions.html" class="nav-link">المزادات</a>
+    <a href="raf_storespage.html" class="nav-link" data-ar="المحلات" data-en="Stores">المحلات</a>
+    <a href="raf_offers.html" class="nav-link" data-ar="العروض" data-en="Offers">العروض</a>
+    <a href="raf_trending.html" class="nav-link" data-ar="الترندات" data-en="Trending">الترندات</a>
+    <a href="#" class="nav-link" data-ar="الجديد" data-en="New">الجديد</a>
+    <a href="raf_used.html" class="nav-link" data-ar="المستعمل" data-en="Used">المستعمل</a>
+    <a href="raf_auctions.html" class="nav-link" data-ar="المزادات" data-en="Auctions">المزادات</a>
   </div>
 
   <a href="raf_homepage.html" class="nav-logo">
@@ -590,16 +623,17 @@
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
   <div class="hero-content">
-    <div class="hero-tag">الكويت · موضة · أسلوب</div>
+    <div class="hero-tag" data-ar="الكويت · موضة · أسلوب" data-en="Kuwait · Fashion · Style">الكويت · موضة · أسلوب</div>
     <h1 class="hero-title">
-      كل ما تبحث عنه<br>في <em>مكان واحد</em>
+      <span data-ar="كل ما تبحث عنه" data-en="Everything You're">كل ما تبحث عنه</span><br>
+      <span data-ar="في " data-en="Looking For In ">في </span><em data-ar="مكان واحد" data-en="One Place">مكان واحد</em>
     </h1>
-    <p class="hero-sub">
-اكتشف أفضل المحلات و المتاجر  — ملابس، أحذية، اكسسوارات، هواتف وغيرها من المنتجات المميزة في مكان واحد.
+    <p class="hero-sub" data-ar="اكتشف أفضل المحلات و المتاجر  — ملابس، أحذية، اكسسوارات، هواتف وغيرها من المنتجات المميزة في مكان واحد." data-en="Discover the best local shops and stores — clothing, shoes, accessories, phones and more, all in one place.">
+      اكتشف أفضل المحلات و المتاجر  — ملابس، أحذية، اكسسوارات، هواتف وغيرها من المنتجات المميزة في مكان واحد.
     </p>
     <div class="hero-actions">
-      <button class="btn-hero" onclick="window.location='raf_store.html'">تسوّق الآن</button>
-      <button class="btn-hero-ghost" onclick="window.location='raf_store.html'">استعرض المحلات</button>
+      <button class="btn-hero" onclick="window.location='raf_storespage.html'" data-ar="تسوّق الآن" data-en="Shop Now">تسوّق الآن</button>
+      <button class="btn-hero-ghost" onclick="window.location='raf_storespage.html'" data-ar="استعرض المحلات" data-en="Browse Stores">استعرض المحلات</button>
     </div>
   </div>
   <div class="hero-visual">
@@ -607,14 +641,14 @@
       <div class="hero-card hero-card-1">
         <div class="hero-card-img"><i class="ti ti-shirt"></i></div>
         <div class="hero-card-info">
-          <div class="hero-card-name">قميص كاجوال</div>
+          <div class="hero-card-name" data-ar="قميص كاجوال" data-en="Casual Shirt">قميص كاجوال</div>
           <div class="hero-card-price">12.500 د.ك</div>
         </div>
       </div>
       <div class="hero-card hero-card-2">
         <div class="hero-card-img"><i class="ti ti-shoe"></i></div>
         <div class="hero-card-info">
-          <div class="hero-card-name">حذاء رياضي</div>
+          <div class="hero-card-name" data-ar="حذاء رياضي" data-en="Sports Shoe">حذاء رياضي</div>
           <div class="hero-card-price">28.000 د.ك</div>
         </div>
       </div>
@@ -623,15 +657,15 @@
   <div class="hero-stats">
     <div>
       <div class="hero-stat-num">+120</div>
-      <div class="hero-stat-lbl">متجر</div>
+      <div class="hero-stat-lbl" data-ar="متجر" data-en="Stores">متجر</div>
     </div>
     <div>
       <div class="hero-stat-num">+5K</div>
-      <div class="hero-stat-lbl">منتج</div>
+      <div class="hero-stat-lbl" data-ar="منتج" data-en="Products">منتج</div>
     </div>
     <div>
       <div class="hero-stat-num">4.9</div>
-      <div class="hero-stat-lbl">تقييم</div>
+      <div class="hero-stat-lbl" data-ar="تقييم" data-en="Rating">تقييم</div>
     </div>
   </div>
 </section>
@@ -641,18 +675,18 @@
   <div class="search-wrap">
     <div class="search-bar">
       <button class="search-btn"><i class="ti ti-search"></i></button>
-      <input type="text" placeholder="ابحث عن منتج أو متجر...">
+      <input type="text" id="searchInput" placeholder="ابحث عن منتج أو متجر أو رقم المنتج..." data-ar-placeholder="ابحث عن منتج أو متجر أو رقم المنتج..." data-en-placeholder="Search by product, store, or product number...">
     </div>
     <div class="filters">
-      <button class="filter-chip active">الكل</button>
-      <button class="filter-chip">ملابس</button>
-      <button class="filter-chip">أحذية</button>
-      <button class="filter-chip">اكسسوارات</button>
-      <button class="filter-chip">هواتف</button>
-      <button class="filter-chip">عروض</button>
-      <button class="filter-chip">الأعلى تقييماً</button>
-      <button class="filter-chip">مفتوح الآن</button>
-      <button class="filter-chip">قرطاسية</button>
+      <button class="filter-chip active" data-ar="الكل" data-en="All">الكل</button>
+      <button class="filter-chip" data-ar="ملابس" data-en="Clothing">ملابس</button>
+      <button class="filter-chip" data-ar="أحذية" data-en="Shoes">أحذية</button>
+      <button class="filter-chip" data-ar="اكسسوارات" data-en="Accessories">اكسسوارات</button>
+      <button class="filter-chip" data-ar="هواتف" data-en="Phones">هواتف</button>
+      <button class="filter-chip" data-ar="عروض" data-en="Deals">عروض</button>
+      <button class="filter-chip" data-ar="الأعلى تقييماً" data-en="Top Rated">الأعلى تقييماً</button>
+      <button class="filter-chip" data-ar="مفتوح الآن" data-en="Open Now">مفتوح الآن</button>
+      <button class="filter-chip" data-ar="قرطاسية" data-en="Stationery">قرطاسية</button>
     </div>
   </div>
 </div>
@@ -662,90 +696,96 @@
   <div style="max-width:1200px; margin:0 auto;">
     <div class="section-header">
       <div class="section-title">
-        المحلات المميزة <span>✦</span>
+        <span data-ar="المحلات المميزة" data-en="Featured Stores">المحلات المميزة</span> <span>✦</span>
       </div>
-      <a href="raf_storespage.html" class="section-link">عرض الكل <i class="ti ti-arrow-left"></i></a>
+      <a href="raf_storespage.html" class="section-link" data-ar="عرض الكل" data-en="View All"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a>
     </div>
-    <div class="stores-row">
-      <!-- Store 1 - Premium -->
-      <div class="store-card" onclick="window.location='raf_store.html'">
+    <div class="stores-grid">
+      <!-- Store 1 — Casa Mode -->
+      <div class="store-card" onclick="window.location='raf_store.html?store=casa-mode'">
         <div class="store-img">
-          <i class="ti ti-hanger" style="font-size:40px;"></i>
-          <span class="store-badge">مميز</span>
+          <i class="ti ti-hanger" style="font-size:44px;"></i>
+          <span class="store-badge" data-ar="مميز" data-en="Premium">مميز</span>
+          <span class="store-num">#001</span>
         </div>
         <div class="store-info">
           <div class="store-name">Casa Mode</div>
           <div class="store-meta">
             <div class="store-rating"><i class="ti ti-star-filled" style="font-size:11px;"></i> 4.9</div>
-            <div class="store-cat">ملابس</div>
+            <div class="store-cat" data-ar="ملابس" data-en="Clothing">ملابس</div>
           </div>
         </div>
       </div>
-      <!-- Store 2 -->
-      <div class="store-card" onclick="window.location='raf_store.html'">
+      <!-- Store 2 — Sole & Co -->
+      <div class="store-card" onclick="window.location='raf_store.html?store=sole-co'">
         <div class="store-img">
-          <i class="ti ti-shoe" style="font-size:40px;"></i>
-          <span class="store-badge">مميز</span>
+          <i class="ti ti-shoe" style="font-size:44px;"></i>
+          <span class="store-badge" data-ar="مميز" data-en="Premium">مميز</span>
+          <span class="store-num">#002</span>
         </div>
         <div class="store-info">
           <div class="store-name">Sole & Co</div>
           <div class="store-meta">
             <div class="store-rating"><i class="ti ti-star-filled" style="font-size:11px;"></i> 4.7</div>
-            <div class="store-cat">أحذية</div>
+            <div class="store-cat" data-ar="أحذية" data-en="Shoes">أحذية</div>
           </div>
         </div>
       </div>
-      <!-- Store 3 -->
-      <div class="store-card" onclick="window.location='raf_store.html'">
+      <!-- Store 3 — TechZone -->
+      <div class="store-card" onclick="window.location='raf_store.html?store=techzone'">
         <div class="store-img">
-          <i class="ti ti-device-mobile" style="font-size:40px;"></i>
+          <i class="ti ti-device-mobile" style="font-size:44px;"></i>
+          <span class="store-num">#003</span>
         </div>
         <div class="store-info">
           <div class="store-name">TechZone</div>
           <div class="store-meta">
             <div class="store-rating"><i class="ti ti-star-filled" style="font-size:11px;"></i> 4.8</div>
-            <div class="store-cat">هواتف</div>
+            <div class="store-cat" data-ar="هواتف" data-en="Phones">هواتف</div>
           </div>
         </div>
       </div>
-      <!-- Store 4 -->
-      <div class="store-card" onclick="window.location='raf_store.html'">
+      <!-- Store 4 — Luxe Accessories -->
+      <div class="store-card" onclick="window.location='raf_store.html?store=luxe-accessories'">
         <div class="store-img">
-          <i class="ti ti-sunglasses" style="font-size:40px;"></i>
+          <i class="ti ti-sunglasses" style="font-size:44px;"></i>
+          <span class="store-num">#004</span>
         </div>
         <div class="store-info">
           <div class="store-name">Luxe Accessories</div>
           <div class="store-meta">
             <div class="store-rating"><i class="ti ti-star-filled" style="font-size:11px;"></i> 4.6</div>
-            <div class="store-cat">اكسسوارات</div>
+            <div class="store-cat" data-ar="اكسسوارات" data-en="Accessories">اكسسوارات</div>
           </div>
         </div>
       </div>
-      <!-- Store 5 - Closed -->
-      <div class="store-card" onclick="window.location='raf_store.html'">
-        <div class="store-img" style="opacity:0.5;">
-          <i class="ti ti-shirt" style="font-size:40px;"></i>
-          <span class="store-badge closed">مغلق</span>
+      <!-- Store 5 — Urban Thread (Closed) -->
+      <div class="store-card" onclick="window.location='raf_store.html?store=urban-thread'">
+        <div class="store-img" style="opacity:0.55;">
+          <i class="ti ti-shirt" style="font-size:44px;"></i>
+          <span class="store-badge closed" data-ar="مغلق" data-en="Closed">مغلق</span>
+          <span class="store-num">#005</span>
         </div>
         <div class="store-info">
           <div class="store-name" style="color:var(--gray-4);">Urban Thread</div>
           <div class="store-meta">
             <div class="store-rating"><i class="ti ti-star-filled" style="font-size:11px;"></i> 4.5</div>
-            <div class="store-cat">ملابس</div>
+            <div class="store-cat" data-ar="ملابس" data-en="Clothing">ملابس</div>
           </div>
         </div>
       </div>
-      <!-- Store 6 -->
-      <div class="store-card" onclick="window.location='raf_store.html'">
+      <!-- Store 6 — Glam Store -->
+      <div class="store-card" onclick="window.location='raf_store.html?store=glam-store'">
         <div class="store-img">
-          <i class="ti ti-diamond" style="font-size:40px;"></i>
-          <span class="store-badge">مميز</span>
+          <i class="ti ti-diamond" style="font-size:44px;"></i>
+          <span class="store-badge" data-ar="مميز" data-en="Premium">مميز</span>
+          <span class="store-num">#006</span>
         </div>
         <div class="store-info">
           <div class="store-name">Glam Store</div>
           <div class="store-meta">
             <div class="store-rating"><i class="ti ti-star-filled" style="font-size:11px;"></i> 4.9</div>
-            <div class="store-cat">اكسسوارات</div>
+            <div class="store-cat" data-ar="اكسسوارات" data-en="Accessories">اكسسوارات</div>
           </div>
         </div>
       </div>
@@ -760,23 +800,24 @@
   <div style="max-width:1200px; margin:0 auto;">
     <div class="section-header">
       <div class="section-title">
-        ترندات الأسبوع
-        <span class="trend-tag"><i class="ti ti-flame" style="font-size:12px;"></i> جديد</span>
+        <span data-ar="ترندات الأسبوع" data-en="This Week's Trends">ترندات الأسبوع</span>
+        <span class="trend-tag"><i class="ti ti-flame" style="font-size:12px;"></i> <span data-ar="جديد" data-en="New">جديد</span></span>
       </div>
-      <a href="#" class="section-link">عرض الكل <i class="ti ti-arrow-left"></i></a>
+      <a href="raf_trending.html" class="section-link"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a>
     </div>
     <div class="products-grid">
 
       <!-- Product 1 -->
-      <div class="product-card" onclick="window.location='raf_product.html'">
+      <div class="product-card" onclick="window.location='raf_product.html?id=P-001'">
         <div class="product-img">
           <i class="ti ti-shirt product-img-icon"></i>
-          <button class="product-wishlist"><i class="ti ti-heart"></i></button>
+          <span class="prod-num">P-001</span>
+          <button class="product-wishlist" onclick="toggleWish(event,this)"><i class="ti ti-heart"></i></button>
           <span class="product-tag">-20%</span>
         </div>
         <div class="product-info">
           <div class="product-store">Casa Mode</div>
-          <div class="product-name">قميص أوفرسايز كلاسيك</div>
+          <div class="product-name" data-ar="قميص أوفرسايز كلاسيك" data-en="Classic Oversized Shirt">قميص أوفرسايز كلاسيك</div>
           <div class="product-bottom">
             <div>
               <span class="product-price-old">15.000</span>
@@ -784,37 +825,35 @@
             </div>
             <div class="product-rating"><i class="ti ti-star-filled" style="color:var(--gold); font-size:11px;"></i> 4.8</div>
           </div>
-          <button class="add-to-cart" onclick="event.stopPropagation(); openModal()">
-            <i class="ti ti-plus"></i> أضف للسلة
-          </button>
+          <div class="cart-btn-wrap" data-pid="P-001" data-name="قميص أوفرسايز كلاسيك" data-price="12.000"></div>
         </div>
       </div>
 
       <!-- Product 2 -->
-      <div class="product-card" onclick="window.location='raf_product.html'">
+      <div class="product-card" onclick="window.location='raf_product.html?id=P-002'">
         <div class="product-img">
           <i class="ti ti-shoe product-img-icon"></i>
-          <button class="product-wishlist"><i class="ti ti-heart"></i></button>
+          <span class="prod-num">P-002</span>
+          <button class="product-wishlist" onclick="toggleWish(event,this)"><i class="ti ti-heart"></i></button>
         </div>
         <div class="product-info">
           <div class="product-store">Sole & Co</div>
-          <div class="product-name">حذاء رياضي Air Comfort</div>
+          <div class="product-name" data-ar="حذاء رياضي Air Comfort" data-en="Air Comfort Sports Shoe">حذاء رياضي Air Comfort</div>
           <div class="product-bottom">
             <div><span class="product-price">28.500 د.ك</span></div>
             <div class="product-rating"><i class="ti ti-star-filled" style="color:var(--gold); font-size:11px;"></i> 4.7</div>
           </div>
-          <button class="add-to-cart" onclick="event.stopPropagation(); openModal()">
-            <i class="ti ti-plus"></i> أضف للسلة
-          </button>
+          <div class="cart-btn-wrap" data-pid="P-002" data-name="حذاء رياضي Air Comfort" data-price="28.500"></div>
         </div>
       </div>
 
       <!-- Product 3 -->
-      <div class="product-card" onclick="window.location='raf_product.html'">
+      <div class="product-card" onclick="window.location='raf_product.html?id=P-003'">
         <div class="product-img">
           <i class="ti ti-device-mobile product-img-icon"></i>
-          <button class="product-wishlist"><i class="ti ti-heart"></i></button>
-          <span class="product-tag">جديد</span>
+          <span class="prod-num">P-003</span>
+          <button class="product-wishlist" onclick="toggleWish(event,this)"><i class="ti ti-heart"></i></button>
+          <span class="product-tag" data-ar="جديد" data-en="New">جديد</span>
         </div>
         <div class="product-info">
           <div class="product-store">TechZone</div>
@@ -823,41 +862,39 @@
             <div><span class="product-price">189.000 د.ك</span></div>
             <div class="product-rating"><i class="ti ti-star-filled" style="color:var(--gold); font-size:11px;"></i> 5.0</div>
           </div>
-          <button class="add-to-cart" onclick="event.stopPropagation(); openModal()">
-            <i class="ti ti-plus"></i> أضف للسلة
-          </button>
+          <div class="cart-btn-wrap" data-pid="P-003" data-name="iPhone 16 Pro — 256GB" data-price="189.000"></div>
         </div>
       </div>
 
       <!-- Product 4 -->
-      <div class="product-card" onclick="window.location='raf_product.html'">
+      <div class="product-card" onclick="window.location='raf_product.html?id=P-004'">
         <div class="product-img">
           <i class="ti ti-sunglasses product-img-icon"></i>
-          <button class="product-wishlist"><i class="ti ti-heart"></i></button>
+          <span class="prod-num">P-004</span>
+          <button class="product-wishlist" onclick="toggleWish(event,this)"><i class="ti ti-heart"></i></button>
         </div>
         <div class="product-info">
           <div class="product-store">Luxe Accessories</div>
-          <div class="product-name">نظارة شمسية Ray Luxe</div>
+          <div class="product-name" data-ar="نظارة شمسية Ray Luxe" data-en="Ray Luxe Sunglasses">نظارة شمسية Ray Luxe</div>
           <div class="product-bottom">
             <div><span class="product-price">35.000 د.ك</span></div>
             <div class="product-rating"><i class="ti ti-star-filled" style="color:var(--gold); font-size:11px;"></i> 4.6</div>
           </div>
-          <button class="add-to-cart" onclick="event.stopPropagation(); openModal()">
-            <i class="ti ti-plus"></i> أضف للسلة
-          </button>
+          <div class="cart-btn-wrap" data-pid="P-004" data-name="نظارة شمسية Ray Luxe" data-price="35.000"></div>
         </div>
       </div>
 
       <!-- Product 5 -->
-      <div class="product-card" onclick="window.location='raf_product.html'">
+      <div class="product-card" onclick="window.location='raf_product.html?id=P-005'">
         <div class="product-img">
           <i class="ti ti-backpack product-img-icon"></i>
-          <button class="product-wishlist"><i class="ti ti-heart"></i></button>
+          <span class="prod-num">P-005</span>
+          <button class="product-wishlist" onclick="toggleWish(event,this)"><i class="ti ti-heart"></i></button>
           <span class="product-tag">-15%</span>
         </div>
         <div class="product-info">
           <div class="product-store">Casa Mode</div>
-          <div class="product-name">حقيبة يد جلد طبيعي</div>
+          <div class="product-name" data-ar="حقيبة يد جلد طبيعي" data-en="Genuine Leather Handbag">حقيبة يد جلد طبيعي</div>
           <div class="product-bottom">
             <div>
               <span class="product-price-old">42.000</span>
@@ -865,28 +902,25 @@
             </div>
             <div class="product-rating"><i class="ti ti-star-filled" style="color:var(--gold); font-size:11px;"></i> 4.9</div>
           </div>
-          <button class="add-to-cart" onclick="event.stopPropagation(); openModal()">
-            <i class="ti ti-plus"></i> أضف للسلة
-          </button>
+          <div class="cart-btn-wrap" data-pid="P-005" data-name="حقيبة يد جلد طبيعي" data-price="35.700"></div>
         </div>
       </div>
 
       <!-- Product 6 -->
-      <div class="product-card" onclick="window.location='raf_product.html'">
+      <div class="product-card" onclick="window.location='raf_product.html?id=P-006'">
         <div class="product-img">
           <i class="ti ti-watch product-img-icon"></i>
-          <button class="product-wishlist"><i class="ti ti-heart"></i></button>
+          <span class="prod-num">P-006</span>
+          <button class="product-wishlist" onclick="toggleWish(event,this)"><i class="ti ti-heart"></i></button>
         </div>
         <div class="product-info">
           <div class="product-store">Glam Store</div>
-          <div class="product-name">ساعة ذكية Premium</div>
+          <div class="product-name" data-ar="ساعة ذكية Premium" data-en="Premium Smart Watch">ساعة ذكية Premium</div>
           <div class="product-bottom">
             <div><span class="product-price">75.000 د.ك</span></div>
             <div class="product-rating"><i class="ti ti-star-filled" style="color:var(--gold); font-size:11px;"></i> 4.8</div>
           </div>
-          <button class="add-to-cart" onclick="event.stopPropagation(); openModal()">
-            <i class="ti ti-plus"></i> أضف للسلة
-          </button>
+          <div class="cart-btn-wrap" data-pid="P-006" data-name="ساعة ذكية Premium" data-price="75.000"></div>
         </div>
       </div>
 
@@ -899,92 +933,233 @@
   <div class="footer-grid">
     <div>
       <div class="footer-logo">رف</div>
-      <div class="footer-desc">منصة التسوق المحلي الأولى في الكويت — ملابس، أحذية، اكسسوارات وهواتف من أفضل المحلات.</div>
+      <div class="footer-desc" data-ar="منصة التسوق المحلي الأولى في الكويت — ملابس، أحذية، اكسسوارات وهواتف من أفضل المحلات." data-en="Kuwait's first local shopping platform — clothing, shoes, accessories and phones from the best stores.">منصة التسوق المحلي الأولى في الكويت — ملابس، أحذية، اكسسوارات وهواتف من أفضل المحلات.</div>
     </div>
     <div>
-      <div class="footer-col-title">روابط سريعة</div>
-      <a href="raf_homepage.html" class="footer-link">الصفحة الرئيسية</a>
-      <a href="raf_store.html" class="footer-link">المحلات</a>
-      <a href="raf_used.html" class="footer-link">المستعملات</a>
-      <a href="raf_auctions.html" class="footer-link">المزادات</a>
+      <div class="footer-col-title" data-ar="روابط سريعة" data-en="Quick Links">روابط سريعة</div>
+      <a href="raf_homepage.html" class="footer-link" data-ar="الصفحة الرئيسية" data-en="Home">الصفحة الرئيسية</a>
+      <a href="raf_storespage.html" class="footer-link" data-ar="المحلات" data-en="Stores">المحلات</a>
+      <a href="raf_used.html" class="footer-link" data-ar="المستعملات" data-en="Used Items">المستعملات</a>
+      <a href="raf_auctions.html" class="footer-link" data-ar="المزادات" data-en="Auctions">المزادات</a>
     </div>
     <div>
-      <div class="footer-col-title">المساعدة</div>
-      <a href="#" class="footer-link">كيف تطلب</a>
-      <a href="#" class="footer-link">سياسة الإرجاع</a>
-      <a href="#" class="footer-link">تواصل معنا</a>
-      <a href="#" class="footer-link">الأسئلة الشائعة</a>
+      <div class="footer-col-title" data-ar="المساعدة" data-en="Help">المساعدة</div>
+      <a href="#" class="footer-link" data-ar="كيف تطلب" data-en="How to Order">كيف تطلب</a>
+      <a href="#" class="footer-link" data-ar="سياسة الإرجاع" data-en="Return Policy">سياسة الإرجاع</a>
+      <a href="#" class="footer-link" data-ar="تواصل معنا" data-en="Contact Us">تواصل معنا</a>
+      <a href="#" class="footer-link" data-ar="الأسئلة الشائعة" data-en="FAQ">الأسئلة الشائعة</a>
     </div>
     <div>
-      <div class="footer-col-title">الأعمال</div>
-      <a href="raf_admin.html" class="footer-link">الإدارة</a>
-      <a href="raf_seller.html" class="footer-link">انضم كتاجر</a>
-      <a href="raf_plans.html" class="footer-link">الباقات</a>
-      <a href="raf_merchant.html" class="footer-link">لوحة التاجر</a>
-      <a href="raf_join_driver.html" class="footer-link">انضم كسائق</a>
+      <div class="footer-col-title" data-ar="الأعمال" data-en="Business">الأعمال</div>
+      <a href="raf_admin.html" class="footer-link" data-ar="الإدارة" data-en="Admin">الإدارة</a>
+      <a href="raf_seller.html" class="footer-link" data-ar="انضم كتاجر" data-en="Join as Merchant">انضم كتاجر</a>
+      <a href="raf_plans.html" class="footer-link" data-ar="الباقات" data-en="Plans">الباقات</a>
+      <a href="raf_merchant.html" class="footer-link" data-ar="لوحة التاجر" data-en="Merchant Dashboard">لوحة التاجر</a>
+      <a href="raf_join_driver.html" class="footer-link" data-ar="انضم كسائق" data-en="Join as Driver">انضم كسائق</a>
     </div>
   </div>
   <div class="footer-bottom">
-    <div>جميع الحقوق محفوظة © 2026 رف</div>
+    <div data-ar="جميع الحقوق محفوظة © 2026 رف" data-en="All Rights Reserved © 2026 Raf">جميع الحقوق محفوظة © 2026 رف</div>
     <div style="display:flex; gap:16px;">
-      <a href="#" class="footer-link" style="margin:0;">سياسة الخصوصية</a>
-      <a href="#" class="footer-link" style="margin:0;">الشروط والأحكام</a>
+      <a href="#" class="footer-link" style="margin:0;" data-ar="سياسة الخصوصية" data-en="Privacy Policy">سياسة الخصوصية</a>
+      <a href="#" class="footer-link" style="margin:0;" data-ar="الشروط والأحكام" data-en="Terms & Conditions">الشروط والأحكام</a>
     </div>
   </div>
 </footer>
 
 <script>
-  // Filter chips
-  document.querySelectorAll('.filter-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+/* =============================================
+   CART STATE MODULE (localStorage)
+   ============================================= */
+const CART_KEY = 'raf_cart';
+
+function getCart() {
+  try { return JSON.parse(localStorage.getItem(CART_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveCart(cart) {
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  updateCartBadge();
+}
+function updateCartBadge() {
+  const cart = getCart();
+  const total = Object.values(cart).reduce((s, i) => s + i.qty, 0);
+  const badge = document.getElementById('cartBadge');
+  if (badge) {
+    badge.textContent = total;
+    badge.style.display = total > 0 ? 'flex' : 'none';
+  }
+}
+
+function renderBtn(wrap) {
+  if (!wrap) return;
+  const pid   = wrap.dataset.pid;
+  const name  = wrap.dataset.name;
+  const price = wrap.dataset.price;
+  const cart  = getCart();
+  const isEN  = document.getElementById('htmlRoot').lang === 'en';
+
+  if (cart[pid]) {
+    const qty = cart[pid].qty;
+    wrap.innerHTML = `
+      <div class="qty-row">
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="event.stopPropagation(); changeQty('${pid}','${encodeURIComponent(name)}','${price}',-1)"><i class="ti ti-minus"></i></button>
+          <span class="qty-num">${qty}</span>
+          <button class="qty-btn" onclick="event.stopPropagation(); changeQty('${pid}','${encodeURIComponent(name)}','${price}',1)"><i class="ti ti-plus"></i></button>
+        </div>
+        <button class="qty-del" onclick="event.stopPropagation(); removeFromCart('${pid}')" title="${isEN ? 'Remove' : 'حذف'}">
+          <i class="ti ti-trash"></i>
+        </button>
+      </div>`;
+  } else {
+    wrap.innerHTML = `
+      <button class="add-to-cart" onclick="event.stopPropagation(); addToCart('${pid}','${encodeURIComponent(name)}','${price}')">
+        <i class="ti ti-plus"></i> ${isEN ? 'Add to Cart' : 'أضف للسلة'}
+      </button>`;
+  }
+}
+
+function addToCart(pid, encodedName, price) {
+  const name = decodeURIComponent(encodedName);
+  const cart = getCart();
+  if (cart[pid]) {
+    cart[pid].qty += 1;
+  } else {
+    cart[pid] = { name, price, qty: 1 };
+  }
+  saveCart(cart);
+  rerenderAll();
+}
+
+function removeFromCart(pid) {
+  const cart = getCart();
+  delete cart[pid];
+  saveCart(cart);
+  rerenderAll();
+}
+
+function changeQty(pid, encodedName, price, delta) {
+  const name = decodeURIComponent(encodedName);
+  const cart = getCart();
+  if (!cart[pid]) return;
+  cart[pid].qty += delta;
+  if (cart[pid].qty <= 0) {
+    delete cart[pid];
+  }
+  saveCart(cart);
+  rerenderAll();
+}
+
+function rerenderAll() {
+  document.querySelectorAll('.cart-btn-wrap').forEach(renderBtn);
+}
+
+/* =============================================
+   LANGUAGE SWITCHER
+   ============================================= */
+function toggleLang() {
+  const html = document.getElementById('htmlRoot');
+  const isAR = html.lang === 'ar';
+  const newLang = isAR ? 'en' : 'ar';
+  const newDir  = isAR ? 'ltr' : 'rtl';
+
+  html.lang = newLang;
+  html.dir  = newDir;
+  document.getElementById('langLabel').textContent = isAR ? 'ع' : 'EN';
+  localStorage.setItem('raf_lang', newLang);
+
+  // Swap all data-ar / data-en text content
+  document.querySelectorAll('[data-ar]').forEach(el => {
+    const txt = el.getAttribute('data-' + newLang);
+    if (txt) el.textContent = txt;
+  });
+
+  // Swap placeholder on search input
+  const inp = document.getElementById('searchInput');
+  if (inp) {
+    const ph = inp.getAttribute('data-' + newLang + '-placeholder');
+    if (ph) inp.placeholder = ph;
+  }
+
+  // Re-render cart buttons so labels update too
+  rerenderAll();
+}
+
+function applyLang(lang) {
+  if (lang === 'en') {
+    document.getElementById('htmlRoot').lang = 'en';
+    document.getElementById('htmlRoot').dir  = 'ltr';
+    document.getElementById('langLabel').textContent = 'ع';
+    document.querySelectorAll('[data-en]').forEach(el => {
+      el.textContent = el.getAttribute('data-en');
     });
-  });
+    const inp = document.getElementById('searchInput');
+    if (inp && inp.getAttribute('data-en-placeholder')) {
+      inp.placeholder = inp.getAttribute('data-en-placeholder');
+    }
+  }
+}
 
-  // Popup
-  function closePopup() {
-    document.getElementById('popup').style.display = 'none';
+/* =============================================
+   WISHLIST TOGGLE
+   ============================================= */
+function toggleWish(e, btn) {
+  e.stopPropagation();
+  const icon = btn.querySelector('i');
+  if (icon.classList.contains('ti-heart')) {
+    icon.classList.replace('ti-heart', 'ti-heart-filled');
+    btn.style.color = '#E05555';
+  } else {
+    icon.classList.replace('ti-heart-filled', 'ti-heart');
+    btn.style.color = '';
   }
-  document.getElementById('popup').addEventListener('click', function(e) {
-    if (e.target === this) closePopup();
-  });
+}
 
-  // Mini Modal
-  function openModal() {
-    document.getElementById('cartModal').classList.add('open');
-  }
-  function closeModal() {
-    document.getElementById('cartModal').classList.remove('open');
-  }
-  function selectOpt(btn) {
-    const group = btn.closest('.options-row');
-    group.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-  }
-  function addToCart() {
-    closeModal();
-    const badge = document.querySelector('.cart-badge');
-    badge.textContent = parseInt(badge.textContent) + 1;
-  }
-  document.getElementById('cartModal').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
+/* =============================================
+   FILTER CHIPS
+   ============================================= */
+document.querySelectorAll('.filter-chip').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
   });
+});
 
-  // Wishlist toggle
-  document.querySelectorAll('.product-wishlist').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const icon = btn.querySelector('i');
-      if (icon.classList.contains('ti-heart')) {
-        icon.classList.replace('ti-heart', 'ti-heart-filled');
-        btn.style.color = '#E05555';
-      } else {
-        icon.classList.replace('ti-heart-filled', 'ti-heart');
-        btn.style.color = '';
-      }
-    });
-  });
+/* =============================================
+   POPUP — first visit only
+   ============================================= */
+function closePopup() {
+  document.getElementById('popup').style.display = 'none';
+  localStorage.setItem('raf_popup_seen', '1');
+}
+document.getElementById('popup').addEventListener('click', function(e) {
+  if (e.target === this) closePopup();
+});
+// CTA button also marks as seen
+document.querySelector('.popup-btn').addEventListener('click', closePopup);
+
+/* =============================================
+   INIT
+   ============================================= */
+(function init() {
+  // Restore language preference
+  const savedLang = localStorage.getItem('raf_lang');
+  if (savedLang === 'en') applyLang('en');
+
+  // Render cart buttons
+  rerenderAll();
+
+  // Update cart badge
+  updateCartBadge();
+
+  // Show popup only on first visit (not if already seen)
+  if (!localStorage.getItem('raf_popup_seen')) {
+    setTimeout(() => {
+      document.getElementById('popup').style.display = 'flex';
+    }, 900);
+  }
+})();
 </script>
 </body>
 </html>

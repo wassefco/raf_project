@@ -260,7 +260,7 @@
 <div class="breadcrumb">
   <a href="raf_homepage.html">الرئيسية</a>
   <i class="ti ti-chevron-left"></i>
-  <a href="raf_store.html">المحلات</a>
+  <a href="raf_storespage.html">المحلات</a>
   <i class="ti ti-chevron-left"></i>
   <span style="color:var(--text);">Casa Mode</span>
 </div>
@@ -360,9 +360,9 @@
 
 <!-- PRODUCTS SECTION -->
 <div class="products-section" id="tab-products">
-  <div class="products-grid">
+  <div class="products-grid" id="products-grid">
 
-    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
+    <div class="product-card" onclick="window.location='raf_product.html?id=P-001'" style="cursor:pointer;">
       <div class="product-img">
         <i class="ti ti-shirt"></i>
         <button class="product-wish"><i class="ti ti-heart"></i></button>
@@ -521,13 +521,168 @@
 </footer>
 
 <script>
+  /* -----------------------------------------------
+     STORE DATA MAP
+     Each store has its own slug (URL ?store=slug)
+  ----------------------------------------------- */
+  const STORE_DATA = {
+    'casa-mode': {
+      name: 'Casa Mode', icon: 'ti-hanger', cat: 'ملابس وأزياء', num: '#001',
+      rating: '4.9', orders: '1,284', followers: '3.2K',
+      desc: 'متجر Casa Mode للملابس والأزياء العصرية — نقدم أحدث صيحات الموضة بجودة عالية وأسعار منافسة. نخدم الكويت منذ 2019.',
+      status: 'open', products: 284, satisfaction: '98%',
+      filters: ['قمصان', 'بناطيل', 'فساتين', 'هودي'],
+      reviewCount: 128, reviewScore: '4.9', productId: 'P-001'
+    },
+    'sole-co': {
+      name: 'Sole & Co', icon: 'ti-shoe', cat: 'أحذية ورياضة', num: '#002',
+      rating: '4.7', orders: '892', followers: '2.1K',
+      desc: 'متجر Sole & Co للأحذية الرياضية والكاجوال — أفضل ماركات الأحذية العالمية والمحلية في الكويت بأسعار تنافسية.',
+      status: 'open', products: 156, satisfaction: '95%',
+      filters: ['رياضي', 'كاجوال', 'رسمي', 'عروض'],
+      reviewCount: 94, reviewScore: '4.7', productId: 'P-002'
+    },
+    'techzone': {
+      name: 'TechZone', icon: 'ti-device-mobile', cat: 'هواتف وإلكترونيات', num: '#003',
+      rating: '4.8', orders: '2,140', followers: '5.8K',
+      desc: 'TechZone — وجهتك الأولى للهواتف والأجهزة الإلكترونية في الكويت. أجهزة أصلية بضمان رسمي وأفضل الأسعار.',
+      status: 'open', products: 312, satisfaction: '97%',
+      filters: ['هواتف', 'أجهزة لوحية', 'اكسسوارات', 'عروض'],
+      reviewCount: 317, reviewScore: '4.8', productId: 'P-003'
+    },
+    'luxe-accessories': {
+      name: 'Luxe Accessories', icon: 'ti-sunglasses', cat: 'اكسسوارات فاخرة', num: '#004',
+      rating: '4.6', orders: '648', followers: '1.4K',
+      desc: 'Luxe Accessories — اكسسوارات فاخرة من أفضل الماركات العالمية. نظارات، حقائب، وساعات بتصاميم راقية.',
+      status: 'open', products: 98, satisfaction: '93%',
+      filters: ['نظارات', 'حقائب', 'ساعات', 'عروض'],
+      reviewCount: 62, reviewScore: '4.6', productId: 'P-004'
+    },
+    'urban-thread': {
+      name: 'Urban Thread', icon: 'ti-shirt', cat: 'ملابس كاجوال', num: '#005',
+      rating: '4.5', orders: '420', followers: '980',
+      desc: 'Urban Thread — ملابس كاجوال عصرية للشباب. أسلوب حياة مريح ومعاصر بأسعار في متناول الجميع.',
+      status: 'closed', products: 74, satisfaction: '90%',
+      filters: ['تيشيرتات', 'سويتشيرتات', 'شورتات', 'عروض'],
+      reviewCount: 48, reviewScore: '4.5', productId: 'P-005'
+    },
+    'glam-store': {
+      name: 'Glam Store', icon: 'ti-diamond', cat: 'اكسسوارات وساعات', num: '#006',
+      rating: '4.9', orders: '1,052', followers: '2.9K',
+      desc: 'Glam Store — اكسسوارات فاخرة وساعات ذكية بريميوم. لأن التفاصيل هي ما يصنع الفارق في إطلالتك.',
+      status: 'open', products: 167, satisfaction: '99%',
+      filters: ['اكسسوارات', 'ساعات ذكية', 'مجوهرات', 'عروض'],
+      reviewCount: 204, reviewScore: '4.9', productId: 'P-006'
+    }
+  };
+
+  /* -----------------------------------------------
+     INIT — read URL param and inject store data
+  ----------------------------------------------- */
+  (function initStore() {
+    const params = new URLSearchParams(window.location.search);
+    const slug   = params.get('store') || 'casa-mode';
+    const s      = STORE_DATA[slug] || STORE_DATA['casa-mode'];
+
+    // Page title
+    document.title = 'رف — ' + s.name;
+
+    // Breadcrumb store name
+    const bcStore = document.querySelector('.breadcrumb span[style]');
+    if (bcStore) bcStore.textContent = s.name;
+
+    // Store avatar icon
+    const avatarIcon = document.querySelector('.store-avatar i');
+    if (avatarIcon) avatarIcon.className = 'ti ' + s.icon;
+
+    // Store hero name
+    const heroName = document.querySelector('.store-hero-name');
+    if (heroName) heroName.textContent = s.name;
+
+    // Store num in hero name (append)
+    heroName.innerHTML = s.name + ' <span style="font-size:14px;color:var(--gold);font-family:\'DM Sans\',sans-serif;font-weight:400;">' + s.num + '</span>';
+
+    // Hero meta: category tag
+    const catTag = document.querySelector('.store-hero-tag');
+    if (catTag) catTag.textContent = s.cat;
+
+    // Hero stats: rating, orders, followers
+    const heroStats = document.querySelectorAll('.store-hero-stat');
+    if (heroStats[0]) heroStats[0].innerHTML = '<i class="ti ti-star-filled" style="color:var(--gold);"></i> ' + s.rating;
+    if (heroStats[1]) heroStats[1].innerHTML = '<i class="ti ti-shopping-bag"></i> ' + s.orders + ' طلب';
+    if (heroStats[2]) heroStats[2].innerHTML = '<i class="ti ti-users"></i> ' + s.followers + ' متابع';
+
+    // Store description
+    const descEl = document.querySelector('.store-desc');
+    if (descEl) descEl.textContent = s.desc;
+
+    // Store stats block (products, rating, satisfaction)
+    const statNums = document.querySelectorAll('.store-stat-num');
+    if (statNums[0]) statNums[0].textContent = s.products;
+    if (statNums[1]) statNums[1].textContent = s.rating;
+    if (statNums[2]) statNums[2].textContent = s.satisfaction;
+
+    // Status: open / closed
+    const statusWrap = document.querySelector('.store-hours');
+    if (statusWrap) {
+      if (s.status === 'closed') {
+        statusWrap.innerHTML = '<span class="status-closed"><i class="ti ti-circle-filled" style="font-size:8px;margin-left:4px;"></i> مغلق حالياً</span>';
+      } else {
+        statusWrap.innerHTML = '<span class="status-open"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مفتوح الآن</span><span class="hours-text">يغلق الساعة 11م</span>';
+      }
+    }
+
+    // Reviews tab label
+    const reviewTab = document.querySelectorAll('.store-tab')[1];
+    if (reviewTab) reviewTab.textContent = 'التقييمات (' + s.reviewCount + ')';
+
+    // Reviews section
+    const reviewsBox = document.querySelector('#tab-reviews div');
+    if (reviewsBox) {
+      reviewsBox.innerHTML = '<i class="ti ti-star" style="font-size:40px;color:var(--gold);margin-bottom:12px;display:block;"></i>' +
+        '<div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;">' + s.reviewCount + ' تقييم</div>' +
+        '<div style="font-size:14px;">متوسط التقييم: <strong style="color:var(--gold);">' + s.reviewScore + ' / 5</strong></div>';
+    }
+
+    // Filter chips (category-specific)
+    const filterBar = document.getElementById('filter-bar');
+    if (filterBar) {
+      const existing = filterBar.querySelectorAll('.filter-chip');
+      existing.forEach(c => c.remove());
+      // Re-insert: الكل first
+      const allChip = document.createElement('button');
+      allChip.className = 'filter-chip on';
+      allChip.textContent = 'الكل';
+      allChip.onclick = function() { filterCat(this); };
+      filterBar.insertBefore(allChip, filterBar.querySelector('.sort-select'));
+      s.filters.forEach(f => {
+        const chip = document.createElement('button');
+        chip.className = 'filter-chip';
+        chip.textContent = f;
+        chip.onclick = function() { filterCat(this); };
+        filterBar.insertBefore(chip, filterBar.querySelector('.sort-select'));
+      });
+    }
+
+    // Wire all product cards to this store's main product page
+    const grid = document.getElementById('products-grid');
+    if (grid && s.productId) {
+      grid.querySelectorAll('.product-card').forEach(card => {
+        card.onclick = function() { window.location = 'raf_product.html?id=' + s.productId; };
+      });
+    }
+  })();
+
+  /* -----------------------------------------------
+     TAB SWITCHING
+  ----------------------------------------------- */
   function switchTab(id, btn) {
     document.querySelectorAll('.store-tab').forEach(t => t.classList.remove('on'));
     btn.classList.add('on');
     document.getElementById('tab-products').style.display = id === 'products' ? 'block' : 'none';
-    document.getElementById('tab-reviews').style.display = id === 'reviews' ? 'block' : 'none';
-    document.getElementById('tab-policy').style.display = id === 'policy' ? 'block' : 'none';
-    document.getElementById('filter-bar').style.display = id === 'products' ? 'flex' : 'none';
+    document.getElementById('tab-reviews').style.display  = id === 'reviews'  ? 'block' : 'none';
+    document.getElementById('tab-policy').style.display   = id === 'policy'   ? 'block' : 'none';
+    document.getElementById('filter-bar').style.display   = id === 'products' ? 'flex'  : 'none';
   }
 
   function filterCat(btn) {

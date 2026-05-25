@@ -164,9 +164,9 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
     <div class="section">
       <div class="sec-head">
         <div class="sec-title"><i class="ti ti-shopping-cart"></i> السلة</div>
-        <span style="font-size:12px;color:var(--text3);">3 منتجات</span>
+        <span style="font-size:12px;color:var(--text3);" id="cart-count">3 منتجات</span>
       </div>
-      <div class="cart-item">
+      <div class="cart-item" data-unit="12.000">
         <div class="item-img"><i class="ti ti-shirt"></i></div>
         <div class="item-info">
           <div class="item-store">Casa Mode</div>
@@ -178,12 +178,12 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
               <div class="qty-num">1</div>
               <button class="qty-btn" onclick="chQty(this,1)"><i class="ti ti-plus" style="font-size:12px;"></i></button>
             </div>
-            <button class="rm-btn"><i class="ti ti-trash" style="font-size:12px;"></i> حذف</button>
+            <button class="rm-btn" onclick="rmItem(this)"><i class="ti ti-trash" style="font-size:12px;"></i> حذف</button>
           </div>
         </div>
         <div class="item-price">12.000</div>
       </div>
-      <div class="cart-item">
+      <div class="cart-item" data-unit="28.500">
         <div class="item-img"><i class="ti ti-shoe"></i></div>
         <div class="item-info">
           <div class="item-store">Sole & Co</div>
@@ -195,12 +195,12 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
               <div class="qty-num">1</div>
               <button class="qty-btn" onclick="chQty(this,1)"><i class="ti ti-plus" style="font-size:12px;"></i></button>
             </div>
-            <button class="rm-btn"><i class="ti ti-trash" style="font-size:12px;"></i> حذف</button>
+            <button class="rm-btn" onclick="rmItem(this)"><i class="ti ti-trash" style="font-size:12px;"></i> حذف</button>
           </div>
         </div>
         <div class="item-price">28.500</div>
       </div>
-      <div class="cart-item">
+      <div class="cart-item" data-unit="35.000">
         <div class="item-img"><i class="ti ti-sunglasses"></i></div>
         <div class="item-info">
           <div class="item-store">Luxe Accessories</div>
@@ -212,7 +212,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
               <div class="qty-num">1</div>
               <button class="qty-btn" onclick="chQty(this,1)"><i class="ti ti-plus" style="font-size:12px;"></i></button>
             </div>
-            <button class="rm-btn"><i class="ti ti-trash" style="font-size:12px;"></i> حذف</button>
+            <button class="rm-btn" onclick="rmItem(this)"><i class="ti ti-trash" style="font-size:12px;"></i> حذف</button>
           </div>
         </div>
         <div class="item-price">35.000</div>
@@ -264,8 +264,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
       <div class="form-body">
         <div style="display:flex;flex-direction:column;gap:0;">
           <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;">
-            <span style="color:var(--text2);">المجموع (3 منتجات)</span>
-            <span style="font-weight:500;font-family:var(--fen);">75.500 د.ك</span>
+            <span style="color:var(--text2);" id="inv-count-lbl">المجموع (3 منتجات)</span>
+            <span style="font-weight:500;font-family:var(--fen);" id="inv-sub">75.500 د.ك</span>
           </div>
           <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;">
             <span style="color:var(--text3);">التوصيل</span>
@@ -353,7 +353,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
     </div>
     <div class="success-btns">
       <button class="sbtn-p">تتبع الطلب</button>
-      <button class="sbtn-g">متابعة التسوق</button>
+      <button class="sbtn-g">العودةالتسوق</button>
     </div>
   </div>
 </div>
@@ -364,13 +364,98 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
 </footer>
 
 <script>
+  /* ---- Qty change: update row price + totals ---- */
   function chQty(btn, d) {
-    const n = btn.closest('.qty-row').querySelector('.qty-num');
-    let v = parseInt(n.textContent) + d;
-    if (v < 1) v = 1;
-    n.textContent = v;
+    const row   = btn.closest('.cart-item');
+    const qNum  = row.querySelector('.qty-num');
+    const priceEl = row.querySelector('.item-price');
+    const unit  = parseFloat(row.dataset.unit);
+
+    let qty = parseInt(qNum.textContent) + d;
+    if (qty < 1) qty = 1;
+    qNum.textContent = qty;
+
+    // Update displayed line price (unit × qty, 3 decimals)
+    priceEl.textContent = (unit * qty).toFixed(3);
+    recalcTotal();
   }
 
+  /* ---- Remove item ---- */
+  function rmItem(btn) {
+    const item = btn.closest('.cart-item');
+    // Animate out
+    item.style.transition = 'opacity .25s, max-height .3s';
+    item.style.overflow = 'hidden';
+    item.style.opacity  = '0';
+    item.style.maxHeight = item.offsetHeight + 'px';
+    setTimeout(() => {
+      item.style.maxHeight = '0';
+      item.style.padding   = '0';
+      item.style.border    = 'none';
+    }, 50);
+    setTimeout(() => {
+      item.remove();
+      recalcTotal();
+    }, 320);
+  }
+
+  /* ---- Recalculate totals ---- */
+  let couponApplied = false;
+  function recalcTotal() {
+    const items = document.querySelectorAll('.cart-item');
+    let sub = 0;
+    items.forEach(item => {
+      const priceEl = item.querySelector('.item-price');
+      sub += parseFloat(priceEl.textContent) || 0;
+    });
+
+    const count = items.length;
+    // Update count label
+    const countEl = document.getElementById('cart-count');
+    if (countEl) countEl.textContent = count + ' منتجات';
+    const invCount = document.getElementById('inv-count-lbl');
+    if (invCount) invCount.textContent = 'المجموع (' + count + ' منتجات)';
+
+    // Update subtotal
+    const invSub = document.getElementById('inv-sub');
+    if (invSub) invSub.textContent = sub.toFixed(3) + ' د.ك';
+
+    // Apply coupon discount if active
+    let total = sub;
+    if (couponApplied) {
+      total = sub * 0.9;
+      const discRow = document.getElementById('inv-disc-row');
+      if (discRow) {
+        discRow.style.display = 'flex';
+        const discVal = discRow.querySelector('span:last-child');
+        if (discVal) discVal.textContent = '- ' + (sub * 0.1).toFixed(3) + ' د.ك';
+      }
+    }
+
+    // Update final total
+    const invTotal = document.getElementById('inv-total');
+    if (invTotal) invTotal.textContent = total.toFixed(3) + ' د.ك';
+
+    // Update confirm button
+    const confirmBtn = document.querySelector('.btn-confirm');
+    if (confirmBtn) {
+      if (count === 0) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="ti ti-shopping-cart"></i> السلة فارغة';
+        confirmBtn.style.background = 'var(--border)';
+      } else {
+        confirmBtn.disabled = false;
+        confirmBtn.style.background = '';
+        confirmBtn.innerHTML = '<i class="ti ti-lock"></i> تأكيد الطلب — ' + total.toFixed(3) + ' د.ك';
+      }
+    }
+
+    // Show empty state if needed
+    const emptyState = document.getElementById('cart-empty');
+    if (emptyState) emptyState.style.display = count === 0 ? 'block' : 'none';
+  }
+
+  /* ---- Address ---- */
   function showAddr(sel) {
     const detail = document.getElementById('addr-detail');
     const map = {
@@ -386,18 +471,22 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
     }
   }
 
+  /* ---- Coupon ---- */
   function applyCoupon() {
-    const v = document.getElementById('couponInput').value.trim();
-    if (v) {
+    const v = document.getElementById('couponInput').value.trim().toUpperCase();
+    const validCodes = ['WELCOME20', 'FLASH10', 'VIP30', 'RAMADAN25'];
+    if (!v) return;
+    if (validCodes.includes(v) || v.length >= 4) {
+      couponApplied = true;
       document.getElementById('couponOk').classList.add('show');
-      document.getElementById('disc-row').style.display = 'flex';
       document.getElementById('inv-disc-row').style.display = 'flex';
-      document.getElementById('total').textContent = '67.950 د.ك';
-      document.getElementById('inv-total').textContent = '67.950 د.ك';
-      document.querySelector('.btn-confirm').innerHTML = '<i class="ti ti-lock"></i> تأكيد الطلب — 67.950 د.ك';
+      recalcTotal();
+    } else {
+      document.getElementById('couponOk').classList.remove('show');
     }
   }
 
+  /* ---- Payment ---- */
   function selPay(el) {
     document.querySelectorAll('.pay-opt').forEach(p => p.classList.remove('on'));
     el.classList.add('on');
@@ -409,6 +498,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
     btn.classList.add('on');
   }
 
+  /* ---- Confirm ---- */
   function confirmOrder() {
     document.getElementById('main-layout').style.display = 'none';
     document.getElementById('breadcrumb').style.display = 'none';

@@ -176,6 +176,11 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
 
 /* TWO COL */
 .two-col{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:16px;}
+
+/* COUPON TYPE BUTTONS */
+.coup-type-btn{padding:7px 14px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text3);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px;}
+.coup-type-btn:hover{border-color:var(--gold);color:var(--gold);}
+.coup-type-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08);font-weight:700;}
 </style>
 </head>
 <body>
@@ -425,34 +430,181 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
 
     <!-- COUPONS -->
     <div class="sec-panel" id="sec-coupons">
-      <div class="card" style="margin-bottom:16px;">
-        <div class="c-head"><div class="c-title">إنشاء كوبون جديد</div></div>
-        <div class="form-grid">
-          <div><label class="field-lbl">رمز الكوبون</label><input type="text" class="field-input" placeholder="مثال: CASA20"></div>
-          <div><label class="field-lbl">نسبة الخصم %</label><input type="number" class="field-input" placeholder="10"></div>
-          <div><label class="field-lbl">تاريخ البداية</label><input type="date" class="field-input"></div>
-          <div><label class="field-lbl">تاريخ الانتهاء</label><input type="date" class="field-input"></div>
+
+      <!-- Welcome Coupon Block -->
+      <div class="card" style="margin-bottom:16px;border-right:3px solid var(--gold);">
+        <div class="c-head" style="background:rgba(201,168,76,0.06);">
+          <div class="c-title" style="display:flex;align-items:center;gap:8px;">
+            <i class="ti ti-gift" style="color:var(--gold);font-size:16px;"></i>
+            كوبون الترحيب (للمشتركين الجدد)
+          </div>
+          <span class="badge b-gold">مرة واحدة لكل مستخدم</span>
         </div>
-        <div class="form-footer">
-          <button class="btn btn-p"><i class="ti ti-plus"></i> إنشاء الكوبون</button>
+        <div style="padding:14px 18px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text3);line-height:1.7;">
+          يُرسل هذا الكوبون تلقائياً لكل عميل جديد يسجّل في منصة رف. يمكن للتاجر تخصيص الكود والنسبة وحد الخصم الأقصى.
+        </div>
+        <div class="form-grid" style="padding:16px 18px;">
+          <div>
+            <label class="field-lbl">رمز الكوبون</label>
+            <input type="text" class="field-input" value="WELCOME20" placeholder="مثال: WELCOME20">
+          </div>
+          <div>
+            <label class="field-lbl">نسبة الخصم %</label>
+            <input type="number" class="field-input" value="20" min="1" max="100">
+          </div>
+          <div>
+            <label class="field-lbl">أقصى خصم (د.ك)</label>
+            <input type="number" class="field-input" value="5.000" placeholder="0.000" step="0.001">
+          </div>
+          <div>
+            <label class="field-lbl">ينطبق على</label>
+            <select class="field-select">
+              <option selected>جميع المنتجات</option>
+              <option>منتجات مختارة</option>
+              <option>فئة معينة</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-footer" style="justify-content:space-between;align-items:center;">
+          <button class="btn btn-p"><i class="ti ti-device-floppy"></i> حفظ الإعدادات</button>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2);">
+            تفعيل الكوبون
+            <button class="toggle on" id="welcomeToggle" onclick="this.classList.toggle('on')"></button>
+          </div>
         </div>
       </div>
+
+      <!-- Limited-Count Coupon Form -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="c-head">
+          <div class="c-title" style="display:flex;align-items:center;gap:8px;">
+            <i class="ti ti-discount" style="color:var(--gold);font-size:16px;"></i>
+            إنشاء كوبون جديد
+          </div>
+          <a class="c-act" onclick="toggleCouponForm()" id="couponFormToggle"><i class="ti ti-plus" style="font-size:12px;"></i> إضافة</a>
+        </div>
+
+        <!-- Coupon Type Selector -->
+        <div id="couponFormBox" style="display:none;border-top:1px solid var(--border);">
+          <div style="padding:14px 18px 10px;">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:10px;letter-spacing:.5px;text-transform:uppercase;">نوع الكوبون</div>
+            <div style="display:flex;gap:8px;margin-bottom:4px;">
+              <button class="coup-type-btn on" id="ctype-limited" onclick="selCType('limited')">
+                <i class="ti ti-users"></i> محدود العدد
+              </button>
+              <button class="coup-type-btn" id="ctype-timed" onclick="selCType('timed')">
+                <i class="ti ti-clock"></i> محدود الوقت
+              </button>
+              <button class="coup-type-btn" id="ctype-fixed" onclick="selCType('fixed')">
+                <i class="ti ti-tag"></i> مبلغ ثابت
+              </button>
+            </div>
+          </div>
+
+          <div class="form-grid" style="padding:0 18px 14px;">
+            <div><label class="field-lbl">رمز الكوبون</label><input type="text" class="field-input" placeholder="مثال: FLASH10"></div>
+            <div id="cfield-pct">
+              <label class="field-lbl">نسبة الخصم %</label>
+              <input type="number" class="field-input" placeholder="10" min="1" max="100">
+            </div>
+            <div id="cfield-amount" style="display:none;">
+              <label class="field-lbl">قيمة الخصم (د.ك)</label>
+              <input type="number" class="field-input" placeholder="0.000" step="0.001">
+            </div>
+            <div id="cfield-max-uses">
+              <label class="field-lbl">أقصى عدد استخدامات</label>
+              <input type="number" class="field-input" placeholder="50" min="1">
+            </div>
+            <div id="cfield-end-date">
+              <label class="field-lbl">تاريخ الانتهاء</label>
+              <input type="date" class="field-input">
+            </div>
+            <div><label class="field-lbl">أقصى خصم (د.ك)</label><input type="number" class="field-input" placeholder="10.000" step="0.001"></div>
+            <div>
+              <label class="field-lbl">ينطبق على</label>
+              <select class="field-select">
+                <option>جميع المنتجات</option>
+                <option>فئة معينة</option>
+                <option>منتجات مختارة</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-footer">
+            <button class="btn btn-p" onclick="saveCoupon()"><i class="ti ti-plus"></i> إنشاء الكوبون</button>
+            <button class="btn btn-g" onclick="toggleCouponForm()">إلغاء</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Existing Coupons -->
       <div class="card">
-        <div class="c-head"><div class="c-title">الكوبونات الحالية</div></div>
+        <div class="c-head"><div class="c-title">الكوبونات الحالية</div><span style="font-size:11px;color:var(--text3);">4 كوبونات</span></div>
+
+        <!-- Limited count coupon with progress -->
         <div class="coup-item">
-          <div style="flex:1;"><div class="coup-code">CASA20</div><div class="coup-meta">خصم 20% · ينتهي 31 مايو · استُخدم 14 مرة</div></div>
+          <div class="coup-code-ico" style="width:40px;height:40px;border-radius:8px;background:rgba(201,168,76,.12);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--gold);flex-shrink:0;">
+            <i class="ti ti-users"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+              <div class="coup-code">FLASH10</div>
+              <span class="badge b-b" style="font-size:9px;">محدود العدد</span>
+            </div>
+            <div class="coup-meta">خصم 10% · أقصى 10 د.ك · 38 من أصل 50 استخداماً متبقّياً</div>
+            <div style="height:4px;background:var(--bg2);border-radius:3px;overflow:hidden;width:160px;margin-top:6px;">
+              <div style="height:100%;width:76%;background:var(--gold);border-radius:3px;"></div>
+            </div>
+          </div>
           <span class="badge b-g">نشط</span>
           <button class="toggle on" onclick="this.classList.toggle('on')" style="margin-right:10px;"></button>
         </div>
+
+        <!-- Welcome coupon (read-only ref) -->
         <div class="coup-item">
-          <div style="flex:1;"><div class="coup-code">WELCOME10</div><div class="coup-meta">خصم 10% · ينتهي 30 يونيو · استُخدم 32 مرة</div></div>
+          <div class="coup-code-ico" style="width:40px;height:40px;border-radius:8px;background:rgba(201,168,76,.12);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--gold);flex-shrink:0;">
+            <i class="ti ti-gift"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+              <div class="coup-code">WELCOME20</div>
+              <span class="badge b-gold" style="font-size:9px;">مرة واحدة / مشترك جديد</span>
+            </div>
+            <div class="coup-meta">خصم 20% · أقصى 5 د.ك · يُرسل تلقائياً عند التسجيل</div>
+          </div>
+          <span class="badge b-g">نشط</span>
+          <button class="toggle on" id="welcomeRef" onclick="this.classList.toggle('on');document.getElementById('welcomeToggle').classList.toggle('on')" style="margin-right:10px;"></button>
+        </div>
+
+        <!-- Regular coupon -->
+        <div class="coup-item">
+          <div class="coup-code-ico" style="width:40px;height:40px;border-radius:8px;background:rgba(201,168,76,.12);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--gold);flex-shrink:0;">
+            <i class="ti ti-clock"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+              <div class="coup-code">CASA20</div>
+              <span class="badge b-b" style="font-size:9px;">محدود الوقت</span>
+            </div>
+            <div class="coup-meta">خصم 20% · ينتهي 31 مايو 2026 · استُخدم 14 مرة</div>
+          </div>
           <span class="badge b-g">نشط</span>
           <button class="toggle on" onclick="this.classList.toggle('on')" style="margin-right:10px;"></button>
         </div>
-        <div class="coup-item">
-          <div style="flex:1;"><div class="coup-code">EID50</div><div class="coup-meta">خصم 50% · انتهى · استُخدم 88 مرة</div></div>
+
+        <!-- Expired coupon -->
+        <div class="coup-item" style="opacity:.65;">
+          <div class="coup-code-ico" style="width:40px;height:40px;border-radius:8px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text3);flex-shrink:0;">
+            <i class="ti ti-discount"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+              <div class="coup-code" style="color:var(--text3);">EID50</div>
+              <span class="badge b-r" style="font-size:9px;">منتهي</span>
+            </div>
+            <div class="coup-meta">خصم 50% · انتهى · استُخدم 88 مرة (100 كحد أقصى)</div>
+          </div>
           <span class="badge b-r">منتهي</span>
-          <button class="toggle" onclick="this.classList.toggle('on')" style="margin-right:10px;"></button>
+          <button class="toggle" style="margin-right:10px;cursor:not-allowed;opacity:.4;"></button>
         </div>
       </div>
     </div>
@@ -532,6 +684,38 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
       this.classList.add('on');
     });
   });
+
+  /* Coupon form toggle */
+  function toggleCouponForm() {
+    const box = document.getElementById('couponFormBox');
+    const btn = document.getElementById('couponFormToggle');
+    const open = box.style.display === 'none' || box.style.display === '';
+    box.style.display = open ? 'block' : 'none';
+    btn.innerHTML = open
+      ? '<i class="ti ti-x" style="font-size:12px;"></i> إغلاق'
+      : '<i class="ti ti-plus" style="font-size:12px;"></i> إضافة';
+  }
+
+  /* Coupon type selector */
+  function selCType(type) {
+    ['limited','timed','fixed'].forEach(t => {
+      document.getElementById('ctype-' + t).classList.toggle('on', t === type);
+    });
+    // Show/hide fields based on type
+    document.getElementById('cfield-max-uses').style.display = type === 'limited' ? 'block' : 'none';
+    document.getElementById('cfield-end-date').style.display = type === 'timed' ? 'block' : 'none';
+    document.getElementById('cfield-pct').style.display     = type !== 'fixed'   ? 'block' : 'none';
+    document.getElementById('cfield-amount').style.display  = type === 'fixed'   ? 'block' : 'none';
+  }
+
+  /* Save coupon (prototype: just close form + flash success) */
+  function saveCoupon() {
+    toggleCouponForm();
+    const btn = document.querySelector('#sec-coupons .btn-p');
+    const orig = btn ? btn.innerHTML : '';
+    if (btn) { btn.innerHTML = '<i class="ti ti-check"></i> تم الحفظ'; btn.style.background='var(--green)'; }
+    setTimeout(() => { if (btn) { btn.innerHTML = orig; btn.style.background=''; } }, 2000);
+  }
 </script>
 </body>
 </html>

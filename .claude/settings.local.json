@@ -3,7 +3,9 @@
     "allow": [
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\user\\\\Desktop\\\\Wassef Files\\\\raf_project\" -Force)",
       "Bash(Select-Object Name, Mode)",
-      "Bash(Format-Table -AutoSize)"
+      "Bash(Format-Table -AutoSize)",
+      "Bash(ls \"C:\\\\Users\\\\user\\\\Desktop\\\\Wassef Files\\\\raf_project\\\\\" | grep -i store)",
+      "Bash(ls '/mnt/c/Users/user/Desktop/Wassef Files/raf_project/' | grep -i store)"
     ]
   }
 }

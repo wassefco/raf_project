@@ -460,11 +460,11 @@
 <div class="breadcrumb">
   <a href="raf_homepage.html">الرئيسية</a>
   <i class="ti ti-chevron-left"></i>
-  <a href="raf_homepage.html">ملابس</a>
+  <a href="raf_homepage.html" id="bc-cat">ملابس</a>
   <i class="ti ti-chevron-left"></i>
-  <a href="raf_store.html">Casa Mode</a>
+  <a href="raf_store.html?store=casa-mode" id="bc-store">Casa Mode</a>
   <i class="ti ti-chevron-left"></i>
-  <span style="color:var(--white);">قميص أوفرسايز كلاسيك</span>
+  <span style="color:var(--white);" id="bc-product">قميص أوفرسايز كلاسيك</span>
 </div>
 
 <!-- PRODUCT LAYOUT -->
@@ -473,8 +473,8 @@
   <!-- GALLERY -->
   <div class="gallery">
     <div class="main-img">
-      <i class="ti ti-shirt main-img-icon"></i>
-      <span class="img-tag">-20%</span>
+      <i class="ti ti-shirt main-img-icon" id="main-icon"></i>
+      <span class="img-tag" id="discount-tag">-20%</span>
       <button class="video-btn">
         <i class="ti ti-player-play-filled"></i> شاهد الفيديو
       </button>
@@ -493,9 +493,9 @@
   <div class="product-info">
 
     <!-- Store -->
-    <a href="raf_store.html" class="store-link">
-      <div class="store-avatar"><i class="ti ti-hanger"></i></div>
-      <span class="store-name-link">Casa Mode</span>
+    <a href="raf_store.html?store=casa-mode" class="store-link" id="prod-store-link">
+      <div class="store-avatar"><i class="ti ti-hanger" id="prod-store-icon"></i></div>
+      <span class="store-name-link" id="prod-store-name">Casa Mode</span>
       <i class="ti ti-rosette-discount-check store-verified"></i>
     </a>
 
@@ -532,7 +532,7 @@
     </div>
 
     <!-- Size -->
-    <div class="option-section">
+    <div class="option-section" id="sizes-section">
       <div class="option-header">
         <span class="option-title">المقاس</span>
         <span class="option-selected">S — مختار</span>
@@ -570,7 +570,7 @@
           <div class="qty-num" id="qty">1</div>
           <button class="qty-btn" onclick="changeQty(1)"><i class="ti ti-plus"></i></button>
         </div>
-        <span style="font-size:13px;color:var(--gray-4);">المتاح: 15 قطعة</span>
+        <span style="font-size:13px;color:var(--gray-4);" id="stock-label">المتاح: 15 قطعة</span>
       </div>
     </div>
 
@@ -603,7 +603,7 @@
 <div class="tabs">
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('desc', this)">تفاصيل المنتج</button>
-    <button class="tab-btn" onclick="switchTab('reviews', this)">التقييمات (128)</button>
+    <button class="tab-btn" id="reviews-tab-btn" onclick="switchTab('reviews', this)">التقييمات (128)</button>
     <button class="tab-btn" onclick="switchTab('returns', this)">الإرجاع والاستبدال</button>
   </div>
 
@@ -774,6 +774,298 @@
 </footer>
 
 <script>
+/* ============================================================
+   PRODUCT DATA — keyed by product ID
+   ============================================================ */
+const PRODUCT_DATA = {
+  'P-001': {
+    name: 'قميص أوفرسايز كلاسيك',
+    store: 'Casa Mode', storeSlug: 'casa-mode', storeIcon: 'ti-hanger',
+    breadcrumbCat: 'ملابس',
+    icon: 'ti-shirt',
+    price: '12.000', oldPrice: '15.000', discount: '-20%', save: 'وفّرت 3.000 د.ك',
+    rating: 4.8, reviews: 128, sales: 342,
+    sizes: ['XS','S','M','L','XL','XXL'], outSizes: ['XXL'], defaultSize: 'S',
+    colors: [
+      {name:'أبيض', hex:'#F5F5F5', border:'#ccc'},
+      {name:'أسود', hex:'#1A1A1A'},
+      {name:'ذهبي', hex:'#C9A84C'},
+      {name:'بيج',  hex:'#8B7355'}
+    ], defaultColor: 'أبيض',
+    stock: 15,
+    desc: 'قميص أوفرسايز كلاسيك من Casa Mode — مصنوع من قطن 100% عالي الجودة بقصة مريحة وأنيقة تناسب جميع الأوقات. مثالي للإطلالات اليومية والكاجوال مع سهولة التنسيق مع مختلف القطع.',
+    features: [
+      {icon:'ti-leaf','text':'قطن 100% طبيعي'},{icon:'ti-wash','text':'قابل للغسيل بالغسالة'},
+      {icon:'ti-ruler','text':'قصة أوفرسايز مريحة'},{icon:'ti-sun','text':'مناسب لجميع المواسم'},
+      {icon:'ti-palette','text':'ألوان ثابتة لا تبهت'},{icon:'ti-award','text':'ضمان الجودة'}
+    ],
+    reviewBars: [75,18,5,2,0]
+  },
+  'P-002': {
+    name: 'حذاء سنيكرز ليدر فاخر',
+    store: 'Sole & Co', storeSlug: 'sole-co', storeIcon: 'ti-shoe',
+    breadcrumbCat: 'أحذية',
+    icon: 'ti-shoe',
+    price: '35.000', oldPrice: '45.000', discount: '-22%', save: 'وفّرت 10.000 د.ك',
+    rating: 4.7, reviews: 94, sales: 210,
+    sizes: ['39','40','41','42','43','44','45'], outSizes: ['45'], defaultSize: '42',
+    colors: [
+      {name:'أبيض', hex:'#F5F5F5', border:'#ccc'},
+      {name:'أسود', hex:'#1A1A1A'},
+      {name:'رمادي',hex:'#888888'}
+    ], defaultColor: 'أبيض',
+    stock: 8,
+    desc: 'حذاء سنيكرز ليدر فاخر من Sole & Co — مصنوع من جلد أصلي عالي الجودة مع نعل مريح وتصميم عصري أنيق. مثالي للإطلالات الكاجوال والرسمية على حدٍّ سواء.',
+    features: [
+      {icon:'ti-star','text':'جلد أصلي 100%'},{icon:'ti-shoe','text':'نعل مريح ومتين'},
+      {icon:'ti-brush','text':'تصميم عصري'},{icon:'ti-award','text':'ضمان الجودة'},
+      {icon:'ti-recycle','text':'مواد صديقة للبيئة'},{icon:'ti-shield-check','text':'منتج أصلي معتمد'}
+    ],
+    reviewBars: [70,20,7,3,0]
+  },
+  'P-003': {
+    name: 'سماعات لاسلكية بريميوم',
+    store: 'TechZone', storeSlug: 'techzone', storeIcon: 'ti-device-laptop',
+    breadcrumbCat: 'إلكترونيات',
+    icon: 'ti-headphones',
+    price: '28.000', oldPrice: null, discount: null, save: null,
+    rating: 4.9, reviews: 256, sales: 520,
+    sizes: null, outSizes: [], defaultSize: null,
+    colors: [
+      {name:'أسود', hex:'#1A1A1A'},
+      {name:'أبيض', hex:'#F5F5F5', border:'#ccc'},
+      {name:'أزرق', hex:'#2D5BE3'}
+    ], defaultColor: 'أسود',
+    stock: 22,
+    desc: 'سماعات لاسلكية بريميوم من TechZone — جودة صوت استثنائية مع تقنية إلغاء الضوضاء النشط وبطارية تدوم 40 ساعة. تصميم مريح للاستخدام اليومي الطويل.',
+    features: [
+      {icon:'ti-wifi','text':'بلوتوث 5.3'},{icon:'ti-battery-charging','text':'بطارية 40 ساعة'},
+      {icon:'ti-ear','text':'إلغاء ضوضاء نشط'},{icon:'ti-microphone','text':'ميكروفون عالي الوضوح'},
+      {icon:'ti-device-floppy','text':'ذاكرة 5 أجهزة'},{icon:'ti-award','text':'ضمان سنتين'}
+    ],
+    reviewBars: [85,12,2,1,0]
+  },
+  'P-004': {
+    name: 'ساعة يد فاخرة كلاسيك',
+    store: 'Luxe Accessories', storeSlug: 'luxe-accessories', storeIcon: 'ti-diamond',
+    breadcrumbCat: 'إكسسوارات',
+    icon: 'ti-watch',
+    price: '85.000', oldPrice: '110.000', discount: '-23%', save: 'وفّرت 25.000 د.ك',
+    rating: 4.9, reviews: 47, sales: 83,
+    sizes: null, outSizes: [], defaultSize: null,
+    colors: [
+      {name:'ذهبي', hex:'#C9A84C'},
+      {name:'فضي',  hex:'#C0C0C0'},
+      {name:'أسود', hex:'#1A1A1A'}
+    ], defaultColor: 'ذهبي',
+    stock: 5,
+    desc: 'ساعة يد فاخرة كلاسيك من Luxe Accessories — تصميم أنيق يجمع بين الأصالة والعصرية. هيكل من الستانلس ستيل مع زجاج سفايرو مقاوم للخدش وآلية دقيقة تضمن الدقة.',
+    features: [
+      {icon:'ti-diamond','text':'زجاج سفايرو'},{icon:'ti-shield','text':'مقاومة الماء 50م'},
+      {icon:'ti-clock','text':'آلية سويسرية'},{icon:'ti-award','text':'ضمان سنتين'},
+      {icon:'ti-gift','text':'تأتي في علبة هدية'},{icon:'ti-star','text':'إصدار محدود'}
+    ],
+    reviewBars: [88,10,2,0,0]
+  },
+  'P-005': {
+    name: 'تراكسوت رياضي فاخر',
+    store: 'Urban Thread', storeSlug: 'urban-thread', storeIcon: 'ti-run',
+    breadcrumbCat: 'رياضة',
+    icon: 'ti-run',
+    price: '42.000', oldPrice: '52.000', discount: '-19%', save: 'وفّرت 10.000 د.ك',
+    rating: 4.6, reviews: 71, sales: 155,
+    sizes: ['S','M','L','XL','XXL'], outSizes: [], defaultSize: 'M',
+    colors: [
+      {name:'أسود', hex:'#1A1A1A'},
+      {name:'رمادي',hex:'#555555'},
+      {name:'كحلي', hex:'#1B2A4A'}
+    ], defaultColor: 'أسود',
+    stock: 12,
+    desc: 'تراكسوت رياضي فاخر من Urban Thread — مصنوع من قماش مرن خفيف الوزن يمنحك حرية الحركة الكاملة. مناسب للجيم والركض والأنشطة الرياضية اليومية.',
+    features: [
+      {icon:'ti-wind','text':'قماش خفيف وسريع الجفاف'},{icon:'ti-arrows-move','text':'مرونة عالية'},
+      {icon:'ti-sun','text':'حماية UV'},{icon:'ti-wash','text':'سهل العناية'},
+      {icon:'ti-pocket','text':'جيوب عملية'},{icon:'ti-award','text':'ضمان الجودة'}
+    ],
+    reviewBars: [65,22,10,3,0]
+  },
+  'P-006': {
+    name: 'سيت عناية بالبشرة الفاخر',
+    store: 'Glam Store', storeSlug: 'glam-store', storeIcon: 'ti-sparkles',
+    breadcrumbCat: 'جمال',
+    icon: 'ti-sparkles',
+    price: '19.500', oldPrice: '26.000', discount: '-25%', save: 'وفّرت 6.500 د.ك',
+    rating: 4.8, reviews: 183, sales: 412,
+    sizes: null, outSizes: [], defaultSize: null,
+    colors: null, defaultColor: null,
+    stock: 30,
+    desc: 'سيت عناية بالبشرة الفاخر من Glam Store — مجموعة متكاملة تضم غسول ومرطب وسيروم بتركيبة طبية مُختبرة. مناسبة لجميع أنواع البشرة ومعتمدة من الجمعية الكويتية للجلدية.',
+    features: [
+      {icon:'ti-leaf','text':'مكونات طبيعية 100%'},{icon:'ti-shield-check','text':'خالي من الباربان'},
+      {icon:'ti-skin','text':'مناسب لجميع أنواع البشرة'},{icon:'ti-award','text':'معتمد طبياً'},
+      {icon:'ti-recycle','text':'تغليف صديق للبيئة'},{icon:'ti-gift','text':'علبة هدية أنيقة'}
+    ],
+    reviewBars: [78,16,4,2,0]
+  }
+};
+
+/* ============================================================
+   INIT — read ?id= param and inject correct product data
+   ============================================================ */
+(function initProduct() {
+  const params  = new URLSearchParams(window.location.search);
+  const id      = params.get('id') || 'P-001';
+  const p       = PRODUCT_DATA[id] || PRODUCT_DATA['P-001'];
+
+  /* helpers */
+  function starsHTML(r) {
+    let h = '';
+    for (let i = 1; i <= 5; i++) {
+      if (r >= i)         h += '<i class="ti ti-star-filled star"></i>';
+      else if (r >= i-0.5) h += '<i class="ti ti-star-half-filled star"></i>';
+      else                 h += '<i class="ti ti-star star empty"></i>';
+    }
+    return h;
+  }
+  function reviewStarsHTML(r) {
+    let h = '';
+    const filled = Math.round(r);
+    for (let i = 1; i <= 5; i++) {
+      h += i <= filled
+        ? '<i class="ti ti-star-filled" style="color:var(--gold);font-size:14px;"></i>'
+        : '<i class="ti ti-star" style="color:var(--gray-3);font-size:14px;"></i>';
+    }
+    return h;
+  }
+
+  /* page title */
+  document.title = 'رف — ' + p.name;
+
+  /* breadcrumb */
+  const bcCat = document.getElementById('bc-cat');
+  if (bcCat) bcCat.textContent = p.breadcrumbCat;
+  const bcStore = document.getElementById('bc-store');
+  if (bcStore) { bcStore.textContent = p.store; bcStore.href = 'raf_store.html?store=' + p.storeSlug; }
+  const bcProd = document.getElementById('bc-product');
+  if (bcProd) bcProd.textContent = p.name;
+
+  /* main icon */
+  const mainIcon = document.getElementById('main-icon');
+  if (mainIcon) mainIcon.className = 'ti ' + p.icon + ' main-img-icon';
+
+  /* discount tag */
+  const discTag = document.getElementById('discount-tag');
+  if (discTag) {
+    if (p.discount) { discTag.textContent = p.discount; discTag.style.display = ''; }
+    else discTag.style.display = 'none';
+  }
+
+  /* store link */
+  const storeLink = document.getElementById('prod-store-link');
+  if (storeLink) storeLink.href = 'raf_store.html?store=' + p.storeSlug;
+  const storeIcon = document.getElementById('prod-store-icon');
+  if (storeIcon) storeIcon.className = 'ti ' + p.storeIcon;
+  const storeName = document.getElementById('prod-store-name');
+  if (storeName) storeName.textContent = p.store;
+
+  /* product title */
+  const titleEl = document.querySelector('.product-title');
+  if (titleEl) titleEl.textContent = p.name;
+
+  /* rating */
+  const starsEl = document.querySelector('.stars');
+  if (starsEl) starsEl.innerHTML = starsHTML(p.rating);
+  const ratingNum = document.querySelector('.rating-num');
+  if (ratingNum) ratingNum.textContent = p.rating.toFixed(1);
+  const ratingCounts = document.querySelectorAll('.rating-count');
+  if (ratingCounts[0]) ratingCounts[0].textContent = p.reviews + ' تقييم';
+  if (ratingCounts[1]) ratingCounts[1].textContent = p.sales + ' مبيعة';
+
+  /* price */
+  const priceMain = document.querySelector('.price-main');
+  if (priceMain) priceMain.textContent = p.price;
+  const priceOld = document.querySelector('.price-old');
+  if (priceOld) { if (p.oldPrice) { priceOld.textContent = p.oldPrice; priceOld.style.display = ''; } else priceOld.style.display = 'none'; }
+  const priceSave = document.querySelector('.price-save');
+  if (priceSave) { if (p.save) { priceSave.textContent = p.save; priceSave.style.display = ''; } else priceSave.style.display = 'none'; }
+
+  /* sizes */
+  const sizesSection = document.getElementById('sizes-section');
+  if (sizesSection) {
+    if (!p.sizes) {
+      sizesSection.style.display = 'none';
+    } else {
+      const sizeLabel = sizesSection.querySelector('.option-selected');
+      if (sizeLabel) sizeLabel.textContent = p.defaultSize + ' — مختار';
+      const sizesRow = sizesSection.querySelector('.options-row');
+      if (sizesRow) {
+        sizesRow.innerHTML = p.sizes.map(s => {
+          const out = p.outSizes.includes(s);
+          return `<button class="option-btn${s === p.defaultSize ? ' selected' : ''}${out ? ' out' : ''}" onclick="selectSize(this)"${out ? ' title="نفد المخزون"' : ''}>${s}</button>`;
+        }).join('');
+      }
+    }
+  }
+
+  /* colors */
+  const colorSections = document.querySelectorAll('.option-section');
+  // colorSections[0] = sizes (handled above), colorSections[1] = colors
+  const colorSection = colorSections[1];
+  if (colorSection) {
+    if (!p.colors) {
+      colorSection.style.display = 'none';
+    } else {
+      const colorLabel = colorSection.querySelector('.option-selected');
+      if (colorLabel) colorLabel.textContent = p.defaultColor + ' — مختار';
+      const colorsRow = colorSection.querySelector('.options-row');
+      if (colorsRow) {
+        colorsRow.innerHTML = p.colors.map(c => {
+          const borderStyle = c.border ? `border-color:${c.border};` : '';
+          const sel = c.name === p.defaultColor ? ' selected' : '';
+          return `<button class="color-btn${sel}" style="background:${c.hex};${borderStyle}" onclick="selectColor(this,'${c.name}')" title="${c.name}"></button>`;
+        }).join('');
+      }
+    }
+  }
+
+  /* stock & qty max */
+  const stockLbl = document.getElementById('stock-label');
+  if (stockLbl) stockLbl.textContent = 'المتاح: ' + p.stock + ' قطعة';
+
+  /* description */
+  const descText = document.querySelector('.desc-text');
+  if (descText) descText.textContent = p.desc;
+  const descFeatures = document.querySelector('.desc-features');
+  if (descFeatures && p.features) {
+    descFeatures.innerHTML = p.features.map(f =>
+      `<div class="desc-feature"><i class="ti ${f.icon}"></i> ${f.text}</div>`
+    ).join('');
+  }
+
+  /* reviews tab label */
+  const revTabBtn = document.getElementById('reviews-tab-btn');
+  if (revTabBtn) revTabBtn.textContent = 'التقييمات (' + p.reviews + ')';
+
+  /* reviews summary */
+  const reviewBigNum = document.querySelector('.review-big-num');
+  if (reviewBigNum) reviewBigNum.textContent = p.rating.toFixed(1);
+  const revSummaryStars = document.querySelector('.reviews-summary .stars');
+  if (revSummaryStars) revSummaryStars.innerHTML = starsHTML(p.rating);
+  const revSummaryCount = document.querySelector('.reviews-summary div[style*="font-size:12px"]');
+  if (revSummaryCount) revSummaryCount.textContent = p.reviews + ' تقييم';
+  const barFills = document.querySelectorAll('.bar-fill');
+  p.reviewBars.forEach((pct, i) => { if (barFills[i]) barFills[i].style.width = pct + '%'; });
+  const barPcts = document.querySelectorAll('.bar-row span:last-child');
+  p.reviewBars.forEach((pct, i) => { if (barPcts[i]) barPcts[i].textContent = pct + '%'; });
+
+  /* similar products — update store references */
+  document.querySelectorAll('.similar-card').forEach(card => {
+    card.style.cursor = 'pointer';
+  });
+})();
+</script>
+
+<script>
   // Size selection
   function selectSize(btn) {
     if (btn.classList.contains('out')) return;
@@ -796,7 +1088,9 @@
   // Quantity
   let qty = 1;
   function changeQty(delta) {
-    qty = Math.max(1, Math.min(15, qty + delta));
+    const pid = new URLSearchParams(window.location.search).get('id') || 'P-001';
+    const maxStock = (PRODUCT_DATA[pid] || PRODUCT_DATA['P-001']).stock;
+    qty = Math.max(1, Math.min(maxStock, qty + delta));
     document.getElementById('qty').textContent = qty;
   }
 
