@@ -5,7 +5,8 @@
       "Bash(Select-Object Name, Mode)",
       "Bash(Format-Table -AutoSize)",
       "Bash(ls \"C:\\\\Users\\\\user\\\\Desktop\\\\Wassef Files\\\\raf_project\\\\\" | grep -i store)",
-      "Bash(ls '/mnt/c/Users/user/Desktop/Wassef Files/raf_project/' | grep -i store)"
+      "Bash(ls '/mnt/c/Users/user/Desktop/Wassef Files/raf_project/' | grep -i store)",
+      "Bash(powershell -Command \"\\(Get-Content 'C:\\\\Users\\\\user\\\\Desktop\\\\Wassef Files\\\\raf_project\\\\raf_admin.html'\\).Count\")"
     ]
   }
 }
