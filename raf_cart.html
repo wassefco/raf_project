@@ -138,6 +138,29 @@ nav{background:rgba(245,242,236,.97);border-bottom:1px solid rgba(201,168,76,.3)
 .sbtn-g:hover{border-color:var(--gold);color:var(--gold);}
 
 footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text3);margin-top:40px;}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  nav{padding:0 16px;}
+  .breadcrumb{padding:10px 16px;font-size:12px;}
+  .layout{padding:16px;}
+  .cart-item{flex-wrap:wrap;gap:10px;}
+  .item-img{width:60px;height:60px;font-size:22px;}
+  .item-price{flex:0 0 100%;text-align:left;}
+  .item-bot{flex-wrap:wrap;}
+  .coupon-row{flex-direction:column;}
+  .summary{position:static;margin-top:16px;}
+  footer{padding:16px;flex-direction:column;gap:8px;text-align:center;}
+}
+@media(max-width:480px){
+  .layout{padding:10px;}
+  .form-body{padding:14px;}
+  .pay-opt{padding:10px 12px;}
+  .success-wrap{padding:0 16px;}
+  .success-btns{flex-direction:column;}
+  .success-btns button{width:100%;}
+  .later-btns{flex-wrap:wrap;}
+}
 </style>
 </head>
 <body>
@@ -352,8 +375,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
       <span style="font-size:12px;color:var(--text3);margin-top:4px;display:block;">الإجمالي: 75.500 د.ك — الدفع عند الاستلام</span>
     </div>
     <div class="success-btns">
-      <button class="sbtn-p">تتبع الطلب</button>
-      <button class="sbtn-g">العودةالتسوق</button>
+      <button class="sbtn-p" onclick="window.location='raf_tracking.html'">تتبع الطلب</button>
+      <button class="sbtn-g" onclick="window.location='raf_homepage.html'">العودة للتسوق</button>
     </div>
   </div>
 </div>

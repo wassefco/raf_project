@@ -180,12 +180,46 @@ select.field-inp{cursor:pointer;appearance:auto;}
 .mm-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;}
 .mm-val{font-size:20px;font-weight:900;font-family:var(--fen);}
 .mm-lbl{font-size:11px;color:var(--text3);margin-top:3px;}
+
+/* ===== RESPONSIVE ===== */
+.mob-menu-btn{display:none;width:34px;height:34px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--gold);align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0;}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99;}
+@media(max-width:1024px){
+  .sidebar{width:200px;min-width:200px;}
+  .view{padding:20px 20px;}
+}
+@media(max-width:768px){
+  body{flex-direction:column;}
+  .sidebar{position:fixed;top:0;right:0;bottom:0;z-index:100;width:240px;height:100vh;transform:translateX(100%);transition:transform .25s;}
+  .sidebar.open{transform:translateX(0);}
+  .sb-overlay.open{display:block;}
+  .mob-menu-btn{display:flex;}
+  .content{width:100%;min-height:100vh;}
+  .top-bar{padding:0 16px;}
+  .view{padding:16px;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .table-wrap{overflow-x:auto;}
+  .data-table{min-width:700px;}
+  .rep-tabs{flex-wrap:wrap;}
+  .bc-col{min-width:24px;}
+}
+@media(max-width:480px){
+  .stats-row{grid-template-columns:1fr;}
+  .top-actions{gap:5px;}
+  .view{padding:12px;}
+  .mini-metrics{grid-template-columns:1fr 1fr;}
+}
 </style>
 </head>
 <body>
 
+<!-- MOBILE MENU BUTTON (hidden on desktop via CSS) -->
+<button class="mob-menu-btn" id="mobMenuBtn" onclick="toggleMgmtSidebar(true)" style="position:fixed;top:12px;right:12px;z-index:101;"><i class="ti ti-menu-2"></i></button>
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sb-overlay" id="sbOverlay" onclick="toggleMgmtSidebar(false)"></div>
+
 <!-- SIDEBAR -->
-<div class="sidebar">
+<div class="sidebar" id="mgmtSidebar">
   <div class="sb-logo">
     <a href="raf_homepage.html">رف<span>RAF MARKETPLACE</span></a>
     <span class="sb-tag">الإدارة</span>
@@ -1782,6 +1816,15 @@ function toggleMaintenance(chk) {
   }
 }
 function saveAllSettings() { alert('تم حفظ جميع إعدادات المنصة ✓'); }
+function toggleMgmtSidebar(open) {
+  const sb = document.getElementById('mgmtSidebar');
+  const ov = document.getElementById('sbOverlay');
+  if (sb) sb.classList.toggle('open', open);
+  if (ov) ov.classList.toggle('open', open);
+}
 </script>
+<!-- FLOATING BACK BUTTON -->
+<button id="floatBack" onclick="history.back()" title="رجوع" style="position:fixed;bottom:24px;left:24px;z-index:9999;width:46px;height:46px;border-radius:50%;background:#1a1a1a;border:1px solid #333;color:#C9A84C;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:all .2s;"><i class="ti ti-arrow-right"></i></button>
+<style>#floatBack:hover{background:#C9A84C!important;color:#0A0A0A!important;border-color:#C9A84C!important;}</style>
 </body>
 </html>

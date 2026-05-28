@@ -172,6 +172,33 @@
 
   /* FOOTER */
   footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text3);margin-top:40px;}
+
+  /* ===== RESPONSIVE ===== */
+  @media(max-width:1024px){
+    .layout{padding:24px 24px;}
+    .wish-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media(max-width:768px){
+    nav{padding:0 16px;}
+    .layout{grid-template-columns:1fr;padding:16px;}
+    .account-sidebar{flex-direction:row;flex-wrap:wrap;gap:10px;}
+    .profile-card{flex:1;min-width:200px;}
+    .sidebar-nav{flex:100%;}
+    .addr-grid{grid-template-columns:1fr;}
+    .wish-grid{grid-template-columns:repeat(2,1fr);}
+    .order-body{flex-wrap:wrap;}
+    .order-foot{flex-wrap:wrap;gap:10px;}
+    footer{padding:16px;flex-direction:column;gap:8px;text-align:center;}
+  }
+  @media(max-width:480px){
+    .account-sidebar{flex-direction:column;}
+    .profile-card{min-width:unset;}
+    .wish-grid{grid-template-columns:1fr;}
+    .track-steps{flex-wrap:nowrap;overflow-x:auto;}
+    .input-field{width:100%;}
+    .settings-row{flex-wrap:wrap;gap:10px;}
+    .settings-action{margin-right:0;}
+  }
 </style>
 </head>
 <body>
@@ -179,6 +206,7 @@
 <!-- NAV -->
 <nav>
   <div class="nav-actions">
+    <button class="nav-ico" onclick="history.back()" title="رجوع"><i class="ti ti-arrow-right"></i></button>
     <button class="nav-ico" onclick="window.location='raf_cart.html'"><i class="ti ti-shopping-cart"></i><span class="cart-badge">3</span></button>
     <button class="nav-ico"><i class="ti ti-bell"></i></button>
     <a href="raf_login.html" class="btn-ghost"><i class="ti ti-logout"></i> تسجيل الخروج</a>
@@ -186,7 +214,11 @@
   <div style="display:flex;align-items:center;gap:8px;">
     <a href="raf_homepage.html" style="color:var(--text3);text-decoration:none;font-size:14px;">الرئيسية</a>
     <span style="color:var(--border);">·</span>
-    <a href="raf_store.html" style="color:var(--text3);text-decoration:none;font-size:14px;">المحلات</a>
+    <a href="raf_storespage.html" style="color:var(--text3);text-decoration:none;font-size:14px;">المحلات</a>
+    <span style="color:var(--border);">·</span>
+    <a href="raf_offers.html" style="color:var(--text3);text-decoration:none;font-size:14px;">العروض</a>
+    <span style="color:var(--border);">·</span>
+    <a href="raf_trending.html" style="color:var(--text3);text-decoration:none;font-size:14px;">الترندات</a>
     <span style="color:var(--border);">·</span>
     <a href="raf_used.html" style="color:var(--text3);text-decoration:none;font-size:14px;">المستعملات</a>
     <span style="color:var(--border);">·</span>

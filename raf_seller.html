@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رف — انضم كتاجر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{--bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;--gold:#C9A84C;--gold2:#A07828;--black:#0A0A0A;--text:#0A0A0A;--text2:#555;--text3:#888;--border:#D8D3C8;--r:8px;--rl:12px;--font:'Tajawal',sans-serif;--fdisplay:'Playfair Display',serif;--fen:'DM Sans',sans-serif;--green:#2E7D32;--green-bg:#E8F5E9;--red:#C62828;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;}
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.3);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.nav-logo{font-family:var(--fdisplay);font-size:28px;font-weight:900;color:var(--gold);text-decoration:none;}
+.nav-logo span{color:var(--text);font-size:11px;font-family:var(--fen);font-weight:300;letter-spacing:3px;display:block;margin-top:-6px;}
+.btn-ghost{padding:8px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+/* HERO */
+.hero{background:var(--black);padding:56px 40px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.05) 1px,transparent 1px);background-size:40px 40px;}
+.hero-ico{width:72px;height:72px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--gold);margin:0 auto 20px;position:relative;z-index:1;}
+.hero-title{font-size:32px;font-weight:900;color:#F5F2EC;position:relative;z-index:1;}
+.hero-title span{color:var(--gold);}
+.hero-sub{font-size:15px;color:#666;margin-top:10px;max-width:520px;margin-inline:auto;line-height:1.7;position:relative;z-index:1;}
+.perks{display:flex;justify-content:center;gap:24px;margin-top:28px;flex-wrap:wrap;position:relative;z-index:1;}
+.perk{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.15);border-radius:var(--r);padding:12px 20px;text-align:center;}
+.perk-num{font-size:22px;font-weight:900;color:var(--gold);font-family:var(--fen);}
+.perk-lbl{font-size:12px;color:#666;margin-top:3px;}
+/* FEATURES STRIP */
+.features-strip{background:var(--bg2);border-bottom:1px solid var(--border);padding:20px 40px;}
+.features-inner{max-width:760px;margin:0 auto;display:flex;justify-content:center;gap:28px;flex-wrap:wrap;}
+.feat-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);}
+.feat-item i{color:var(--gold);font-size:16px;}
+/* PROGRESS */
+.progress-wrap{max-width:680px;margin:32px auto 0;padding:0 40px;}
+.steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:28px;}
+.step-item{display:flex;flex-direction:column;align-items:center;flex:1;}
+.step-ico{width:36px;height:36px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--text3);background:var(--card);transition:all .3s;font-family:var(--fen);}
+.step-item.done .step-ico{background:var(--green);border-color:var(--green);color:#fff;}
+.step-item.act .step-ico{background:var(--gold);border-color:var(--gold);color:var(--black);}
+.step-lbl{font-size:11px;color:var(--text3);margin-top:6px;text-align:center;}
+.step-item.act .step-lbl{color:var(--gold);font-weight:700;}
+.step-item.done .step-lbl{color:var(--green);}
+.step-line{flex:1;height:2px;background:var(--border);margin-bottom:22px;transition:background .3s;}
+.step-line.done{background:var(--green);}
+/* FORM CARD */
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;max-width:680px;margin:0 auto;margin-bottom:40px;}
+.form-card-head{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+.form-card-head i{font-size:20px;color:var(--gold);}
+.form-card-title{font-size:15px;font-weight:700;}
+.form-card-sub{font-size:13px;color:var(--text3);margin-top:2px;}
+.form-body{padding:24px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.field{margin-bottom:16px;}
+.field:last-child{margin-bottom:0;}
+.field-lbl{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:7px;display:block;}
+.field-lbl .req{color:var(--red);margin-right:2px;}
+.field-inp{width:100%;padding:11px 16px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color .2s;appearance:auto;}
+.field-inp:focus{border-color:var(--gold);background:var(--card);}
+.field-inp::placeholder{color:var(--text3);}
+select.field-inp{cursor:pointer;}
+textarea.field-inp{resize:vertical;min-height:90px;}
+/* PLAN SELECTOR */
+.plan-select-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px;}
+.plan-opt{border:2px solid var(--border);border-radius:var(--r);padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.plan-opt:hover{border-color:var(--gold);}
+.plan-opt.sel{border-color:var(--gold);background:rgba(201,168,76,.06);}
+.plan-opt-badge{font-size:9px;font-weight:700;background:var(--gold);color:var(--black);padding:2px 8px;border-radius:10px;position:absolute;top:-8px;right:50%;transform:translateX(50%);white-space:nowrap;}
+.plan-opt-name{font-size:14px;font-weight:700;margin-bottom:3px;}
+.plan-opt-price{font-size:12px;color:var(--text3);font-family:var(--fen);}
+/* UPLOAD ZONE */
+.upload-zone{border:2px dashed var(--border);border-radius:var(--r);padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.upload-zone:hover,.upload-zone.over{border-color:var(--gold);background:rgba(201,168,76,.04);}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.upload-ico{font-size:28px;color:var(--text3);margin-bottom:8px;}
+.upload-title{font-size:14px;font-weight:500;margin-bottom:4px;}
+.upload-sub{font-size:12px;color:var(--text3);}
+.upload-done{display:none;align-items:center;gap:8px;padding:10px 14px;background:var(--green-bg);border:1px solid rgba(46,125,50,.2);border-radius:var(--r);margin-top:10px;font-size:13px;color:var(--green);}
+.upload-done.show{display:flex;}
+/* AGREEMENT */
+.agree-wrap{display:flex;align-items:flex-start;gap:12px;padding:16px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border);cursor:pointer;}
+.agree-chk{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.agree-wrap.on .agree-chk{background:var(--gold);border-color:var(--gold);color:var(--black);}
+.agree-text{font-size:13px;color:var(--text2);line-height:1.6;}
+.agree-text a{color:var(--gold);text-decoration:none;}
+/* NAVIGATION BUTTONS */
+.btn-row{display:flex;gap:10px;margin-top:20px;}
+.btn-next{flex:1;padding:13px;background:var(--gold);border:none;border-radius:var(--r);color:var(--black);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-next:hover{background:var(--gold2);}
+.btn-prev{padding:13px 20px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:8px;}
+.btn-prev:hover{border-color:var(--gold);color:var(--gold);}
+/* HINT CARD */
+.hint-card{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);padding:12px 16px;font-size:13px;color:var(--text2);display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;}
+.hint-card i{color:var(--gold);flex-shrink:0;margin-top:2px;}
+/* SUCCESS */
+.success-wrap{max-width:500px;margin:40px auto;padding:0 40px;text-align:center;display:none;}
+.success-ico{width:80px;height:80px;border-radius:50%;background:var(--green-bg);display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--green);margin:0 auto 24px;}
+.success-title{font-family:var(--fdisplay);font-size:28px;font-weight:700;margin-bottom:10px;}
+.success-sub{font-size:15px;color:var(--text3);line-height:1.7;margin-bottom:24px;}
+.success-ref{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px 20px;font-size:14px;margin-bottom:24px;}
+.success-ref b{color:var(--gold);font-family:var(--fen);}
+.success-next-steps{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:20px;text-align:right;margin-bottom:24px;}
+.success-next-steps h4{font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.success-next-steps h4 i{color:var(--gold);}
+.snext-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:13px;color:var(--text2);}
+.snext-num{width:20px;height:20px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.3);color:var(--gold);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--fen);}
+/* FOOTER */
+footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
+.footer-bottom-simple{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#444;max-width:680px;margin:0 auto;}
+.footer-link{color:#444;text-decoration:none;transition:color .2s;}
+.footer-link:hover{color:var(--gold);}
+/* RESPONSIVE */
+@media(max-width:768px){
+  nav{padding:0 16px;}
+  .hero{padding:36px 16px;}
+  .features-strip{padding:16px;}
+  .progress-wrap{padding:0 16px;}
+  .form-card-head{padding:14px 16px;}
+  .form-body{padding:16px;}
+  .row2{grid-template-columns:1fr;}
+  .plan-select-grid{grid-template-columns:1fr;}
+  .perks{gap:10px;}
+  .success-wrap{padding:0 16px;}
+  footer{padding:24px 16px;}
+}
+@media(max-width:480px){
+  .hero-title{font-size:24px;}
+  .features-inner{flex-direction:column;gap:12px;}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <a href="raf_homepage.html" class="btn-ghost"><i class="ti ti-arrow-right"></i> رجوع</a>
+  </div>
+  <a href="raf_homepage.html" class="nav-logo">رف<span>RAF MARKETPLACE</span></a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-ico"><i class="ti ti-building-store"></i></div>
+  <div class="hero-title">افتح متجرك على <span>رف</span> اليوم</div>
+  <div class="hero-sub">انضم إلى مئات التجار الذين يبيعون منتجاتهم يومياً عبر أكبر منصة تسوق محلية في الكويت — الإعداد سريع وبسيط.</div>
+  <div class="perks">
+    <div class="perk"><div class="perk-num">+450</div><div class="perk-lbl">تاجر نشط</div></div>
+    <div class="perk"><div class="perk-num">8K+</div><div class="perk-lbl">طلب شهري</div></div>
+    <div class="perk"><div class="perk-num">مجاناً</div><div class="perk-lbl">التسجيل</div></div>
+    <div class="perk"><div class="perk-num">24/7</div><div class="perk-lbl">دعم فني</div></div>
+  </div>
+</div>
+
+<!-- FEATURES STRIP -->
+<div class="features-strip">
+  <div class="features-inner">
+    <div class="feat-item"><i class="ti ti-chart-line"></i> لوحة تحكم متكاملة</div>
+    <div class="feat-item"><i class="ti ti-truck-delivery"></i> توصيل عبر سائقي رف</div>
+    <div class="feat-item"><i class="ti ti-credit-card"></i> دفع آمن ومضمون</div>
+    <div class="feat-item"><i class="ti ti-speakerphone"></i> إعلانات داخل المنصة</div>
+    <div class="feat-item"><i class="ti ti-headset"></i> دعم مباشر</div>
+  </div>
+</div>
+
+<!-- PROGRESS STEPS -->
+<div class="progress-wrap">
+  <div class="steps" id="stepsBar">
+    <div class="step-item act" id="stp1">
+      <div class="step-ico">1</div>
+      <div class="step-lbl">بيانات الحساب</div>
+    </div>
+    <div class="step-line" id="ln1"></div>
+    <div class="step-item" id="stp2">
+      <div class="step-ico">2</div>
+      <div class="step-lbl">بيانات المتجر</div>
+    </div>
+    <div class="step-line" id="ln2"></div>
+    <div class="step-item" id="stp3">
+      <div class="step-ico">3</div>
+      <div class="step-lbl">المستندات</div>
+    </div>
+    <div class="step-line" id="ln3"></div>
+    <div class="step-item" id="stp4">
+      <div class="step-ico">4</div>
+      <div class="step-lbl">التأكيد</div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 1: ACCOUNT INFO -->
+<div id="step1" class="form-card">
+  <div class="form-card-head">
+    <i class="ti ti-user-circle"></i>
+    <div>
+      <div class="form-card-title">بيانات الحساب</div>
+      <div class="form-card-sub">أدخل بياناتك الشخصية لإنشاء حسابك كتاجر</div>
+    </div>
+  </div>
+  <div class="form-body">
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">الاسم الأول <span class="req">*</span></label>
+        <input type="text" class="field-inp" placeholder="أحمد">
+      </div>
+      <div class="field">
+        <label class="field-lbl">الاسم الأخير <span class="req">*</span></label>
+        <input type="text" class="field-inp" placeholder="العتيبي">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">رقم الهاتف <span class="req">*</span></label>
+        <input type="tel" class="field-inp" placeholder="5X XXX XXXX" dir="ltr">
+      </div>
+      <div class="field">
+        <label class="field-lbl">البريد الإلكتروني <span class="req">*</span></label>
+        <input type="email" class="field-inp" placeholder="store@example.com" dir="ltr">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">كلمة المرور <span class="req">*</span></label>
+        <input type="password" class="field-inp" placeholder="8 أحرف كحد أدنى">
+      </div>
+      <div class="field">
+        <label class="field-lbl">تأكيد كلمة المرور <span class="req">*</span></label>
+        <input type="password" class="field-inp" placeholder="أعد كتابة كلمة المرور">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">الرقم المدني <span class="req">*</span></label>
+        <input type="text" class="field-inp" placeholder="XXXXXXXXXXX" dir="ltr" maxlength="12">
+      </div>
+      <div class="field">
+        <label class="field-lbl">الجنسية <span class="req">*</span></label>
+        <select class="field-inp">
+          <option value="">— اختر —</option>
+          <option>كويتي</option>
+          <option>سعودي</option>
+          <option>مصري</option>
+          <option>هندي</option>
+          <option>باكستاني</option>
+          <option>أخرى</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-next" onclick="goStep(2)">التالي — بيانات المتجر <i class="ti ti-arrow-left"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2: STORE INFO -->
+<div id="step2" class="form-card" style="display:none;">
+  <div class="form-card-head">
+    <i class="ti ti-store"></i>
+    <div>
+      <div class="form-card-title">بيانات المتجر</div>
+      <div class="form-card-sub">أخبرنا عن متجرك وما تبيعه</div>
+    </div>
+  </div>
+  <div class="form-body">
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">اسم المتجر <span class="req">*</span></label>
+        <input type="text" class="field-inp" placeholder="مثال: Casa Mode">
+      </div>
+      <div class="field">
+        <label class="field-lbl">فئة المتجر <span class="req">*</span></label>
+        <select class="field-inp">
+          <option value="">— اختر —</option>
+          <option>ملابس وأزياء</option>
+          <option>أحذية وحقائب</option>
+          <option>إلكترونيات</option>
+          <option>اكسسوارات</option>
+          <option>تجميل وعناية</option>
+          <option>رياضة ولياقة</option>
+          <option>منزل وديكور</option>
+          <option>أطفال ومستلزمات</option>
+          <option>أخرى</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-lbl">وصف المتجر <span class="req">*</span></label>
+      <textarea class="field-inp" placeholder="اكتب وصفاً مختصراً عن متجرك ومنتجاتك..."></textarea>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">منطقة التشغيل <span class="req">*</span></label>
+        <select class="field-inp">
+          <option value="">— اختر —</option>
+          <option>الكويت العاصمة</option>
+          <option>حولي</option>
+          <option>الفروانية</option>
+          <option>الأحمدي</option>
+          <option>الجهراء</option>
+          <option>مبارك الكبير</option>
+          <option>كل الكويت</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-lbl">عدد المنتجات المتوقعة</label>
+        <select class="field-inp">
+          <option>1 — 20 منتج</option>
+          <option>21 — 50 منتج</option>
+          <option>51 — 100 منتج</option>
+          <option>100+ منتج</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-lbl">اختر باقة الاشتراك <span class="req">*</span></label>
+      <div class="hint-card"><i class="ti ti-info-circle"></i> يمكنك ترقية باقتك في أي وقت من لوحة التحكم. <a href="raf_plans.html" style="color:var(--gold);text-decoration:none;">عرض تفاصيل الباقات</a></div>
+      <div class="plan-select-grid">
+        <div class="plan-opt sel" onclick="selectPlan(this,'free')">
+          <div class="plan-opt-name">مجاني</div>
+          <div class="plan-opt-price">0 د.ك / شهر</div>
+        </div>
+        <div class="plan-opt" onclick="selectPlan(this,'pro')">
+          <div class="plan-opt-badge">الأكثر شعبية</div>
+          <div class="plan-opt-name">مميز</div>
+          <div class="plan-opt-price">9.900 د.ك / شهر</div>
+        </div>
+        <div class="plan-opt" onclick="selectPlan(this,'premium')">
+          <div class="plan-opt-name">بريميوم</div>
+          <div class="plan-opt-price">19.900 د.ك / شهر</div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-prev" onclick="goStep(1)"><i class="ti ti-arrow-right"></i> السابق</button>
+      <button class="btn-next" onclick="goStep(3)">التالي — المستندات <i class="ti ti-arrow-left"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3: DOCUMENTS -->
+<div id="step3" class="form-card" style="display:none;">
+  <div class="form-card-head">
+    <i class="ti ti-files"></i>
+    <div>
+      <div class="form-card-title">المستندات الرسمية</div>
+      <div class="form-card-sub">مطلوبة للتحقق من هويتك وترخيص نشاطك التجاري</div>
+    </div>
+  </div>
+  <div class="form-body">
+    <div class="hint-card"><i class="ti ti-shield-check"></i> تُحفظ جميع مستنداتك بشكل مشفر وآمن ولا تُشارك مع أطراف ثالثة.</div>
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">البطاقة المدنية <span class="req">*</span></label>
+        <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
+          <input type="file" accept="image/*,application/pdf" onchange="markUpload(this,'id-done')">
+          <div class="upload-ico"><i class="ti ti-id-badge-2"></i></div>
+          <div class="upload-title">رفع البطاقة المدنية</div>
+          <div class="upload-sub">JPG أو PNG أو PDF — حد 5 ميغا</div>
+        </div>
+        <div class="upload-done" id="id-done"><i class="ti ti-check-circle"></i> تم رفع الملف</div>
+      </div>
+      <div class="field">
+        <label class="field-lbl">السجل التجاري / الترخيص <span class="req">*</span></label>
+        <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
+          <input type="file" accept="image/*,application/pdf" onchange="markUpload(this,'cr-done')">
+          <div class="upload-ico"><i class="ti ti-building"></i></div>
+          <div class="upload-title">رفع السجل التجاري</div>
+          <div class="upload-sub">JPG أو PNG أو PDF — حد 5 ميغا</div>
+        </div>
+        <div class="upload-done" id="cr-done"><i class="ti ti-check-circle"></i> تم رفع الملف</div>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl">شعار المتجر</label>
+        <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
+          <input type="file" accept="image/*" onchange="markUpload(this,'logo-done')">
+          <div class="upload-ico"><i class="ti ti-photo"></i></div>
+          <div class="upload-title">رفع شعار المتجر</div>
+          <div class="upload-sub">PNG أو JPG — حد 2 ميغا (اختياري)</div>
+        </div>
+        <div class="upload-done" id="logo-done"><i class="ti ti-check-circle"></i> تم رفع الملف</div>
+      </div>
+      <div class="field">
+        <label class="field-lbl">صورة غلاف المتجر</label>
+        <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
+          <input type="file" accept="image/*" onchange="markUpload(this,'cover-done')">
+          <div class="upload-ico"><i class="ti ti-photo-scan"></i></div>
+          <div class="upload-title">رفع صورة الغلاف</div>
+          <div class="upload-sub">PNG أو JPG — حد 4 ميغا (اختياري)</div>
+        </div>
+        <div class="upload-done" id="cover-done"><i class="ti ti-check-circle"></i> تم رفع الملف</div>
+      </div>
+    </div>
+    <div class="field" style="margin-top:8px;">
+      <div class="agree-wrap" onclick="toggleAgree(this)" id="agreeWrap">
+        <div class="agree-chk" id="agreeChk"></div>
+        <div class="agree-text">
+          أوافق على <a href="#" onclick="return false;">شروط وأحكام</a> بيع التجار على منصة رف، وأقر بصحة جميع البيانات والمستندات المقدمة، وأن النشاط التجاري مرخّص وفق القوانين الكويتية.
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn-prev" onclick="goStep(2)"><i class="ti ti-arrow-right"></i> السابق</button>
+      <button class="btn-next" onclick="submitApp()"><i class="ti ti-send"></i> إرسال الطلب</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-wrap" id="successWrap">
+  <div class="success-ico"><i class="ti ti-circle-check"></i></div>
+  <div class="success-title">تم إرسال طلبك!</div>
+  <div class="success-sub">شكراً لاهتمامك بالانضمام إلى منصة رف كتاجر. سيقوم فريقنا بمراجعة بياناتك والتواصل معك خلال 1-2 يوم عمل.</div>
+  <div class="success-ref">رقم الطلب: <b id="refNum">MR-2026-00XXX</b></div>
+  <div class="success-next-steps">
+    <h4><i class="ti ti-list-check"></i> الخطوات التالية</h4>
+    <div class="snext-item"><div class="snext-num">1</div><span>سيصلك بريد إلكتروني بتأكيد استلام طلبك</span></div>
+    <div class="snext-item"><div class="snext-num">2</div><span>يراجع فريقنا مستنداتك خلال يوم عمل</span></div>
+    <div class="snext-item"><div class="snext-num">3</div><span>بعد الموافقة، تستقبل بيانات دخول لوحة التحكم</span></div>
+    <div class="snext-item"><div class="snext-num">4</div><span>أضف منتجاتك وابدأ البيع فوراً</span></div>
+  </div>
+  <a href="raf_homepage.html" class="btn-next" style="text-decoration:none;justify-content:center;">
+    <i class="ti ti-home"></i> العودة للرئيسية
+  </a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-bottom-simple">
+    <div>جميع الحقوق محفوظة © 2026 رف</div>
+    <div style="display:flex;gap:16px;">
+      <a href="#" class="footer-link">سياسة الخصوصية</a>
+      <a href="#" class="footer-link">الشروط والأحكام</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+let agreed = false;
+let curStep = 1;
+
+function goStep(n) {
+  document.getElementById('step' + curStep).style.display = 'none';
+  curStep = n;
+  document.getElementById('step' + n).style.display = 'block';
+  document.getElementById('step' + n).scrollIntoView({behavior:'smooth', block:'start'});
+  updateProgress(n);
+}
+
+function updateProgress(n) {
+  for (let i = 1; i <= 4; i++) {
+    const stp = document.getElementById('stp' + i);
+    stp.className = 'step-item';
+    if (i < n) stp.classList.add('done');
+    else if (i === n) stp.classList.add('act');
+    if (i < 4) {
+      const ln = document.getElementById('ln' + i);
+      ln.className = 'step-line' + (i < n ? ' done' : '');
+    }
+  }
+}
+
+function selectPlan(el, plan) {
+  document.querySelectorAll('.plan-opt').forEach(p => p.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function markUpload(inp, doneId) {
+  if (inp.files && inp.files[0]) {
+    document.getElementById(doneId).classList.add('show');
+  }
+}
+
+function toggleAgree(wrap) {
+  agreed = !agreed;
+  wrap.classList.toggle('on', agreed);
+}
+
+function submitApp() {
+  if (!agreed) {
+    alert('الرجاء الموافقة على الشروط والأحكام');
+    return;
+  }
+  document.getElementById('step3').style.display = 'none';
+  document.getElementById('stepsBar').style.display = 'none';
+  const refNum = 'MR-2026-' + String(Math.floor(Math.random() * 90000) + 10000);
+  document.getElementById('refNum').textContent = refNum;
+  document.getElementById('successWrap').style.display = 'block';
+  updateProgress(4);
+  document.getElementById('successWrap').scrollIntoView({behavior:'smooth'});
+}
+</script>
+</body>
+</html>

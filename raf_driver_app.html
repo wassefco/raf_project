@@ -126,6 +126,16 @@ html,body{height:100%;background:#1A1A1A;display:flex;align-items:center;justify
 /* PANELS */
 .panel{display:none;}
 .panel.on{display:block;}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:430px){
+  html,body{height:auto;align-items:flex-start;justify-content:flex-start;background:var(--bg);}
+  .phone{width:100%;height:auto;min-height:100vh;border-radius:0;box-shadow:none;}
+}
+@media(max-width:768px) and (min-width:431px){
+  html,body{align-items:flex-start;justify-content:center;padding:20px 0;background:#111;}
+  .phone{width:390px;height:auto;min-height:844px;}
+}
 </style>
 </head>
 <body>
@@ -431,5 +441,8 @@ html,body{height:100%;background:#1A1A1A;display:flex;align-items:center;justify
     lines[1].classList.add('done');
   }
 </script>
+<!-- FLOATING BACK BUTTON -->
+<button id="floatBack" onclick="history.back()" title="رجوع" style="position:fixed;bottom:24px;left:24px;z-index:9999;width:46px;height:46px;border-radius:50%;background:#1a1a1a;border:1px solid #333;color:#C9A84C;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:all .2s;"><i class="ti ti-arrow-right"></i></button>
+<style>#floatBack:hover{background:#C9A84C!important;color:#0A0A0A!important;border-color:#C9A84C!important;}</style>
 </body>
 </html>

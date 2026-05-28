@@ -180,6 +180,32 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
 .prog-f{height:100%;background:var(--gold);border-radius:3px;}
 
 .two-col{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px;}
+
+/* ===== RESPONSIVE ===== */
+.mob-menu-btn{display:none;width:34px;height:34px;border:1px solid rgba(201,168,76,.3);border-radius:var(--r);background:transparent;color:var(--gold);align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0;margin-left:10px;}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:998;cursor:pointer;}
+@media(max-width:900px){
+  html,body{overflow:auto;height:auto;}
+  .mode-bar{padding:0 12px;}
+  .mode-btn{padding:0 14px;font-size:12px;}
+}
+@media(max-width:768px){
+  .mode-panel.on{flex-direction:column;}
+  .sb{position:fixed;top:44px;right:0;bottom:0;z-index:999;width:220px;transform:translateX(100%);transition:transform .25s;display:flex;flex-direction:column;}
+  .sb.open{transform:translateX(0);}
+  .sb-overlay.open{display:block;}
+  .mob-menu-btn{display:flex;}
+  .main{overflow:auto;flex:1;}
+  .cnt{padding:14px;overflow:visible;}
+  .top{padding:0 14px;}
+  .two-col{grid-template-columns:1fr;}
+  .table-wrap,.tbl-wrap{overflow-x:auto;}
+  table{min-width:600px;}
+}
+@media(max-width:480px){
+  .metrics-grid,.mini-metrics{grid-template-columns:1fr 1fr!important;}
+  .cnt{padding:10px;}
+}
 </style>
 </head>
 <body>
@@ -193,6 +219,9 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
     <i class="ti ti-motorbike"></i> لوحة السائق
   </button>
 </div>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sb-overlay" id="sbOverlay" onclick="toggleDeliverySidebar(false)"></div>
 
 <!-- ===== SUPERVISOR MODE ===== -->
 <div class="mode-panel on" id="mode-supervisor">
@@ -212,13 +241,14 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
       <div class="sb-user">
         <div class="sb-av" style="background:var(--blue-bg);color:var(--blue);">م</div>
         <div><div class="sb-un">مشرف التوصيل</div><div class="sb-ur">Express Delivery</div></div>
-        <i class="ti ti-logout" style="margin-right:auto;color:#333;font-size:16px;cursor:pointer;" onclick="window.location='raf_login.html'"></i>
+        <i class="ti ti-logout" style="margin-right:auto;color:#333;font-size:16px;cursor:pointer;" onclick="window.location='raf_login_staff.html'"></i>
       </div>
     </div>
   </aside>
 
   <div class="main">
     <header class="top">
+      <button class="mob-menu-btn" onclick="toggleDeliverySidebar(true)"><i class="ti ti-menu-2"></i></button>
       <div>
         <div class="top-t" id="sup-top-title">لوحة التحكم</div>
         <div class="top-b">مشرف التوصيل</div>
@@ -624,6 +654,16 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
       this.classList.add('on');
     });
   });
+
+  function toggleDeliverySidebar(open) {
+    const activeSb = document.querySelector('.mode-panel.on .sb');
+    const ov = document.getElementById('sbOverlay');
+    if (activeSb) activeSb.classList.toggle('open', open);
+    if (ov) ov.classList.toggle('open', open);
+  }
 </script>
+<!-- FLOATING BACK BUTTON -->
+<button id="floatBack" onclick="history.back()" title="رجوع" style="position:fixed;bottom:24px;left:24px;z-index:9999;width:46px;height:46px;border-radius:50%;background:#1a1a1a;border:1px solid #333;color:#C9A84C;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:all .2s;"><i class="ti ti-arrow-right"></i></button>
+<style>#floatBack:hover{background:#C9A84C!important;color:#0A0A0A!important;border-color:#C9A84C!important;}</style>
 </body>
 </html>
