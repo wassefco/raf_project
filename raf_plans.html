@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html id="htmlRoot" lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,6 +19,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.97);backdrop-
 .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
 .btn-gold{padding:8px 20px;border:none;border-radius:var(--r);background:var(--gold);color:var(--black);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
 .btn-gold:hover{background:var(--gold2);}
+.lang-btn{padding:7px 14px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--fen);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.5px;}
+.lang-btn:hover{border-color:var(--gold);color:var(--gold);}
 /* HERO */
 .hero{background:var(--black);padding:56px 40px;text-align:center;position:relative;overflow:hidden;}
 .hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.05) 1px,transparent 1px);background-size:40px 40px;}
@@ -139,16 +141,17 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:0;}
 <!-- NAV -->
 <nav>
   <div style="display:flex;align-items:center;gap:8px;">
-    <a href="raf_homepage.html" class="btn-ghost"><i class="ti ti-arrow-right"></i> رجوع</a>
+    <button class="lang-btn" onclick="toggleLang()" data-ar="EN" data-en="ع">EN</button>
+    <a href="raf_homepage.html" class="btn-ghost"><i class="ti ti-arrow-right"></i> <span data-ar="رجوع" data-en="Back">رجوع</span></a>
   </div>
   <a href="raf_homepage.html" class="nav-logo">رف<span>RAF MARKETPLACE</span></a>
-  <a href="raf_seller.html" class="btn-gold"><i class="ti ti-building-store"></i> ابدأ مجاناً</a>
+  <a href="raf_seller.html" class="btn-gold"><i class="ti ti-building-store"></i> <span data-ar="ابدأ مجاناً" data-en="Start Free">ابدأ مجاناً</span></a>
 </nav>
 
 <!-- HERO -->
 <div class="hero">
-  <div class="hero-title">اختر الباقة <span>المناسبة لمتجرك</span></div>
-  <div class="hero-sub">ابدأ مجاناً وطوّر متجرك — لا عقود، لا رسوم خفية، يمكنك الترقية أو التخفيض في أي وقت.</div>
+  <div class="hero-title" data-ar="اختر الباقة المناسبة لمتجرك" data-en="Choose the Right Plan for Your Store">اختر الباقة <span>المناسبة لمتجرك</span></div>
+  <div class="hero-sub" data-ar="ابدأ مجاناً وطوّر متجرك — لا عقود، لا رسوم خفية، يمكنك الترقية أو التخفيض في أي وقت." data-en="Start free and grow your store — no contracts, no hidden fees, upgrade or downgrade anytime.">ابدأ مجاناً وطوّر متجرك — لا عقود، لا رسوم خفية، يمكنك الترقية أو التخفيض في أي وقت.</div>
   <!-- BILLING TOGGLE -->
   <div class="billing-toggle">
     <span class="billing-label">شهري</span>
@@ -388,6 +391,19 @@ function toggleBilling(el) {
     document.getElementById('premAnnual').innerHTML = '&nbsp;';
   }
 }
+/* LANG */
+function toggleLang(){
+  const r=document.getElementById('htmlRoot');
+  const isAr=r.lang==='ar';
+  r.lang=isAr?'en':'ar';r.dir=isAr?'ltr':'rtl';
+  localStorage.setItem('raf_lang',isAr?'en':'ar');
+  applyLang();
+}
+function applyLang(){
+  const en=document.getElementById('htmlRoot').lang==='en';
+  document.querySelectorAll('[data-ar]').forEach(el=>{el.textContent=en?el.dataset.en:el.dataset.ar;});
+}
+(function(){const l=localStorage.getItem('raf_lang');if(l){const r=document.getElementById('htmlRoot');r.lang=l;r.dir=l==='en'?'ltr':'rtl';}applyLang();})();
 </script>
 </body>
 </html>

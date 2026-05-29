@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رف — عناويني</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{--bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;--gold:#C9A84C;--gold2:#A07828;--black:#0A0A0A;--text:#0A0A0A;--text2:#555;--text3:#888;--border:#D8D3C8;--r:8px;--rl:12px;--font:'Tajawal',sans-serif;--fdisplay:'Playfair Display',serif;--fen:'DM Sans',sans-serif;--green:#2E7D32;--red:#C62828;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.3);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.nav-logo{font-family:var(--fdisplay);font-size:28px;font-weight:900;color:var(--gold);text-decoration:none;}
+.nav-logo span{color:var(--text);font-size:11px;font-family:var(--fen);font-weight:300;letter-spacing:3px;display:block;margin-top:-6px;}
+.nav-actions{display:flex;align-items:center;gap:8px;}
+.btn-ghost{padding:8px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.btn-gold{padding:8px 20px;border:none;border-radius:var(--r);background:var(--gold);color:var(--black);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-gold:hover{background:var(--gold2);}
+.nav-ico{width:40px;height:40px;border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;background:transparent;font-size:18px;position:relative;transition:all .2s;}
+.nav-ico:hover{border-color:var(--gold);color:var(--gold);}
+.lang-btn{padding:6px 12px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text3);font-family:var(--fen);font-size:12px;cursor:pointer;transition:all .2s;letter-spacing:1px;display:inline-flex;align-items:center;gap:5px;}
+.lang-btn:hover{border-color:var(--gold);color:var(--gold);}
+.lang-btn .lang-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block;}
+
+/* MAIN */
+.main{max-width:900px;margin:0 auto;padding:40px;}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
+.page-title{font-family:var(--fdisplay);font-size:28px;font-weight:900;color:var(--text);}
+.page-title span{color:var(--gold);}
+
+/* ADDRESS GRID */
+.addr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px;}
+.addr-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:20px;position:relative;transition:all .2s;}
+.addr-card:hover{border-color:var(--gold);box-shadow:0 4px 16px rgba(0,0,0,.06);}
+.addr-card.default-card{border-color:var(--gold);background:rgba(201,168,76,.03);}
+.addr-type-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.addr-type-icon{width:34px;height:34px;border-radius:8px;background:rgba(201,168,76,.12);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:16px;}
+.addr-type-name{font-size:13px;font-weight:700;color:var(--text);}
+.default-badge{font-size:10px;font-weight:700;background:var(--gold);color:var(--black);padding:2px 8px;border-radius:20px;margin-right:auto;}
+.addr-details{font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:14px;}
+.addr-actions{display:flex;gap:8px;}
+.addr-btn{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;font-family:var(--font);}
+.addr-btn-edit{background:transparent;border:1px solid var(--border);color:var(--text2);}
+.addr-btn-edit:hover{border-color:var(--gold);color:var(--gold);}
+.addr-btn-default{background:transparent;border:1px solid var(--border);color:var(--text2);}
+.addr-btn-default:hover{border-color:var(--gold);color:var(--gold);}
+.addr-btn-default.on{background:rgba(201,168,76,.1);border-color:var(--gold);color:var(--gold);}
+.addr-btn-del{background:transparent;border:1px solid transparent;color:var(--text3);}
+.addr-btn-del:hover{border-color:#C62828;color:#C62828;}
+
+/* ADD ADDRESS FORM */
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:28px;margin-bottom:32px;}
+.form-card-title{font-size:17px;font-weight:700;margin-bottom:24px;display:flex;align-items:center;gap:8px;}
+.form-card-title i{color:var(--gold);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+.form-label{font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.5px;}
+.form-input,.form-select{padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text);outline:none;transition:border-color .2s;width:100%;}
+.form-input:focus,.form-select:focus{border-color:var(--gold);}
+.type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.type-opt{padding:10px 8px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;text-align:center;transition:all .2s;font-size:12px;font-weight:500;color:var(--text2);}
+.type-opt i{display:block;font-size:18px;color:var(--gold);margin-bottom:4px;}
+.type-opt:hover,.type-opt.on{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.06);}
+.form-actions{display:flex;gap:12px;margin-top:24px;justify-content:flex-end;}
+.btn-cancel{padding:11px 24px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:14px;cursor:pointer;transition:all .2s;}
+.btn-cancel:hover{border-color:var(--gold);color:var(--gold);}
+.btn-save{padding:11px 28px;border:none;border-radius:var(--r);background:var(--gold);color:var(--black);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
+.btn-save:hover{background:var(--gold2);}
+
+/* BREADCRUMB */
+.breadcrumb{padding:12px 40px;font-size:13px;color:var(--text3);display:flex;align-items:center;gap:6px;background:var(--bg2);border-bottom:1px solid var(--border);}
+.breadcrumb a{color:var(--text3);text-decoration:none;transition:color .2s;}
+.breadcrumb a:hover{color:var(--gold);}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:48px 20px;color:var(--text3);}
+.empty-state i{font-size:48px;color:var(--border);margin-bottom:12px;display:block;}
+.empty-state p{font-size:15px;}
+
+/* FOOTER */
+footer{background:#0A0A0A;border-top:1px solid rgba(201,168,76,.2);padding:40px 40px 20px;}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:20px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.35);max-width:900px;margin:0 auto;}
+
+@media(max-width:768px){nav{padding:0 16px;}.main{padding:20px 16px;}.form-grid{grid-template-columns:1fr;}.breadcrumb{padding:10px 16px;}.type-grid{grid-template-columns:repeat(2,1fr);}}
+html[lang="en"] body{font-family:'DM Sans',sans-serif;}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-actions">
+    <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
+    <button class="nav-ico" onclick="goBack()" title="رجوع"><i class="ti ti-arrow-right"></i></button>
+    <button class="nav-ico" onclick="window.location='raf_cart.html'"><i class="ti ti-shopping-cart"></i></button>
+    <a href="raf_account.html" class="btn-ghost"><i class="ti ti-user"></i> <span data-ar="حسابي" data-en="My Account">حسابي</span></a>
+  </div>
+  <div></div>
+  <a href="raf_homepage.html" class="nav-logo">رف<span>RAF MARKETPLACE</span></a>
+</nav>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
+  <i class="ti ti-chevron-left"></i>
+  <a href="raf_account.html" data-ar="حسابي" data-en="My Account">حسابي</a>
+  <i class="ti ti-chevron-left"></i>
+  <span data-ar="عناويني" data-en="My Addresses">عناويني</span>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="page-title" data-ar="عناويني" data-en="My Addresses">عناويني</div>
+    <button class="btn-gold" onclick="openForm()" id="addBtn">
+      <i class="ti ti-plus"></i>
+      <span data-ar="إضافة عنوان" data-en="Add Address">إضافة عنوان</span>
+    </button>
+  </div>
+
+  <!-- ADD/EDIT FORM (hidden by default) -->
+  <div class="form-card" id="addrForm" style="display:none;">
+    <div class="form-card-title"><i class="ti ti-map-pin"></i> <span id="formTitle" data-ar="إضافة عنوان جديد" data-en="Add New Address">إضافة عنوان جديد</span></div>
+    <input type="hidden" id="editId">
+    <div class="form-group full" style="margin-bottom:16px;">
+      <div class="form-label" data-ar="نوع العنوان" data-en="Address Type">نوع العنوان</div>
+      <div class="type-grid">
+        <div class="type-opt on" data-type="home" onclick="selType(this)"><i class="ti ti-home"></i><span data-ar="منزل" data-en="Home">منزل</span></div>
+        <div class="type-opt" data-type="work" onclick="selType(this)"><i class="ti ti-building"></i><span data-ar="عمل" data-en="Work">عمل</span></div>
+        <div class="type-opt" data-type="family" onclick="selType(this)"><i class="ti ti-users"></i><span data-ar="عائلة" data-en="Family">عائلة</span></div>
+        <div class="type-opt" data-type="other" onclick="selType(this)"><i class="ti ti-map-pin"></i><span data-ar="أخرى" data-en="Other">أخرى</span></div>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label" data-ar="الاسم الكامل" data-en="Full Name">الاسم الكامل</label>
+        <input type="text" class="form-input" id="fName" placeholder="محمد العنزي">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-ar="رقم الهاتف" data-en="Phone Number">رقم الهاتف</label>
+        <input type="tel" class="form-input" id="fPhone" placeholder="+965 9XXX XXXX">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-ar="المنطقة" data-en="Area">المنطقة</label>
+        <select class="form-select" id="fArea">
+          <option value="">اختر المنطقة</option>
+          <option>حولي</option><option>السالمية</option><option>الرميثية</option>
+          <option>الفروانية</option><option>مبارك الكبير</option><option>الأحمدي</option>
+          <option>الجهراء</option><option>شرق</option><option>الكويت</option><option>أخرى</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-ar="القطعة" data-en="Block">القطعة</label>
+        <input type="text" class="form-input" id="fBlock" placeholder="رقم القطعة">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-ar="الشارع" data-en="Street">الشارع</label>
+        <input type="text" class="form-input" id="fStreet" placeholder="اسم أو رقم الشارع">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-ar="المبنى / المنزل" data-en="Building / House">المبنى / المنزل</label>
+        <input type="text" class="form-input" id="fBuilding" placeholder="رقم المبنى">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-ar="الطابق" data-en="Floor">الطابق</label>
+        <input type="text" class="form-input" id="fFloor" placeholder="رقم الطابق (اختياري)">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-ar="الشقة" data-en="Apartment">الشقة</label>
+        <input type="text" class="form-input" id="fApt" placeholder="رقم الشقة (اختياري)">
+      </div>
+      <div class="form-group full">
+        <label class="form-label" data-ar="ملاحظات للتوصيل" data-en="Delivery Notes">ملاحظات للتوصيل</label>
+        <input type="text" class="form-input" id="fNotes" placeholder="أي تعليمات إضافية...">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="closeForm()" data-ar="إلغاء" data-en="Cancel">إلغاء</button>
+      <button class="btn-save" onclick="saveAddress()" data-ar="حفظ العنوان" data-en="Save Address">حفظ العنوان</button>
+    </div>
+  </div>
+
+  <!-- ADDRESS GRID -->
+  <div class="addr-grid" id="addrGrid">
+    <!-- rendered by JS -->
+  </div>
+
+</div><!-- /main -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-bottom">
+    <div data-ar="جميع الحقوق محفوظة © 2026 رف" data-en="All Rights Reserved © 2026 Raf">جميع الحقوق محفوظة © 2026 رف</div>
+    <div style="display:flex;gap:16px;color:rgba(255,255,255,.45);">
+      <a href="#" style="color:rgba(255,255,255,.45);text-decoration:none;" data-ar="سياسة الخصوصية" data-en="Privacy Policy">سياسة الخصوصية</a>
+      <a href="#" style="color:rgba(255,255,255,.45);text-decoration:none;" data-ar="الشروط والأحكام" data-en="Terms">الشروط والأحكام</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const ADDR_KEY = 'raf_addresses';
+
+const SEED_DATA = [
+  { id:'addr-1', type:'home', name:'محمد العنزي', phone:'+965 9123 4567',
+    area:'حولي', block:'5', street:'شارع الأمير', building:'12',
+    floor:'1', apartment:'4', notes:'', isDefault:true },
+  { id:'addr-2', type:'work', name:'محمد العنزي', phone:'+965 9123 4567',
+    area:'شرق', block:'1', street:'برج X', building:'',
+    floor:'8', apartment:'', notes:'مكتب 801', isDefault:false }
+];
+
+const TYPE_ICONS = { home:'ti-home', work:'ti-building', family:'ti-users', other:'ti-map-pin' };
+const TYPE_LABELS = { home:'منزل', work:'عمل', family:'عائلة', other:'أخرى' };
+const TYPE_LABELS_EN = { home:'Home', work:'Work', family:'Family', other:'Other' };
+
+function loadAddresses() {
+  try {
+    const d = JSON.parse(localStorage.getItem(ADDR_KEY));
+    if (d && d.length > 0) return d;
+  } catch(e) {}
+  return JSON.parse(JSON.stringify(SEED_DATA));
+}
+
+function saveAddresses(list) {
+  localStorage.setItem(ADDR_KEY, JSON.stringify(list));
+}
+
+function renderAddresses() {
+  const list = loadAddresses();
+  const grid = document.getElementById('addrGrid');
+  const isEN = document.getElementById('htmlRoot').lang === 'en';
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><i class="ti ti-map-pin-off"></i><p>' + (isEN?'No addresses saved yet.':'لا توجد عناوين محفوظة بعد.') + '</p></div>';
+    return;
+  }
+  grid.innerHTML = list.map(addr => {
+    const lbl = isEN ? TYPE_LABELS_EN[addr.type]||addr.type : TYPE_LABELS[addr.type]||addr.type;
+    const ico = TYPE_ICONS[addr.type] || 'ti-map-pin';
+    const lines = [addr.area, 'ق '+addr.block, addr.street, 'م '+addr.building, addr.floor?'ط '+addr.floor:'', addr.apartment?'ش '+addr.apartment:''].filter(Boolean).join(' · ');
+    return `<div class="addr-card${addr.isDefault?' default-card':''}">
+      <div class="addr-type-row">
+        <div class="addr-type-icon"><i class="ti ${ico}"></i></div>
+        <span class="addr-type-name">${lbl}</span>
+        ${addr.isDefault?`<span class="default-badge">${isEN?'Default':'الافتراضي'}</span>`:''}
+      </div>
+      <div class="addr-details">
+        <strong>${addr.name}</strong><br>
+        ${addr.phone}<br>
+        ${lines}
+        ${addr.notes?'<br><span style="color:var(--text3);">'+addr.notes+'</span>':''}
+      </div>
+      <div class="addr-actions">
+        <button class="addr-btn addr-btn-edit" onclick="editAddress('${addr.id}')"><i class="ti ti-pencil"></i> ${isEN?'Edit':'تعديل'}</button>
+        ${!addr.isDefault?`<button class="addr-btn addr-btn-default" onclick="setDefault('${addr.id}')"><i class="ti ti-star"></i> ${isEN?'Set Default':'جعله افتراضي'}</button>`:''}
+        <button class="addr-btn addr-btn-del" onclick="deleteAddress('${addr.id}')" style="margin-right:auto;"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openForm(id) {
+  const form = document.getElementById('addrForm');
+  const isEN = document.getElementById('htmlRoot').lang === 'en';
+  document.getElementById('editId').value = id || '';
+  document.getElementById('formTitle').textContent = id ? (isEN?'Edit Address':'تعديل العنوان') : (isEN?'Add New Address':'إضافة عنوان جديد');
+  if (id) {
+    const addr = loadAddresses().find(a => a.id === id);
+    if (addr) {
+      document.getElementById('fName').value     = addr.name;
+      document.getElementById('fPhone').value    = addr.phone;
+      document.getElementById('fArea').value     = addr.area;
+      document.getElementById('fBlock').value    = addr.block;
+      document.getElementById('fStreet').value   = addr.street;
+      document.getElementById('fBuilding').value = addr.building;
+      document.getElementById('fFloor').value    = addr.floor;
+      document.getElementById('fApt').value      = addr.apartment;
+      document.getElementById('fNotes').value    = addr.notes;
+      document.querySelectorAll('.type-opt').forEach(o => {
+        o.classList.toggle('on', o.dataset.type === addr.type);
+      });
+    }
+  } else {
+    ['fName','fPhone','fBlock','fStreet','fBuilding','fFloor','fApt','fNotes'].forEach(id => document.getElementById(id).value='');
+    document.getElementById('fArea').value='';
+    document.querySelectorAll('.type-opt').forEach((o,i) => o.classList.toggle('on', i===0));
+  }
+  form.style.display = 'block';
+  form.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function closeForm() {
+  document.getElementById('addrForm').style.display = 'none';
+}
+
+function selType(el) {
+  document.querySelectorAll('.type-opt').forEach(o => o.classList.remove('on'));
+  el.classList.add('on');
+}
+
+function saveAddress() {
+  const id      = document.getElementById('editId').value;
+  const name    = document.getElementById('fName').value.trim();
+  const phone   = document.getElementById('fPhone').value.trim();
+  const area    = document.getElementById('fArea').value;
+  const block   = document.getElementById('fBlock').value.trim();
+  const street  = document.getElementById('fStreet').value.trim();
+  const building= document.getElementById('fBuilding').value.trim();
+  const floor   = document.getElementById('fFloor').value.trim();
+  const apt     = document.getElementById('fApt').value.trim();
+  const notes   = document.getElementById('fNotes').value.trim();
+  const type    = document.querySelector('.type-opt.on')?.dataset.type || 'home';
+  const isEN    = document.getElementById('htmlRoot').lang === 'en';
+
+  if (!name || !area || !block || !street) {
+    alert(isEN ? 'Please fill required fields (name, area, block, street).' : 'يرجى تعبئة الحقول المطلوبة: الاسم، المنطقة، القطعة، الشارع.');
+    return;
+  }
+  const list = loadAddresses();
+  if (id) {
+    const idx = list.findIndex(a => a.id === id);
+    if (idx > -1) list[idx] = { ...list[idx], type, name, phone, area, block, street, building, floor, apartment:apt, notes };
+  } else {
+    list.push({ id:'addr-'+Date.now(), type, name, phone, area, block, street, building, floor, apartment:apt, notes, isDefault:list.length===0 });
+  }
+  saveAddresses(list);
+  closeForm();
+  renderAddresses();
+  // If came from cart, go back
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('from') === 'cart') {
+    setTimeout(() => window.location='raf_cart.html', 300);
+  }
+}
+
+function deleteAddress(id) {
+  const isEN = document.getElementById('htmlRoot').lang === 'en';
+  if (!confirm(isEN?'Delete this address?':'حذف هذا العنوان؟')) return;
+  let list = loadAddresses().filter(a => a.id !== id);
+  if (list.length > 0 && !list.some(a => a.isDefault)) list[0].isDefault = true;
+  saveAddresses(list);
+  renderAddresses();
+}
+
+function setDefault(id) {
+  const list = loadAddresses().map(a => ({ ...a, isDefault: a.id === id }));
+  saveAddresses(list);
+  renderAddresses();
+}
+
+function editAddress(id) {
+  openForm(id);
+}
+
+function goBack() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('from') === 'cart') window.location = 'raf_cart.html';
+  else if (document.referrer) history.back();
+  else window.location = 'raf_account.html';
+}
+
+/* LANG */
+function toggleLang() {
+  const html=document.getElementById('htmlRoot'),isAR=html.lang==='ar',nl=isAR?'en':'ar';
+  html.lang=nl;html.dir=isAR?'ltr':'rtl';
+  document.getElementById('langLabel').textContent=isAR?'ع':'EN';
+  localStorage.setItem('raf_lang',nl);
+  document.querySelectorAll('[data-ar]').forEach(el=>{const t=el.getAttribute('data-'+nl);if(t)el.textContent=t;});
+  renderAddresses(); // re-render labels in new language
+}
+
+/* INIT */
+(function init() {
+  if (localStorage.getItem('raf_lang') === 'en') {
+    document.getElementById('htmlRoot').lang='en';
+    document.getElementById('htmlRoot').dir='ltr';
+    document.getElementById('langLabel').textContent='ع';
+    document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.getAttribute('data-en');});
+  }
+  // Seed default data if none exists
+  if (!localStorage.getItem(ADDR_KEY)) {
+    saveAddresses(SEED_DATA);
+  }
+  renderAddresses();
+
+  // Auto-open edit form if ?edit=id in URL
+  const params = new URLSearchParams(window.location.search);
+  const editId = params.get('edit');
+  if (editId) {
+    setTimeout(() => openForm(editId), 100);
+  }
+})();
+</script>
+</body>
+</html>

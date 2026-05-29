@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -220,6 +220,10 @@ footer { background: var(--black); color: #888; padding: 48px 40px 24px; margin-
   .ml-stats { grid-template-columns: 1fr 1fr; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
 }
+.lang-btn{padding:6px 12px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;letter-spacing:1px;display:inline-flex;align-items:center;gap:5px;}
+.lang-btn:hover{border-color:var(--gold);color:var(--gold);}
+.lang-btn .lang-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block;}
+html[lang="en"] body{font-family:'DM Sans',sans-serif;}
 </style>
 </head>
 <body>
@@ -227,14 +231,15 @@ footer { background: var(--black); color: #888; padding: 48px 40px 24px; margin-
 <!-- NAV -->
 <nav>
   <div class="nav-actions">
+    <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
     <button class="nav-ico" onclick="history.back()" title="رجوع"><i class="ti ti-arrow-right"></i></button>
     <button class="nav-ico" onclick="window.location='raf_cart.html'">
       <i class="ti ti-shopping-cart"></i>
       <span class="cart-badge">3</span>
     </button>
     <button class="nav-ico" onclick="window.location='raf_account.html'"><i class="ti ti-heart"></i></button>
-    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> تسجيل الدخول</a>
-    <a href="raf_login.html" class="btn-gold">إنشاء حساب</a>
+    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> <span data-ar="تسجيل الدخول" data-en="Sign In">تسجيل الدخول</span></a>
+    <a href="raf_login.html" class="btn-gold"><span data-ar="إنشاء حساب" data-en="Sign Up">إنشاء حساب</span></a>
   </div>
   <div class="nav-links">
     <a href="raf_storespage.html" class="nav-link">المحلات</a>
@@ -291,32 +296,35 @@ footer { background: var(--black); color: #888; padding: 48px 40px 24px; margin-
     <div class="search-bar">
       <div class="search-inp-wrap">
         <i class="ti ti-search"></i>
-        <input type="text" placeholder="ابحث عن منتج مستعمل...">
+        <input type="text" id="usedSearch" placeholder="ابحث عن منتج مستعمل..." oninput="applyUsedFilters()">
       </div>
-      <select class="f-select">
-        <option>الفئة</option>
+      <select class="f-select" id="usedCat" onchange="applyUsedFilters()">
+        <option value="">الفئة</option>
         <option>ملابس</option><option>أحذية</option><option>إلكترونيات</option>
         <option>أثاث</option><option>سيارات</option><option>أخرى</option>
       </select>
-      <select class="f-select">
-        <option>الحالة</option>
-        <option>كالجديد</option><option>جيد جداً</option><option>جيد</option>
+      <select class="f-select" id="usedCond" onchange="applyUsedFilters()">
+        <option value="">الحالة</option>
+        <option value="كالجديد">كالجديد</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option>
       </select>
-      <select class="f-select">
-        <option>المنطقة</option>
+      <select class="f-select" id="usedArea" onchange="applyUsedFilters()">
+        <option value="">المنطقة</option>
         <option>حولي</option><option>السالمية</option><option>الرميثية</option>
         <option>الفروانية</option><option>مبارك الكبير</option><option>الأحمدي</option><option>الجهراء</option>
       </select>
-      <select class="f-select">
-        <option>الترتيب</option>
-        <option>الأحدث</option><option>السعر: الأقل</option><option>السعر: الأعلى</option>
+      <select class="f-select" id="usedSort" onchange="applyUsedFilters()">
+        <option value="">الترتيب</option>
+        <option value="priceAsc">السعر: الأقل</option><option value="priceDesc">السعر: الأعلى</option>
       </select>
     </div>
-    <div class="chips">
-      <div class="chip on">الكل</div>
-      <div class="chip">ملابس</div><div class="chip">إلكترونيات</div>
-      <div class="chip">أحذية</div><div class="chip">أثاث</div>
-      <div class="chip">سيارات</div><div class="chip">أخرى</div>
+    <div class="chips" id="usedChips">
+      <div class="chip on" data-cat="" onclick="selUsedChip(this)">الكل</div>
+      <div class="chip" data-cat="ملابس" onclick="selUsedChip(this)">ملابس</div>
+      <div class="chip" data-cat="إلكترونيات" onclick="selUsedChip(this)">إلكترونيات</div>
+      <div class="chip" data-cat="أحذية" onclick="selUsedChip(this)">أحذية</div>
+      <div class="chip" data-cat="أثاث" onclick="selUsedChip(this)">أثاث</div>
+      <div class="chip" data-cat="سيارات" onclick="selUsedChip(this)">سيارات</div>
+      <div class="chip" data-cat="أخرى" onclick="selUsedChip(this)">أخرى</div>
     </div>
     <div class="listings-grid">
       <div class="listing-card" onclick="switchView('detail',null)">
@@ -697,6 +705,63 @@ document.querySelectorAll('.thumb').forEach(t => {
 });
 function selPlan(el) { document.querySelectorAll('.plan-card').forEach(p => p.classList.remove('on')); el.classList.add('on'); }
 function selCond(el) { document.querySelectorAll('.cond-opt').forEach(c => c.classList.remove('on')); el.classList.add('on'); }
+
+/* ===== USED FILTER ===== */
+function selUsedChip(el) {
+  document.querySelectorAll('#usedChips .chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  applyUsedFilters();
+}
+function applyUsedFilters() {
+  const q    = (document.getElementById('usedSearch')?.value||'').toLowerCase();
+  const cat  = document.getElementById('usedCat')?.value||'';
+  const cond = document.getElementById('usedCond')?.value||'';
+  const area = document.getElementById('usedArea')?.value||'';
+  const sort = document.getElementById('usedSort')?.value||'';
+  const chipCat = document.querySelector('#usedChips .chip.on')?.dataset.cat||'';
+  const activeCat = cat || chipCat;
+  const cards = Array.from(document.querySelectorAll('.listings-grid .listing-card'));
+
+  // Sort
+  if (sort === 'priceAsc' || sort === 'priceDesc') {
+    cards.sort((a,b) => {
+      const pa = parseFloat(a.querySelector('.listing-price')?.textContent)||0;
+      const pb = parseFloat(b.querySelector('.listing-price')?.textContent)||0;
+      return sort==='priceAsc' ? pa-pb : pb-pa;
+    });
+    const grid = document.querySelector('.listings-grid');
+    cards.forEach(c => grid.appendChild(c));
+  }
+
+  cards.forEach(card => {
+    const title  = (card.querySelector('.listing-title')?.textContent||'').toLowerCase();
+    const cardCat= (card.querySelector('.listing-cat')?.textContent||'');
+    const condEl = card.querySelector('.cond-badge');
+    const cardCond = condEl ? condEl.textContent.trim() : '';
+    const cardArea = (card.querySelector('.listing-area')?.textContent||'');
+    const mQ    = !q         || title.includes(q);
+    const mCat  = !activeCat || cardCat.includes(activeCat);
+    const mCond = !cond      || cardCond === cond;
+    const mArea = !area      || cardArea.includes(area);
+    card.style.display = (mQ && mCat && mCond && mArea) ? '' : 'none';
+  });
+}
+
+/* ===== LANG TOGGLE ===== */
+function toggleLang() {
+  const html=document.getElementById('htmlRoot'),isAR=html.lang==='ar',nl=isAR?'en':'ar';
+  html.lang=nl;html.dir=isAR?'ltr':'rtl';
+  document.getElementById('langLabel').textContent=isAR?'ع':'EN';
+  localStorage.setItem('raf_lang',nl);
+  document.querySelectorAll('[data-ar]').forEach(el=>{const t=el.getAttribute('data-'+nl);if(t)el.textContent=t;});
+}
+(function(){
+  if(localStorage.getItem('raf_lang')==='en'){
+    document.getElementById('htmlRoot').lang='en';document.getElementById('htmlRoot').dir='ltr';
+    document.getElementById('langLabel').textContent='ع';
+    document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.getAttribute('data-en');});
+  }
+})();
 </script>
 </body>
 </html>

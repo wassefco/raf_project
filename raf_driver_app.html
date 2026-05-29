@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html id="htmlRoot" lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -126,6 +126,8 @@ html,body{height:100%;background:#1A1A1A;display:flex;align-items:center;justify
 /* PANELS */
 .panel{display:none;}
 .panel.on{display:block;}
+.lang-btn-float{position:fixed;top:16px;right:16px;z-index:9999;padding:7px 14px;border:1px solid rgba(201,168,76,.4);border-radius:8px;background:rgba(10,10,10,.85);color:#C9A84C;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;backdrop-filter:blur(8px);}
+.lang-btn-float:hover{border-color:#C9A84C;background:rgba(201,168,76,.1);}
 
 /* ===== RESPONSIVE ===== */
 @media(max-width:430px){
@@ -186,11 +188,11 @@ html,body{height:100%;background:#1A1A1A;display:flex;align-items:center;justify
   <!-- TABS -->
   <div class="tabs">
     <div class="tab on" onclick="switchTab('available', this)">
-      المتاحة
+      <span data-ar="المتاحة" data-en="Available">المتاحة</span>
       <span style="background:var(--red-bg);color:var(--red);padding:1px 5px;border-radius:8px;font-size:10px;margin-right:3px;">3</span>
     </div>
-    <div class="tab" onclick="switchTab('active', this)">طلبي الحالي</div>
-    <div class="tab" onclick="switchTab('history', this)">سجلي</div>
+    <div class="tab" onclick="switchTab('active', this)" data-ar="طلبي الحالي" data-en="Active Order">طلبي الحالي</div>
+    <div class="tab" onclick="switchTab('history', this)" data-ar="سجلي" data-en="History">سجلي</div>
   </div>
 
   <!-- CONTENT -->
@@ -376,19 +378,19 @@ html,body{height:100%;background:#1A1A1A;display:flex;align-items:center;justify
   <div class="bottom-nav">
     <div class="nav-item on" onclick="switchNav(this,'available')">
       <div class="nav-badge"><i class="ti ti-package"></i></div>
-      <span>الطلبات</span>
+      <span data-ar="الطلبات" data-en="Orders">الطلبات</span>
     </div>
     <div class="nav-item" onclick="switchNav(this,'active')">
       <i class="ti ti-truck"></i>
-      <span>الحالي</span>
+      <span data-ar="الحالي" data-en="Active">الحالي</span>
     </div>
     <div class="nav-item" onclick="switchNav(this,'history')">
       <i class="ti ti-history"></i>
-      <span>سجلي</span>
+      <span data-ar="سجلي" data-en="History">سجلي</span>
     </div>
     <div class="nav-item" onclick="switchNav(this,'profile')">
       <i class="ti ti-user"></i>
-      <span>حسابي</span>
+      <span data-ar="حسابي" data-en="Profile">حسابي</span>
     </div>
   </div>
 
@@ -428,6 +430,21 @@ html,body{height:100%;background:#1A1A1A;display:flex;align-items:center;justify
     }, 1500);
   }
 
+  /* LANG */
+  function toggleLang(){
+    const r=document.getElementById('htmlRoot');
+    const isAr=r.lang==='ar';
+    r.lang=isAr?'en':'ar';r.dir=isAr?'ltr':'rtl';
+    localStorage.setItem('raf_lang',isAr?'en':'ar');
+    applyLang();
+  }
+  function applyLang(){
+    const en=document.getElementById('htmlRoot').lang==='en';
+    document.querySelectorAll('[data-ar]').forEach(el=>{el.textContent=en?el.dataset.en:el.dataset.ar;});
+    const lb=document.getElementById('langBtnFloat');
+    if(lb)lb.textContent=en?'ع':'EN';
+  }
+  (function(){const l=localStorage.getItem('raf_lang');if(l){const r=document.getElementById('htmlRoot');r.lang=l;r.dir=l==='en'?'ltr':'rtl';}applyLang();})();
   function markDelivered() {
     const dots = document.querySelectorAll('.ao-dot');
     const lbls = document.querySelectorAll('.ao-lbl');
@@ -441,6 +458,7 @@ html,body{height:100%;background:#1A1A1A;display:flex;align-items:center;justify
     lines[1].classList.add('done');
   }
 </script>
+<button id="langBtnFloat" class="lang-btn-float" onclick="toggleLang()">EN</button>
 <!-- FLOATING BACK BUTTON -->
 <button id="floatBack" onclick="history.back()" title="رجوع" style="position:fixed;bottom:24px;left:24px;z-index:9999;width:46px;height:46px;border-radius:50%;background:#1a1a1a;border:1px solid #333;color:#C9A84C;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:all .2s;"><i class="ti ti-arrow-right"></i></button>
 <style>#floatBack:hover{background:#C9A84C!important;color:#0A0A0A!important;border-color:#C9A84C!important;}</style>

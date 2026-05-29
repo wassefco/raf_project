@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -239,6 +239,10 @@ footer { background: var(--black); color: #888; padding: 48px 40px 24px; margin-
   .footer-grid { grid-template-columns: 1fr 1fr; }
   .offer-row { flex-wrap: wrap; }
 }
+.lang-btn{padding:6px 12px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;letter-spacing:1px;display:inline-flex;align-items:center;gap:5px;}
+.lang-btn:hover{border-color:var(--gold);color:var(--gold);}
+.lang-btn .lang-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block;}
+html[lang="en"] body{font-family:'DM Sans',sans-serif;}
 </style>
 </head>
 <body>
@@ -246,14 +250,15 @@ footer { background: var(--black); color: #888; padding: 48px 40px 24px; margin-
 <!-- NAV -->
 <nav>
   <div class="nav-actions">
+    <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
     <button class="nav-ico" onclick="history.back()" title="رجوع"><i class="ti ti-arrow-right"></i></button>
     <button class="nav-ico" onclick="window.location='raf_cart.html'">
       <i class="ti ti-shopping-cart"></i>
       <span class="cart-badge">3</span>
     </button>
     <button class="nav-ico" onclick="window.location='raf_account.html'"><i class="ti ti-heart"></i></button>
-    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> تسجيل الدخول</a>
-    <a href="raf_login.html" class="btn-gold">إنشاء حساب</a>
+    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> <span data-ar="تسجيل الدخول" data-en="Sign In">تسجيل الدخول</span></a>
+    <a href="raf_login.html" class="btn-gold"><span data-ar="إنشاء حساب" data-en="Sign Up">إنشاء حساب</span></a>
   </div>
   <div class="nav-links">
     <a href="raf_storespage.html" class="nav-link">المحلات</a>
@@ -310,28 +315,33 @@ footer { background: var(--black); color: #888; padding: 48px 40px 24px; margin-
     <div class="search-bar">
       <div class="search-inp-wrap">
         <i class="ti ti-search"></i>
-        <input type="text" placeholder="ابحث عن مزاد...">
+        <input type="text" id="auctSearch" placeholder="ابحث عن مزاد..." oninput="applyAuctFilters()">
       </div>
-      <select class="f-select">
-        <option>الفئة</option>
+      <select class="f-select" id="auctCat" onchange="applyAuctFilters()">
+        <option value="">الفئة</option>
         <option>ملابس</option><option>إلكترونيات</option><option>أثاث</option>
-        <option>مقتنيات</option><option>فن</option><option>أخرى</option>
+        <option>مقتنيات</option><option>فن</option><option>اكسسوارات</option><option>مجوهرات</option><option>أخرى</option>
       </select>
-      <select class="f-select">
-        <option>المنطقة</option>
+      <select class="f-select" id="auctArea" onchange="applyAuctFilters()">
+        <option value="">المنطقة</option>
         <option>حولي</option><option>السالمية</option><option>الرميثية</option>
         <option>الفروانية</option><option>مبارك الكبير</option>
       </select>
-      <select class="f-select">
-        <option>الترتيب</option>
-        <option>الأحدث</option><option>الأكثر عروضاً</option><option>السعر: الأقل</option>
+      <select class="f-select" id="auctSort" onchange="applyAuctFilters()">
+        <option value="">الترتيب</option>
+        <option value="priceAsc">السعر: الأقل</option>
+        <option value="priceDesc">السعر: الأعلى</option>
       </select>
     </div>
-    <div class="chips">
-      <div class="chip on">الكل</div>
-      <div class="chip">إلكترونيات</div><div class="chip">ملابس</div>
-      <div class="chip">أثاث</div><div class="chip">مقتنيات</div>
-      <div class="chip">فن</div><div class="chip">أخرى</div>
+    <div class="chips" id="auctChips">
+      <div class="chip on" data-cat="" onclick="selAuctChip(this)">الكل</div>
+      <div class="chip" data-cat="إلكترونيات" onclick="selAuctChip(this)">إلكترونيات</div>
+      <div class="chip" data-cat="ملابس" onclick="selAuctChip(this)">ملابس</div>
+      <div class="chip" data-cat="أثاث" onclick="selAuctChip(this)">أثاث</div>
+      <div class="chip" data-cat="مقتنيات" onclick="selAuctChip(this)">مقتنيات</div>
+      <div class="chip" data-cat="فن" onclick="selAuctChip(this)">فن</div>
+      <div class="chip" data-cat="مجوهرات" onclick="selAuctChip(this)">مجوهرات</div>
+      <div class="chip" data-cat="أخرى" onclick="selAuctChip(this)">أخرى</div>
     </div>
     <div class="auctions-grid">
 
@@ -814,12 +824,55 @@ function switchView(name, tab) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-document.querySelectorAll('.chip').forEach(c => {
-  c.addEventListener('click', () => {
-    document.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
-    c.classList.add('on');
+/* ===== AUCTION FILTER ===== */
+function selAuctChip(el) {
+  document.querySelectorAll('#auctChips .chip').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  applyAuctFilters();
+}
+function applyAuctFilters() {
+  const q    = (document.getElementById('auctSearch')?.value||'').toLowerCase();
+  const cat  = document.getElementById('auctCat')?.value||'';
+  const area = document.getElementById('auctArea')?.value||'';
+  const sort = document.getElementById('auctSort')?.value||'';
+  const chipCat = document.querySelector('#auctChips .chip.on')?.dataset.cat||'';
+  const activeCat = cat || chipCat;
+  const cards = Array.from(document.querySelectorAll('.auctions-grid .auction-card'));
+  if (sort === 'priceAsc' || sort === 'priceDesc') {
+    cards.sort((a,b) => {
+      const pa = parseFloat((a.querySelector('.start-price')?.textContent||'0').replace(/,/g,''))||0;
+      const pb = parseFloat((b.querySelector('.start-price')?.textContent||'0').replace(/,/g,''))||0;
+      return sort==='priceAsc' ? pa-pb : pb-pa;
+    });
+    const grid = document.querySelector('.auctions-grid');
+    if (grid) cards.forEach(c => grid.appendChild(c));
+  }
+  cards.forEach(card => {
+    const title  = (card.querySelector('.auction-title')?.textContent||'').toLowerCase();
+    const cardCat= (card.querySelector('.auction-cat')?.textContent||'');
+    const cardArea= (card.querySelector('.auction-area')?.textContent||'');
+    const mQ   = !q         || title.includes(q);
+    const mCat = !activeCat || cardCat.includes(activeCat);
+    const mArea= !area      || cardArea.includes(area);
+    card.style.display = (mQ && mCat && mArea) ? '' : 'none';
   });
-});
+}
+
+/* ===== LANG TOGGLE ===== */
+function toggleLang() {
+  const html=document.getElementById('htmlRoot'),isAR=html.lang==='ar',nl=isAR?'en':'ar';
+  html.lang=nl;html.dir=isAR?'ltr':'rtl';
+  document.getElementById('langLabel').textContent=isAR?'ع':'EN';
+  localStorage.setItem('raf_lang',nl);
+  document.querySelectorAll('[data-ar]').forEach(el=>{const t=el.getAttribute('data-'+nl);if(t)el.textContent=t;});
+}
+(function(){
+  if(localStorage.getItem('raf_lang')==='en'){
+    document.getElementById('htmlRoot').lang='en';document.getElementById('htmlRoot').dir='ltr';
+    document.getElementById('langLabel').textContent='ع';
+    document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.getAttribute('data-en');});
+  }
+})();
 
 document.querySelectorAll('.thumb').forEach(t => {
   t.addEventListener('click', () => {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -105,17 +105,22 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
 .footer-link:hover{color:var(--gold);}
 .footer-bottom{border-top:1px solid #1a1a1a;padding-top:24px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#444;max-width:1200px;margin:0 auto;}
 @media(max-width:900px){nav{padding:0 16px;}.nav-links{display:none;}.main{padding:20px 16px;}.page-header{padding:28px 16px;}.breadcrumb{padding:10px 16px;}.footer-grid{grid-template-columns:1fr 1fr;}}
+.lang-btn{padding:6px 12px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;letter-spacing:1px;display:inline-flex;align-items:center;gap:5px;}
+.lang-btn:hover{border-color:var(--gold);color:var(--gold);}
+.lang-btn .lang-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block;}
+html[lang="en"] body{font-family:'DM Sans',sans-serif;}
 </style>
 </head>
 <body>
 
 <nav>
   <div class="nav-actions">
+    <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
     <button class="nav-ico" onclick="history.back()" title="رجوع"><i class="ti ti-arrow-right"></i></button>
     <button class="nav-ico" onclick="window.location='raf_cart.html'"><i class="ti ti-shopping-cart"></i><span class="cart-badge" id="cartBadge">0</span></button>
     <button class="nav-ico" onclick="window.location='raf_wishlist.html'"><i class="ti ti-heart"></i></button>
-    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> تسجيل الدخول</a>
-    <a href="raf_login.html" class="btn-gold">إنشاء حساب</a>
+    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> <span data-ar="تسجيل الدخول" data-en="Sign In">تسجيل الدخول</span></a>
+    <a href="raf_login.html" class="btn-gold"><span data-ar="إنشاء حساب" data-en="Sign Up">إنشاء حساب</span></a>
   </div>
   <div class="nav-links">
     <a href="raf_storespage.html" class="nav-link">المحلات</a>
@@ -165,29 +170,29 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
   <div class="filter-bar">
     <div class="search-inp" style="flex:1;">
       <i class="ti ti-search" style="color:var(--text3);"></i>
-      <input type="text" placeholder="ابحث بالاسم أو رقم المنتج (P-001)...">
+      <input type="text" id="trendSearch" placeholder="ابحث بالاسم أو رقم المنتج (P-001)..." oninput="filterTrending()">
     </div>
-    <select class="f-select">
+    <select class="f-select" id="trendStore" onchange="filterTrending()">
       <option value="">كل المحلات</option>
-      <option>Casa Mode</option><option>Sole & Co</option>
+      <option>Casa Mode</option><option>Sole &amp; Co</option>
       <option>TechZone</option><option>Luxe Accessories</option><option>Glam Store</option>
     </select>
-    <select class="f-select">
-      <option>الترتيب</option>
-      <option>الأحدث</option>
-      <option>الأكثر مبيعاً</option>
-      <option>الأعلى تقييماً</option>
+    <select class="f-select" id="trendSort" onchange="filterTrending()">
+      <option value="">الترتيب</option>
+      <option value="priceAsc">السعر: الأقل</option>
+      <option value="priceDesc">السعر: الأعلى</option>
+      <option value="rating">الأعلى تقييماً</option>
     </select>
   </div>
 
   <!-- CATEGORY CHIPS -->
-  <div class="chips">
-    <div class="chip on" onclick="selChip(this)">الكل</div>
-    <div class="chip" onclick="selChip(this)">ملابس</div>
-    <div class="chip" onclick="selChip(this)">أحذية</div>
-    <div class="chip" onclick="selChip(this)">إلكترونيات</div>
-    <div class="chip" onclick="selChip(this)">اكسسوارات</div>
-    <div class="chip" onclick="selChip(this)">حقائب</div>
+  <div class="chips" id="trendChips">
+    <div class="chip on" data-cat="" onclick="selChip(this)">الكل</div>
+    <div class="chip" data-cat="ملابس" onclick="selChip(this)">ملابس</div>
+    <div class="chip" data-cat="أحذية" onclick="selChip(this)">أحذية</div>
+    <div class="chip" data-cat="إلكترونيات" onclick="selChip(this)">إلكترونيات</div>
+    <div class="chip" data-cat="اكسسوارات" onclick="selChip(this)">اكسسوارات</div>
+    <div class="chip" data-cat="حقائب" onclick="selChip(this)">حقائب</div>
   </div>
 
   <!-- ======== TRENDING TAB ======== -->
@@ -198,7 +203,7 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
     </div>
     <div class="prod-grid">
 
-      <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-card" data-cat="ملابس" data-store="Casa Mode" onclick="window.location='raf_product.html'">
         <div class="prod-img">
           <i class="ti ti-shirt"></i>
           <span class="badge-fire"><i class="ti ti-flame" style="font-size:10px;"></i> رائج #1</span>
@@ -217,7 +222,7 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
         </div>
       </div>
 
-      <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-card" data-cat="إلكترونيات" data-store="TechZone" onclick="window.location='raf_product.html'">
         <div class="prod-img">
           <i class="ti ti-device-mobile"></i>
           <span class="badge-fire"><i class="ti ti-flame" style="font-size:10px;"></i> رائج #2</span>
@@ -236,7 +241,7 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
         </div>
       </div>
 
-      <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-card" data-cat="اكسسوارات" data-store="Glam Store" onclick="window.location='raf_product.html'">
         <div class="prod-img">
           <i class="ti ti-watch"></i>
           <span class="badge-fire"><i class="ti ti-flame" style="font-size:10px;"></i> رائج #3</span>
@@ -255,7 +260,7 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
         </div>
       </div>
 
-      <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-card" data-cat="حقائب" data-store="Casa Mode" onclick="window.location='raf_product.html'">
         <div class="prod-img">
           <i class="ti ti-backpack"></i>
           <span class="badge-fire"><i class="ti ti-flame" style="font-size:10px;"></i> رائج #4</span>
@@ -274,7 +279,7 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
         </div>
       </div>
 
-      <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-card" data-cat="اكسسوارات" data-store="Luxe Accessories" onclick="window.location='raf_product.html'">
         <div class="prod-img">
           <i class="ti ti-sunglasses"></i>
           <span class="badge-fire"><i class="ti ti-flame" style="font-size:10px;"></i> رائج #5</span>
@@ -293,7 +298,7 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
         </div>
       </div>
 
-      <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-card" data-cat="إلكترونيات" data-store="TechZone" onclick="window.location='raf_product.html'">
         <div class="prod-img">
           <i class="ti ti-headphones"></i>
           <span class="badge-fire"><i class="ti ti-flame" style="font-size:10px;"></i> رائج #6</span>
@@ -323,7 +328,7 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
     </div>
     <div class="prod-grid">
 
-      <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-card" data-cat="ملابس" data-store="Casa Mode" onclick="window.location='raf_product.html'">
         <div class="prod-img">
           <i class="ti ti-shirt"></i>
           <span class="badge-new">جديد</span>
@@ -342,7 +347,7 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
         </div>
       </div>
 
-      <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-card" data-cat="أحذية" data-store="Sole &amp; Co" onclick="window.location='raf_product.html'">
         <div class="prod-img">
           <i class="ti ti-shoe"></i>
           <span class="badge-new">جديد</span>
@@ -361,7 +366,7 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
         </div>
       </div>
 
-      <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-card" data-cat="إلكترونيات" data-store="TechZone" onclick="window.location='raf_product.html'">
         <div class="prod-img" style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#7c83f5;">
           <i class="ti ti-device-tablet"></i>
           <span class="badge-new">جديد</span>
@@ -380,7 +385,7 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
         </div>
       </div>
 
-      <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-card" data-cat="اكسسوارات" data-store="Glam Store" onclick="window.location='raf_product.html'">
         <div class="prod-img">
           <i class="ti ti-diamond"></i>
           <span class="badge-new">جديد</span>
@@ -408,7 +413,7 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
       <div class="sec-label"><i class="ti ti-trending-up"></i> الأكثر مبيعاً هذا الشهر</div>
     </div>
     <div class="prod-grid">
-      <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-card" data-cat="ملابس" data-store="Casa Mode" onclick="window.location='raf_product.html'">
         <div class="prod-img"><i class="ti ti-shirt"></i>
           <span class="badge-fire" style="background:var(--gold);color:var(--black);">🏆 #1</span>
           <span class="prod-num">P-001</span>
@@ -425,7 +430,7 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
           </div>
         </div>
       </div>
-      <div class="prod-card" onclick="window.location='raf_product.html'">
+      <div class="prod-card" data-cat="إلكترونيات" data-store="TechZone" onclick="window.location='raf_product.html'">
         <div class="prod-img"><i class="ti ti-device-mobile"></i>
           <span class="badge-fire" style="background:var(--gold);color:var(--black);">🥈 #2</span>
           <span class="prod-num">P-003</span>
@@ -525,16 +530,47 @@ function initCartBtns(){
 function switchTab(tab,btn){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
-  document.getElementById('view-trending').style.display='none';
-  document.getElementById('view-new').style.display='none';
-  document.getElementById('view-weekly').style.display='none';
+  ['trending','new','weekly'].forEach(t=>document.getElementById('view-'+t).style.display='none');
   document.getElementById('view-'+tab).style.display='block';
+  filterTrending();
 }
 /* CHIPS */
 function selChip(el){
-  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  document.querySelectorAll('#trendChips .chip').forEach(c=>c.classList.remove('on'));
   el.classList.add('on');
+  filterTrending();
 }
+/* FILTER */
+function filterTrending(){
+  const q = (document.getElementById('trendSearch')?.value||'').toLowerCase();
+  const store = document.getElementById('trendStore')?.value||'';
+  const cat = document.querySelector('#trendChips .chip.on')?.dataset.cat||'';
+  document.querySelectorAll('.prod-card').forEach(card=>{
+    const name  = (card.querySelector('.prod-name')?.textContent||'').toLowerCase();
+    const cs    = card.dataset.store||'';
+    const cc    = card.dataset.cat||'';
+    const pnum  = (card.querySelector('.prod-num')?.textContent||'').toLowerCase();
+    const mQ    = !q     || name.includes(q) || cs.toLowerCase().includes(q) || pnum.includes(q);
+    const mSt   = !store || cs === store;
+    const mCat  = !cat   || cc === cat;
+    card.style.display = (mQ && mSt && mCat) ? '' : 'none';
+  });
+}
+/* LANG */
+function toggleLang(){
+  const html=document.getElementById('htmlRoot'),isAR=html.lang==='ar',nl=isAR?'en':'ar';
+  html.lang=nl;html.dir=isAR?'ltr':'rtl';
+  document.getElementById('langLabel').textContent=isAR?'ع':'EN';
+  localStorage.setItem('raf_lang',nl);
+  document.querySelectorAll('[data-ar]').forEach(el=>{const t=el.getAttribute('data-'+nl);if(t)el.textContent=t;});
+}
+(function(){
+  if(localStorage.getItem('raf_lang')==='en'){
+    document.getElementById('htmlRoot').lang='en';document.getElementById('htmlRoot').dir='ltr';
+    document.getElementById('langLabel').textContent='ع';
+    document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.getAttribute('data-en');});
+  }
+})();
 /* WISHLIST */
 function toggleWish(btn){
   const ico=btn.querySelector('i');

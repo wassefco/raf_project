@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html id="htmlRoot" lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -70,6 +70,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex
 .btn-p:hover{background:var(--gold2);}
 .btn-g{background:transparent;border:1px solid var(--border);color:var(--text2);}
 .btn-g:hover{border-color:var(--gold);color:var(--gold);}
+.lang-btn{padding:6px 12px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--fen);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.5px;}
+.lang-btn:hover{border-color:var(--gold);color:var(--gold);}
 .ico{width:34px;height:34px;border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;background:transparent;font-size:16px;position:relative;transition:all .2s;}
 .ico:hover{border-color:var(--gold);color:var(--gold);}
 .dot{position:absolute;top:-3px;right:-3px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid var(--card);}
@@ -213,10 +215,10 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
 <!-- MODE SWITCHER -->
 <div class="mode-bar">
   <button class="mode-btn on" onclick="switchMode('supervisor')">
-    <i class="ti ti-shield"></i> لوحة مشرف التوصيل
+    <i class="ti ti-shield"></i> <span data-ar="لوحة مشرف التوصيل" data-en="Supervisor Panel">لوحة مشرف التوصيل</span>
   </button>
   <button class="mode-btn" onclick="switchMode('driver')">
-    <i class="ti ti-motorbike"></i> لوحة السائق
+    <i class="ti ti-motorbike"></i> <span data-ar="لوحة السائق" data-en="Driver Panel">لوحة السائق</span>
   </button>
 </div>
 
@@ -231,12 +233,12 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
       <div class="sb-mark">ر</div>
       <div><div class="sb-title">Ruph</div><div class="sb-sub">DELIVERY</div></div>
     </div>
-    <div class="sb-sec">الرئيسية</div>
-    <div class="sb-item on" onclick="switchSec('sup-dashboard',this,'sup')"><i class="ti ti-layout-dashboard"></i> لوحة التحكم</div>
-    <div class="sb-item" onclick="switchSec('sup-orders',this,'sup')"><i class="ti ti-shopping-cart"></i> الطلبات <span class="sb-n r">8</span></div>
-    <div class="sb-sec">السائقون</div>
-    <div class="sb-item" onclick="switchSec('sup-drivers',this,'sup')"><i class="ti ti-users"></i> السائقون</div>
-    <div class="sb-item" onclick="switchSec('sup-reports',this,'sup')"><i class="ti ti-chart-bar"></i> التقارير</div>
+    <div class="sb-sec" data-ar="الرئيسية" data-en="MAIN">الرئيسية</div>
+    <div class="sb-item on" onclick="switchSec('sup-dashboard',this,'sup')"><i class="ti ti-layout-dashboard"></i> <span data-ar="لوحة التحكم" data-en="Dashboard">لوحة التحكم</span></div>
+    <div class="sb-item" onclick="switchSec('sup-orders',this,'sup')"><i class="ti ti-shopping-cart"></i> <span data-ar="الطلبات" data-en="Orders">الطلبات</span> <span class="sb-n r">8</span></div>
+    <div class="sb-sec" data-ar="السائقون" data-en="DRIVERS">السائقون</div>
+    <div class="sb-item" onclick="switchSec('sup-drivers',this,'sup')"><i class="ti ti-users"></i> <span data-ar="السائقون" data-en="Drivers">السائقون</span></div>
+    <div class="sb-item" onclick="switchSec('sup-reports',this,'sup')"><i class="ti ti-chart-bar"></i> <span data-ar="التقارير" data-en="Reports">التقارير</span></div>
     <div class="sb-foot">
       <div class="sb-user">
         <div class="sb-av" style="background:var(--blue-bg);color:var(--blue);">م</div>
@@ -254,7 +256,8 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
         <div class="top-b">مشرف التوصيل</div>
       </div>
       <div class="top-act">
-        <button class="btn btn-p" onclick="switchSec('sup-drivers',null,'sup')"><i class="ti ti-user-plus"></i> إضافة سائق</button>
+        <button class="lang-btn" onclick="toggleLang()" data-ar="EN" data-en="ع">EN</button>
+        <button class="btn btn-p" onclick="switchSec('sup-drivers',null,'sup')"><i class="ti ti-user-plus"></i> <span data-ar="إضافة سائق" data-en="Add Driver">إضافة سائق</span></button>
         <button class="ico"><i class="ti ti-bell"></i><span class="dot"></span></button>
       </div>
     </header>
@@ -489,7 +492,7 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
         <div class="top-b">خالد السائق</div>
       </div>
       <div class="top-act">
-        <span class="badge b-g" style="font-size:12px;padding:6px 12px;"><i class="ti ti-circle-filled" style="font-size:8px;"></i> نشط</span>
+        <span class="badge b-g" style="font-size:12px;padding:6px 12px;"><i class="ti ti-circle-filled" style="font-size:8px;"></i> <span data-ar="نشط" data-en="Active">نشط</span></span>
         <button class="ico"><i class="ti ti-bell"></i><span class="dot"></span></button>
       </div>
     </header>
@@ -661,6 +664,19 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
     if (activeSb) activeSb.classList.toggle('open', open);
     if (ov) ov.classList.toggle('open', open);
   }
+  /* LANG */
+  function toggleLang(){
+    const r=document.getElementById('htmlRoot');
+    const isAr=r.lang==='ar';
+    r.lang=isAr?'en':'ar';r.dir=isAr?'ltr':'rtl';
+    localStorage.setItem('raf_lang',isAr?'en':'ar');
+    applyLang();
+  }
+  function applyLang(){
+    const en=document.getElementById('htmlRoot').lang==='en';
+    document.querySelectorAll('[data-ar]').forEach(el=>{el.textContent=en?el.dataset.en:el.dataset.ar;});
+  }
+  (function(){const l=localStorage.getItem('raf_lang');if(l){const r=document.getElementById('htmlRoot');r.lang=l;r.dir=l==='en'?'ltr':'rtl';}applyLang();})();
 </script>
 <!-- FLOATING BACK BUTTON -->
 <button id="floatBack" onclick="history.back()" title="رجوع" style="position:fixed;bottom:24px;left:24px;z-index:9999;width:46px;height:46px;border-radius:50%;background:#1a1a1a;border:1px solid #333;color:#C9A84C;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:all .2s;"><i class="ti ti-arrow-right"></i></button>

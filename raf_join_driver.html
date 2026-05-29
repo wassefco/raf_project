@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html id="htmlRoot" lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,6 +17,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.97);backdrop-
 .nav-logo span{color:var(--text);font-size:11px;font-family:var(--fen);font-weight:300;letter-spacing:3px;display:block;margin-top:-6px;}
 .btn-ghost{padding:8px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
 .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.lang-btn{padding:7px 14px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--fen);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.5px;}
+.lang-btn:hover{border-color:var(--gold);color:var(--gold);}
 /* HERO HEADER */
 .hero{background:var(--black);padding:56px 40px;text-align:center;position:relative;overflow:hidden;}
 .hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(201,168,76,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.05) 1px,transparent 1px);background-size:40px 40px;}
@@ -97,7 +99,8 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
 <!-- NAV -->
 <nav>
   <div style="display:flex;align-items:center;gap:8px;">
-    <a href="raf_homepage.html" class="btn-ghost"><i class="ti ti-arrow-right"></i> رجوع</a>
+    <button class="lang-btn" onclick="toggleLang()" data-ar="EN" data-en="ع">EN</button>
+    <a href="raf_homepage.html" class="btn-ghost"><i class="ti ti-arrow-right"></i> <span data-ar="رجوع" data-en="Back">رجوع</span></a>
   </div>
   <a href="raf_homepage.html" class="nav-logo">رف<span>RAF MARKETPLACE</span></a>
 </nav>
@@ -105,8 +108,8 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
 <!-- HERO -->
 <div class="hero">
   <div class="hero-ico"><i class="ti ti-steering-wheel"></i></div>
-  <div class="hero-title">انضم إلى فريق سائقي <span>رف</span></div>
-  <div class="hero-sub">اكسب دخلاً ثابتاً بجدول مرن — انضم إلى مئات السائقين الذين يوصلون البضائع يومياً في الكويت.</div>
+  <div class="hero-title" data-ar="انضم إلى فريق سائقي رف" data-en="Join the RAF Drivers Team">انضم إلى فريق سائقي <span>رف</span></div>
+  <div class="hero-sub" data-ar="اكسب دخلاً ثابتاً بجدول مرن — انضم إلى مئات السائقين الذين يوصلون البضائع يومياً في الكويت." data-en="Earn steady income on a flexible schedule — join hundreds of drivers delivering daily across Kuwait.">اكسب دخلاً ثابتاً بجدول مرن — انضم إلى مئات السائقين الذين يوصلون البضائع يومياً في الكويت.</div>
   <div class="perks">
     <div class="perk"><div class="perk-num">+250</div><div class="perk-lbl">سائق نشط</div></div>
     <div class="perk"><div class="perk-num">500+</div><div class="perk-lbl">طلب يومي</div></div>
@@ -397,6 +400,19 @@ function submitApp() {
   updateProgress(4);
   document.getElementById('successWrap').scrollIntoView({behavior:'smooth'});
 }
+/* LANG */
+function toggleLang(){
+  const r=document.getElementById('htmlRoot');
+  const isAr=r.lang==='ar';
+  r.lang=isAr?'en':'ar';r.dir=isAr?'ltr':'rtl';
+  localStorage.setItem('raf_lang',isAr?'en':'ar');
+  applyLang();
+}
+function applyLang(){
+  const en=document.getElementById('htmlRoot').lang==='en';
+  document.querySelectorAll('[data-ar]').forEach(el=>{el.textContent=en?el.dataset.en:el.dataset.ar;});
+}
+(function(){const l=localStorage.getItem('raf_lang');if(l){const r=document.getElementById('htmlRoot');r.lang=l;r.dir=l==='en'?'ltr':'rtl';}applyLang();})();
 </script>
 </body>
 </html>

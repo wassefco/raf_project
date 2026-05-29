@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html id="htmlRoot" lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,6 +45,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .tb-btn:hover{border-color:var(--gold);color:var(--gold);}
 .tb-btn.gold{background:var(--gold);border-color:var(--gold);color:var(--bg);font-weight:700;}
 .tb-btn.gold:hover{background:var(--gold2);}
+.lang-btn{padding:6px 12px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--fen);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.5px;}
+.lang-btn:hover{border-color:var(--gold);color:var(--gold);}
 /* VIEW WRAPPER */
 .view{display:none;padding:28px 32px;}
 .view.on{display:block;}
@@ -227,45 +229,45 @@ select.field-inp{cursor:pointer;appearance:auto;}
   <div class="sb-scroll">
 
     <div class="sb-section">
-      <div class="sb-section-lbl">الرئيسية</div>
-      <div class="sb-item on" onclick="sw('overview',this)"><i class="ti ti-layout-dashboard"></i> لوحة المراقبة</div>
+      <div class="sb-section-lbl" data-ar="الرئيسية" data-en="MAIN">الرئيسية</div>
+      <div class="sb-item on" onclick="sw('overview',this)"><i class="ti ti-layout-dashboard"></i> <span data-ar="لوحة المراقبة" data-en="Overview">لوحة المراقبة</span></div>
     </div>
 
     <div class="sb-section">
-      <div class="sb-section-lbl">العمليات</div>
-      <div class="sb-item" onclick="sw('orders',this)"><i class="ti ti-shopping-bag"></i> الطلبات <span class="sb-badge">14</span></div>
-      <div class="sb-item" onclick="sw('invoices',this)"><i class="ti ti-file-invoice"></i> الفواتير والمدفوعات <span class="sb-badge" style="background:var(--amber);color:#000;">3</span></div>
+      <div class="sb-section-lbl" data-ar="العمليات" data-en="OPERATIONS">العمليات</div>
+      <div class="sb-item" onclick="sw('orders',this)"><i class="ti ti-shopping-bag"></i> <span data-ar="الطلبات" data-en="Orders">الطلبات</span> <span class="sb-badge">14</span></div>
+      <div class="sb-item" onclick="sw('invoices',this)"><i class="ti ti-file-invoice"></i> <span data-ar="الفواتير والمدفوعات" data-en="Invoices &amp; Payments">الفواتير والمدفوعات</span> <span class="sb-badge" style="background:var(--amber);color:#000;">3</span></div>
     </div>
 
     <div class="sb-section">
-      <div class="sb-section-lbl">إدارة المحتوى</div>
-      <div class="sb-item" onclick="sw('accounts',this)"><i class="ti ti-users"></i> الحسابات</div>
-      <div class="sb-item" onclick="sw('stores',this)"><i class="ti ti-building-store"></i> المحلات</div>
-      <div class="sb-item" onclick="sw('products',this)"><i class="ti ti-package"></i> المنتجات</div>
-      <div class="sb-item" onclick="sw('content',this)"><i class="ti ti-photo"></i> النوافذ والبانرات</div>
-      <div class="sb-item" onclick="sw('ads',this)"><i class="ti ti-ad-2"></i> الإعلانات الممولة</div>
+      <div class="sb-section-lbl" data-ar="إدارة المحتوى" data-en="CONTENT">إدارة المحتوى</div>
+      <div class="sb-item" onclick="sw('accounts',this)"><i class="ti ti-users"></i> <span data-ar="الحسابات" data-en="Accounts">الحسابات</span></div>
+      <div class="sb-item" onclick="sw('stores',this)"><i class="ti ti-building-store"></i> <span data-ar="المحلات" data-en="Stores">المحلات</span></div>
+      <div class="sb-item" onclick="sw('products',this)"><i class="ti ti-package"></i> <span data-ar="المنتجات" data-en="Products">المنتجات</span></div>
+      <div class="sb-item" onclick="sw('content',this)"><i class="ti ti-photo"></i> <span data-ar="النوافذ والبانرات" data-en="Banners &amp; Ads">النوافذ والبانرات</span></div>
+      <div class="sb-item" onclick="sw('ads',this)"><i class="ti ti-ad-2"></i> <span data-ar="الإعلانات الممولة" data-en="Sponsored Ads">الإعلانات الممولة</span></div>
     </div>
 
     <div class="sb-section">
-      <div class="sb-section-lbl">التسويق</div>
-      <div class="sb-item" onclick="sw('coupons',this)"><i class="ti ti-ticket"></i> الكوبونات <span class="sb-badge gold">3</span></div>
-      <div class="sb-item" onclick="sw('commissions',this)"><i class="ti ti-percentage"></i> العمولات</div>
+      <div class="sb-section-lbl" data-ar="التسويق" data-en="MARKETING">التسويق</div>
+      <div class="sb-item" onclick="sw('coupons',this)"><i class="ti ti-ticket"></i> <span data-ar="الكوبونات" data-en="Coupons">الكوبونات</span> <span class="sb-badge gold">3</span></div>
+      <div class="sb-item" onclick="sw('commissions',this)"><i class="ti ti-percentage"></i> <span data-ar="العمولات" data-en="Commissions">العمولات</span></div>
     </div>
 
     <div class="sb-section">
-      <div class="sb-section-lbl">التقارير</div>
-      <div class="sb-item" onclick="sw('reports',this)"><i class="ti ti-chart-bar"></i> التقارير والإحصاءات</div>
+      <div class="sb-section-lbl" data-ar="التقارير" data-en="REPORTS">التقارير</div>
+      <div class="sb-item" onclick="sw('reports',this)"><i class="ti ti-chart-bar"></i> <span data-ar="التقارير والإحصاءات" data-en="Reports &amp; Analytics">التقارير والإحصاءات</span></div>
     </div>
 
     <div class="sb-section">
-      <div class="sb-section-lbl">الصلاحيات</div>
-      <div class="sb-item" onclick="sw('access',this)"><i class="ti ti-shield-check"></i> التحكم بالصلاحيات</div>
-      <div class="sb-item" onclick="sw('approvals',this)"><i class="ti ti-clock-check"></i> طلبات الموافقة <span class="sb-badge">7</span></div>
+      <div class="sb-section-lbl" data-ar="الصلاحيات" data-en="ACCESS">الصلاحيات</div>
+      <div class="sb-item" onclick="sw('access',this)"><i class="ti ti-shield-check"></i> <span data-ar="التحكم بالصلاحيات" data-en="Access Control">التحكم بالصلاحيات</span></div>
+      <div class="sb-item" onclick="sw('approvals',this)"><i class="ti ti-clock-check"></i> <span data-ar="طلبات الموافقة" data-en="Approval Requests">طلبات الموافقة</span> <span class="sb-badge">7</span></div>
     </div>
 
     <div class="sb-section">
-      <div class="sb-section-lbl">الإعدادات</div>
-      <div class="sb-item" onclick="sw('settings',this)"><i class="ti ti-settings"></i> إعدادات المنصة</div>
+      <div class="sb-section-lbl" data-ar="الإعدادات" data-en="SETTINGS">الإعدادات</div>
+      <div class="sb-item" onclick="sw('settings',this)"><i class="ti ti-settings"></i> <span data-ar="إعدادات المنصة" data-en="Platform Settings">إعدادات المنصة</span></div>
     </div>
 
   </div>
@@ -277,7 +279,10 @@ select.field-inp{cursor:pointer;appearance:auto;}
         <div class="sb-admin-role">مدير أول</div>
       </div>
     </div>
-    <button class="sb-logout" onclick="window.location='raf_login_staff.html'"><i class="ti ti-logout"></i> تسجيل الخروج</button>
+    <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <button class="lang-btn" onclick="toggleLang()" data-ar="EN" data-en="ع" style="flex:1;">EN</button>
+    </div>
+    <button class="sb-logout" onclick="window.location='raf_login_staff.html'"><i class="ti ti-logout"></i> <span data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span></button>
   </div>
 </div>
 
@@ -1822,6 +1827,19 @@ function toggleMgmtSidebar(open) {
   if (sb) sb.classList.toggle('open', open);
   if (ov) ov.classList.toggle('open', open);
 }
+/* LANG */
+function toggleLang(){
+  const r=document.getElementById('htmlRoot');
+  const isAr=r.lang==='ar';
+  r.lang=isAr?'en':'ar';r.dir=isAr?'ltr':'rtl';
+  localStorage.setItem('raf_lang',isAr?'en':'ar');
+  applyLang();
+}
+function applyLang(){
+  const en=document.getElementById('htmlRoot').lang==='en';
+  document.querySelectorAll('[data-ar]').forEach(el=>{el.textContent=en?el.dataset.en:el.dataset.ar;});
+}
+(function(){const l=localStorage.getItem('raf_lang');if(l){const r=document.getElementById('htmlRoot');r.lang=l;r.dir=l==='en'?'ltr':'rtl';}applyLang();})();
 </script>
 <!-- FLOATING BACK BUTTON -->
 <button id="floatBack" onclick="history.back()" title="رجوع" style="position:fixed;bottom:24px;left:24px;z-index:9999;width:46px;height:46px;border-radius:50%;background:#1a1a1a;border:1px solid #333;color:#C9A84C;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:all .2s;"><i class="ti ti-arrow-right"></i></button>

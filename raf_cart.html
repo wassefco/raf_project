@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html id="htmlRoot" lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,6 +29,8 @@ nav{background:rgba(245,242,236,.97);border-bottom:1px solid rgba(201,168,76,.3)
 .nav-logo span{color:var(--text);font-size:11px;font-family:var(--fen);font-weight:300;letter-spacing:3px;display:block;margin-top:-6px;}
 .btn-ghost{padding:8px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
 .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.lang-btn{padding:7px 14px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--fen);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.5px;}
+.lang-btn:hover{border-color:var(--gold);color:var(--gold);}
 
 /* BREADCRUMB */
 .breadcrumb{padding:14px 40px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3);border-bottom:1px solid var(--border);background:var(--card);}
@@ -167,7 +169,10 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
 
 <!-- NAV -->
 <nav>
-  <a href="raf_homepage.html" class="btn-ghost"><i class="ti ti-arrow-right"></i> متابعة التسوق</a>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <button class="lang-btn" onclick="toggleLang()" data-ar="EN" data-en="ع">EN</button>
+    <a href="raf_homepage.html" class="btn-ghost"><i class="ti ti-arrow-right"></i> <span data-ar="متابعة التسوق" data-en="Continue Shopping">متابعة التسوق</span></a>
+  </div>
   <a href="raf_homepage.html" class="nav-logo">رف<span>RAF MARKETPLACE</span></a>
 </nav>
 
@@ -250,11 +255,10 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
       <div class="form-body">
         <div class="field">
           <label class="field-lbl">اختر العنوان</label>
-          <select class="select-field" onchange="showAddr(this)">
+          <select class="select-field" id="addrSelect" onchange="showAddr(this)">
             <option value="">— اختر عنواناً —</option>
-            <option value="home">🏠 المنزل — حولي، شارع الأمير، بناية 12، شقة 4</option>
-            <option value="work">💼 العمل — شرق، برج X، الطابق 8</option>
-            <option value="new">+ إضافة عنوان جديد</option>
+            <!-- populated from localStorage by JS -->
+            <option value="__new">＋ إضافة عنوان جديد</option>
           </select>
           <div class="addr-detail" id="addr-detail"></div>
         </div>
@@ -479,17 +483,44 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
   }
 
   /* ---- Address ---- */
+  function loadAddrOptions() {
+    const sel = document.getElementById('addrSelect');
+    if (!sel) return;
+    try {
+      const list = JSON.parse(localStorage.getItem('raf_addresses')) || [];
+      const ICONS = {home:'🏠',work:'💼',family:'👨‍👩‍👧',other:'📍'};
+      // Remove all except last option (+ add new)
+      while (sel.options.length > 1) sel.remove(1);
+      // Insert addresses before the "add new" option
+      const addNewOpt = sel.options[0]; // placeholder "—"
+      list.forEach((addr,i) => {
+        const lbl = `${ICONS[addr.type]||'📍'} ${addr.area}، ${addr.street}${addr.isDefault?' (افتراضي)':''}`;
+        const opt = new Option(lbl, addr.id);
+        if (addr.isDefault) opt.selected = true;
+        sel.add(opt, sel.options[sel.length - 1] < 0 ? undefined : undefined);
+        // insert before last option "add new"
+        sel.insertBefore(opt, sel.options[sel.options.length - 1]);
+      });
+      // Pre-show default
+      if (sel.value && sel.value !== '__new' && sel.value !== '') showAddr(sel);
+    } catch(e) {}
+  }
+
   function showAddr(sel) {
     const detail = document.getElementById('addr-detail');
-    const map = {
-      home: 'حولي، شارع الأمير، بناية 12، شقة 4\n+965 9XXX XXXX',
-      work: 'شرق، برج X، الطابق 8\n+965 9XXX XXXX',
-      new: ''
-    };
-    if (sel.value && sel.value !== 'new') {
-      detail.textContent = map[sel.value];
-      detail.classList.add('show');
-    } else {
+    if (sel.value === '__new') {
+      window.location = 'raf_address.html?from=cart';
+      return;
+    }
+    if (!sel.value) { detail.classList.remove('show'); return; }
+    try {
+      const list = JSON.parse(localStorage.getItem('raf_addresses')) || [];
+      const addr = list.find(a => a.id === sel.value);
+      if (addr) {
+        detail.textContent = `${addr.area}، ق${addr.block}، ${addr.street}${addr.building?'، م'+addr.building:''}${addr.floor?'، ط'+addr.floor:''}${addr.apartment?'، ش'+addr.apartment:''}\n${addr.phone}${addr.notes?'\n'+addr.notes:''}`;
+        detail.classList.add('show');
+      }
+    } catch(e) {
       detail.classList.remove('show');
     }
   }
@@ -521,6 +552,9 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
     btn.classList.add('on');
   }
 
+  /* ---- Init ---- */
+  document.addEventListener('DOMContentLoaded', loadAddrOptions);
+
   /* ---- Confirm ---- */
   function confirmOrder() {
     document.getElementById('main-layout').style.display = 'none';
@@ -528,6 +562,19 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
     document.getElementById('success').style.display = 'block';
     window.scrollTo(0, 0);
   }
+  /* LANG */
+  function toggleLang(){
+    const r=document.getElementById('htmlRoot');
+    const isAr=r.lang==='ar';
+    r.lang=isAr?'en':'ar';r.dir=isAr?'ltr':'rtl';
+    localStorage.setItem('raf_lang',isAr?'en':'ar');
+    applyLang();
+  }
+  function applyLang(){
+    const en=document.getElementById('htmlRoot').lang==='en';
+    document.querySelectorAll('[data-ar]').forEach(el=>{el.textContent=en?el.dataset.en:el.dataset.ar;});
+  }
+  (function(){const l=localStorage.getItem('raf_lang');if(l){const r=document.getElementById('htmlRoot');r.lang=l;r.dir=l==='en'?'ltr':'rtl';}applyLang();})();
 </script>
 </body>
 </html>

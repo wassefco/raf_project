@@ -10,13 +10,25 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
   :root {
-    --black: #F5F2EC;
-    --gold: #C9A84C;
+    /* ── Standard design-system variables (match all other pages) ── */
+    --bg:    #F5F2EC;
+    --bg2:   #EDE8DC;
+    --card:  #FFFFFF;
+    --gold:  #C9A84C;
+    --gold2: #A07828;
     --gold-light: #A07828;
-    --gold-dim: #C9A84C;
-    --white: #0A0A0A;
-    --white-pure: #0A0A0A;
-    --gray-1: #E8E4DC;
+    --gold-dim:   #C9A84C;
+    --black: #0A0A0A;
+    --text:  #0A0A0A;
+    --text2: #555555;
+    --text3: #888888;
+    --border: #D8D3C8;
+    --r:  8px;
+    --rl: 12px;
+    /* ── Legacy aliases (kept so inner CSS still compiles) ── */
+    --white:      #F5F2EC;   /* was --black; now cream for text-on-dark uses */
+    --white-pure: #0A0A0A;   /* was --white; still dark for headings */
+    --gray-1: #EDE8DC;
     --gray-2: #D8D3C8;
     --gray-3: #C0BAB0;
     --gray-4: #666666;
@@ -31,8 +43,8 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    background: var(--black);
-    color: var(--white);
+    background: var(--bg);
+    color: var(--text);
     font-family: var(--font-ar);
     overflow-x: hidden;
   }
@@ -109,12 +121,12 @@
     border-radius: var(--radius);
     transition: color 0.2s;
   }
-  .nav-link:hover { color: var(--white); }
+  .nav-link:hover { color: var(--gold); }
   .nav-actions { display: flex; align-items: center; gap: 8px; }
   .btn-ghost {
     padding: 8px 16px; border: 1px solid var(--gray-3);
     border-radius: var(--radius); background: transparent;
-    color: var(--white); font-family: var(--font-ar);
+    color: var(--text); font-family: var(--font-ar);
     font-size: 13px; cursor: pointer; transition: all 0.2s;
     text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
   }
@@ -171,7 +183,7 @@
 
   /* HERO BANNER */
   .hero {
-    height: 520px; position: relative;
+    min-height: 500px; position: relative;
     overflow: hidden;
     background: linear-gradient(135deg, #F5F2EC 0%, #EDE8DC 50%, #F5F2EC 100%);
     display: flex; align-items: center;
@@ -179,19 +191,19 @@
   .hero-bg {
     position: absolute; inset: 0;
     background:
-      radial-gradient(ellipse 60% 80% at 20% 50%, rgba(201,168,76,0.15) 0%, transparent 70%),
-      radial-gradient(ellipse 40% 60% at 80% 30%, rgba(201,168,76,0.10) 0%, transparent 70%);
+      radial-gradient(ellipse 60% 80% at 80% 50%, rgba(201,168,76,0.15) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 20% 30%, rgba(201,168,76,0.08) 0%, transparent 70%);
   }
   .hero-grid {
     position: absolute; inset: 0;
     background-image:
-      linear-gradient(rgba(201,168,76,0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(201,168,76,0.08) 1px, transparent 1px);
+      linear-gradient(rgba(201,168,76,0.07) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.07) 1px, transparent 1px);
     background-size: 60px 60px;
   }
   .hero-content {
     position: relative; z-index: 2;
-    padding: 0 60px; max-width: 600px;
+    padding: 60px 60px; flex: 1; max-width: 580px;
   }
   .hero-tag {
     display: inline-flex; align-items: center; gap: 6px;
@@ -204,74 +216,74 @@
   }
   .hero-title {
     font-family: var(--font-display);
-    font-size: clamp(36px, 5vw, 60px);
+    font-size: clamp(34px, 4.5vw, 56px);
     font-weight: 900; line-height: 1.1;
     margin-bottom: 16px;
-    color: var(--white-pure);
+    color: var(--text);
   }
   .hero-title em { color: var(--gold); font-style: normal; }
   .hero-sub {
-    font-size: 16px; color: var(--gray-4); line-height: 1.7;
+    font-size: 15px; color: var(--gray-4); line-height: 1.8;
     margin-bottom: 32px; font-weight: 300;
   }
-  .hero-actions { display: flex; gap: 12px; align-items: center; }
+  .hero-actions { display: flex; gap: 12px; align-items: center; margin-bottom: 36px; }
   .btn-hero {
-    padding: 14px 32px; background: var(--gold);
+    padding: 13px 28px; background: var(--gold);
     color: var(--black); border: none; border-radius: var(--radius);
-    font-family: var(--font-ar); font-size: 15px; font-weight: 700;
+    font-family: var(--font-ar); font-size: 14px; font-weight: 700;
     cursor: pointer; transition: all 0.2s;
   }
   .btn-hero:hover { background: var(--gold-light); transform: translateY(-1px); }
   .btn-hero-ghost {
-    padding: 14px 32px; background: transparent;
-    color: var(--white); border: 1px solid rgba(10,10,10,0.2);
+    padding: 13px 28px; background: transparent;
+    color: var(--text); border: 1px solid rgba(10,10,10,0.2);
     border-radius: var(--radius); font-family: var(--font-ar);
-    font-size: 15px; cursor: pointer; transition: all 0.2s;
+    font-size: 14px; cursor: pointer; transition: all 0.2s;
   }
   .btn-hero-ghost:hover { border-color: var(--gold); color: var(--gold); }
+  /* Stats inline below CTAs */
   .hero-stats {
-    position: absolute; bottom: 40px; left: 60px;
-    display: flex; gap: 40px; z-index: 2;
+    display: flex; gap: 36px; align-items: center;
+    padding-top: 20px; border-top: 1px solid rgba(201,168,76,0.2);
   }
   .hero-stat-num {
     font-family: var(--font-display);
-    font-size: 28px; font-weight: 700; color: var(--gold);
+    font-size: 26px; font-weight: 700; color: var(--gold);
   }
-  .hero-stat-lbl { font-size: 12px; color: var(--gray-4); margin-top: 2px; }
+  .hero-stat-lbl { font-size: 11px; color: var(--gray-4); margin-top: 2px; }
+  /* Hero visual — category grid */
   .hero-visual {
-    position: absolute; left: 0; top: 0; bottom: 0;
-    width: 45%;
+    position: relative; z-index: 2;
+    width: 420px; flex-shrink: 0;
+    padding: 40px 40px 40px 20px;
     display: flex; align-items: center; justify-content: center;
-    overflow: hidden;
   }
-  .hero-cards {
-    position: relative; width: 320px; height: 380px;
+  .cat-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    width: 100%;
   }
-  .hero-card {
-    position: absolute;
-    background: var(--gray-1);
+  .cat-tile {
+    background: rgba(255,255,255,0.7);
     border: 1px solid rgba(201,168,76,0.2);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    border-radius: var(--radius-lg); padding: 18px 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    cursor: pointer; transition: all .2s;
+    font-size: 11px; font-weight: 500; color: var(--gray-4);
+    text-align: center; backdrop-filter: blur(4px);
   }
-  .hero-card-1 { width: 180px; height: 220px; top: 20px; right: 40px; transform: rotate(-3deg); }
-  .hero-card-2 { width: 160px; height: 200px; bottom: 20px; left: 20px; transform: rotate(4deg); }
-  .hero-card-img {
-    width: 100%; height: 70%;
-    background: linear-gradient(160deg, var(--gray-2), var(--gray-3));
-    display: flex; align-items: center; justify-content: center;
-    color: var(--gold-dim); font-size: 32px;
+  .cat-tile:hover {
+    border-color: var(--gold); color: var(--gold);
+    background: rgba(201,168,76,0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(201,168,76,0.15);
   }
-  .hero-card-info { padding: 10px 12px; }
-  .hero-card-name { font-size: 11px; font-weight: 500; color: var(--white); }
-  .hero-card-price { font-size: 13px; font-weight: 700; color: var(--gold); margin-top: 3px; }
+  .cat-tile i { font-size: 26px; color: var(--gold); }
 
   /* SEARCH BAR */
   .search-section {
     padding: 32px 24px;
-    background: var(--gray-1);
-    border-bottom: 1px solid var(--gray-2);
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
   }
   .search-wrap {
     max-width: 900px; margin: 0 auto;
@@ -286,7 +298,7 @@
   .search-bar input {
     flex: 1; padding: 14px 20px;
     background: transparent; border: none; outline: none;
-    color: var(--white); font-family: var(--font-ar); font-size: 15px;
+    color: var(--text); font-family: var(--font-ar); font-size: 15px;
   }
   .search-bar input::placeholder { color: var(--gray-4); }
   .search-btn {
@@ -336,8 +348,8 @@
     gap: 20px;
   }
   .store-card {
-    background: var(--gray-1);
-    border: 1px solid var(--gray-2);
+    background: var(--bg2);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     overflow: hidden;
     cursor: pointer;
@@ -403,8 +415,8 @@
     gap: 16px;
   }
   .product-card {
-    background: var(--gray-1);
-    border: 1px solid var(--gray-2);
+    background: var(--bg2);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     overflow: hidden;
     cursor: pointer;
@@ -467,7 +479,7 @@
   .add-to-cart {
     width: 100%; padding: 10px;
     background: var(--gray-2); border: 1px solid var(--gray-3);
-    border-radius: var(--radius); color: var(--white);
+    border-radius: var(--radius); color: var(--text);
     font-family: var(--font-ar); font-size: 13px; font-weight: 500;
     cursor: pointer; transition: all 0.2s;
     display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -494,7 +506,7 @@
   }
   .qty-btn:hover { background: rgba(201,168,76,0.15); }
   .qty-num {
-    font-size: 14px; font-weight: 700; color: var(--white);
+    font-size: 14px; font-weight: 700; color: var(--text);
     font-family: var(--font-en); min-width: 24px; text-align: center;
   }
   .qty-del {
@@ -509,8 +521,8 @@
 
   /* FOOTER */
   footer {
-    background: var(--gray-1);
-    border-top: 1px solid var(--gray-2);
+    background: #0A0A0A;
+    border-top: 1px solid rgba(201,168,76,0.2);
     padding: 48px 24px 24px;
   }
   .footer-grid {
@@ -521,14 +533,14 @@
     font-family: var(--font-display);
     font-size: 32px; font-weight: 900; color: var(--gold);
   }
-  .footer-desc { font-size: 13px; color: var(--gray-4); line-height: 1.7; margin-top: 12px; }
-  .footer-col-title { font-size: 13px; font-weight: 700; color: var(--white-pure); margin-bottom: 16px; letter-spacing: 1px; }
-  .footer-link { display: block; font-size: 13px; color: var(--gray-4); text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
+  .footer-desc { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.7; margin-top: 12px; }
+  .footer-col-title { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.75); margin-bottom: 16px; letter-spacing: 1px; }
+  .footer-link { display: block; font-size: 13px; color: rgba(255,255,255,0.45); text-decoration: none; margin-bottom: 10px; transition: color 0.2s; }
   .footer-link:hover { color: var(--gold); }
   .footer-bottom {
-    border-top: 1px solid var(--gray-2); padding-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px;
     display: flex; align-items: center; justify-content: space-between;
-    font-size: 12px; color: var(--gray-4);
+    font-size: 12px; color: rgba(255,255,255,0.35);
     max-width: 1200px; margin: 0 auto;
   }
 
@@ -559,10 +571,10 @@
     .stores-grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 768px) {
-    .hero { height: auto; padding: 60px 0 40px; }
+    .hero { height: auto; padding: 60px 0 40px; flex-wrap: wrap; }
     .hero-visual { display: none; }
     .hero-content { padding: 0 24px; }
-    .hero-stats { left: 24px; bottom: 20px; gap: 24px; }
+    .hero-stats { gap: 24px; }
     .nav-links { display: none; }
     .footer-grid { grid-template-columns: 1fr 1fr; }
     .products-grid { grid-template-columns: repeat(2, 1fr); }
@@ -635,37 +647,41 @@
       <button class="btn-hero" onclick="window.location='raf_storespage.html'" data-ar="تسوّق الآن" data-en="Shop Now">تسوّق الآن</button>
       <button class="btn-hero-ghost" onclick="window.location='raf_storespage.html'" data-ar="استعرض المحلات" data-en="Browse Stores">استعرض المحلات</button>
     </div>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-num">+120</div>
+        <div class="hero-stat-lbl" data-ar="متجر" data-en="Stores">متجر</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">+5K</div>
+        <div class="hero-stat-lbl" data-ar="منتج" data-en="Products">منتج</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">4.9</div>
+        <div class="hero-stat-lbl" data-ar="تقييم" data-en="Rating">تقييم</div>
+      </div>
+    </div>
   </div>
   <div class="hero-visual">
-    <div class="hero-cards">
-      <div class="hero-card hero-card-1">
-        <div class="hero-card-img"><i class="ti ti-shirt"></i></div>
-        <div class="hero-card-info">
-          <div class="hero-card-name" data-ar="قميص كاجوال" data-en="Casual Shirt">قميص كاجوال</div>
-          <div class="hero-card-price">12.500 د.ك</div>
-        </div>
+    <div class="cat-grid">
+      <div class="cat-tile" onclick="window.location='raf_storespage.html?cat=clothing'">
+        <i class="ti ti-shirt"></i><span data-ar="ملابس" data-en="Clothing">ملابس</span>
       </div>
-      <div class="hero-card hero-card-2">
-        <div class="hero-card-img"><i class="ti ti-shoe"></i></div>
-        <div class="hero-card-info">
-          <div class="hero-card-name" data-ar="حذاء رياضي" data-en="Sports Shoe">حذاء رياضي</div>
-          <div class="hero-card-price">28.000 د.ك</div>
-        </div>
+      <div class="cat-tile" onclick="window.location='raf_storespage.html?cat=shoes'">
+        <i class="ti ti-shoe"></i><span data-ar="أحذية" data-en="Shoes">أحذية</span>
       </div>
-    </div>
-  </div>
-  <div class="hero-stats">
-    <div>
-      <div class="hero-stat-num">+120</div>
-      <div class="hero-stat-lbl" data-ar="متجر" data-en="Stores">متجر</div>
-    </div>
-    <div>
-      <div class="hero-stat-num">+5K</div>
-      <div class="hero-stat-lbl" data-ar="منتج" data-en="Products">منتج</div>
-    </div>
-    <div>
-      <div class="hero-stat-num">4.9</div>
-      <div class="hero-stat-lbl" data-ar="تقييم" data-en="Rating">تقييم</div>
+      <div class="cat-tile" onclick="window.location='raf_storespage.html?cat=electronics'">
+        <i class="ti ti-device-mobile"></i><span data-ar="إلكترونيات" data-en="Electronics">إلكترونيات</span>
+      </div>
+      <div class="cat-tile" onclick="window.location='raf_storespage.html?cat=accessories'">
+        <i class="ti ti-diamond"></i><span data-ar="اكسسوارات" data-en="Accessories">اكسسوارات</span>
+      </div>
+      <div class="cat-tile" onclick="window.location='raf_used.html'">
+        <i class="ti ti-refresh"></i><span data-ar="مستعمل" data-en="Used">مستعمل</span>
+      </div>
+      <div class="cat-tile" onclick="window.location='raf_auctions.html'">
+        <i class="ti ti-gavel"></i><span data-ar="مزادات" data-en="Auctions">مزادات</span>
+      </div>
     </div>
   </div>
 </section>
@@ -675,24 +691,21 @@
   <div class="search-wrap">
     <div class="search-bar">
       <button class="search-btn"><i class="ti ti-search"></i></button>
-      <input type="text" id="searchInput" placeholder="ابحث عن منتج أو متجر أو رقم المنتج..." data-ar-placeholder="ابحث عن منتج أو متجر أو رقم المنتج..." data-en-placeholder="Search by product, store, or product number...">
+      <input type="text" id="searchInput" placeholder="ابحث عن منتج أو متجر أو رقم المنتج..." data-ar-placeholder="ابحث عن منتج أو متجر أو رقم المنتج..." data-en-placeholder="Search by product, store, or product number..." oninput="filterHomepage(this.value, activeChip)">
     </div>
-    <div class="filters">
-      <button class="filter-chip active" data-ar="الكل" data-en="All">الكل</button>
-      <button class="filter-chip" data-ar="ملابس" data-en="Clothing">ملابس</button>
-      <button class="filter-chip" data-ar="أحذية" data-en="Shoes">أحذية</button>
-      <button class="filter-chip" data-ar="اكسسوارات" data-en="Accessories">اكسسوارات</button>
-      <button class="filter-chip" data-ar="هواتف" data-en="Phones">هواتف</button>
-      <button class="filter-chip" data-ar="عروض" data-en="Deals">عروض</button>
-      <button class="filter-chip" data-ar="الأعلى تقييماً" data-en="Top Rated">الأعلى تقييماً</button>
-      <button class="filter-chip" data-ar="مفتوح الآن" data-en="Open Now">مفتوح الآن</button>
-      <button class="filter-chip" data-ar="قرطاسية" data-en="Stationery">قرطاسية</button>
+    <div class="filters" id="filterChips">
+      <button class="filter-chip active" data-cat="" data-ar="الكل" data-en="All" onclick="selectChip(this,'')">الكل</button>
+      <button class="filter-chip" data-cat="ملابس" data-ar="ملابس" data-en="Clothing" onclick="selectChip(this,'ملابس')">ملابس</button>
+      <button class="filter-chip" data-cat="أحذية" data-ar="أحذية" data-en="Shoes" onclick="selectChip(this,'أحذية')">أحذية</button>
+      <button class="filter-chip" data-cat="اكسسوارات" data-ar="اكسسوارات" data-en="Accessories" onclick="selectChip(this,'اكسسوارات')">اكسسوارات</button>
+      <button class="filter-chip" data-cat="هواتف" data-ar="هواتف" data-en="Phones" onclick="selectChip(this,'هواتف')">هواتف</button>
+      <button class="filter-chip" data-cat="عروض" data-ar="عروض" data-en="Deals" onclick="selectChip(this,'عروض')">عروض</button>
     </div>
   </div>
 </div>
 
 <!-- STORES -->
-<section class="section" style="background: var(--black);">
+<section class="section" style="background: var(--bg);">
   <div style="max-width:1200px; margin:0 auto;">
     <div class="section-header">
       <div class="section-title">
@@ -702,7 +715,7 @@
     </div>
     <div class="stores-grid">
       <!-- Store 1 — Casa Mode -->
-      <div class="store-card" onclick="window.location='raf_store.html?store=casa-mode'">
+      <div class="store-card" data-name="Casa Mode" data-cat="ملابس" data-status="open" onclick="window.location='raf_store.html?store=casa-mode'">
         <div class="store-img">
           <i class="ti ti-hanger" style="font-size:44px;"></i>
           <span class="store-badge" data-ar="مميز" data-en="Premium">مميز</span>
@@ -717,7 +730,7 @@
         </div>
       </div>
       <!-- Store 2 — Sole & Co -->
-      <div class="store-card" onclick="window.location='raf_store.html?store=sole-co'">
+      <div class="store-card" data-name="Sole &amp; Co" data-cat="أحذية" data-status="open" onclick="window.location='raf_store.html?store=sole-co'">
         <div class="store-img">
           <i class="ti ti-shoe" style="font-size:44px;"></i>
           <span class="store-badge" data-ar="مميز" data-en="Premium">مميز</span>
@@ -732,7 +745,7 @@
         </div>
       </div>
       <!-- Store 3 — TechZone -->
-      <div class="store-card" onclick="window.location='raf_store.html?store=techzone'">
+      <div class="store-card" data-name="TechZone" data-cat="هواتف" data-status="open" onclick="window.location='raf_store.html?store=techzone'">
         <div class="store-img">
           <i class="ti ti-device-mobile" style="font-size:44px;"></i>
           <span class="store-num">#003</span>
@@ -746,7 +759,7 @@
         </div>
       </div>
       <!-- Store 4 — Luxe Accessories -->
-      <div class="store-card" onclick="window.location='raf_store.html?store=luxe-accessories'">
+      <div class="store-card" data-name="Luxe Accessories" data-cat="اكسسوارات" data-status="open" onclick="window.location='raf_store.html?store=luxe-accessories'">
         <div class="store-img">
           <i class="ti ti-sunglasses" style="font-size:44px;"></i>
           <span class="store-num">#004</span>
@@ -760,7 +773,7 @@
         </div>
       </div>
       <!-- Store 5 — Urban Thread (Closed) -->
-      <div class="store-card" onclick="window.location='raf_store.html?store=urban-thread'">
+      <div class="store-card" data-name="Urban Thread" data-cat="ملابس" data-status="closed" onclick="window.location='raf_store.html?store=urban-thread'">
         <div class="store-img" style="opacity:0.55;">
           <i class="ti ti-shirt" style="font-size:44px;"></i>
           <span class="store-badge closed" data-ar="مغلق" data-en="Closed">مغلق</span>
@@ -775,7 +788,7 @@
         </div>
       </div>
       <!-- Store 6 — Glam Store -->
-      <div class="store-card" onclick="window.location='raf_store.html?store=glam-store'">
+      <div class="store-card" data-name="Glam Store" data-cat="اكسسوارات" data-status="open" onclick="window.location='raf_store.html?store=glam-store'">
         <div class="store-img">
           <i class="ti ti-diamond" style="font-size:44px;"></i>
           <span class="store-badge" data-ar="مميز" data-en="Premium">مميز</span>
@@ -796,7 +809,7 @@
 <div class="gold-divider"></div>
 
 <!-- PRODUCTS -->
-<section class="section" style="background: var(--black);">
+<section class="section" style="background: var(--bg);">
   <div style="max-width:1200px; margin:0 auto;">
     <div class="section-header">
       <div class="section-title">
@@ -808,7 +821,7 @@
     <div class="products-grid">
 
       <!-- Product 1 -->
-      <div class="product-card" onclick="window.location='raf_product.html?id=P-001'">
+      <div class="product-card" data-cat="ملابس" data-store="Casa Mode" data-disc="20" onclick="window.location='raf_product.html?id=P-001'">
         <div class="product-img">
           <i class="ti ti-shirt product-img-icon"></i>
           <span class="prod-num">P-001</span>
@@ -830,7 +843,7 @@
       </div>
 
       <!-- Product 2 -->
-      <div class="product-card" onclick="window.location='raf_product.html?id=P-002'">
+      <div class="product-card" data-cat="أحذية" data-store="Sole & Co" data-disc="0" onclick="window.location='raf_product.html?id=P-002'">
         <div class="product-img">
           <i class="ti ti-shoe product-img-icon"></i>
           <span class="prod-num">P-002</span>
@@ -848,7 +861,7 @@
       </div>
 
       <!-- Product 3 -->
-      <div class="product-card" onclick="window.location='raf_product.html?id=P-003'">
+      <div class="product-card" data-cat="هواتف" data-store="TechZone" data-disc="0" onclick="window.location='raf_product.html?id=P-003'">
         <div class="product-img">
           <i class="ti ti-device-mobile product-img-icon"></i>
           <span class="prod-num">P-003</span>
@@ -867,7 +880,7 @@
       </div>
 
       <!-- Product 4 -->
-      <div class="product-card" onclick="window.location='raf_product.html?id=P-004'">
+      <div class="product-card" data-cat="اكسسوارات" data-store="Luxe Accessories" data-disc="0" onclick="window.location='raf_product.html?id=P-004'">
         <div class="product-img">
           <i class="ti ti-sunglasses product-img-icon"></i>
           <span class="prod-num">P-004</span>
@@ -885,7 +898,7 @@
       </div>
 
       <!-- Product 5 -->
-      <div class="product-card" onclick="window.location='raf_product.html?id=P-005'">
+      <div class="product-card" data-cat="اكسسوارات" data-store="Casa Mode" data-disc="15" onclick="window.location='raf_product.html?id=P-005'">
         <div class="product-img">
           <i class="ti ti-backpack product-img-icon"></i>
           <span class="prod-num">P-005</span>
@@ -907,7 +920,7 @@
       </div>
 
       <!-- Product 6 -->
-      <div class="product-card" onclick="window.location='raf_product.html?id=P-006'">
+      <div class="product-card" data-cat="اكسسوارات" data-store="Glam Store" data-disc="0" onclick="window.location='raf_product.html?id=P-006'">
         <div class="product-img">
           <i class="ti ti-watch product-img-icon"></i>
           <span class="prod-num">P-006</span>
@@ -1117,14 +1130,54 @@ function toggleWish(e, btn) {
 }
 
 /* =============================================
-   FILTER CHIPS
+   HOMEPAGE SEARCH & FILTER
    ============================================= */
-document.querySelectorAll('.filter-chip').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+let activeChip = '';
+
+function selectChip(el, cat) {
+  activeChip = cat;
+  document.querySelectorAll('#filterChips .filter-chip').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const q = document.getElementById('searchInput').value;
+  filterHomepage(q, cat);
+}
+
+function filterHomepage(q, cat) {
+  q = (q || '').trim().toLowerCase();
+  cat = cat !== undefined ? cat : activeChip;
+  const isDeal = (cat === 'عروض' || cat === 'Deals');
+  const catFilter = isDeal ? '' : cat;
+
+  // Filter store cards
+  document.querySelectorAll('.store-card').forEach(card => {
+    const name = (card.dataset.name || '').toLowerCase();
+    const cardCat = card.dataset.cat || '';
+    const matchQ   = !q || name.includes(q);
+    const matchCat = !catFilter || cardCat === catFilter;
+    card.style.display = (matchQ && matchCat) ? '' : 'none';
   });
-});
+
+  // Filter product cards
+  document.querySelectorAll('.product-card').forEach(card => {
+    const pName  = (card.querySelector('.product-name')?.textContent || '').toLowerCase();
+    const store  = (card.dataset.store || '').toLowerCase();
+    const prodNum = (card.querySelector('.prod-num')?.textContent || '').toLowerCase();
+    const cardCat = card.dataset.cat || '';
+    const disc    = parseInt(card.dataset.disc) || 0;
+    const matchQ    = !q || pName.includes(q) || store.includes(q) || prodNum.includes(q);
+    const matchCat  = !catFilter || cardCat === catFilter;
+    const matchDeal = !isDeal || disc > 0;
+    card.style.display = (matchQ && matchCat && matchDeal) ? '' : 'none';
+  });
+
+  // If search query exists and nothing visible locally, navigate to offers page
+  if (q) {
+    const visibleCards = document.querySelectorAll('.product-card:not([style*="none"]), .store-card:not([style*="none"])');
+    if (visibleCards.length === 0) {
+      window.location = 'raf_offers.html?q=' + encodeURIComponent(q);
+    }
+  }
+}
 
 /* =============================================
    POPUP — first visit only

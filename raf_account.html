@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html id="htmlRoot" lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -32,6 +32,8 @@
   .nav-actions{display:flex;align-items:center;gap:8px;}
   .btn-ghost{padding:8px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
   .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+  .lang-btn{padding:7px 14px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--fen);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.5px;}
+  .lang-btn:hover{border-color:var(--gold);color:var(--gold);}
   .nav-ico{width:40px;height:40px;border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;background:transparent;font-size:18px;position:relative;transition:all .2s;}
   .nav-ico:hover{border-color:var(--gold);color:var(--gold);}
   .cart-badge{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--gold);border-radius:50%;font-size:10px;color:var(--black);font-weight:700;display:flex;align-items:center;justify-content:center;}
@@ -206,23 +208,24 @@
 <!-- NAV -->
 <nav>
   <div class="nav-actions">
+    <button class="lang-btn" onclick="toggleLang()" data-ar="EN" data-en="ع">EN</button>
     <button class="nav-ico" onclick="history.back()" title="رجوع"><i class="ti ti-arrow-right"></i></button>
     <button class="nav-ico" onclick="window.location='raf_cart.html'"><i class="ti ti-shopping-cart"></i><span class="cart-badge">3</span></button>
     <button class="nav-ico"><i class="ti ti-bell"></i></button>
-    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-logout"></i> تسجيل الخروج</a>
+    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-logout"></i> <span data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span></a>
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
-    <a href="raf_homepage.html" style="color:var(--text3);text-decoration:none;font-size:14px;">الرئيسية</a>
+    <a href="raf_homepage.html" style="color:var(--text3);text-decoration:none;font-size:14px;" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
     <span style="color:var(--border);">·</span>
-    <a href="raf_storespage.html" style="color:var(--text3);text-decoration:none;font-size:14px;">المحلات</a>
+    <a href="raf_storespage.html" style="color:var(--text3);text-decoration:none;font-size:14px;" data-ar="المحلات" data-en="Stores">المحلات</a>
     <span style="color:var(--border);">·</span>
-    <a href="raf_offers.html" style="color:var(--text3);text-decoration:none;font-size:14px;">العروض</a>
+    <a href="raf_offers.html" style="color:var(--text3);text-decoration:none;font-size:14px;" data-ar="العروض" data-en="Offers">العروض</a>
     <span style="color:var(--border);">·</span>
-    <a href="raf_trending.html" style="color:var(--text3);text-decoration:none;font-size:14px;">الترندات</a>
+    <a href="raf_trending.html" style="color:var(--text3);text-decoration:none;font-size:14px;" data-ar="الترندات" data-en="Trending">الترندات</a>
     <span style="color:var(--border);">·</span>
-    <a href="raf_used.html" style="color:var(--text3);text-decoration:none;font-size:14px;">المستعملات</a>
+    <a href="raf_used.html" style="color:var(--text3);text-decoration:none;font-size:14px;" data-ar="المستعملات" data-en="Used">المستعملات</a>
     <span style="color:var(--border);">·</span>
-    <a href="raf_auctions.html" style="color:var(--text3);text-decoration:none;font-size:14px;">المزادات</a>
+    <a href="raf_auctions.html" style="color:var(--text3);text-decoration:none;font-size:14px;" data-ar="المزادات" data-en="Auctions">المزادات</a>
   </div>
   <a href="raf_homepage.html" class="nav-logo">رف<span>RAF MARKETPLACE</span></a>
 </nav>
@@ -236,30 +239,30 @@
       <div class="profile-avatar">م</div>
       <div class="profile-name">محمد العنزي</div>
       <div class="profile-phone">+965 9XXX XXXX</div>
-      <button class="profile-edit"><i class="ti ti-edit"></i> تعديل الملف</button>
+      <button class="profile-edit"><i class="ti ti-edit"></i> <span data-ar="تعديل الملف" data-en="Edit Profile">تعديل الملف</span></button>
     </div>
 
     <div class="sidebar-nav">
       <div class="sidebar-item on" onclick="switchSection('orders', this)">
-        <i class="ti ti-shopping-bag"></i> طلباتي
+        <i class="ti ti-shopping-bag"></i> <span data-ar="طلباتي" data-en="My Orders">طلباتي</span>
         <span class="sidebar-badge sb-gold">12</span>
       </div>
-      <div class="sidebar-item" onclick="switchSection('addresses', this)">
-        <i class="ti ti-map-pin"></i> عناويني
+      <div class="sidebar-item" onclick="window.location='raf_address.html'">
+        <i class="ti ti-map-pin"></i> <span data-ar="عناويني" data-en="My Addresses">عناويني</span>
       </div>
       <div class="sidebar-item" onclick="switchSection('wishlist', this)">
-        <i class="ti ti-heart"></i> المفضلة
+        <i class="ti ti-heart"></i> <span data-ar="المفضلة" data-en="Wishlist">المفضلة</span>
         <span class="sidebar-badge sb-gold">8</span>
       </div>
       <div class="sidebar-item" onclick="switchSection('ratings', this)">
-        <i class="ti ti-star"></i> تقييماتي
+        <i class="ti ti-star"></i> <span data-ar="تقييماتي" data-en="My Reviews">تقييماتي</span>
       </div>
       <div class="sidebar-item" onclick="switchSection('notifications', this)">
-        <i class="ti ti-bell"></i> الإشعارات
+        <i class="ti ti-bell"></i> <span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span>
         <span class="sidebar-badge sb-red">3</span>
       </div>
       <div class="sidebar-item" onclick="switchSection('settings', this)">
-        <i class="ti ti-settings"></i> الإعدادات
+        <i class="ti ti-settings"></i> <span data-ar="الإعدادات" data-en="Settings">الإعدادات</span>
       </div>
     </div>
 
@@ -415,7 +418,7 @@
           <div class="addr-text">حولي، شارع الأمير، بناية 12، شقة 4</div>
           <div class="addr-text" style="margin-top:4px;">+965 9XXX XXXX</div>
           <div class="addr-actions">
-            <button class="addr-btn"><i class="ti ti-edit"></i> تعديل</button>
+            <button class="addr-btn" onclick="window.location='raf_address.html?edit=addr-1'"><i class="ti ti-edit"></i> تعديل</button>
           </div>
         </div>
         <div class="addr-card">
@@ -424,11 +427,11 @@
           <div class="addr-text">شرق، برج X، الطابق 8</div>
           <div class="addr-text" style="margin-top:4px;">+965 9XXX XXXX</div>
           <div class="addr-actions">
-            <button class="addr-btn"><i class="ti ti-edit"></i> تعديل</button>
+            <button class="addr-btn" onclick="window.location='raf_address.html?edit=addr-2'"><i class="ti ti-edit"></i> تعديل</button>
             <button class="addr-btn"><i class="ti ti-trash"></i> حذف</button>
           </div>
         </div>
-        <div class="add-addr">
+        <div class="add-addr" onclick="window.location='raf_address.html'" style="cursor:pointer;">
           <i class="ti ti-plus"></i>
           <span>إضافة عنوان جديد</span>
         </div>
@@ -596,6 +599,19 @@
     document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('on'));
     document.getElementById('sec-' + id).classList.add('on');
   }
+  /* LANG */
+  function toggleLang(){
+    const r=document.getElementById('htmlRoot');
+    const isAr=r.lang==='ar';
+    r.lang=isAr?'en':'ar';r.dir=isAr?'ltr':'rtl';
+    localStorage.setItem('raf_lang',isAr?'en':'ar');
+    applyLang();
+  }
+  function applyLang(){
+    const en=document.getElementById('htmlRoot').lang==='en';
+    document.querySelectorAll('[data-ar]').forEach(el=>{el.textContent=en?el.dataset.en:el.dataset.ar;});
+  }
+  (function(){const l=localStorage.getItem('raf_lang');if(l){const r=document.getElementById('htmlRoot');r.lang=l;r.dir=l==='en'?'ltr':'rtl';}applyLang();})();
 </script>
 </body>
 </html>
