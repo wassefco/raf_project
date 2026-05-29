@@ -97,6 +97,21 @@ footer{background:#0A0A0A;border-top:1px solid rgba(201,168,76,.2);padding:40px 
   .footer-bottom{flex-direction:column;gap:6px;text-align:center;}
 }
 html[lang="en"] body{font-family:'DM Sans',sans-serif;}
+
+  /* ===== APP BOTTOM NAV ===== */
+  .app-bnav{display:none;}
+  @media(max-width:768px){
+    body{padding-bottom:68px!important;}
+    footer{display:none!important;}
+    .app-bnav{display:flex;position:fixed;bottom:0;left:0;right:0;height:56px;background:#fff;border-top:1px solid #e8e4dc;box-shadow:0 -2px 16px rgba(0,0,0,.06);z-index:998;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);align-items:stretch;}
+    .bnav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#aaa;font-size:10px;font-family:'Tajawal',sans-serif;font-weight:500;transition:color .15s;border:none;background:transparent;cursor:pointer;padding:0;}
+    .bnav-tab i{font-size:22px;line-height:1;}
+    .bnav-tab.on{color:#C9A84C;}
+    .bnav-cart{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;text-decoration:none;font-size:10px;font-family:'Tajawal',sans-serif;color:#aaa;padding-bottom:4px;}
+    .bnav-cart-ring{width:44px;height:44px;border-radius:50%;background:#C9A84C;display:flex;align-items:center;justify-content:center;font-size:20px;color:#0A0A0A;margin-top:-14px;box-shadow:0 4px 14px rgba(201,168,76,.3);}
+    .bnav-cart.on .bnav-cart-ring{background:#A07828;}
+    nav a.btn-ghost,nav a.btn-gold,nav .btn-ghost,nav .btn-gold{display:none!important;}
+  }
 </style>
 </head>
 <body>
@@ -407,5 +422,14 @@ function toggleLang() {
   }
 })();
 </script>
+
+<!-- MOBILE APP BOTTOM NAV -->
+<nav class="app-bnav">
+  <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
+  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفح" data-en="Browse">تصفح</span></a>
+  <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
+  <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
+  <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
+</nav>
 </body>
 </html>
