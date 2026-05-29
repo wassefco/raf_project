@@ -24,497 +24,505 @@
     --font: 'Tajawal', sans-serif;
     --fdisplay: 'Playfair Display', serif;
     --fen: 'DM Sans', sans-serif;
-    --green: #2E7D32;
-    --green-bg: #E8F5E9;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font);
+    background: #0A0A0A;
     min-height: 100vh;
     display: flex;
-  }
-
-  /* LEFT PANEL — DECORATIVE */
-  .left-panel {
-    width: 44%;
-    background: var(--black);
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 60px 48px;
+    font-family: var(--font);
+    padding: 20px;
+    position: relative;
+    overflow-x: hidden;
   }
-  .panel-pattern {
-    position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(201,168,76,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(201,168,76,0.05) 1px, transparent 1px);
-    background-size: 48px 48px;
+
+  /* Background dot grid */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: radial-gradient(rgba(201,168,76,0.07) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
   }
-  .panel-glow {
-    position: absolute;
-    width: 400px; height: 400px;
+
+  /* Ambient gold glow */
+  body::after {
+    content: '';
+    position: fixed;
+    width: 600px; height: 600px;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(201,168,76,0.09) 0%, transparent 65%);
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
+    pointer-events: none;
   }
-  .panel-content { position: relative; z-index: 2; text-align: center; }
-  .panel-logo {
+
+  /* LANG BUTTON */
+  .lang-btn {
+    position: fixed; top: 20px; left: 20px;
+    padding: 7px 14px;
+    border: 1px solid #222;
+    border-radius: var(--r);
+    background: rgba(255,255,255,0.04);
+    color: #555; font-family: var(--fen);
+    font-size: 12px; cursor: pointer;
+    transition: all .2s;
+    display: inline-flex; align-items: center; gap: 6px;
+    z-index: 100; letter-spacing: .5px;
+  }
+  .lang-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .lang-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+
+  /* BACK LINK */
+  .back-link {
+    position: fixed; top: 20px; right: 20px;
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: #444;
+    text-decoration: none;
+    transition: color .2s;
+    z-index: 100;
+  }
+  .back-link:hover { color: var(--gold); }
+
+  /* LOGIN CARD */
+  .login-card {
+    position: relative; z-index: 10;
+    width: 100%; max-width: 420px;
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 20px;
+    padding: 44px 40px 36px;
+    box-shadow: 0 0 0 1px rgba(201,168,76,0.08), 0 40px 80px rgba(0,0,0,0.6);
+  }
+
+  /* Card top glow accent */
+  .login-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 160px; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    border-radius: 50%;
+  }
+
+  /* LOGO */
+  .logo-wrap {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .logo-mark {
     font-family: var(--fdisplay);
-    font-size: 72px; font-weight: 900;
+    font-size: 52px; font-weight: 900;
     color: var(--gold);
     line-height: 1;
-    margin-bottom: 8px;
+    display: block;
+    letter-spacing: -1px;
   }
-  .panel-logo-en {
+  .logo-sub {
     font-family: var(--fen);
-    font-size: 11px; font-weight: 300;
-    color: #333; letter-spacing: 6px;
+    font-size: 10px; font-weight: 300;
+    color: #333; letter-spacing: 5px;
     text-transform: uppercase;
-    margin-bottom: 48px;
+    margin-top: 4px;
+    display: block;
   }
-  .panel-divider {
-    width: 40px; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    margin: 0 auto 32px;
+
+  /* STEP INDICATOR */
+  .steps {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 24px;
   }
-  .panel-title {
+  .step-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #222; transition: all .3s;
+  }
+  .step-dot.on { background: var(--gold); width: 20px; border-radius: 3px; }
+  .step-label { font-size: 11px; color: #333; margin-right: auto; font-family: var(--fen); }
+
+  /* FORM HEADER */
+  .form-header { margin-bottom: 24px; }
+  .form-title {
     font-family: var(--fdisplay);
-    font-size: 24px; font-weight: 700;
-    color: #F5F2EC; margin-bottom: 12px;
-    line-height: 1.3;
+    font-size: 22px; font-weight: 700;
+    color: #F5F2EC; margin-bottom: 6px;
   }
-  .panel-sub {
-    font-size: 14px; color: #555;
-    line-height: 1.8; max-width: 280px;
-  }
-  .panel-features { margin-top: 48px; display: flex; flex-direction: column; gap: 16px; }
-  .panel-feat {
-    display: flex; align-items: center; gap: 14px;
-    text-align: right;
-  }
-  .feat-ico {
-    width: 36px; height: 36px; border-radius: var(--r);
-    background: rgba(201,168,76,0.1);
-    border: 0.5px solid rgba(201,168,76,0.2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 17px; color: var(--gold); flex-shrink: 0;
-  }
-  .feat-text { font-size: 13px; color: #666; }
-  .feat-title { font-size: 13px; font-weight: 500; color: #CCC; margin-bottom: 2px; }
-
-  /* RIGHT PANEL — FORM */
-  .right-panel {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 48px;
-    overflow-y: auto;
-  }
-  .form-box { width: 100%; max-width: 420px; }
-
-  .form-header { margin-bottom: 32px; }
-  .form-title { font-family: var(--fdisplay); font-size: 28px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-  .form-sub { font-size: 14px; color: var(--text3); line-height: 1.6; }
+  .form-sub { font-size: 13px; color: #444; line-height: 1.6; }
 
   /* METHOD TABS */
   .method-tabs {
     display: grid; grid-template-columns: repeat(3,1fr);
-    gap: 8px; margin-bottom: 28px;
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--rl);
-    padding: 5px;
+    gap: 6px; margin-bottom: 24px;
+    background: #0d0d0d;
+    border: 1px solid #1e1e1e;
+    border-radius: 12px;
+    padding: 4px;
   }
   .method-tab {
-    padding: 10px 8px;
-    border-radius: 10px;
+    padding: 10px 6px;
+    border-radius: 9px;
     border: none; background: transparent;
-    color: var(--text3); font-family: var(--font);
-    font-size: 13px; cursor: pointer;
+    color: #444; font-family: var(--font);
+    font-size: 12px; cursor: pointer;
     transition: all .2s;
     display: flex; flex-direction: column;
     align-items: center; gap: 5px;
   }
-  .method-tab i { font-size: 20px; }
+  .method-tab i { font-size: 18px; }
   .method-tab.on {
-    background: var(--card);
-    color: var(--text);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    background: #1a1a1a;
+    color: #ccc;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    border: 1px solid #2a2a2a;
   }
   .method-tab.on i { color: var(--gold); }
 
   /* FORM FIELDS */
-  .field { margin-bottom: 18px; }
-  .field-label { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 7px; display: block; }
+  .field { margin-bottom: 16px; }
+  .field-label {
+    font-size: 12px; font-weight: 500;
+    color: #444; margin-bottom: 7px;
+    display: block; letter-spacing: .3px;
+  }
   .field-input {
     width: 100%; padding: 12px 16px;
-    border: 1px solid var(--border);
+    border: 1px solid #1e1e1e;
     border-radius: var(--r);
-    background: var(--card);
-    color: var(--text); font-family: var(--font);
+    background: #0d0d0d;
+    color: #ccc; font-family: var(--font);
     font-size: 14px; outline: none;
-    transition: border-color .2s;
-    display: flex; align-items: center;
+    transition: border-color .2s, box-shadow .2s;
   }
-  .field-input:focus { border-color: var(--gold); }
-  .field-input::placeholder { color: var(--text3); }
+  .field-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+  }
+  .field-input::placeholder { color: #2e2e2e; }
   .input-wrap { position: relative; }
   .input-wrap input { padding-right: 44px; }
   .input-prefix {
     position: absolute; right: 14px; top: 50%;
     transform: translateY(-50%);
-    font-size: 16px; color: var(--text3);
+    font-size: 14px; color: #333;
   }
 
-  /* OTP FIELD */
-  .otp-wrap { display: flex; gap: 10px; }
+  /* OTP */
+  .otp-wrap { display: flex; gap: 8px; }
   .otp-input {
-    flex: 1; padding: 14px 0;
-    border: 1px solid var(--border);
+    flex: 1; padding: 12px 0;
+    border: 1px solid #1e1e1e;
     border-radius: var(--r);
-    background: var(--card);
-    color: var(--text); font-family: var(--fen);
-    font-size: 22px; font-weight: 700;
+    background: #0d0d0d;
+    color: #F5F2EC; font-family: var(--fen);
+    font-size: 20px; font-weight: 700;
     text-align: center; outline: none;
-    transition: border-color .2s;
-    width: 56px;
+    transition: border-color .2s, box-shadow .2s;
+    min-width: 0;
   }
-  .otp-input:focus { border-color: var(--gold); }
-
-  /* SEND BTN */
-  .send-otp {
-    width: 100%; padding: 13px;
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: var(--r); color: var(--text2);
-    font-family: var(--font); font-size: 14px;
-    cursor: pointer; transition: all .2s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    margin-bottom: 18px;
+  .otp-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
   }
-  .send-otp:hover { border-color: var(--gold); color: var(--gold); }
 
-  /* MAIN BTN */
+  /* PRIMARY BUTTON */
   .btn-main {
     width: 100%; padding: 14px;
     background: var(--gold); border: none;
-    border-radius: var(--r); color: var(--black);
-    font-family: var(--font); font-size: 15px; font-weight: 700;
+    border-radius: var(--r);
+    color: #0A0A0A;
+    font-family: var(--font); font-size: 14px; font-weight: 700;
     cursor: pointer; transition: all .2s;
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 16px; letter-spacing: .3px;
   }
-  .btn-main:hover { background: var(--gold2); }
+  .btn-main:hover { background: var(--gold2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.25); }
+
+  /* GHOST BUTTON */
+  .btn-ghost {
+    width: 100%; padding: 12px;
+    background: transparent; border: 1px solid #1e1e1e;
+    border-radius: var(--r); color: #444;
+    font-family: var(--font); font-size: 13px;
+    cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
 
   /* DIVIDER */
   .or-divider {
-    display: flex; align-items: center; gap: 14px;
-    margin-bottom: 20px; color: var(--text3); font-size: 12px;
+    display: flex; align-items: center; gap: 12px;
+    margin: 16px 0; color: #2a2a2a; font-size: 12px; font-family: var(--fen);
   }
   .or-divider::before, .or-divider::after {
-    content: ''; flex: 1; height: 1px; background: var(--border);
+    content: ''; flex: 1; height: 1px; background: #1a1a1a;
   }
 
-  /* SOCIAL BTNS */
-  .social-btns { display: flex; gap: 10px; margin-bottom: 28px; }
+  /* SOCIAL BUTTONS */
+  .social-btns { display: flex; gap: 8px; margin-bottom: 20px; }
   .social-login {
-    flex: 1; padding: 12px;
-    border: 1px solid var(--border); border-radius: var(--r);
-    background: var(--card); cursor: pointer;
+    flex: 1; padding: 11px;
+    border: 1px solid #1e1e1e; border-radius: var(--r);
+    background: #0d0d0d; cursor: pointer;
     transition: all .2s; font-family: var(--font);
-    font-size: 13px; color: var(--text2);
-    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 13px; color: #444;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
   }
-  .social-login:hover { border-color: var(--gold); color: var(--text); }
-  .social-login i { font-size: 18px; }
+  .social-login:hover { border-color: #2a2a2a; color: #888; }
+  .social-login i { font-size: 17px; }
 
   /* TERMS */
-  .terms-text { font-size: 12px; color: var(--text3); text-align: center; line-height: 1.7; }
-  .terms-text a { color: var(--gold); text-decoration: none; }
-  .terms-text a:hover { text-decoration: underline; }
+  .terms-text { font-size: 11px; color: #2e2e2e; text-align: center; line-height: 1.7; }
+  .terms-text a { color: var(--gold); text-decoration: none; opacity: .7; }
+  .terms-text a:hover { opacity: 1; }
 
-  /* BACK LINK */
-  .back-link {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 13px; color: var(--text3);
-    text-decoration: none; margin-bottom: 32px;
-    transition: color .2s;
-  }
-  .back-link:hover { color: var(--gold); }
-
-  /* STEP INDICATOR */
-  .steps { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; }
-  .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: all .3s; }
-  .step-dot.on { background: var(--gold); width: 24px; border-radius: 4px; }
-  .step-label { font-size: 12px; color: var(--text3); margin-right: auto; }
-
-  /* PANEL CONTENT SWITCH */
+  /* PANEL SWITCH */
   .form-panel { display: none; }
   .form-panel.on { display: block; }
 
-  @media (max-width: 768px) {
-    .left-panel { display: none; }
-    .right-panel { padding: 32px 24px; }
+  /* OTP HEADER */
+  .otp-header {
+    text-align: center; margin-bottom: 24px;
   }
+  .otp-icon-wrap {
+    width: 56px; height: 56px;
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; color: var(--gold);
+    margin: 0 auto 14px;
+  }
+  .otp-title { font-size: 15px; font-weight: 600; color: #ccc; margin-bottom: 6px; }
+  .otp-desc { font-size: 12px; color: #333; line-height: 1.6; }
 
   /* STAFF SECTION */
-  .staff-section { margin-top: 32px; padding-top: 24px; }
-  .staff-divider {
-    display: flex; align-items: center; gap: 12px;
-    margin-bottom: 16px;
+  .staff-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #161616;
   }
-  .staff-divider::before,
-  .staff-divider::after {
-    content: ''; flex: 1; height: 1px; background: var(--border);
-  }
-  .staff-divider span {
-    font-size: 11px; color: var(--text3); white-space: nowrap;
-    letter-spacing: 1px; text-transform: uppercase; font-family: var(--fen);
+  .staff-label {
+    text-align: center;
+    font-size: 10px; color: #2a2a2a;
+    letter-spacing: 2px; text-transform: uppercase;
+    font-family: var(--fen);
+    margin-bottom: 12px;
   }
   .staff-roles {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
   }
   .role-btn {
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    padding: 14px 8px;
-    background: transparent; border: 1px solid var(--border);
-    border-radius: var(--r); color: var(--text2);
-    font-family: var(--font); font-size: 12px; font-weight: 500;
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    padding: 12px 6px;
+    background: transparent; border: 1px solid #1a1a1a;
+    border-radius: var(--r); color: #2e2e2e;
+    font-family: var(--font); font-size: 11px; font-weight: 500;
     cursor: pointer; transition: all .2s;
   }
-  .role-btn i { font-size: 20px; color: var(--gold); }
-  .role-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.06); }
+  .role-btn i { font-size: 18px; color: #2a2a2a; transition: color .2s; }
+  .role-btn:hover { border-color: rgba(201,168,76,0.3); color: #666; }
+  .role-btn:hover i { color: var(--gold); }
 
-  /* LANG BUTTON (top-right of right panel) */
-  .lang-btn-login {
-    position: absolute; top: 20px; left: 20px;
-    padding: 6px 12px; border: 1px solid var(--border);
-    border-radius: var(--r); background: transparent;
-    color: var(--text3); font-family: var(--fen);
-    font-size: 12px; cursor: pointer; transition: all .2s;
-    display: inline-flex; align-items: center; gap: 5px;
-    z-index: 10;
+  /* RESEND */
+  .resend-row { text-align: center; margin-bottom: 16px; }
+  .resend-row span { font-size: 12px; color: #333; }
+  .resend-row a { font-size: 12px; color: var(--gold); text-decoration: none; opacity: .7; }
+  .resend-row a:hover { opacity: 1; }
+
+  @media (max-width: 480px) {
+    .login-card { padding: 36px 24px 28px; border-radius: 16px; }
+    .logo-mark { font-size: 44px; }
+    .back-link span { display: none; }
+    .staff-roles { grid-template-columns: repeat(2, 1fr); }
   }
-  .lang-btn-login:hover { border-color: var(--gold); color: var(--gold); }
-  .lang-btn-login .lang-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
 </style>
 </head>
 <body>
 
-<!-- LEFT PANEL -->
-<div class="left-panel">
-  <div class="panel-pattern"></div>
-  <div class="panel-glow"></div>
-  <div class="panel-content">
-    <div class="panel-logo">رف</div>
-    <div class="panel-logo-en">Ruph Marketplace</div>
-    <div class="panel-divider"></div>
-    <div class="panel-title">أفضل المحلات الكويتية في مكان واحد</div>
-    <p class="panel-sub">تسوّق من محلات الملابس والأحذية والاكسسوارات والهواتف بسهولة وأمان.</p>
-    <div class="panel-features">
-      <div class="panel-feat">
-        <div class="feat-ico"><i class="ti ti-truck" aria-hidden="true"></i></div>
-        <div>
-          <div class="feat-title">توصيل سريع</div>
-          <div class="feat-text">لجميع مناطق الكويت</div>
-        </div>
-      </div>
-      <div class="panel-feat">
-        <div class="feat-ico"><i class="ti ti-shield-check" aria-hidden="true"></i></div>
-        <div>
-          <div class="feat-title">تسوق آمن</div>
-          <div class="feat-text">دفع عند الاستلام أو K-Net</div>
-        </div>
-      </div>
-      <div class="panel-feat">
-        <div class="feat-ico"><i class="ti ti-refresh" aria-hidden="true"></i></div>
-        <div>
-          <div class="feat-title">إرجاع مجاني</div>
-          <div class="feat-text">خلال 7 أيام من الاستلام</div>
-        </div>
-      </div>
-    </div>
+<!-- LANG TOGGLE -->
+<button class="lang-btn" onclick="toggleLang()">
+  <span class="lang-dot"></span>
+  <span id="langLabel">EN</span>
+</button>
+
+<!-- BACK LINK -->
+<a href="raf_homepage.html" class="back-link">
+  <i class="ti ti-arrow-right"></i>
+  <span data-ar="التسوق" data-en="Shopping">التسوق</span>
+</a>
+
+<!-- MAIN CARD -->
+<div class="login-card">
+
+  <!-- LOGO -->
+  <div class="logo-wrap">
+    <span class="logo-mark">رف</span>
+    <span class="logo-sub">RAF Marketplace</span>
   </div>
-</div>
 
-<!-- RIGHT PANEL -->
-<div class="right-panel" style="position:relative;">
-  <button class="lang-btn-login" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
-  <div class="form-box">
+  <!-- STEP DOTS -->
+  <div class="steps">
+    <div class="step-dot on" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <span class="step-label" id="step-label">١ / ٢</span>
+  </div>
 
-    <a href="raf_homepage.html" class="back-link"><i class="ti ti-arrow-right"></i> العودة للتسوق</a>
+  <!-- ────────── STEP 1 ────────── -->
+  <div class="form-panel on" id="step1">
 
     <div class="form-header">
-      <div class="form-title">أهلاً بك في رف</div>
-      <div class="form-sub">سجّل دخولك أو أنشئ حساباً جديداً للمتابعة</div>
+      <div class="form-title" data-ar="أهلاً بك" data-en="Welcome Back">أهلاً بك</div>
+      <div class="form-sub" data-ar="سجّل دخولك أو أنشئ حساباً جديداً" data-en="Sign in or create a new account">سجّل دخولك أو أنشئ حساباً جديداً</div>
     </div>
 
-    <!-- STEP INDICATOR -->
-    <div class="steps">
-      <div class="step-dot on" id="dot1"></div>
-      <div class="step-dot" id="dot2"></div>
-      <span class="step-label" id="step-label">الخطوة 1 من 2</span>
+    <!-- METHOD TABS -->
+    <div class="method-tabs">
+      <button class="method-tab on" onclick="selectMethod(this,'whatsapp')">
+        <i class="ti ti-brand-whatsapp"></i>
+        <span data-ar="واتساب" data-en="WhatsApp">واتساب</span>
+      </button>
+      <button class="method-tab" onclick="selectMethod(this,'email')">
+        <i class="ti ti-mail"></i>
+        <span data-ar="البريد" data-en="Email">البريد</span>
+      </button>
+      <button class="method-tab" onclick="selectMethod(this,'sms')">
+        <i class="ti ti-device-mobile"></i>
+        <span>SMS</span>
+      </button>
     </div>
 
-    <!-- STEP 1: METHOD SELECTION -->
-    <div class="form-panel on" id="step1">
-
-      <!-- METHOD TABS -->
-      <div class="method-tabs">
-        <button class="method-tab on" onclick="selectMethod(this, 'whatsapp')">
-          <i class="ti ti-brand-whatsapp"></i>
-          واتساب
-        </button>
-        <button class="method-tab" onclick="selectMethod(this, 'email')">
-          <i class="ti ti-mail"></i>
-          البريد
-        </button>
-        <button class="method-tab" onclick="selectMethod(this, 'sms')">
-          <i class="ti ti-device-mobile"></i>
-          SMS
-        </button>
-      </div>
-
-      <!-- WHATSAPP PANEL -->
-      <div id="method-whatsapp">
-        <div class="field">
-          <label class="field-label">رقم الواتساب</label>
-          <div class="input-wrap">
-            <input type="tel" class="field-input" placeholder="XXXXXXXX" style="padding-right:80px;direction:ltr;text-align:right;">
-            <span class="input-prefix" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--text2);">
-              🇰🇼 +965
-            </span>
-          </div>
-        </div>
-        <button class="btn-main" onclick="goStep2()">
-          <i class="ti ti-brand-whatsapp"></i>
-          إرسال رمز واتساب
-        </button>
-      </div>
-
-      <!-- EMAIL PANEL -->
-      <div id="method-email" style="display:none;">
-        <div class="field">
-          <label class="field-label">البريد الإلكتروني</label>
-          <div class="input-wrap">
-            <input type="email" class="field-input" placeholder="example@email.com" style="direction:ltr;text-align:right;padding-right:44px;">
-            <span class="input-prefix"><i class="ti ti-mail"></i></span>
-          </div>
-        </div>
-        <button class="btn-main" onclick="goStep2()">
-          <i class="ti ti-send"></i>
-          إرسال رمز التحقق
-        </button>
-      </div>
-
-      <!-- SMS PANEL -->
-      <div id="method-sms" style="display:none;">
-        <div class="field">
-          <label class="field-label">رقم الجوال</label>
-          <div class="input-wrap">
-            <input type="tel" class="field-input" placeholder="XXXXXXXX" style="padding-right:80px;direction:ltr;text-align:right;">
-            <span class="input-prefix" style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--text2);">
-              🇰🇼 +965
-            </span>
-          </div>
-        </div>
-        <button class="btn-main" onclick="goStep2()">
-          <i class="ti ti-message"></i>
-          إرسال رمز SMS
-        </button>
-      </div>
-
-      <div class="or-divider">أو سجّل بـ</div>
-
-      <div class="social-btns">
-        <button class="social-login">
-          <i class="ti ti-brand-google" style="color:#EA4335;"></i>
-          Google
-        </button>
-        <button class="social-login">
-          <i class="ti ti-brand-apple"></i>
-          Apple
-        </button>
-      </div>
-
-      <div class="terms-text">
-        بتسجيل الدخول أنت توافق على
-        <a href="#">شروط الاستخدام</a> و
-        <a href="#">سياسة الخصوصية</a>
-      </div>
-
-    </div>
-
-    <!-- STEP 2: OTP VERIFICATION -->
-    <div class="form-panel" id="step2">
-
-      <div style="text-align:center;margin-bottom:28px;">
-        <div style="width:64px;height:64px;background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--gold);margin:0 auto 16px;">
-          <i class="ti ti-brand-whatsapp" id="otp-icon"></i>
-        </div>
-        <div style="font-size:16px;font-weight:700;margin-bottom:6px;">أدخل رمز التحقق</div>
-        <div style="font-size:13px;color:var(--text3);" id="otp-desc">تم إرسال رمز مكون من 6 أرقام إلى واتساب رقم +965 XXXXXXXX</div>
-      </div>
-
+    <!-- WHATSAPP -->
+    <div id="method-whatsapp">
       <div class="field">
-        <div class="otp-wrap" style="direction:ltr;">
-          <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this, 1)">
-          <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this, 2)">
-          <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this, 3)">
-          <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this, 4)">
-          <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this, 5)">
-          <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this, 6)">
+        <label class="field-label" data-ar="رقم الواتساب" data-en="WhatsApp Number">رقم الواتساب</label>
+        <div class="input-wrap">
+          <input type="tel" class="field-input" placeholder="XXXXXXXX" style="padding-right:82px;direction:ltr;text-align:right;">
+          <span class="input-prefix" style="display:flex;align-items:center;gap:4px;font-size:12px;color:#333;">🇰🇼 +965</span>
         </div>
       </div>
-
-      <button class="btn-main" style="margin-top:8px;" onclick="window.location='raf_account.html'">
-        <i class="ti ti-check"></i>
-        تأكيد الدخول
+      <button class="btn-main" onclick="goStep2()">
+        <i class="ti ti-brand-whatsapp"></i>
+        <span data-ar="إرسال رمز واتساب" data-en="Send WhatsApp Code">إرسال رمز واتساب</span>
       </button>
+    </div>
 
-      <div style="text-align:center;margin-bottom:20px;">
-        <span style="font-size:13px;color:var(--text3);">لم يصلك الرمز؟ </span>
-        <a href="#" style="font-size:13px;color:var(--gold);text-decoration:none;" onclick="return false;">إعادة الإرسال (59s)</a>
+    <!-- EMAIL -->
+    <div id="method-email" style="display:none;">
+      <div class="field">
+        <label class="field-label" data-ar="البريد الإلكتروني" data-en="Email Address">البريد الإلكتروني</label>
+        <div class="input-wrap">
+          <input type="email" class="field-input" placeholder="example@email.com" style="direction:ltr;text-align:right;padding-right:44px;">
+          <span class="input-prefix"><i class="ti ti-mail"></i></span>
+        </div>
       </div>
-
-      <button onclick="goStep1()" style="width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">
-        <i class="ti ti-arrow-right"></i> تغيير طريقة التحقق
+      <button class="btn-main" onclick="goStep2()">
+        <i class="ti ti-send"></i>
+        <span data-ar="إرسال رمز التحقق" data-en="Send Verification Code">إرسال رمز التحقق</span>
       </button>
+    </div>
 
-    </div><!-- /step2 -->
+    <!-- SMS -->
+    <div id="method-sms" style="display:none;">
+      <div class="field">
+        <label class="field-label" data-ar="رقم الجوال" data-en="Mobile Number">رقم الجوال</label>
+        <div class="input-wrap">
+          <input type="tel" class="field-input" placeholder="XXXXXXXX" style="padding-right:82px;direction:ltr;text-align:right;">
+          <span class="input-prefix" style="display:flex;align-items:center;gap:4px;font-size:12px;color:#333;">🇰🇼 +965</span>
+        </div>
+      </div>
+      <button class="btn-main" onclick="goStep2()">
+        <i class="ti ti-message"></i>
+        <span data-ar="إرسال رمز SMS" data-en="Send SMS Code">إرسال رمز SMS</span>
+      </button>
+    </div>
 
-    <!-- STAFF ACCESS -->
-    <div class="staff-section">
-      <div class="staff-divider"><span data-ar="دخول طاقم العمل" data-en="Staff Access">دخول طاقم العمل</span></div>
-      <div class="staff-roles">
-        <button class="role-btn" onclick="goStaff('merchant')">
-          <i class="ti ti-building-store"></i>
-          <span data-ar="تاجر" data-en="Merchant">تاجر</span>
-        </button>
-        <button class="role-btn" onclick="goStaff('driver')">
-          <i class="ti ti-motorbike"></i>
-          <span data-ar="سائق" data-en="Driver">سائق</span>
-        </button>
-        <button class="role-btn" onclick="goStaff('supervisor')">
-          <i class="ti ti-truck-delivery"></i>
-          <span data-ar="مشرف" data-en="Supervisor">مشرف</span>
-        </button>
-        <button class="role-btn" onclick="goStaff('management')">
-          <i class="ti ti-shield"></i>
-          <span data-ar="إدارة" data-en="Admin">إدارة</span>
-        </button>
+    <div class="or-divider" data-ar="أو" data-en="or">أو</div>
+
+    <div class="social-btns">
+      <button class="social-login">
+        <i class="ti ti-brand-google" style="color:#EA4335;"></i>
+        Google
+      </button>
+      <button class="social-login">
+        <i class="ti ti-brand-apple" style="color:#888;"></i>
+        Apple
+      </button>
+    </div>
+
+    <div class="terms-text">
+      <span data-ar="بالمتابعة أنت توافق على" data-en="By continuing you agree to">بالمتابعة أنت توافق على</span>
+      <a href="#" data-ar="الشروط" data-en="Terms">الشروط</a>
+      <span data-ar="و" data-en="&amp;"> و </span>
+      <a href="#" data-ar="الخصوصية" data-en="Privacy">الخصوصية</a>
+    </div>
+
+  </div><!-- /step1 -->
+
+  <!-- ────────── STEP 2 ────────── -->
+  <div class="form-panel" id="step2">
+
+    <div class="otp-header">
+      <div class="otp-icon-wrap">
+        <i class="ti ti-brand-whatsapp" id="otp-icon"></i>
+      </div>
+      <div class="otp-title" data-ar="أدخل رمز التحقق" data-en="Enter Verification Code">أدخل رمز التحقق</div>
+      <div class="otp-desc" id="otp-desc">تم إرسال رمز مكون من 6 أرقام إلى واتساب رقم +965 XXXXXXXX</div>
+    </div>
+
+    <div class="field">
+      <div class="otp-wrap" style="direction:ltr;">
+        <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this,1)">
+        <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this,2)">
+        <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this,3)">
+        <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this,4)">
+        <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this,5)">
+        <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this,6)">
       </div>
     </div>
 
-  </div><!-- /form-box -->
-</div>
+    <button class="btn-main" style="margin-top:12px;" onclick="window.location='raf_account.html'">
+      <i class="ti ti-check"></i>
+      <span data-ar="تأكيد الدخول" data-en="Confirm">تأكيد الدخول</span>
+    </button>
+
+    <div class="resend-row">
+      <span data-ar="لم يصلك الرمز؟ " data-en="Didn't receive it? ">لم يصلك الرمز؟ </span>
+      <a href="#" onclick="return false;" data-ar="إعادة الإرسال (59s)" data-en="Resend (59s)">إعادة الإرسال (59s)</a>
+    </div>
+
+    <button class="btn-ghost" onclick="goStep1()">
+      <i class="ti ti-arrow-right"></i>
+      <span data-ar="تغيير طريقة التحقق" data-en="Change method">تغيير طريقة التحقق</span>
+    </button>
+
+  </div><!-- /step2 -->
+
+  <!-- ────────── STAFF ACCESS ────────── -->
+  <div class="staff-section">
+    <div class="staff-label" data-ar="دخول طاقم العمل" data-en="STAFF ACCESS">دخول طاقم العمل</div>
+    <div class="staff-roles">
+      <button class="role-btn" onclick="goStaff('merchant')">
+        <i class="ti ti-building-store"></i>
+        <span data-ar="تاجر" data-en="Merchant">تاجر</span>
+      </button>
+      <button class="role-btn" onclick="goStaff('driver')">
+        <i class="ti ti-motorbike"></i>
+        <span data-ar="سائق" data-en="Driver">سائق</span>
+      </button>
+      <button class="role-btn" onclick="goStaff('supervisor')">
+        <i class="ti ti-truck-delivery"></i>
+        <span data-ar="مشرف" data-en="Supervisor">مشرف</span>
+      </button>
+      <button class="role-btn" onclick="goStaff('management')">
+        <i class="ti ti-shield"></i>
+        <span data-ar="إدارة" data-en="Admin">إدارة</span>
+      </button>
+    </div>
+  </div>
+
+</div><!-- /login-card -->
 
 <script>
   let currentMethod = 'whatsapp';
@@ -533,10 +541,10 @@
     document.getElementById('step2').classList.add('on');
     document.getElementById('dot1').classList.remove('on');
     document.getElementById('dot2').classList.add('on');
-    document.getElementById('step-label').textContent = 'الخطوة 2 من 2';
+    document.getElementById('step-label').textContent = '٢ / ٢';
     const icons = { whatsapp: 'ti-brand-whatsapp', email: 'ti-mail', sms: 'ti-device-mobile' };
     document.getElementById('otp-icon').className = 'ti ' + icons[currentMethod];
-    document.querySelector('.otp-input').focus();
+    setTimeout(() => document.querySelector('.otp-input').focus(), 50);
   }
 
   function goStep1() {
@@ -544,7 +552,7 @@
     document.getElementById('step1').classList.add('on');
     document.getElementById('dot2').classList.remove('on');
     document.getElementById('dot1').classList.add('on');
-    document.getElementById('step-label').textContent = 'الخطوة 1 من 2';
+    document.getElementById('step-label').textContent = '١ / ٢';
   }
 
   function moveOtp(input, index) {
@@ -573,8 +581,8 @@
   }
   (function() {
     if (localStorage.getItem('raf_lang') === 'en') {
-      document.getElementById('htmlRoot').lang = 'en';
-      document.getElementById('htmlRoot').dir  = 'ltr';
+      const html = document.getElementById('htmlRoot');
+      html.lang = 'en'; html.dir = 'ltr';
       document.getElementById('langLabel').textContent = 'ع';
       document.querySelectorAll('[data-en]').forEach(el => { el.textContent = el.getAttribute('data-en'); });
     }

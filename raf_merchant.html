@@ -152,6 +152,22 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
 .set-sub{font-size:11px;color:var(--text3);margin-top:2px;}
 .set-act{margin-right:auto;}
 
+/* WORKING HOURS (settings card) */
+.wh-card-grid{display:flex;flex-direction:column;gap:6px;padding:16px 18px;}
+.wh-card-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);transition:background .2s;}
+.wh-card-row.closed{opacity:.45;}
+.wh-card-toggle{position:relative;width:36px;height:20px;flex-shrink:0;}
+.wh-card-toggle input{opacity:0;width:0;height:0;position:absolute;}
+.wh-card-slider{position:absolute;inset:0;background:var(--border);border-radius:10px;cursor:pointer;transition:.2s;}
+.wh-card-slider::before{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;bottom:3px;right:3px;transition:.2s;}
+.wh-card-toggle input:checked+.wh-card-slider{background:var(--gold);}
+.wh-card-toggle input:checked+.wh-card-slider::before{transform:translateX(-16px);}
+.wh-card-day{width:68px;font-size:13px;font-weight:600;color:var(--text);flex-shrink:0;}
+.wh-card-times{display:flex;align-items:center;gap:8px;flex:1;font-size:12px;color:var(--text2);}
+.wh-card-times select{padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-family:var(--font);font-size:12px;outline:none;cursor:pointer;}
+.wh-card-times select:focus{border-color:var(--gold);}
+.wh-closed-badge{font-size:11px;color:var(--text3);font-style:italic;}
+
 /* PAGINATION */
 .t-foot{padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text3);}
 .pgs{display:flex;gap:3px;}
@@ -205,6 +221,10 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
   .metrics-grid,.mini-metrics,.stats-grid{grid-template-columns:1fr 1fr!important;}
   .top-act{flex-wrap:wrap;gap:5px;}
   .cnt{padding:10px;}
+  .wh-card-row{flex-wrap:wrap;gap:6px;}
+  .wh-card-day{width:auto;}
+  .wh-card-times{flex-wrap:wrap;}
+  .form-grid{grid-template-columns:1fr!important;}
 }
 </style>
 </head>
@@ -692,6 +712,87 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
           <button class="toggle on set-act" onclick="this.classList.toggle('on')"></button>
         </div>
       </div>
+
+      <!-- WORKING HOURS CARD -->
+      <div class="card" style="margin-top:16px;">
+        <div class="c-head" style="display:flex;align-items:center;justify-content:space-between;">
+          <div class="c-title"><i class="ti ti-clock" style="font-size:16px;color:var(--gold);margin-left:8px;"></i>ساعات العمل</div>
+          <span style="font-size:11px;color:var(--text3);">السبت — الخميس: 10ص–10م</span>
+        </div>
+        <div class="wh-card-grid" id="merchantWhGrid">
+
+          <div class="wh-card-row" id="mwh-sat">
+            <label class="wh-card-toggle"><input type="checkbox" checked onchange="toggleMWh('sat',this)"><span class="wh-card-slider"></span></label>
+            <span class="wh-card-day">السبت</span>
+            <div class="wh-card-times">
+              من <select><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
+              <span>—</span>
+              حتى <select><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
+            </div>
+          </div>
+
+          <div class="wh-card-row" id="mwh-sun">
+            <label class="wh-card-toggle"><input type="checkbox" checked onchange="toggleMWh('sun',this)"><span class="wh-card-slider"></span></label>
+            <span class="wh-card-day">الأحد</span>
+            <div class="wh-card-times">
+              من <select><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
+              <span>—</span>
+              حتى <select><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
+            </div>
+          </div>
+
+          <div class="wh-card-row" id="mwh-mon">
+            <label class="wh-card-toggle"><input type="checkbox" checked onchange="toggleMWh('mon',this)"><span class="wh-card-slider"></span></label>
+            <span class="wh-card-day">الاثنين</span>
+            <div class="wh-card-times">
+              من <select><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
+              <span>—</span>
+              حتى <select><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
+            </div>
+          </div>
+
+          <div class="wh-card-row" id="mwh-tue">
+            <label class="wh-card-toggle"><input type="checkbox" checked onchange="toggleMWh('tue',this)"><span class="wh-card-slider"></span></label>
+            <span class="wh-card-day">الثلاثاء</span>
+            <div class="wh-card-times">
+              من <select><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
+              <span>—</span>
+              حتى <select><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
+            </div>
+          </div>
+
+          <div class="wh-card-row" id="mwh-wed">
+            <label class="wh-card-toggle"><input type="checkbox" checked onchange="toggleMWh('wed',this)"><span class="wh-card-slider"></span></label>
+            <span class="wh-card-day">الأربعاء</span>
+            <div class="wh-card-times">
+              من <select><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
+              <span>—</span>
+              حتى <select><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
+            </div>
+          </div>
+
+          <div class="wh-card-row" id="mwh-thu">
+            <label class="wh-card-toggle"><input type="checkbox" checked onchange="toggleMWh('thu',this)"><span class="wh-card-slider"></span></label>
+            <span class="wh-card-day">الخميس</span>
+            <div class="wh-card-times">
+              من <select><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
+              <span>—</span>
+              حتى <select><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
+            </div>
+          </div>
+
+          <div class="wh-card-row closed" id="mwh-fri">
+            <label class="wh-card-toggle"><input type="checkbox" onchange="toggleMWh('fri',this)"><span class="wh-card-slider"></span></label>
+            <span class="wh-card-day">الجمعة</span>
+            <div class="wh-card-times" style="opacity:.4;pointer-events:none;">
+              <span class="wh-closed-badge">مغلق</span>
+            </div>
+          </div>
+
+        </div>
+        <div class="form-footer"><button class="btn btn-p" onclick="saveMWh(this)"><i class="ti ti-device-floppy"></i> حفظ ساعات العمل</button></div>
+      </div>
+
     </div>
 
   </div>
@@ -751,6 +852,29 @@ tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middl
     const ov = document.getElementById('sbOverlay');
     if (sb) sb.classList.toggle('open', open);
     if (ov) ov.classList.toggle('open', open);
+  }
+
+  /* Working Hours */
+  function toggleMWh(day, chk) {
+    const row = document.getElementById('mwh-' + day);
+    const times = row.querySelector('.wh-card-times');
+    if (chk.checked) {
+      row.classList.remove('closed');
+      times.style.opacity = '';
+      times.style.pointerEvents = '';
+      times.querySelectorAll('select').forEach(s => s.disabled = false);
+    } else {
+      row.classList.add('closed');
+      times.style.opacity = '.4';
+      times.style.pointerEvents = 'none';
+      times.querySelectorAll('select').forEach(s => s.disabled = true);
+    }
+  }
+  function saveMWh(btn) {
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="ti ti-check"></i> تم الحفظ';
+    btn.style.background = 'var(--green)';
+    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
   }
   /* LANG */
   function toggleLang(){

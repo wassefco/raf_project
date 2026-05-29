@@ -96,6 +96,21 @@ textarea.field-inp{resize:vertical;min-height:90px;}
 /* HINT CARD */
 .hint-card{background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:var(--r);padding:12px 16px;font-size:13px;color:var(--text2);display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;}
 .hint-card i{color:var(--gold);flex-shrink:0;margin-top:2px;}
+/* WORKING HOURS */
+.wh-grid{display:flex;flex-direction:column;gap:8px;margin-top:10px;}
+.wh-row{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);transition:background .2s;}
+.wh-row.closed{opacity:.45;}
+.wh-toggle{position:relative;width:36px;height:20px;flex-shrink:0;}
+.wh-toggle input{opacity:0;width:0;height:0;position:absolute;}
+.wh-slider{position:absolute;inset:0;background:#D8D3C8;border-radius:10px;cursor:pointer;transition:.2s;}
+.wh-slider::before{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;bottom:3px;right:3px;transition:.2s;}
+.wh-toggle input:checked+.wh-slider{background:var(--gold);}
+.wh-toggle input:checked+.wh-slider::before{transform:translateX(-16px);}
+.wh-day{width:70px;font-size:13px;font-weight:600;color:var(--text);flex-shrink:0;}
+.wh-times{display:flex;align-items:center;gap:8px;flex:1;font-size:13px;color:var(--text2);}
+.wh-times select{padding:5px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-family:var(--font);font-size:12px;outline:none;cursor:pointer;}
+.wh-times select:focus{border-color:var(--gold);}
+.wh-sep{color:var(--text3);font-size:12px;}
 /* SUCCESS */
 .success-wrap{max-width:500px;margin:40px auto;padding:0 40px;text-align:center;display:none;}
 .success-ico{width:80px;height:80px;border-radius:50%;background:var(--green-bg);display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--green);margin:0 auto 24px;}
@@ -130,6 +145,10 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
 @media(max-width:480px){
   .hero-title{font-size:24px;}
   .features-inner{flex-direction:column;gap:12px;}
+  .wh-row{flex-wrap:wrap;gap:8px;}
+  .wh-day{width:auto;}
+  .wh-times{flex-wrap:wrap;}
+  .footer-bottom-simple{flex-direction:column;gap:6px;text-align:center;}
 }
 </style>
 </head>
@@ -316,6 +335,76 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
         </select>
       </div>
     </div>
+    <!-- WORKING HOURS -->
+    <div class="field">
+      <label class="field-lbl">ساعات العمل</label>
+      <div class="wh-grid" id="sellerWhGrid">
+        <div class="wh-row" id="wh-sat">
+          <label class="wh-toggle"><input type="checkbox" checked onchange="toggleWhDay('sat',this)"><span class="wh-slider"></span></label>
+          <span class="wh-day">السبت</span>
+          <div class="wh-times">
+            من <select class="wh-from"><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
+            <span class="wh-sep">—</span>
+            حتى <select class="wh-to"><option>6 م</option><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
+          </div>
+        </div>
+        <div class="wh-row" id="wh-sun">
+          <label class="wh-toggle"><input type="checkbox" checked onchange="toggleWhDay('sun',this)"><span class="wh-slider"></span></label>
+          <span class="wh-day">الأحد</span>
+          <div class="wh-times">
+            من <select class="wh-from"><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
+            <span class="wh-sep">—</span>
+            حتى <select class="wh-to"><option>6 م</option><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
+          </div>
+        </div>
+        <div class="wh-row" id="wh-mon">
+          <label class="wh-toggle"><input type="checkbox" checked onchange="toggleWhDay('mon',this)"><span class="wh-slider"></span></label>
+          <span class="wh-day">الاثنين</span>
+          <div class="wh-times">
+            من <select class="wh-from"><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
+            <span class="wh-sep">—</span>
+            حتى <select class="wh-to"><option>6 م</option><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
+          </div>
+        </div>
+        <div class="wh-row" id="wh-tue">
+          <label class="wh-toggle"><input type="checkbox" checked onchange="toggleWhDay('tue',this)"><span class="wh-slider"></span></label>
+          <span class="wh-day">الثلاثاء</span>
+          <div class="wh-times">
+            من <select class="wh-from"><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
+            <span class="wh-sep">—</span>
+            حتى <select class="wh-to"><option>6 م</option><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
+          </div>
+        </div>
+        <div class="wh-row" id="wh-wed">
+          <label class="wh-toggle"><input type="checkbox" checked onchange="toggleWhDay('wed',this)"><span class="wh-slider"></span></label>
+          <span class="wh-day">الأربعاء</span>
+          <div class="wh-times">
+            من <select class="wh-from"><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
+            <span class="wh-sep">—</span>
+            حتى <select class="wh-to"><option>6 م</option><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12  م</option></select>
+          </div>
+        </div>
+        <div class="wh-row" id="wh-thu">
+          <label class="wh-toggle"><input type="checkbox" checked onchange="toggleWhDay('thu',this)"><span class="wh-slider"></span></label>
+          <span class="wh-day">الخميس</span>
+          <div class="wh-times">
+            من <select class="wh-from"><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
+            <span class="wh-sep">—</span>
+            حتى <select class="wh-to"><option>6 م</option><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
+          </div>
+        </div>
+        <div class="wh-row closed" id="wh-fri">
+          <label class="wh-toggle"><input type="checkbox" onchange="toggleWhDay('fri',this)"><span class="wh-slider"></span></label>
+          <span class="wh-day">الجمعة</span>
+          <div class="wh-times" style="opacity:.4;pointer-events:none;">
+            من <select class="wh-from" disabled><option>10 ص</option></select>
+            <span class="wh-sep">—</span>
+            حتى <select class="wh-to" disabled><option>10 م</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="field">
       <label class="field-lbl">اختر باقة الاشتراك <span class="req">*</span></label>
       <div class="hint-card"><i class="ti ti-info-circle"></i> يمكنك ترقية باقتك في أي وقت من لوحة التحكم. <a href="raf_plans.html" style="color:var(--gold);text-decoration:none;">عرض تفاصيل الباقات</a></div>
@@ -444,6 +533,22 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
 <script>
 let agreed = false;
 let curStep = 1;
+
+function toggleWhDay(day, chk) {
+  const row = document.getElementById('wh-' + day);
+  const times = row.querySelector('.wh-times');
+  if (chk.checked) {
+    row.classList.remove('closed');
+    times.style.opacity = '';
+    times.style.pointerEvents = '';
+    times.querySelectorAll('select').forEach(s => s.disabled = false);
+  } else {
+    row.classList.add('closed');
+    times.style.opacity = '.4';
+    times.style.pointerEvents = 'none';
+    times.querySelectorAll('select').forEach(s => s.disabled = true);
+  }
+}
 
 function goStep(n) {
   document.getElementById('step' + curStep).style.display = 'none';

@@ -234,6 +234,13 @@
     .store-stats { gap: 16px; }
     .policy-grid { grid-template-columns: 1fr; }
   }
+  @media (max-width: 480px) {
+    .products-grid { grid-template-columns: 1fr; }
+    .store-stats { flex-wrap: wrap; gap: 12px; }
+    .filter-bar { flex-direction: column; gap: 6px; }
+    .nav-links { display: none; }
+    footer { padding: 16px; flex-direction: column; gap: 8px; text-align: center; }
+  }
 </style>
 </head>
 <body>

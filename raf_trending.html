@@ -105,6 +105,17 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
 .footer-link:hover{color:var(--gold);}
 .footer-bottom{border-top:1px solid #1a1a1a;padding-top:24px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#444;max-width:1200px;margin:0 auto;}
 @media(max-width:900px){nav{padding:0 16px;}.nav-links{display:none;}.main{padding:20px 16px;}.page-header{padding:28px 16px;}.breadcrumb{padding:10px 16px;}.footer-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){
+  .main{padding:12px;}
+  .chips{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:6px;}
+  .chips::-webkit-scrollbar{display:none;}
+  .chip{flex-shrink:0;}
+  .tab-bar{overflow-x:auto;white-space:nowrap;scrollbar-width:none;}
+  .tab-bar::-webkit-scrollbar{display:none;}
+  .footer-grid{grid-template-columns:1fr;}
+  .footer-bottom{flex-direction:column;text-align:center;gap:6px;}
+  footer{padding:32px 16px 16px;}
+}
 .lang-btn{padding:6px 12px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text3);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;letter-spacing:1px;display:inline-flex;align-items:center;gap:5px;}
 .lang-btn:hover{border-color:var(--gold);color:var(--gold);}
 .lang-btn .lang-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block;}

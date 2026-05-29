@@ -99,6 +99,14 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:48px;}
 .fl{color:#444;text-decoration:none;transition:color .2s;}
 .fl:hover{color:var(--gold);}
 @media(max-width:700px){nav{padding:0 16px;}.main{padding:20px 16px;}.breadcrumb{padding:10px 16px;}.order-top{flex-direction:column;align-items:flex-start;}.eta-card{flex-direction:column;}}
+@media(max-width:480px){
+  .main{padding:12px;}
+  .track-steps{overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;scrollbar-width:none;padding-bottom:4px;}
+  .track-steps::-webkit-scrollbar{display:none;}
+  .order-items-list{overflow-x:auto;}
+  footer{padding:16px;flex-direction:column;gap:8px;text-align:center;}
+  .footer-simple{flex-direction:column;gap:6px;text-align:center;}
+}
 </style>
 </head>
 <body>

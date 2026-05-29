@@ -428,6 +428,12 @@
     .similar-section { padding: 0 20px 40px; }
     .breadcrumb { padding: 12px 20px; }
   }
+  @media (max-width: 480px) {
+    .similar-grid { grid-template-columns: 1fr; }
+    .product-actions { flex-direction: column; }
+    .nav-links { display: none; }
+    footer { padding: 16px; flex-direction: column; gap: 8px; text-align: center; }
+  }
 </style>
 </head>
 <body>

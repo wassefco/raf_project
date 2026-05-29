@@ -182,102 +182,104 @@
   }
 
   /* HERO BANNER */
+  /* ═══════════ HERO — redesigned ═══════════ */
   .hero {
-    min-height: 500px; position: relative;
-    overflow: hidden;
-    background: linear-gradient(135deg, #F5F2EC 0%, #EDE8DC 50%, #F5F2EC 100%);
-    display: flex; align-items: center;
+    min-height: 560px; position: relative; overflow: hidden;
+    background: var(--black);
+    display: flex; align-items: stretch;
   }
+  /* subtle dot-grid overlay */
   .hero-bg {
     position: absolute; inset: 0;
-    background:
-      radial-gradient(ellipse 60% 80% at 80% 50%, rgba(201,168,76,0.15) 0%, transparent 70%),
-      radial-gradient(ellipse 40% 60% at 20% 30%, rgba(201,168,76,0.08) 0%, transparent 70%);
+    background-image: radial-gradient(rgba(201,168,76,.08) 1px, transparent 1px);
+    background-size: 28px 28px;
   }
+  /* warm gold glow on the right */
   .hero-grid {
     position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(201,168,76,0.07) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(201,168,76,0.07) 1px, transparent 1px);
-    background-size: 60px 60px;
+    background:
+      radial-gradient(ellipse 55% 70% at 95% 50%, rgba(201,168,76,.12) 0%, transparent 65%),
+      radial-gradient(ellipse 35% 50% at 5%  80%, rgba(201,168,76,.06) 0%, transparent 60%);
   }
+  /* ── content column (text side) ── */
   .hero-content {
     position: relative; z-index: 2;
-    padding: 60px 60px; flex: 1; max-width: 580px;
+    flex: 1; max-width: 560px;
+    padding: 72px 60px 56px;
+    display: flex; flex-direction: column; justify-content: center;
   }
   .hero-tag {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
     color: var(--gold); font-family: var(--font-en);
-    margin-bottom: 20px;
+    margin-bottom: 24px;
   }
-  .hero-tag::before {
-    content: ''; width: 24px; height: 1px; background: var(--gold);
-  }
+  .hero-tag::before { content: ''; width: 20px; height: 1px; background: var(--gold); }
   .hero-title {
     font-family: var(--font-display);
-    font-size: clamp(34px, 4.5vw, 56px);
-    font-weight: 900; line-height: 1.1;
-    margin-bottom: 16px;
-    color: var(--text);
+    font-size: clamp(38px, 5vw, 64px);
+    font-weight: 900; line-height: 1.05;
+    margin-bottom: 18px; color: #F5F2EC;
   }
   .hero-title em { color: var(--gold); font-style: normal; }
   .hero-sub {
-    font-size: 15px; color: var(--gray-4); line-height: 1.8;
-    margin-bottom: 32px; font-weight: 300;
+    font-size: 15px; color: #666; line-height: 1.85;
+    margin-bottom: 36px; font-weight: 300; max-width: 420px;
   }
-  .hero-actions { display: flex; gap: 12px; align-items: center; margin-bottom: 36px; }
+  .hero-actions { display: flex; gap: 12px; align-items: center; margin-bottom: 44px; flex-wrap: wrap; }
   .btn-hero {
-    padding: 13px 28px; background: var(--gold);
+    padding: 14px 32px; background: var(--gold);
     color: var(--black); border: none; border-radius: var(--radius);
     font-family: var(--font-ar); font-size: 14px; font-weight: 700;
-    cursor: pointer; transition: all 0.2s;
+    cursor: pointer; transition: all .2s; letter-spacing: .3px;
   }
-  .btn-hero:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .btn-hero:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,168,76,.35); }
   .btn-hero-ghost {
-    padding: 13px 28px; background: transparent;
-    color: var(--text); border: 1px solid rgba(10,10,10,0.2);
+    padding: 14px 32px; background: transparent;
+    color: #aaa; border: 1px solid #333;
     border-radius: var(--radius); font-family: var(--font-ar);
-    font-size: 14px; cursor: pointer; transition: all 0.2s;
+    font-size: 14px; cursor: pointer; transition: all .2s;
   }
   .btn-hero-ghost:hover { border-color: var(--gold); color: var(--gold); }
-  /* Stats inline below CTAs */
+  /* stats row */
   .hero-stats {
-    display: flex; gap: 36px; align-items: center;
-    padding-top: 20px; border-top: 1px solid rgba(201,168,76,0.2);
+    display: flex; gap: 32px; align-items: flex-start;
+    padding-top: 24px; border-top: 1px solid #1f1f1f;
   }
   .hero-stat-num {
     font-family: var(--font-display);
-    font-size: 26px; font-weight: 700; color: var(--gold);
+    font-size: 28px; font-weight: 700; color: var(--gold);
   }
-  .hero-stat-lbl { font-size: 11px; color: var(--gray-4); margin-top: 2px; }
-  /* Hero visual — category grid */
+  .hero-stat-lbl { font-size: 11px; color: #444; margin-top: 3px; letter-spacing: .5px; }
+
+  /* ── visual column (category cards) ── */
   .hero-visual {
     position: relative; z-index: 2;
-    width: 420px; flex-shrink: 0;
-    padding: 40px 40px 40px 20px;
+    width: 400px; flex-shrink: 0;
+    padding: 40px 44px 40px 20px;
     display: flex; align-items: center; justify-content: center;
   }
   .cat-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
     width: 100%;
   }
   .cat-tile {
-    background: rgba(255,255,255,0.7);
-    border: 1px solid rgba(201,168,76,0.2);
-    border-radius: var(--radius-lg); padding: 18px 10px;
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    cursor: pointer; transition: all .2s;
-    font-size: 11px; font-weight: 500; color: var(--gray-4);
-    text-align: center; backdrop-filter: blur(4px);
+    background: rgba(255,255,255,.04);
+    border: 1px solid #222;
+    border-radius: var(--radius-lg); padding: 20px 12px;
+    display: flex; flex-direction: column; align-items: center; gap: 9px;
+    cursor: pointer; transition: all .22s;
+    font-size: 12px; font-weight: 500; color: #666;
+    text-align: center;
   }
   .cat-tile:hover {
     border-color: var(--gold); color: var(--gold);
-    background: rgba(201,168,76,0.08);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(201,168,76,0.15);
+    background: rgba(201,168,76,.07);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(201,168,76,.12);
   }
-  .cat-tile i { font-size: 26px; color: var(--gold); }
+  .cat-tile i { font-size: 28px; color: var(--gold); }
+  .cat-tile:nth-child(1) { grid-column: span 2; }  /* Clothing spans full width */
 
   /* SEARCH BAR */
   .search-section {
@@ -571,14 +573,24 @@
     .stores-grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 768px) {
-    .hero { height: auto; padding: 60px 0 40px; flex-wrap: wrap; }
+    .hero { min-height: auto; flex-direction: column; }
     .hero-visual { display: none; }
-    .hero-content { padding: 0 24px; }
-    .hero-stats { gap: 24px; }
+    .hero-content { padding: 48px 20px 40px; max-width: 100%; }
+    .hero-title { font-size: clamp(30px, 8vw, 44px); }
+    .hero-stats { gap: 20px; }
+    .hero-actions { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .btn-hero, .btn-hero-ghost { width: 100%; text-align: center; }
     .nav-links { display: none; }
     .footer-grid { grid-template-columns: 1fr 1fr; }
     .products-grid { grid-template-columns: repeat(2, 1fr); }
     .stores-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  }
+  @media (max-width: 480px) {
+    .hero-content { padding: 36px 16px 32px; }
+    .hero-stats { gap: 16px; flex-wrap: wrap; }
+    .products-grid { grid-template-columns: 1fr; }
+    .stores-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -664,8 +676,8 @@
   </div>
   <div class="hero-visual">
     <div class="cat-grid">
-      <div class="cat-tile" onclick="window.location='raf_storespage.html?cat=clothing'">
-        <i class="ti ti-shirt"></i><span data-ar="ملابس" data-en="Clothing">ملابس</span>
+      <div class="cat-tile" onclick="window.location='raf_storespage.html?cat=clothing'" style="grid-column:span 2">
+        <i class="ti ti-shirt"></i><span data-ar="ملابس وأزياء" data-en="Clothing & Fashion">ملابس وأزياء</span>
       </div>
       <div class="cat-tile" onclick="window.location='raf_storespage.html?cat=shoes'">
         <i class="ti ti-shoe"></i><span data-ar="أحذية" data-en="Shoes">أحذية</span>
@@ -679,8 +691,8 @@
       <div class="cat-tile" onclick="window.location='raf_used.html'">
         <i class="ti ti-refresh"></i><span data-ar="مستعمل" data-en="Used">مستعمل</span>
       </div>
-      <div class="cat-tile" onclick="window.location='raf_auctions.html'">
-        <i class="ti ti-gavel"></i><span data-ar="مزادات" data-en="Auctions">مزادات</span>
+      <div class="cat-tile" onclick="window.location='raf_auctions.html'" style="grid-column:span 2">
+        <i class="ti ti-gavel"></i><span data-ar="المزادات الحية" data-en="Live Auctions">المزادات الحية</span>
       </div>
     </div>
   </div>
