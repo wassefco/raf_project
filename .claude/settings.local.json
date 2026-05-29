@@ -12,7 +12,10 @@
       "Bash(git -C \"C:\\\\Users\\\\user\\\\Desktop\\\\Wassef Files\\\\raf_project\" add index.html)",
       "Bash(git -C 'C:\\\\Users\\\\user\\\\Desktop\\\\Wassef Files\\\\raf_project' commit -m ' *)",
       "WebFetch(domain:wassefco.github.io)",
-      "WebFetch(domain:api.github.com)"
+      "WebFetch(domain:api.github.com)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
