@@ -23,7 +23,8 @@
     --fen:'DM Sans',sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
-  body{background:var(--bg);color:var(--text);font-family:var(--font);}
+  html{overflow-x:hidden;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font);max-width:100%;overflow-x:hidden;}
 
   /* NAV */
   nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.3);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;}
@@ -174,6 +175,9 @@
 
   /* FOOTER */
   footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text3);margin-top:40px;}
+
+  /* ── GLOBAL MOBILE RESET ── */
+  @media(max-width:768px){*{max-width:100%;}img,video,iframe{max-width:100%!important;height:auto;}table{max-width:100%;}}
 
   /* ===== RESPONSIVE ===== */
   @media(max-width:1024px){

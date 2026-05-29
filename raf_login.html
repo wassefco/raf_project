@@ -27,6 +27,7 @@
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html { overflow-x: hidden; }
   body {
     background: #0A0A0A;
     min-height: 100vh;
@@ -37,6 +38,7 @@
     padding: 20px;
     position: relative;
     overflow-x: hidden;
+    max-width: 100%;
   }
 
   /* Background dot grid */
@@ -331,11 +333,21 @@
   .resend-row a { font-size: 12px; color: var(--gold); text-decoration: none; opacity: .7; }
   .resend-row a:hover { opacity: 1; }
 
+  /* ── GLOBAL MOBILE RESET ── */
+  @media (max-width: 768px) {
+    * { max-width: 100%; }
+    img, video, iframe { max-width: 100% !important; height: auto; }
+    table { max-width: 100%; }
+  }
+
   @media (max-width: 480px) {
     .login-card { padding: 36px 24px 28px; border-radius: 16px; }
     .logo-mark { font-size: 44px; }
     .back-link span { display: none; }
     .staff-roles { grid-template-columns: repeat(2, 1fr); }
+    .login-card { padding: 28px 16px 24px; margin: 0; }
+    .otp-wrap { gap: 5px; }
+    .otp-input { font-size: 18px; padding: 10px 0; }
   }
 </style>
 </head>

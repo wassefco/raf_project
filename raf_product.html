@@ -30,11 +30,13 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html { overflow-x: hidden; }
   body {
     background: var(--black);
     color: var(--white);
     font-family: var(--font-ar);
     overflow-x: hidden;
+    max-width: 100%;
   }
 
   /* NAV */
@@ -419,6 +421,13 @@
     font-size: 12px; color: var(--gray-4);
   }
 
+  /* ── GLOBAL MOBILE RESET ── */
+  @media (max-width: 768px) {
+    * { max-width: 100%; }
+    img, video, iframe { max-width: 100% !important; height: auto; }
+    table { max-width: 100%; }
+  }
+
   @media (max-width: 768px) {
     .product-layout { grid-template-columns: 1fr; padding: 20px; gap: 32px; }
     .gallery { padding-left: 0; }
@@ -427,12 +436,18 @@
     .tabs { padding: 0 20px 40px; }
     .similar-section { padding: 0 20px 40px; }
     .breadcrumb { padding: 12px 20px; }
+    nav { padding: 0 16px; }
+    .product-layout { padding: 16px; }
+    .tabs { padding: 0 16px 32px; }
   }
   @media (max-width: 480px) {
     .similar-grid { grid-template-columns: 1fr; }
     .product-actions { flex-direction: column; }
     .nav-links { display: none; }
     footer { padding: 16px; flex-direction: column; gap: 8px; text-align: center; }
+    .product-layout { padding: 12px; }
+    .thumbnails { grid-template-columns: repeat(4, 1fr); }
+    .product-title { font-size: 24px; }
   }
 
   /* ===== APP BOTTOM NAV ===== */

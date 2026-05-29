@@ -42,11 +42,13 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html { overflow-x: hidden; }
   body {
     background: var(--bg);
     color: var(--text);
     font-family: var(--font-ar);
     overflow-x: hidden;
+    max-width: 100%;
   }
 
   /* POPUP */
@@ -568,6 +570,15 @@
   /* EN mode overrides */
   html[lang="en"] body { font-family: var(--font-en); }
   html[lang="en"] .nav-logo { letter-spacing: 0; }
+
+  /* ── GLOBAL MOBILE RESET ── */
+  @media (max-width: 768px) {
+    * { max-width: 100%; }
+    img, video, iframe { max-width: 100% !important; height: auto; }
+    table { max-width: 100%; }
+    .hero { min-height: auto; }
+    body { overflow-x: hidden; }
+  }
 
   @media (max-width: 960px) {
     .stores-grid { grid-template-columns: repeat(2, 1fr); }

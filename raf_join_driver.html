@@ -10,7 +10,8 @@
 <style>
 :root{--bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;--gold:#C9A84C;--gold2:#A07828;--black:#0A0A0A;--text:#0A0A0A;--text2:#555;--text3:#888;--border:#D8D3C8;--r:8px;--rl:12px;--font:'Tajawal',sans-serif;--fdisplay:'Playfair Display',serif;--fen:'DM Sans',sans-serif;--green:#2E7D32;--green-bg:#E8F5E9;--red:#C62828;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;}
+html{overflow-x:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;max-width:100%;overflow-x:hidden;}
 /* NAV */
 nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.3);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;}
 .nav-logo{font-family:var(--fdisplay);font-size:28px;font-weight:900;color:var(--gold);text-decoration:none;}
@@ -91,6 +92,8 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
 .footer-bottom-simple{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#444;max-width:680px;margin:0 auto;}
 .footer-link{color:#444;text-decoration:none;transition:color .2s;}
 .footer-link:hover{color:var(--gold);}
+/* ── GLOBAL MOBILE RESET ── */
+@media(max-width:768px){*{max-width:100%;}img,video,iframe{max-width:100%!important;height:auto;}table{max-width:100%;}nav{padding:0 12px;}.form-card{border-radius:8px;}}
 @media(max-width:700px){nav{padding:0 16px;}.hero{padding:40px 16px;}.progress-wrap{padding:0 16px;}.form-body{padding:16px;}.row2{grid-template-columns:1fr;}.perks{gap:10px;}.success-wrap{padding:0 16px;}}
 @media(max-width:480px){.hero-title{font-size:22px;}.form-card{margin-inline:0;}.footer-bottom-simple{flex-direction:column;gap:6px;text-align:center;}footer{padding:16px;}}
 </style>
