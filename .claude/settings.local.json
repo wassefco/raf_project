@@ -6,7 +6,13 @@
       "Bash(Format-Table -AutoSize)",
       "Bash(ls \"C:\\\\Users\\\\user\\\\Desktop\\\\Wassef Files\\\\raf_project\\\\\" | grep -i store)",
       "Bash(ls '/mnt/c/Users/user/Desktop/Wassef Files/raf_project/' | grep -i store)",
-      "Bash(powershell -Command \"\\(Get-Content 'C:\\\\Users\\\\user\\\\Desktop\\\\Wassef Files\\\\raf_project\\\\raf_admin.html'\\).Count\")"
+      "Bash(powershell -Command \"\\(Get-Content 'C:\\\\Users\\\\user\\\\Desktop\\\\Wassef Files\\\\raf_project\\\\raf_admin.html'\\).Count\")",
+      "Bash(git -C \"C:\\\\Users\\\\user\\\\Desktop\\\\Wassef Files\\\\raf_project\" remote -v)",
+      "Bash(git -C \"C:\\\\Users\\\\user\\\\Desktop\\\\Wassef Files\\\\raf_project\" branch)",
+      "Bash(git -C \"C:\\\\Users\\\\user\\\\Desktop\\\\Wassef Files\\\\raf_project\" add index.html)",
+      "Bash(git -C 'C:\\\\Users\\\\user\\\\Desktop\\\\Wassef Files\\\\raf_project' commit -m ' *)",
+      "WebFetch(domain:wassefco.github.io)",
+      "WebFetch(domain:api.github.com)"
     ]
   }
 }
