@@ -138,15 +138,7 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:0;}
   .footer-grid{grid-template-columns:1fr;}
 }
 </style>
-<style id="raf-safe-area">
-/* Android/iOS header safe-area spacing — responsive, no per-device hardcoding */
-@supports (padding-top: env(safe-area-inset-top)) {
-  nav:not(.app-bnav):not(.top), nav.top {
-    padding-top: env(safe-area-inset-top, 0px);
-    height: calc(64px + env(safe-area-inset-top, 0px));
-  }
-}
-</style>
+<link rel="stylesheet" href="raf_header.css">
 </head>
 <body>
 

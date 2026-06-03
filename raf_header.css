@@ -1,0 +1,85 @@
+/* ==========================================================================
+   RAF Marketplace — GLOBAL Header / Safe-Area Standardization
+   --------------------------------------------------------------------------
+   Single source of truth, linked on EVERY page. Replaces the per-page inline
+   safe-area patches so the header behaves identically everywhere.
+
+   It normalizes the three header implementations used across the project:
+     • nav  (not .app-bnav / not .top)  → customer marketplace pages
+     • nav.top                          → info / legal / help pages
+     • .top-bar                         → dashboard / admin pages
+
+   ROOT CAUSE OF THE ANDROID ISSUE
+   -------------------------------------------------------------------------
+   The headers reserved no space for the device status bar, and the previous
+   `env(safe-area-inset-top)` patch is *0* in a normal browser tab AND is
+   frequently reported as 0 by Android when the app runs standalone / installed
+   (iOS reports it correctly, which is why iPhone looked fine and Android did
+   not). Result: on Android the header sat directly under the status bar.
+
+   SOLUTION
+   -------------------------------------------------------------------------
+   • Reserve the real top inset on every header (no effect in a normal tab).
+   • In standalone / fullscreen / minimal-ui (where the status bar actually
+     overlaps the page) FLOOR the inset with max(env, 24px) so Android — which
+     may report 0 — still gets guaranteed clearance, while iOS still uses its
+     larger notch inset. 24px is a universal minimum, not a per-device value.
+   • Standardize header height, vertical centering and horizontal padding so
+     the logo / hamburger / icons line up the same way on every page.
+   ========================================================================== */
+
+/* ---- vertical centering + reserve the device top inset (all header types) -- */
+nav:not(.app-bnav):not(.top),
+nav.top,
+.top-bar{
+  align-items: center;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* ---- standardized header height (kept per design system), grown by inset --- */
+nav:not(.app-bnav):not(.top),
+nav.top{ height: calc(64px + env(safe-area-inset-top, 0px)); }
+.top-bar{ height: calc(56px + env(safe-area-inset-top, 0px)); }
+
+/* ---- consistent horizontal padding so logo/hamburger/icons align everywhere -
+   responsive (clamp), never a single fixed per-device number ----------------- */
+nav:not(.app-bnav):not(.top),
+nav.top{
+  padding-left: clamp(16px, 4vw, 40px);
+  padding-right: clamp(16px, 4vw, 40px);
+}
+
+/* ---- STANDALONE / INSTALLED PWA / FULLSCREEN -------------------------------
+   The OS status bar overlaps the page here. Guarantee top clearance even where
+   the OS inset is 0 (common on Android). max() keeps iOS's larger notch inset. */
+@media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui){
+  nav:not(.app-bnav):not(.top),
+  nav.top{
+    padding-top: max(env(safe-area-inset-top, 0px), 24px);
+    height: calc(64px + max(env(safe-area-inset-top, 0px), 24px));
+  }
+  .top-bar{
+    padding-top: max(env(safe-area-inset-top, 0px), 24px);
+    height: calc(56px + max(env(safe-area-inset-top, 0px), 24px));
+  }
+}
+
+/* ---- bottom app nav already handles the bottom inset; keep it consistent ---- */
+.app-bnav{ padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+/* ==========================================================================
+   PAGE-SPECIFIC TOP CONTAINERS (unique class names) — kept consistent with the
+   same safe-area rules so NO page is left without status-bar handling.
+   ========================================================================== */
+
+/* Driver app (raf_driver_app.html) — custom sticky top header (.header,12px top) */
+.header{ padding-top: calc(12px + env(safe-area-inset-top, 0px)); }
+@media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui){
+  .header{ padding-top: calc(12px + max(env(safe-area-inset-top, 0px), 24px)); }
+}
+
+/* Login / Register (raf_login.html) — centered auth card, no top bar.
+   Guarantee the card never slides under the status bar in standalone. */
+@media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui){
+  .login-card{ margin-top: max(env(safe-area-inset-top, 0px), 24px); }
+}

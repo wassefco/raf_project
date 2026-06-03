@@ -21,7 +21,8 @@
       "Bash(git rm *)",
       "Bash(rm -f raf_admin.html)",
       "Bash([ -f \"$f.html\" ])",
-      "Bash([ -f \"$p.html\" ])"
+      "Bash([ -f \"$p.html\" ])",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8123/raf_header.css)"
     ]
   }
 }

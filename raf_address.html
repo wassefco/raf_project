@@ -116,15 +116,7 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
     nav a.btn-ghost,nav a.btn-gold,nav .btn-ghost,nav .btn-gold{display:none!important;}
   }
 </style>
-<style id="raf-safe-area">
-/* Android/iOS header safe-area spacing — responsive, no per-device hardcoding */
-@supports (padding-top: env(safe-area-inset-top)) {
-  nav:not(.app-bnav):not(.top), nav.top {
-    padding-top: env(safe-area-inset-top, 0px);
-    height: calc(64px + env(safe-area-inset-top, 0px));
-  }
-}
-</style>
+<link rel="stylesheet" href="raf_header.css">
 </head>
 <body>
 

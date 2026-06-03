@@ -62,15 +62,7 @@
     .bnav-cart-ring{width:44px;height:44px;border-radius:50%;background:#C9A84C;display:flex;align-items:center;justify-content:center;font-size:20px;color:#0A0A0A;margin-top:-14px;box-shadow:0 4px 14px rgba(201,168,76,.3);}
   }
 </style>
-<style id="raf-safe-area">
-/* Android/iOS header safe-area spacing — responsive, no per-device hardcoding */
-@supports (padding-top: env(safe-area-inset-top)) {
-  nav:not(.app-bnav):not(.top), nav.top {
-    padding-top: env(safe-area-inset-top, 0px);
-    height: calc(64px + env(safe-area-inset-top, 0px));
-  }
-}
-</style>
+<link rel="stylesheet" href="raf_header.css">
 </head>
 <body>
 <nav class="top">
