@@ -440,6 +440,10 @@
     .product-layout { padding: 16px; }
     .tabs { padding: 0 16px 32px; }
   }
+  /* Collapse desktop center menu in the tablet-portrait gap so the nav never overflows */
+  @media (max-width: 900px) {
+    .nav-center { display: none !important; }
+  }
   @media (max-width: 480px) {
     .similar-grid { grid-template-columns: 1fr; }
     .product-actions { flex-direction: column; }
@@ -480,7 +484,7 @@
     <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> تسجيل الدخول</a>
     <a href="raf_login.html" class="btn-gold">إنشاء حساب</a>
   </div>
-  <div style="display:flex;align-items:center;gap:8px;">
+  <div class="nav-center" style="display:flex;align-items:center;gap:8px;">
     <a href="raf_storespage.html" style="color:var(--gray-4);text-decoration:none;font-size:14px;">المحلات</a>
     <span style="color:var(--gray-3);">·</span>
     <a href="raf_offers.html" style="color:var(--gray-4);text-decoration:none;font-size:14px;">العروض</a>

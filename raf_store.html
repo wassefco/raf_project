@@ -245,11 +245,14 @@
     .store-tabs { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
     .store-tabs::-webkit-scrollbar { display: none; }
   }
+  /* Collapse desktop center menu in the tablet-portrait gap so the nav never overflows */
+  @media (max-width: 900px) {
+    .nav-links { display: none; }
+  }
   @media (max-width: 480px) {
     .products-grid { grid-template-columns: 1fr; }
     .store-stats { flex-wrap: wrap; gap: 12px; }
     .filter-bar { flex-direction: column; gap: 6px; }
-    .nav-links { display: none; }
     footer { padding: 16px; flex-direction: column; gap: 8px; text-align: center; }
     .store-info-inner { padding: 48px 12px 12px; }
     .store-hero-content { padding: 0 12px; }

@@ -596,6 +596,10 @@
     .products-grid { grid-template-columns: repeat(2, 1fr); }
     .stores-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
   }
+  /* Collapse desktop center menu in the tablet-portrait gap so the nav never overflows */
+  @media (max-width: 900px) {
+    .nav-links { display: none; }
+  }
   @media (max-width: 480px) {
     .hero-content { padding: 36px 16px 32px; }
     .hero-stats { gap: 16px; flex-wrap: wrap; }

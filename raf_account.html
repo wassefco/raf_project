@@ -178,6 +178,8 @@
 
   /* ── GLOBAL MOBILE RESET ── */
   @media(max-width:768px){*{max-width:100%;}img,video,iframe{max-width:100%!important;height:auto;}table{max-width:100%;}}
+  /* Collapse desktop center menu in the tablet-portrait gap so the nav never overflows */
+  @media(max-width:900px){.nav-center{display:none!important;}}
 
   /* ===== RESPONSIVE ===== */
   @media(max-width:1024px){
@@ -233,7 +235,7 @@
     <button class="nav-ico"><i class="ti ti-bell"></i></button>
     <a href="raf_login.html" class="btn-ghost"><i class="ti ti-logout"></i> <span data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span></a>
   </div>
-  <div style="display:flex;align-items:center;gap:8px;">
+  <div class="nav-center" style="display:flex;align-items:center;gap:8px;">
     <a href="raf_homepage.html" style="color:var(--text3);text-decoration:none;font-size:14px;" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
     <span style="color:var(--border);">·</span>
     <a href="raf_storespage.html" style="color:var(--text3);text-decoration:none;font-size:14px;" data-ar="المحلات" data-en="Stores">المحلات</a>
