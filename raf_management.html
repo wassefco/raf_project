@@ -261,6 +261,7 @@ select.field-inp{cursor:pointer;appearance:auto;}
 
     <div class="sb-section">
       <div class="sb-section-lbl" data-ar="الصلاحيات" data-en="ACCESS">الصلاحيات</div>
+      <a class="sb-item" href="raf_permissions.html" data-perm="permissions.view" style="text-decoration:none;"><i class="ti ti-shield-lock"></i> <span data-ar="إدارة الصلاحيات" data-en="Permissions Mgmt">إدارة الصلاحيات</span> <span class="sb-badge gold" data-ar="جديد" data-en="New">جديد</span></a>
       <div class="sb-item" onclick="sw('access',this)"><i class="ti ti-shield-check"></i> <span data-ar="التحكم بالصلاحيات" data-en="Access Control">التحكم بالصلاحيات</span></div>
       <div class="sb-item" onclick="sw('approvals',this)"><i class="ti ti-clock-check"></i> <span data-ar="طلبات الموافقة" data-en="Approval Requests">طلبات الموافقة</span> <span class="sb-badge">7</span></div>
     </div>
@@ -326,6 +327,16 @@ select.field-inp{cursor:pointer;appearance:auto;}
       <div class="top-actions"><button class="tb-btn gold" onclick="showAddAdmin()"><i class="ti ti-plus"></i> إضافة مدير</button></div>
     </div>
     <div style="padding:28px 32px;">
+
+      <!-- NEW CONSOLE CTA -->
+      <a href="raf_permissions.html" data-perm="permissions.view" style="text-decoration:none;display:flex;align-items:center;gap:14px;background:linear-gradient(90deg,rgba(201,168,76,.12),rgba(201,168,76,.03));border:1px solid rgba(201,168,76,.3);border-radius:var(--rl);padding:16px 20px;margin-bottom:20px;">
+        <div style="width:44px;height:44px;border-radius:var(--r);background:rgba(201,168,76,.15);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--gold);flex-shrink:0;"><i class="ti ti-shield-lock"></i></div>
+        <div style="flex:1;">
+          <div style="font-size:14px;font-weight:700;color:var(--gold);" data-ar="نظام إدارة الصلاحيات المتقدم" data-en="Advanced Permissions Console">نظام إدارة الصلاحيات المتقدم</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px;" data-ar="بحث المستخدمين، الأدوار، التجاوزات الفردية، والقوالب — تجربة إدارة احترافية." data-en="User search, roles, per-user overrides and templates — full admin console.">بحث المستخدمين، الأدوار، التجاوزات الفردية، والقوالب — تجربة إدارة احترافية.</div>
+        </div>
+        <i class="ti ti-arrow-left" style="color:var(--gold);font-size:20px;"></i>
+      </a>
 
       <!-- ADMINS LIST -->
       <div class="sec-card" style="margin-bottom:20px;">
@@ -1633,6 +1644,7 @@ select.field-inp{cursor:pointer;appearance:auto;}
 
 </div><!-- /content -->
 
+<script src="raf_permissions.js"></script>
 <script>
 /* NAVIGATION */
 function sw(view, el) {
@@ -1840,6 +1852,10 @@ function applyLang(){
   document.querySelectorAll('[data-ar]').forEach(el=>{el.textContent=en?el.dataset.en:el.dataset.ar;});
 }
 (function(){const l=localStorage.getItem('raf_lang');if(l){const r=document.getElementById('htmlRoot');r.lang=l;r.dir=l==='en'?'ltr':'rtl';}applyLang();})();
+/* RBAC ENFORCEMENT — hides [data-perm] elements the acting staff member can't access.
+   Acting user defaults to Super Admin (raf_current_user), so all admin controls show.
+   Backend must enforce the SAME permission keys server-side. */
+if(window.RAFPerm){ try{ RAFPerm.enforce(); }catch(e){} }
 </script>
 <!-- FLOATING BACK BUTTON -->
 <button id="floatBack" onclick="history.back()" title="رجوع" style="position:fixed;bottom:24px;left:24px;z-index:9999;width:46px;height:46px;border-radius:50%;background:#1a1a1a;border:1px solid #333;color:#C9A84C;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:all .2s;"><i class="ti ti-arrow-right"></i></button>

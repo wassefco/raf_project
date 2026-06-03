@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رف — إدارة الصلاحيات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{--bg:#0A0A0A;--bg2:#111;--bg3:#161616;--card:#1a1a1a;--gold:#C9A84C;--gold2:#A07828;--text:#F5F2EC;--text2:#aaa;--text3:#555;--border:#222;--r:8px;--rl:12px;--font:'Tajawal',sans-serif;--fdisplay:'Playfair Display',serif;--fen:'DM Sans',sans-serif;--green:#4CAF50;--green-bg:rgba(76,175,80,.1);--red:#ef5350;--red-bg:rgba(239,83,80,.1);--amber:#FFA726;--amber-bg:rgba(255,167,38,.1);--blue:#42A5F5;--blue-bg:rgba(66,165,245,.1);--purple:#AB47BC;--purple-bg:rgba(171,71,188,.1);}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{overflow-x:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;max-width:100%;}
+/* SIDEBAR */
+.sidebar{width:240px;min-width:240px;background:var(--bg2);border-left:1px solid var(--border);height:100vh;position:sticky;top:0;display:flex;flex-direction:column;overflow:hidden;}
+.sb-logo{padding:20px 20px 16px;border-bottom:1px solid var(--border);}
+.sb-logo a{font-family:var(--fdisplay);font-size:26px;font-weight:900;color:var(--gold);text-decoration:none;display:block;}
+.sb-logo a span{font-size:10px;font-family:var(--fen);color:var(--text3);letter-spacing:2px;display:block;margin-top:-4px;}
+.sb-tag{background:rgba(171,71,188,.15);border:1px solid rgba(171,71,188,.25);border-radius:4px;padding:2px 8px;font-size:10px;color:var(--purple);display:inline-block;margin-top:8px;letter-spacing:.5px;}
+.sb-scroll{flex:1;overflow-y:auto;padding:12px 0;}
+.sb-scroll::-webkit-scrollbar{width:3px;}
+.sb-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.sb-section{padding:0 12px;margin-bottom:4px;}
+.sb-section-lbl{font-size:10px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;padding:10px 8px 6px;font-family:var(--fen);}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--r);cursor:pointer;transition:all .2s;color:var(--text2);font-size:13px;border:1px solid transparent;text-decoration:none;position:relative;}
+.sb-item:hover{background:var(--bg3);color:var(--text);}
+.sb-item.on{background:rgba(201,168,76,.08);border-color:rgba(201,168,76,.15);color:var(--gold);}
+.sb-item i{font-size:17px;flex-shrink:0;}
+.sb-badge{margin-right:auto;background:rgba(201,168,76,.2);color:var(--gold);border-radius:20px;font-size:10px;font-weight:700;padding:1px 7px;font-family:var(--fen);}
+.sb-footer{padding:14px 16px;border-top:1px solid var(--border);}
+.sb-admin{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.sb-avatar{width:36px;height:36px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.25);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--gold);flex-shrink:0;}
+.sb-admin-name{font-size:13px;font-weight:700;}
+.sb-admin-role{font-size:11px;color:var(--purple);}
+.sb-logout{width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text3);font-family:var(--font);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
+.sb-logout:hover{border-color:var(--red);color:var(--red);}
+/* MAIN */
+.content{flex:1;overflow-y:auto;min-height:100vh;display:flex;flex-direction:column;max-width:100%;}
+.top-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.top-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.top-title i{color:var(--gold);}
+.top-actions{display:flex;align-items:center;gap:8px;}
+.tb-btn{padding:7px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.tb-btn:hover{border-color:var(--gold);color:var(--gold);}
+.tb-btn.gold{background:var(--gold);border-color:var(--gold);color:var(--bg);font-weight:700;}
+.tb-btn.gold:hover{background:var(--gold2);}
+.lang-btn{padding:6px 12px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--fen);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.5px;}
+.lang-btn:hover{border-color:var(--gold);color:var(--gold);}
+.view{display:none;padding:24px 32px 96px;flex:1;}
+.view.on{display:block;}
+.sec-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:20px;}
+.sec-card-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.sc-head-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.sc-head-title i{color:var(--gold);}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.tag-green{background:var(--green-bg);color:var(--green);}
+.tag-red{background:var(--red-bg);color:var(--red);}
+.tag-amber{background:var(--amber-bg);color:var(--amber);}
+.tag-gold{background:rgba(201,168,76,.1);color:var(--gold);}
+.tag-blue{background:var(--blue-bg);color:var(--blue);}
+.tag-purple{background:var(--purple-bg);color:var(--purple);}
+.tag-gray{background:rgba(255,255,255,.05);color:var(--text3);}
+.act-btn{padding:5px 12px;border-radius:var(--r);border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;}
+.act-btn:hover{border-color:var(--gold);color:var(--gold);}
+.act-btn.danger:hover{border-color:var(--red);color:var(--red);}
+.field-inp{width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .2s;}
+.field-inp:focus{border-color:rgba(201,168,76,.5);}
+.field-inp::placeholder{color:var(--text3);}
+select.field-inp{cursor:pointer;appearance:auto;}
+/* SEARCH TOOLBAR */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center;}
+.search-wrap{position:relative;flex:1;min-width:220px;}
+.search-wrap i{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:16px;}
+.search-wrap .field-inp{padding-right:38px;}
+.toolbar select.field-inp{width:auto;min-width:150px;}
+.muted{font-size:12px;color:var(--text3);}
+/* USER TABLE */
+.utbl{width:100%;border-collapse:collapse;}
+.utbl th{padding:10px 16px;text-align:right;font-size:11px;color:var(--text3);font-weight:600;letter-spacing:.5px;border-bottom:1px solid var(--border);font-family:var(--fen);white-space:nowrap;}
+.utbl td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2);vertical-align:middle;}
+.utbl tr:last-child td{border-bottom:none;}
+.utbl tr:hover td{background:rgba(255,255,255,.02);}
+.u-cell{display:flex;align-items:center;gap:10px;}
+.u-avatar{width:34px;height:34px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--gold);flex-shrink:0;font-weight:700;}
+.u-name{font-size:13px;font-weight:700;color:var(--text);}
+.u-sub{font-size:11px;color:var(--text3);}
+.table-wrap{overflow-x:auto;}
+/* DETAIL */
+.detail-grid{display:grid;grid-template-columns:1fr;gap:20px;}
+.uinfo{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.uinfo-avatar{width:60px;height:60px;border-radius:50%;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.25);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--gold);font-weight:700;flex-shrink:0;}
+.uinfo-meta{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:8px;}
+.uinfo-meta div{font-size:12px;color:var(--text3);}
+.uinfo-meta b{color:var(--text2);font-weight:600;}
+.role-pick{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.role-pick select{min-width:200px;}
+.role-desc{font-size:12px;color:var(--text3);flex:1;min-width:200px;}
+/* PERMISSION ACCORDION */
+.pcat{border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden;background:var(--bg2);}
+.pcat-head{padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;}
+.pcat-head:hover{background:var(--bg3);}
+.pcat-head i.mod-ico{color:var(--gold);font-size:18px;}
+.pcat-title{font-size:13px;font-weight:700;flex:1;}
+.pcat-count{font-size:11px;color:var(--text3);font-family:var(--fen);}
+.pcat-chev{color:var(--text3);transition:transform .2s;}
+.pcat.open .pcat-chev{transform:rotate(180deg);}
+.pcat-body{display:none;border-top:1px solid var(--border);}
+.pcat.open .pcat-body{display:block;}
+.prow{display:flex;align-items:center;gap:12px;padding:11px 16px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.prow:last-child{border-bottom:none;}
+.prow-label{flex:1;font-size:13px;min-width:140px;}
+.prow-key{font-size:10px;color:var(--text3);font-family:var(--fen);margin-top:2px;}
+/* origin badge */
+.ob{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap;}
+.ob-role{background:var(--blue-bg);color:var(--blue);}
+.ob-grant{background:var(--green-bg);color:var(--green);}
+.ob-revoke{background:var(--red-bg);color:var(--red);}
+.ob-none{background:rgba(255,255,255,.05);color:var(--text3);}
+/* tri-state segment */
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;flex-shrink:0;}
+.seg-btn{padding:5px 11px;background:transparent;border:none;color:var(--text3);font-family:var(--font);font-size:11px;cursor:pointer;transition:all .15s;border-left:1px solid var(--border);}
+.seg-btn:last-child{border-left:none;}
+.seg-btn.on{color:var(--bg);font-weight:700;}
+.seg-btn.on.s-inherit{background:var(--text2);color:var(--bg);}
+.seg-btn.on.s-grant{background:var(--green);color:#fff;}
+.seg-btn.on.s-revoke{background:var(--red);color:#fff;}
+/* role matrix checkbox */
+.pchk{width:18px;height:18px;accent-color:var(--gold);cursor:pointer;flex-shrink:0;}
+.prow.locked{opacity:.55;}
+/* ROLE / TEMPLATE CARDS */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.rcard{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px;cursor:pointer;transition:all .2s;}
+.rcard:hover{border-color:rgba(201,168,76,.4);}
+.rcard.on{border-color:var(--gold);background:rgba(201,168,76,.05);}
+.rcard-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.rcard-ico{width:38px;height:38px;border-radius:var(--r);background:var(--bg2);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:18px;flex-shrink:0;}
+.rcard-name{font-size:14px;font-weight:700;}
+.rcard-desc{font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:10px;min-height:36px;}
+.rcard-foot{display:flex;align-items:center;justify-content:space-between;}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;font-size:11px;color:var(--text3);align-items:center;}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.legend i.dot{width:9px;height:9px;border-radius:50%;display:inline-block;}
+/* STICKY ACTION BAR */
+.action-bar{position:sticky;bottom:0;background:var(--bg2);border-top:1px solid var(--border);padding:12px 32px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:40;flex-wrap:wrap;}
+.action-bar .ab-info{font-size:12px;color:var(--text3);}
+.action-bar .ab-btns{display:flex;gap:8px;}
+.hidden{display:none!important;}
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);border:1px solid var(--gold);color:var(--text);padding:12px 22px;border-radius:var(--r);font-size:13px;z-index:9999;opacity:0;transition:all .3s;box-shadow:0 8px 30px rgba(0,0,0,.5);display:flex;align-items:center;gap:8px;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast i{color:var(--green);}
+/* MOBILE */
+.mob-menu-btn{display:none;width:34px;height:34px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--gold);align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0;}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:99;}
+@media(max-width:1024px){.sidebar{width:200px;min-width:200px;}.view{padding:18px 18px 96px;}.top-bar{padding:0 18px;}.action-bar{padding:12px 18px;}}
+@media(max-width:768px){
+  body{flex-direction:column;}
+  .sidebar{position:fixed;top:0;right:0;bottom:0;z-index:100;width:240px;height:100vh;transform:translateX(100%);transition:transform .25s;}
+  .sidebar.open{transform:translateX(0);}
+  .sb-overlay.open{display:block;}
+  .mob-menu-btn{display:flex;}
+  .content{width:100%;}
+  .top-bar{padding:0 14px;}
+  .view{padding:14px 14px 96px;}
+  .toolbar select.field-inp{flex:1;min-width:0;}
+  .utbl thead{display:none;}
+  .utbl,.utbl tbody,.utbl tr,.utbl td{display:block;width:100%;}
+  .utbl tr{border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;padding:6px;}
+  .utbl td{border:none;padding:6px 10px;}
+  .action-bar{padding:10px 14px;}
+}
+@media(max-width:480px){.seg-btn{padding:5px 8px;font-size:10px;}.prow-label{min-width:100%;}}
+</style>
+</head>
+<body>
+
+<button class="mob-menu-btn" id="mobMenuBtn" onclick="toggleSb(true)" style="position:fixed;top:12px;right:12px;z-index:101;"><i class="ti ti-menu-2"></i></button>
+<div class="sb-overlay" id="sbOverlay" onclick="toggleSb(false)"></div>
+
+<!-- SIDEBAR -->
+<div class="sidebar" id="sb">
+  <div class="sb-logo">
+    <a href="raf_homepage.html">رف<span>RAF MARKETPLACE</span></a>
+    <span class="sb-tag" data-ar="إدارة الصلاحيات" data-en="Access Control">إدارة الصلاحيات</span>
+  </div>
+  <div class="sb-scroll">
+    <div class="sb-section">
+      <div class="sb-section-lbl" data-ar="التحكم" data-en="CONTROL">التحكم</div>
+      <div class="sb-item on" data-view="users" onclick="sw('users',this)"><i class="ti ti-users"></i> <span data-ar="المستخدمون والصلاحيات" data-en="Users &amp; Access">المستخدمون والصلاحيات</span></div>
+      <div class="sb-item" data-view="roles" onclick="sw('roles',this)"><i class="ti ti-shield-lock"></i> <span data-ar="الأدوار والمصفوفة" data-en="Roles &amp; Matrix">الأدوار والمصفوفة</span></div>
+      <div class="sb-item" data-view="templates" onclick="sw('templates',this)"><i class="ti ti-template"></i> <span data-ar="قوالب الصلاحيات" data-en="Templates">قوالب الصلاحيات</span></div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-section-lbl" data-ar="التنقل" data-en="NAVIGATE">التنقل</div>
+      <a class="sb-item" href="raf_management.html"><i class="ti ti-layout-dashboard"></i> <span data-ar="لوحة الإدارة" data-en="Management">لوحة الإدارة</span></a>
+    </div>
+  </div>
+  <div class="sb-footer">
+    <div class="sb-admin">
+      <div class="sb-avatar"><i class="ti ti-shield-check"></i></div>
+      <div>
+        <div class="sb-admin-name">أحمد المنصور</div>
+        <div class="sb-admin-role" data-ar="مدير عام" data-en="Super Admin">مدير عام</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:8px;">
+      <button class="lang-btn" onclick="toggleLang()" data-ar="EN" data-en="ع" style="flex:1;">EN</button>
+      <button class="lang-btn" onclick="resetData()" data-ar="إعادة تعيين" data-en="Reset" style="flex:1;">إعادة تعيين</button>
+    </div>
+    <button class="sb-logout" onclick="window.location='raf_management.html'"><i class="ti ti-arrow-right"></i> <span data-ar="رجوع للوحة الإدارة" data-en="Back to Admin">رجوع للوحة الإدارة</span></button>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+  <div class="top-bar">
+    <div class="top-title"><i class="ti ti-shield-lock"></i> <span id="topTitle" data-ar="إدارة الصلاحيات" data-en="Permissions Management">إدارة الصلاحيات</span></div>
+    <div class="top-actions">
+      <span class="muted" id="envNote" data-ar="نموذج أولي — يُخزَّن محلياً" data-en="Prototype — stored locally">نموذج أولي — يُخزَّن محلياً</span>
+    </div>
+  </div>
+
+  <!-- ============ USERS VIEW ============ -->
+  <div class="view on" id="v-users">
+    <!-- LIST -->
+    <div id="usersList">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <i class="ti ti-search"></i>
+          <input class="field-inp" id="userSearch" oninput="renderUsers()" data-ar-ph="ابحث بالاسم أو البريد أو الهاتف أو المعرّف…" data-en-ph="Search name, email, phone or ID…" placeholder="ابحث بالاسم أو البريد أو الهاتف أو المعرّف…">
+        </div>
+        <select class="field-inp" id="roleFilter" onchange="renderUsers()"></select>
+        <select class="field-inp" id="statusFilter" onchange="renderUsers()">
+          <option value="" data-ar="كل الحالات" data-en="All statuses">كل الحالات</option>
+          <option value="active" data-ar="نشط" data-en="Active">نشط</option>
+          <option value="suspended" data-ar="موقوف" data-en="Suspended">موقوف</option>
+        </select>
+      </div>
+      <div class="muted" id="userCount" style="margin-bottom:12px;"></div>
+      <div class="sec-card">
+        <div class="table-wrap">
+          <table class="utbl">
+            <thead>
+              <tr>
+                <th data-ar="المستخدم" data-en="User">المستخدم</th>
+                <th data-ar="الهاتف" data-en="Phone">الهاتف</th>
+                <th data-ar="النوع" data-en="Type">النوع</th>
+                <th data-ar="الدور" data-en="Role">الدور</th>
+                <th data-ar="الحالة" data-en="Status">الحالة</th>
+                <th data-ar="التسجيل" data-en="Joined">التسجيل</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL -->
+    <div id="userDetail" class="hidden">
+      <button class="act-btn" onclick="closeDetail()" style="margin-bottom:16px;"><i class="ti ti-arrow-right"></i> <span data-ar="رجوع للقائمة" data-en="Back to list">رجوع للقائمة</span></button>
+      <div class="sec-card">
+        <div class="sec-card-head"><div class="sc-head-title"><i class="ti ti-user"></i> <span data-ar="بيانات المستخدم" data-en="User Information">بيانات المستخدم</span></div></div>
+        <div style="padding:18px 20px;">
+          <div class="uinfo" id="detailInfo"></div>
+        </div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-card-head"><div class="sc-head-title"><i class="ti ti-shield"></i> <span data-ar="الدور المُسنَد" data-en="Assigned Role">الدور المُسنَد</span></div></div>
+        <div style="padding:18px 20px;">
+          <div class="role-pick">
+            <select class="field-inp" id="detailRole" onchange="changeDraftRole(this.value)"></select>
+            <div class="role-desc" id="detailRoleDesc"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sec-card">
+        <div class="sec-card-head">
+          <div class="sc-head-title"><i class="ti ti-key"></i> <span data-ar="الصلاحيات التفصيلية" data-en="Granular Permissions">الصلاحيات التفصيلية</span></div>
+          <span class="muted" id="effCount"></span>
+        </div>
+        <div style="padding:16px 20px;">
+          <div class="legend">
+            <span><i class="dot" style="background:var(--blue);"></i> <span data-ar="موروثة من الدور" data-en="Inherited from role">موروثة من الدور</span></span>
+            <span><i class="dot" style="background:var(--green);"></i> <span data-ar="ممنوحة (تجاوز)" data-en="Granted (override)">ممنوحة (تجاوز)</span></span>
+            <span><i class="dot" style="background:var(--red);"></i> <span data-ar="محجوبة (تجاوز)" data-en="Revoked (override)">محجوبة (تجاوز)</span></span>
+            <span><i class="dot" style="background:var(--text3);"></i> <span data-ar="غير مفعّلة" data-en="Not granted">غير مفعّلة</span></span>
+          </div>
+          <div id="permAccordion"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ROLES VIEW ============ -->
+  <div class="view" id="v-roles">
+    <div class="sec-card">
+      <div class="sec-card-head"><div class="sc-head-title"><i class="ti ti-shield-lock"></i> <span data-ar="الأدوار المُعرّفة" data-en="Defined Roles">الأدوار المُعرّفة</span></div></div>
+      <div style="padding:16px 20px;"><div class="card-grid" id="rolesGrid"></div></div>
+    </div>
+    <div class="sec-card" id="roleMatrixCard">
+      <div class="sec-card-head">
+        <div class="sc-head-title"><i class="ti ti-key"></i> <span data-ar="مصفوفة صلاحيات:" data-en="Permission matrix:">مصفوفة صلاحيات:</span> <span id="matrixRoleName" style="color:var(--gold);"></span></div>
+        <span class="muted" id="matrixCount"></span>
+      </div>
+      <div style="padding:16px 20px;"><div id="roleAccordion"></div></div>
+    </div>
+  </div>
+
+  <!-- ============ TEMPLATES VIEW ============ -->
+  <div class="view" id="v-templates">
+    <div class="sec-card">
+      <div class="sec-card-head">
+        <div class="sc-head-title"><i class="ti ti-template"></i> <span data-ar="قوالب الصلاحيات الجاهزة" data-en="Reusable Permission Templates">قوالب الصلاحيات الجاهزة</span></div>
+      </div>
+      <div style="padding:16px 20px;">
+        <p class="muted" style="margin-bottom:14px;" data-ar="القوالب مجموعات صلاحيات جاهزة يمكن تطبيقها على أي مستخدم كتجاوزات سريعة." data-en="Templates are preset permission bundles you can apply to any user as quick overrides.">القوالب مجموعات صلاحيات جاهزة يمكن تطبيقها على أي مستخدم كتجاوزات سريعة.</p>
+        <div class="card-grid" id="templatesGrid"></div>
+      </div>
+    </div>
+    <div class="sec-card hidden" id="tplDetailCard">
+      <div class="sec-card-head"><div class="sc-head-title"><i class="ti ti-list-check"></i> <span id="tplDetailName" style="color:var(--gold);"></span></div></div>
+      <div style="padding:16px 20px;">
+        <div class="toolbar" style="margin-bottom:14px;">
+          <select class="field-inp" id="tplApplyUser" style="flex:1;min-width:220px;"></select>
+          <button class="tb-btn gold" onclick="applyTemplate()"><i class="ti ti-user-plus"></i> <span data-ar="تطبيق على المستخدم" data-en="Apply to user">تطبيق على المستخدم</span></button>
+        </div>
+        <div id="tplPerms"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STICKY ACTION BAR -->
+  <div class="action-bar hidden" id="actionBar">
+    <div class="ab-info" id="abInfo"></div>
+    <div class="ab-btns">
+      <button class="tb-btn" onclick="resetDraft()"><i class="ti ti-rotate"></i> <span data-ar="تراجع" data-en="Reset">تراجع</span></button>
+      <button class="tb-btn gold" onclick="saveDraft()"><i class="ti ti-device-floppy"></i> <span data-ar="حفظ التغييرات" data-en="Save changes">حفظ التغييرات</span></button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="ti ti-circle-check"></i> <span id="toastMsg"></span></div>
+
+<script src="raf_permissions.js"></script>
+<script>
+/* ========== LANG ========== */
+function curLang(){ return document.getElementById('htmlRoot').lang === 'en' ? 'en' : 'ar'; }
+function t(ar,en){ return curLang()==='en' ? en : ar; }
+function toggleLang(){
+  const r=document.getElementById('htmlRoot');
+  const isAr=r.lang==='ar';
+  r.lang=isAr?'en':'ar'; r.dir=isAr?'ltr':'rtl';
+  localStorage.setItem('raf_lang', isAr?'en':'ar');
+  applyLang(); rerenderAll();
+}
+function applyLang(){
+  const en=curLang()==='en';
+  document.querySelectorAll('[data-ar]').forEach(el=>{ el.textContent = en?el.dataset.en:el.dataset.ar; });
+  document.querySelectorAll('[data-ar-ph]').forEach(el=>{ el.placeholder = en?el.dataset.enPh:el.dataset.arPh; });
+}
+
+/* ========== STATE ========== */
+let DRAFT = null;            // user draft {id, roleId, overrides}
+let ROLE_DRAFT = null;       // role draft {id, permissions:[]}
+let CUR_VIEW = 'users';
+let SEL_ROLE_ID = null;
+let SEL_TPL_ID = null;
+
+/* ========== NAV ========== */
+function sw(view, el){
+  CUR_VIEW = view;
+  document.querySelectorAll('.sb-item[data-view]').forEach(i=>i.classList.remove('on'));
+  if(el) el.classList.add('on');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById('v-'+view).classList.add('on');
+  document.getElementById('topTitle').textContent =
+    view==='users' ? t('المستخدمون والصلاحيات','Users & Access')
+    : view==='roles' ? t('الأدوار والمصفوفة','Roles & Matrix')
+    : t('قوالب الصلاحيات','Permission Templates');
+  // leaving a view discards unsaved draft
+  DRAFT=null; ROLE_DRAFT=null; updateActionBar();
+  if(view==='users'){ closeDetail(); }
+  if(view==='roles'){ const rid = SEL_ROLE_ID || (RAFPerm.getRoles()[0]||{}).id; if(rid) selectRole(rid); }
+  toggleSb(false);
+}
+function toggleSb(open){
+  document.getElementById('sb').classList.toggle('open',open);
+  document.getElementById('sbOverlay').classList.toggle('open',open);
+}
+
+/* ========== HELPERS ========== */
+function initials(name){ const p=name.trim().split(/\s+/); return (p[0]?p[0][0]:'')+(p[1]?p[1][0]:''); }
+function roleName(roleId){ const r=RAFPerm.getRole(roleId); return r?t(r.nameAr,r.nameEn):roleId; }
+function roleTagClass(roleId){
+  return { super_admin:'tag-gold', higher_mgmt:'tag-purple', ops_manager:'tag-blue',
+    customer_service:'tag-blue', finance:'tag-amber', marketing:'tag-amber',
+    merchant:'tag-green', merchant_employee:'tag-green', driver:'tag-blue', customer:'tag-gray'
+  }[roleId] || 'tag-gray';
+}
+function moduleMeta(id){ return RAFPerm.getModules().filter(m=>m.id===id)[0]; }
+function modLabel(m){ return t(m.labelAr,m.labelEn); }
+function toast(msg){
+  const el=document.getElementById('toast'); document.getElementById('toastMsg').textContent=msg;
+  el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2200);
+}
+
+/* ========== USERS: LIST ========== */
+function fillRoleFilter(){
+  const sel=document.getElementById('roleFilter');
+  const cur=sel.value;
+  let html='<option value="">'+t('كل الأدوار','All roles')+'</option>';
+  RAFPerm.getRoles().forEach(r=>{ html+='<option value="'+r.id+'">'+t(r.nameAr,r.nameEn)+'</option>'; });
+  sel.innerHTML=html; sel.value=cur;
+}
+function renderUsers(){
+  const q=(document.getElementById('userSearch').value||'').trim().toLowerCase();
+  const rf=document.getElementById('roleFilter').value;
+  const sf=document.getElementById('statusFilter').value;
+  const users=RAFPerm.getUsers().filter(u=>{
+    const hay=(u.name+' '+u.email+' '+u.phone+' '+u.id).toLowerCase();
+    return (!q||hay.indexOf(q)!==-1) && (!rf||u.roleId===rf) && (!sf||u.status===sf);
+  });
+  const body=document.getElementById('usersBody');
+  if(!users.length){ body.innerHTML='<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text3);">'+t('لا توجد نتائج','No results')+'</td></tr>'; }
+  else body.innerHTML=users.map(u=>{
+    const stTag = u.status==='active' ? '<span class="tag tag-green">'+t('نشط','Active')+'</span>' : '<span class="tag tag-red">'+t('موقوف','Suspended')+'</span>';
+    const typeLbl={staff:t('طاقم','Staff'),merchant:t('تاجر','Merchant'),driver:t('سائق','Driver'),customer:t('عميل','Customer')}[u.accountType]||u.accountType;
+    return '<tr>'
+      +'<td><div class="u-cell"><div class="u-avatar">'+initials(u.name)+'</div><div><div class="u-name">'+u.name+'</div><div class="u-sub">'+u.email+'</div></div></div></td>'
+      +'<td style="direction:ltr;text-align:right;">'+u.phone+'</td>'
+      +'<td>'+typeLbl+'</td>'
+      +'<td><span class="tag '+roleTagClass(u.roleId)+'">'+roleName(u.roleId)+'</span></td>'
+      +'<td>'+stTag+'</td>'
+      +'<td style="font-family:var(--fen);">'+u.regDate+'</td>'
+      +'<td><button class="act-btn" onclick="openDetail(\''+u.id+'\')"><i class="ti ti-adjustments"></i> '+t('إدارة','Manage')+'</button></td>'
+      +'</tr>';
+  }).join('');
+  document.getElementById('userCount').textContent = users.length+' '+t('مستخدم','users');
+}
+
+/* ========== USERS: DETAIL ========== */
+function openDetail(userId){
+  const u=RAFPerm.getUser(userId); if(!u) return;
+  DRAFT={ id:u.id, roleId:u.roleId, overrides:Object.assign({},u.overrides||{}) };
+  document.getElementById('usersList').classList.add('hidden');
+  document.getElementById('userDetail').classList.remove('hidden');
+  renderDetail();
+  updateActionBar();
+  window.scrollTo(0,0);
+}
+function closeDetail(){
+  DRAFT=null;
+  document.getElementById('userDetail').classList.add('hidden');
+  document.getElementById('usersList').classList.remove('hidden');
+  updateActionBar();
+}
+function changeDraftRole(roleId){ DRAFT.roleId=roleId; renderDetail(); updateActionBar(); }
+function renderDetail(){
+  const u=RAFPerm.getUser(DRAFT.id);
+  const typeLbl={staff:t('طاقم','Staff'),merchant:t('تاجر','Merchant'),driver:t('سائق','Driver'),customer:t('عميل','Customer')}[u.accountType]||u.accountType;
+  const stTag = u.status==='active' ? '<span class="tag tag-green">'+t('نشط','Active')+'</span>' : '<span class="tag tag-red">'+t('موقوف','Suspended')+'</span>';
+  document.getElementById('detailInfo').innerHTML=
+    '<div class="uinfo-avatar">'+initials(u.name)+'</div>'
+    +'<div style="flex:1;min-width:200px;"><div style="font-size:18px;font-weight:700;">'+u.name+'</div>'
+    +'<div class="uinfo-meta">'
+    +'<div><b>'+t('البريد','Email')+':</b> '+u.email+'</div>'
+    +'<div style="direction:ltr;"><b>'+t('الهاتف','Phone')+':</b> '+u.phone+'</div>'
+    +'<div><b>'+t('النوع','Type')+':</b> '+typeLbl+'</div>'
+    +'<div><b>'+t('المعرّف','ID')+':</b> <span style="font-family:var(--fen);">'+u.id+'</span></div>'
+    +'<div><b>'+t('التسجيل','Joined')+':</b> <span style="font-family:var(--fen);">'+u.regDate+'</span></div>'
+    +'</div></div>'
+    +'<div>'+stTag+'</div>';
+  // role select
+  const sel=document.getElementById('detailRole');
+  sel.innerHTML=RAFPerm.getRoles().map(r=>'<option value="'+r.id+'"'+(r.id===DRAFT.roleId?' selected':'')+'>'+t(r.nameAr,r.nameEn)+'</option>').join('');
+  const role=RAFPerm.getRole(DRAFT.roleId);
+  document.getElementById('detailRoleDesc').textContent = role ? t(role.descAr,role.descEn) : '';
+  renderPermAccordion();
+}
+function draftOrigin(key){
+  const ov=DRAFT.overrides||{};
+  if(ov[key]==='revoke') return 'revoke';
+  if(ov[key]==='grant') return 'grant';
+  const role=RAFPerm.getRole(DRAFT.roleId);
+  if(role && role.permissions.indexOf(key)!==-1) return 'role';
+  return 'none';
+}
+function draftCan(key){ const o=draftOrigin(key); return o==='role'||o==='grant'; }
+function renderPermAccordion(){
+  const cat=RAFPerm.getCatalog();
+  let eff=0;
+  const html=RAFPerm.getModules().map(m=>{
+    const perms=cat.filter(p=>p.module===m.id);
+    const granted=perms.filter(p=>draftCan(p.key)).length;
+    eff+=granted;
+    const rows=perms.map(p=>{
+      const o=draftOrigin(p.key);
+      const obCls={role:'ob-role',grant:'ob-grant',revoke:'ob-revoke',none:'ob-none'}[o];
+      const obTxt={role:t('من الدور','Role'),grant:t('ممنوحة','Granted'),revoke:t('محجوبة','Revoked'),none:t('غير مفعّلة','Off')}[o];
+      const inheritOn=!(DRAFT.overrides&&DRAFT.overrides[p.key]);
+      const grantOn=DRAFT.overrides&&DRAFT.overrides[p.key]==='grant';
+      const revokeOn=DRAFT.overrides&&DRAFT.overrides[p.key]==='revoke';
+      return '<div class="prow">'
+        +'<div class="prow-label">'+t(p.labelAr,p.labelEn)+'<div class="prow-key">'+p.key+'</div></div>'
+        +'<span class="ob '+obCls+'">'+obTxt+'</span>'
+        +'<div class="seg">'
+          +'<button class="seg-btn s-inherit'+(inheritOn?' on':'')+'" onclick="setOv(\''+p.key+'\',null)" title="'+t('وراثة من الدور','Inherit')+'">'+t('وراثة','Inherit')+'</button>'
+          +'<button class="seg-btn s-grant'+(grantOn?' on':'')+'" onclick="setOv(\''+p.key+'\',\'grant\')">'+t('منح','Grant')+'</button>'
+          +'<button class="seg-btn s-revoke'+(revokeOn?' on':'')+'" onclick="setOv(\''+p.key+'\',\'revoke\')">'+t('حجب','Revoke')+'</button>'
+        +'</div>'
+      +'</div>';
+    }).join('');
+    return '<div class="pcat" id="pcat-'+m.id+'">'
+      +'<div class="pcat-head" onclick="this.parentElement.classList.toggle(\'open\')">'
+        +'<i class="ti '+m.icon+' mod-ico"></i>'
+        +'<span class="pcat-title">'+modLabel(m)+'</span>'
+        +'<span class="pcat-count">'+granted+'/'+perms.length+'</span>'
+        +'<i class="ti ti-chevron-down pcat-chev"></i>'
+      +'</div>'
+      +'<div class="pcat-body">'+rows+'</div>'
+    +'</div>';
+  }).join('');
+  document.getElementById('permAccordion').innerHTML=html;
+  document.getElementById('effCount').textContent = t('الصلاحيات الفعّالة','Effective')+': '+eff;
+}
+function setOv(key, effect){
+  DRAFT.overrides=DRAFT.overrides||{};
+  if(effect==='grant'||effect==='revoke') DRAFT.overrides[key]=effect;
+  else delete DRAFT.overrides[key];
+  renderPermAccordion(); updateActionBar();
+}
+
+/* ========== ACTION BAR ========== */
+function isUserDirty(){
+  if(!DRAFT) return false;
+  const u=RAFPerm.getUser(DRAFT.id);
+  if(u.roleId!==DRAFT.roleId) return true;
+  const a=u.overrides||{}, b=DRAFT.overrides||{};
+  const ka=Object.keys(a), kb=Object.keys(b);
+  if(ka.length!==kb.length) return true;
+  return kb.some(k=>a[k]!==b[k]);
+}
+function isRoleDirty(){
+  if(!ROLE_DRAFT) return false;
+  const r=RAFPerm.getRole(ROLE_DRAFT.id);
+  if(r.permissions.length!==ROLE_DRAFT.permissions.length) return true;
+  return ROLE_DRAFT.permissions.some(k=>r.permissions.indexOf(k)===-1);
+}
+function updateActionBar(){
+  const bar=document.getElementById('actionBar');
+  const dirty = (CUR_VIEW==='users'&&DRAFT&&isUserDirty()) || (CUR_VIEW==='roles'&&ROLE_DRAFT&&isRoleDirty());
+  if(dirty){
+    bar.classList.remove('hidden');
+    document.getElementById('abInfo').textContent =
+      CUR_VIEW==='users' ? t('تغييرات غير محفوظة على المستخدم','Unsaved changes for this user')
+                         : t('تغييرات غير محفوظة على الدور','Unsaved changes for this role');
+  } else bar.classList.add('hidden');
+}
+function saveDraft(){
+  if(CUR_VIEW==='users'&&DRAFT){
+    const u=RAFPerm.getUser(DRAFT.id);
+    u.roleId=DRAFT.roleId; u.overrides=Object.assign({},DRAFT.overrides);
+    RAFPerm.saveUser(u);
+    toast(t('تم حفظ صلاحيات المستخدم ✓','User permissions saved ✓'));
+    renderDetail();
+  } else if(CUR_VIEW==='roles'&&ROLE_DRAFT){
+    const r=RAFPerm.getRole(ROLE_DRAFT.id);
+    r.permissions=ROLE_DRAFT.permissions.slice();
+    RAFPerm.saveRole(r);
+    toast(t('تم حفظ صلاحيات الدور ✓','Role permissions saved ✓'));
+    renderRolesGrid(); renderRoleAccordion();
+  }
+  updateActionBar();
+}
+function resetDraft(){
+  if(CUR_VIEW==='users'&&DRAFT){
+    const u=RAFPerm.getUser(DRAFT.id);
+    DRAFT.roleId=u.roleId; DRAFT.overrides=Object.assign({},u.overrides||{});
+    renderDetail();
+  } else if(CUR_VIEW==='roles'&&ROLE_DRAFT){
+    const r=RAFPerm.getRole(ROLE_DRAFT.id);
+    ROLE_DRAFT.permissions=r.permissions.slice();
+    renderRoleAccordion();
+  }
+  updateActionBar();
+}
+
+/* ========== ROLES VIEW ========== */
+function renderRolesGrid(){
+  const grid=document.getElementById('rolesGrid');
+  grid.innerHTML=RAFPerm.getRoles().map(r=>{
+    const sys = r.system ? '<span class="tag tag-gray">'+t('نظامي','System')+'</span>' : '';
+    return '<div class="rcard'+(r.id===SEL_ROLE_ID?' on':'')+'" onclick="selectRole(\''+r.id+'\')">'
+      +'<div class="rcard-top"><div class="rcard-ico"><i class="ti ti-shield"></i></div>'
+      +'<div><div class="rcard-name">'+t(r.nameAr,r.nameEn)+'</div></div></div>'
+      +'<div class="rcard-desc">'+t(r.descAr,r.descEn)+'</div>'
+      +'<div class="rcard-foot"><span class="tag tag-gold">'+r.permissions.length+' '+t('صلاحية','perms')+'</span>'+sys+'</div>'
+    +'</div>';
+  }).join('');
+}
+function selectRole(roleId){
+  SEL_ROLE_ID=roleId;
+  const r=RAFPerm.getRole(roleId);
+  ROLE_DRAFT={ id:roleId, permissions:r.permissions.slice() };
+  document.getElementById('matrixRoleName').textContent=t(r.nameAr,r.nameEn);
+  renderRolesGrid(); renderRoleAccordion(); updateActionBar();
+}
+function roleHas(key){ return ROLE_DRAFT.permissions.indexOf(key)!==-1; }
+function renderRoleAccordion(){
+  const cat=RAFPerm.getCatalog();
+  const locked = ROLE_DRAFT.id==='super_admin';
+  let total=0;
+  const html=RAFPerm.getModules().map(m=>{
+    const perms=cat.filter(p=>p.module===m.id);
+    const on=perms.filter(p=>roleHas(p.key)).length; total+=on;
+    const rows=perms.map(p=>{
+      return '<div class="prow'+(locked?' locked':'')+'">'
+        +'<div class="prow-label">'+t(p.labelAr,p.labelEn)+'<div class="prow-key">'+p.key+'</div></div>'
+        +'<input type="checkbox" class="pchk" '+(roleHas(p.key)?'checked':'')+(locked?' disabled':'')+' onchange="toggleRolePerm(\''+p.key+'\',this.checked)">'
+      +'</div>';
+    }).join('');
+    return '<div class="pcat" id="rcat-'+m.id+'">'
+      +'<div class="pcat-head" onclick="this.parentElement.classList.toggle(\'open\')">'
+        +'<i class="ti '+m.icon+' mod-ico"></i><span class="pcat-title">'+modLabel(m)+'</span>'
+        +'<span class="pcat-count">'+on+'/'+perms.length+'</span>'
+        +'<i class="ti ti-chevron-down pcat-chev"></i>'
+      +'</div><div class="pcat-body">'+rows+'</div></div>';
+  }).join('');
+  document.getElementById('roleAccordion').innerHTML=html;
+  document.getElementById('matrixCount').textContent = total+' '+t('صلاحية مفعّلة','enabled')+ (locked?' · '+t('دور محمي','protected role'):'');
+}
+function toggleRolePerm(key, on){
+  if(on){ if(ROLE_DRAFT.permissions.indexOf(key)===-1) ROLE_DRAFT.permissions.push(key); }
+  else { ROLE_DRAFT.permissions=ROLE_DRAFT.permissions.filter(k=>k!==key); }
+  renderRoleAccordion(); updateActionBar();
+}
+
+/* ========== TEMPLATES VIEW ========== */
+function renderTemplates(){
+  const grid=document.getElementById('templatesGrid');
+  grid.innerHTML=RAFPerm.getTemplates().map(tp=>{
+    return '<div class="rcard'+(tp.id===SEL_TPL_ID?' on':'')+'" onclick="selectTemplate(\''+tp.id+'\')">'
+      +'<div class="rcard-top"><div class="rcard-ico"><i class="ti ti-template"></i></div>'
+      +'<div><div class="rcard-name">'+t(tp.nameAr,tp.nameEn)+'</div></div></div>'
+      +'<div class="rcard-desc">'+t(tp.descAr,tp.descEn)+'</div>'
+      +'<div class="rcard-foot"><span class="tag tag-gold">'+tp.permissions.length+' '+t('صلاحية','perms')+'</span></div>'
+    +'</div>';
+  }).join('');
+}
+function selectTemplate(tplId){
+  SEL_TPL_ID=tplId;
+  const tp=RAFPerm.getTemplates().filter(x=>x.id===tplId)[0];
+  document.getElementById('tplDetailCard').classList.remove('hidden');
+  document.getElementById('tplDetailName').textContent=t(tp.nameAr,tp.nameEn);
+  // user picker
+  document.getElementById('tplApplyUser').innerHTML=
+    '<option value="">'+t('اختر مستخدماً لتطبيق القالب…','Select a user to apply…')+'</option>'
+    +RAFPerm.getUsers().map(u=>'<option value="'+u.id+'">'+u.name+' — '+roleName(u.roleId)+'</option>').join('');
+  // perms list grouped
+  const cat=RAFPerm.getCatalog();
+  const byMod=RAFPerm.getModules().map(m=>{
+    const ks=tp.permissions.filter(k=>k.indexOf(m.id+'.')===0);
+    if(!ks.length) return '';
+    const items=ks.map(k=>{ const p=cat.filter(c=>c.key===k)[0]; return '<span class="tag tag-blue" style="margin:3px;">'+(p?t(p.labelAr,p.labelEn):k)+'</span>'; }).join('');
+    return '<div style="margin-bottom:10px;"><div style="font-size:12px;font-weight:700;margin-bottom:4px;"><i class="ti '+m.icon+'" style="color:var(--gold);"></i> '+modLabel(m)+'</div>'+items+'</div>';
+  }).join('');
+  document.getElementById('tplPerms').innerHTML=byMod;
+  renderTemplates();
+  document.getElementById('tplDetailCard').scrollIntoView({behavior:'smooth'});
+}
+function applyTemplate(){
+  const uid=document.getElementById('tplApplyUser').value;
+  if(!uid){ toast(t('اختر مستخدماً أولاً','Select a user first')); return; }
+  const tp=RAFPerm.getTemplates().filter(x=>x.id===SEL_TPL_ID)[0];
+  const u=RAFPerm.getUser(uid);
+  u.overrides=u.overrides||{};
+  tp.permissions.forEach(k=>{ if(!RAFPerm.can(u,k)) u.overrides[k]='grant'; });
+  RAFPerm.saveUser(u);
+  toast(t('تم تطبيق القالب على ','Template applied to ')+u.name+' ✓');
+}
+
+/* ========== RESET DATA ========== */
+function resetData(){
+  if(confirm(t('إعادة تعيين كل بيانات الصلاحيات للوضع الافتراضي؟','Reset all permission data to defaults?'))){
+    RAFPerm.reset(); SEL_ROLE_ID=null; SEL_TPL_ID=null; DRAFT=null; ROLE_DRAFT=null;
+    document.getElementById('tplDetailCard').classList.add('hidden');
+    rerenderAll(); closeDetail();
+    toast(t('تمت إعادة التعيين ✓','Data reset ✓'));
+  }
+}
+
+/* ========== RERENDER ALL ========== */
+function rerenderAll(){
+  fillRoleFilter(); renderUsers(); renderRolesGrid(); renderTemplates();
+  if(DRAFT) renderDetail();
+  if(SEL_ROLE_ID){ const r=RAFPerm.getRole(SEL_ROLE_ID); document.getElementById('matrixRoleName').textContent=t(r.nameAr,r.nameEn); if(ROLE_DRAFT) renderRoleAccordion(); }
+  if(SEL_TPL_ID) selectTemplate(SEL_TPL_ID);
+}
+
+/* ========== INIT ========== */
+(function(){
+  const l=localStorage.getItem('raf_lang');
+  if(l){ const r=document.getElementById('htmlRoot'); r.lang=l; r.dir=l==='en'?'ltr':'rtl'; }
+  applyLang();
+  fillRoleFilter();
+  renderUsers();
+  renderRolesGrid();
+  const firstRole=RAFPerm.getRoles()[0]; if(firstRole) selectRole(firstRole.id);
+  renderTemplates();
+})();
+</script>
+</body>
+</html>
