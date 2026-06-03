@@ -65,7 +65,8 @@
   @media(max-width:768px){body{padding-bottom:68px;}.doc-title{font-size:30px;}.footer-grid{grid-template-columns:1fr;}.footer-bottom{flex-direction:column;gap:8px;text-align:center;}}
   @media(max-width:480px){.doc-title{font-size:26px;}}
   .app-bnav{display:none;}
-  @media(max-width:768px){
+  @media (max-width:768px), (max-height:500px){
+    body{padding-bottom:calc(68px + env(safe-area-inset-bottom,0px));}
     .app-bnav{display:flex;position:fixed;bottom:0;left:0;right:0;height:56px;background:#fff;border-top:1px solid #e8e4dc;box-shadow:0 -2px 16px rgba(0,0,0,.06);z-index:998;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);align-items:stretch;}
     .bnav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#aaa;font-size:10px;font-family:'Tajawal',sans-serif;font-weight:500;transition:color .15s;}
     .bnav-tab i{font-size:22px;line-height:1;}
