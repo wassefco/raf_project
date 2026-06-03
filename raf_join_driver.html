@@ -2,7 +2,7 @@
 <html id="htmlRoot" lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>رف — انضم كسائق</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -96,6 +96,15 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
 @media(max-width:768px){*{max-width:100%;}img,video,iframe{max-width:100%!important;height:auto;}table{max-width:100%;}nav{padding:0 12px;}.form-card{border-radius:8px;}}
 @media(max-width:700px){nav{padding:0 16px;}.hero{padding:40px 16px;}.progress-wrap{padding:0 16px;}.form-body{padding:16px;}.row2{grid-template-columns:1fr;}.perks{gap:10px;}.success-wrap{padding:0 16px;}}
 @media(max-width:480px){.hero-title{font-size:22px;}.form-card{margin-inline:0;}.footer-bottom-simple{flex-direction:column;gap:6px;text-align:center;}footer{padding:16px;}}
+</style>
+<style id="raf-safe-area">
+/* Android/iOS header safe-area spacing — responsive, no per-device hardcoding */
+@supports (padding-top: env(safe-area-inset-top)) {
+  nav:not(.app-bnav):not(.top), nav.top {
+    padding-top: env(safe-area-inset-top, 0px);
+    height: calc(64px + env(safe-area-inset-top, 0px));
+  }
+}
 </style>
 </head>
 <body>

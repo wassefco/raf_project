@@ -2,7 +2,7 @@
 <html id="htmlRoot" lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>رف — الشروط والأحكام</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -61,6 +61,15 @@
     .bnav-cart{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;text-decoration:none;font-size:10px;font-family:'Tajawal',sans-serif;color:#aaa;padding-bottom:4px;}
     .bnav-cart-ring{width:44px;height:44px;border-radius:50%;background:#C9A84C;display:flex;align-items:center;justify-content:center;font-size:20px;color:#0A0A0A;margin-top:-14px;box-shadow:0 4px 14px rgba(201,168,76,.3);}
   }
+</style>
+<style id="raf-safe-area">
+/* Android/iOS header safe-area spacing — responsive, no per-device hardcoding */
+@supports (padding-top: env(safe-area-inset-top)) {
+  nav:not(.app-bnav):not(.top), nav.top {
+    padding-top: env(safe-area-inset-top, 0px);
+    height: calc(64px + env(safe-area-inset-top, 0px));
+  }
+}
 </style>
 </head>
 <body>

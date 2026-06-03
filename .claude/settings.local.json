@@ -20,7 +20,8 @@
       "mcp__Claude_Preview__preview_start",
       "Bash(git rm *)",
       "Bash(rm -f raf_admin.html)",
-      "Bash([ -f \"$f.html\" ])"
+      "Bash([ -f \"$f.html\" ])",
+      "Bash([ -f \"$p.html\" ])"
     ]
   }
 }

@@ -22,10 +22,11 @@
 
   /* ---- primary navigation model (single source of truth) ---------------- */
   var SECTIONS = [
-    { labelAr: 'التصفح', labelEn: 'Browse', items: [
+    { labelAr: 'روابط سريعة', labelEn: 'Quick Links', items: [
+      { href: 'raf_homepage.html',   icon: 'ti-home-2',         ar: 'الرئيسية', en: 'Home' },
       { href: 'raf_storespage.html', icon: 'ti-building-store', ar: 'المحلات',  en: 'Stores' },
       { href: 'raf_offers.html',     icon: 'ti-discount',       ar: 'العروض',   en: 'Offers' },
-      { href: 'raf_trending.html',   icon: 'ti-flame',          ar: 'الترندات', en: 'Trending' },
+      { href: 'raf_trending.html',   icon: 'ti-flame',          ar: 'الترندات', en: 'Trends' },
       { href: 'raf_used.html',       icon: 'ti-recycle',        ar: 'المستعمل', en: 'Used Items' },
       { href: 'raf_auctions.html',   icon: 'ti-gavel',          ar: 'المزادات', en: 'Auctions' }
     ]},
@@ -33,6 +34,24 @@
       { href: 'raf_account.html',  icon: 'ti-user-circle',   ar: 'حسابي',   en: 'Account' },
       { href: 'raf_wishlist.html', icon: 'ti-heart',         ar: 'المفضلة', en: 'Wishlist' },
       { href: 'raf_cart.html',     icon: 'ti-shopping-cart', ar: 'السلة',   en: 'Cart' }
+    ]},
+    { labelAr: 'المساعدة', labelEn: 'Help', items: [
+      { href: 'raf_how_to_order.html', icon: 'ti-list-check',     ar: 'كيف أطلب',        en: 'How to Order' },
+      { href: 'raf_tracking.html',     icon: 'ti-truck-delivery', ar: 'تتبع طلبك',       en: 'Track Your Order' },
+      { href: 'raf_contact.html',      icon: 'ti-mail',           ar: 'تواصل معنا',      en: 'Contact Us' },
+      { href: 'raf_faq.html',          icon: 'ti-help-circle',    ar: 'الأسئلة الشائعة', en: 'FAQ' },
+      { href: 'raf_help.html',         icon: 'ti-lifebuoy',       ar: 'مركز المساعدة',   en: 'Help Center' }
+    ]},
+    { labelAr: 'السياسات', labelEn: 'Legal', items: [
+      { href: 'raf_privacy.html', icon: 'ti-shield-lock',   ar: 'سياسة الخصوصية',  en: 'Privacy Policy' },
+      { href: 'raf_terms.html',   icon: 'ti-file-text',     ar: 'الشروط والأحكام', en: 'Terms & Conditions' },
+      { href: 'raf_returns.html', icon: 'ti-arrow-back-up', ar: 'سياسة الإرجاع',   en: 'Returns Policy' }
+    ]},
+    { labelAr: 'التجار والسائقون', labelEn: 'Merchants & Drivers', items: [
+      { href: 'raf_seller.html',      icon: 'ti-building-store',    ar: 'افتح متجرك',     en: 'Open Your Store' },
+      { href: 'raf_plans.html',       icon: 'ti-tag',              ar: 'الباقات والأسعار', en: 'Pricing & Plans' },
+      { href: 'raf_merchant.html',    icon: 'ti-layout-dashboard', ar: 'لوحة التاجر',     en: 'Merchant Dashboard' },
+      { href: 'raf_join_driver.html', icon: 'ti-motorbike',        ar: 'انضم كسائق',      en: 'Join as Driver' }
     ]}
   ];
 

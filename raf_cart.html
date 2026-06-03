@@ -2,7 +2,7 @@
 <html id="htmlRoot" lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>رف — السلة والدفع</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
@@ -182,6 +182,15 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
     .bnav-cart.on .bnav-cart-ring{background:#A07828;}
     nav a.btn-ghost,nav a.btn-gold,nav .btn-ghost,nav .btn-gold{display:none!important;}
   }
+</style>
+<style id="raf-safe-area">
+/* Android/iOS header safe-area spacing — responsive, no per-device hardcoding */
+@supports (padding-top: env(safe-area-inset-top)) {
+  nav:not(.app-bnav):not(.top), nav.top {
+    padding-top: env(safe-area-inset-top, 0px);
+    height: calc(64px + env(safe-area-inset-top, 0px));
+  }
+}
 </style>
 </head>
 <body>
