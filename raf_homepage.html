@@ -184,104 +184,103 @@
   }
 
   /* HERO BANNER */
-  /* ═══════════ HERO — redesigned ═══════════ */
+  /* ═══════════ HERO — classic (restored) ═══════════ */
   .hero {
-    min-height: 560px; position: relative; overflow: hidden;
-    background: var(--black);
-    display: flex; align-items: stretch;
+    height: 520px; position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #F5F2EC 0%, #EDE8DC 50%, #F5F2EC 100%);
+    display: flex; align-items: center;
   }
-  /* subtle dot-grid overlay */
   .hero-bg {
     position: absolute; inset: 0;
-    background-image: radial-gradient(rgba(201,168,76,.08) 1px, transparent 1px);
-    background-size: 28px 28px;
+    background:
+      radial-gradient(ellipse 60% 80% at 20% 50%, rgba(201,168,76,0.15) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 80% 30%, rgba(201,168,76,0.10) 0%, transparent 70%);
   }
-  /* warm gold glow on the right */
   .hero-grid {
     position: absolute; inset: 0;
-    background:
-      radial-gradient(ellipse 55% 70% at 95% 50%, rgba(201,168,76,.12) 0%, transparent 65%),
-      radial-gradient(ellipse 35% 50% at 5%  80%, rgba(201,168,76,.06) 0%, transparent 60%);
+    background-image:
+      linear-gradient(rgba(201,168,76,0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.08) 1px, transparent 1px);
+    background-size: 60px 60px;
   }
-  /* ── content column (text side) ── */
   .hero-content {
     position: relative; z-index: 2;
-    flex: 1; max-width: 560px;
-    padding: 72px 60px 56px;
-    display: flex; flex-direction: column; justify-content: center;
+    padding: 0 60px; max-width: 600px;
   }
   .hero-tag {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
     color: var(--gold); font-family: var(--font-en);
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
-  .hero-tag::before { content: ''; width: 20px; height: 1px; background: var(--gold); }
+  .hero-tag::before {
+    content: ''; width: 24px; height: 1px; background: var(--gold);
+  }
   .hero-title {
     font-family: var(--font-display);
-    font-size: clamp(38px, 5vw, 64px);
-    font-weight: 900; line-height: 1.05;
-    margin-bottom: 18px; color: #F5F2EC;
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 900; line-height: 1.1;
+    margin-bottom: 16px;
+    color: var(--white-pure);
   }
   .hero-title em { color: var(--gold); font-style: normal; }
   .hero-sub {
-    font-size: 15px; color: #666; line-height: 1.85;
-    margin-bottom: 36px; font-weight: 300; max-width: 420px;
+    font-size: 16px; color: var(--gray-4); line-height: 1.7;
+    margin-bottom: 32px; font-weight: 300;
   }
-  .hero-actions { display: flex; gap: 12px; align-items: center; margin-bottom: 44px; flex-wrap: wrap; }
+  .hero-actions { display: flex; gap: 12px; align-items: center; }
   .btn-hero {
     padding: 14px 32px; background: var(--gold);
     color: var(--black); border: none; border-radius: var(--radius);
-    font-family: var(--font-ar); font-size: 14px; font-weight: 700;
-    cursor: pointer; transition: all .2s; letter-spacing: .3px;
+    font-family: var(--font-ar); font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: all 0.2s;
   }
-  .btn-hero:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,168,76,.35); }
+  .btn-hero:hover { background: var(--gold-light); transform: translateY(-1px); }
   .btn-hero-ghost {
     padding: 14px 32px; background: transparent;
-    color: #aaa; border: 1px solid #333;
+    color: var(--white-pure); border: 1px solid rgba(10,10,10,0.2);
     border-radius: var(--radius); font-family: var(--font-ar);
-    font-size: 14px; cursor: pointer; transition: all .2s;
+    font-size: 15px; cursor: pointer; transition: all 0.2s;
   }
   .btn-hero-ghost:hover { border-color: var(--gold); color: var(--gold); }
-  /* stats row */
   .hero-stats {
-    display: flex; gap: 32px; align-items: flex-start;
-    padding-top: 24px; border-top: 1px solid #1f1f1f;
+    position: absolute; bottom: 40px; left: 60px;
+    display: flex; gap: 40px; z-index: 2;
   }
   .hero-stat-num {
     font-family: var(--font-display);
     font-size: 28px; font-weight: 700; color: var(--gold);
   }
-  .hero-stat-lbl { font-size: 11px; color: #444; margin-top: 3px; letter-spacing: .5px; }
-
-  /* ── visual column (category cards) ── */
+  .hero-stat-lbl { font-size: 12px; color: var(--gray-4); margin-top: 2px; }
   .hero-visual {
-    position: relative; z-index: 2;
-    width: 400px; flex-shrink: 0;
-    padding: 40px 44px 40px 20px;
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 45%;
     display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
   }
-  .cat-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;
-    width: 100%;
+  .hero-cards {
+    position: relative; width: 320px; height: 380px;
   }
-  .cat-tile {
-    background: rgba(255,255,255,.04);
-    border: 1px solid #222;
-    border-radius: var(--radius-lg); padding: 20px 12px;
-    display: flex; flex-direction: column; align-items: center; gap: 9px;
-    cursor: pointer; transition: all .22s;
-    font-size: 12px; font-weight: 500; color: #666;
-    text-align: center;
+  .hero-card {
+    position: absolute;
+    background: var(--gray-1);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
   }
-  .cat-tile:hover {
-    border-color: var(--gold); color: var(--gold);
-    background: rgba(201,168,76,.07);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(201,168,76,.12);
+  .hero-card-1 { width: 180px; height: 220px; top: 20px; right: 40px; transform: rotate(-3deg); }
+  .hero-card-2 { width: 160px; height: 200px; bottom: 20px; left: 20px; transform: rotate(4deg); }
+  .hero-card-img {
+    width: 100%; height: 70%;
+    background: linear-gradient(160deg, var(--gray-2), var(--gray-3));
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold-dim); font-size: 32px;
   }
-  .cat-tile i { font-size: 28px; color: var(--gold); }
-  .cat-tile:nth-child(1) { grid-column: span 2; }  /* Clothing spans full width */
+  .hero-card-info { padding: 10px 12px; }
+  .hero-card-name { font-size: 11px; font-weight: 500; color: var(--white-pure); }
+  .hero-card-price { font-size: 13px; font-weight: 700; color: var(--gold); margin-top: 3px; }
 
   /* SEARCH BAR */
   .search-section {
@@ -584,11 +583,11 @@
     .stores-grid { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 768px) {
-    .hero { min-height: auto; flex-direction: column; }
+    .hero { height: auto; padding: 60px 0 40px; }
     .hero-visual { display: none; }
-    .hero-content { padding: 48px 20px 40px; max-width: 100%; }
+    .hero-content { padding: 0 24px; max-width: 100%; }
     .hero-title { font-size: clamp(30px, 8vw, 44px); }
-    .hero-stats { gap: 20px; }
+    .hero-stats { position: static; margin: 28px 24px 0; gap: 24px; }
     .hero-actions { flex-direction: column; align-items: flex-start; gap: 10px; }
     .btn-hero, .btn-hero-ghost { width: 100%; text-align: center; }
     .nav-links { display: none; }
@@ -688,41 +687,37 @@
       <button class="btn-hero" onclick="window.location='raf_storespage.html'" data-ar="تسوّق الآن" data-en="Shop Now">تسوّق الآن</button>
       <button class="btn-hero-ghost" onclick="window.location='raf_storespage.html'" data-ar="استعرض المحلات" data-en="Browse Stores">استعرض المحلات</button>
     </div>
-    <div class="hero-stats">
-      <div>
-        <div class="hero-stat-num">+120</div>
-        <div class="hero-stat-lbl" data-ar="متجر" data-en="Stores">متجر</div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-cards">
+      <div class="hero-card hero-card-1">
+        <div class="hero-card-img"><i class="ti ti-shirt"></i></div>
+        <div class="hero-card-info">
+          <div class="hero-card-name" data-ar="قميص كاجوال" data-en="Casual Shirt">قميص كاجوال</div>
+          <div class="hero-card-price">12.500 د.ك</div>
+        </div>
       </div>
-      <div>
-        <div class="hero-stat-num">+5K</div>
-        <div class="hero-stat-lbl" data-ar="منتج" data-en="Products">منتج</div>
-      </div>
-      <div>
-        <div class="hero-stat-num">4.9</div>
-        <div class="hero-stat-lbl" data-ar="تقييم" data-en="Rating">تقييم</div>
+      <div class="hero-card hero-card-2">
+        <div class="hero-card-img"><i class="ti ti-shoe"></i></div>
+        <div class="hero-card-info">
+          <div class="hero-card-name" data-ar="حذاء رياضي" data-en="Sports Shoe">حذاء رياضي</div>
+          <div class="hero-card-price">28.000 د.ك</div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="hero-visual">
-    <div class="cat-grid">
-      <div class="cat-tile" onclick="window.location='raf_storespage.html?cat=clothing'" style="grid-column:span 2">
-        <i class="ti ti-shirt"></i><span data-ar="ملابس وأزياء" data-en="Clothing & Fashion">ملابس وأزياء</span>
-      </div>
-      <div class="cat-tile" onclick="window.location='raf_storespage.html?cat=shoes'">
-        <i class="ti ti-shoe"></i><span data-ar="أحذية" data-en="Shoes">أحذية</span>
-      </div>
-      <div class="cat-tile" onclick="window.location='raf_storespage.html?cat=electronics'">
-        <i class="ti ti-device-mobile"></i><span data-ar="إلكترونيات" data-en="Electronics">إلكترونيات</span>
-      </div>
-      <div class="cat-tile" onclick="window.location='raf_storespage.html?cat=accessories'">
-        <i class="ti ti-diamond"></i><span data-ar="اكسسوارات" data-en="Accessories">اكسسوارات</span>
-      </div>
-      <div class="cat-tile" onclick="window.location='raf_used.html'">
-        <i class="ti ti-refresh"></i><span data-ar="مستعمل" data-en="Used">مستعمل</span>
-      </div>
-      <div class="cat-tile" onclick="window.location='raf_auctions.html'" style="grid-column:span 2">
-        <i class="ti ti-gavel"></i><span data-ar="المزادات الحية" data-en="Live Auctions">المزادات الحية</span>
-      </div>
+  <div class="hero-stats">
+    <div>
+      <div class="hero-stat-num">+120</div>
+      <div class="hero-stat-lbl" data-ar="متجر" data-en="Stores">متجر</div>
+    </div>
+    <div>
+      <div class="hero-stat-num">+5K</div>
+      <div class="hero-stat-lbl" data-ar="منتج" data-en="Products">منتج</div>
+    </div>
+    <div>
+      <div class="hero-stat-num">4.9</div>
+      <div class="hero-stat-lbl" data-ar="تقييم" data-en="Rating">تقييم</div>
     </div>
   </div>
 </section>
