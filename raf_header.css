@@ -1,34 +1,32 @@
 /* ==========================================================================
-   RAF Marketplace — GLOBAL Header / Safe-Area Standardization
+   RAF Marketplace — GLOBAL Header: safe-area + mobile height optimization
    --------------------------------------------------------------------------
-   Single source of truth, linked on EVERY page. Replaces the per-page inline
-   safe-area patches so the header behaves identically everywhere.
-
-   It normalizes the three header implementations used across the project:
+   Single source of truth, linked on EVERY page. Normalizes the three header
+   implementations and keeps them slim on mobile:
      • nav  (not .app-bnav / not .top)  → customer marketplace pages
      • nav.top                          → info / legal / help pages
      • .top-bar                         → dashboard / admin pages
 
-   ROOT CAUSE OF THE ANDROID ISSUE
+   HEIGHT MODEL
    -------------------------------------------------------------------------
-   The headers reserved no space for the device status bar, and the previous
-   `env(safe-area-inset-top)` patch is *0* in a normal browser tab AND is
-   frequently reported as 0 by Android when the app runs standalone / installed
-   (iOS reports it correctly, which is why iPhone looked fine and Android did
-   not). Result: on Android the header sat directly under the status bar.
+   Each header exposes a --raf-hdr variable (its visual content height). The
+   real height = var(--raf-hdr) + the device top inset. Breakpoints only change
+   --raf-hdr, so the safe-area math is written once and never duplicated.
 
-   SOLUTION
+   SAFE-AREA (Android/iOS)
    -------------------------------------------------------------------------
-   • Reserve the real top inset on every header (no effect in a normal tab).
-   • In standalone / fullscreen / minimal-ui (where the status bar actually
-     overlaps the page) FLOOR the inset with max(env, 24px) so Android — which
-     may report 0 — still gets guaranteed clearance, while iOS still uses its
-     larger notch inset. 24px is a universal minimum, not a per-device value.
-   • Standardize header height, vertical centering and horizontal padding so
-     the logo / hamburger / icons line up the same way on every page.
+   In a normal browser tab the inset is 0 → no change. In standalone / PWA /
+   fullscreen the status bar overlaps the page; iOS reports the notch inset,
+   Android often reports 0, so we floor it with max(env, 24px).
+
+   MOBILE OPTIMIZATION (this revision)
+   -------------------------------------------------------------------------
+   On phones the header is slimmed (smaller logo, tighter padding/icons, and the
+   MARKETPLACE subtitle is hidden on small screens) to free up above-the-fold
+   content. One unified responsive solution — no separate iPhone/Android paths.
    ========================================================================== */
 
-/* ---- vertical centering + reserve the device top inset (all header types) -- */
+/* ---- base: vertical centering + reserve the device top inset --------------- */
 nav:not(.app-bnav):not(.top),
 nav.top,
 .top-bar{
@@ -36,50 +34,75 @@ nav.top,
   padding-top: env(safe-area-inset-top, 0px);
 }
 
-/* ---- standardized header height (kept per design system), grown by inset --- */
-nav:not(.app-bnav):not(.top),
-nav.top{ height: calc(64px + env(safe-area-inset-top, 0px)); }
-.top-bar{ height: calc(56px + env(safe-area-inset-top, 0px)); }
-
-/* ---- consistent horizontal padding so logo/hamburger/icons align everywhere -
-   responsive (clamp), never a single fixed per-device number ----------------- */
+/* ---- header height driven by a per-type variable + the inset --------------- */
 nav:not(.app-bnav):not(.top),
 nav.top{
+  --raf-hdr: 64px;
+  height: calc(var(--raf-hdr) + env(safe-area-inset-top, 0px));
   padding-left: clamp(16px, 4vw, 40px);
   padding-right: clamp(16px, 4vw, 40px);
 }
+.top-bar{
+  --raf-hdr: 56px;
+  height: calc(var(--raf-hdr) + env(safe-area-inset-top, 0px));
+}
 
-/* ---- STANDALONE / INSTALLED PWA / FULLSCREEN -------------------------------
-   The OS status bar overlaps the page here. Guarantee top clearance even where
-   the OS inset is 0 (common on Android). max() keeps iOS's larger notch inset. */
+/* ---- STANDALONE / INSTALLED PWA / FULLSCREEN: floor the inset for Android --- */
 @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui){
   nav:not(.app-bnav):not(.top),
-  nav.top{
-    padding-top: max(env(safe-area-inset-top, 0px), 24px);
-    height: calc(64px + max(env(safe-area-inset-top, 0px), 24px));
-  }
+  nav.top,
   .top-bar{
     padding-top: max(env(safe-area-inset-top, 0px), 24px);
-    height: calc(56px + max(env(safe-area-inset-top, 0px), 24px));
+    height: calc(var(--raf-hdr) + max(env(safe-area-inset-top, 0px), 24px));
   }
 }
 
-/* ---- bottom app nav already handles the bottom inset; keep it consistent ---- */
-.app-bnav{ padding-bottom: env(safe-area-inset-bottom, 0px); }
+/* ==========================================================================
+   MOBILE HEADER OPTIMIZATION — unified for iPhone, Android, foldables,
+   small/large phones. Reduces header height + logo footprint.
+   ========================================================================== */
+@media (max-width: 768px), (max-height: 500px){
+  /* slimmer header band */
+  nav:not(.app-bnav):not(.top),
+  nav.top{
+    --raf-hdr: 52px;
+    padding-left: clamp(12px, 3.5vw, 18px);
+    padding-right: clamp(12px, 3.5vw, 18px);
+  }
+  /* smaller, tighter brand */
+  nav:not(.app-bnav) .nav-logo{ font-size: 22px; letter-spacing: -.5px; }
+  nav:not(.app-bnav) .nav-logo span{ font-size: 8px; letter-spacing: 2px; margin-top: -3px; }
+  /* compact icons / controls (kept tappable ≥36px) */
+  nav:not(.app-bnav) .nav-icon,
+  nav:not(.app-bnav) .nav-ico{ width: 36px; height: 36px; font-size: 17px; }
+  nav:not(.app-bnav) .lang-btn{ padding: 5px 9px; }
+  .raf-burger{ width: 36px; height: 36px; font-size: 19px; }
+}
+
+/* small phones — drop the MARKETPLACE subtitle to slim the header further */
+@media (max-width: 480px){
+  nav:not(.app-bnav) .nav-logo span{ display: none; }
+}
+
+/* mobile landscape (short viewports) — tightest header, no subtitle ---------- */
+@media (max-height: 500px) and (orientation: landscape){
+  nav:not(.app-bnav):not(.top),
+  nav.top{ --raf-hdr: 48px; }
+  nav:not(.app-bnav) .nav-logo span{ display: none; }
+}
 
 /* ==========================================================================
-   PAGE-SPECIFIC TOP CONTAINERS (unique class names) — kept consistent with the
-   same safe-area rules so NO page is left without status-bar handling.
+   PAGE-SPECIFIC TOP CONTAINERS (unique class names) — same safe-area handling.
    ========================================================================== */
-
-/* Driver app (raf_driver_app.html) — custom sticky top header (.header,12px top) */
+/* Driver app — custom sticky top header (.header, 12px top padding) */
 .header{ padding-top: calc(12px + env(safe-area-inset-top, 0px)); }
 @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui){
   .header{ padding-top: calc(12px + max(env(safe-area-inset-top, 0px), 24px)); }
 }
-
-/* Login / Register (raf_login.html) — centered auth card, no top bar.
-   Guarantee the card never slides under the status bar in standalone. */
+/* Login / Register — centered auth card; keep it clear of the status bar */
 @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui){
   .login-card{ margin-top: max(env(safe-area-inset-top, 0px), 24px); }
 }
+
+/* bottom app nav already handles the bottom inset; keep it consistent */
+.app-bnav{ padding-bottom: env(safe-area-inset-bottom, 0px); }
