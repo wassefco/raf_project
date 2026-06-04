@@ -37,7 +37,7 @@ nav.top,
 /* ---- header height driven by a per-type variable + the inset --------------- */
 nav:not(.app-bnav):not(.top),
 nav.top{
-  --raf-hdr: 64px;
+  --raf-hdr: 72px;
   height: calc(var(--raf-hdr) + env(safe-area-inset-top, 0px));
   padding-left: clamp(16px, 4vw, 40px);
   padding-right: clamp(16px, 4vw, 40px);
@@ -106,3 +106,21 @@ nav.top{
 
 /* bottom app nav already handles the bottom inset; keep it consistent */
 .app-bnav{ padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+/* ==========================================================================
+   OFFICIAL RAF LOGO IMAGE — single source of truth (raf_logo.png → raf_logo_web.png)
+   Replaces the text wordmark across header, footer, sidebar and login.
+   Transparent PNG → blends on cream (header) and dark (footer/sidebar/login).
+   ========================================================================== */
+.nav-logo{ display:inline-flex; align-items:center; }
+.nav-logo .brand-logo{ height:58px; width:auto; display:block; }
+.brand-logo-foot{ height:46px; width:auto; display:block; }
+.sb-logo a .brand-logo-sb{ height:42px; width:auto; display:block; }
+.sb-mark-img{ width:34px; height:34px; border-radius:7px; flex-shrink:0; object-fit:cover; display:block; }
+.logo-wrap .brand-logo-login{ height:86px; width:auto; display:block; margin:0 auto; }
+@media (max-width:768px), (max-height:500px){
+  .nav-logo .brand-logo{ height:38px; }
+}
+@media (max-width:480px){
+  .nav-logo .brand-logo{ height:34px; }
+}

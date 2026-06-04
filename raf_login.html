@@ -351,6 +351,9 @@
   }
 </style>
 <link rel="stylesheet" href="raf_header.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
 </head>
 <body>
 
@@ -371,8 +374,8 @@
 
   <!-- LOGO -->
   <div class="logo-wrap">
-    <span class="logo-mark">رف</span>
-    <span class="logo-sub">RAF Marketplace</span>
+    <img src="raf_logo_web.png" alt="RAF Marketplace" class="brand-logo-login">
+    
   </div>
 
   <!-- STEP DOTS -->
@@ -495,7 +498,7 @@
       </div>
     </div>
 
-    <button class="btn-main" style="margin-top:12px;" onclick="window.location='raf_account.html'">
+    <button class="btn-main" style="margin-top:12px;" onclick="routeByRole()">
       <i class="ti ti-check"></i>
       <span data-ar="تأكيد الدخول" data-en="Confirm">تأكيد الدخول</span>
     </button>
@@ -514,29 +517,13 @@
 
   <!-- ────────── STAFF ACCESS ────────── -->
   <div class="staff-section">
-    <div class="staff-label" data-ar="دخول طاقم العمل" data-en="STAFF ACCESS">دخول طاقم العمل</div>
-    <div class="staff-roles">
-      <button class="role-btn" onclick="goStaff('merchant')">
-        <i class="ti ti-building-store"></i>
-        <span data-ar="تاجر" data-en="Merchant">تاجر</span>
-      </button>
-      <button class="role-btn" onclick="goStaff('driver')">
-        <i class="ti ti-motorbike"></i>
-        <span data-ar="سائق" data-en="Driver">سائق</span>
-      </button>
-      <button class="role-btn" onclick="goStaff('supervisor')">
-        <i class="ti ti-truck-delivery"></i>
-        <span data-ar="مشرف" data-en="Supervisor">مشرف</span>
-      </button>
-      <button class="role-btn" onclick="goStaff('management')">
-        <i class="ti ti-shield"></i>
-        <span data-ar="إدارة" data-en="Admin">إدارة</span>
-      </button>
-    </div>
+    <div class="staff-label" data-ar="طاقم العمل والشركاء" data-en="STAFF & PARTNERS">طاقم العمل والشركاء</div>
+    <p style="font-size:12.5px;color:#888;line-height:1.7;text-align:center;margin:8px auto 0;max-width:300px;" data-ar="سجّل الدخول بحسابك المعتاد — سيتم توجيهك تلقائياً إلى لوحة التحكم المناسبة لصلاحياتك (إدارة، تاجر، أو سائق)." data-en="Sign in with your usual account — you'll be routed automatically to the dashboard that matches your role (Admin, Merchant or Driver).">سجّل الدخول بحسابك المعتاد — سيتم توجيهك تلقائياً إلى لوحة التحكم المناسبة لصلاحياتك (إدارة، تاجر، أو سائق).</p>
   </div>
 
 </div><!-- /login-card -->
 
+<script src="raf_permissions.js"></script>
 <script>
   let currentMethod = 'whatsapp';
 
@@ -574,8 +561,27 @@
     }
   }
 
-  function goStaff(role) {
-    window.location = 'raf_login_staff.html?role=' + role;
+  /* RBAC-based auto-routing: detect role from the entered account → redirect.
+     RBAC (raf_permissions.js) is the single source of truth. */
+  function routeByRole() {
+    let id = '';
+    const block = document.getElementById('method-' + currentMethod);
+    if (block) { const inp = block.querySelector('input'); if (inp) id = (inp.value || '').trim().toLowerCase(); }
+    let dest = 'raf_account.html';
+    try {
+      if (window.RAFPerm) {
+        const norm = s => (s || '').toString().toLowerCase().replace(/[\s+]/g, '');
+        const u = RAFPerm.getUsers().find(x => (x.email || '').toLowerCase() === id || norm(x.phone) === norm(id));
+        if (u) {
+          const map = { super_admin:'raf_management.html', higher_mgmt:'raf_management.html', ops_manager:'raf_management.html',
+            customer_service:'raf_management.html', finance:'raf_management.html', marketing:'raf_management.html',
+            merchant:'raf_merchant.html', merchant_employee:'raf_merchant.html', driver:'raf_driver_app.html', customer:'raf_account.html' };
+          dest = map[u.roleId] || 'raf_account.html';
+          RAFPerm.setCurrentUser(u.id);
+        }
+      }
+    } catch (e) {}
+    window.location = dest;
   }
 
   /* LANG TOGGLE */

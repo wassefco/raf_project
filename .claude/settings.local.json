@@ -22,7 +22,11 @@
       "Bash(rm -f raf_admin.html)",
       "Bash([ -f \"$f.html\" ])",
       "Bash([ -f \"$p.html\" ])",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8123/raf_header.css)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8123/raf_header.css)",
+      "Bash(grep -l 'raf_logo\\\\|raf_favicon\\\\|_logo_preview' raf_*.html)",
+      "Bash(rm -f raf_logo.svg raf_logo_full.svg raf_logo_header.svg raf_logo_mark.svg raf_favicon.svg _logo_preview.html)",
+      "Bash(ls -1 *logo* *favicon* _logo_preview.html)",
+      "Bash(grep -vE '\\\\.png$')"
     ]
   }
 }
