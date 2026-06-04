@@ -62,9 +62,8 @@ nav{position:sticky;top:0;z-index:200;background:rgba(245,242,236,.9);backdrop-f
 .lang-btn:hover{border-color:var(--gold);color:var(--gold2);}
 .lang-btn .dot{width:5px;height:5px;border-radius:50%;background:var(--gold);}
 /* SEARCH OVERLAY */
-.search-overlay{position:absolute;top:calc(100% + 8px);right:0;left:0;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);box-shadow:0 18px 50px rgba(20,16,8,.16);padding:18px;z-index:210;display:none;max-height:70vh;overflow-y:auto;}
-.search-overlay.open{display:block;animation:fadeDown .18s ease;}
-@keyframes fadeDown{from{opacity:0;transform:translateY(-6px);}to{opacity:1;transform:none;}}
+.search-overlay{position:absolute;top:calc(100% + 8px);right:0;left:0;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);box-shadow:0 18px 50px rgba(20,16,8,.16);padding:16px;z-index:210;max-height:74vh;overflow-y:auto;opacity:0;visibility:hidden;transform:translateY(-8px);transition:opacity .2s ease,transform .2s ease,visibility .2s;pointer-events:none;}
+.search-overlay.open{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto;}
 .so-block{margin-bottom:18px;}
 .so-block:last-child{margin-bottom:0;}
 .so-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
@@ -88,6 +87,22 @@ nav{position:sticky;top:0;z-index:200;background:rgba(245,242,236,.9);backdrop-f
 .so-hist-thumb{width:120px;height:88px;border-radius:10px;background:linear-gradient(150deg,var(--bg2),var(--bg3));display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--gold2);margin-bottom:6px;}
 .so-hist-card.store .so-hist-thumb{border-radius:50%;width:64px;height:64px;margin:0 auto 6px;}
 .so-hist-name{font-size:12px;color:var(--text);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* quick actions row */
+.so-actions{display:flex;gap:8px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.so-action{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px;padding:11px 4px;border:1px solid var(--border);border-radius:12px;background:var(--bg2);cursor:pointer;transition:all .15s;color:var(--text2);font-size:11.5px;font-weight:600;text-align:center;}
+.so-action:hover{border-color:var(--gold);color:var(--gold2);background:var(--gold-soft);transform:translateY(-2px);}
+.so-action i{font-size:20px;color:var(--gold2);}
+/* live suggestion items */
+.sug-item{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:9px;cursor:pointer;transition:background .15s;}
+.sug-item:hover{background:var(--bg2);}
+.sug-thumb{width:42px;height:42px;border-radius:10px;background:linear-gradient(150deg,var(--bg2),var(--bg3));display:flex;align-items:center;justify-content:center;font-size:21px;color:var(--gold2);flex-shrink:0;}
+.sug-thumb.store{border-radius:50%;}
+.sug-thumb.cat{border-radius:50%;background:var(--gold-soft);}
+.sug-info{flex:1;min-width:0;}
+.sug-name{font-size:13.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sug-meta{font-size:11.5px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sug-go{color:var(--text3);font-size:16px;flex-shrink:0;}
+.so-noresult{text-align:center;color:var(--text3);font-size:13px;padding:16px;}
 .search-backdrop{position:fixed;inset:0;background:transparent;z-index:205;display:none;}
 .search-backdrop.open{display:block;}
 /* mobile search (shown ≤860 inside hero) */
@@ -343,7 +358,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   <a href="raf_homepage.html" class="nav-logo"><img src="raf_logo_web.png" alt="RAF Marketplace" class="brand-logo"></a>
   <div class="nav-search" id="searchWrap">
     <form onsubmit="return doSearch(event)">
-      <input id="navSearch" type="text" autocomplete="off" data-ar-ph="ابحث عن منتجات، محلات، أو ماركات…" data-en-ph="Search products, stores or brands…" placeholder="ابحث عن منتجات، محلات، أو ماركات…" onfocus="openSearch()">
+      <input id="navSearch" type="text" autocomplete="off" data-ar-ph="ابحث عن منتجات، محلات، أو ماركات…" data-en-ph="Search products, stores or brands…" placeholder="ابحث عن منتجات، محلات، أو ماركات…" onfocus="openSearch()" oninput="onSearchType(this)">
       <button type="submit" aria-label="search"><i class="ti ti-search"></i></button>
     </form>
     <div class="search-overlay" id="searchOverlay"></div>
@@ -376,7 +391,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   <div class="wrap">
     <div class="mobile-search" id="mSearchWrap">
       <form onsubmit="return doSearchM(event)">
-        <input id="navSearchM" type="text" autocomplete="off" data-ar-ph="ابحث عن منتجات، محلات…" data-en-ph="Search products, stores…" placeholder="ابحث عن منتجات، محلات…" onfocus="openSearch('searchOverlayM')">
+        <input id="navSearchM" type="text" autocomplete="off" data-ar-ph="ابحث عن منتجات، محلات…" data-en-ph="Search products, stores…" placeholder="ابحث عن منتجات، محلات…" onfocus="openSearch('searchOverlayM')" oninput="onSearchType(this)">
         <button type="submit" aria-label="search"><i class="ti ti-search"></i></button>
       </form>
       <div class="search-overlay" id="searchOverlayM"></div>
@@ -658,7 +673,7 @@ function seedHistory(){ if(!localStorage.getItem('raf_recent_views')) lsSet('raf
 function renderSearch(){
   const recents=lsGet('raf_recent_searches',[]);
   const views=lsGet('raf_recent_views',[]);
-  let html='';
+  let html=quickHTML();
   if(recents.length){
     html+=`<div class="so-block"><div class="so-head"><h4><i class="ti ti-history"></i> ${curLang()==='en'?'Recently Searched':'عمليات بحث سابقة'}</h4><button class="so-clear" onclick="clearSearches()">${curLang()==='en'?'Clear all':'مسح الكل'}</button></div>`;
     html+=recents.map((q,i)=>`<div class="so-recent" onclick="runSearch('${encodeURIComponent(q)}')"><span><i class="ti ti-search"></i> ${q}</span><i class="ti ti-x x" onclick="delSearch(${i},event)"></i></div>`).join('')+'</div>';
@@ -672,10 +687,37 @@ function renderSearch(){
   document.getElementById(ACTIVE_OV).innerHTML=html;
 }
 let ACTIVE_OV='searchOverlay';
-function openSearch(id){ACTIVE_OV=id||'searchOverlay';renderSearch();document.getElementById(ACTIVE_OV).classList.add('open');document.getElementById('searchBackdrop').classList.add('open');}
+const QUICK=[
+  {ar:'المنتجات',en:'Products',ic:'ti-box',href:'raf_offers.html'},
+  {ar:'المحلات',en:'Stores',ic:'ti-building-store',href:'raf_storespage.html'},
+  {ar:'العروض',en:'Offers',ic:'ti-discount',href:'raf_offers.html'},
+  {ar:'المزادات',en:'Auctions',ic:'ti-gavel',href:'raf_auctions.html'},
+  {ar:'الترندات',en:'Trends',ic:'ti-flame',href:'raf_trending.html'}
+];
+function quickHTML(){return `<div class="so-actions">${QUICK.map(a=>`<a class="so-action" href="${a.href}"><i class="ti ${a.ic}"></i> ${L(a)}</a>`).join('')}</div>`;}
+function activeInputId(){return ACTIVE_OV==='searchOverlayM'?'navSearchM':'navSearch';}
+function currentQuery(){const el=document.getElementById(activeInputId());return el?el.value.trim():'';}
+function renderPanel(){const q=currentQuery();if(q.length>=1)renderSuggestions(q);else renderSearch();}
+function renderSuggestions(q){
+  const ql=q.toLowerCase();
+  const m=o=>((o.ar||'')+' '+(o.en||'')).toLowerCase().includes(ql);
+  const cats=CATEGORIES.filter(c=>c.active&&m(c)).slice(0,4);
+  const prods=OFFERS.filter(m).slice(0,4);
+  const stores=STORES.filter(m).slice(0,3);
+  const grp=(t,ic,items)=>items.length?`<div class="so-block"><div class="so-head"><h4><i class="ti ${ic}"></i> ${t}</h4></div>${items.join('')}</div>`:'';
+  let html=quickHTML();
+  html+=grp(curLang()==='en'?'Categories':'الفئات','ti-category',cats.map(c=>`<a class="sug-item" href="raf_storespage.html?cat=${c.id}"><div class="sug-thumb cat"><i class="ti ${c.icon}"></i></div><div class="sug-info"><div class="sug-name">${L(c)}</div><div class="sug-meta">${curLang()==='en'?'Category':'فئة'}</div></div><i class="ti ti-arrow-left sug-go"></i></a>`));
+  html+=grp(curLang()==='en'?'Products':'المنتجات','ti-box',prods.map(p=>`<a class="sug-item" href="raf_product.html"><div class="sug-thumb"><i class="ti ${p.ic}"></i></div><div class="sug-info"><div class="sug-name">${L(p)}</div><div class="sug-meta">${L(p.store)} · ${p.price} KWD</div></div><i class="ti ti-arrow-left sug-go"></i></a>`));
+  html+=grp(curLang()==='en'?'Stores':'المحلات','ti-building-store',stores.map(s=>`<a class="sug-item" href="raf_store.html"><div class="sug-thumb store"><i class="ti ${s.ic}"></i></div><div class="sug-info"><div class="sug-name">${L(s)}</div><div class="sug-meta">${s.prod} ${curLang()==='en'?'products':'منتج'} · ★ ${s.rate}</div></div><i class="ti ti-arrow-left sug-go"></i></a>`));
+  if(!cats.length&&!prods.length&&!stores.length)html+=`<div class="so-noresult">${curLang()==='en'?'No matches found':'لا نتائج مطابقة'}</div>`;
+  html+=`<div class="so-recent" style="background:var(--gold-soft);border:1px solid rgba(201,168,76,.3);margin-top:6px;" onclick="runSearch('${encodeURIComponent(q)}')"><span><i class="ti ti-search" style="color:var(--gold2)"></i> ${curLang()==='en'?'Search for':'ابحث عن'} &quot;${q}&quot;</span><i class="ti ti-arrow-left" style="color:var(--gold2)"></i></div>`;
+  document.getElementById(ACTIVE_OV).innerHTML=html;
+}
+function openSearch(id){ACTIVE_OV=id||'searchOverlay';renderPanel();document.getElementById(ACTIVE_OV).classList.add('open');document.getElementById('searchBackdrop').classList.add('open');}
+function onSearchType(inp){ACTIVE_OV=inp.id==='navSearchM'?'searchOverlayM':'searchOverlay';const ov=document.getElementById(ACTIVE_OV);if(!ov.classList.contains('open')){ov.classList.add('open');document.getElementById('searchBackdrop').classList.add('open');}renderPanel();}
 function closeSearch(){document.querySelectorAll('.search-overlay').forEach(o=>o.classList.remove('open'));document.getElementById('searchBackdrop').classList.remove('open');}
-function clearSearches(){lsSet('raf_recent_searches',[]);renderSearch();}
-function delSearch(i,e){e.stopPropagation();const a=lsGet('raf_recent_searches',[]);a.splice(i,1);lsSet('raf_recent_searches',a);renderSearch();}
+function clearSearches(){lsSet('raf_recent_searches',[]);renderPanel();}
+function delSearch(i,e){e.stopPropagation();const a=lsGet('raf_recent_searches',[]);a.splice(i,1);lsSet('raf_recent_searches',a);renderPanel();}
 function runSearch(q){q=decodeURIComponent(q);saveSearch(q);window.location='raf_offers.html?q='+encodeURIComponent(q);}
 function saveSearch(q){if(!q)return;let a=lsGet('raf_recent_searches',[]);a=a.filter(x=>x!==q);a.unshift(q);a=a.slice(0,6);lsSet('raf_recent_searches',a);}
 function doSearch(e){e.preventDefault();const q=document.getElementById('navSearch').value.trim();closeSearch();if(q){saveSearch(q);window.location='raf_offers.html?q='+encodeURIComponent(q);}return false;}
@@ -688,7 +730,7 @@ function tick(){document.querySelectorAll('[data-sec]').forEach(el=>{let s=parse
 function updateCartBadge(){try{const c=JSON.parse(localStorage.getItem('raf_cart')||'[]');const n=Array.isArray(c)?c.reduce((s,i)=>s+(i.qty||1),0):0;const b=document.getElementById('cartBadge');if(n>0){b.textContent=n>99?'99+':n;b.style.display='flex';}else b.style.display='none';}catch(e){}}
 
 /* ===== LANG ===== */
-function toggleLang(){const r=document.getElementById('htmlRoot');const isAr=r.lang==='ar';r.lang=isAr?'en':'ar';r.dir=isAr?'ltr':'rtl';localStorage.setItem('raf_lang',isAr?'en':'ar');applyLang();adcRender();renderCarousels();if(document.querySelector('.search-overlay.open'))renderSearch();}
+function toggleLang(){const r=document.getElementById('htmlRoot');const isAr=r.lang==='ar';r.lang=isAr?'en':'ar';r.dir=isAr?'ltr':'rtl';localStorage.setItem('raf_lang',isAr?'en':'ar');applyLang();adcRender();renderCarousels();if(document.querySelector('.search-overlay.open'))renderPanel();}
 function applyLang(){const en=curLang()==='en';document.getElementById('langLabel').textContent=en?'ع':'EN';
   document.querySelectorAll('[data-ar]').forEach(el=>{el.textContent=en?el.dataset.en:el.dataset.ar;});
   document.querySelectorAll('[data-ar-ph]').forEach(el=>{el.placeholder=en?el.dataset.enPh:el.dataset.arPh;});}
