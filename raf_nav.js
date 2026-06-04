@@ -68,7 +68,7 @@
     + 'border:1px solid #D8D3C8;border-radius:8px;background:transparent;color:#555;cursor:pointer;'
     + 'font-size:20px;flex-shrink:0;transition:all .2s;}'
     + '.raf-burger:hover{border-color:#C9A84C;color:#C9A84C;}'
-    + '@media(max-width:900px){.raf-burger{display:inline-flex;}}'
+    + '@media(max-width:1024px){.raf-burger{display:inline-flex;}}'
     + '.raf-drawer-overlay{position:fixed;inset:0;background:rgba(10,10,10,.45);opacity:0;visibility:hidden;'
     + 'transition:opacity .25s;z-index:1400;}'
     + '.raf-drawer-overlay.open{opacity:1;visibility:visible;}'

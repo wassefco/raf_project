@@ -38,7 +38,18 @@
     '.rtb-sub-inner::-webkit-scrollbar{display:none;}'+
     '.rtb-sub-inner a{font-size:13.5px;font-weight:500;color:#5A5650;padding:8px 14px;border-radius:8px;white-space:nowrap;transition:all .2s;display:inline-flex;align-items:center;gap:6px;text-decoration:none;}'+
     '.rtb-sub-inner a i{font-size:16px;color:#A07828;}.rtb-sub-inner a:hover{background:#EDE8DC;color:#15130F;}'+
-    '@media(max-width:860px){nav:not(.app-bnav):not(.top){padding:0 14px!important;}.rtb-inner{gap:12px;}.rtb-search{display:none;}.rtb-subnav{display:none;}.rtb-account-l{display:none;}.rtb-account{padding:0 14px;}.rtb-logo img{height:38px;}}'+
+    '.rtb-msearch{display:none;}'+
+    /* tablet-portrait + phones (≤860): app chrome (no inline search/subnav) + visible mobile search bar */
+    '@media(max-width:860px){'+
+      'nav:not(.app-bnav):not(.top){padding:0 14px!important;}.rtb-inner{gap:12px;}.rtb-search{display:none;}.rtb-subnav{display:none;}.rtb-account-l{display:none;}.rtb-account{padding:0 14px;}.rtb-logo img{height:38px;}'+
+      '.rtb-msearch{display:block;background:rgba(245,242,236,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #E2DBCC;padding:10px 14px;}'+
+      '.rtb-msearch form{position:relative;max-width:680px;margin:0 auto;}'+
+      '.rtb-msearch input{width:100%;height:46px;border:1.5px solid #D8D3C8;background:#fff;border-radius:13px;padding:0 48px 0 16px;font-family:"Tajawal",sans-serif;font-size:14.5px;color:#0A0A0A;outline:none;box-shadow:0 2px 10px rgba(20,16,8,.05);}'+
+      '.rtb-msearch input:focus{border-color:#C9A84C;box-shadow:0 0 0 3px rgba(201,168,76,.12);}'+
+      '.rtb-msearch button{position:absolute;top:5px;right:5px;width:36px;height:36px;border:none;border-radius:10px;background:#C9A84C;color:#0A0A0A;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;}'+
+    '}'+
+    /* tablet + mobile (≤1024): language lives in the hamburger; cart/wishlist/account live in the bottom nav → remove from header */
+    '@media(max-width:1024px){.rtb-lang{display:none!important;}.rtb-actions .rtb-ico,.rtb-actions .rtb-account{display:none!important;}}'+
     '@media(max-width:480px){.rtb-logo img{height:34px;}}';
     var s=document.createElement('style'); s.id='raf-topbar-css'; s.textContent=c; document.head.appendChild(s);
   }
@@ -61,6 +72,9 @@
           '<a href="raf_account.html" class="rtb-account"><i class="ti ti-user"></i><span class="rtb-account-l" data-ar="حسابي" data-en="Account">'+t('حسابي','Account')+'</span></a>'+
         '</div>'+
       '</div>';
+    var ms=document.createElement('div'); ms.className='rtb-msearch';
+    ms.innerHTML='<form onsubmit="return RAFTopbar.submitM(event)"><input id="navSearchM" data-raf-search-input type="text" autocomplete="off" placeholder="'+ph+'"><button type="submit" aria-label="search"><i class="ti ti-search"></i></button></form>';
+    if(nav.nextSibling) nav.parentNode.insertBefore(ms, nav.nextSibling); else nav.parentNode.appendChild(ms);
     var sub=document.createElement('div'); sub.className='rtb-subnav';
     sub.innerHTML='<div class="rtb-sub-inner">'+
       '<a href="raf_storespage.html"><i class="ti ti-building-store"></i> <span data-ar="المحلات" data-en="Stores">'+t('المحلات','Stores')+'</span></a>'+
@@ -70,13 +84,14 @@
       '<a href="raf_trending.html"><i class="ti ti-flame"></i> <span data-ar="الترندات" data-en="Trends">'+t('الترندات','Trends')+'</span></a>'+
       '<a href="raf_used.html"><i class="ti ti-recycle"></i> <span data-ar="المستعمل" data-en="Used">'+t('المستعمل','Used')+'</span></a>'+
     '</div>';
-    if(nav.nextSibling) nav.parentNode.insertBefore(sub, nav.nextSibling); else nav.parentNode.appendChild(sub);
+    if(ms.nextSibling) nav.parentNode.insertBefore(sub, ms.nextSibling); else nav.parentNode.appendChild(sub);
     updateBadge();
   }
   function updateBadge(){ var b=document.getElementById('rtbCartBadge'); if(!b)return; var n=cartCount(); if(n>0){b.textContent=n>99?'99+':n;b.style.display='flex';} else b.style.display='none'; }
 
   var API={
     submit:function(e){ e.preventDefault(); var inp=document.getElementById('navSearch'); var q=(inp&&inp.value||'').trim(); if(window.RAFSearch&&RAFSearch.close)RAFSearch.close(); if(q){ try{var a=JSON.parse(localStorage.getItem('raf_recent_searches')||'[]');a=a.filter(function(x){return x!==q;});a.unshift(q);localStorage.setItem('raf_recent_searches',JSON.stringify(a.slice(0,6)));}catch(_){ } window.location='raf_offers.html?q='+encodeURIComponent(q); } return false; },
+    submitM:function(e){ e.preventDefault(); var inp=document.getElementById('navSearchM'); var q=(inp&&inp.value||'').trim(); if(window.RAFSearch&&RAFSearch.close)RAFSearch.close(); if(q){ try{var a=JSON.parse(localStorage.getItem('raf_recent_searches')||'[]');a=a.filter(function(x){return x!==q;});a.unshift(q);localStorage.setItem('raf_recent_searches',JSON.stringify(a.slice(0,6)));}catch(_){ } window.location='raf_offers.html?q='+encodeURIComponent(q); } return false; },
     lang:function(){ if(window.toggleLang){ toggleLang(); } var l=document.querySelector('.rtb-lang-l'); if(l)l.textContent=en()?'ع':'EN'; },
     refresh:updateBadge
   };
