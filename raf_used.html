@@ -266,6 +266,7 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
+<link rel="stylesheet" href="raf_theme.css">
 </head>
 <body>
 
@@ -334,39 +335,8 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
 
   <!-- ===== BROWSE ===== -->
   <div class="view on" id="view-browse">
-    <div class="search-bar">
-      <div class="search-inp-wrap">
-        <i class="ti ti-search"></i>
-        <input type="text" id="usedSearch" placeholder="ابحث عن منتج مستعمل..." oninput="applyUsedFilters()">
-      </div>
-      <select class="f-select" id="usedCat" onchange="applyUsedFilters()">
-        <option value="">الفئة</option>
-        <option>ملابس</option><option>أحذية</option><option>إلكترونيات</option>
-        <option>أثاث</option><option>سيارات</option><option>أخرى</option>
-      </select>
-      <select class="f-select" id="usedCond" onchange="applyUsedFilters()">
-        <option value="">الحالة</option>
-        <option value="كالجديد">كالجديد</option><option value="جيد جداً">جيد جداً</option><option value="جيد">جيد</option>
-      </select>
-      <select class="f-select" id="usedArea" onchange="applyUsedFilters()">
-        <option value="">المنطقة</option>
-        <option>حولي</option><option>السالمية</option><option>الرميثية</option>
-        <option>الفروانية</option><option>مبارك الكبير</option><option>الأحمدي</option><option>الجهراء</option>
-      </select>
-      <select class="f-select" id="usedSort" onchange="applyUsedFilters()">
-        <option value="">الترتيب</option>
-        <option value="priceAsc">السعر: الأقل</option><option value="priceDesc">السعر: الأعلى</option>
-      </select>
-    </div>
-    <div class="chips" id="usedChips">
-      <div class="chip on" data-cat="" onclick="selUsedChip(this)">الكل</div>
-      <div class="chip" data-cat="ملابس" onclick="selUsedChip(this)">ملابس</div>
-      <div class="chip" data-cat="إلكترونيات" onclick="selUsedChip(this)">إلكترونيات</div>
-      <div class="chip" data-cat="أحذية" onclick="selUsedChip(this)">أحذية</div>
-      <div class="chip" data-cat="أثاث" onclick="selUsedChip(this)">أثاث</div>
-      <div class="chip" data-cat="سيارات" onclick="selUsedChip(this)">سيارات</div>
-      <div class="chip" data-cat="أخرى" onclick="selUsedChip(this)">أخرى</div>
-    </div>
+    <!-- PREMIUM AD (replaces removed legacy filter block) -->
+    <div class="ad-slot" data-ad-slot="filter-used" style="margin-bottom:20px;"></div>
     <div class="listings-grid">
       <div class="listing-card" onclick="switchView('detail',null)">
         <div class="listing-img"><i class="ti ti-device-mobile"></i><span class="cond-badge cond-new">كالجديد</span></div>
@@ -813,6 +783,9 @@ function toggleLang() {
   <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
+<script src="raf_topbar.js"></script>
 <script src="raf_nav.js"></script>
+<script src="raf_search.js"></script>
+<script src="raf_ads.js"></script>
 </body>
 </html>

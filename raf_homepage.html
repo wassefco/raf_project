@@ -136,9 +136,12 @@ nav{position:sticky;top:0;z-index:200;background:rgba(245,242,236,.9);backdrop-f
 .btn-gold:hover{background:var(--gold2);transform:translateY(-2px);}
 .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--ink);}
 .btn-ghost:hover{background:var(--ink);color:var(--bg);}
-.hero-stats{display:flex;gap:24px;}
-.hero-stat b{font-family:var(--font-display);font-size:22px;font-weight:900;color:var(--ink);display:block;line-height:1;}
-.hero-stat span{font-size:11.5px;color:var(--text3);}
+.hero-trust{display:flex;gap:12px;flex-wrap:wrap;}
+.trust-pill{display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 16px;box-shadow:var(--sh-sm);transition:transform .2s,box-shadow .2s;}
+.trust-pill:hover{transform:translateY(-2px);box-shadow:var(--sh);}
+.trust-pill .ic{width:40px;height:40px;border-radius:11px;background:var(--gold-soft);display:flex;align-items:center;justify-content:center;color:var(--gold2);font-size:20px;flex-shrink:0;}
+.trust-pill b{font-family:var(--font-display);font-size:20px;font-weight:900;color:var(--ink);display:block;line-height:1;}
+.trust-pill span{font-size:11.5px;color:var(--text3);}
 
 /* ============ AD CAROUSEL (hero) ============ */
 .adc{position:relative;border-radius:var(--rxl);overflow:hidden;box-shadow:var(--sh);}
@@ -402,14 +405,10 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
         <h1><span data-ar="اكتشف أفضل المنتجات" data-en="Discover the Finest Products">اكتشف أفضل المنتجات</span> <em data-ar="وأقوى العروض" data-en="& Best Offers">وأقوى العروض</em></h1>
       </div>
       <div class="hero-intro-r">
-        <div class="hero-cta">
-          <a href="raf_storespage.html" class="btn btn-gold"><i class="ti ti-shopping-bag"></i> <span data-ar="تسوّق الآن" data-en="Shop Now">تسوّق الآن</span></a>
-          <a href="raf_storespage.html" class="btn btn-ghost"><i class="ti ti-building-store"></i> <span data-ar="تصفّح المحلات" data-en="Browse Stores">تصفّح المحلات</span></a>
-        </div>
-        <div class="hero-stats">
-          <div class="hero-stat"><b class="dm">+120</b><span data-ar="متجر موثّق" data-en="Verified stores">متجر موثّق</span></div>
-          <div class="hero-stat"><b class="dm">+5K</b><span data-ar="منتج مميّز" data-en="Premium products">منتج مميّز</span></div>
-          <div class="hero-stat"><b class="dm">4.9</b><span data-ar="تقييم" data-en="Rating">تقييم</span></div>
+        <div class="hero-trust">
+          <div class="trust-pill"><div class="ic"><i class="ti ti-rosette-discount-check"></i></div><div><b class="dm">+120</b><span data-ar="متجر موثّق" data-en="Verified Stores">متجر موثّق</span></div></div>
+          <div class="trust-pill"><div class="ic"><i class="ti ti-box"></i></div><div><b class="dm">+5K</b><span data-ar="منتج مميّز" data-en="Products">منتج مميّز</span></div></div>
+          <div class="trust-pill"><div class="ic"><i class="ti ti-star-filled"></i></div><div><b class="dm">4.9</b><span data-ar="تقييم العملاء" data-en="Customer Rating">تقييم العملاء</span></div></div>
         </div>
       </div>
     </div>
@@ -440,6 +439,8 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   </div>
 </div></section>
 
+<div class="ad-slot wrap" data-ad-slot="after-categories"></div>
+
 <!-- ============ OFFERS ============ -->
 <section class="sec" style="background:var(--bg2);"><div class="wrap">
   <div class="sec-head"><div><div class="sec-kicker">HOT DEALS</div><h2 class="sec-title" data-ar="عروض مميّزة" data-en="Featured Offers">عروض مميّزة</h2></div></div>
@@ -448,6 +449,8 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
     <button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button>
   </div>
 </div></section>
+
+<div class="ad-slot wrap" data-ad-slot="after-offers"></div>
 
 <!-- ============ STORES ============ -->
 <section class="sec"><div class="wrap">
@@ -458,6 +461,8 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   </div>
 </div></section>
 
+<div class="ad-slot wrap" data-ad-slot="after-stores"></div>
+
 <!-- ============ AUCTIONS ============ -->
 <section class="sec" style="background:var(--bg2);"><div class="wrap">
   <div class="sec-head"><div><div class="sec-kicker">LIVE NOW</div><h2 class="sec-title" data-ar="مزادات حيّة" data-en="Live Auctions">مزادات حيّة</h2></div></div>
@@ -466,6 +471,8 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
     <button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button>
   </div>
 </div></section>
+
+<div class="ad-slot wrap" data-ad-slot="after-auctions"></div>
 
 <!-- ============ TRENDING ============ -->
 <section class="sec"><div class="wrap">
@@ -479,6 +486,8 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   <div class="tab-pane" id="tab-sold"><div class="car"><div class="car-track"></div><button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button><button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button></div></div>
   <div class="tab-pane" id="tab-liked"><div class="car"><div class="car-track"></div><button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button><button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button></div></div>
 </div></section>
+
+<div class="ad-slot wrap" data-ad-slot="after-trending"></div>
 
 <!-- ============ WHY RAF ============ -->
 <section class="sec why"><div class="wrap">
@@ -530,6 +539,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 </nav>
 
 <script src="raf_nav.js"></script>
+<script src="raf_ads.js"></script>
 <script>
 /* ===== ADMIN-READY DATA (replace with API later) ===== */
 /* Advertising slides — structured for admin-managed ad data */
@@ -730,7 +740,7 @@ function tick(){document.querySelectorAll('[data-sec]').forEach(el=>{let s=parse
 function updateCartBadge(){try{const c=JSON.parse(localStorage.getItem('raf_cart')||'[]');const n=Array.isArray(c)?c.reduce((s,i)=>s+(i.qty||1),0):0;const b=document.getElementById('cartBadge');if(n>0){b.textContent=n>99?'99+':n;b.style.display='flex';}else b.style.display='none';}catch(e){}}
 
 /* ===== LANG ===== */
-function toggleLang(){const r=document.getElementById('htmlRoot');const isAr=r.lang==='ar';r.lang=isAr?'en':'ar';r.dir=isAr?'ltr':'rtl';localStorage.setItem('raf_lang',isAr?'en':'ar');applyLang();adcRender();renderCarousels();if(document.querySelector('.search-overlay.open'))renderPanel();}
+function toggleLang(){const r=document.getElementById('htmlRoot');const isAr=r.lang==='ar';r.lang=isAr?'en':'ar';r.dir=isAr?'ltr':'rtl';localStorage.setItem('raf_lang',isAr?'en':'ar');applyLang();adcRender();renderCarousels();if(window.RAFAds)RAFAds.mountAll(curLang());if(document.querySelector('.search-overlay.open'))renderPanel();}
 function applyLang(){const en=curLang()==='en';document.getElementById('langLabel').textContent=en?'ع':'EN';
   document.querySelectorAll('[data-ar]').forEach(el=>{el.textContent=en?el.dataset.en:el.dataset.ar;});
   document.querySelectorAll('[data-ar-ph]').forEach(el=>{el.placeholder=en?el.dataset.enPh:el.dataset.arPh;});}
@@ -738,6 +748,7 @@ function applyLang(){const en=curLang()==='en';document.getElementById('langLabe
 /* ===== INIT ===== */
 (function(){const l=localStorage.getItem('raf_lang');if(l==='en'){const r=document.getElementById('htmlRoot');r.lang='en';r.dir='ltr';}
   seedHistory();applyLang();adcRender();adcPlay();renderCarousels();updateCartBadge();tick();setInterval(tick,1000);
+  if(window.RAFAds)RAFAds.mountAll(curLang());
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSearch();});
 })();
 </script>

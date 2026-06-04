@@ -143,6 +143,7 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
+<link rel="stylesheet" href="raf_theme.css">
 </head>
 <body>
 
@@ -199,34 +200,8 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
     </button>
   </div>
 
-  <!-- FILTERS -->
-  <div class="filter-bar">
-    <div class="search-inp" style="flex:1;">
-      <i class="ti ti-search" style="color:var(--text3);"></i>
-      <input type="text" id="trendSearch" placeholder="ابحث بالاسم أو رقم المنتج (P-001)..." oninput="filterTrending()">
-    </div>
-    <select class="f-select" id="trendStore" onchange="filterTrending()">
-      <option value="">كل المحلات</option>
-      <option>Casa Mode</option><option>Sole &amp; Co</option>
-      <option>TechZone</option><option>Luxe Accessories</option><option>Glam Store</option>
-    </select>
-    <select class="f-select" id="trendSort" onchange="filterTrending()">
-      <option value="">الترتيب</option>
-      <option value="priceAsc">السعر: الأقل</option>
-      <option value="priceDesc">السعر: الأعلى</option>
-      <option value="rating">الأعلى تقييماً</option>
-    </select>
-  </div>
-
-  <!-- CATEGORY CHIPS -->
-  <div class="chips" id="trendChips">
-    <div class="chip on" data-cat="" onclick="selChip(this)">الكل</div>
-    <div class="chip" data-cat="ملابس" onclick="selChip(this)">ملابس</div>
-    <div class="chip" data-cat="أحذية" onclick="selChip(this)">أحذية</div>
-    <div class="chip" data-cat="إلكترونيات" onclick="selChip(this)">إلكترونيات</div>
-    <div class="chip" data-cat="اكسسوارات" onclick="selChip(this)">اكسسوارات</div>
-    <div class="chip" data-cat="حقائب" onclick="selChip(this)">حقائب</div>
-  </div>
+  <!-- PREMIUM AD (replaces removed legacy filter block) -->
+  <div class="ad-slot" data-ad-slot="filter-trending" style="margin-bottom:20px;"></div>
 
   <!-- ======== TRENDING TAB ======== -->
   <div id="view-trending">
@@ -621,6 +596,9 @@ window.addEventListener('DOMContentLoaded',()=>{initCartBtns();updateBadge();});
   <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
+<script src="raf_topbar.js"></script>
 <script src="raf_nav.js"></script>
+<script src="raf_search.js"></script>
+<script src="raf_ads.js"></script>
 </body>
 </html>

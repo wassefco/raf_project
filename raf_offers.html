@@ -138,6 +138,7 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
+<link rel="stylesheet" href="raf_theme.css">
 </head>
 <body>
 
@@ -188,48 +189,8 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
 
 <div class="main">
 
-  <!-- FILTER BAR -->
-  <div class="filter-bar">
-    <div class="search-inp" style="flex:1;">
-      <i class="ti ti-search" style="color:var(--text3);"></i>
-      <input type="text" placeholder="ابحث بالاسم أو رقم المنتج (P-001)..." oninput="filterProds(this.value)" id="prodSearch">
-    </div>
-    <select class="f-select" onchange="filterStore(this.value)">
-      <option value="">كل المحلات</option>
-      <option>Casa Mode</option>
-      <option>Sole & Co</option>
-      <option>TechZone</option>
-      <option>Luxe Accessories</option>
-      <option>Glam Store</option>
-    </select>
-    <select class="f-select" id="discFilter" onchange="filterDisc(this.value)">
-      <option value="">نسبة الخصم</option>
-      <option value="10">10% فأكثر</option>
-      <option value="20">20% فأكثر</option>
-      <option value="30">30% فأكثر</option>
-      <option value="50">50% فأكثر</option>
-    </select>
-    <select class="f-select" onchange="sortProds(this.value)">
-      <option>الترتيب</option>
-      <option>الأعلى خصماً</option>
-      <option>الأقل سعراً</option>
-      <option>الأعلى تقييماً</option>
-    </select>
-  </div>
-
-  <!-- CATEGORY CHIPS -->
-  <div class="chips" id="catChips">
-    <div class="chip on" onclick="filterCat('',this)">الكل <span style="color:inherit;opacity:.6;">(86)</span></div>
-    <div class="chip" onclick="filterCat('ملابس',this)">ملابس <span style="opacity:.6;">(32)</span></div>
-    <div class="chip" onclick="filterCat('أحذية',this)">أحذية <span style="opacity:.6;">(14)</span></div>
-    <div class="chip" onclick="filterCat('إلكترونيات',this)">إلكترونيات <span style="opacity:.6;">(11)</span></div>
-    <div class="chip" onclick="filterCat('اكسسوارات',this)">اكسسوارات <span style="opacity:.6;">(19)</span></div>
-    <div class="chip" onclick="filterCat('حقائب',this)">حقائب <span style="opacity:.6;">(10)</span></div>
-  </div>
-
-  <div class="results-bar">
-    <span class="results-count" id="resultsCount">86 عرض</span>
-  </div>
+  <!-- PREMIUM AD (replaces removed legacy filter block) -->
+  <div class="ad-slot" data-ad-slot="filter-offers" style="margin-bottom:20px;"></div>
 
   <!-- PRODUCTS GRID -->
   <div class="prod-grid" id="prodGrid">
@@ -636,6 +597,9 @@ window.addEventListener('DOMContentLoaded',()=>{initCartBtns();updateBadge();});
   <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
+<script src="raf_topbar.js"></script>
 <script src="raf_nav.js"></script>
+<script src="raf_search.js"></script>
+<script src="raf_ads.js"></script>
 </body>
 </html>

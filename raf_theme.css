@@ -1,0 +1,53 @@
+/* ==========================================================================
+ * RAF Marketplace — UNIFIED DESIGN SYSTEM (single source of truth)
+ * --------------------------------------------------------------------------
+ * Linked AFTER each page's inline <style>. SAFE layer: it only harmonizes
+ * NON-conflicting tokens (radius scale, premium shadows, additive accents)
+ * and exposes premium component classes (rafx-*) for redesigns to adopt.
+ *
+ * IMPORTANT: it deliberately does NOT override core colour tokens
+ * (--black/--white/--bg/--card/--text/--gold) because some legacy pages use
+ * an inverted convention (e.g. product page: --black=cream). Overriding those
+ * would break their colours. Colour unification is handled per-page in the
+ * redesign phase, not here.
+ * ==========================================================================*/
+
+/* ---- 1) SAFE TOKEN HARMONIZATION (radius + shadows + additive accents) --- */
+:root{
+  /* unified radius scale (was 8/12 or 4/12 on legacy pages) */
+  --r:10px; --rl:16px; --rxl:22px; --radius:8px; --radius-lg:16px;
+  /* warm premium shadow language (homepage) — additive, pages didn't define these */
+  --sh-sm:0 2px 10px rgba(20,16,8,.05);
+  --sh:0 8px 30px rgba(20,16,8,.08);
+  --sh-gold:0 14px 40px rgba(201,168,76,.22);
+  /* additive accents used by the component library */
+  --ink:#15130F; --gold2:#A07828; --gold-soft:rgba(201,168,76,.12); --bg3:#E7E1D4; --border2:#D8D3C8;
+}
+
+/* ---- 2) REUSABLE PREMIUM COMPONENTS (opt-in: rafx-*; self-contained) ----- */
+.rafx-sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
+.rafx-kicker{font-family:var(--font-en,'DM Sans',sans-serif);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold2);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.rafx-kicker::before{content:'';width:22px;height:1px;background:var(--gold,#C9A84C);}
+.rafx-title{font-family:var(--font-display,'Playfair Display',serif);font-size:clamp(23px,2.4vw,30px);font-weight:900;color:var(--ink);line-height:1.1;}
+.rafx-link{font-size:13px;color:var(--gold2);font-weight:700;display:inline-flex;align-items:center;gap:5px;transition:gap .2s,color .2s;white-space:nowrap;text-decoration:none;}
+.rafx-link:hover{gap:9px;color:var(--gold,#C9A84C);}
+
+.rafx-card{background:var(--card,#FFFFFF);border:1px solid var(--border,#E2DBCC);border-radius:var(--rl);overflow:hidden;box-shadow:var(--sh-sm);transition:transform .22s,box-shadow .22s,border-color .22s;}
+.rafx-card:hover{transform:translateY(-5px);box-shadow:var(--sh);border-color:var(--border2);}
+
+.rafx-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 26px;border-radius:30px;font-family:var(--font-ar,'Tajawal',sans-serif);font-size:14.5px;font-weight:700;cursor:pointer;border:none;transition:all .22s;white-space:nowrap;text-decoration:none;}
+.rafx-btn-gold{background:var(--gold,#C9A84C);color:#0A0A0A;box-shadow:var(--sh-gold);}
+.rafx-btn-gold:hover{background:var(--gold2);transform:translateY(-2px);}
+.rafx-btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--ink);}
+.rafx-btn-ghost:hover{background:var(--ink);color:#F5F2EC;}
+.rafx-btn-soft{background:var(--bg2,#EDE8DC);color:var(--ink);}
+.rafx-btn-soft:hover{background:var(--gold,#C9A84C);color:#0A0A0A;}
+
+.rafx-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700;}
+.rafx-badge-gold{background:var(--gold-soft);color:var(--gold2);}
+.rafx-badge-red{background:rgba(217,83,79,.1);color:#D9534F;}
+.rafx-badge-green{background:rgba(62,156,106,.12);color:#3E9C6A;}
+
+.rafx-wrap{max-width:1300px;margin:0 auto;padding:0 24px;}
+.rafx-sec{padding:48px 0;}
+@media(max-width:680px){.rafx-sec{padding:34px 0;}.rafx-wrap{padding:0 16px;}}

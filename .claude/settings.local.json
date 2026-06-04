@@ -26,7 +26,11 @@
       "Bash(grep -l 'raf_logo\\\\|raf_favicon\\\\|_logo_preview' raf_*.html)",
       "Bash(rm -f raf_logo.svg raf_logo_full.svg raf_logo_header.svg raf_logo_mark.svg raf_favicon.svg _logo_preview.html)",
       "Bash(ls -1 *logo* *favicon* _logo_preview.html)",
-      "Bash(grep -vE '\\\\.png$')"
+      "Bash(grep -vE '\\\\.png$')",
+      "Bash(grep -oE '\\\\-\\\\-\\(radius|r|rl\\):[^;]*' __TRACKED_VAR__.html)",
+      "Bash(grep -qE 'class=\"nav-search\"|class=\"subnav\"' __TRACKED_VAR__.html)",
+      "Bash(grep -qE 'class=\"nav-links\"' __TRACKED_VAR__.html)",
+      "Bash(grep -rohE 'class=\"btn[a-z-]*\"' __TRACKED_VAR__.html)"
     ]
   }
 }
