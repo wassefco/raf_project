@@ -342,8 +342,8 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 @media(max-width:420px){.tabs{display:flex;width:100%;}.tab{flex:1;justify-content:center;padding:9px 6px;font-size:12px;}.cta-strip h3{font-size:20px;}}
 /* mobile bottom nav (phones + landscape) */
 @media(max-width:1024px),(max-height:500px){
-  /* remove duplicate header icons on phones (kept in bottom nav) */
-  .nav-actions .nav-ico,.nav-actions .btn-account{display:none!important;}
+  /* remove duplicate header icons + language switcher on mobile/tablet (kept in bottom nav + hamburger) */
+  .nav-actions .nav-ico,.nav-actions .btn-account,.nav-actions .lang-btn{display:none!important;}
   body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px));}
   .app-bnav{display:flex;position:fixed;bottom:0;left:0;right:0;top:auto;height:58px;background:rgba(255,255,255,.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);box-shadow:0 -2px 18px rgba(20,16,8,.08);z-index:998;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);align-items:stretch;}
   .bnav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--text3);font-size:10px;font-weight:600;font-family:var(--font-ar);transition:color .15s;}
