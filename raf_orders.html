@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — طلباتي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="raf_account.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+</head>
+<body>
+
+<header class="ahead">
+  <button type="button" class="ahead-back" onclick="goBack('raf_account.html')"><i class="ti ti-arrow-right"></i> <span data-ar="العودة" data-en="Back">العودة</span></button>
+  <div class="ahead-title" data-ar="طلباتي" data-en="My Orders">طلباتي</div>
+  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
+</header>
+
+<div class="wrap">
+  <div class="tabs" id="ordTabs">
+    <button class="tab on" data-f="all" onclick="filterOrders('all',this)" data-ar="الكل" data-en="All">الكل</button>
+    <button class="tab" data-f="progress" onclick="filterOrders('progress',this)" data-ar="قيد التوصيل" data-en="In Progress">قيد التوصيل</button>
+    <button class="tab" data-f="delivered" onclick="filterOrders('delivered',this)" data-ar="تم التسليم" data-en="Delivered">تم التسليم</button>
+    <button class="tab" data-f="cancelled" onclick="filterOrders('cancelled',this)" data-ar="ملغاة" data-en="Cancelled">ملغاة</button>
+  </div>
+  <div id="ordList"></div>
+  <div class="empty" id="ordEmpty" style="display:none;">
+    <i class="ti ti-package-off"></i>
+    <div class="empty-t" data-ar="لا توجد طلبات" data-en="No orders">لا توجد طلبات</div>
+    <div data-ar="لا توجد طلبات في هذه الحالة" data-en="No orders in this status">لا توجد طلبات في هذه الحالة</div>
+  </div>
+</div>
+
+<nav class="app-bnav">
+  <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
+  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفّح" data-en="Browse">تصفّح</span></a>
+  <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
+  <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
+  <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
+</nav>
+
+<script src="raf_account.js"></script>
+<script>
+  var curFilter = 'all';
+  function renderOrders(){
+    var list = (RAF_ORDERS || []).filter(function(o){ return curFilter === 'all' || o.status === curFilter; });
+    document.getElementById('ordList').innerHTML = list.map(orderCardHTML).join('');
+    document.getElementById('ordEmpty').style.display = list.length ? 'none' : 'block';
+  }
+  function filterOrders(f, btn){
+    curFilter = f;
+    document.querySelectorAll('#ordTabs .tab').forEach(function(t){ t.classList.remove('on'); });
+    btn.classList.add('on');
+    renderOrders();
+  }
+  window.onLangChange = renderOrders;
+  renderOrders();
+</script>
+</body>
+</html>

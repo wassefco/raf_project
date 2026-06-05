@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — الإعدادات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="raf_account.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+</head>
+<body>
+<header class="ahead">
+  <a href="raf_account.html" class="ahead-back"><i class="ti ti-arrow-right"></i> <span data-ar="هوية رف" data-en="RAF ID">هوية رف</span></a>
+  <div class="ahead-title" data-ar="الإعدادات" data-en="Settings">الإعدادات</div>
+  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
+</header>
+
+<div class="wrap">
+  <div class="section-h" data-ar="الإشعارات" data-en="Notifications">الإشعارات</div>
+  <div class="panel">
+    <div class="row"><div class="row-ic" style="background:var(--blue-bg);color:var(--blue)"><i class="ti ti-bell"></i></div><div class="row-body"><div class="row-lbl" data-ar="إشعارات الطلبات" data-en="Order updates">إشعارات الطلبات</div><div class="row-sub" data-ar="حالة الطلب والتوصيل" data-en="Order & delivery status">حالة الطلب والتوصيل</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+    <div class="row"><div class="row-ic" style="background:var(--amber-bg);color:var(--amber)"><i class="ti ti-discount"></i></div><div class="row-body"><div class="row-lbl" data-ar="العروض والتخفيضات" data-en="Offers & promotions">العروض والتخفيضات</div><div class="row-sub" data-ar="كوبونات وعروض حصرية" data-en="Coupons & deals">كوبونات وعروض حصرية</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
+    <div class="row"><div class="row-ic" style="background:var(--green-bg);color:var(--green)"><i class="ti ti-building-store"></i></div><div class="row-body"><div class="row-lbl" data-ar="المتاجر الجديدة" data-en="New stores">المتاجر الجديدة</div><div class="row-sub" data-ar="عند انضمام متجر جديد" data-en="When a store joins">عند انضمام متجر جديد</div></div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
+  </div>
+
+  <div class="section-h" data-ar="عام" data-en="General">عام</div>
+  <div class="panel">
+    <div class="row"><div class="row-ic"><i class="ti ti-language"></i></div><div class="row-body"><div class="row-lbl" data-ar="اللغة" data-en="Language">اللغة</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="toggleLang()"><span data-ar="English" data-en="العربية">English</span></button></div>
+    <div class="row"><div class="row-ic"><i class="ti ti-shield-lock"></i></div><div class="row-body"><div class="row-lbl" data-ar="الخصوصية والأمان" data-en="Privacy & Security">الخصوصية والأمان</div><div class="row-sub" data-ar="إدارة بياناتك" data-en="Manage your data">إدارة بياناتك</div></div><i class="ti ti-chevron-left sec-arrow"></i></div>
+    <div class="row"><div class="row-ic"><i class="ti ti-file-text"></i></div><div class="row-body"><div class="row-lbl" data-ar="الشروط والأحكام" data-en="Terms & Conditions">الشروط والأحكام</div></div><i class="ti ti-chevron-left sec-arrow"></i></div>
+  </div>
+
+  <div class="section-h" data-ar="الحساب" data-en="Account">الحساب</div>
+  <div class="panel">
+    <div class="row" onclick="location='raf_login.html'" style="cursor:pointer;"><div class="row-ic" style="background:var(--bg2);color:var(--text2)"><i class="ti ti-logout"></i></div><div class="row-body"><div class="row-lbl" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</div></div><i class="ti ti-chevron-left sec-arrow"></i></div>
+    <div class="row" style="cursor:pointer;"><div class="row-ic" style="background:var(--red-bg);color:var(--red)"><i class="ti ti-trash"></i></div><div class="row-body"><div class="row-lbl" style="color:var(--red)" data-ar="حذف الحساب" data-en="Delete Account">حذف الحساب</div><div class="row-sub" data-ar="سيتم حذف جميع بياناتك نهائياً" data-en="All your data will be permanently deleted">سيتم حذف جميع بياناتك نهائياً</div></div></div>
+  </div>
+
+  <div style="text-align:center;color:var(--text3);font-size:12px;margin-top:24px;font-family:var(--fen);">RAF Marketplace · v1.0</div>
+</div>
+
+<nav class="app-bnav">
+  <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
+  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفّح" data-en="Browse">تصفّح</span></a>
+  <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
+  <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
+  <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
+</nav>
+
+<script src="raf_account.js"></script>
+</body>
+</html>

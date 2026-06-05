@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — المتاجر المتابَعة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="raf_account.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+</head>
+<body>
+<header class="ahead">
+  <a href="raf_account.html" class="ahead-back"><i class="ti ti-arrow-right"></i> <span data-ar="هوية رف" data-en="RAF ID">هوية رف</span></a>
+  <div class="ahead-title" data-ar="المتاجر المتابَعة" data-en="Following Stores">المتاجر المتابَعة</div>
+  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
+</header>
+
+<div class="wrap">
+  <div class="section-h"><span data-ar="تتابع 4 متاجر" data-en="Following 4 stores">تتابع 4 متاجر</span></div>
+  <div class="panel" id="storeList"></div>
+</div>
+
+<nav class="app-bnav">
+  <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
+  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفّح" data-en="Browse">تصفّح</span></a>
+  <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
+  <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
+  <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
+</nav>
+
+<script src="raf_account.js"></script>
+<script>
+  var STORES=[
+    {n:'Casa Mode', ic:'ti-hanger', cat:{ar:'ملابس وأزياء',en:'Fashion'}, p:284},
+    {n:'TechZone', ic:'ti-device-mobile', cat:{ar:'إلكترونيات',en:'Electronics'}, p:312},
+    {n:'Sole & Co', ic:'ti-shoe', cat:{ar:'أحذية',en:'Shoes'}, p:156},
+    {n:'Glam Store', ic:'ti-diamond', cat:{ar:'إكسسوارات',en:'Accessories'}, p:98}
+  ];
+  function render(){
+    var en=curLang()==='en';
+    document.getElementById('storeList').innerHTML = STORES.map(function(s,i){
+      return '<div class="store-row"><div class="store-logo"><i class="ti '+s.ic+'"></i></div>'+
+        '<div class="row-body"><div class="row-lbl">'+s.n+' <i class="ti ti-rosette-discount-check" style="color:var(--gold);font-size:14px"></i></div>'+
+        '<div class="row-sub">'+s.cat[en?'en':'ar']+' · '+s.p+' '+(en?'products':'منتج')+'</div></div>'+
+        '<button class="btn btn-ghost btn-sm" onclick="toggleFollow(this)" data-following="1"><i class="ti ti-check"></i> '+(en?'Following':'متابَع')+'</button></div>';
+    }).join('');
+  }
+  function toggleFollow(btn){
+    var en=curLang()==='en', on=btn.dataset.following==='1';
+    btn.dataset.following=on?'0':'1';
+    btn.className='btn btn-sm '+(on?'btn-gold':'btn-ghost');
+    btn.innerHTML=on?('<i class="ti ti-plus"></i> '+(en?'Follow':'متابعة')):('<i class="ti ti-check"></i> '+(en?'Following':'متابَع'));
+  }
+  window.onLangChange=render; render();
+</script>
+</body>
+</html>

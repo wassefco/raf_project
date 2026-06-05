@@ -37,6 +37,10 @@ img{max-width:100%;display:block;}
 .wrap{max-width:1300px;margin:0 auto;padding:0 24px;}
 .sec{padding:48px 0;}
 .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;}
+.sec-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--gold2);text-decoration:none;white-space:nowrap;flex-shrink:0;transition:gap .2s,color .2s;}
+.sec-link:hover{gap:9px;color:var(--gold);}
+.sec-link i{font-size:16px;}
+html[dir="ltr"] .sec-link i{transform:scaleX(-1);}
 .sec-kicker{font-family:var(--font-en);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold2);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
 .sec-kicker::before{content:'';width:22px;height:1px;background:var(--gold);}
 .sec-title{font-family:var(--font-display);font-size:30px;font-weight:900;color:var(--ink);line-height:1.1;}
@@ -355,6 +359,27 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   .hero h1{font-size:26px;}
   .hero-cta{flex:1;}.hero-cta .btn{flex:1;}
 }
+/* ===== Homepage mobile UX polish ===== */
+@media(max-width:768px){
+  /* 1. balanced mobile header — slimmer logo (~24% smaller), tighter spacing */
+  nav .nav-inner .nav-logo .brand-logo{height:29px;}
+  nav{gap:10px;padding:0 12px;}
+  .nav-inner{gap:14px;}
+}
+@media(max-width:600px){
+  /* 2. compact horizontal trust stats (single row, less vertical space) */
+  .hero-intro-r{margin-top:2px;}
+  .hero-trust{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:100%;}
+  .trust-pill{flex-direction:column;align-items:center;text-align:center;gap:3px;padding:9px 6px;border-radius:12px;}
+  .trust-pill .ic{width:26px;height:26px;border-radius:8px;font-size:14px;}
+  .trust-pill b{font-size:16px;}
+  .trust-pill span{font-size:10px;line-height:1.25;}
+  /* 4. denser category carousel — more categories on screen, less wasted space */
+  .car-track{gap:10px;}
+  .cat-circle{width:62px;height:62px;font-size:25px;}
+  .cat-item{width:72px;}
+  .cat-item span{font-size:11.5px;}
+}
 @media(max-width:420px){.tabs{display:flex;width:100%;}.tab{flex:1;justify-content:center;padding:9px 6px;font-size:12px;}.cta-strip h3{font-size:20px;}}
 /* mobile bottom nav (phones + landscape) */
 @media(max-width:1024px),(max-height:500px){
@@ -450,7 +475,8 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 
 <!-- ============ CATEGORIES ============ -->
 <section class="sec" id="categories"><div class="wrap">
-  <div class="sec-head"><div><div class="sec-kicker">CATEGORIES</div><h2 class="sec-title" data-ar="تسوّق حسب الفئة" data-en="Shop by Category">تسوّق حسب الفئة</h2></div></div>
+  <div class="sec-head"><div><div class="sec-kicker">CATEGORIES</div><h2 class="sec-title" data-ar="تسوّق حسب الفئة" data-en="Shop by Category">تسوّق حسب الفئة</h2></div>
+    <a class="sec-link" href="raf_storespage.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
   <div class="car"><div class="car-track" id="catTrack"></div>
     <button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button>
     <button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button>
@@ -676,7 +702,7 @@ function aucCard(a){return `<article class="car-item auc-card">
     <a href="raf_auctions.html" class="btn-join"><i class="ti ti-gavel"></i> ${curLang()==='en'?'Join':'شارك'}</a></div></div></article>`;}
 
 function renderCarousels(){
-  document.getElementById('catTrack').innerHTML=CATEGORIES.filter(c=>c.active).sort((a,b)=>a.sort-b.sort).map(catCard).join('')+viewAllCard('raf_storespage.html','cat-va');
+  document.getElementById('catTrack').innerHTML=CATEGORIES.filter(c=>c.active).sort((a,b)=>a.sort-b.sort).map(catCard).join('');
   document.getElementById('offersTrack').innerHTML=OFFERS.map(offerCard).join('')+viewAllCard('raf_offers.html');
   document.getElementById('storesTrack').innerHTML=STORES.map(storeCard).join('')+viewAllCard('raf_storespage.html');
   document.getElementById('aucTrack').innerHTML=AUCS.map(aucCard).join('')+viewAllCard('raf_auctions.html');

@@ -3,836 +3,148 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>رف — حساب العميل</title>
+<title>رف — هوية رف (حسابي)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<style>
-  :root {
-    --bg:#F5F2EC; --bg2:#EDE8DC; --card:#FFFFFF;
-    --gold:#C9A84C; --gold2:#A07828;
-    --black:#0A0A0A; --text:#0A0A0A; --text2:#555; --text3:#888;
-    --border:#D8D3C8;
-    --green:#2E7D32; --green-bg:#E8F5E9;
-    --red:#C62828; --red-bg:#FFEBEE;
-    --blue:#1565C0; --blue-bg:#E3F2FD;
-    --amber:#E65100; --amber-bg:#FFF3E0;
-    --r:8px; --rl:12px;
-    --font:'Tajawal',sans-serif;
-    --fdisplay:'Playfair Display',serif;
-    --fen:'DM Sans',sans-serif;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  html{overflow-x:hidden;}
-  body{background:var(--bg);color:var(--text);font-family:var(--font);max-width:100%;overflow-x:hidden;}
-
-  /* NAV */
-  nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.3);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;}
-  .nav-logo{font-family:var(--fdisplay);font-size:28px;font-weight:900;color:var(--gold);text-decoration:none;}
-  .nav-logo span{color:var(--text);font-size:11px;font-family:var(--fen);font-weight:300;letter-spacing:3px;display:block;margin-top:-6px;}
-  .nav-actions{display:flex;align-items:center;gap:8px;}
-  .btn-ghost{padding:8px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
-  .btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
-  .lang-btn{padding:7px 14px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--fen);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.5px;}
-  .lang-btn:hover{border-color:var(--gold);color:var(--gold);}
-  .nav-ico{width:40px;height:40px;border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;background:transparent;font-size:18px;position:relative;transition:all .2s;}
-  .nav-ico:hover{border-color:var(--gold);color:var(--gold);}
-  .cart-badge{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--gold);border-radius:50%;font-size:10px;color:var(--black);font-weight:700;display:flex;align-items:center;justify-content:center;}
-
-  /* LAYOUT */
-  .layout{max-width:1200px;margin:0 auto;padding:32px 40px;display:grid;grid-template-columns:260px 1fr;gap:24px;}
-
-  /* SIDEBAR */
-  .account-sidebar{display:flex;flex-direction:column;gap:12px;}
-  .profile-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:24px;text-align:center;}
-  .profile-avatar{width:72px;height:72px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:var(--fdisplay);font-size:28px;font-weight:700;color:var(--black);margin:0 auto 12px;}
-  .profile-name{font-size:16px;font-weight:700;margin-bottom:4px;}
-  .profile-phone{font-size:13px;color:var(--text3);margin-bottom:12px;}
-  .profile-edit{width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;}
-  .profile-edit:hover{border-color:var(--gold);color:var(--gold);}
-
-  .sidebar-nav{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
-  .sidebar-item{display:flex;align-items:center;gap:12px;padding:13px 18px;color:var(--text2);cursor:pointer;transition:all .15s;border-bottom:1px solid var(--border);font-size:14px;position:relative;}
-  .sidebar-item:last-child{border-bottom:none;}
-  .sidebar-item:hover{background:var(--bg);color:var(--text);}
-  .sidebar-item.on{color:var(--gold);background:rgba(201,168,76,.05);}
-  .sidebar-item.on::before{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;background:var(--gold);border-radius:0 3px 3px 0;}
-  .sidebar-item i{font-size:18px;flex-shrink:0;}
-  .sidebar-badge{margin-right:auto;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;}
-  .sb-red{background:var(--red-bg);color:var(--red);}
-  .sb-gold{background:rgba(201,168,76,.12);color:var(--gold2);}
-
-  /* ===== RAF ID — DIGITAL IDENTITY ===== */
-  .rafid-card{position:relative;border-radius:18px;padding:20px;color:#F3EEDD;background:linear-gradient(140deg,#1C1813 0%,#2C2417 55%,#14110B 100%);border:1px solid rgba(201,168,76,.35);overflow:hidden;box-shadow:0 18px 40px -22px rgba(20,16,8,.7);}
-  .rafid-card::before{content:'';position:absolute;inset:0;background:radial-gradient(360px 150px at 115% -25%,rgba(201,168,76,.30),transparent 60%);pointer-events:none;}
-  .rafid-card>*{position:relative;}
-  .rafid-row{display:flex;align-items:center;justify-content:space-between;}
-  .rafid-brand{display:flex;align-items:center;gap:8px;}
-  .rafid-brand img{height:24px;width:auto;display:block;}
-  .rafid-tag{font-family:var(--fen);font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,.45);padding:3px 8px;border-radius:20px;}
-  .rafid-chip{width:34px;height:26px;border-radius:6px;background:linear-gradient(135deg,#EBCF7A,#9C742A);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);}
-  .rafid-avwrap{display:flex;align-items:center;gap:12px;margin:18px 0 14px;}
-  .rafid-avatar{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:var(--fdisplay);font-size:22px;font-weight:700;color:#1A1409;flex-shrink:0;box-shadow:0 0 0 3px rgba(201,168,76,.18);}
-  .rafid-uname{font-size:17px;font-weight:700;color:#F8F3E6;line-height:1.2;}
-  .rafid-level{display:inline-flex;align-items:center;gap:4px;margin-top:5px;font-size:11px;font-weight:700;color:var(--gold);}
-  .rafid-level i{font-size:13px;}
-  .rafid-num{font-family:var(--fen);font-size:13.5px;letter-spacing:3px;color:#D9CEB4;margin-bottom:14px;}
-  .rafid-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(201,168,76,.18);padding-top:12px;}
-  .rafid-since{font-size:10px;color:#A99F86;line-height:1.5;}
-  .rafid-since b{color:#E7DCC2;font-weight:600;display:block;font-size:12px;}
-  .rafid-vbadge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:#86DAA6;background:rgba(46,158,91,.14);border:1px solid rgba(46,158,91,.32);padding:4px 9px;border-radius:20px;}
-  .rafid-edit{width:100%;margin-top:12px;padding:9px;border:1px solid rgba(201,168,76,.4);border-radius:9px;background:rgba(201,168,76,.08);color:var(--gold);font-family:var(--font);font-size:12.5px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;}
-  .rafid-edit:hover{background:var(--gold);color:#1A1409;}
-
-  /* identity hero (overview) */
-  .idhero{position:relative;border-radius:18px;padding:26px 28px;color:#F3EEDD;background:linear-gradient(120deg,#1C1813 0%,#2C2417 55%,#14110B 100%);border:1px solid rgba(201,168,76,.35);overflow:hidden;margin-bottom:22px;box-shadow:0 18px 44px -24px rgba(20,16,8,.7);}
-  .idhero::before{content:'';position:absolute;inset:0;background:radial-gradient(520px 220px at 110% -40%,rgba(201,168,76,.26),transparent 60%);pointer-events:none;}
-  .idhero>*{position:relative;}
-  .idhero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-  .idhero-main{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
-  .idhero-av{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:var(--fdisplay);font-size:32px;font-weight:700;color:#1A1409;box-shadow:0 0 0 4px rgba(201,168,76,.2);flex-shrink:0;}
-  .idhero-name{font-family:var(--fdisplay);font-size:24px;font-weight:700;color:#F8F3E6;}
-  .idhero-sub{font-family:var(--fen);font-size:13px;letter-spacing:2px;color:#D9CEB4;margin-top:4px;}
-  .idhero-tags{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap;}
-
-  /* identity detail grid */
-  .sec-block-title{font-size:14px;font-weight:700;margin:0 0 12px;display:flex;align-items:center;gap:7px;}
-  .idgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
-  .idcell{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;}
-  .idcell-lbl{font-size:11px;color:var(--text3);margin-bottom:6px;display:flex;align-items:center;gap:5px;}
-  .idcell-val{font-size:14px;font-weight:700;color:var(--text);}
-  .idcell-val.mono{font-family:var(--fen);letter-spacing:1px;}
-
-  /* loyalty (future-ready) */
-  .loyalty{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px;margin-bottom:24px;}
-  .loyalty-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-  .loyalty-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;}
-  .loyalty-title i{color:var(--gold);}
-  .loyalty-pts{font-family:var(--fen);font-weight:700;color:var(--gold2);}
-  .loyalty-bar{height:8px;border-radius:6px;background:var(--bg2);overflow:hidden;}
-  .loyalty-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
-  .loyalty-hint{font-size:11.5px;color:var(--text3);margin-top:9px;}
-
-  /* quick-access ecosystem tiles */
-  .qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
-  .qa-tile{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px 12px;text-align:center;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:9px;position:relative;}
-  .qa-tile:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 22px -12px rgba(20,16,8,.3);}
-  .qa-ic{width:44px;height:44px;border-radius:13px;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;font-size:21px;color:var(--gold2);}
-  .qa-tile span{font-size:12.5px;font-weight:600;color:var(--text);}
-  .qa-badge{position:absolute;top:8px;left:8px;min-width:18px;height:18px;padding:0 5px;background:var(--red);color:#fff;border-radius:10px;font-size:10px;font-weight:700;font-family:var(--fen);display:flex;align-items:center;justify-content:center;}
-
-  /* payment cards */
-  .pay-card{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px;margin-bottom:12px;}
-  .pay-logo{width:46px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;flex-shrink:0;}
-  .pay-num{font-family:var(--fen);font-size:14px;font-weight:600;letter-spacing:1px;}
-  .pay-sub{font-size:12px;color:var(--text3);margin-top:2px;}
-  .pay-add{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:1.5px dashed var(--border);border-radius:var(--rl);background:var(--bg);color:var(--text3);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;}
-  .pay-add:hover{border-color:var(--gold);color:var(--gold);}
-
-  @media(max-width:768px){.idgrid{grid-template-columns:1fr 1fr;}.qa-grid{grid-template-columns:repeat(3,1fr);}.idhero{padding:22px 20px;}.idhero-name{font-size:20px;}.idhero-av{width:66px;height:66px;font-size:26px;}}
-  @media(max-width:480px){.idgrid{grid-template-columns:1fr 1fr;}.qa-grid{grid-template-columns:repeat(2,1fr);}}
-
-  /* MAIN CONTENT */
-  .account-main{}
-  .section-panel{display:none;}
-  .section-panel.on{display:block;}
-
-  /* SECTION HEADER */
-  .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-  .sec-title{font-family:var(--fdisplay);font-size:22px;font-weight:700;}
-  .sec-sub{font-size:13px;color:var(--text3);margin-top:3px;}
-
-  /* CARDS */
-  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
-  .card-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-  .card-title{font-size:14px;font-weight:700;}
-  .card-act{font-size:12px;color:var(--gold);cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:4px;}
-
-  /* ORDER CARDS */
-  .order-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:12px;}
-  .order-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;}
-  .order-num{font-size:13px;font-weight:700;color:var(--text);}
-  .order-date{font-size:12px;color:var(--text3);}
-  .order-store{font-size:12px;color:var(--text2);}
-  .order-body{padding:16px 20px;display:flex;align-items:center;gap:16px;}
-  .order-items{display:flex;gap:8px;flex:1;}
-  .order-item-img{width:56px;height:56px;border-radius:var(--r);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--border);flex-shrink:0;}
-  .order-item-info{flex:1;}
-  .order-item-name{font-size:13px;font-weight:500;margin-bottom:3px;}
-  .order-item-meta{font-size:12px;color:var(--text3);}
-  .order-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-  .order-total{font-size:14px;font-weight:700;color:var(--gold);}
-  .order-actions{display:flex;gap:8px;}
-  .btn-sm{padding:7px 14px;border-radius:var(--r);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;border:none;}
-  .btn-sm-ghost{background:transparent;border:1px solid var(--border);color:var(--text2);}
-  .btn-sm-ghost:hover{border-color:var(--gold);color:var(--gold);}
-  .btn-sm-gold{background:var(--gold);color:var(--black);font-weight:700;}
-  .btn-sm-gold:hover{background:var(--gold2);}
-
-  /* TRACKING */
-  .tracking{padding:16px 20px;background:var(--bg);border-top:1px solid var(--border);}
-  .track-steps{display:flex;align-items:center;gap:0;position:relative;}
-  .track-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;position:relative;z-index:1;}
-  .track-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text3);transition:all .3s;}
-  .track-dot.done{background:var(--green);border-color:var(--green);color:white;}
-  .track-dot.active{background:var(--gold);border-color:var(--gold);color:var(--black);}
-  .track-lbl{font-size:10px;color:var(--text3);text-align:center;}
-  .track-lbl.done{color:var(--green);}
-  .track-lbl.active{color:var(--gold);font-weight:700;}
-  .track-line{position:absolute;top:14px;right:50%;left:-50%;height:2px;background:var(--border);z-index:0;}
-  .track-line.done{background:var(--green);}
-  .driver-info{margin-top:14px;display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);}
-  .driver-av{width:36px;height:36px;border-radius:50%;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--blue);}
-  .driver-name{font-size:13px;font-weight:500;}
-  .driver-sub{font-size:11px;color:var(--text3);}
-  .driver-call{margin-right:auto;padding:7px 14px;background:var(--green-bg);color:var(--green);border:none;border-radius:var(--r);font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;}
-
-  /* BADGE */
-  .badge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
-  .b-g{background:var(--green-bg);color:var(--green);}
-  .b-r{background:var(--red-bg);color:var(--red);}
-  .b-b{background:var(--blue-bg);color:var(--blue);}
-  .b-a{background:var(--amber-bg);color:var(--amber);}
-  .b-gold{background:rgba(201,168,76,.12);color:var(--gold2);}
-
-  /* ADDRESSES */
-  .addr-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
-  .addr-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:18px;position:relative;cursor:pointer;transition:all .2s;}
-  .addr-card:hover{border-color:var(--gold);}
-  .addr-card.default{border-color:var(--gold);background:rgba(201,168,76,.03);}
-  .addr-type{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
-  .addr-default-tag{font-size:10px;background:rgba(201,168,76,.12);color:var(--gold2);padding:2px 7px;border-radius:10px;font-weight:700;}
-  .addr-name{font-size:14px;font-weight:700;margin-bottom:4px;}
-  .addr-text{font-size:13px;color:var(--text2);line-height:1.6;}
-  .addr-actions{display:flex;gap:6px;margin-top:12px;}
-  .addr-btn{padding:5px 12px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text3);font-family:var(--font);font-size:11px;cursor:pointer;transition:all .2s;}
-  .addr-btn:hover{border-color:var(--gold);color:var(--gold);}
-  .add-addr{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:var(--bg);border:1.5px dashed var(--border);border-radius:var(--rl);padding:32px;cursor:pointer;transition:all .2s;color:var(--text3);}
-  .add-addr:hover{border-color:var(--gold);color:var(--gold);}
-  .add-addr i{font-size:28px;}
-  .add-addr span{font-size:13px;}
-
-  /* WISHLIST */
-  .wish-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-  .wish-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:all .25s;}
-  .wish-card:hover{border-color:rgba(201,168,76,.5);transform:translateY(-2px);}
-  .wish-img{height:160px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:40px;color:var(--border);position:relative;}
-  .wish-remove{position:absolute;top:8px;left:8px;width:26px;height:26px;background:rgba(245,242,236,.9);border:none;border-radius:50%;color:var(--text3);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
-  .wish-remove:hover{color:var(--red);}
-  .wish-info{padding:12px;}
-  .wish-store{font-size:11px;color:var(--gold2);margin-bottom:3px;}
-  .wish-name{font-size:13px;font-weight:500;margin-bottom:8px;}
-  .wish-price{font-size:15px;font-weight:700;color:var(--gold);margin-bottom:8px;}
-  .wish-add{width:100%;padding:8px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);color:var(--text2);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px;}
-  .wish-add:hover{background:var(--gold);color:var(--black);border-color:var(--gold);font-weight:700;}
-
-  /* SETTINGS */
-  .settings-section{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:16px;overflow:hidden;}
-  .settings-row{display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);}
-  .settings-row:last-child{border-bottom:none;}
-  .settings-icon{width:38px;height:38px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;margin-left:14px;}
-  .settings-label{font-size:14px;font-weight:500;}
-  .settings-sub{font-size:12px;color:var(--text3);margin-top:2px;}
-  .settings-action{margin-right:auto;}
-  .toggle{width:44px;height:24px;background:var(--border);border-radius:12px;cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0;}
-  .toggle.on{background:var(--gold);}
-  .toggle::after{content:'';position:absolute;top:3px;right:3px;width:18px;height:18px;background:white;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
-  .toggle.on::after{transform:translateX(-20px);}
-  .input-field{padding:8px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .2s;width:200px;}
-  .input-field:focus{border-color:var(--gold);}
-  .danger-btn{padding:8px 16px;background:var(--red-bg);color:var(--red);border:1px solid rgba(198,40,40,.2);border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
-  .danger-btn:hover{background:var(--red);color:white;}
-
-  /* FOOTER */
-  footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text3);margin-top:40px;}
-
-  /* ── GLOBAL MOBILE RESET ── */
-  @media(max-width:768px){*{max-width:100%;}img,video,iframe{max-width:100%!important;height:auto;}table{max-width:100%;}}
-  /* Collapse desktop center menu in the tablet-portrait gap so the nav never overflows */
-  @media(max-width:900px){.nav-center{display:none!important;}}
-
-  /* ===== RESPONSIVE ===== */
-  @media(max-width:1024px){
-    .layout{padding:24px 24px;}
-    .wish-grid{grid-template-columns:repeat(2,1fr);}
-  }
-  @media(max-width:768px){
-    nav{padding:0 16px;}
-    .layout{grid-template-columns:1fr;padding:16px;}
-    .account-sidebar{flex-direction:row;flex-wrap:wrap;gap:10px;}
-    .profile-card{flex:1;min-width:200px;}
-    .rafid-card{width:100%;flex:none;}
-    .sidebar-nav{flex:100%;}
-    .addr-grid{grid-template-columns:1fr;}
-    .wish-grid{grid-template-columns:repeat(2,1fr);}
-    .order-body{flex-wrap:wrap;}
-    .order-foot{flex-wrap:wrap;gap:10px;}
-    footer{padding:16px;flex-direction:column;gap:8px;text-align:center;}
-  }
-  @media(max-width:480px){
-    .account-sidebar{flex-direction:column;flex-wrap:nowrap;}
-    .rafid-card,.profile-card,.sidebar-nav{width:100%;flex:none;}
-    .profile-card{min-width:unset;}
-    .wish-grid{grid-template-columns:1fr;}
-    .track-steps{flex-wrap:nowrap;overflow-x:auto;}
-    .input-field{width:100%;}
-    .settings-row{flex-wrap:wrap;gap:10px;}
-    .settings-action{margin-right:0;}
-  }
-
-  /* ===== APP BOTTOM NAV ===== */
-  .app-bnav{display:none;}
-  @media (max-width:1024px), (max-height:500px){
-    body{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))!important;}
-    footer{display:none!important;}
-    .app-bnav{display:flex;position:fixed;top:auto;bottom:0;left:0;right:0;height:56px;background:#fff;border-top:1px solid #e8e4dc;box-shadow:0 -2px 16px rgba(0,0,0,.06);z-index:998;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);align-items:stretch;}
-    .bnav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#aaa;font-size:10px;font-family:'Tajawal',sans-serif;font-weight:500;transition:color .15s;border:none;background:transparent;cursor:pointer;padding:0;}
-    .bnav-tab i{font-size:22px;line-height:1;}
-    .bnav-tab.on{color:#C9A84C;}
-    .bnav-cart{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;text-decoration:none;font-size:10px;font-family:'Tajawal',sans-serif;color:#aaa;padding-bottom:4px;}
-    .bnav-cart-ring{width:44px;height:44px;border-radius:50%;background:#C9A84C;display:flex;align-items:center;justify-content:center;font-size:20px;color:#0A0A0A;margin-top:-14px;box-shadow:0 4px 14px rgba(201,168,76,.3);}
-    .bnav-cart.on .bnav-cart-ring{background:#A07828;}
-    nav a.btn-ghost,nav a.btn-gold,nav .btn-ghost,nav .btn-gold{display:none!important;}
-  }
-</style>
-<link rel="stylesheet" href="raf_header.css">
+<link rel="stylesheet" href="raf_account.css">
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
-<link rel="stylesheet" href="raf_theme.css">
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <div class="nav-actions">
-    <button class="lang-btn" onclick="toggleLang()" data-ar="EN" data-en="ع">EN</button>
-    <button class="nav-ico" onclick="history.back()" title="رجوع"><i class="ti ti-arrow-right"></i></button>
-    <button class="nav-ico" onclick="window.location='raf_cart.html'"><i class="ti ti-shopping-cart"></i><span class="cart-badge">3</span></button>
-    <button class="nav-ico"><i class="ti ti-bell"></i></button>
-    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-logout"></i> <span data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span></a>
-  </div>
-  <div class="nav-center" style="display:flex;align-items:center;gap:8px;">
-    <a href="raf_homepage.html" style="color:var(--text3);text-decoration:none;font-size:14px;" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
-    <span style="color:var(--border);">·</span>
-    <a href="raf_storespage.html" style="color:var(--text3);text-decoration:none;font-size:14px;" data-ar="المحلات" data-en="Stores">المحلات</a>
-    <span style="color:var(--border);">·</span>
-    <a href="raf_offers.html" style="color:var(--text3);text-decoration:none;font-size:14px;" data-ar="العروض" data-en="Offers">العروض</a>
-    <span style="color:var(--border);">·</span>
-    <a href="raf_trending.html" style="color:var(--text3);text-decoration:none;font-size:14px;" data-ar="الترندات" data-en="Trending">الترندات</a>
-    <span style="color:var(--border);">·</span>
-    <a href="raf_used.html" style="color:var(--text3);text-decoration:none;font-size:14px;" data-ar="المستعملات" data-en="Used">المستعملات</a>
-    <span style="color:var(--border);">·</span>
-    <a href="raf_auctions.html" style="color:var(--text3);text-decoration:none;font-size:14px;" data-ar="المزادات" data-en="Auctions">المزادات</a>
-  </div>
-  <a href="raf_homepage.html" class="nav-logo"><img src="raf_logo_web.png" alt="RAF Marketplace" class="brand-logo"></a>
-</nav>
+<!-- TOP BAR (no search) -->
+<header class="ahead">
+  <button type="button" class="ahead-back" onclick="goBack('raf_homepage.html')"><i class="ti ti-arrow-right"></i> <span data-ar="العودة" data-en="Back">العودة</span></button>
+  <div class="ahead-title" data-ar="حسابي" data-en="My Account">حسابي</div>
+  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
+</header>
 
-<div class="layout">
+<div class="wrap">
 
-  <!-- SIDEBAR -->
-  <div class="account-sidebar">
-
-    <div class="rafid-card">
-      <div class="rafid-row">
-        <div class="rafid-brand"><img src="raf_logo_web.png" alt="RAF"><span class="rafid-tag">RAF ID</span></div>
-        <div class="rafid-chip"></div>
+  <!-- RAF ID HEADER CARD -->
+  <div class="idcard">
+    <div class="idcard-top">
+      <div class="id-avatar" id="idAvatar">م</div>
+      <div>
+        <div class="id-name" id="idName">محمد العنزي</div>
+        <div class="id-num" id="idNum">RAF-2026-04871</div>
       </div>
-      <div class="rafid-avwrap">
-        <div class="rafid-avatar" id="sbAvatar">م</div>
-        <div>
-          <div class="rafid-uname" id="sbName">محمد العنزي</div>
-          <div class="rafid-level"><i class="ti ti-crown"></i> <span data-ar="عضو ذهبي" data-en="Gold Member">عضو ذهبي</span></div>
-        </div>
-      </div>
-      <div class="rafid-num" id="sbNum">RAF · 2026 · 04871</div>
-      <div class="rafid-foot">
-        <div class="rafid-since"><span data-ar="عضو منذ" data-en="Member since">عضو منذ</span><b><span data-ar="يناير 2024" data-en="Jan 2024">يناير 2024</span></b></div>
-        <span class="rafid-vbadge"><i class="ti ti-rosette-discount-check"></i> <span data-ar="موثّق" data-en="Verified">موثّق</span></span>
-      </div>
-      <button class="rafid-edit" onclick="switchSection('overview', document.getElementById('sbItemOverview'))"><i class="ti ti-id-badge-2"></i> <span data-ar="عرض هوية رف" data-en="View RAF ID">عرض هوية رف</span></button>
+      <a href="raf_settings.html" class="idcard-set" title="الإعدادات"><i class="ti ti-settings"></i></a>
     </div>
-
-    <div class="sidebar-nav">
-      <div class="sidebar-item on" id="sbItemOverview" onclick="switchSection('overview', this)">
-        <i class="ti ti-id-badge-2"></i> <span data-ar="هوية رف" data-en="RAF ID">هوية رف</span>
-      </div>
-      <div class="sidebar-item" id="sbItemOrders" onclick="switchSection('orders', this)">
-        <i class="ti ti-shopping-bag"></i> <span data-ar="طلباتي" data-en="My Orders">طلباتي</span>
-        <span class="sidebar-badge sb-gold">12</span>
-      </div>
-      <div class="sidebar-item" onclick="window.location='raf_address.html'">
-        <i class="ti ti-map-pin"></i> <span data-ar="عناويني" data-en="My Addresses">عناويني</span>
-      </div>
-      <div class="sidebar-item" id="sbItemWishlist" onclick="switchSection('wishlist', this)">
-        <i class="ti ti-heart"></i> <span data-ar="المفضلة" data-en="Wishlist">المفضلة</span>
-        <span class="sidebar-badge sb-gold">8</span>
-      </div>
-      <div class="sidebar-item" id="sbItemPayments" onclick="switchSection('payments', this)">
-        <i class="ti ti-credit-card"></i> <span data-ar="طرق الدفع" data-en="Payment Methods">طرق الدفع</span>
-      </div>
-      <div class="sidebar-item" onclick="switchSection('ratings', this)">
-        <i class="ti ti-star"></i> <span data-ar="تقييماتي" data-en="My Reviews">تقييماتي</span>
-      </div>
-      <div class="sidebar-item" id="sbItemNotif" onclick="switchSection('notifications', this)">
-        <i class="ti ti-bell"></i> <span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span>
-        <span class="sidebar-badge sb-red">3</span>
-      </div>
-      <div class="sidebar-item" id="sbItemSettings" onclick="switchSection('settings', this)">
-        <i class="ti ti-settings"></i> <span data-ar="الإعدادات" data-en="Settings">الإعدادات</span>
-      </div>
+    <div class="id-meta">
+      <span class="id-chip verified"><i class="ti ti-rosette-discount-check"></i> <span data-ar="حساب موثّق" data-en="Verified account">حساب موثّق</span></span>
+      <span class="id-chip member"><i class="ti ti-calendar"></i> <span data-ar="عضو منذ يناير 2024" data-en="Member since Jan 2024">عضو منذ يناير 2024</span></span>
     </div>
-
+    <div class="stat-strip">
+      <div class="stat-cell"><div class="stat-num">12</div><div class="stat-lbl" data-ar="الطلبات" data-en="Orders">الطلبات</div></div>
+      <div class="stat-cell"><div class="stat-num">8</div><div class="stat-lbl" data-ar="المفضلة" data-en="Wishlist">المفضلة</div></div>
+      <div class="stat-cell"><div class="stat-num">1,250</div><div class="stat-lbl" data-ar="نقاط المكافآت" data-en="Reward points">نقاط المكافآت</div></div>
+    </div>
   </div>
 
-  <!-- MAIN -->
-  <div class="account-main">
-
-    <!-- RAF ID OVERVIEW -->
-    <div class="section-panel on" id="sec-overview">
-      <!-- identity hero -->
-      <div class="idhero">
-        <div class="idhero-top">
-          <div class="rafid-brand"><img src="raf_logo_web.png" alt="RAF" style="height:26px;"><span class="rafid-tag">RAF ID</span></div>
-          <div class="rafid-chip"></div>
-        </div>
-        <div class="idhero-main">
-          <div class="idhero-av" id="ovAvatar">م</div>
-          <div>
-            <div class="idhero-name" id="ovName">محمد العنزي</div>
-            <div class="idhero-sub" id="ovNum">RAF · 2026 · 04871</div>
-            <div class="idhero-tags">
-              <span class="rafid-vbadge"><i class="ti ti-rosette-discount-check"></i> <span data-ar="حساب موثّق" data-en="Verified account">حساب موثّق</span></span>
-              <span class="rafid-vbadge" style="color:var(--gold);background:rgba(201,168,76,.14);border-color:rgba(201,168,76,.35);"><i class="ti ti-crown"></i> <span data-ar="عضو ذهبي" data-en="Gold Member">عضو ذهبي</span></span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- identity details -->
-      <div class="sec-block-title"><i class="ti ti-user-check" style="color:var(--gold);"></i> <span data-ar="تفاصيل الهوية" data-en="Identity Details">تفاصيل الهوية</span></div>
-      <div class="idgrid">
-        <div class="idcell"><div class="idcell-lbl"><i class="ti ti-id"></i> <span data-ar="رقم هوية رف" data-en="RAF ID Number">رقم هوية رف</span></div><div class="idcell-val mono" id="ovNum2">RAF-2026-04871</div></div>
-        <div class="idcell"><div class="idcell-lbl"><i class="ti ti-user"></i> <span data-ar="الاسم" data-en="Name">الاسم</span></div><div class="idcell-val" id="ovName2">محمد العنزي</div></div>
-        <div class="idcell"><div class="idcell-lbl"><i class="ti ti-mail"></i> <span data-ar="البريد الإلكتروني" data-en="Email">البريد الإلكتروني</span></div><div class="idcell-val" id="ovEmail" style="direction:ltr;text-align:right;font-size:13px;">—</div></div>
-        <div class="idcell"><div class="idcell-lbl"><i class="ti ti-phone"></i> <span data-ar="رقم الجوال" data-en="Phone Number">رقم الجوال</span></div><div class="idcell-val" style="direction:ltr;text-align:right;">+965 9XXX XXXX</div></div>
-        <div class="idcell"><div class="idcell-lbl"><i class="ti ti-shield-check"></i> <span data-ar="حالة التوثيق" data-en="Verification">حالة التوثيق</span></div><div class="idcell-val" style="color:var(--green);"><i class="ti ti-circle-check" style="font-size:13px;"></i> <span data-ar="موثّق" data-en="Verified">موثّق</span></div></div>
-        <div class="idcell"><div class="idcell-lbl"><i class="ti ti-calendar"></i> <span data-ar="عضو منذ" data-en="Member Since">عضو منذ</span></div><div class="idcell-val"><span data-ar="يناير 2024" data-en="Jan 2024">يناير 2024</span></div></div>
-      </div>
-
-      <!-- loyalty (future-ready) -->
-      <div class="loyalty">
-        <div class="loyalty-top">
-          <div class="loyalty-title"><i class="ti ti-gift"></i> <span data-ar="مكافآت رف" data-en="RAF Rewards">مكافآت رف</span></div>
-          <div class="loyalty-pts">1,250 <span style="font-weight:400;color:var(--text3);font-size:11px;" data-ar="نقطة" data-en="pts">نقطة</span></div>
-        </div>
-        <div class="loyalty-bar"><div class="loyalty-fill" style="width:62%;"></div></div>
-        <div class="loyalty-hint"><span data-ar="750 نقطة للوصول إلى المستوى البلاتيني" data-en="750 points to reach Platinum level">750 نقطة للوصول إلى المستوى البلاتيني</span></div>
-      </div>
-
-      <!-- ecosystem quick access -->
-      <div class="sec-block-title"><i class="ti ti-apps" style="color:var(--gold);"></i> <span data-ar="كل ما يخص حسابك" data-en="Everything in your account">كل ما يخص حسابك</span></div>
-      <div class="qa-grid">
-        <div class="qa-tile" onclick="switchSection('orders', document.getElementById('sbItemOrders'))"><div class="qa-ic"><i class="ti ti-shopping-bag"></i></div><span data-ar="طلباتي" data-en="Orders">طلباتي</span><span class="qa-badge">12</span></div>
-        <div class="qa-tile" onclick="switchSection('wishlist', document.getElementById('sbItemWishlist'))"><div class="qa-ic"><i class="ti ti-heart"></i></div><span data-ar="المفضلة" data-en="Wishlist">المفضلة</span><span class="qa-badge">8</span></div>
-        <a class="qa-tile" href="raf_address.html"><div class="qa-ic"><i class="ti ti-map-pin"></i></div><span data-ar="عناويني" data-en="Addresses">عناويني</span></a>
-        <div class="qa-tile" onclick="switchSection('payments', document.getElementById('sbItemPayments'))"><div class="qa-ic"><i class="ti ti-credit-card"></i></div><span data-ar="طرق الدفع" data-en="Payments">طرق الدفع</span></div>
-        <a class="qa-tile" href="raf_auctions.html"><div class="qa-ic"><i class="ti ti-gavel"></i></div><span data-ar="مزاداتي" data-en="Auctions">مزاداتي</span></a>
-        <a class="qa-tile" href="raf_offers.html"><div class="qa-ic"><i class="ti ti-discount"></i></div><span data-ar="عروضي" data-en="Offers">عروضي</span></a>
-        <a class="qa-tile" href="raf_storespage.html"><div class="qa-ic"><i class="ti ti-building-store"></i></div><span data-ar="متابعاتي" data-en="Following">متابعاتي</span></a>
-        <div class="qa-tile" onclick="switchSection('notifications', document.getElementById('sbItemNotif'))"><div class="qa-ic"><i class="ti ti-bell"></i></div><span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span><span class="qa-badge">3</span></div>
-      </div>
-    </div>
-
-    <!-- PAYMENT METHODS -->
-    <div class="section-panel" id="sec-payments">
-      <div class="sec-head">
-        <div>
-          <div class="sec-title" data-ar="طرق الدفع" data-en="Payment Methods">طرق الدفع</div>
-          <div class="sec-sub" data-ar="بطاقاتك المحفوظة بأمان في هوية رف" data-en="Cards saved securely to your RAF ID">بطاقاتك المحفوظة بأمان في هوية رف</div>
-        </div>
-      </div>
-      <div class="pay-card">
-        <div class="pay-logo" style="background:linear-gradient(135deg,#1A1F71,#2A3D9E);"><i class="ti ti-brand-visa"></i></div>
-        <div style="flex:1;"><div class="pay-num">•••• •••• •••• 4821</div><div class="pay-sub"><span data-ar="تنتهي 09/27 — محمد العنزي" data-en="Expires 09/27 — Mohammed Al-Anzi">تنتهي 09/27 — محمد العنزي</span></div></div>
-        <span class="badge b-gold"><span data-ar="افتراضية" data-en="Default">افتراضية</span></span>
-      </div>
-      <div class="pay-card">
-        <div class="pay-logo" style="background:linear-gradient(135deg,#EB001B,#F79E1B);"><i class="ti ti-brand-mastercard"></i></div>
-        <div style="flex:1;"><div class="pay-num">•••• •••• •••• 9035</div><div class="pay-sub"><span data-ar="تنتهي 04/26" data-en="Expires 04/26">تنتهي 04/26</span></div></div>
-        <button class="addr-btn"><i class="ti ti-trash"></i> <span data-ar="حذف" data-en="Remove">حذف</span></button>
-      </div>
-      <button class="pay-add"><i class="ti ti-plus"></i> <span data-ar="إضافة بطاقة جديدة" data-en="Add new card">إضافة بطاقة جديدة</span></button>
-    </div>
-
-    <!-- ORDERS -->
-    <div class="section-panel" id="sec-orders">
-      <div class="sec-head">
-        <div>
-          <div class="sec-title">طلباتي</div>
-          <div class="sec-sub">12 طلب إجمالاً</div>
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn-sm btn-sm-ghost">الكل</button>
-          <button class="btn-sm btn-sm-ghost">قيد التوصيل</button>
-          <button class="btn-sm btn-sm-ghost">مكتمل</button>
-        </div>
-      </div>
-
-      <!-- ORDER 1 — قيد التوصيل -->
-      <div class="order-card">
-        <div class="order-head">
-          <div>
-            <div class="order-num">#ORD-1284</div>
-            <div class="order-date">اليوم، 2:30م</div>
-          </div>
-          <div class="order-store"><i class="ti ti-building-store" style="font-size:13px;"></i> Casa Mode</div>
-          <div style="margin-right:auto;"><span class="badge b-b"><i class="ti ti-truck"></i> قيد التوصيل</span></div>
-        </div>
-        <div class="order-body">
-          <div class="order-items">
-            <div class="order-item-img"><i class="ti ti-shirt"></i></div>
-            <div class="order-item-info">
-              <div class="order-item-name">قميص أوفرسايز كلاسيك</div>
-              <div class="order-item-meta">مقاس M — لون أبيض — الكمية: 1</div>
-            </div>
-          </div>
-        </div>
-        <!-- TRACKING -->
-        <div class="tracking">
-          <div class="track-steps">
-            <div class="track-step">
-              <div class="track-dot done"><i class="ti ti-check" style="font-size:13px;"></i></div>
-              <div class="track-lbl done">تم الطلب</div>
-            </div>
-            <div class="track-step">
-              <div class="track-line done"></div>
-              <div class="track-dot done"><i class="ti ti-check" style="font-size:13px;"></i></div>
-              <div class="track-lbl done">قيد التجهيز</div>
-            </div>
-            <div class="track-step">
-              <div class="track-line done"></div>
-              <div class="track-dot active"><i class="ti ti-truck" style="font-size:13px;"></i></div>
-              <div class="track-lbl active">مع السائق</div>
-            </div>
-            <div class="track-step">
-              <div class="track-line"></div>
-              <div class="track-dot"><i class="ti ti-home" style="font-size:13px;"></i></div>
-              <div class="track-lbl">تم التوصيل</div>
-            </div>
-          </div>
-          <div class="driver-info">
-            <div class="driver-av"><i class="ti ti-user"></i></div>
-            <div>
-              <div class="driver-name">خالد السائق</div>
-              <div class="driver-sub">على الطريق — يصل خلال ~20 دقيقة</div>
-            </div>
-            <button class="driver-call"><i class="ti ti-brand-whatsapp"></i> تواصل</button>
-          </div>
-        </div>
-        <div class="order-foot">
-          <div class="order-total">24.500 د.ك</div>
-          <div class="order-actions">
-            <button class="btn-sm btn-sm-ghost"><i class="ti ti-file-invoice"></i> الفاتورة</button>
-            <button class="btn-sm btn-sm-ghost"><i class="ti ti-headset"></i> الدعم</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ORDER 2 — مكتمل -->
-      <div class="order-card">
-        <div class="order-head">
-          <div>
-            <div class="order-num">#ORD-1280</div>
-            <div class="order-date">أمس، 4:00م</div>
-          </div>
-          <div class="order-store"><i class="ti ti-building-store" style="font-size:13px;"></i> TechZone</div>
-          <div style="margin-right:auto;"><span class="badge b-g"><i class="ti ti-check"></i> مكتمل</span></div>
-        </div>
-        <div class="order-body">
-          <div class="order-items">
-            <div class="order-item-img"><i class="ti ti-device-mobile"></i></div>
-            <div class="order-item-info">
-              <div class="order-item-name">iPhone 16 Pro — 256GB</div>
-              <div class="order-item-meta">لون تيتانيوم — الكمية: 1</div>
-            </div>
-          </div>
-        </div>
-        <div class="order-foot">
-          <div class="order-total">189.000 د.ك</div>
-          <div class="order-actions">
-            <button class="btn-sm btn-sm-ghost"><i class="ti ti-file-invoice"></i> الفاتورة</button>
-            <button class="btn-sm btn-sm-ghost"><i class="ti ti-refresh"></i> طلب مجدداً</button>
-            <button class="btn-sm btn-sm-gold"><i class="ti ti-star"></i> قيّم الطلب</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ORDER 3 — ملغي -->
-      <div class="order-card">
-        <div class="order-head">
-          <div>
-            <div class="order-num">#ORD-1275</div>
-            <div class="order-date">3 أيام، 11:00ص</div>
-          </div>
-          <div class="order-store"><i class="ti ti-building-store" style="font-size:13px;"></i> Sole & Co</div>
-          <div style="margin-right:auto;"><span class="badge b-r"><i class="ti ti-x"></i> ملغي</span></div>
-        </div>
-        <div class="order-body">
-          <div class="order-items">
-            <div class="order-item-img"><i class="ti ti-shoe"></i></div>
-            <div class="order-item-info">
-              <div class="order-item-name">حذاء رياضي Air Comfort</div>
-              <div class="order-item-meta">مقاس 42 — لون أسود — الكمية: 1</div>
-            </div>
-          </div>
-        </div>
-        <div class="order-foot">
-          <div class="order-total">56.000 د.ك</div>
-          <div class="order-actions">
-            <button class="btn-sm btn-sm-ghost"><i class="ti ti-refresh"></i> إعادة الطلب</button>
-          </div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- ADDRESSES -->
-    <div class="section-panel" id="sec-addresses">
-      <div class="sec-head">
-        <div>
-          <div class="sec-title">عناويني</div>
-          <div class="sec-sub">3 عناوين محفوظة</div>
-        </div>
-      </div>
-      <div class="addr-grid">
-        <div class="addr-card default">
-          <div class="addr-type"><i class="ti ti-home"></i> المنزل <span class="addr-default-tag">افتراضي</span></div>
-          <div class="addr-name">محمد العنزي</div>
-          <div class="addr-text">حولي، شارع الأمير، بناية 12، شقة 4</div>
-          <div class="addr-text" style="margin-top:4px;">+965 9XXX XXXX</div>
-          <div class="addr-actions">
-            <button class="addr-btn" onclick="window.location='raf_address.html?edit=addr-1'"><i class="ti ti-edit"></i> تعديل</button>
-          </div>
-        </div>
-        <div class="addr-card">
-          <div class="addr-type"><i class="ti ti-briefcase"></i> العمل</div>
-          <div class="addr-name">محمد العنزي</div>
-          <div class="addr-text">شرق، برج X، الطابق 8</div>
-          <div class="addr-text" style="margin-top:4px;">+965 9XXX XXXX</div>
-          <div class="addr-actions">
-            <button class="addr-btn" onclick="window.location='raf_address.html?edit=addr-2'"><i class="ti ti-edit"></i> تعديل</button>
-            <button class="addr-btn"><i class="ti ti-trash"></i> حذف</button>
-          </div>
-        </div>
-        <div class="add-addr" onclick="window.location='raf_address.html'" style="cursor:pointer;">
-          <i class="ti ti-plus"></i>
-          <span>إضافة عنوان جديد</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- WISHLIST -->
-    <div class="section-panel" id="sec-wishlist">
-      <div class="sec-head">
-        <div>
-          <div class="sec-title">المفضلة</div>
-          <div class="sec-sub">8 منتجات و3 محلات</div>
-        </div>
-      </div>
-      <div class="wish-grid">
-        <div class="wish-card">
-          <div class="wish-img"><i class="ti ti-shirt"></i><button class="wish-remove"><i class="ti ti-heart-filled" style="color:#E05555;"></i></button></div>
-          <div class="wish-info">
-            <div class="wish-store">Casa Mode</div>
-            <div class="wish-name">قميص أوفرسايز كلاسيك</div>
-            <div class="wish-price">12.000 د.ك</div>
-            <button class="wish-add"><i class="ti ti-shopping-cart"></i> أضف للسلة</button>
-          </div>
-        </div>
-        <div class="wish-card">
-          <div class="wish-img"><i class="ti ti-shoe"></i><button class="wish-remove"><i class="ti ti-heart-filled" style="color:#E05555;"></i></button></div>
-          <div class="wish-info">
-            <div class="wish-store">Sole & Co</div>
-            <div class="wish-name">حذاء رياضي Air Comfort</div>
-            <div class="wish-price">28.500 د.ك</div>
-            <button class="wish-add"><i class="ti ti-shopping-cart"></i> أضف للسلة</button>
-          </div>
-        </div>
-        <div class="wish-card">
-          <div class="wish-img"><i class="ti ti-watch"></i><button class="wish-remove"><i class="ti ti-heart-filled" style="color:#E05555;"></i></button></div>
-          <div class="wish-info">
-            <div class="wish-store">Glam Store</div>
-            <div class="wish-name">ساعة ذكية Premium</div>
-            <div class="wish-price">75.000 د.ك</div>
-            <button class="wish-add"><i class="ti ti-shopping-cart"></i> أضف للسلة</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- RATINGS -->
-    <div class="section-panel" id="sec-ratings">
-      <div class="sec-head">
-        <div><div class="sec-title">تقييماتي</div></div>
-      </div>
-      <div class="card">
-        <div style="padding:40px;text-align:center;color:var(--text3);">
-          <i class="ti ti-star" style="font-size:40px;color:var(--gold);display:block;margin-bottom:12px;"></i>
-          <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">لديك 5 طلبات بانتظار تقييمك</div>
-          <div style="font-size:13px;">ساعد المتسوقين الآخرين باختياراتهم</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- NOTIFICATIONS -->
-    <div class="section-panel" id="sec-notifications">
-      <div class="sec-head">
-        <div><div class="sec-title">الإشعارات</div></div>
-      </div>
-      <div class="card">
-        <div style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);background:rgba(201,168,76,.03);">
-          <div style="width:38px;height:38px;border-radius:50%;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--blue);flex-shrink:0;"><i class="ti ti-truck"></i></div>
-          <div style="flex:1;"><div style="font-size:13px;font-weight:500;">طلبك #ORD-1284 في الطريق</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">منذ 10 دقائق</div></div>
-          <div style="width:8px;height:8px;background:var(--gold);border-radius:50%;flex-shrink:0;"></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);background:rgba(201,168,76,.03);">
-          <div style="width:38px;height:38px;border-radius:50%;background:var(--amber-bg);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--amber);flex-shrink:0;"><i class="ti ti-discount"></i></div>
-          <div style="flex:1;"><div style="font-size:13px;font-weight:500;">عرض حصري من Casa Mode — خصم 25%</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">منذ ساعة</div></div>
-          <div style="width:8px;height:8px;background:var(--gold);border-radius:50%;flex-shrink:0;"></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--border);background:rgba(201,168,76,.03);">
-          <div style="width:38px;height:38px;border-radius:50%;background:var(--green-bg);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--green);flex-shrink:0;"><i class="ti ti-building-store"></i></div>
-          <div style="flex:1;"><div style="font-size:13px;font-weight:500;">محل جديد انضم — Nova Shoes</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">منذ 3 ساعات</div></div>
-          <div style="width:8px;height:8px;background:var(--gold);border-radius:50%;flex-shrink:0;"></div>
-        </div>
-        <div style="display:flex;align-items:center;gap:12px;padding:14px 20px;">
-          <div style="width:38px;height:38px;border-radius:50%;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--text3);flex-shrink:0;"><i class="ti ti-check"></i></div>
-          <div style="flex:1;"><div style="font-size:13px;color:var(--text2);">تم تسليم طلبك #ORD-1280 بنجاح</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">أمس</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SETTINGS -->
-    <div class="section-panel" id="sec-settings">
-      <div class="sec-head">
-        <div><div class="sec-title">الإعدادات</div></div>
-      </div>
-
-      <div class="settings-section">
-        <div class="settings-row">
-          <div class="settings-icon" style="background:var(--bg2);color:var(--text2);"><i class="ti ti-user"></i></div>
-          <div><div class="settings-label">الاسم</div></div>
-          <div class="settings-action"><input type="text" class="input-field" value="محمد العنزي"></div>
-        </div>
-        <div class="settings-row">
-          <div class="settings-icon" style="background:var(--bg2);color:var(--text2);"><i class="ti ti-brand-whatsapp"></i></div>
-          <div><div class="settings-label">رقم الواتساب</div></div>
-          <div class="settings-action"><input type="text" class="input-field" value="+965 9XXX XXXX" style="direction:ltr;text-align:right;"></div>
-        </div>
-        <div class="settings-row">
-          <div class="settings-icon" style="background:var(--bg2);color:var(--text2);"><i class="ti ti-mail"></i></div>
-          <div><div class="settings-label">البريد الإلكتروني</div></div>
-          <div class="settings-action"><input type="email" class="input-field" placeholder="أضف بريدك" style="direction:ltr;text-align:right;"></div>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <div class="settings-row">
-          <div class="settings-icon" style="background:var(--blue-bg);color:var(--blue);"><i class="ti ti-bell"></i></div>
-          <div><div class="settings-label">إشعارات الطلبات</div><div class="settings-sub">تحديثات حالة الطلب</div></div>
-          <button class="toggle on settings-action" onclick="this.classList.toggle('on')"></button>
-        </div>
-        <div class="settings-row">
-          <div class="settings-icon" style="background:var(--amber-bg);color:var(--amber);"><i class="ti ti-discount"></i></div>
-          <div><div class="settings-label">إشعارات العروض</div><div class="settings-sub">كوبونات وتخفيضات</div></div>
-          <button class="toggle on settings-action" onclick="this.classList.toggle('on')"></button>
-        </div>
-        <div class="settings-row">
-          <div class="settings-icon" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-building-store"></i></div>
-          <div><div class="settings-label">محلات جديدة</div><div class="settings-sub">عند انضمام محل جديد</div></div>
-          <button class="toggle settings-action" onclick="this.classList.toggle('on')"></button>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <div class="settings-row">
-          <div class="settings-icon" style="background:var(--bg2);color:var(--text2);"><i class="ti ti-language"></i></div>
-          <div><div class="settings-label">اللغة</div></div>
-          <div class="settings-action">
-            <select class="input-field" style="width:140px;">
-              <option>العربية</option>
-              <option>English</option>
-            </select>
-          </div>
-        </div>
-        <div class="settings-row">
-          <div class="settings-icon" style="background:var(--red-bg);color:var(--red);"><i class="ti ti-trash"></i></div>
-          <div><div class="settings-label">حذف الحساب</div><div class="settings-sub">سيتم حذف جميع بياناتك</div></div>
-          <div class="settings-action"><button class="danger-btn">حذف الحساب</button></div>
-        </div>
-      </div>
-
-      <div style="text-align:left;">
-        <button style="padding:12px 32px;background:var(--gold);border:none;border-radius:var(--r);color:var(--black);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;" onmouseover="this.style.background='var(--gold2)'" onmouseout="this.style.background='var(--gold)'">حفظ التغييرات</button>
-      </div>
-    </div>
-
+  <!-- ACCOUNT -->
+  <div class="section-h" data-ar="حسابي" data-en="My Account">حسابي</div>
+  <div class="sec-grid">
+    <a class="sec-card" href="raf_personal.html">
+      <div class="sec-ic"><i class="ti ti-user"></i></div>
+      <div class="sec-body"><div class="sec-name" data-ar="المعلومات الشخصية" data-en="Personal Information">المعلومات الشخصية</div><div class="sec-sub" data-ar="الاسم، البريد، الجوال" data-en="Name, email, phone">الاسم، البريد، الجوال</div></div>
+      <i class="ti ti-chevron-left sec-arrow"></i>
+    </a>
+    <a class="sec-card" href="raf_orders.html">
+      <div class="sec-ic"><i class="ti ti-shopping-bag"></i></div>
+      <div class="sec-body"><div class="sec-name" data-ar="طلباتي" data-en="Orders">طلباتي</div><div class="sec-sub" data-ar="تتبّع وإدارة طلباتك" data-en="Track & manage orders">تتبّع وإدارة طلباتك</div></div>
+      <span class="sec-badge">2</span>
+      <i class="ti ti-chevron-left sec-arrow"></i>
+    </a>
+    <a class="sec-card" href="raf_address.html">
+      <div class="sec-ic"><i class="ti ti-map-pin"></i></div>
+      <div class="sec-body"><div class="sec-name" data-ar="عناويني" data-en="Addresses">عناويني</div><div class="sec-sub" data-ar="عناوين التوصيل" data-en="Delivery addresses">عناوين التوصيل</div></div>
+      <i class="ti ti-chevron-left sec-arrow"></i>
+    </a>
+    <a class="sec-card" href="raf_payments.html">
+      <div class="sec-ic"><i class="ti ti-credit-card"></i></div>
+      <div class="sec-body"><div class="sec-name" data-ar="طرق الدفع" data-en="Payment Methods">طرق الدفع</div><div class="sec-sub" data-ar="البطاقات المحفوظة" data-en="Saved cards">البطاقات المحفوظة</div></div>
+      <i class="ti ti-chevron-left sec-arrow"></i>
+    </a>
+    <a class="sec-card" href="raf_notifications.html">
+      <div class="sec-ic"><i class="ti ti-bell"></i></div>
+      <div class="sec-body"><div class="sec-name" data-ar="الإشعارات" data-en="Notifications">الإشعارات</div><div class="sec-sub" data-ar="التحديثات والتنبيهات" data-en="Updates & alerts">التحديثات والتنبيهات</div></div>
+      <span class="sec-badge">3</span>
+      <i class="ti ti-chevron-left sec-arrow"></i>
+    </a>
   </div>
+
+  <!-- SHOPPING -->
+  <div class="section-h" data-ar="تسوّقي" data-en="My Shopping">تسوّقي</div>
+  <div class="sec-grid">
+    <a class="sec-card" href="raf_wishlist.html">
+      <div class="sec-ic"><i class="ti ti-heart"></i></div>
+      <div class="sec-body"><div class="sec-name" data-ar="المفضلة" data-en="Wishlist">المفضلة</div><div class="sec-sub" data-ar="منتجاتك المحفوظة" data-en="Saved products">منتجاتك المحفوظة</div></div>
+      <i class="ti ti-chevron-left sec-arrow"></i>
+    </a>
+    <a class="sec-card" href="raf_following.html">
+      <div class="sec-ic"><i class="ti ti-building-store"></i></div>
+      <div class="sec-body"><div class="sec-name" data-ar="المتاجر المتابَعة" data-en="Following Stores">المتاجر المتابَعة</div><div class="sec-sub" data-ar="متاجرك المفضّلة" data-en="Stores you follow">متاجرك المفضّلة</div></div>
+      <i class="ti ti-chevron-left sec-arrow"></i>
+    </a>
+    <a class="sec-card" href="raf_auctions.html">
+      <div class="sec-ic"><i class="ti ti-gavel"></i></div>
+      <div class="sec-body"><div class="sec-name" data-ar="مزاداتي" data-en="Auctions">مزاداتي</div><div class="sec-sub" data-ar="مزايداتك النشطة" data-en="Your active bids">مزايداتك النشطة</div></div>
+      <i class="ti ti-chevron-left sec-arrow"></i>
+    </a>
+    <a class="sec-card" href="raf_offers.html">
+      <div class="sec-ic"><i class="ti ti-discount"></i></div>
+      <div class="sec-body"><div class="sec-name" data-ar="العروض والتخفيضات" data-en="Offers & Promotions">العروض والتخفيضات</div><div class="sec-sub" data-ar="كوبونات وعروض حصرية" data-en="Coupons & deals">كوبونات وعروض حصرية</div></div>
+      <i class="ti ti-chevron-left sec-arrow"></i>
+    </a>
+    <a class="sec-card" href="raf_rewards.html">
+      <div class="sec-ic"><i class="ti ti-gift"></i></div>
+      <div class="sec-body"><div class="sec-name" data-ar="المكافآت والولاء" data-en="Rewards & Loyalty">المكافآت والولاء</div><div class="sec-sub" data-ar="1,250 نقطة" data-en="1,250 points">1,250 نقطة</div></div>
+      <i class="ti ti-chevron-left sec-arrow"></i>
+    </a>
+  </div>
+
+  <!-- SUPPORT -->
+  <div class="section-h" data-ar="المساعدة" data-en="Help">المساعدة</div>
+  <div class="sec-grid">
+    <a class="sec-card" href="raf_support.html">
+      <div class="sec-ic"><i class="ti ti-headset"></i></div>
+      <div class="sec-body"><div class="sec-name" data-ar="مركز الدعم" data-en="Support Center">مركز الدعم</div><div class="sec-sub" data-ar="مساعدة وأسئلة شائعة" data-en="Help & FAQ">مساعدة وأسئلة شائعة</div></div>
+      <i class="ti ti-chevron-left sec-arrow"></i>
+    </a>
+    <a class="sec-card" href="raf_settings.html">
+      <div class="sec-ic"><i class="ti ti-settings"></i></div>
+      <div class="sec-body"><div class="sec-name" data-ar="الإعدادات" data-en="Settings">الإعدادات</div><div class="sec-sub" data-ar="اللغة والخصوصية" data-en="Language & privacy">اللغة والخصوصية</div></div>
+      <i class="ti ti-chevron-left sec-arrow"></i>
+    </a>
+    <a class="sec-card" href="raf_login.html" style="--gd:1;">
+      <div class="sec-ic" style="background:var(--red-bg);color:var(--red);"><i class="ti ti-logout"></i></div>
+      <div class="sec-body"><div class="sec-name" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</div><div class="sec-sub" data-ar="إنهاء الجلسة" data-en="End session">إنهاء الجلسة</div></div>
+      <i class="ti ti-chevron-left sec-arrow"></i>
+    </a>
+  </div>
+
 </div>
 
-<footer>
-  <div>جميع الحقوق محفوظة © 2026 رف</div>
-  <a href="raf_homepage.html"><img src="raf_logo_web.png" alt="RAF Marketplace" class="brand-logo-foot"></a>
-</footer>
-
-<script>
-  function switchSection(id, item) {
-    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('on'));
-    if (item) item.classList.add('on');
-    document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('on'));
-    const sec = document.getElementById('sec-' + id);
-    if (sec) sec.classList.add('on');
-    if (window.innerWidth <= 768) window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  /* Populate RAF ID from the account created during sign-up (raf_account in localStorage) */
-  (function populateRafId(){
-    var acc = {};
-    try { acc = JSON.parse(localStorage.getItem('raf_account') || '{}') || {}; } catch(e){}
-    var name = (acc.name || '').trim();
-    if (name) {
-      var initial = name.charAt(0);
-      ['sbName','ovName','ovName2'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent = name; });
-      ['sbAvatar','ovAvatar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent = initial; });
-    }
-    if (acc.email) { var em=document.getElementById('ovEmail'); if(em) em.textContent = acc.email; }
-  })();
-  /* LANG */
-  function toggleLang(){
-    const r=document.getElementById('htmlRoot');
-    const isAr=r.lang==='ar';
-    r.lang=isAr?'en':'ar';r.dir=isAr?'ltr':'rtl';
-    localStorage.setItem('raf_lang',isAr?'en':'ar');
-    applyLang();
-  }
-  function applyLang(){
-    const en=document.getElementById('htmlRoot').lang==='en';
-    document.querySelectorAll('[data-ar]').forEach(el=>{el.textContent=en?el.dataset.en:el.dataset.ar;});
-  }
-  (function(){const l=localStorage.getItem('raf_lang');if(l){const r=document.getElementById('htmlRoot');r.lang=l;r.dir=l==='en'?'ltr':'rtl';}applyLang();})();
-</script>
-
-<!-- MOBILE APP BOTTOM NAV -->
+<!-- BOTTOM NAV -->
 <nav class="app-bnav">
   <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
-  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفح" data-en="Browse">تصفح</span></a>
+  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفّح" data-en="Browse">تصفّح</span></a>
   <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
   <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
   <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
-<script src="raf_topbar.js"></script>
-<script src="raf_nav.js"></script>
-<script src="raf_search.js"></script>
+
+<script src="raf_account.js"></script>
+<script>
+  (function(){
+    var p = rafProfile();
+    document.getElementById('idName').textContent = p.name;
+    document.getElementById('idAvatar').textContent = p.name.charAt(0);
+    document.getElementById('idNum').textContent = p.id;
+  })();
+</script>
 </body>
 </html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — مركز الدعم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="raf_account.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<style>.faq{padding:16px 20px;border-bottom:1px solid var(--border);cursor:pointer;}.faq:last-child{border-bottom:none;}.faq-q{display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:600;color:var(--ink);}.faq-a{font-size:13px;color:var(--text3);line-height:1.7;margin-top:0;max-height:0;overflow:hidden;transition:max-height .25s,margin-top .25s;}.faq.open .faq-a{max-height:200px;margin-top:10px;}.faq.open .faq-q i{transform:rotate(180deg);}.faq-q i{transition:transform .2s;}</style>
+</head>
+<body>
+<header class="ahead">
+  <a href="raf_account.html" class="ahead-back"><i class="ti ti-arrow-right"></i> <span data-ar="هوية رف" data-en="RAF ID">هوية رف</span></a>
+  <div class="ahead-title" data-ar="مركز الدعم" data-en="Support Center">مركز الدعم</div>
+  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
+</header>
+
+<div class="wrap">
+  <div class="section-h" data-ar="تواصل معنا" data-en="Contact us">تواصل معنا</div>
+  <div class="sec-grid" style="grid-template-columns:repeat(3,1fr);">
+    <a class="sec-card" href="#" style="flex-direction:column;align-items:center;text-align:center;"><div class="sec-ic" style="background:var(--green-bg);color:var(--green)"><i class="ti ti-brand-whatsapp"></i></div><div class="sec-name" data-ar="واتساب" data-en="WhatsApp">واتساب</div></a>
+    <a class="sec-card" href="#" style="flex-direction:column;align-items:center;text-align:center;"><div class="sec-ic"><i class="ti ti-message-2"></i></div><div class="sec-name" data-ar="محادثة" data-en="Live Chat">محادثة</div></a>
+    <a class="sec-card" href="#" style="flex-direction:column;align-items:center;text-align:center;"><div class="sec-ic"><i class="ti ti-phone"></i></div><div class="sec-name" data-ar="اتصال" data-en="Call">اتصال</div></a>
+  </div>
+
+  <div class="section-h" data-ar="الأسئلة الشائعة" data-en="Frequently asked">الأسئلة الشائعة</div>
+  <div class="panel">
+    <div class="faq" onclick="this.classList.toggle('open')"><div class="faq-q"><span data-ar="كيف أتتبّع طلبي؟" data-en="How do I track my order?">كيف أتتبّع طلبي؟</span><i class="ti ti-chevron-down"></i></div><div class="faq-a" data-ar="من صفحة طلباتي اختر الطلب ثم اضغط تتبّع الطلب لرؤية حالته مباشرة." data-en="Open My Orders, select the order, then tap Track Order to see its live status.">من صفحة طلباتي اختر الطلب ثم اضغط تتبّع الطلب لرؤية حالته مباشرة.</div></div>
+    <div class="faq" onclick="this.classList.toggle('open')"><div class="faq-q"><span data-ar="ما هي سياسة الإرجاع؟" data-en="What is the return policy?">ما هي سياسة الإرجاع؟</span><i class="ti ti-chevron-down"></i></div><div class="faq-a" data-ar="يمكنك إرجاع معظم المنتجات خلال 14 يوماً من الاستلام بشرط بقائها بحالتها الأصلية." data-en="Most items can be returned within 14 days of delivery if they remain in original condition.">يمكنك إرجاع معظم المنتجات خلال 14 يوماً من الاستلام بشرط بقائها بحالتها الأصلية.</div></div>
+    <div class="faq" onclick="this.classList.toggle('open')"><div class="faq-q"><span data-ar="كيف أضيف طريقة دفع؟" data-en="How do I add a payment method?">كيف أضيف طريقة دفع؟</span><i class="ti ti-chevron-down"></i></div><div class="faq-a" data-ar="من هوية رف اذهب إلى طرق الدفع ثم اضغط إضافة بطاقة جديدة." data-en="From RAF ID open Payment Methods then tap Add new card.">من هوية رف اذهب إلى طرق الدفع ثم اضغط إضافة بطاقة جديدة.</div></div>
+  </div>
+
+  <div class="section-h" data-ar="تذاكر الدعم" data-en="Support tickets">تذاكر الدعم</div>
+  <div class="panel">
+    <div class="row"><div class="row-ic" style="background:var(--blue-bg);color:var(--blue)"><i class="ti ti-ticket"></i></div><div class="row-body"><div class="row-lbl" data-ar="استفسار عن طلب ‎#ORD-1284" data-en="Inquiry about #ORD-1284">استفسار عن طلب ‎#ORD-1284</div><div class="row-sub" data-ar="آخر رد منذ ساعة" data-en="Last reply 1h ago">آخر رد منذ ساعة</div></div><span class="badge b-progress" data-ar="مفتوحة" data-en="Open">مفتوحة</span></div>
+  </div>
+  <button class="btn btn-gold btn-block" style="margin-top:6px;"><i class="ti ti-plus"></i> <span data-ar="فتح تذكرة جديدة" data-en="Open new ticket">فتح تذكرة جديدة</span></button>
+</div>
+
+<nav class="app-bnav">
+  <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
+  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفّح" data-en="Browse">تصفّح</span></a>
+  <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
+  <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
+  <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
+</nav>
+
+<script src="raf_account.js"></script>
+</body>
+</html>

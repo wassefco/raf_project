@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — تفاصيل الطلب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="raf_account.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+</head>
+<body>
+
+<header class="ahead">
+  <a href="raf_orders.html" class="ahead-back"><i class="ti ti-arrow-right"></i> <span data-ar="طلباتي" data-en="Orders">طلباتي</span></a>
+  <div class="ahead-title" data-ar="تفاصيل الطلب" data-en="Order Details">تفاصيل الطلب</div>
+  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
+</header>
+
+<div class="wrap" id="odWrap"></div>
+
+<nav class="app-bnav">
+  <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
+  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفّح" data-en="Browse">تصفّح</span></a>
+  <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
+  <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
+  <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
+</nav>
+
+<script src="raf_account.js"></script>
+<script>
+  function T(ar,en){ return curLang()==='en' ? en : ar; }
+  function getId(){ return new URLSearchParams(location.search).get('id') || (RAF_ORDERS[0] && RAF_ORDERS[0].id); }
+
+  function tlIcon(k){ return {placed:'ti-receipt',prep:'ti-package',ship:'ti-truck-delivery',done:'ti-home-check',cancel:'ti-circle-x'}[k] || 'ti-point'; }
+
+  function render(){
+    var en = curLang()==='en';
+    var o = orderById(getId());
+    var wrap = document.getElementById('odWrap');
+    if(!o){ wrap.innerHTML='<div class="empty"><i class="ti ti-package-off"></i><div class="empty-t">'+T('الطلب غير موجود','Order not found')+'</div></div>'; return; }
+    var sm = statusMeta(o.status);
+
+    /* totals */
+    var subtotal = o.items.reduce(function(s,i){ return s + parseFloat(i.price); }, 0);
+    var ship = parseFloat(o.ship||'0');
+    var grand = subtotal + ship;
+    var kwd = en ? 'KWD' : 'د.ك';
+    var f = function(n){ return n.toFixed(3); };
+
+    /* timeline / status history */
+    var tl = o.tl.map(function(st){
+      var cls = st.s==='cancel' ? 'tl-dot done' : (st.s ? 'tl-dot '+st.s : 'tl-dot');
+      var line = (st.s==='done') ? 'tl-line done' : 'tl-line';
+      var icon = st.s==='cancel' ? 'ti-x' : (st.s==='done' ? 'ti-check' : tlIcon(st.k));
+      if(st.s==='cancel'){ cls='tl-dot'; }
+      return '<div class="tl-step"><div class="tl-rail"><div class="'+cls+'" '+(st.s==='cancel'?'style="background:var(--red);border-color:var(--red);color:#fff"':'')+'><i class="ti '+icon+'"></i></div><div class="'+line+'"></div></div>'+
+        '<div class="tl-body"><div class="tl-title'+(st.s?'':' muted')+'">'+st.t[en?'en':'ar']+'</div><div class="tl-time">'+st.time[en?'en':'ar']+'</div></div></div>';
+    }).join('');
+
+    /* products */
+    var prods = o.items.map(function(i){
+      return '<div class="prod"><div class="prod-img"><i class="ti '+i.ic+'"></i></div>'+
+        '<div class="prod-info"><div class="prod-name">'+i.name[en?'en':'ar']+'</div><div class="prod-meta">'+i.meta[en?'en':'ar']+'</div></div>'+
+        '<div class="prod-price">'+i.price+' <small style="font-size:10px;color:var(--text3)">'+kwd+'</small></div></div>';
+    }).join('');
+
+    /* primary action */
+    var action = '';
+    if(o.status==='progress') action = '<a class="btn btn-gold btn-block" href="raf_tracking.html"><i class="ti ti-map-pin"></i> '+T('تتبّع الطلب مباشرة','Live track order')+'</a>';
+    else if(o.status==='delivered') action = '<button class="btn btn-ghost btn-block"><i class="ti ti-refresh"></i> '+T('إعادة الطلب','Reorder')+'</button>';
+    else action = '<button class="btn btn-ghost btn-block"><i class="ti ti-refresh"></i> '+T('اطلب مرة أخرى','Order again')+'</button>';
+
+    wrap.innerHTML =
+      '<div class="od-hero"><div class="od-hero-top">'+
+        '<div><div class="od-num">#'+o.id+'</div><div class="od-sub"><i class="ti ti-building-store" style="font-size:13px"></i> '+o.store[en?'en':'ar']+' · '+o.date[en?'en':'ar']+'</div></div>'+
+        '<span class="badge '+sm.cls+'"><i class="ti '+sm.ic+'"></i> '+sm.label+'</span>'+
+      '</div></div>'+
+
+      '<div class="section-h">'+T('حالة الطلب','Status History')+'</div>'+
+      '<div class="panel"><div class="panel-pad"><div class="tl">'+tl+'</div></div></div>'+
+
+      '<div class="section-h">'+T('المنتجات','Products')+'</div>'+
+      '<div class="panel">'+prods+
+        '<div class="sum-row"><span>'+T('المجموع الفرعي','Subtotal')+'</span><span>'+f(subtotal)+' '+kwd+'</span></div>'+
+        '<div class="sum-row"><span>'+T('التوصيل','Delivery')+'</span><span>'+(ship===0?T('مجاني','Free'):f(ship)+' '+kwd)+'</span></div>'+
+        '<div class="sum-row total"><span>'+T('الإجمالي','Total')+'</span><b>'+f(grand)+' '+kwd+'</b></div>'+
+      '</div>'+
+
+      '<div class="section-h">'+T('معلومات التوصيل','Delivery Information')+'</div>'+
+      '<div class="panel">'+
+        '<div class="row"><div class="row-ic"><i class="ti ti-map-pin"></i></div><div class="row-body"><div class="row-lbl">'+T('عنوان التوصيل','Delivery address')+'</div><div class="row-sub">'+o.addr[en?'en':'ar']+'</div></div></div>'+
+        (o.driver ? '<div class="row"><div class="row-ic"><i class="ti ti-user"></i></div><div class="row-body"><div class="row-lbl">'+T('المندوب','Courier')+'</div><div class="row-sub">'+o.driver[en?'en':'ar']+'</div></div></div>' : '')+
+      '</div>'+
+
+      '<div class="section-h">'+T('معلومات الدفع','Payment Information')+'</div>'+
+      '<div class="panel">'+
+        '<div class="row"><div class="row-ic"><i class="ti ti-credit-card"></i></div><div class="row-body"><div class="row-lbl">'+T('طريقة الدفع','Payment method')+'</div><div class="row-sub">'+o.pay[en?'en':'ar']+'</div></div><div class="row-val">'+f(grand)+' '+kwd+'</div></div>'+
+      '</div>'+
+
+      '<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">'+action+
+        '<button class="btn btn-ghost btn-block"><i class="ti ti-headset"></i> '+T('الدعم والمساعدة','Help & Support')+'</button></div>';
+  }
+
+  window.onLangChange = render;
+  render();
+  if(location.hash==='#track'){ var h=document.querySelector('.tl'); if(h) h.scrollIntoView({block:'center'}); }
+</script>
+</body>
+</html>

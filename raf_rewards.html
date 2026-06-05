@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — المكافآت والولاء</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="raf_account.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+</head>
+<body>
+<header class="ahead">
+  <a href="raf_account.html" class="ahead-back"><i class="ti ti-arrow-right"></i> <span data-ar="هوية رف" data-en="RAF ID">هوية رف</span></a>
+  <div class="ahead-title" data-ar="المكافآت والولاء" data-en="Rewards & Loyalty">المكافآت والولاء</div>
+  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
+</header>
+
+<div class="wrap">
+  <div class="reward-hero">
+    <div style="display:flex;align-items:center;justify-content:space-between;">
+      <div><div style="font-size:12px;opacity:.85;letter-spacing:1px;font-family:var(--fen);" data-ar="رصيد نقاطك" data-en="Your points balance">رصيد نقاطك</div>
+        <div class="reward-pts">1,250</div></div>
+      <span class="badge" style="background:rgba(255,255,255,.22);color:#fff;"><i class="ti ti-crown"></i> <span data-ar="عضو ذهبي" data-en="Gold Member">عضو ذهبي</span></span>
+    </div>
+    <div class="reward-bar"><div class="reward-fill" style="width:62%;"></div></div>
+    <div style="font-size:12.5px;opacity:.9;margin-top:10px;" data-ar="750 نقطة للوصول إلى المستوى البلاتيني" data-en="750 points to reach Platinum tier">750 نقطة للوصول إلى المستوى البلاتيني</div>
+  </div>
+
+  <div class="section-h" data-ar="اكسب المزيد من النقاط" data-en="Earn more points">اكسب المزيد من النقاط</div>
+  <div class="panel">
+    <div class="row"><div class="row-ic" style="background:var(--gold-soft);color:var(--gold2)"><i class="ti ti-shopping-bag"></i></div><div class="row-body"><div class="row-lbl" data-ar="كل عملية شراء" data-en="Every purchase">كل عملية شراء</div><div class="row-sub" data-ar="نقطة واحدة لكل د.ك" data-en="1 point per KWD">نقطة واحدة لكل د.ك</div></div><span class="row-val">+1</span></div>
+    <div class="row"><div class="row-ic" style="background:var(--gold-soft);color:var(--gold2)"><i class="ti ti-star"></i></div><div class="row-body"><div class="row-lbl" data-ar="تقييم منتج" data-en="Rate a product">تقييم منتج</div><div class="row-sub" data-ar="بعد استلام الطلب" data-en="After delivery">بعد استلام الطلب</div></div><span class="row-val">+20</span></div>
+    <div class="row"><div class="row-ic" style="background:var(--gold-soft);color:var(--gold2)"><i class="ti ti-user-plus"></i></div><div class="row-body"><div class="row-lbl" data-ar="دعوة صديق" data-en="Invite a friend">دعوة صديق</div><div class="row-sub" data-ar="عند أول طلب له" data-en="On their first order">عند أول طلب له</div></div><span class="row-val">+250</span></div>
+  </div>
+
+  <div class="section-h" data-ar="سجل النقاط" data-en="Points history">سجل النقاط</div>
+  <div class="panel">
+    <div class="row"><div class="row-ic" style="background:var(--green-bg);color:var(--green)"><i class="ti ti-plus"></i></div><div class="row-body"><div class="row-lbl" data-ar="شراء من TechZone" data-en="Purchase at TechZone">شراء من TechZone</div><div class="row-sub" data-ar="3 يونيو" data-en="Jun 3">3 يونيو</div></div><span class="row-val" style="color:var(--green)">+189</span></div>
+    <div class="row"><div class="row-ic" style="background:var(--green-bg);color:var(--green)"><i class="ti ti-plus"></i></div><div class="row-body"><div class="row-lbl" data-ar="تقييم طلب" data-en="Order review">تقييم طلب</div><div class="row-sub" data-ar="2 يونيو" data-en="Jun 2">2 يونيو</div></div><span class="row-val" style="color:var(--green)">+20</span></div>
+    <div class="row"><div class="row-ic" style="background:var(--red-bg);color:var(--red)"><i class="ti ti-minus"></i></div><div class="row-body"><div class="row-lbl" data-ar="استبدال قسيمة خصم" data-en="Redeemed a coupon">استبدال قسيمة خصم</div><div class="row-sub" data-ar="30 مايو" data-en="May 30">30 مايو</div></div><span class="row-val" style="color:var(--red)">-500</span></div>
+  </div>
+</div>
+
+<nav class="app-bnav">
+  <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
+  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفّح" data-en="Browse">تصفّح</span></a>
+  <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
+  <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
+  <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
+</nav>
+
+<script src="raf_account.js"></script>
+</body>
+</html>
