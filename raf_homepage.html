@@ -182,6 +182,8 @@ html[dir="ltr"] .adc-slide .ov{background:linear-gradient(90deg,rgba(10,10,10,.8
 .car-track{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:4px 0 8px;scroll-behavior:smooth;}
 .car-track::-webkit-scrollbar{display:none;}
 .car-item{flex:0 0 auto;scroll-snap-align:start;}
+.car-item.pwrap{width:230px;}
+@media(max-width:680px){.car-item.pwrap{width:170px;}}
 .car-arrow{position:absolute;top:42%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;background:var(--card);border:1px solid var(--border);color:var(--ink);font-size:22px;display:none;align-items:center;justify-content:center;cursor:pointer;z-index:6;box-shadow:var(--sh-sm);transition:all .2s;}
 .car-arrow:hover{background:var(--gold);color:var(--black);border-color:var(--gold);}
 .car-arrow.prev{right:-8px;} .car-arrow.next{left:-8px;}
@@ -584,6 +586,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 
 <script src="raf_nav.js"></script>
 <script src="raf_ads.js"></script>
+<script src="raf_card.js"></script>
 <script>
 /* ===== ADMIN-READY DATA (replace with API later) ===== */
 /* Advertising slides — structured for admin-managed ad data */
@@ -606,11 +609,17 @@ const CATEGORIES=[
   {id:'sports',ar:'رياضة',en:'Sports',icon:'ti-ball-football',image:'',cover:'',sort:8,active:true}
 ];
 const OFFERS=[
-  {ic:'ti-device-mobile',ar:'سماعات لاسلكية فاخرة',en:'Premium Wireless Earbuds',store:{ar:'تك هاوس',en:'Tech House'},price:'24.500',old:'35.000',disc:30,rate:'4.8',rev:'320'},
-  {ic:'ti-spray',ar:'عطر شرقي فاخر 100مل',en:'Luxury Oriental Perfume 100ml',store:{ar:'دار العود',en:'Dar Aloud'},price:'42.000',old:'60.000',disc:30,rate:'4.9',rev:'215'},
-  {ic:'ti-clock-hour-4',ar:'ساعة كلاسيكية جلد',en:'Classic Leather Watch',store:{ar:'تايم بوكس',en:'Time Box'},price:'68.000',old:'85.000',disc:20,rate:'4.7',rev:'142'},
-  {ic:'ti-hanger',ar:'جاكيت شتوي عصري',en:'Modern Winter Jacket',store:{ar:'كازا مود',en:'Casa Mode'},price:'29.900',old:'45.000',disc:33,rate:'4.6',rev:'98'},
-  {ic:'ti-headphones',ar:'سماعة رأس احترافية',en:'Pro Headphones',store:{ar:'تك هاوس',en:'Tech House'},price:'38.000',old:'52.000',disc:27,rate:'4.8',rev:'410'}
+  {id:'P-EARBUDS',ic:'ti-device-mobile',ar:'سماعات لاسلكية فاخرة',en:'Premium Wireless Earbuds',store:{ar:'تك هاوس',en:'Tech House'},price:'24.500',old:'35.000',disc:30,rate:'4.8',rev:'320'},
+  {id:'P-PERFUME',ic:'ti-spray',ar:'عطر شرقي فاخر',en:'Luxury Oriental Perfume',store:{ar:'دار العود',en:'Dar Aloud'},price:'42.000',old:'60.000',disc:30,rate:'4.9',rev:'215',
+    variants:[{label:{ar:'الحجم',en:'Size'},options:[{v:'50',label:{ar:'50 مل',en:'50 ml'}},{v:'100',label:{ar:'100 مل',en:'100 ml'}},{v:'150',label:{ar:'150 مل',en:'150 ml'}}]}]},
+  {id:'P-WATCH',ic:'ti-clock-hour-4',ar:'ساعة كلاسيكية جلد',en:'Classic Leather Watch',store:{ar:'تايم بوكس',en:'Time Box'},price:'68.000',old:'85.000',disc:20,rate:'4.7',rev:'142',
+    variants:[{label:{ar:'اللون / الخامة',en:'Color / Material'},options:[{v:'brown',label:{ar:'جلد بني',en:'Brown Leather'}},{v:'black',label:{ar:'جلد أسود',en:'Black Leather'}}]}]},
+  {id:'P-JACKET',ic:'ti-hanger',ar:'جاكيت شتوي عصري',en:'Modern Winter Jacket',store:{ar:'كازا مود',en:'Casa Mode'},price:'29.900',old:'45.000',disc:33,rate:'4.6',rev:'98',
+    variants:[{label:{ar:'المقاس',en:'Size'},options:[{v:'s',label:{ar:'S',en:'S'}},{v:'m',label:{ar:'M',en:'M'}},{v:'l',label:{ar:'L',en:'L'}},{v:'xl',label:{ar:'XL',en:'XL'}}]},
+              {label:{ar:'اللون',en:'Color'},options:[{v:'black',label:{ar:'أسود',en:'Black'}},{v:'navy',label:{ar:'كحلي',en:'Navy'}},{v:'olive',label:{ar:'زيتي',en:'Olive'}}]}]},
+  {id:'P-HEADPHONES',ic:'ti-headphones',ar:'سماعة رأس احترافية',en:'Pro Headphones',store:{ar:'تك هاوس',en:'Tech House'},price:'38.000',old:'52.000',disc:27,rate:'4.8',rev:'410',
+    variants:[{label:{ar:'اللون',en:'Color'},options:[{v:'black',label:{ar:'أسود',en:'Black'}},{v:'white',label:{ar:'أبيض',en:'White'}}]},
+              {label:{ar:'السعة',en:'Storage'},options:[{v:'std',label:{ar:'قياسي',en:'Standard'}},{v:'plus',label:{ar:'بلس (ذاكرة)',en:'Plus (memory)'}}]}]}
 ];
 const STORES=[
   {ic:'ti-device-mobile',ar:'تك هاوس',en:'Tech House',rate:'4.8',prod:'320',cat:{ar:'إلكترونيات',en:'Electronics'}},
@@ -681,13 +690,8 @@ function catCard(c){
   const inner=c.image?'':`<i class="ti ${c.icon}"></i>`;
   return `<div class="car-item cat-item"><a class="cat" href="raf_storespage.html?cat=${c.id}"><div class="cat-circle" style="${bg}">${inner}</div><span>${L(c)}</span></a></div>`;
 }
-function offerCard(o){return `<article class="car-item pcard" onclick="window.location='raf_product.html'">
-  <div class="pcard-img"><i class="ti ${o.ic}"></i>${o.disc?`<span class="disc-badge dm">-${o.disc}%</span>`:''}<button class="wish-btn" onclick="toggleWish(this,event)" aria-label="wishlist"><i class="ti ti-heart"></i></button></div>
-  <div class="pcard-body"><div class="pcard-store"><i class="ti ti-building-store"></i> ${L(o.store)}</div>
-    <div class="pcard-name">${L(o)}</div>
-    <div class="pcard-rate"><i class="ti ti-star-filled"></i> ${o.rate} <span style="color:var(--text3)">(${o.rev})</span></div>
-    <div class="pcard-foot"><span class="price dm">${o.price} <small>KWD</small></span>${o.old?`<span class="price-old dm">${o.old}</span>`:''}</div>
-    <div class="pcard-cartwrap" onclick="event.stopPropagation()">${cartCtrl(L(o),o.price)}</div></div></article>`;}
+/* Uses the single global RAF Product Card component (raf_card.js) */
+function offerCard(o){return `<div class="car-item pwrap">${RAFCard.product(o)}</div>`;}
 function storeCard(s){return `<article class="car-item store-card" onclick="window.location='raf_store.html'">
   <div class="store-cover"></div><div class="store-body"><div class="store-logo"><i class="ti ${s.ic}"></i></div>
   <div class="store-name">${L(s)} <i class="ti ti-rosette-discount-check verify"></i></div>

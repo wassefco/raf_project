@@ -815,5 +815,11 @@
 <script src="raf_topbar.js"></script>
 <script src="raf_nav.js"></script>
 <script src="raf_search.js"></script>
+<!-- Global RAF Product Card — replace legacy store product cards (store element disabled: single store) -->
+<script src="raf_card.js"></script>
+<script>
+  (function(){ function up(){ RAFCard.upgradeAll({ selector:'.product-card' }); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', up); else up(); })();
+</script>
 </body>
 </html>

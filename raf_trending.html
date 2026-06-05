@@ -600,5 +600,11 @@ window.addEventListener('DOMContentLoaded',()=>{initCartBtns();updateBadge();});
 <script src="raf_nav.js"></script>
 <script src="raf_search.js"></script>
 <script src="raf_ads.js"></script>
+<!-- Global RAF Product Card — replace legacy trending cards -->
+<script src="raf_card.js"></script>
+<script>
+  (function(){ function up(){ RAFCard.upgradeAll({ selector:'.prod-card' }); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', up); else up(); })();
+</script>
 </body>
 </html>
