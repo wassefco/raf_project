@@ -62,6 +62,76 @@
   .sb-red{background:var(--red-bg);color:var(--red);}
   .sb-gold{background:rgba(201,168,76,.12);color:var(--gold2);}
 
+  /* ===== RAF ID — DIGITAL IDENTITY ===== */
+  .rafid-card{position:relative;border-radius:18px;padding:20px;color:#F3EEDD;background:linear-gradient(140deg,#1C1813 0%,#2C2417 55%,#14110B 100%);border:1px solid rgba(201,168,76,.35);overflow:hidden;box-shadow:0 18px 40px -22px rgba(20,16,8,.7);}
+  .rafid-card::before{content:'';position:absolute;inset:0;background:radial-gradient(360px 150px at 115% -25%,rgba(201,168,76,.30),transparent 60%);pointer-events:none;}
+  .rafid-card>*{position:relative;}
+  .rafid-row{display:flex;align-items:center;justify-content:space-between;}
+  .rafid-brand{display:flex;align-items:center;gap:8px;}
+  .rafid-brand img{height:24px;width:auto;display:block;}
+  .rafid-tag{font-family:var(--fen);font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,.45);padding:3px 8px;border-radius:20px;}
+  .rafid-chip{width:34px;height:26px;border-radius:6px;background:linear-gradient(135deg,#EBCF7A,#9C742A);box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);}
+  .rafid-avwrap{display:flex;align-items:center;gap:12px;margin:18px 0 14px;}
+  .rafid-avatar{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:var(--fdisplay);font-size:22px;font-weight:700;color:#1A1409;flex-shrink:0;box-shadow:0 0 0 3px rgba(201,168,76,.18);}
+  .rafid-uname{font-size:17px;font-weight:700;color:#F8F3E6;line-height:1.2;}
+  .rafid-level{display:inline-flex;align-items:center;gap:4px;margin-top:5px;font-size:11px;font-weight:700;color:var(--gold);}
+  .rafid-level i{font-size:13px;}
+  .rafid-num{font-family:var(--fen);font-size:13.5px;letter-spacing:3px;color:#D9CEB4;margin-bottom:14px;}
+  .rafid-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(201,168,76,.18);padding-top:12px;}
+  .rafid-since{font-size:10px;color:#A99F86;line-height:1.5;}
+  .rafid-since b{color:#E7DCC2;font-weight:600;display:block;font-size:12px;}
+  .rafid-vbadge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:#86DAA6;background:rgba(46,158,91,.14);border:1px solid rgba(46,158,91,.32);padding:4px 9px;border-radius:20px;}
+  .rafid-edit{width:100%;margin-top:12px;padding:9px;border:1px solid rgba(201,168,76,.4);border-radius:9px;background:rgba(201,168,76,.08);color:var(--gold);font-family:var(--font);font-size:12.5px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .rafid-edit:hover{background:var(--gold);color:#1A1409;}
+
+  /* identity hero (overview) */
+  .idhero{position:relative;border-radius:18px;padding:26px 28px;color:#F3EEDD;background:linear-gradient(120deg,#1C1813 0%,#2C2417 55%,#14110B 100%);border:1px solid rgba(201,168,76,.35);overflow:hidden;margin-bottom:22px;box-shadow:0 18px 44px -24px rgba(20,16,8,.7);}
+  .idhero::before{content:'';position:absolute;inset:0;background:radial-gradient(520px 220px at 110% -40%,rgba(201,168,76,.26),transparent 60%);pointer-events:none;}
+  .idhero>*{position:relative;}
+  .idhero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+  .idhero-main{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+  .idhero-av{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-family:var(--fdisplay);font-size:32px;font-weight:700;color:#1A1409;box-shadow:0 0 0 4px rgba(201,168,76,.2);flex-shrink:0;}
+  .idhero-name{font-family:var(--fdisplay);font-size:24px;font-weight:700;color:#F8F3E6;}
+  .idhero-sub{font-family:var(--fen);font-size:13px;letter-spacing:2px;color:#D9CEB4;margin-top:4px;}
+  .idhero-tags{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap;}
+
+  /* identity detail grid */
+  .sec-block-title{font-size:14px;font-weight:700;margin:0 0 12px;display:flex;align-items:center;gap:7px;}
+  .idgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px;}
+  .idcell{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px;}
+  .idcell-lbl{font-size:11px;color:var(--text3);margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+  .idcell-val{font-size:14px;font-weight:700;color:var(--text);}
+  .idcell-val.mono{font-family:var(--fen);letter-spacing:1px;}
+
+  /* loyalty (future-ready) */
+  .loyalty{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px;margin-bottom:24px;}
+  .loyalty-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+  .loyalty-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:7px;}
+  .loyalty-title i{color:var(--gold);}
+  .loyalty-pts{font-family:var(--fen);font-weight:700;color:var(--gold2);}
+  .loyalty-bar{height:8px;border-radius:6px;background:var(--bg2);overflow:hidden;}
+  .loyalty-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--gold),var(--gold2));}
+  .loyalty-hint{font-size:11.5px;color:var(--text3);margin-top:9px;}
+
+  /* quick-access ecosystem tiles */
+  .qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+  .qa-tile{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px 12px;text-align:center;cursor:pointer;transition:all .2s;text-decoration:none;display:flex;flex-direction:column;align-items:center;gap:9px;position:relative;}
+  .qa-tile:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 22px -12px rgba(20,16,8,.3);}
+  .qa-ic{width:44px;height:44px;border-radius:13px;background:rgba(201,168,76,.1);display:flex;align-items:center;justify-content:center;font-size:21px;color:var(--gold2);}
+  .qa-tile span{font-size:12.5px;font-weight:600;color:var(--text);}
+  .qa-badge{position:absolute;top:8px;left:8px;min-width:18px;height:18px;padding:0 5px;background:var(--red);color:#fff;border-radius:10px;font-size:10px;font-weight:700;font-family:var(--fen);display:flex;align-items:center;justify-content:center;}
+
+  /* payment cards */
+  .pay-card{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px 18px;margin-bottom:12px;}
+  .pay-logo{width:46px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;flex-shrink:0;}
+  .pay-num{font-family:var(--fen);font-size:14px;font-weight:600;letter-spacing:1px;}
+  .pay-sub{font-size:12px;color:var(--text3);margin-top:2px;}
+  .pay-add{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border:1.5px dashed var(--border);border-radius:var(--rl);background:var(--bg);color:var(--text3);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;}
+  .pay-add:hover{border-color:var(--gold);color:var(--gold);}
+
+  @media(max-width:768px){.idgrid{grid-template-columns:1fr 1fr;}.qa-grid{grid-template-columns:repeat(3,1fr);}.idhero{padding:22px 20px;}.idhero-name{font-size:20px;}.idhero-av{width:66px;height:66px;font-size:26px;}}
+  @media(max-width:480px){.idgrid{grid-template-columns:1fr 1fr;}.qa-grid{grid-template-columns:repeat(2,1fr);}}
+
   /* MAIN CONTENT */
   .account-main{}
   .section-panel{display:none;}
@@ -191,6 +261,7 @@
     .layout{grid-template-columns:1fr;padding:16px;}
     .account-sidebar{flex-direction:row;flex-wrap:wrap;gap:10px;}
     .profile-card{flex:1;min-width:200px;}
+    .rafid-card{width:100%;flex:none;}
     .sidebar-nav{flex:100%;}
     .addr-grid{grid-template-columns:1fr;}
     .wish-grid{grid-template-columns:repeat(2,1fr);}
@@ -199,7 +270,8 @@
     footer{padding:16px;flex-direction:column;gap:8px;text-align:center;}
   }
   @media(max-width:480px){
-    .account-sidebar{flex-direction:column;}
+    .account-sidebar{flex-direction:column;flex-wrap:nowrap;}
+    .rafid-card,.profile-card,.sidebar-nav{width:100%;flex:none;}
     .profile-card{min-width:unset;}
     .wish-grid{grid-template-columns:1fr;}
     .track-steps{flex-wrap:nowrap;overflow-x:auto;}
@@ -261,33 +333,52 @@
   <!-- SIDEBAR -->
   <div class="account-sidebar">
 
-    <div class="profile-card">
-      <div class="profile-avatar">م</div>
-      <div class="profile-name">محمد العنزي</div>
-      <div class="profile-phone">+965 9XXX XXXX</div>
-      <button class="profile-edit"><i class="ti ti-edit"></i> <span data-ar="تعديل الملف" data-en="Edit Profile">تعديل الملف</span></button>
+    <div class="rafid-card">
+      <div class="rafid-row">
+        <div class="rafid-brand"><img src="raf_logo_web.png" alt="RAF"><span class="rafid-tag">RAF ID</span></div>
+        <div class="rafid-chip"></div>
+      </div>
+      <div class="rafid-avwrap">
+        <div class="rafid-avatar" id="sbAvatar">م</div>
+        <div>
+          <div class="rafid-uname" id="sbName">محمد العنزي</div>
+          <div class="rafid-level"><i class="ti ti-crown"></i> <span data-ar="عضو ذهبي" data-en="Gold Member">عضو ذهبي</span></div>
+        </div>
+      </div>
+      <div class="rafid-num" id="sbNum">RAF · 2026 · 04871</div>
+      <div class="rafid-foot">
+        <div class="rafid-since"><span data-ar="عضو منذ" data-en="Member since">عضو منذ</span><b><span data-ar="يناير 2024" data-en="Jan 2024">يناير 2024</span></b></div>
+        <span class="rafid-vbadge"><i class="ti ti-rosette-discount-check"></i> <span data-ar="موثّق" data-en="Verified">موثّق</span></span>
+      </div>
+      <button class="rafid-edit" onclick="switchSection('overview', document.getElementById('sbItemOverview'))"><i class="ti ti-id-badge-2"></i> <span data-ar="عرض هوية رف" data-en="View RAF ID">عرض هوية رف</span></button>
     </div>
 
     <div class="sidebar-nav">
-      <div class="sidebar-item on" onclick="switchSection('orders', this)">
+      <div class="sidebar-item on" id="sbItemOverview" onclick="switchSection('overview', this)">
+        <i class="ti ti-id-badge-2"></i> <span data-ar="هوية رف" data-en="RAF ID">هوية رف</span>
+      </div>
+      <div class="sidebar-item" id="sbItemOrders" onclick="switchSection('orders', this)">
         <i class="ti ti-shopping-bag"></i> <span data-ar="طلباتي" data-en="My Orders">طلباتي</span>
         <span class="sidebar-badge sb-gold">12</span>
       </div>
       <div class="sidebar-item" onclick="window.location='raf_address.html'">
         <i class="ti ti-map-pin"></i> <span data-ar="عناويني" data-en="My Addresses">عناويني</span>
       </div>
-      <div class="sidebar-item" onclick="switchSection('wishlist', this)">
+      <div class="sidebar-item" id="sbItemWishlist" onclick="switchSection('wishlist', this)">
         <i class="ti ti-heart"></i> <span data-ar="المفضلة" data-en="Wishlist">المفضلة</span>
         <span class="sidebar-badge sb-gold">8</span>
+      </div>
+      <div class="sidebar-item" id="sbItemPayments" onclick="switchSection('payments', this)">
+        <i class="ti ti-credit-card"></i> <span data-ar="طرق الدفع" data-en="Payment Methods">طرق الدفع</span>
       </div>
       <div class="sidebar-item" onclick="switchSection('ratings', this)">
         <i class="ti ti-star"></i> <span data-ar="تقييماتي" data-en="My Reviews">تقييماتي</span>
       </div>
-      <div class="sidebar-item" onclick="switchSection('notifications', this)">
+      <div class="sidebar-item" id="sbItemNotif" onclick="switchSection('notifications', this)">
         <i class="ti ti-bell"></i> <span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span>
         <span class="sidebar-badge sb-red">3</span>
       </div>
-      <div class="sidebar-item" onclick="switchSection('settings', this)">
+      <div class="sidebar-item" id="sbItemSettings" onclick="switchSection('settings', this)">
         <i class="ti ti-settings"></i> <span data-ar="الإعدادات" data-en="Settings">الإعدادات</span>
       </div>
     </div>
@@ -297,8 +388,85 @@
   <!-- MAIN -->
   <div class="account-main">
 
+    <!-- RAF ID OVERVIEW -->
+    <div class="section-panel on" id="sec-overview">
+      <!-- identity hero -->
+      <div class="idhero">
+        <div class="idhero-top">
+          <div class="rafid-brand"><img src="raf_logo_web.png" alt="RAF" style="height:26px;"><span class="rafid-tag">RAF ID</span></div>
+          <div class="rafid-chip"></div>
+        </div>
+        <div class="idhero-main">
+          <div class="idhero-av" id="ovAvatar">م</div>
+          <div>
+            <div class="idhero-name" id="ovName">محمد العنزي</div>
+            <div class="idhero-sub" id="ovNum">RAF · 2026 · 04871</div>
+            <div class="idhero-tags">
+              <span class="rafid-vbadge"><i class="ti ti-rosette-discount-check"></i> <span data-ar="حساب موثّق" data-en="Verified account">حساب موثّق</span></span>
+              <span class="rafid-vbadge" style="color:var(--gold);background:rgba(201,168,76,.14);border-color:rgba(201,168,76,.35);"><i class="ti ti-crown"></i> <span data-ar="عضو ذهبي" data-en="Gold Member">عضو ذهبي</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- identity details -->
+      <div class="sec-block-title"><i class="ti ti-user-check" style="color:var(--gold);"></i> <span data-ar="تفاصيل الهوية" data-en="Identity Details">تفاصيل الهوية</span></div>
+      <div class="idgrid">
+        <div class="idcell"><div class="idcell-lbl"><i class="ti ti-id"></i> <span data-ar="رقم هوية رف" data-en="RAF ID Number">رقم هوية رف</span></div><div class="idcell-val mono" id="ovNum2">RAF-2026-04871</div></div>
+        <div class="idcell"><div class="idcell-lbl"><i class="ti ti-user"></i> <span data-ar="الاسم" data-en="Name">الاسم</span></div><div class="idcell-val" id="ovName2">محمد العنزي</div></div>
+        <div class="idcell"><div class="idcell-lbl"><i class="ti ti-mail"></i> <span data-ar="البريد الإلكتروني" data-en="Email">البريد الإلكتروني</span></div><div class="idcell-val" id="ovEmail" style="direction:ltr;text-align:right;font-size:13px;">—</div></div>
+        <div class="idcell"><div class="idcell-lbl"><i class="ti ti-phone"></i> <span data-ar="رقم الجوال" data-en="Phone Number">رقم الجوال</span></div><div class="idcell-val" style="direction:ltr;text-align:right;">+965 9XXX XXXX</div></div>
+        <div class="idcell"><div class="idcell-lbl"><i class="ti ti-shield-check"></i> <span data-ar="حالة التوثيق" data-en="Verification">حالة التوثيق</span></div><div class="idcell-val" style="color:var(--green);"><i class="ti ti-circle-check" style="font-size:13px;"></i> <span data-ar="موثّق" data-en="Verified">موثّق</span></div></div>
+        <div class="idcell"><div class="idcell-lbl"><i class="ti ti-calendar"></i> <span data-ar="عضو منذ" data-en="Member Since">عضو منذ</span></div><div class="idcell-val"><span data-ar="يناير 2024" data-en="Jan 2024">يناير 2024</span></div></div>
+      </div>
+
+      <!-- loyalty (future-ready) -->
+      <div class="loyalty">
+        <div class="loyalty-top">
+          <div class="loyalty-title"><i class="ti ti-gift"></i> <span data-ar="مكافآت رف" data-en="RAF Rewards">مكافآت رف</span></div>
+          <div class="loyalty-pts">1,250 <span style="font-weight:400;color:var(--text3);font-size:11px;" data-ar="نقطة" data-en="pts">نقطة</span></div>
+        </div>
+        <div class="loyalty-bar"><div class="loyalty-fill" style="width:62%;"></div></div>
+        <div class="loyalty-hint"><span data-ar="750 نقطة للوصول إلى المستوى البلاتيني" data-en="750 points to reach Platinum level">750 نقطة للوصول إلى المستوى البلاتيني</span></div>
+      </div>
+
+      <!-- ecosystem quick access -->
+      <div class="sec-block-title"><i class="ti ti-apps" style="color:var(--gold);"></i> <span data-ar="كل ما يخص حسابك" data-en="Everything in your account">كل ما يخص حسابك</span></div>
+      <div class="qa-grid">
+        <div class="qa-tile" onclick="switchSection('orders', document.getElementById('sbItemOrders'))"><div class="qa-ic"><i class="ti ti-shopping-bag"></i></div><span data-ar="طلباتي" data-en="Orders">طلباتي</span><span class="qa-badge">12</span></div>
+        <div class="qa-tile" onclick="switchSection('wishlist', document.getElementById('sbItemWishlist'))"><div class="qa-ic"><i class="ti ti-heart"></i></div><span data-ar="المفضلة" data-en="Wishlist">المفضلة</span><span class="qa-badge">8</span></div>
+        <a class="qa-tile" href="raf_address.html"><div class="qa-ic"><i class="ti ti-map-pin"></i></div><span data-ar="عناويني" data-en="Addresses">عناويني</span></a>
+        <div class="qa-tile" onclick="switchSection('payments', document.getElementById('sbItemPayments'))"><div class="qa-ic"><i class="ti ti-credit-card"></i></div><span data-ar="طرق الدفع" data-en="Payments">طرق الدفع</span></div>
+        <a class="qa-tile" href="raf_auctions.html"><div class="qa-ic"><i class="ti ti-gavel"></i></div><span data-ar="مزاداتي" data-en="Auctions">مزاداتي</span></a>
+        <a class="qa-tile" href="raf_offers.html"><div class="qa-ic"><i class="ti ti-discount"></i></div><span data-ar="عروضي" data-en="Offers">عروضي</span></a>
+        <a class="qa-tile" href="raf_storespage.html"><div class="qa-ic"><i class="ti ti-building-store"></i></div><span data-ar="متابعاتي" data-en="Following">متابعاتي</span></a>
+        <div class="qa-tile" onclick="switchSection('notifications', document.getElementById('sbItemNotif'))"><div class="qa-ic"><i class="ti ti-bell"></i></div><span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span><span class="qa-badge">3</span></div>
+      </div>
+    </div>
+
+    <!-- PAYMENT METHODS -->
+    <div class="section-panel" id="sec-payments">
+      <div class="sec-head">
+        <div>
+          <div class="sec-title" data-ar="طرق الدفع" data-en="Payment Methods">طرق الدفع</div>
+          <div class="sec-sub" data-ar="بطاقاتك المحفوظة بأمان في هوية رف" data-en="Cards saved securely to your RAF ID">بطاقاتك المحفوظة بأمان في هوية رف</div>
+        </div>
+      </div>
+      <div class="pay-card">
+        <div class="pay-logo" style="background:linear-gradient(135deg,#1A1F71,#2A3D9E);"><i class="ti ti-brand-visa"></i></div>
+        <div style="flex:1;"><div class="pay-num">•••• •••• •••• 4821</div><div class="pay-sub"><span data-ar="تنتهي 09/27 — محمد العنزي" data-en="Expires 09/27 — Mohammed Al-Anzi">تنتهي 09/27 — محمد العنزي</span></div></div>
+        <span class="badge b-gold"><span data-ar="افتراضية" data-en="Default">افتراضية</span></span>
+      </div>
+      <div class="pay-card">
+        <div class="pay-logo" style="background:linear-gradient(135deg,#EB001B,#F79E1B);"><i class="ti ti-brand-mastercard"></i></div>
+        <div style="flex:1;"><div class="pay-num">•••• •••• •••• 9035</div><div class="pay-sub"><span data-ar="تنتهي 04/26" data-en="Expires 04/26">تنتهي 04/26</span></div></div>
+        <button class="addr-btn"><i class="ti ti-trash"></i> <span data-ar="حذف" data-en="Remove">حذف</span></button>
+      </div>
+      <button class="pay-add"><i class="ti ti-plus"></i> <span data-ar="إضافة بطاقة جديدة" data-en="Add new card">إضافة بطاقة جديدة</span></button>
+    </div>
+
     <!-- ORDERS -->
-    <div class="section-panel on" id="sec-orders">
+    <div class="section-panel" id="sec-orders">
       <div class="sec-head">
         <div>
           <div class="sec-title">طلباتي</div>
@@ -621,10 +789,25 @@
 <script>
   function switchSection(id, item) {
     document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('on'));
-    item.classList.add('on');
+    if (item) item.classList.add('on');
     document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('on'));
-    document.getElementById('sec-' + id).classList.add('on');
+    const sec = document.getElementById('sec-' + id);
+    if (sec) sec.classList.add('on');
+    if (window.innerWidth <= 768) window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+
+  /* Populate RAF ID from the account created during sign-up (raf_account in localStorage) */
+  (function populateRafId(){
+    var acc = {};
+    try { acc = JSON.parse(localStorage.getItem('raf_account') || '{}') || {}; } catch(e){}
+    var name = (acc.name || '').trim();
+    if (name) {
+      var initial = name.charAt(0);
+      ['sbName','ovName','ovName2'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent = name; });
+      ['sbAvatar','ovAvatar'].forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent = initial; });
+    }
+    if (acc.email) { var em=document.getElementById('ovEmail'); if(em) em.textContent = acc.email; }
+  })();
   /* LANG */
   function toggleLang(){
     const r=document.getElementById('htmlRoot');

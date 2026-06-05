@@ -196,7 +196,23 @@ html[dir="ltr"] .adc-slide .ov{background:linear-gradient(90deg,rgba(10,10,10,.8
 .view-all-card.cat-va{width:96px;height:96px;border-radius:50%;}
 
 /* product / offer card */
-.pcard{width:230px;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:transform .22s,box-shadow .22s;display:flex;flex-direction:column;}
+.pcard{width:230px;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:transform .22s,box-shadow .22s;display:flex;flex-direction:column;cursor:pointer;}
+.pcard-name{cursor:pointer;}
+.pcard-cart{margin-top:11px;width:100%;height:38px;border:1px solid var(--border);background:var(--bg2);color:var(--ink);border-radius:30px;font-family:var(--font-ar);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
+.pcard-cart:hover{background:var(--gold);color:var(--black);border-color:var(--gold);}
+.pcard-cart:active{transform:scale(.97);}
+.pcard-cart.added{background:var(--green);color:#fff;border-color:var(--green);}
+.pcard-cart i{font-size:16px;}
+.pcard-qty{margin-top:11px;width:100%;height:38px;border:1px solid var(--gold);background:var(--gold-soft);border-radius:30px;display:flex;align-items:center;justify-content:space-between;padding:0 4px;gap:4px;}
+.pcard-qty .qbtn{width:30px;height:30px;flex:0 0 30px;border:none;border-radius:50%;background:var(--gold);color:var(--black);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
+.pcard-qty .qbtn:hover{background:var(--gold2);color:#fff;}
+.pcard-qty .qbtn:active{transform:scale(.88);}
+.pcard-qty .qbtn i{font-size:15px;}
+.pcard-qty .qbtn.qminus.is-trash i{color:var(--red);}
+.pcard-qty .qbtn.qminus.is-trash{background:transparent;border:1px solid var(--border);}
+.pcard-qty .qbtn.qminus.is-trash:hover{background:var(--red);border-color:var(--red);}
+.pcard-qty .qbtn.qminus.is-trash:hover i{color:#fff;}
+.pcard-qty .qnum{font-family:var(--font-en);font-size:15px;font-weight:800;color:var(--ink);min-width:24px;text-align:center;flex:1;}
 .pcard:hover{transform:translateY(-5px);box-shadow:var(--sh);}
 .pcard-img{aspect-ratio:1/1;background:linear-gradient(150deg,var(--bg2),var(--bg3));display:flex;align-items:center;justify-content:center;font-size:58px;color:var(--gold2);position:relative;}
 .disc-badge{position:absolute;top:12px;right:12px;background:var(--red);color:#fff;font-family:var(--font-en);font-size:12px;font-weight:700;padding:4px 9px;border-radius:8px;}
@@ -214,7 +230,7 @@ html[dir="ltr"] .adc-slide .ov{background:linear-gradient(90deg,rgba(10,10,10,.8
 .price-old{font-family:var(--font-en);font-size:13px;color:var(--text3);text-decoration:line-through;}
 
 /* store card */
-.store-card{width:300px;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:transform .22s,box-shadow .22s;}
+.store-card{width:300px;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:transform .22s,box-shadow .22s;cursor:pointer;}
 .store-card:hover{transform:translateY(-4px);box-shadow:var(--sh);}
 .store-cover{height:90px;background:linear-gradient(120deg,var(--ink),#2a2419);position:relative;}
 .store-cover::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(201,168,76,.35),transparent 60%);}
@@ -639,17 +655,18 @@ function catCard(c){
   const inner=c.image?'':`<i class="ti ${c.icon}"></i>`;
   return `<div class="car-item cat-item"><a class="cat" href="raf_storespage.html?cat=${c.id}"><div class="cat-circle" style="${bg}">${inner}</div><span>${L(c)}</span></a></div>`;
 }
-function offerCard(o){return `<article class="car-item pcard">
-  <div class="pcard-img"><i class="ti ${o.ic}"></i>${o.disc?`<span class="disc-badge dm">-${o.disc}%</span>`:''}<button class="wish-btn" onclick="toggleWish(this,event)"><i class="ti ti-heart"></i></button></div>
+function offerCard(o){return `<article class="car-item pcard" onclick="window.location='raf_product.html'">
+  <div class="pcard-img"><i class="ti ${o.ic}"></i>${o.disc?`<span class="disc-badge dm">-${o.disc}%</span>`:''}<button class="wish-btn" onclick="toggleWish(this,event)" aria-label="wishlist"><i class="ti ti-heart"></i></button></div>
   <div class="pcard-body"><div class="pcard-store"><i class="ti ti-building-store"></i> ${L(o.store)}</div>
-    <a href="raf_product.html" class="pcard-name">${L(o)}</a>
+    <div class="pcard-name">${L(o)}</div>
     <div class="pcard-rate"><i class="ti ti-star-filled"></i> ${o.rate} <span style="color:var(--text3)">(${o.rev})</span></div>
-    <div class="pcard-foot"><span class="price dm">${o.price} <small>KWD</small></span>${o.old?`<span class="price-old dm">${o.old}</span>`:''}</div></div></article>`;}
-function storeCard(s){return `<article class="car-item store-card">
+    <div class="pcard-foot"><span class="price dm">${o.price} <small>KWD</small></span>${o.old?`<span class="price-old dm">${o.old}</span>`:''}</div>
+    <div class="pcard-cartwrap" onclick="event.stopPropagation()">${cartCtrl(L(o),o.price)}</div></div></article>`;}
+function storeCard(s){return `<article class="car-item store-card" onclick="window.location='raf_store.html'">
   <div class="store-cover"></div><div class="store-body"><div class="store-logo"><i class="ti ${s.ic}"></i></div>
   <div class="store-name">${L(s)} <i class="ti ti-rosette-discount-check verify"></i></div>
   <div class="store-meta"><span><i class="ti ti-star-filled"></i> ${s.rate}</span><span class="dot"></span><span>${s.prod} ${curLang()==='en'?'products':'منتج'}</span><span class="dot"></span><span>${L(s.cat)}</span></div>
-  <a href="raf_store.html" class="btn-visit"><i class="ti ti-arrow-left"></i> ${curLang()==='en'?'Visit Store':'زيارة المتجر'}</a></div></article>`;}
+  <a href="raf_store.html" class="btn-visit" onclick="event.stopPropagation()"><i class="ti ti-arrow-left"></i> ${curLang()==='en'?'Visit Store':'زيارة المتجر'}</a></div></article>`;}
 function aucCard(a){return `<article class="car-item auc-card">
   <div class="auc-img"><i class="ti ${a.ic}"></i><span class="auc-live"><span class="pulse"></span> ${curLang()==='en'?'LIVE':'مباشر'}</span></div>
   <div class="auc-body"><div class="auc-name">${L(a)}</div>
@@ -674,6 +691,39 @@ function carScroll(btn,dir){
 }
 function swTab(id,btn){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));document.getElementById('tab-'+id).classList.add('on');}
 function toggleWish(btn,e){e.preventDefault();e.stopPropagation();btn.classList.toggle('on');btn.querySelector('i').className='ti '+(btn.classList.contains('on')?'ti-heart-filled':'ti-heart');}
+/* ===== CART QUANTITY CONTROLS (direct from product card; never navigates) ===== */
+function readCart(){try{var c=JSON.parse(localStorage.getItem('raf_cart')||'[]');return Array.isArray(c)?c:[];}catch(_){return [];}}
+function cartQty(name){var ex=readCart().find(function(i){return i.name===name;});return ex?(ex.qty||1):0;}
+function writeCart(name,price,qty){
+  var c=readCart(),idx=c.findIndex(function(i){return i.name===name;});
+  if(qty<=0){if(idx>-1)c.splice(idx,1);}
+  else if(idx>-1){c[idx].qty=qty;c[idx].price=price;}
+  else c.push({name:name,price:price,qty:qty});
+  try{localStorage.setItem('raf_cart',JSON.stringify(c));}catch(_){}
+}
+/* renders either the Add button OR the [- n +] stepper, depending on current cart state */
+function cartCtrl(name,price){
+  var q=cartQty(name),a='data-name="'+name+'" data-price="'+price+'"';
+  if(q>0){
+    var trash=q===1?' is-trash':'',ic=q===1?'ti-trash':'ti-minus';
+    return '<div class="pcard-qty" '+a+'>'
+      +'<button class="qbtn qminus'+trash+'" onclick="cartDec(event,this)" aria-label="decrease"><i class="ti '+ic+'"></i></button>'
+      +'<span class="qnum">'+q+'</span>'
+      +'<button class="qbtn qplus" onclick="cartInc(event,this)" aria-label="increase"><i class="ti ti-plus"></i></button>'
+      +'</div>';
+  }
+  return '<button class="pcard-cart" '+a+' onclick="addToCart(event,this)"><i class="ti ti-shopping-cart-plus"></i> <span data-cart-lbl>'+(curLang()==='en'?'Add to Cart':'أضف للسلة')+'</span></button>';
+}
+/* keep every card showing the same product in sync */
+function refreshCartCtrls(name){
+  document.querySelectorAll('.pcard-cartwrap').forEach(function(w){
+    var el=w.querySelector('[data-name]');if(el&&el.dataset.name===name)w.innerHTML=cartCtrl(name,el.dataset.price);
+  });
+}
+function bump(name,price,delta){writeCart(name,price,cartQty(name)+delta);updateCartBadge();refreshCartCtrls(name);}
+function addToCart(e,btn){e.preventDefault();e.stopPropagation();bump(btn.dataset.name,btn.dataset.price,1);}
+function cartInc(e,btn){e.preventDefault();e.stopPropagation();var w=btn.closest('.pcard-qty');bump(w.dataset.name,w.dataset.price,1);}
+function cartDec(e,btn){e.preventDefault();e.stopPropagation();var w=btn.closest('.pcard-qty');bump(w.dataset.name,w.dataset.price,-1);}
 
 /* ===== SMART SEARCH OVERLAY ===== */
 function seedHistory(){ if(!localStorage.getItem('raf_recent_views')) lsSet('raf_recent_views',[

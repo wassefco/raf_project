@@ -3,23 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>رف — تسجيل الدخول</title>
+<title>رف — تسجيل الدخول / إنشاء حساب</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
   :root {
     --bg: #F5F2EC;
     --bg2: #EDE8DC;
+    --bg3: #E7E1D4;
     --card: #FFFFFF;
     --gold: #C9A84C;
     --gold2: #A07828;
-    --black: #0A0A0A;
+    --gold-soft: rgba(201,168,76,0.12);
+    --ink: #15130F;
     --text: #0A0A0A;
-    --text2: #555;
-    --text3: #888;
-    --border: #D8D3C8;
-    --r: 8px;
+    --text2: #5A5650;
+    --text3: #8A857C;
+    --border: #E2DBCC;
+    --border2: #D8D0BE;
+    --green: #2E9E5B;
+    --red: #C0392B;
+    --r: 10px;
     --rl: 16px;
     --font: 'Tajawal', sans-serif;
     --fdisplay: 'Playfair Display', serif;
@@ -29,325 +34,329 @@
 
   html { overflow-x: hidden; }
   body {
-    background: #0A0A0A;
+    background: var(--bg);
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; flex-direction: column;
     font-family: var(--font);
-    padding: 20px;
+    color: var(--text);
     position: relative;
     overflow-x: hidden;
     max-width: 100%;
   }
-
-  /* Background dot grid */
+  /* soft ambient backdrop */
   body::before {
     content: '';
-    position: fixed; inset: 0;
-    background-image: radial-gradient(rgba(201,168,76,0.07) 1px, transparent 1px);
-    background-size: 32px 32px;
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(620px 420px at 85% -5%, rgba(201,168,76,0.10), transparent 60%),
+      radial-gradient(560px 420px at 0% 100%, rgba(201,168,76,0.07), transparent 60%);
     pointer-events: none;
   }
 
-  /* Ambient gold glow */
-  body::after {
-    content: '';
-    position: fixed;
-    width: 600px; height: 600px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(201,168,76,0.09) 0%, transparent 65%);
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
+  /* ─────────── TOP NAV ─────────── */
+  .auth-nav {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+    padding: 12px clamp(16px, 4vw, 40px);
+    padding-top: max(12px, env(safe-area-inset-top));
+    background: rgba(245,242,236,0.85);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--border);
   }
+  .nav-logo { display: inline-flex; align-items: center; }
+  .nav-logo img { height: 42px; width: auto; display: block; }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
 
-  /* LANG BUTTON */
   .lang-btn {
-    position: fixed; top: 20px; left: 20px;
-    padding: 7px 14px;
-    border: 1px solid #222;
-    border-radius: var(--r);
-    background: rgba(255,255,255,0.04);
-    color: #555; font-family: var(--fen);
-    font-size: 12px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 14px;
+    border: 1px solid var(--border2);
+    border-radius: 30px;
+    background: var(--card);
+    color: var(--text2); font-family: var(--fen);
+    font-size: 12px; font-weight: 500; cursor: pointer;
+    transition: all .2s; letter-spacing: .5px;
+  }
+  .lang-btn:hover { border-color: var(--gold); color: var(--gold2); }
+  .lang-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+
+  .nav-back {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 8px 16px; border-radius: 30px;
+    background: var(--ink); color: #F3EFE5;
+    font-size: 13px; font-weight: 500; text-decoration: none;
     transition: all .2s;
-    display: inline-flex; align-items: center; gap: 6px;
-    z-index: 100; letter-spacing: .5px;
   }
-  .lang-btn:hover { border-color: var(--gold); color: var(--gold); }
-  .lang-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); }
+  .nav-back:hover { background: #000; transform: translateY(-1px); }
+  .nav-back i { font-size: 16px; }
 
-  /* BACK LINK */
-  .back-link {
-    position: fixed; top: 20px; right: 20px;
-    display: flex; align-items: center; gap: 6px;
-    font-size: 13px; color: #444;
-    text-decoration: none;
-    transition: color .2s;
-    z-index: 100;
+  /* ─────────── MAIN / CARD ─────────── */
+  .auth-main {
+    flex: 1; position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 36px 20px 56px;
   }
-  .back-link:hover { color: var(--gold); }
-
-  /* LOGIN CARD */
   .login-card {
-    position: relative; z-index: 10;
-    width: 100%; max-width: 420px;
-    background: #111;
-    border: 1px solid #1e1e1e;
-    border-radius: 20px;
-    padding: 44px 40px 36px;
-    box-shadow: 0 0 0 1px rgba(201,168,76,0.08), 0 40px 80px rgba(0,0,0,0.6);
+    position: relative;
+    width: 100%; max-width: 440px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    padding: 38px 38px 30px;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 30px 70px -30px rgba(20,16,8,0.30), 0 8px 24px -12px rgba(20,16,8,0.12);
   }
 
-  /* Card top glow accent */
-  .login-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 50%; transform: translateX(-50%);
-    width: 160px; height: 1px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    border-radius: 50%;
+  /* LOGO inside card (subtle, brand reinforcement) */
+  .card-head { text-align: center; margin-bottom: 22px; }
+  .card-head .kicker {
+    font-family: var(--fen); font-size: 10px; font-weight: 600;
+    letter-spacing: 3px; text-transform: uppercase; color: var(--gold2);
   }
 
-  /* LOGO */
-  .logo-wrap {
-    text-align: center;
-    margin-bottom: 32px;
+  /* SEGMENTED TOGGLE */
+  .auth-toggle {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 5px; margin-bottom: 26px;
   }
-  .logo-mark {
-    font-family: var(--fdisplay);
-    font-size: 52px; font-weight: 900;
-    color: var(--gold);
-    line-height: 1;
-    display: block;
-    letter-spacing: -1px;
+  .auth-seg {
+    padding: 12px 8px; border: none; background: transparent;
+    color: var(--text2); font-family: var(--font);
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    border-radius: 10px; transition: all .22s; letter-spacing: .2px;
   }
-  .logo-sub {
-    font-family: var(--fen);
-    font-size: 10px; font-weight: 300;
-    color: #333; letter-spacing: 5px;
-    text-transform: uppercase;
-    margin-top: 4px;
-    display: block;
+  .auth-seg:hover { color: var(--ink); }
+  .auth-seg.on {
+    background: var(--ink); color: #F5F0E4;
+    box-shadow: 0 4px 14px -4px rgba(20,16,8,0.5);
   }
-
-  /* STEP INDICATOR */
-  .steps {
-    display: flex; align-items: center; gap: 8px;
-    margin-bottom: 24px;
-  }
-  .step-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    background: #222; transition: all .3s;
-  }
-  .step-dot.on { background: var(--gold); width: 20px; border-radius: 3px; }
-  .step-label { font-size: 11px; color: #333; margin-right: auto; font-family: var(--fen); }
 
   /* FORM HEADER */
-  .form-header { margin-bottom: 24px; }
+  .form-header { margin-bottom: 22px; }
   .form-title {
     font-family: var(--fdisplay);
-    font-size: 22px; font-weight: 700;
-    color: #F5F2EC; margin-bottom: 6px;
+    font-size: 24px; font-weight: 700;
+    color: var(--ink); margin-bottom: 6px;
   }
-  .form-sub { font-size: 13px; color: #444; line-height: 1.6; }
+  .form-sub { font-size: 13.5px; color: var(--text3); line-height: 1.6; }
 
   /* METHOD TABS */
   .method-tabs {
-    display: grid; grid-template-columns: repeat(3,1fr);
-    gap: 6px; margin-bottom: 24px;
-    background: #0d0d0d;
-    border: 1px solid #1e1e1e;
-    border-radius: 12px;
-    padding: 4px;
+    display: grid; grid-template-columns: repeat(2,1fr);
+    gap: 8px; margin-bottom: 22px;
   }
   .method-tab {
-    padding: 10px 6px;
-    border-radius: 9px;
-    border: none; background: transparent;
-    color: #444; font-family: var(--font);
-    font-size: 12px; cursor: pointer;
-    transition: all .2s;
-    display: flex; flex-direction: column;
-    align-items: center; gap: 5px;
+    padding: 11px 8px; border-radius: var(--r);
+    border: 1px solid var(--border); background: var(--bg);
+    color: var(--text2); font-family: var(--font);
+    font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
   }
-  .method-tab i { font-size: 18px; }
+  .method-tab i { font-size: 17px; color: var(--text3); transition: color .2s; }
+  .method-tab:hover { border-color: var(--border2); }
   .method-tab.on {
-    background: #1a1a1a;
-    color: #ccc;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
-    border: 1px solid #2a2a2a;
+    background: var(--gold-soft); border-color: var(--gold);
+    color: var(--ink); font-weight: 700;
   }
-  .method-tab.on i { color: var(--gold); }
+  .method-tab.on i { color: var(--gold2); }
 
   /* FORM FIELDS */
   .field { margin-bottom: 16px; }
   .field-label {
-    font-size: 12px; font-weight: 500;
-    color: #444; margin-bottom: 7px;
-    display: block; letter-spacing: .3px;
+    font-size: 12.5px; font-weight: 600;
+    color: var(--text2); margin-bottom: 8px;
+    display: block; letter-spacing: .2px;
   }
   .field-input {
-    width: 100%; padding: 12px 16px;
-    border: 1px solid #1e1e1e;
+    width: 100%; padding: 13px 16px;
+    border: 1px solid var(--border2);
     border-radius: var(--r);
-    background: #0d0d0d;
-    color: #ccc; font-family: var(--font);
-    font-size: 14px; outline: none;
-    transition: border-color .2s, box-shadow .2s;
+    background: #FCFBF8;
+    color: var(--text); font-family: var(--font);
+    font-size: 14.5px; outline: none;
+    transition: border-color .2s, box-shadow .2s, background .2s;
   }
   .field-input:focus {
     border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.16);
   }
-  .field-input::placeholder { color: #2e2e2e; }
+  .field-input.invalid { border-color: var(--red); box-shadow: 0 0 0 3px rgba(192,57,43,0.10); }
+  .field-input::placeholder { color: #B8B1A2; }
   .input-wrap { position: relative; }
-  .input-wrap input { padding-right: 44px; }
   .input-prefix {
     position: absolute; right: 14px; top: 50%;
     transform: translateY(-50%);
-    font-size: 14px; color: #333;
+    font-size: 15px; color: var(--text3);
   }
+  .pw-toggle {
+    position: absolute; left: 12px; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: var(--text3); font-size: 18px; padding: 4px;
+    display: flex; align-items: center;
+  }
+  .pw-toggle:hover { color: var(--gold2); }
+
+  /* inline validation message */
+  .field-error {
+    font-size: 12px; color: var(--red);
+    margin-top: 7px; display: none;
+    align-items: center; gap: 6px;
+  }
+  .field-error.show { display: flex; }
+  .field-error i { font-size: 14px; }
+
+  /* PASSWORD STRENGTH */
+  .pw-meter { display: flex; gap: 5px; margin-top: 10px; }
+  .pw-bar { flex: 1; height: 4px; border-radius: 3px; background: var(--bg3); transition: background .25s; }
+  .pw-bar.f1 { background: #C0392B; }
+  .pw-bar.f2 { background: #E67E22; }
+  .pw-bar.f3 { background: var(--gold); }
+  .pw-bar.f4 { background: var(--green); }
+  .pw-hint { font-size: 11.5px; color: var(--text3); margin-top: 8px; line-height: 1.5; }
+
+  /* forgot password */
+  .forgot-row { text-align: left; margin: -2px 0 18px; }
+  .forgot-row a { font-size: 12.5px; color: var(--gold2); text-decoration: none; font-weight: 500; }
+  .forgot-row a:hover { text-decoration: underline; }
 
   /* OTP */
-  .otp-wrap { display: flex; gap: 8px; }
+  .otp-wrap { display: flex; gap: 9px; }
   .otp-input {
-    flex: 1; padding: 12px 0;
-    border: 1px solid #1e1e1e;
+    flex: 1; padding: 14px 0;
+    border: 1px solid var(--border2);
     border-radius: var(--r);
-    background: #0d0d0d;
-    color: #F5F2EC; font-family: var(--fen);
-    font-size: 20px; font-weight: 700;
+    background: #FCFBF8;
+    color: var(--ink); font-family: var(--fen);
+    font-size: 22px; font-weight: 700;
     text-align: center; outline: none;
     transition: border-color .2s, box-shadow .2s;
     min-width: 0;
   }
   .otp-input:focus {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+    border-color: var(--gold); background: #fff;
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.16);
   }
 
-  /* PRIMARY BUTTON */
+  /* ─────────── BUTTONS (clear hierarchy) ─────────── */
   .btn-main {
-    width: 100%; padding: 14px;
-    background: var(--gold); border: none;
+    width: 100%; padding: 15px;
+    background: var(--gold); border: 1px solid var(--gold2);
     border-radius: var(--r);
-    color: #0A0A0A;
-    font-family: var(--font); font-size: 14px; font-weight: 700;
+    color: #1C1606;
+    font-family: var(--font); font-size: 15px; font-weight: 700;
     cursor: pointer; transition: all .2s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
+    display: flex; align-items: center; justify-content: center; gap: 9px;
     margin-bottom: 16px; letter-spacing: .3px;
+    box-shadow: 0 8px 20px -8px rgba(201,168,76,0.7);
   }
-  .btn-main:hover { background: var(--gold2); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.25); }
+  .btn-main:hover { background: var(--gold2); border-color: var(--gold2); color: #fff; transform: translateY(-1px); box-shadow: 0 12px 26px -8px rgba(160,120,40,0.6); }
+  .btn-main i { font-size: 18px; }
 
-  /* GHOST BUTTON */
   .btn-ghost {
-    width: 100%; padding: 12px;
-    background: transparent; border: 1px solid #1e1e1e;
-    border-radius: var(--r); color: #444;
-    font-family: var(--font); font-size: 13px;
+    width: 100%; padding: 13px;
+    background: var(--card); border: 1px solid var(--border2);
+    border-radius: var(--r); color: var(--text2);
+    font-family: var(--font); font-size: 13.5px; font-weight: 600;
     cursor: pointer; transition: all .2s;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
   }
-  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+  .btn-ghost:hover { border-color: var(--gold); color: var(--gold2); background: var(--gold-soft); }
 
   /* DIVIDER */
   .or-divider {
     display: flex; align-items: center; gap: 12px;
-    margin: 16px 0; color: #2a2a2a; font-size: 12px; font-family: var(--fen);
+    margin: 18px 0; color: var(--text3); font-size: 12px; font-family: var(--fen);
   }
   .or-divider::before, .or-divider::after {
-    content: ''; flex: 1; height: 1px; background: #1a1a1a;
+    content: ''; flex: 1; height: 1px; background: var(--border);
   }
 
   /* SOCIAL BUTTONS */
-  .social-btns { display: flex; gap: 8px; margin-bottom: 20px; }
+  .social-btns { display: flex; gap: 10px; margin-bottom: 20px; }
   .social-login {
-    flex: 1; padding: 11px;
-    border: 1px solid #1e1e1e; border-radius: var(--r);
-    background: #0d0d0d; cursor: pointer;
+    flex: 1; padding: 12px;
+    border: 1px solid var(--border2); border-radius: var(--r);
+    background: var(--card); cursor: pointer;
     transition: all .2s; font-family: var(--font);
-    font-size: 13px; color: #444;
-    display: flex; align-items: center; justify-content: center; gap: 7px;
+    font-size: 13.5px; font-weight: 600; color: var(--text2);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
   }
-  .social-login:hover { border-color: #2a2a2a; color: #888; }
-  .social-login i { font-size: 17px; }
+  .social-login:hover { border-color: var(--ink); color: var(--ink); box-shadow: 0 4px 12px -6px rgba(20,16,8,0.25); }
+  .social-login i { font-size: 18px; }
 
   /* TERMS */
-  .terms-text { font-size: 11px; color: #2e2e2e; text-align: center; line-height: 1.7; }
-  .terms-text a { color: var(--gold); text-decoration: none; opacity: .7; }
-  .terms-text a:hover { opacity: 1; }
+  .terms-text { font-size: 11.5px; color: var(--text3); text-align: center; line-height: 1.7; }
+  .terms-text a { color: var(--gold2); text-decoration: none; font-weight: 500; }
+  .terms-text a:hover { text-decoration: underline; }
 
   /* PANEL SWITCH */
   .form-panel { display: none; }
-  .form-panel.on { display: block; }
+  .form-panel.on { display: block; animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
   /* OTP HEADER */
-  .otp-header {
-    text-align: center; margin-bottom: 24px;
-  }
+  .otp-header { text-align: center; margin-bottom: 24px; }
   .otp-icon-wrap {
-    width: 56px; height: 56px;
-    background: rgba(201,168,76,0.08);
-    border: 1px solid rgba(201,168,76,0.15);
+    width: 60px; height: 60px;
+    background: var(--gold-soft);
+    border: 1px solid rgba(201,168,76,0.30);
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 24px; color: var(--gold);
-    margin: 0 auto 14px;
+    font-size: 26px; color: var(--gold2);
+    margin: 0 auto 16px;
   }
-  .otp-title { font-size: 15px; font-weight: 600; color: #ccc; margin-bottom: 6px; }
-  .otp-desc { font-size: 12px; color: #333; line-height: 1.6; }
+  .otp-title { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 7px; }
+  .otp-desc { font-size: 12.5px; color: var(--text3); line-height: 1.6; }
+  .otp-desc b { color: var(--text); font-weight: 700; }
 
-  /* STAFF SECTION */
-  .staff-section {
-    margin-top: 24px;
-    padding-top: 20px;
-    border-top: 1px solid #161616;
+  /* ACTIVATED SUCCESS */
+  .activated-wrap { text-align: center; padding: 14px 0 6px; }
+  .activated-icon {
+    width: 84px; height: 84px; margin: 0 auto 22px;
+    border-radius: 50%;
+    background: rgba(46,158,91,0.10);
+    border: 1px solid rgba(46,158,91,0.35);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 42px; color: var(--green);
+    animation: pop .4s ease;
   }
-  .staff-label {
-    text-align: center;
-    font-size: 10px; color: #2a2a2a;
-    letter-spacing: 2px; text-transform: uppercase;
-    font-family: var(--fen);
-    margin-bottom: 12px;
-  }
-  .staff-roles {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
-  }
-  .role-btn {
-    display: flex; flex-direction: column; align-items: center; gap: 5px;
-    padding: 12px 6px;
-    background: transparent; border: 1px solid #1a1a1a;
-    border-radius: var(--r); color: #2e2e2e;
-    font-family: var(--font); font-size: 11px; font-weight: 500;
-    cursor: pointer; transition: all .2s;
-  }
-  .role-btn i { font-size: 18px; color: #2a2a2a; transition: color .2s; }
-  .role-btn:hover { border-color: rgba(201,168,76,0.3); color: #666; }
-  .role-btn:hover i { color: var(--gold); }
+  @keyframes pop { 0% { transform: scale(.5); opacity: 0; } 70% { transform: scale(1.08); } 100% { transform: scale(1); opacity: 1; } }
+  .activated-title { font-family: var(--fdisplay); font-size: 25px; font-weight: 700; color: var(--ink); margin-bottom: 10px; }
+  .activated-sub { font-size: 13.5px; color: var(--text3); line-height: 1.7; margin-bottom: 28px; }
 
   /* RESEND */
   .resend-row { text-align: center; margin-bottom: 16px; }
-  .resend-row span { font-size: 12px; color: #333; }
-  .resend-row a { font-size: 12px; color: var(--gold); text-decoration: none; opacity: .7; }
-  .resend-row a:hover { opacity: 1; }
+  .resend-row span { font-size: 12.5px; color: var(--text3); }
+  .resend-row a { font-size: 12.5px; color: var(--gold2); text-decoration: none; font-weight: 600; }
+  .resend-row a:hover { text-decoration: underline; }
 
-  /* ── GLOBAL MOBILE RESET ── */
-  @media (max-width: 768px) {
-    * { max-width: 100%; }
-    img, video, iframe { max-width: 100% !important; height: auto; }
-    table { max-width: 100%; }
+  /* STAFF SECTION */
+  .staff-section { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+  .staff-label {
+    text-align: center; font-size: 10px; color: var(--text3);
+    letter-spacing: 2px; text-transform: uppercase;
+    font-family: var(--fen); margin-bottom: 10px; font-weight: 600;
+  }
+  .staff-note {
+    font-size: 12.5px; color: var(--text2); line-height: 1.7;
+    text-align: center; margin: 6px auto 0; max-width: 320px;
   }
 
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    img, video, iframe { max-width: 100% !important; height: auto; }
+  }
   @media (max-width: 480px) {
-    .login-card { padding: 36px 24px 28px; border-radius: 16px; }
-    .logo-mark { font-size: 44px; }
-    .back-link span { display: none; }
-    .staff-roles { grid-template-columns: repeat(2, 1fr); }
-    .login-card { padding: 28px 16px 24px; margin: 0; }
-    .otp-wrap { gap: 5px; }
-    .otp-input { font-size: 18px; padding: 10px 0; }
+    .auth-main { padding: 22px 14px 40px; }
+    .login-card { padding: 28px 20px 24px; border-radius: 18px; }
+    .nav-logo img { height: 36px; }
+    .nav-back span { display: none; }
+    .nav-back { padding: 9px 11px; }
+    .otp-wrap { gap: 6px; }
+    .otp-input { font-size: 19px; padding: 12px 0; }
   }
 </style>
 <link rel="stylesheet" href="raf_header.css">
@@ -357,113 +366,108 @@
 </head>
 <body>
 
-<!-- LANG TOGGLE -->
-<button class="lang-btn" onclick="toggleLang()">
-  <span class="lang-dot"></span>
-  <span id="langLabel">EN</span>
-</button>
+<!-- ─────────── TOP NAV ─────────── -->
+<header class="auth-nav">
+  <a href="raf_homepage.html" class="nav-logo" aria-label="RAF">
+    <img src="raf_logo_web.png" alt="RAF Marketplace">
+  </a>
+  <div class="nav-right">
+    <button class="lang-btn" onclick="toggleLang()">
+      <span class="lang-dot"></span>
+      <span id="langLabel">EN</span>
+    </button>
+    <a href="raf_homepage.html" class="nav-back">
+      <i class="ti ti-arrow-right"></i>
+      <span data-ar="العودة للتسوق" data-en="Back to shopping">العودة للتسوق</span>
+    </a>
+  </div>
+</header>
 
-<!-- BACK LINK -->
-<a href="raf_homepage.html" class="back-link">
-  <i class="ti ti-arrow-right"></i>
-  <span data-ar="التسوق" data-en="Shopping">التسوق</span>
-</a>
-
-<!-- MAIN CARD -->
+<!-- ─────────── MAIN ─────────── -->
+<main class="auth-main">
 <div class="login-card">
 
-  <!-- LOGO -->
-  <div class="logo-wrap">
-    <img src="raf_logo_web.png" alt="RAF Marketplace" class="brand-logo-login">
-    
+  <div class="card-head">
+    <span class="kicker" data-ar="هوية رف" data-en="RAF ID">هوية رف</span>
   </div>
 
-  <!-- STEP DOTS -->
-  <div class="steps">
-    <div class="step-dot on" id="dot1"></div>
-    <div class="step-dot" id="dot2"></div>
-    <span class="step-label" id="step-label">١ / ٢</span>
+  <!-- SEGMENTED TOGGLE -->
+  <div class="auth-toggle" id="authToggle">
+    <button class="auth-seg on" id="seg-signin" onclick="setMode('signin')" data-ar="تسجيل الدخول" data-en="Sign In">تسجيل الدخول</button>
+    <button class="auth-seg" id="seg-register" onclick="setMode('register')" data-ar="إنشاء حساب" data-en="Create Account">إنشاء حساب</button>
   </div>
 
-  <!-- ────────── STEP 1 ────────── -->
-  <div class="form-panel on" id="step1">
+  <!-- ══════════ SIGN IN ══════════ -->
+  <div class="form-panel on" id="view-signin">
 
     <div class="form-header">
-      <div class="form-title" data-ar="أهلاً بك" data-en="Welcome Back">أهلاً بك</div>
-      <div class="form-sub" data-ar="سجّل دخولك أو أنشئ حساباً جديداً" data-en="Sign in or create a new account">سجّل دخولك أو أنشئ حساباً جديداً</div>
+      <div class="form-title" data-ar="أهلاً بعودتك" data-en="Welcome Back">أهلاً بعودتك</div>
+      <div class="form-sub" data-ar="سجّل دخولك إلى هوية رف الخاصة بك" data-en="Sign in to your RAF ID">سجّل دخولك إلى هوية رف الخاصة بك</div>
     </div>
 
     <!-- METHOD TABS -->
     <div class="method-tabs">
-      <button class="method-tab on" onclick="selectMethod(this,'whatsapp')">
-        <i class="ti ti-brand-whatsapp"></i>
-        <span data-ar="واتساب" data-en="WhatsApp">واتساب</span>
-      </button>
-      <button class="method-tab" onclick="selectMethod(this,'email')">
+      <button class="method-tab on" id="si-tab-email" onclick="selectSigninMethod('email')">
         <i class="ti ti-mail"></i>
-        <span data-ar="البريد" data-en="Email">البريد</span>
+        <span data-ar="البريد الإلكتروني" data-en="Email">البريد الإلكتروني</span>
       </button>
-      <button class="method-tab" onclick="selectMethod(this,'sms')">
+      <button class="method-tab" id="si-tab-phone" onclick="selectSigninMethod('phone')">
         <i class="ti ti-device-mobile"></i>
-        <span>SMS</span>
+        <span data-ar="رقم الجوال" data-en="Phone">رقم الجوال</span>
       </button>
     </div>
 
-    <!-- WHATSAPP -->
-    <div id="method-whatsapp">
-      <div class="field">
-        <label class="field-label" data-ar="رقم الواتساب" data-en="WhatsApp Number">رقم الواتساب</label>
-        <div class="input-wrap">
-          <input type="tel" class="field-input" placeholder="XXXXXXXX" style="padding-right:82px;direction:ltr;text-align:right;">
-          <span class="input-prefix" style="display:flex;align-items:center;gap:4px;font-size:12px;color:#333;">🇰🇼 +965</span>
-        </div>
-      </div>
-      <button class="btn-main" onclick="goStep2()">
-        <i class="ti ti-brand-whatsapp"></i>
-        <span data-ar="إرسال رمز واتساب" data-en="Send WhatsApp Code">إرسال رمز واتساب</span>
-      </button>
-    </div>
-
-    <!-- EMAIL -->
-    <div id="method-email" style="display:none;">
+    <!-- EMAIL + PASSWORD -->
+    <div id="si-email">
       <div class="field">
         <label class="field-label" data-ar="البريد الإلكتروني" data-en="Email Address">البريد الإلكتروني</label>
         <div class="input-wrap">
-          <input type="email" class="field-input" placeholder="example@email.com" style="direction:ltr;text-align:right;padding-right:44px;">
+          <input id="si-email-input" type="email" class="field-input" placeholder="example@email.com" style="direction:ltr;text-align:right;padding-right:44px;">
           <span class="input-prefix"><i class="ti ti-mail"></i></span>
         </div>
+        <div class="field-error" id="err-si-email"><i class="ti ti-alert-circle"></i><span></span></div>
       </div>
-      <button class="btn-main" onclick="goStep2()">
+      <div class="field">
+        <label class="field-label" data-ar="كلمة المرور" data-en="Password">كلمة المرور</label>
+        <div class="input-wrap">
+          <input id="si-pw-input" type="password" class="field-input" placeholder="••••••••" style="direction:ltr;text-align:right;padding-left:42px;">
+          <button type="button" class="pw-toggle" onclick="togglePw('si-pw-input',this)"><i class="ti ti-eye"></i></button>
+        </div>
+        <div class="field-error" id="err-si-pw"><i class="ti ti-alert-circle"></i><span></span></div>
+      </div>
+      <div class="forgot-row">
+        <a href="#" onclick="return false;" data-ar="نسيت كلمة المرور؟" data-en="Forgot password?">نسيت كلمة المرور؟</a>
+      </div>
+      <button class="btn-main" onclick="doEmailLogin()">
+        <i class="ti ti-login-2"></i>
+        <span data-ar="تسجيل الدخول" data-en="Login">تسجيل الدخول</span>
+      </button>
+    </div>
+
+    <!-- PHONE (OTP) -->
+    <div id="si-phone" style="display:none;">
+      <div class="field">
+        <label class="field-label" data-ar="رقم الجوال" data-en="Mobile Number">رقم الجوال</label>
+        <div class="input-wrap">
+          <input id="si-phone-input" type="tel" class="field-input" placeholder="XXXXXXXX" style="padding-right:82px;direction:ltr;text-align:right;">
+          <span class="input-prefix" style="display:flex;align-items:center;gap:4px;font-size:12.5px;color:var(--text2);">🇰🇼 +965</span>
+        </div>
+        <div class="field-error" id="err-si-phone"><i class="ti ti-alert-circle"></i><span></span></div>
+      </div>
+      <button class="btn-main" onclick="doPhoneSignin()">
         <i class="ti ti-send"></i>
         <span data-ar="إرسال رمز التحقق" data-en="Send Verification Code">إرسال رمز التحقق</span>
       </button>
     </div>
 
-    <!-- SMS -->
-    <div id="method-sms" style="display:none;">
-      <div class="field">
-        <label class="field-label" data-ar="رقم الجوال" data-en="Mobile Number">رقم الجوال</label>
-        <div class="input-wrap">
-          <input type="tel" class="field-input" placeholder="XXXXXXXX" style="padding-right:82px;direction:ltr;text-align:right;">
-          <span class="input-prefix" style="display:flex;align-items:center;gap:4px;font-size:12px;color:#333;">🇰🇼 +965</span>
-        </div>
-      </div>
-      <button class="btn-main" onclick="goStep2()">
-        <i class="ti ti-message"></i>
-        <span data-ar="إرسال رمز SMS" data-en="Send SMS Code">إرسال رمز SMS</span>
-      </button>
-    </div>
-
-    <div class="or-divider" data-ar="أو" data-en="or">أو</div>
+    <div class="or-divider" data-ar="أو تابع باستخدام" data-en="or continue with">أو تابع باستخدام</div>
 
     <div class="social-btns">
-      <button class="social-login">
-        <i class="ti ti-brand-google" style="color:#EA4335;"></i>
-        Google
+      <button class="social-login" onclick="socialAuth('google')">
+        <i class="ti ti-brand-google" style="color:#EA4335;"></i> Google
       </button>
-      <button class="social-login">
-        <i class="ti ti-brand-apple" style="color:#888;"></i>
-        Apple
+      <button class="social-login" onclick="socialAuth('apple')">
+        <i class="ti ti-brand-apple" style="color:#111;"></i> Apple
       </button>
     </div>
 
@@ -473,106 +477,319 @@
       <span data-ar="و" data-en="&amp;"> و </span>
       <a href="raf_privacy.html" target="_blank" data-ar="الخصوصية" data-en="Privacy">الخصوصية</a>
     </div>
+  </div><!-- /view-signin -->
 
-  </div><!-- /step1 -->
-
-  <!-- ────────── STEP 2 ────────── -->
-  <div class="form-panel" id="step2">
-
+  <!-- ══════════ SIGN IN — PHONE OTP ══════════ -->
+  <div class="form-panel" id="view-signin-otp">
     <div class="otp-header">
-      <div class="otp-icon-wrap">
-        <i class="ti ti-brand-whatsapp" id="otp-icon"></i>
-      </div>
+      <div class="otp-icon-wrap"><i class="ti ti-device-mobile"></i></div>
       <div class="otp-title" data-ar="أدخل رمز التحقق" data-en="Enter Verification Code">أدخل رمز التحقق</div>
-      <div class="otp-desc" id="otp-desc">تم إرسال رمز مكون من 6 أرقام إلى واتساب رقم +965 XXXXXXXX</div>
+      <div class="otp-desc" data-ar="تم إرسال رمز مكوّن من 6 أرقام إلى" data-en="A 6-digit code was sent to">تم إرسال رمز مكوّن من 6 أرقام إلى <b id="si-otp-dest">+965 XXXXXXXX</b></div>
     </div>
-
     <div class="field">
       <div class="otp-wrap" style="direction:ltr;">
-        <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this,1)">
-        <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this,2)">
-        <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this,3)">
-        <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this,4)">
-        <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this,5)">
-        <input type="text" class="otp-input" maxlength="1" oninput="moveOtp(this,6)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
       </div>
     </div>
-
-    <button class="btn-main" style="margin-top:12px;" onclick="routeByRole()">
+    <button class="btn-main" style="margin-top:14px;" onclick="confirmPhoneSignin()">
       <i class="ti ti-check"></i>
       <span data-ar="تأكيد الدخول" data-en="Confirm">تأكيد الدخول</span>
     </button>
-
     <div class="resend-row">
       <span data-ar="لم يصلك الرمز؟ " data-en="Didn't receive it? ">لم يصلك الرمز؟ </span>
-      <a href="#" onclick="return false;" data-ar="إعادة الإرسال (59s)" data-en="Resend (59s)">إعادة الإرسال (59s)</a>
+      <a href="#" onclick="return false;" data-ar="إعادة الإرسال" data-en="Resend">إعادة الإرسال</a>
+    </div>
+    <button class="btn-ghost" onclick="setMode('signin')">
+      <i class="ti ti-arrow-right"></i>
+      <span data-ar="رجوع" data-en="Back">رجوع</span>
+    </button>
+  </div><!-- /view-signin-otp -->
+
+  <!-- ══════════ CREATE ACCOUNT ══════════ -->
+  <div class="form-panel" id="view-register">
+    <div class="form-header">
+      <div class="form-title" data-ar="أنشئ هوية رف" data-en="Create your RAF ID">أنشئ هوية رف</div>
+      <div class="form-sub" data-ar="حساب واحد لكل تجربة رف الخاصة بك" data-en="One account for your entire RAF experience">حساب واحد لكل تجربة رف الخاصة بك</div>
     </div>
 
-    <button class="btn-ghost" onclick="goStep1()">
-      <i class="ti ti-arrow-right"></i>
-      <span data-ar="تغيير طريقة التحقق" data-en="Change method">تغيير طريقة التحقق</span>
+    <div class="field">
+      <label class="field-label" data-ar="الاسم الكامل" data-en="Full Name">الاسم الكامل</label>
+      <div class="input-wrap">
+        <input id="reg-name" type="text" class="field-input" placeholder="محمد العنزي" style="padding-right:44px;">
+        <span class="input-prefix"><i class="ti ti-user"></i></span>
+      </div>
+      <div class="field-error" id="err-reg-name"><i class="ti ti-alert-circle"></i><span></span></div>
+    </div>
+
+    <div class="field">
+      <label class="field-label" data-ar="البريد الإلكتروني" data-en="Email Address">البريد الإلكتروني</label>
+      <div class="input-wrap">
+        <input id="reg-email" type="email" class="field-input" placeholder="example@email.com" style="direction:ltr;text-align:right;padding-right:44px;">
+        <span class="input-prefix"><i class="ti ti-mail"></i></span>
+      </div>
+      <div class="field-error" id="err-reg-email"><i class="ti ti-alert-circle"></i><span></span></div>
+    </div>
+
+    <div class="field">
+      <label class="field-label" data-ar="كلمة المرور" data-en="Create Password">كلمة المرور</label>
+      <div class="input-wrap">
+        <input id="reg-pw" type="password" class="field-input" placeholder="••••••••" style="direction:ltr;text-align:right;padding-left:42px;" oninput="updateStrength()">
+        <button type="button" class="pw-toggle" onclick="togglePw('reg-pw',this)"><i class="ti ti-eye"></i></button>
+      </div>
+      <div class="pw-meter">
+        <div class="pw-bar" id="pwb1"></div><div class="pw-bar" id="pwb2"></div>
+        <div class="pw-bar" id="pwb3"></div><div class="pw-bar" id="pwb4"></div>
+      </div>
+      <div class="pw-hint" id="pw-hint" data-ar="8 أحرف على الأقل، مع أحرف كبيرة وأرقام لقوة أعلى." data-en="At least 8 characters, with uppercase letters and numbers for more strength.">8 أحرف على الأقل، مع أحرف كبيرة وأرقام لقوة أعلى.</div>
+      <div class="field-error" id="err-reg-pw"><i class="ti ti-alert-circle"></i><span></span></div>
+    </div>
+
+    <div class="field">
+      <label class="field-label" data-ar="تأكيد كلمة المرور" data-en="Confirm Password">تأكيد كلمة المرور</label>
+      <div class="input-wrap">
+        <input id="reg-cpw" type="password" class="field-input" placeholder="••••••••" style="direction:ltr;text-align:right;padding-left:42px;">
+        <button type="button" class="pw-toggle" onclick="togglePw('reg-cpw',this)"><i class="ti ti-eye"></i></button>
+      </div>
+      <div class="field-error" id="err-reg-cpw"><i class="ti ti-alert-circle"></i><span></span></div>
+    </div>
+
+    <button class="btn-main" style="margin-top:8px;" onclick="createAccount()">
+      <i class="ti ti-user-plus"></i>
+      <span data-ar="إنشاء الحساب" data-en="Create Account">إنشاء الحساب</span>
     </button>
 
-  </div><!-- /step2 -->
+    <div class="or-divider" data-ar="أو سجّل باستخدام" data-en="or sign up with">أو سجّل باستخدام</div>
+
+    <div class="social-btns">
+      <button class="social-login" onclick="socialAuth('google')">
+        <i class="ti ti-brand-google" style="color:#EA4335;"></i> Google
+      </button>
+      <button class="social-login" onclick="socialAuth('apple')">
+        <i class="ti ti-brand-apple" style="color:#111;"></i> Apple
+      </button>
+    </div>
+
+    <div class="terms-text">
+      <span data-ar="بإنشائك حساباً أنت توافق على" data-en="By creating an account you agree to">بإنشائك حساباً أنت توافق على</span>
+      <a href="raf_terms.html" target="_blank" data-ar="الشروط" data-en="Terms">الشروط</a>
+      <span data-ar="و" data-en="&amp;"> و </span>
+      <a href="raf_privacy.html" target="_blank" data-ar="الخصوصية" data-en="Privacy">الخصوصية</a>
+    </div>
+  </div><!-- /view-register -->
+
+  <!-- ══════════ REGISTER — OTP ══════════ -->
+  <div class="form-panel" id="view-register-otp">
+    <div class="otp-header">
+      <div class="otp-icon-wrap"><i class="ti ti-mail-opened"></i></div>
+      <div class="otp-title" data-ar="تأكيد بريدك الإلكتروني" data-en="Verify your email">تأكيد بريدك الإلكتروني</div>
+      <div class="otp-desc" data-ar="أدخل الرمز المكوّن من 6 أرقام المُرسَل إلى" data-en="Enter the 6-digit code sent to">أدخل الرمز المكوّن من 6 أرقام المُرسَل إلى <b id="reg-otp-dest">example@email.com</b></div>
+    </div>
+    <div class="field">
+      <div class="otp-wrap" style="direction:ltr;">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
+      </div>
+    </div>
+    <button class="btn-main" style="margin-top:14px;" onclick="verifyRegisterOtp()">
+      <i class="ti ti-shield-check"></i>
+      <span data-ar="تفعيل الحساب" data-en="Activate Account">تفعيل الحساب</span>
+    </button>
+    <div class="resend-row">
+      <span data-ar="لم يصلك الرمز؟ " data-en="Didn't receive it? ">لم يصلك الرمز؟ </span>
+      <a href="#" onclick="return false;" data-ar="إعادة الإرسال" data-en="Resend">إعادة الإرسال</a>
+    </div>
+    <button class="btn-ghost" onclick="setMode('register')">
+      <i class="ti ti-arrow-right"></i>
+      <span data-ar="رجوع" data-en="Back">رجوع</span>
+    </button>
+  </div><!-- /view-register-otp -->
+
+  <!-- ══════════ ACCOUNT ACTIVATED ══════════ -->
+  <div class="form-panel" id="view-activated">
+    <div class="activated-wrap">
+      <div class="activated-icon"><i class="ti ti-circle-check"></i></div>
+      <div class="activated-title" data-ar="تم تفعيل حسابك" data-en="Account Activated">تم تفعيل حسابك</div>
+      <div class="activated-sub" data-ar="مرحباً بك في رف! هوية رف الخاصة بك جاهزة الآن." data-en="Welcome to RAF! Your RAF ID is now ready.">مرحباً بك في رف! هوية رف الخاصة بك جاهزة الآن.</div>
+      <button class="btn-main" onclick="goToAccount()">
+        <i class="ti ti-arrow-left"></i>
+        <span data-ar="الانتقال إلى هوية رف" data-en="Go to your RAF ID">الانتقال إلى هوية رف</span>
+      </button>
+    </div>
+  </div><!-- /view-activated -->
 
   <!-- ────────── STAFF ACCESS ────────── -->
-  <div class="staff-section">
+  <div class="staff-section" id="staffSection">
     <div class="staff-label" data-ar="طاقم العمل والشركاء" data-en="STAFF & PARTNERS">طاقم العمل والشركاء</div>
-    <p style="font-size:12.5px;color:#888;line-height:1.7;text-align:center;margin:8px auto 0;max-width:300px;" data-ar="سجّل الدخول بحسابك المعتاد — سيتم توجيهك تلقائياً إلى لوحة التحكم المناسبة لصلاحياتك (إدارة، تاجر، أو سائق)." data-en="Sign in with your usual account — you'll be routed automatically to the dashboard that matches your role (Admin, Merchant or Driver).">سجّل الدخول بحسابك المعتاد — سيتم توجيهك تلقائياً إلى لوحة التحكم المناسبة لصلاحياتك (إدارة، تاجر، أو سائق).</p>
+    <p class="staff-note" data-ar="سجّل الدخول بحسابك المعتاد — سيتم توجيهك تلقائياً إلى لوحة التحكم المناسبة لصلاحياتك (إدارة، تاجر، أو سائق)." data-en="Sign in with your usual account — you'll be routed automatically to the dashboard that matches your role (Admin, Merchant or Driver).">سجّل الدخول بحسابك المعتاد — سيتم توجيهك تلقائياً إلى لوحة التحكم المناسبة لصلاحياتك (إدارة، تاجر، أو سائق).</p>
   </div>
 
 </div><!-- /login-card -->
+</main>
 
 <script src="raf_permissions.js"></script>
 <script>
-  let currentMethod = 'whatsapp';
+  /* ───────── helpers ───────── */
+  function curLang(){ return document.getElementById('htmlRoot').lang === 'en' ? 'en' : 'ar'; }
+  function t(ar, en){ return curLang() === 'en' ? en : ar; }
+  function val(id){ return (document.getElementById(id).value || '').trim(); }
+  function showErr(id, msg){
+    const box = document.getElementById(id);
+    box.querySelector('span').textContent = msg;
+    box.classList.add('show');
+    const inp = box.parentElement.querySelector('input');
+    if (inp) inp.classList.add('invalid');
+  }
+  function clearErr(id){
+    const box = document.getElementById(id);
+    box.classList.remove('show');
+    const inp = box.parentElement.querySelector('input');
+    if (inp) inp.classList.remove('invalid');
+  }
+  function clearAllErrors(){ document.querySelectorAll('.field-error').forEach(b => b.classList.remove('show'));
+    document.querySelectorAll('.field-input').forEach(i => i.classList.remove('invalid')); }
+  const isEmail = v => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v);
 
-  function selectMethod(btn, method) {
-    document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('on'));
-    btn.classList.add('on');
-    currentMethod = method;
-    ['whatsapp','email','sms'].forEach(m => {
-      document.getElementById('method-' + m).style.display = m === method ? 'block' : 'none';
-    });
+  /* ───────── view / mode switching ───────── */
+  function showView(id){
+    document.querySelectorAll('.form-panel').forEach(p => p.classList.remove('on'));
+    document.getElementById(id).classList.add('on');
+    const isMain = (id === 'view-signin' || id === 'view-register');
+    document.getElementById('authToggle').style.display = isMain ? 'grid' : 'none';
+    document.getElementById('staffSection').style.display = isMain ? 'block' : 'none';
+    clearAllErrors();
+    window.scrollTo(0,0);
+  }
+  function setMode(mode){
+    document.getElementById('seg-signin').classList.toggle('on', mode === 'signin');
+    document.getElementById('seg-register').classList.toggle('on', mode === 'register');
+    showView(mode === 'signin' ? 'view-signin' : 'view-register');
   }
 
-  function goStep2() {
-    document.getElementById('step1').classList.remove('on');
-    document.getElementById('step2').classList.add('on');
-    document.getElementById('dot1').classList.remove('on');
-    document.getElementById('dot2').classList.add('on');
-    document.getElementById('step-label').textContent = '٢ / ٢';
-    const icons = { whatsapp: 'ti-brand-whatsapp', email: 'ti-mail', sms: 'ti-device-mobile' };
-    document.getElementById('otp-icon').className = 'ti ' + icons[currentMethod];
-    setTimeout(() => document.querySelector('.otp-input').focus(), 50);
+  /* ───────── SIGN IN ───────── */
+  let signinMethod = 'email';
+  function selectSigninMethod(m){
+    signinMethod = m;
+    document.getElementById('si-tab-email').classList.toggle('on', m === 'email');
+    document.getElementById('si-tab-phone').classList.toggle('on', m === 'phone');
+    document.getElementById('si-email').style.display = m === 'email' ? 'block' : 'none';
+    document.getElementById('si-phone').style.display = m === 'phone' ? 'block' : 'none';
   }
 
-  function goStep1() {
-    document.getElementById('step2').classList.remove('on');
-    document.getElementById('step1').classList.add('on');
-    document.getElementById('dot2').classList.remove('on');
-    document.getElementById('dot1').classList.add('on');
-    document.getElementById('step-label').textContent = '١ / ٢';
+  function togglePw(id, btn){
+    const inp = document.getElementById(id);
+    const showing = inp.type === 'text';
+    inp.type = showing ? 'password' : 'text';
+    btn.querySelector('i').className = showing ? 'ti ti-eye' : 'ti ti-eye-off';
   }
 
-  function moveOtp(input, index) {
-    if (input.value.length === 1 && index < 6) {
-      document.querySelectorAll('.otp-input')[index].focus();
+  /* Email login REQUIRES password */
+  function doEmailLogin(){
+    clearErr('err-si-email'); clearErr('err-si-pw');
+    const email = val('si-email-input');
+    const pw = document.getElementById('si-pw-input').value;
+    let ok = true;
+    if (!isEmail(email)) { showErr('err-si-email', t('يرجى إدخال بريد إلكتروني صالح','Please enter a valid email address')); ok = false; }
+    if (!pw) { showErr('err-si-pw', t('كلمة المرور مطلوبة','Password is required')); ok = false; }
+    if (!ok) return;
+    routeByRole(email);
+  }
+
+  function doPhoneSignin(){
+    clearErr('err-si-phone');
+    const phone = val('si-phone-input');
+    if (phone.replace(/\D/g,'').length < 6) { showErr('err-si-phone', t('يرجى إدخال رقم جوال صالح','Please enter a valid phone number')); return; }
+    document.getElementById('si-otp-dest').textContent = '+965 ' + phone;
+    showView('view-signin-otp');
+    setTimeout(() => document.querySelector('#view-signin-otp .otp-input').focus(), 60);
+  }
+  function confirmPhoneSignin(){ routeByRole(val('si-phone-input')); }
+
+  function socialAuth(provider){ /* placeholder — OAuth in production */ window.location = 'raf_account.html'; }
+
+  /* ───────── REGISTER ───────── */
+  function pwScore(v){
+    let s = 0;
+    if (v.length >= 8) s++;
+    if (/[A-Z]/.test(v) && /[a-z]/.test(v)) s++;
+    if (/\d/.test(v)) s++;
+    if (/[^A-Za-z0-9]/.test(v)) s++;
+    return s; // 0..4
+  }
+  function updateStrength(){
+    const v = document.getElementById('reg-pw').value;
+    const s = v ? pwScore(v) : 0;
+    for (let i = 1; i <= 4; i++){
+      const bar = document.getElementById('pwb' + i);
+      bar.className = 'pw-bar' + (i <= s ? ' f' + s : '');
     }
+    const hint = document.getElementById('pw-hint');
+    if (!v){ hint.textContent = t('8 أحرف على الأقل، مع أحرف كبيرة وأرقام لقوة أعلى.','At least 8 characters, with uppercase letters and numbers for more strength.'); hint.style.color = ''; return; }
+    const labelsAr = ['ضعيفة جداً','ضعيفة','متوسطة','قوية','قوية جداً'];
+    const labelsEn = ['Very weak','Weak','Medium','Strong','Very strong'];
+    const colors = ['#C0392B','#C0392B','#E67E22','#A07828','#2E9E5B'];
+    hint.textContent = t('قوة كلمة المرور: ','Password strength: ') + t(labelsAr[s], labelsEn[s]);
+    hint.style.color = colors[s];
   }
 
-  /* RBAC-based auto-routing: detect role from the entered account → redirect.
-     RBAC (raf_permissions.js) is the single source of truth. */
-  function routeByRole() {
-    let id = '';
-    const block = document.getElementById('method-' + currentMethod);
-    if (block) { const inp = block.querySelector('input'); if (inp) id = (inp.value || '').trim().toLowerCase(); }
+  function createAccount(){
+    clearAllErrors();
+    const name = val('reg-name'), email = val('reg-email');
+    const pw = document.getElementById('reg-pw').value, cpw = document.getElementById('reg-cpw').value;
+    let ok = true;
+    if (name.length < 2){ showErr('err-reg-name', t('يرجى إدخال الاسم الكامل','Please enter your full name')); ok = false; }
+    if (!isEmail(email)){ showErr('err-reg-email', t('يرجى إدخال بريد إلكتروني صالح','Please enter a valid email address')); ok = false; }
+    if (pwScore(pw) < 2){ showErr('err-reg-pw', t('كلمة المرور ضعيفة جداً — استخدم 8 أحرف على الأقل وأرقاماً','Password too weak — use 8+ characters and numbers')); ok = false; }
+    if (cpw !== pw || !cpw){ showErr('err-reg-cpw', t('كلمتا المرور غير متطابقتين','Passwords do not match')); ok = false; }
+    if (!ok) return;
+    window._pendingAccount = { name, email };
+    document.getElementById('reg-otp-dest').textContent = email;
+    showView('view-register-otp');
+    setTimeout(() => document.querySelector('#view-register-otp .otp-input').focus(), 60);
+  }
+
+  function verifyRegisterOtp(){
+    try {
+      const acc = window._pendingAccount || {};
+      if (window.RAFPerm && acc.email){
+        const existing = RAFPerm.getUsers().find(u => (u.email||'').toLowerCase() === acc.email.toLowerCase());
+        if (!existing && RAFPerm.addUser){
+          const u = RAFPerm.addUser({ name: acc.name, email: acc.email, roleId: 'customer' });
+          if (u && RAFPerm.setCurrentUser) RAFPerm.setCurrentUser(u.id);
+        } else if (existing && RAFPerm.setCurrentUser){ RAFPerm.setCurrentUser(existing.id); }
+      }
+      localStorage.setItem('raf_account', JSON.stringify(window._pendingAccount || {}));
+    } catch(e){}
+    showView('view-activated');
+  }
+
+  function goToAccount(){ window.location = 'raf_account.html'; }
+
+  /* ───────── OTP input auto-advance (generic) ───────── */
+  function moveOtp(input){
+    const inputs = [...input.parentElement.querySelectorAll('.otp-input')];
+    const i = inputs.indexOf(input);
+    input.value = input.value.replace(/\D/g,'').slice(0,1);
+    if (input.value.length === 1 && i < inputs.length - 1) inputs[i + 1].focus();
+  }
+
+  /* ───────── RBAC auto-routing (single source of truth) ───────── */
+  function routeByRole(identifier){
+    const id = (identifier || '').toString().trim().toLowerCase();
     let dest = 'raf_account.html';
     try {
-      if (window.RAFPerm) {
-        const norm = s => (s || '').toString().toLowerCase().replace(/[\s+]/g, '');
-        const u = RAFPerm.getUsers().find(x => (x.email || '').toLowerCase() === id || norm(x.phone) === norm(id));
-        if (u) {
+      if (window.RAFPerm){
+        const norm = s => (s || '').toString().toLowerCase().replace(/[\s+]/g,'');
+        const u = RAFPerm.getUsers().find(x => (x.email||'').toLowerCase() === id || norm(x.phone) === norm(id));
+        if (u){
           const map = { super_admin:'raf_management.html', higher_mgmt:'raf_management.html', ops_manager:'raf_management.html',
             customer_service:'raf_management.html', finance:'raf_management.html', marketing:'raf_management.html',
             merchant:'raf_merchant.html', merchant_employee:'raf_merchant.html', driver:'raf_driver_app.html', customer:'raf_account.html' };
@@ -580,12 +797,18 @@
           RAFPerm.setCurrentUser(u.id);
         }
       }
-    } catch (e) {}
+    } catch(e){}
     window.location = dest;
   }
 
-  /* LANG TOGGLE */
-  function toggleLang() {
+  /* ───────── deep-link: ?mode=register opens the register tab ───────── */
+  (function(){
+    const m = new URLSearchParams(location.search).get('mode');
+    if (m === 'register' || m === 'signup') setMode('register');
+  })();
+
+  /* ───────── LANG TOGGLE ───────── */
+  function toggleLang(){
     const html = document.getElementById('htmlRoot');
     const isAR = html.lang === 'ar';
     const newLang = isAR ? 'en' : 'ar';
@@ -594,16 +817,19 @@
     document.getElementById('langLabel').textContent = isAR ? 'ع' : 'EN';
     localStorage.setItem('raf_lang', newLang);
     document.querySelectorAll('[data-ar]').forEach(el => {
-      const t = el.getAttribute('data-' + newLang);
-      if (t) el.textContent = t;
+      const tx = el.getAttribute('data-' + newLang);
+      if (tx !== null) el.textContent = tx;
     });
+    updateStrength();
   }
-  (function() {
-    if (localStorage.getItem('raf_lang') === 'en') {
+  (function(){
+    if (localStorage.getItem('raf_lang') === 'en'){
       const html = document.getElementById('htmlRoot');
       html.lang = 'en'; html.dir = 'ltr';
       document.getElementById('langLabel').textContent = 'ع';
-      document.querySelectorAll('[data-en]').forEach(el => { el.textContent = el.getAttribute('data-en'); });
+      document.querySelectorAll('[data-en]').forEach(el => {
+        const tx = el.getAttribute('data-en'); if (tx !== null) el.textContent = tx;
+      });
     }
   })();
 </script>
