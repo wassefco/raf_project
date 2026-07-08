@@ -23,7 +23,8 @@
   /* ---------- cart (single schema in localStorage 'raf_cart') ---------- */
   function vsig(v) { v = v || {}; return Object.keys(v).sort().map(function (k) { return k + ':' + v[k]; }).join(','); }
   function keyOf(id, v) { return id + '|' + vsig(v); }
-  var Cart = {
+  /* use the shared RAFShop cart authority when present (single source of truth) */
+  var Cart = (window.RAFShop && window.RAFShop.Cart) || {
     read: function () { try { var c = JSON.parse(localStorage.getItem('raf_cart') || '[]'); return Array.isArray(c) ? c : []; } catch (e) { return []; } },
     write: function (a) { try { localStorage.setItem('raf_cart', JSON.stringify(a)); } catch (e) {} Cart.badge(); },
     line: function (key) { return Cart.read().find(function (l) { return l.key === key; }); },
@@ -54,6 +55,16 @@
   function injectCSS() {
     if (document.getElementById('rc-style')) return;
     var css = `
+    /* self-contained design tokens so the card looks identical on ANY page
+       (including pages that redefine --card/--ink/etc., e.g. the inverted product page) */
+    .rc-card,.rcv-back,.rcv{
+      --card:#FFFFFF;--bg:#F5F2EC;--bg2:#EDE8DC;--bg3:#E7E1D4;
+      --gold:#C9A84C;--gold2:#A07828;--gold-soft:rgba(201,168,76,.12);
+      --ink:#15130F;--text:#0A0A0A;--text2:#5A5650;--text3:#8A857C;
+      --border:#E2DBCC;--border2:#D8D0BE;--red:#D9534F;--green:#2E9E5B;
+      --font-ar:'Tajawal',sans-serif;--font-en:'DM Sans',sans-serif;
+      --sh:0 12px 30px -14px rgba(20,16,8,.28);--sh-sm:0 2px 8px rgba(20,16,8,.12);
+    }
     .rc-card{width:100%;background:var(--card,#fff);border:1px solid var(--border,#E2DBCC);border-radius:var(--rl,16px);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .22s,box-shadow .22s;font-family:var(--font-ar,'Tajawal',sans-serif);}
     .rc-card:hover{transform:translateY(-5px);box-shadow:var(--sh,0 12px 30px -14px rgba(20,16,8,.28));}
     .rc-img{aspect-ratio:1/1;background:linear-gradient(150deg,var(--bg2,#EDE8DC),var(--bg3,#E7E1D4));display:flex;align-items:center;justify-content:center;font-size:58px;color:var(--gold2,#A07828);position:relative;background-size:cover;background-position:center;}
@@ -155,7 +166,7 @@
     return '<article class="rc-card" data-id="' + p.id + '" data-href="' + o.href + '" onclick="RAFCard.go(this)">' +
       '<div class="rc-img"' + imgStyle + '>' + imgInner +
         (p.disc ? '<span class="rc-disc">-' + p.disc + '%</span>' : '') +
-        (o.wish ? '<button class="rc-wish" onclick="RAFCard.wish(event,this)" aria-label="wishlist"><i class="ti ti-heart"></i></button>' : '') +
+        (o.wish ? (function(){ var w = (window.RAFShop && RAFShop.Wish.has(p.id)); return '<button class="rc-wish' + (w ? ' on' : '') + '" onclick="RAFCard.wish(event,this)" aria-label="wishlist"><i class="ti ' + (w ? 'ti-heart-filled' : 'ti-heart') + '"></i></button>'; })() : '') +
       '</div>' +
       '<div class="rc-body">' +
         (o.store && p.store ? '<div class="rc-store"><i class="ti ti-building-store"></i> ' + L(p.store) + '</div>' : '') +
@@ -174,7 +185,14 @@
 
   /* ---------- interactions ---------- */
   function go(card) { var h = card.getAttribute('data-href'); if (h) window.location = h; }
-  function wish(e, btn) { e.preventDefault(); e.stopPropagation(); btn.classList.toggle('on'); btn.querySelector('i').className = 'ti ' + (btn.classList.contains('on') ? 'ti-heart-filled' : 'ti-heart'); }
+  function wish(e, btn) {
+    e.preventDefault(); e.stopPropagation();
+    var p = prodFromEl(btn), on;
+    if (window.RAFShop && p) { on = RAFShop.Wish.toggle(p); }
+    else { on = !btn.classList.contains('on'); }
+    btn.classList.toggle('on', on);
+    btn.querySelector('i').className = 'ti ' + (on ? 'ti-heart-filled' : 'ti-heart');
+  }
 
   function prodFromEl(el) { var c = el.closest('.rc-card'); return c ? REG[c.dataset.id] : null; }
 

@@ -129,6 +129,12 @@ nav{position:sticky;top:0;z-index:200;background:rgba(245,242,236,.9);backdrop-f
 .hero{background:linear-gradient(160deg,#FBF9F4 0%,var(--bg) 50%,var(--bg2) 100%);overflow:hidden;border-bottom:1px solid var(--border);}
 .hero .wrap{padding-top:26px;padding-bottom:40px;}
 .hero-intro{display:flex;align-items:center;justify-content:space-between;gap:26px;margin-bottom:22px;flex-wrap:wrap;}
+/* premium hero brand mark — flagship RAF identity beside the headline */
+.hero-headwrap{display:flex;align-items:center;gap:26px;}
+.hero-brand{display:inline-flex;align-items:center;flex-shrink:0;}
+.hero-brand img{height:88px;width:auto;display:block;}
+@media(max-width:860px){.hero-headwrap{gap:18px;}.hero-brand img{height:60px;}}
+@media(max-width:600px){.hero-headwrap{gap:14px;}.hero-brand img{height:46px;}}
 .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border2);border-radius:30px;padding:6px 13px;font-size:12px;font-weight:600;color:var(--gold2);margin-bottom:12px;box-shadow:var(--sh-sm);}
 .hero-eyebrow i{font-size:15px;}
 .hero h1{font-family:var(--font-display);font-size:clamp(26px,3vw,40px);font-weight:900;line-height:1.1;color:var(--ink);}
@@ -364,7 +370,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 /* ===== Homepage mobile UX polish ===== */
 @media(max-width:768px){
   /* 1. balanced mobile header — slimmer logo (~24% smaller), tighter spacing */
-  nav .nav-inner .nav-logo .brand-logo{height:29px;}
+  nav .nav-inner .nav-logo .brand-logo{height:34px;}
   nav{gap:10px;padding:0 12px;}
   .nav-inner{gap:14px;}
 }
@@ -403,7 +409,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 <!-- ============ HEADER ============ -->
 <nav>
  <div class="nav-inner">
-  <a href="raf_homepage.html" class="nav-logo"><img src="raf_logo_web.png" alt="RAF Marketplace" class="brand-logo"></a>
+  <a href="raf_homepage.html" class="nav-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace" class="brand-logo"></a>
   <div class="nav-search" id="searchWrap">
     <form onsubmit="return doSearch(event)">
       <input id="navSearch" type="text" autocomplete="off" data-ar-ph="ابحث عن منتجات، محلات، أو ماركات…" data-en-ph="Search products, stores or brands…" placeholder="ابحث عن منتجات، محلات، أو ماركات…" onfocus="openSearch()" oninput="onSearchType(this)">
@@ -445,9 +451,12 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
       <div class="search-overlay" id="searchOverlayM"></div>
     </div>
     <div class="hero-intro">
-      <div>
-        <div class="hero-eyebrow"><i class="ti ti-sparkles"></i> <span data-ar="سوق الكويت الفاخر" data-en="Kuwait's Premium Marketplace">سوق الكويت الفاخر</span></div>
-        <h1><span data-ar="اكتشف أفضل المنتجات" data-en="Discover the Finest Products">اكتشف أفضل المنتجات</span> <em data-ar="وأقوى العروض" data-en="& Best Offers">وأقوى العروض</em></h1>
+      <div class="hero-headwrap">
+        <a href="raf_homepage.html" class="hero-brand" aria-label="RAF Marketplace"><img src="assets/branding/logo.svg" alt="RAF Marketplace"></a>
+        <div>
+          <div class="hero-eyebrow"><i class="ti ti-sparkles"></i> <span data-ar="سوق الكويت الفاخر" data-en="Kuwait's Premium Marketplace">سوق الكويت الفاخر</span></div>
+          <h1><span data-ar="اكتشف أفضل المنتجات" data-en="Discover the Finest Products">اكتشف أفضل المنتجات</span> <em data-ar="وأقوى العروض" data-en="& Best Offers">وأقوى العروض</em></h1>
+        </div>
       </div>
       <div class="hero-intro-r">
         <div class="hero-trust">
@@ -558,7 +567,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 <footer><div class="wrap">
   <div class="foot-grid">
     <div>
-      <div class="foot-logo"><a href="raf_homepage.html"><img src="raf_logo_web.png" alt="RAF Marketplace" class="brand-logo-foot"></a></div>
+      <div class="foot-logo"><a href="raf_homepage.html"><img src="assets/branding/logo-light.svg" alt="RAF Marketplace" class="brand-logo-foot"></a></div>
       <p class="foot-about" data-ar="رف — سوق إلكتروني فاخر يجمع أفضل المحلات والمنتجات والعروض والمزادات المحلية في مكان واحد." data-en="RAF — a premium marketplace bringing the best local stores, products, offers and auctions together in one place.">رف — سوق إلكتروني فاخر يجمع أفضل المحلات والمنتجات والعروض والمزادات المحلية في مكان واحد.</p>
       <div class="foot-social"><a href="#" aria-label="instagram"><i class="ti ti-brand-instagram"></i></a><a href="#" aria-label="x"><i class="ti ti-brand-x"></i></a><a href="#" aria-label="whatsapp"><i class="ti ti-brand-whatsapp"></i></a><a href="#" aria-label="tiktok"><i class="ti ti-brand-tiktok"></i></a></div>
     </div>
@@ -586,6 +595,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 
 <script src="raf_nav.js"></script>
 <script src="raf_ads.js"></script>
+<script src="raf_data.js"></script>
 <script src="raf_card.js"></script>
 <script>
 /* ===== ADMIN-READY DATA (replace with API later) ===== */

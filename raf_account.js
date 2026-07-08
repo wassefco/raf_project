@@ -93,7 +93,9 @@
             { k: 'done', t: { ar: 'تم التسليم', en: 'Delivered' }, time: { ar: '29 مايو', en: 'May 29' }, s: 'done' } ] }
   ];
 
-  window.orderById = function (id) { return (window.RAF_ORDERS || []).find(function (o) { return o.id === id; }); };
+  /* orders come from the shared RAFShop store (falls back to the seed array) */
+  window.rafOrders = function () { return (window.RAFShop && RAFShop.Orders) ? RAFShop.Orders.all() : (window.RAF_ORDERS || []); };
+  window.orderById = function (id) { return rafOrders().find(function (o) { return o.id === id; }); };
 
   window.statusMeta = function (st) {
     var en = curLang() === 'en';

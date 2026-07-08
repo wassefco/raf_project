@@ -130,7 +130,7 @@
   drawer.setAttribute('role', 'dialog');
 
   var head = el('div', 'raf-drawer-head');
-  head.innerHTML = '<a href="raf_homepage.html" class="raf-drawer-logo">رف<span>RAF MARKETPLACE</span></a>'
+  head.innerHTML = '<a href="raf_homepage.html" class="raf-drawer-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace" style="height:38px;width:auto;display:block;"></a>'
     + '<button class="raf-drawer-close" id="rafDrawerClose" aria-label="Close menu"><i class="ti ti-x"></i></button>';
   drawer.appendChild(head);
 

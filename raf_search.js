@@ -156,7 +156,7 @@
     input.setAttribute('autocomplete','off');
     input.addEventListener('focus',function(){ open(input); });
     input.addEventListener('input',function(){ activeInput=input; if(!ov.classList.contains('open')){ov.classList.add('open');backdrop.classList.add('open');} renderPanel(); position(); });
-    input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ var q=input.value.trim(); if(q){save(q);} close(); } if(e.key==='Escape'){ close(); } });
+    input.addEventListener('keydown',function(e){ if(e.key==='Enter'){ e.preventDefault(); var q=input.value.trim(); if(q){ save(q); window.location='raf_offers.html?q='+encodeURIComponent(q); } } if(e.key==='Escape'){ close(); } });
   }
 
   function init(){

@@ -159,7 +159,7 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
     <a href="raf_used.html" class="nav-link">المستعملات</a>
     <a href="raf_auctions.html" class="nav-link">المزادات</a>
   </div>
-  <a href="raf_homepage.html" class="nav-logo"><img src="raf_logo_web.png" alt="RAF Marketplace" class="brand-logo"></a>
+  <a href="raf_homepage.html" class="nav-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace" class="brand-logo"></a>
 </nav>
 
 <!-- FLASH SALE BANNER -->
@@ -395,7 +395,7 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
 <footer>
   <div class="footer-grid">
     <div>
-      <a href="raf_homepage.html" class="footer-logo"><img src="raf_logo_web.png" alt="RAF Marketplace" class="brand-logo-foot"></a>
+      <a href="raf_homepage.html" class="footer-logo"><img src="assets/branding/logo-light.svg" alt="RAF Marketplace" class="brand-logo-foot"></a>
       <div class="footer-desc">منصة التسوق المحلي الأولى في الكويت — أفضل العروض من أفضل المحلات.</div>
     </div>
     <div>
@@ -602,6 +602,7 @@ window.addEventListener('DOMContentLoaded',()=>{initCartBtns();updateBadge();});
 <script src="raf_search.js"></script>
 <script src="raf_ads.js"></script>
 <!-- ===== Global RAF Product Card — render the offers grid ===== -->
+<script src="raf_data.js"></script>
 <script src="raf_card.js"></script>
 <script>
 (function(){
@@ -623,7 +624,19 @@ window.addEventListener('DOMContentLoaded',()=>{initCartBtns();updateBadge();});
     {id:'P-008',ic:'ti-headphones',ar:'سماعة Sony WH-1000XM5',en:'Sony WH-1000XM5',store:{ar:'TechZone',en:'TechZone'},price:'35.750',old:'55.000',disc:35,rate:'4.9',rev:'201',
       variants:[{label:{ar:'اللون',en:'Color'},options:[{v:'black',label:{ar:'أسود',en:'Black'}},{v:'silver',label:{ar:'فضي',en:'Silver'}}]}]}
   ];
-  function render(){var g=document.getElementById('prodGrid');if(g)g.innerHTML=P.map(function(p){return RAFCard.product(p);}).join('');}
+  function render(){
+    var g=document.getElementById('prodGrid'); if(!g) return;
+    var en=document.getElementById('htmlRoot').lang==='en';
+    var q=(new URLSearchParams(location.search).get('q')||'').trim().toLowerCase();
+    var list=P;
+    if(q){ list=P.filter(function(p){ return (p.ar+' '+p.en+' '+(p.store?p.store.ar+' '+p.store.en:'')+' '+p.id).toLowerCase().indexOf(q)>-1; }); }
+    var rc=document.getElementById('rc-results');
+    if(q){ if(!rc){ rc=document.createElement('div'); rc.id='rc-results'; rc.style.cssText='margin:0 0 16px;font-size:14px;font-weight:600;color:#5A5650;'; g.parentNode.insertBefore(rc,g); }
+      rc.textContent=(en?'Search results for ':'نتائج البحث عن ')+'“'+q+'” — '+list.length; }
+    else if(rc){ rc.remove(); }
+    g.innerHTML = list.length ? list.map(function(p){ return RAFCard.product(p); }).join('')
+      : '<div style="grid-column:1/-1;text-align:center;padding:52px 20px;color:#8A857C;"><i class="ti ti-search-off" style="font-size:46px;color:#C9A84C;display:block;margin-bottom:12px;"></i><div style="font-size:15px;font-weight:700;color:#15130F;">'+(en?'No results for':'لا توجد نتائج لـ')+' “'+q+'”</div></div>';
+  }
   render();
   new MutationObserver(render).observe(document.getElementById('htmlRoot'),{attributes:true,attributeFilter:['lang']});
 })();

@@ -43,11 +43,12 @@
   <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
 
+<script src="raf_data.js"></script>
 <script src="raf_account.js"></script>
 <script>
   var curFilter = 'all';
   function renderOrders(){
-    var list = (RAF_ORDERS || []).filter(function(o){ return curFilter === 'all' || o.status === curFilter; });
+    var list = rafOrders().filter(function(o){ return curFilter === 'all' || o.status === curFilter; });
     document.getElementById('ordList').innerHTML = list.map(orderCardHTML).join('');
     document.getElementById('ordEmpty').style.display = list.length ? 'none' : 'block';
   }

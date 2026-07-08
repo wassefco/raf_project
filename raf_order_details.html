@@ -30,6 +30,7 @@
   <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
 
+<script src="raf_data.js"></script>
 <script src="raf_account.js"></script>
 <script>
   function T(ar,en){ return curLang()==='en' ? en : ar; }
@@ -44,10 +45,10 @@
     if(!o){ wrap.innerHTML='<div class="empty"><i class="ti ti-package-off"></i><div class="empty-t">'+T('الطلب غير موجود','Order not found')+'</div></div>'; return; }
     var sm = statusMeta(o.status);
 
-    /* totals */
-    var subtotal = o.items.reduce(function(s,i){ return s + parseFloat(i.price); }, 0);
+    /* totals — trust the order's stored total (accounts for quantities) */
     var ship = parseFloat(o.ship||'0');
-    var grand = subtotal + ship;
+    var grand = o.total ? parseFloat(o.total) : (o.items.reduce(function(s,i){ return s + parseFloat(i.price); }, 0) + ship);
+    var subtotal = grand - ship;
     var kwd = en ? 'KWD' : 'د.ك';
     var f = function(n){ return n.toFixed(3); };
 

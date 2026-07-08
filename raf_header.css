@@ -108,19 +108,19 @@ nav.top{
 .app-bnav{ padding-bottom: env(safe-area-inset-bottom, 0px); }
 
 /* ==========================================================================
-   OFFICIAL RAF LOGO IMAGE — single source of truth (raf_logo.png → raf_logo_web.png)
-   Replaces the text wordmark across header, footer, sidebar and login.
-   Transparent PNG → blends on cream (header) and dark (footer/sidebar/login).
+   OFFICIAL RAF LOGO — single shared SVG asset  /assets/branding/logo.svg
+   Horizontal "رف | RAF" wordmark. Sized larger for stronger brand presence
+   while staying balanced; width:auto preserves aspect ratio (never distorts).
    ========================================================================== */
 .nav-logo{ display:inline-flex; align-items:center; }
-.nav-logo .brand-logo{ height:58px; width:auto; display:block; }
-.brand-logo-foot{ height:46px; width:auto; display:block; }
+.nav-logo .brand-logo{ height:50px; width:auto; display:block; }
+.brand-logo-foot{ height:44px; width:auto; display:block; }
 .sb-logo a .brand-logo-sb{ height:42px; width:auto; display:block; }
 .sb-mark-img{ width:34px; height:34px; border-radius:7px; flex-shrink:0; object-fit:cover; display:block; }
-.logo-wrap .brand-logo-login{ height:86px; width:auto; display:block; margin:0 auto; }
+.logo-wrap .brand-logo-login{ height:64px; width:auto; display:block; margin:0 auto; }
 @media (max-width:768px), (max-height:500px){
-  .nav-logo .brand-logo{ height:38px; }
+  .nav-logo .brand-logo{ height:36px; }
 }
 @media (max-width:480px){
-  .nav-logo .brand-logo{ height:34px; }
+  .nav-logo .brand-logo{ height:32px; }
 }

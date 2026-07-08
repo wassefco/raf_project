@@ -197,7 +197,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
     <button class="lang-btn" onclick="toggleLang()" data-ar="EN" data-en="ع">EN</button>
     <a href="raf_homepage.html" class="btn-ghost"><i class="ti ti-arrow-right"></i> <span data-ar="متابعة التسوق" data-en="Continue Shopping">متابعة التسوق</span></a>
   </div>
-  <a href="raf_homepage.html" class="nav-logo"><img src="raf_logo_web.png" alt="RAF Marketplace" class="brand-logo"></a>
+  <a href="raf_homepage.html" class="nav-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace" class="brand-logo"></a>
 </nav>
 
 <!-- BREADCRUMB -->
@@ -218,56 +218,12 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
         <div class="sec-title"><i class="ti ti-shopping-cart"></i> السلة</div>
         <span style="font-size:12px;color:var(--text3);" id="cart-count">3 منتجات</span>
       </div>
-      <div class="cart-item" data-unit="12.000">
-        <div class="item-img"><i class="ti ti-shirt"></i></div>
-        <div class="item-info">
-          <div class="item-store">Casa Mode</div>
-          <div class="item-name">قميص أوفرسايز كلاسيك</div>
-          <div class="item-meta">مقاس M — لون أبيض</div>
-          <div class="item-bot">
-            <div class="qty-row">
-              <button class="qty-btn" onclick="chQty(this,-1)"><i class="ti ti-minus" style="font-size:12px;"></i></button>
-              <div class="qty-num">1</div>
-              <button class="qty-btn" onclick="chQty(this,1)"><i class="ti ti-plus" style="font-size:12px;"></i></button>
-            </div>
-            <button class="rm-btn" onclick="rmItem(this)"><i class="ti ti-trash" style="font-size:12px;"></i> حذف</button>
-          </div>
-        </div>
-        <div class="item-price">12.000</div>
-      </div>
-      <div class="cart-item" data-unit="28.500">
-        <div class="item-img"><i class="ti ti-shoe"></i></div>
-        <div class="item-info">
-          <div class="item-store">Sole & Co</div>
-          <div class="item-name">حذاء رياضي Air Comfort</div>
-          <div class="item-meta">مقاس 42 — لون أسود</div>
-          <div class="item-bot">
-            <div class="qty-row">
-              <button class="qty-btn" onclick="chQty(this,-1)"><i class="ti ti-minus" style="font-size:12px;"></i></button>
-              <div class="qty-num">1</div>
-              <button class="qty-btn" onclick="chQty(this,1)"><i class="ti ti-plus" style="font-size:12px;"></i></button>
-            </div>
-            <button class="rm-btn" onclick="rmItem(this)"><i class="ti ti-trash" style="font-size:12px;"></i> حذف</button>
-          </div>
-        </div>
-        <div class="item-price">28.500</div>
-      </div>
-      <div class="cart-item" data-unit="35.000">
-        <div class="item-img"><i class="ti ti-sunglasses"></i></div>
-        <div class="item-info">
-          <div class="item-store">Luxe Accessories</div>
-          <div class="item-name">نظارة شمسية Ray Luxe</div>
-          <div class="item-meta">لون ذهبي</div>
-          <div class="item-bot">
-            <div class="qty-row">
-              <button class="qty-btn" onclick="chQty(this,-1)"><i class="ti ti-minus" style="font-size:12px;"></i></button>
-              <div class="qty-num">1</div>
-              <button class="qty-btn" onclick="chQty(this,1)"><i class="ti ti-plus" style="font-size:12px;"></i></button>
-            </div>
-            <button class="rm-btn" onclick="rmItem(this)"><i class="ti ti-trash" style="font-size:12px;"></i> حذف</button>
-          </div>
-        </div>
-        <div class="item-price">35.000</div>
+      <!-- cart rows rendered from the shared RAF cart (raf_data.js) -->
+      <div id="cartItems"></div>
+      <div id="cart-empty" style="display:none;text-align:center;padding:40px 20px;color:var(--text3);">
+        <i class="ti ti-shopping-cart-off" style="font-size:44px;color:var(--gold);display:block;margin-bottom:12px;"></i>
+        <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;" data-ar="سلتك فارغة" data-en="Your cart is empty">سلتك فارغة</div>
+        <a href="raf_homepage.html" style="color:var(--gold2);text-decoration:none;font-weight:600;" data-ar="تصفّح المنتجات" data-en="Browse products">تصفّح المنتجات</a>
       </div>
     </div>
 
@@ -411,11 +367,38 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
 
 <footer>
   <div>جميع الحقوق محفوظة © 2026 رف</div>
-  <a href="raf_homepage.html"><img src="raf_logo_web.png" alt="RAF Marketplace" class="brand-logo-foot"></a>
+  <a href="raf_homepage.html"><img src="assets/branding/logo-light.svg" alt="RAF Marketplace" class="brand-logo-foot"></a>
 </footer>
 
+<script src="raf_data.js"></script>
 <script>
-  /* ---- Qty change: update row price + totals ---- */
+  function T(ar,en){ return (document.getElementById('htmlRoot').lang==='en') ? en : ar; }
+
+  /* ---- Render cart rows from the shared RAF cart ---- */
+  function cartRowHTML(l){
+    var meta = Object.keys(l.variant||{}).map(function(k){ return k+': '+l.variant[k]; }).join(' — ');
+    return '<div class="cart-item" data-key="'+l.key+'" data-unit="'+l.price+'">'
+      + '<div class="item-img"><i class="ti '+(l.ic||'ti-box')+'"></i></div>'
+      + '<div class="item-info">'
+        + (l.store ? '<div class="item-store">'+RAFShop.L(l.store)+'</div>' : '')
+        + '<div class="item-name">'+RAFShop.L(l.name)+'</div>'
+        + (meta ? '<div class="item-meta">'+meta+'</div>' : '')
+        + '<div class="item-bot"><div class="qty-row">'
+          + '<button class="qty-btn" onclick="chQty(this,-1)"><i class="ti ti-minus" style="font-size:12px;"></i></button>'
+          + '<div class="qty-num">'+l.qty+'</div>'
+          + '<button class="qty-btn" onclick="chQty(this,1)"><i class="ti ti-plus" style="font-size:12px;"></i></button>'
+        + '</div><button class="rm-btn" onclick="rmItem(this)"><i class="ti ti-trash" style="font-size:12px;"></i> '+T('حذف','Remove')+'</button></div>'
+      + '</div>'
+      + '<div class="item-price">'+(parseFloat(l.price)*l.qty).toFixed(3)+'</div></div>';
+  }
+  function renderCart(){
+    var box = document.getElementById('cartItems');
+    var items = RAFShop.Cart.items();
+    box.innerHTML = items.map(cartRowHTML).join('');
+    recalcTotal();
+  }
+
+  /* ---- Qty change: sync shared cart + row + totals ---- */
   function chQty(btn, d) {
     const row   = btn.closest('.cart-item');
     const qNum  = row.querySelector('.qty-num');
@@ -424,9 +407,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
 
     let qty = parseInt(qNum.textContent) + d;
     if (qty < 1) qty = 1;
+    if (row.dataset.key) RAFShop.Cart.setQty(row.dataset.key, qty);
     qNum.textContent = qty;
-
-    // Update displayed line price (unit × qty, 3 decimals)
     priceEl.textContent = (unit * qty).toFixed(3);
     recalcTotal();
   }
@@ -434,6 +416,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
   /* ---- Remove item ---- */
   function rmItem(btn) {
     const item = btn.closest('.cart-item');
+    if (item.dataset.key) RAFShop.Cart.remove(item.dataset.key);
     // Animate out
     item.style.transition = 'opacity .25s, max-height .3s';
     item.style.overflow = 'hidden';
@@ -577,12 +560,37 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40p
   }
 
   /* ---- Init ---- */
-  document.addEventListener('DOMContentLoaded', loadAddrOptions);
+  document.addEventListener('DOMContentLoaded', function(){ renderCart(); loadAddrOptions(); });
 
-  /* ---- Confirm ---- */
+  /* ---- Confirm: create a REAL order, clear cart, show success ---- */
   function confirmOrder() {
+    if (!RAFShop.Cart.count()) return;
+    // selected payment method
+    var payEl = document.querySelector('.pay-opt.on .pay-name');
+    var payName = payEl ? payEl.textContent.trim() : 'الدفع عند الاستلام';
+    // selected address (optional)
+    var addr = null;
+    try {
+      var sel = document.getElementById('addrSelect');
+      if (sel && sel.value && sel.value !== '__new') {
+        var list = JSON.parse(localStorage.getItem('raf_addresses')) || [];
+        var a = list.find(function(x){ return x.id === sel.value; });
+        if (a) { var s = a.area+'، '+a.street+(a.building?'، م'+a.building:''); addr = { ar: s, en: s }; }
+      }
+    } catch(e){}
+
+    var order = RAFShop.Orders.create({ pay: { ar: payName, en: payName }, addr: addr });
+    if (!order) return;
+    RAFShop.Cart.clear();
+    RAFShop.Cart.badge();
+
+    // fill success panel with the real order
+    var numEl = document.querySelector('.success-num strong'); if (numEl) numEl.textContent = '#' + order.id;
+    var subEl = document.querySelector('.success-num span'); if (subEl) subEl.textContent = T('الإجمالي: ','Total: ') + order.total + T(' د.ك — ',' KWD — ') + payName;
+    var trackBtn = document.querySelector('.success-btns .sbtn-p'); if (trackBtn) trackBtn.setAttribute('onclick', "window.location='raf_tracking.html?id=" + order.id + "'");
+
     document.getElementById('main-layout').style.display = 'none';
-    document.getElementById('breadcrumb').style.display = 'none';
+    var bc = document.getElementById('breadcrumb'); if (bc) bc.style.display = 'none';
     document.getElementById('success').style.display = 'block';
     window.scrollTo(0, 0);
   }

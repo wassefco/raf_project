@@ -820,7 +820,7 @@
     <a href="raf_privacy.html" style="color:var(--gray-4);text-decoration:none;font-size:12px;">سياسة الخصوصية</a>
     <a href="raf_terms.html" style="color:var(--gray-4);text-decoration:none;font-size:12px;">الشروط والأحكام</a>
   </div>
-  <a href="raf_homepage.html"><img src="raf_logo_web.png" alt="RAF Marketplace" class="brand-logo-foot"></a>
+  <a href="raf_homepage.html"><img src="assets/branding/logo-light.svg" alt="RAF Marketplace" class="brand-logo-foot"></a>
 </footer>
 
 <script>
@@ -1144,17 +1144,39 @@ const PRODUCT_DATA = {
 
   // Add to cart
   function addToCart() {
-    const badge = document.querySelector('.cart-badge');
-    badge.textContent = parseInt(badge.textContent) + qty;
-    const btn = document.querySelector('.btn-add-cart');
-    btn.textContent = '✓ تمت الإضافة';
-    btn.style.background = '#3B6D11';
-    btn.style.color = 'white';
-    setTimeout(() => {
-      btn.innerHTML = '<i class="ti ti-shopping-cart"></i> أضف للسلة';
-      btn.style.background = '';
-      btn.style.color = '';
-    }, 2000);
+    var en = (document.getElementById('htmlRoot') || document.documentElement).lang === 'en';
+    var t = function(ar,e){ return en ? e : ar; };
+    var pid = new URLSearchParams(location.search).get('id') || 'P-001';
+    var pd = (typeof PRODUCT_DATA !== 'undefined' && PRODUCT_DATA[pid]) ? PRODUCT_DATA[pid] : null;
+    if (!pd || !window.RAFShop) return;
+    var btn = document.querySelector('.btn-add-cart');
+
+    /* enforce required variant selection */
+    var variant = {};
+    if (pd.sizes && pd.sizes.length) {
+      var sizeSel = document.querySelector('#sizes-section .option-btn.selected:not(.out)');
+      if (!sizeSel) { flashBtn(btn, t('اختر المقاس أولاً','Select a size first'), '#B22'); return; }
+      variant[t('المقاس','Size')] = sizeSel.textContent.trim();
+    }
+    if (pd.colors && pd.colors.length) {
+      var colorSel = document.querySelector('.color-btn.selected');
+      if (!colorSel) { flashBtn(btn, t('اختر اللون أولاً','Select a color first'), '#B22'); return; }
+      variant[t('اللون','Color')] = colorSel.getAttribute('title') || pd.defaultColor || '';
+    }
+
+    var q = parseInt((document.getElementById('qty') || {}).textContent) || 1;
+    var prod = { id: pid, ar: pd.name, en: pd.name, price: pd.price, ic: pd.icon || 'ti-box',
+                 store: pd.store ? { ar: pd.store, en: pd.store } : null };
+    for (var i = 0; i < q; i++) RAFShop.Cart.add(prod, variant);
+    RAFShop.Cart.badge();
+    flashBtn(btn, t('تمت الإضافة ✓','Added ✓'), '#3B6D11');
+  }
+  function flashBtn(btn, msg, bg) {
+    if (!btn) return;
+    var en = (document.getElementById('htmlRoot') || document.documentElement).lang === 'en';
+    btn.innerHTML = '<i class="ti ti-check"></i> ' + msg;
+    btn.style.background = bg; btn.style.color = 'white';
+    setTimeout(function(){ btn.innerHTML = '<i class="ti ti-shopping-cart"></i> ' + (en ? 'Add to Cart' : 'أضف للسلة'); btn.style.background=''; btn.style.color=''; }, 1600);
   }
 
   // Tabs
@@ -1185,5 +1207,23 @@ const PRODUCT_DATA = {
 <script src="raf_topbar.js"></script>
 <script src="raf_nav.js"></script>
 <script src="raf_search.js"></script>
+<!-- ===== Global RAF Product Card — Related / Similar / Recommended products ===== -->
+<script src="raf_data.js"></script>
+<script src="raf_card.js"></script>
+<script>
+(function(){
+  var fashion=[{label:{ar:'المقاس',en:'Size'},options:['S','M','L','XL'].map(function(v){return {v:v.toLowerCase(),label:{ar:v,en:v}};})},
+               {label:{ar:'اللون',en:'Color'},options:[{v:'white',label:{ar:'أبيض',en:'White'}},{v:'black',label:{ar:'أسود',en:'Black'}},{v:'navy',label:{ar:'كحلي',en:'Navy'}}]}];
+  var SIMILAR=[
+    {id:'S-101',ic:'ti-shirt',ar:'قميص لينن بريميوم',en:'Premium Linen Shirt',store:{ar:'Casa Mode',en:'Casa Mode'},price:'18.000',old:'24.000',disc:25,rate:'4.7',rev:'86',variants:fashion},
+    {id:'S-102',ic:'ti-shirt',ar:'تيشيرت بيسك كلاسيك',en:'Classic Basic Tee',store:{ar:'Casa Mode',en:'Casa Mode'},price:'8.500',old:'12.000',disc:29,rate:'4.6',rev:'152',variants:fashion},
+    {id:'S-103',ic:'ti-shirt',ar:'قميص بولو فاخر',en:'Premium Polo Shirt',store:{ar:'Casa Mode',en:'Casa Mode'},price:'22.000',old:'28.000',disc:21,rate:'4.8',rev:'64',variants:fashion},
+    {id:'S-104',ic:'ti-hanger',ar:'هودي أوفرسايز',en:'Oversize Hoodie',store:{ar:'Casa Mode',en:'Casa Mode'},price:'25.000',old:'32.000',disc:22,rate:'4.9',rev:'110',variants:fashion}
+  ];
+  function render(){var g=document.querySelector('.similar-grid');if(g&&window.RAFCard)g.innerHTML=SIMILAR.map(function(p){return RAFCard.product(p);}).join('');}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',render);else render();
+  var r=document.getElementById('htmlRoot');if(r)new MutationObserver(render).observe(r,{attributes:true,attributeFilter:['lang']});
+})();
+</script>
 </body>
 </html>

@@ -143,7 +143,7 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:48px;}
     <a href="raf_cart.html" class="nav-ico"><i class="ti ti-shopping-cart"></i><span class="cart-badge" id="cartBadge">0</span></a>
     <a href="raf_account.html" class="btn-ghost"><i class="ti ti-user"></i> <span data-ar="حسابي" data-en="My Account">حسابي</span></a>
   </div>
-  <a href="raf_homepage.html" class="nav-logo"><img src="raf_logo_web.png" alt="RAF Marketplace" class="brand-logo"></a>
+  <a href="raf_homepage.html" class="nav-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace" class="brand-logo"></a>
 </nav>
 
 <div class="breadcrumb">
@@ -323,6 +323,45 @@ function applyLang(){
   <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
   <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
+<!-- ===== Bind live tracking to the actual order (raf_data.js) ===== -->
+<script src="raf_data.js"></script>
+<script>
+(function(){
+  if(!window.RAFShop) return;
+  var en=function(){return document.getElementById('htmlRoot').lang==='en';};
+  var t=function(ar,e){return en()?e:ar;};
+  var L=function(o){return RAFShop.L(o);};
+  var id=new URLSearchParams(location.search).get('id');
+  var o=id?RAFShop.Orders.get(id):null;
+  if(!o) return; /* unknown id → keep the default sample */
+
+  var oid=document.querySelector('.order-id'); if(oid)oid.innerHTML='<span class="order-id-lbl">'+t('رقم الطلب','Order No.')+'</span>#'+o.id;
+  var si=document.getElementById('orderSearch'); if(si)si.value=o.id;
+
+  var chip=document.querySelector('.status-chip');
+  if(chip){var map={progress:{c:'s-preparing',i:'ti-truck-delivery',l:t('قيد التوصيل','On the way')},delivered:{c:'s-delivered',i:'ti-circle-check',l:t('تم التسليم','Delivered')},cancelled:{c:'s-cancelled',i:'ti-circle-x',l:t('ملغى','Cancelled')}};var m=map[o.status]||map.progress;chip.className='status-chip '+m.c;chip.innerHTML='<i class="ti '+m.i+'"></i> '+m.l;}
+
+  var metas=document.querySelectorAll('.order-meta .meta-item span');
+  if(metas[0])metas[0].innerHTML=L(o.date);
+  if(metas[1])metas[1].textContent=L(o.addr);
+  if(metas[2])metas[2].textContent=L(o.store);
+
+  var etaTime=document.querySelector('.eta-time'), etaNote=document.querySelector('.eta-note');
+  if(o.status==='delivered'){ if(etaTime)etaTime.textContent=t('تم التوصيل','Delivered'); if(etaNote)etaNote.textContent=t('تم تسليم طلبك بنجاح','Your order was delivered'); }
+  else if(o.status==='cancelled'){ if(etaTime)etaTime.textContent=t('طلب ملغى','Cancelled'); if(etaNote)etaNote.textContent=t('تم إلغاء هذا الطلب','This order was cancelled'); }
+  else { if(etaTime)etaTime.textContent=t('اليوم — قريباً','Today — soon'); if(etaNote)etaNote.textContent=t('طلبك قيد التجهيز','Your order is being prepared'); }
+
+  /* real products of this order */
+  var eta=document.querySelector('.eta-card');
+  if(eta && o.items){
+    var pc=document.createElement('div'); pc.className='timeline-card'; pc.style.marginTop='16px';
+    pc.innerHTML='<div class="tl-title"><i class="ti ti-package"></i> '+t('منتجات الطلب','Order items')+'</div>'+
+      o.items.map(function(it){return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);"><div style="width:44px;height:44px;border-radius:10px;background:var(--bg2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:20px;"><i class="ti '+(it.ic||'ti-box')+'"></i></div><div style="flex:1;"><div style="font-size:13.5px;font-weight:600;">'+L(it.name)+'</div><div style="font-size:12px;color:var(--text3);">'+L(it.meta)+'</div></div><div style="font-family:var(--fen);font-weight:700;">'+it.price+'</div></div>';}).join('')+
+      '<div style="display:flex;justify-content:space-between;padding-top:12px;font-weight:700;"><span>'+t('الإجمالي','Total')+'</span><span style="color:var(--gold2);font-family:var(--fen);">'+o.total+' '+t('د.ك','KWD')+'</span></div>';
+    eta.parentNode.insertBefore(pc, eta.nextSibling);
+  }
+})();
+</script>
 <script src="raf_topbar.js"></script>
 <script src="raf_nav.js"></script>
 <script src="raf_search.js"></script>
