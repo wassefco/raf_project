@@ -18,7 +18,7 @@
     var c=
     'nav:not(.app-bnav):not(.top){background:rgba(245,242,236,.9)!important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid #E2DBCC!important;display:flex!important;align-items:center;justify-content:center;padding:0 28px!important;gap:0!important;z-index:200;}'+
     '.rtb-inner{width:100%;max-width:1300px;height:100%;display:flex;align-items:center;gap:24px;}'+
-    '.rtb-logo{flex-shrink:0;display:inline-flex;align-items:center;}.rtb-logo img{height:48px;width:auto;display:block;}'+
+    '.rtb-logo{flex-shrink:0;display:inline-flex;align-items:center;}.rtb-logo img{height:56px;width:auto;display:block;}'+
     '.rtb-search{flex:1;max-width:1000px;position:relative;}'+
     '.rtb-search input{width:100%;height:52px;border:1.5px solid #D8D3C8;background:#fff;border-radius:14px;padding:0 54px 0 18px;font-family:"Tajawal",sans-serif;font-size:15px;color:#0A0A0A;outline:none;transition:border-color .2s,box-shadow .2s;box-shadow:0 4px 16px rgba(20,16,8,.06);}'+
     '.rtb-search input::placeholder{color:#8A857C;}'+
@@ -41,7 +41,7 @@
     '.rtb-msearch{display:none;}'+
     /* tablet-portrait + phones (≤860): app chrome (no inline search/subnav) + visible mobile search bar */
     '@media(max-width:860px){'+
-      'nav:not(.app-bnav):not(.top){padding:0 14px!important;}.rtb-inner{gap:12px;}.rtb-search{display:none;}.rtb-subnav{display:none;}.rtb-account-l{display:none;}.rtb-account{padding:0 14px;}.rtb-logo img{height:35px;}'+
+      'nav:not(.app-bnav):not(.top){padding:0 14px!important;}.rtb-inner{gap:12px;}.rtb-search{display:none;}.rtb-subnav{display:none;}.rtb-account-l{display:none;}.rtb-account{padding:0 14px;}.rtb-logo img{height:42px;}'+
       '.rtb-msearch{display:block;background:rgba(245,242,236,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #E2DBCC;padding:10px 14px;}'+
       '.rtb-msearch form{position:relative;max-width:680px;margin:0 auto;}'+
       '.rtb-msearch input{width:100%;height:46px;border:1.5px solid #D8D3C8;background:#fff;border-radius:13px;padding:0 48px 0 16px;font-family:"Tajawal",sans-serif;font-size:14.5px;color:#0A0A0A;outline:none;box-shadow:0 2px 10px rgba(20,16,8,.05);}'+
@@ -50,7 +50,7 @@
     '}'+
     /* tablet + mobile (≤1024): language lives in the hamburger; cart/wishlist/account live in the bottom nav → remove from header */
     '@media(max-width:1024px){.rtb-lang{display:none!important;}.rtb-actions .rtb-ico,.rtb-actions .rtb-account{display:none!important;}}'+
-    '@media(max-width:480px){.rtb-logo img{height:31px;}}';
+    '@media(max-width:480px){.rtb-logo img{height:38px;}}';
     var s=document.createElement('style'); s.id='raf-topbar-css'; s.textContent=c; document.head.appendChild(s);
   }
 
