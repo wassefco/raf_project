@@ -128,13 +128,18 @@ nav{position:sticky;top:0;z-index:200;background:rgba(245,242,236,.9);backdrop-f
 /* ============ HERO ============ */
 .hero{background:linear-gradient(160deg,#FBF9F4 0%,var(--bg) 50%,var(--bg2) 100%);overflow:hidden;border-bottom:1px solid var(--border);}
 .hero .wrap{padding-top:26px;padding-bottom:40px;}
-/* premium hero — the RAF logo is the sole, centered flagship focus */
-.hero-logo-band{display:flex;align-items:center;justify-content:center;padding:28px 0 40px;margin-bottom:22px;}
+/* premium hero — centered RAF logo + brand statement */
+.hero-logo-band{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:28px 0 40px;margin-bottom:22px;text-align:center;}
 .hero-brand{display:inline-flex;align-items:center;}
-.hero-brand img{height:236px;width:auto;display:block;}
-@media(max-width:860px){.hero-logo-band{padding:20px 0 30px;}.hero-brand img{height:172px;}}
-@media(max-width:600px){.hero-logo-band{padding:12px 0 22px;}.hero-brand img{height:118px;}}
-@media(max-height:520px) and (orientation:landscape){.hero-logo-band{padding:8px 0 16px;}.hero-brand img{height:92px;}}
+.hero-brand img{height:220px;width:auto;display:block;}
+.hero-statement{max-width:660px;padding:0 16px;}
+.hero-tagline{margin:0;font-family:var(--font-ar);font-size:clamp(19px,2.5vw,27px);font-weight:700;color:var(--ink);line-height:1.35;}
+html[lang="en"] .hero-tagline{font-family:var(--font-en);text-transform:uppercase;letter-spacing:3px;font-weight:600;font-size:clamp(15px,2vw,21px);}
+.hero-cats{margin:10px 0 0;font-family:var(--font-ar);font-size:clamp(13px,1.6vw,15.5px);font-weight:600;color:var(--gold2);letter-spacing:1px;line-height:1.5;}
+html[lang="en"] .hero-cats{font-family:var(--font-en);text-transform:uppercase;letter-spacing:2.5px;font-size:clamp(11px,1.4vw,13px);}
+@media(max-width:860px){.hero-logo-band{gap:16px;padding:20px 0 30px;}.hero-brand img{height:162px;}}
+@media(max-width:600px){.hero-logo-band{gap:12px;padding:12px 0 22px;}.hero-brand img{height:112px;}}
+@media(max-height:520px) and (orientation:landscape){.hero-logo-band{gap:10px;padding:8px 0 16px;}.hero-brand img{height:86px;}}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:50px;padding:0 24px;border-radius:30px;font-family:var(--font-ar);font-size:14.5px;font-weight:700;cursor:pointer;border:none;transition:all .22s;white-space:nowrap;}
 .btn-gold{background:var(--gold);color:var(--black);box-shadow:var(--sh-gold);}
 .btn-gold:hover{background:var(--gold2);transform:translateY(-2px);}
@@ -280,16 +285,6 @@ html[dir="ltr"] .adc-slide .ov{background:linear-gradient(90deg,rgba(10,10,10,.8
 .trust-item b{font-size:14.5px;font-weight:700;color:var(--ink);display:block;}
 .trust-item span{font-size:12px;color:var(--text3);}
 
-/* why raf */
-.why{background:linear-gradient(160deg,var(--ink),#1c180f);color:var(--bg);}
-.why .sec-title{color:#fff;} .why .sec-kicker{color:var(--gold);}
-.why-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
-.why-item{background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.18);border-radius:var(--rl);padding:24px 18px;transition:all .25s;}
-.why-item:hover{background:rgba(201,168,76,.08);border-color:rgba(201,168,76,.4);transform:translateY(-4px);}
-.why-ico{width:50px;height:50px;border-radius:14px;background:rgba(201,168,76,.15);display:flex;align-items:center;justify-content:center;font-size:25px;color:var(--gold);margin-bottom:14px;}
-.why-item b{font-size:15px;font-weight:700;display:block;margin-bottom:6px;}
-.why-item p{font-size:12.5px;color:#b5ad9c;line-height:1.6;}
-
 /* cta strip */
 .cta-strip{background:var(--gold);}
 .cta-strip .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:30px 24px;flex-wrap:wrap;}
@@ -316,7 +311,6 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 
 /* ============ RESPONSIVE ============ */
 @media(max-width:1024px){
-  .why-grid{grid-template-columns:repeat(3,1fr);}
   .adc-slide{height:380px;}
   .adc-content{max-width:62%;padding:36px 40px;}
   .adc-product{width:188px;height:188px;font-size:90px;}
@@ -340,7 +334,6 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   .wrap{padding:0 16px;}
   .sec{padding:34px 0;}
   .sec-title{font-size:23px;}
-  .why-grid{grid-template-columns:repeat(2,1fr);}
   .trust-grid{grid-template-columns:repeat(2,1fr);gap:18px 14px;padding:20px 0;}
   .foot-grid{grid-template-columns:1fr 1fr;gap:26px;}
   .adc-slide{height:300px;}
@@ -428,6 +421,10 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
     </div>
     <div class="hero-logo-band">
       <a href="raf_homepage.html" class="hero-brand" aria-label="RAF Marketplace"><img src="assets/branding/logo.svg" alt="RAF Marketplace"></a>
+      <div class="hero-statement">
+        <p class="hero-tagline" data-ar="كل ما تحب، في مكان واحد" data-en="LOCAL BRANDS, ENDLESS CHOICES">كل ما تحب، في مكان واحد</p>
+        <p class="hero-cats" data-ar="أزياء | عطور | إكسسوارات | وأكثر" data-en="FASHION | PERFUME | ACCESSORIES | AND MORE">أزياء | عطور | إكسسوارات | وأكثر</p>
+      </div>
     </div>
     <!-- FULL-WIDTH AD CAROUSEL (admin-ready) -->
     <div class="adc" id="adc" onmouseenter="adcPause()" onmouseleave="adcPlay()">
@@ -506,19 +503,6 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 </div></section>
 
 <div class="ad-slot wrap" data-ad-slot="after-trending"></div>
-
-<!-- ============ WHY RAF ============ -->
-<section class="sec why"><div class="wrap">
-  <div class="sec-head" style="justify-content:center;text-align:center;flex-direction:column;align-items:center;">
-    <div class="sec-kicker" style="justify-content:center;">WHY RAF</div><h2 class="sec-title" data-ar="لماذا رف؟" data-en="Why RAF?">لماذا رف؟</h2></div>
-  <div class="why-grid">
-    <div class="why-item"><div class="why-ico"><i class="ti ti-map-pin"></i></div><b data-ar="سوق محلي" data-en="Local Marketplace">سوق محلي</b><p data-ar="أفضل المحلات الكويتية في منصة واحدة." data-en="The best Kuwaiti stores on one platform.">أفضل المحلات الكويتية في منصة واحدة.</p></div>
-    <div class="why-item"><div class="why-ico"><i class="ti ti-rosette-discount-check"></i></div><b data-ar="محلات موثّقة" data-en="Verified Stores">محلات موثّقة</b><p data-ar="كل متجر مُراجَع وموثّق من فريق رف." data-en="Every store reviewed and verified by RAF.">كل متجر مُراجَع وموثّق من فريق رف.</p></div>
-    <div class="why-item"><div class="why-ico"><i class="ti ti-lock-check"></i></div><b data-ar="معاملات آمنة" data-en="Secure Transactions">معاملات آمنة</b><p data-ar="دفع محمي بالكامل واسترجاع مضمون." data-en="Fully protected payments and guaranteed refunds.">دفع محمي بالكامل واسترجاع مضمون.</p></div>
-    <div class="why-item"><div class="why-ico"><i class="ti ti-truck-delivery"></i></div><b data-ar="توصيل سريع" data-en="Fast Delivery">توصيل سريع</b><p data-ar="شبكة توصيل تغطي جميع المناطق." data-en="Delivery network covering all areas.">شبكة توصيل تغطي جميع المناطق.</p></div>
-    <div class="why-item"><div class="why-ico"><i class="ti ti-arrow-back-up"></i></div><b data-ar="إرجاع سهل" data-en="Easy Returns">إرجاع سهل</b><p data-ar="سياسة إرجاع مرنة خلال 14 يوماً." data-en="Flexible 14-day return policy.">سياسة إرجاع مرنة خلال 14 يوماً.</p></div>
-  </div>
-</div></section>
 
 <!-- ============ CTA ============ -->
 <section class="cta-strip"><div class="wrap">

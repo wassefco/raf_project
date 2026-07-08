@@ -36,6 +36,7 @@
       { href: 'raf_cart.html',     icon: 'ti-shopping-cart', ar: 'السلة',   en: 'Cart' }
     ]},
     { labelAr: 'المساعدة', labelEn: 'Help', items: [
+      { href: 'raf_about.html',        icon: 'ti-building-community', ar: 'من نحن',        en: 'About Us' },
       { href: 'raf_how_to_order.html', icon: 'ti-list-check',     ar: 'كيف أطلب',        en: 'How to Order' },
       { href: 'raf_tracking.html',     icon: 'ti-truck-delivery', ar: 'تتبع طلبك',       en: 'Track Your Order' },
       { href: 'raf_contact.html',      icon: 'ti-mail',           ar: 'تواصل معنا',      en: 'Contact Us' },
