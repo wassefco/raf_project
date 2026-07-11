@@ -20,6 +20,9 @@
   if (window.__rafNavInit) return;
   window.__rafNavInit = true;
 
+  /* ---- admin feature flags (auctions/used hidden until re-enabled) ------- */
+  function rafFeatureOn(k){ if(window.RAFFeatures) return RAFFeatures.on(k); try{ return (JSON.parse(localStorage.getItem('raf_features')||'{}'))[k] === true; }catch(e){ return false; } }
+
   /* ---- primary navigation model (single source of truth) ---------------- */
   var SECTIONS = [
     { labelAr: 'روابط سريعة', labelEn: 'Quick Links', items: [
@@ -27,8 +30,8 @@
       { href: 'raf_storespage.html', icon: 'ti-building-store', ar: 'المحلات',  en: 'Stores' },
       { href: 'raf_offers.html',     icon: 'ti-discount',       ar: 'العروض',   en: 'Offers' },
       { href: 'raf_trending.html',   icon: 'ti-flame',          ar: 'الترندات', en: 'Trends' },
-      { href: 'raf_used.html',       icon: 'ti-recycle',        ar: 'المستعمل', en: 'Used Items' },
-      { href: 'raf_auctions.html',   icon: 'ti-gavel',          ar: 'المزادات', en: 'Auctions' }
+      { href: 'raf_used.html',       icon: 'ti-recycle',        ar: 'المستعمل', en: 'Used Items', feature: 'used' },
+      { href: 'raf_auctions.html',   icon: 'ti-gavel',          ar: 'المزادات', en: 'Auctions', feature: 'auctions' }
     ]},
     { labelAr: 'حسابي', labelEn: 'My Account', items: [
       { href: 'raf_account.html',  icon: 'ti-user-circle',   ar: 'حسابي',   en: 'Account' },
@@ -143,6 +146,7 @@
     s.textContent = isEn() ? sec.labelEn : sec.labelAr;
     body.appendChild(s);
     sec.items.forEach(function (it) {
+      if (it.feature && !rafFeatureOn(it.feature)) return;   /* hidden while feature is OFF */
       var a = el('a', 'raf-drawer-link' + (it.href === here ? ' active' : ''));
       a.href = it.href;
       a.innerHTML = '<i class="ti ' + it.icon + '"></i><span data-ar="' + it.ar + '" data-en="' + it.en + '">'

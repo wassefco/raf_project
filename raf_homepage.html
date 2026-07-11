@@ -50,7 +50,37 @@ nav{position:sticky;top:0;z-index:200;background:rgba(245,242,236,.9);backdrop-f
 .nav-inner{width:100%;max-width:1300px;height:100%;display:flex;align-items:center;justify-content:space-between;gap:26px;}
 .nav-logo{display:inline-flex;align-items:center;flex-shrink:0;}
 .nav-search{flex:1;max-width:1000px;position:relative;}
-.nav-search input{width:100%;height:56px;border:1.5px solid var(--border2);background:var(--card);border-radius:15px;padding:0 58px 0 18px;font-family:var(--font-ar);font-size:15.5px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;box-shadow:0 4px 16px rgba(20,16,8,.06);}
+.nav-search input{width:100%;height:56px;border:1.5px solid var(--border2);background:var(--card);border-radius:15px;padding:0 58px 0 58px;font-family:var(--font-ar);font-size:15.5px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;box-shadow:0 4px 16px rgba(20,16,8,.06);}
+.nav-filter-btn{position:absolute;top:8px;left:8px;height:40px;padding:0 12px;border:1px solid var(--border2);border-radius:12px;background:var(--bg);color:var(--gold2);cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:19px;transition:all .2s;z-index:2;}
+.nav-filter-btn:hover{border-color:var(--gold);background:var(--gold-soft);}
+.msearch-filter-btn{position:absolute;top:6px;left:6px;width:38px;height:38px;border:1px solid var(--border2);border-radius:11px;background:var(--bg);color:var(--gold2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;z-index:2;}
+.msearch-filter-btn:hover{border-color:var(--gold);}
+/* filter sheet */
+.fs-backdrop{position:fixed;inset:0;z-index:3500;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(20,16,8,.5);backdrop-filter:blur(3px);opacity:0;transition:opacity .2s;}
+.fs-backdrop.show{display:flex;opacity:1;}
+.fs-card{width:100%;max-width:480px;max-height:88vh;overflow:auto;background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 30px 70px -22px rgba(20,16,8,.55);transform:translateY(14px);transition:transform .24s;}
+.fs-backdrop.show .fs-card{transform:none;}
+.fs-head{position:sticky;top:0;background:var(--card);display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border);z-index:1;}
+.fs-head h3{font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--ink);}
+.fs-x{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--text2);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.fs-x:hover{border-color:var(--red);color:var(--red);}
+.fs-body{padding:16px 20px 4px;}
+.fs-group{margin-bottom:18px;}
+.fs-label{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:9px;display:flex;align-items:center;gap:6px;}
+.fs-label i{color:var(--gold2);font-size:15px;}
+.fs-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.fs-chip{padding:8px 14px;border:1px solid var(--border2);border-radius:30px;background:var(--card);color:var(--text2);font-family:var(--font-ar);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+.fs-chip:hover{border-color:var(--gold);}
+.fs-chip.on{background:var(--ink);color:#F5F0E4;border-color:var(--ink);}
+.fs-price{display:flex;align-items:center;gap:10px;}
+.fs-price input{flex:1;height:42px;border:1px solid var(--border2);border-radius:10px;background:#FCFBF8;padding:0 12px;font-family:var(--font-en);font-size:14px;color:var(--text);outline:none;}
+.fs-price input:focus{border-color:var(--gold);}
+.fs-price span{color:var(--text3);font-size:13px;}
+.fs-foot{position:sticky;bottom:0;background:var(--card);display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--border);}
+.fs-reset{flex:0 0 auto;height:46px;padding:0 18px;border:1px solid var(--border2);border-radius:30px;background:var(--card);color:var(--text2);font-family:var(--font-ar);font-size:14px;font-weight:600;cursor:pointer;}
+.fs-reset:hover{border-color:var(--gold);color:var(--gold2);}
+.fs-apply{flex:1;height:46px;border:none;border-radius:30px;background:var(--gold);color:#1C1606;font-family:var(--font-ar);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
+.fs-apply:hover{background:var(--gold2);color:#fff;}
 .nav-search input::placeholder{color:var(--text3);}
 .nav-search input:focus{border-color:var(--gold);box-shadow:0 0 0 4px var(--gold-soft),0 6px 20px rgba(20,16,8,.08);}
 .nav-search>form>button{position:absolute;top:7px;right:7px;width:42px;height:42px;border:none;border-radius:12px;background:var(--gold);color:var(--black);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:21px;transition:background .2s;}
@@ -239,6 +269,8 @@ html[dir="ltr"] .adc-slide .ov{background:linear-gradient(90deg,rgba(10,10,10,.8
 .store-card:hover{transform:translateY(-4px);box-shadow:var(--sh);}
 .store-cover{height:90px;background:linear-gradient(120deg,var(--ink),#2a2419);position:relative;}
 .store-cover::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(201,168,76,.35),transparent 60%);}
+.store-deal-badge{position:absolute;top:12px;inset-inline-start:14px;z-index:1;display:inline-flex;align-items:center;gap:5px;background:var(--gold);color:#1C1606;font-family:var(--font-en);font-size:11.5px;font-weight:800;padding:5px 11px;border-radius:20px;box-shadow:0 4px 12px rgba(201,168,76,.4);}
+.store-deal-badge i{font-size:14px;}
 .store-body{padding:0 18px 18px;margin-top:-30px;position:relative;}
 .store-logo{width:60px;height:60px;border-radius:16px;background:var(--card);border:1px solid var(--border);box-shadow:var(--sh-sm);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--gold2);margin-bottom:10px;}
 .store-name{font-size:16px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:6px;}
@@ -371,8 +403,27 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   .bnav-cart{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;font-size:10px;font-weight:600;color:var(--text3);padding-bottom:6px;}
   .bnav-cart-ring{width:46px;height:46px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--black);margin-top:-16px;box-shadow:0 6px 16px rgba(201,168,76,.4);}
 }
+/* ===== FIRST-VISIT PROMO POPUP ===== */
+.pp-backdrop{position:fixed;inset:0;z-index:4000;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(20,16,8,.55);backdrop-filter:blur(3px);opacity:0;transition:opacity .25s;}
+.pp-backdrop.show{display:flex;opacity:1;}
+.pp-card{position:relative;width:100%;max-width:400px;background:var(--card);border:1px solid var(--border);border-radius:22px;padding:34px 28px 26px;text-align:center;box-shadow:0 30px 80px -24px rgba(20,16,8,.6);transform:translateY(14px) scale(.98);transition:transform .28s;overflow:hidden;}
+.pp-backdrop.show .pp-card{transform:none;}
+.pp-card::before{content:'';position:absolute;top:0;left:0;right:0;height:120px;background:radial-gradient(320px 120px at 50% -30%,var(--gold-soft),transparent 70%);pointer-events:none;}
+.pp-x{position:absolute;top:14px;inset-inline-end:14px;width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--text2);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.pp-x:hover{border-color:var(--red);color:var(--red);}
+.pp-icon{width:66px;height:66px;margin:2px auto 16px;border-radius:20px;background:linear-gradient(135deg,var(--gold),var(--gold2));display:flex;align-items:center;justify-content:center;font-size:32px;color:#1C1606;box-shadow:0 10px 24px -8px rgba(201,168,76,.6);}
+.pp-badge{display:inline-block;font-family:var(--font-en);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold2);background:var(--gold-soft);padding:5px 12px;border-radius:20px;margin-bottom:12px;}
+.pp-title{font-family:var(--font-display);font-size:24px;font-weight:800;color:var(--ink);margin-bottom:10px;}
+.pp-sub{font-size:14px;line-height:1.75;color:var(--text2);margin-bottom:22px;}
+.pp-cta{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:50px;border-radius:30px;background:var(--gold);color:#1C1606;font-family:var(--font-ar);font-size:15px;font-weight:700;text-decoration:none;transition:all .2s;box-shadow:0 8px 20px -10px rgba(201,168,76,.7);}
+.pp-cta:hover{background:var(--gold2);color:#fff;transform:translateY(-1px);}
+.pp-cta i{font-size:18px;} html[dir="ltr"] .pp-cta i{transform:scaleX(-1);}
+.pp-dismiss{margin-top:12px;background:none;border:none;color:var(--text3);font-family:var(--font-ar);font-size:13px;cursor:pointer;transition:color .2s;}
+.pp-dismiss:hover{color:var(--text);}
+@media(max-width:480px){.pp-card{padding:28px 20px 22px;border-radius:18px;}.pp-title{font-size:21px;}}
 </style>
 <link rel="stylesheet" href="raf_header.css">
+<script src="raf_features.js"></script>
 </head>
 <body>
 
@@ -383,6 +434,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
     <form onsubmit="return doSearch(event)">
       <input id="navSearch" type="text" autocomplete="off" data-ar-ph="ابحث عن منتجات، محلات، أو ماركات…" data-en-ph="Search products, stores or brands…" placeholder="ابحث عن منتجات، محلات، أو ماركات…" onfocus="openSearch()" oninput="onSearchType(this)">
       <button type="submit" aria-label="search"><i class="ti ti-search"></i></button>
+      <button type="button" class="nav-filter-btn" onclick="openFilters(event)" aria-label="filters" data-ar-t="تصفية" data-en-t="Filter"><i class="ti ti-adjustments-horizontal"></i></button>
     </form>
     <div class="search-overlay" id="searchOverlay"></div>
   </div>
@@ -403,9 +455,9 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
     <a href="raf_offers.html"><i class="ti ti-box"></i><span data-ar="المنتجات" data-en="Products">المنتجات</span></a>
     <a href="raf_storespage.html"><i class="ti ti-building-store"></i><span data-ar="المحلات" data-en="Stores">المحلات</span></a>
     <a href="raf_offers.html"><i class="ti ti-discount"></i><span data-ar="العروض" data-en="Offers">العروض</span></a>
-    <a href="raf_auctions.html"><i class="ti ti-gavel"></i><span data-ar="المزادات" data-en="Auctions">المزادات</span></a>
+    <a href="raf_auctions.html" data-feature="auctions"><i class="ti ti-gavel"></i><span data-ar="المزادات" data-en="Auctions">المزادات</span></a>
     <a href="raf_trending.html"><i class="ti ti-flame"></i><span data-ar="الترندات" data-en="Trends">الترندات</span></a>
-    <a href="raf_used.html"><i class="ti ti-recycle"></i><span data-ar="المستعمل" data-en="Used">المستعمل</span></a>
+    <a href="raf_used.html" data-feature="used"><i class="ti ti-recycle"></i><span data-ar="المستعمل" data-en="Used">المستعمل</span></a>
   </div>
 </div>
 
@@ -416,6 +468,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
       <form onsubmit="return doSearchM(event)">
         <input id="navSearchM" type="text" autocomplete="off" data-ar-ph="ابحث عن منتجات، محلات…" data-en-ph="Search products, stores…" placeholder="ابحث عن منتجات، محلات…" onfocus="openSearch('searchOverlayM')" oninput="onSearchType(this)">
         <button type="submit" aria-label="search"><i class="ti ti-search"></i></button>
+        <button type="button" class="msearch-filter-btn" onclick="openFilters(event)" aria-label="filters"><i class="ti ti-adjustments-horizontal"></i></button>
       </form>
       <div class="search-overlay" id="searchOverlayM"></div>
     </div>
@@ -456,9 +509,20 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 
 <div class="ad-slot wrap" data-ad-slot="after-categories"></div>
 
-<!-- ============ OFFERS ============ -->
+<!-- ============ SECTION 1 · RECOMMENDED STORES ============ -->
+<section class="sec"><div class="wrap">
+  <div class="sec-head"><div><div class="sec-kicker">RECOMMENDED</div><h2 class="sec-title" data-ar="محلات مختارة لك" data-en="Recommended for You">محلات مختارة لك</h2></div>
+    <a class="sec-link" href="raf_storespage.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
+  <div class="car"><div class="car-track" id="storesTrack"></div>
+    <button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button>
+    <button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button>
+  </div>
+</div></section>
+
+<!-- ============ SECTION 2 · FEATURED OFFERS ============ -->
 <section class="sec" style="background:var(--bg2);"><div class="wrap">
-  <div class="sec-head"><div><div class="sec-kicker">HOT DEALS</div><h2 class="sec-title" data-ar="عروض مميّزة" data-en="Featured Offers">عروض مميّزة</h2></div></div>
+  <div class="sec-head"><div><div class="sec-kicker">HOT DEALS</div><h2 class="sec-title" data-ar="العروض المميزة" data-en="Featured Offers">العروض المميزة</h2></div>
+    <a class="sec-link" href="raf_offers.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
   <div class="car"><div class="car-track" id="offersTrack"></div>
     <button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button>
     <button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button>
@@ -467,31 +531,20 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 
 <div class="ad-slot wrap" data-ad-slot="after-offers"></div>
 
-<!-- ============ STORES ============ -->
+<!-- ============ SECTION 3 · STORES WITH ACTIVE OFFERS ============ -->
 <section class="sec"><div class="wrap">
-  <div class="sec-head"><div><div class="sec-kicker">TOP STORES</div><h2 class="sec-title" data-ar="محلات مختارة" data-en="Featured Stores">محلات مختارة</h2></div></div>
-  <div class="car"><div class="car-track" id="storesTrack"></div>
+  <div class="sec-head"><div><div class="sec-kicker">ON SALE NOW</div><h2 class="sec-title" data-ar="محلات لديها عروض" data-en="Stores with Offers">محلات لديها عروض</h2></div>
+    <a class="sec-link" href="raf_offers.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
+  <div class="car"><div class="car-track" id="dealStoresTrack"></div>
     <button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button>
     <button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button>
   </div>
 </div></section>
 
-<div class="ad-slot wrap" data-ad-slot="after-stores"></div>
-
-<!-- ============ AUCTIONS ============ -->
+<!-- ============ SECTION 4 · TRENDING PRODUCTS ============ -->
 <section class="sec" style="background:var(--bg2);"><div class="wrap">
-  <div class="sec-head"><div><div class="sec-kicker">LIVE NOW</div><h2 class="sec-title" data-ar="مزادات حيّة" data-en="Live Auctions">مزادات حيّة</h2></div></div>
-  <div class="car"><div class="car-track" id="aucTrack"></div>
-    <button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button>
-    <button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button>
-  </div>
-</div></section>
-
-<div class="ad-slot wrap" data-ad-slot="after-auctions"></div>
-
-<!-- ============ TRENDING ============ -->
-<section class="sec"><div class="wrap">
-  <div class="sec-head"><div><div class="sec-kicker">TRENDING</div><h2 class="sec-title" data-ar="الأكثر رواجاً" data-en="What's Trending">الأكثر رواجاً</h2></div></div>
+  <div class="sec-head"><div><div class="sec-kicker">TRENDING</div><h2 class="sec-title" data-ar="الأكثر رواجاً" data-en="What's Trending">الأكثر رواجاً</h2></div>
+    <a class="sec-link" href="raf_trending.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
   <div class="tabs">
     <button class="tab on" onclick="swTab('viewed',this)"><i class="ti ti-eye"></i> <span data-ar="الأكثر مشاهدة" data-en="Most Viewed">الأكثر مشاهدة</span></button>
     <button class="tab" onclick="swTab('sold',this)"><i class="ti ti-shopping-cart"></i> <span data-ar="الأكثر مبيعاً" data-en="Best Selling">الأكثر مبيعاً</span></button>
@@ -519,9 +572,9 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
       <div class="foot-social"><a href="#" aria-label="instagram"><i class="ti ti-brand-instagram"></i></a><a href="#" aria-label="x"><i class="ti ti-brand-x"></i></a><a href="#" aria-label="whatsapp"><i class="ti ti-brand-whatsapp"></i></a><a href="#" aria-label="tiktok"><i class="ti ti-brand-tiktok"></i></a></div>
     </div>
     <div class="foot-col"><h4 data-ar="روابط سريعة" data-en="Quick Links">روابط سريعة</h4>
-      <a href="raf_storespage.html" data-ar="المحلات" data-en="Stores">المحلات</a><a href="raf_offers.html" data-ar="العروض" data-en="Offers">العروض</a><a href="raf_auctions.html" data-ar="المزادات" data-en="Auctions">المزادات</a><a href="raf_trending.html" data-ar="الترندات" data-en="Trends">الترندات</a></div>
+      <a href="raf_storespage.html" data-ar="المحلات" data-en="Stores">المحلات</a><a href="raf_offers.html" data-ar="العروض" data-en="Offers">العروض</a><a href="raf_auctions.html" data-feature="auctions" data-ar="المزادات" data-en="Auctions">المزادات</a><a href="raf_trending.html" data-ar="الترندات" data-en="Trends">الترندات</a></div>
     <div class="foot-col"><h4 data-ar="المساعدة" data-en="Help">المساعدة</h4>
-      <a href="raf_how_to_order.html" data-ar="كيف أطلب" data-en="How to Order">كيف أطلب</a><a href="raf_tracking.html" data-ar="تتبع الطلب" data-en="Track Order">تتبع الطلب</a><a href="raf_contact.html" data-ar="تواصل معنا" data-en="Contact Us">تواصل معنا</a><a href="raf_faq.html" data-ar="الأسئلة الشائعة" data-en="FAQ">الأسئلة الشائعة</a></div>
+      <a href="raf_about.html" data-ar="من نحن" data-en="About Us">من نحن</a><a href="raf_how_to_order.html" data-ar="كيف أطلب" data-en="How to Order">كيف أطلب</a><a href="raf_tracking.html" data-ar="تتبع الطلب" data-en="Track Order">تتبع الطلب</a><a href="raf_contact.html" data-ar="تواصل معنا" data-en="Contact Us">تواصل معنا</a><a href="raf_faq.html" data-ar="الأسئلة الشائعة" data-en="FAQ">الأسئلة الشائعة</a></div>
     <div class="foot-col"><h4 data-ar="رف للأعمال" data-en="RAF Business">رف للأعمال</h4>
       <a href="raf_seller.html" data-ar="افتح متجرك" data-en="Open Your Store">افتح متجرك</a><a href="raf_plans.html" data-ar="الباقات والأسعار" data-en="Pricing & Plans">الباقات والأسعار</a><a href="raf_join_driver.html" data-ar="انضم كسائق" data-en="Join as Driver">انضم كسائق</a><a href="raf_merchant.html" data-ar="لوحة التاجر" data-en="Merchant Dashboard">لوحة التاجر</a></div>
   </div>
@@ -539,6 +592,68 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
+
+<!-- ===== FIRST-VISIT ADVERTISEMENT POPUP ===== -->
+<div class="pp-backdrop" id="promoPopup" onclick="if(event.target===this)closePromoPopup()">
+  <div class="pp-card" role="dialog" aria-modal="true">
+    <button class="pp-x" onclick="closePromoPopup()" aria-label="close"><i class="ti ti-x"></i></button>
+    <div class="pp-icon"><i class="ti ti-gift"></i></div>
+    <span class="pp-badge">حصري لك</span>
+    <h3 class="pp-title">أهلاً بك في رف</h3>
+    <p class="pp-sub"></p>
+    <a class="pp-cta" href="raf_offers.html" onclick="closePromoPopup()"><span>تسوّق العروض الآن</span> <i class="ti ti-arrow-left"></i></a>
+    <button class="pp-dismiss" onclick="closePromoPopup()" data-ar="لا، شكراً" data-en="No, thanks">لا، شكراً</button>
+  </div>
+</div>
+
+<!-- ===== SEARCH FILTER SHEET ===== -->
+<div class="fs-backdrop" id="filterSheet" onclick="if(event.target===this)closeFilters()">
+  <div class="fs-card" role="dialog" aria-modal="true">
+    <div class="fs-head"><h3 data-ar="تصفية البحث" data-en="Filter Search">تصفية البحث</h3><button class="fs-x" onclick="closeFilters()" aria-label="close"><i class="ti ti-x"></i></button></div>
+    <div class="fs-body">
+      <div class="fs-group"><div class="fs-label"><i class="ti ti-category"></i> <span data-ar="الفئة" data-en="Category">الفئة</span></div>
+        <div class="fs-chips" data-filter="cat">
+          <button class="fs-chip" onclick="pickChip(this)" data-v="electronics" data-ar="إلكترونيات" data-en="Electronics">إلكترونيات</button>
+          <button class="fs-chip" onclick="pickChip(this)" data-v="fashion" data-ar="أزياء" data-en="Fashion">أزياء</button>
+          <button class="fs-chip" onclick="pickChip(this)" data-v="perfume" data-ar="عطور" data-en="Perfume">عطور</button>
+          <button class="fs-chip" onclick="pickChip(this)" data-v="watches" data-ar="ساعات" data-en="Watches">ساعات</button>
+          <button class="fs-chip" onclick="pickChip(this)" data-v="jewelry" data-ar="مجوهرات" data-en="Jewelry">مجوهرات</button>
+        </div></div>
+      <div class="fs-group"><div class="fs-label"><i class="ti ti-building-store"></i> <span data-ar="المتجر" data-en="Store">المتجر</span></div>
+        <div class="fs-chips" data-filter="store">
+          <button class="fs-chip" onclick="pickChip(this)" data-ar="تك هاوس" data-en="Tech House">تك هاوس</button>
+          <button class="fs-chip" onclick="pickChip(this)" data-ar="دار العود" data-en="Dar Aloud">دار العود</button>
+          <button class="fs-chip" onclick="pickChip(this)" data-ar="كازا مود" data-en="Casa Mode">كازا مود</button>
+          <button class="fs-chip" onclick="pickChip(this)" data-ar="لمسة ذهب" data-en="Lamsa Gold">لمسة ذهب</button>
+        </div></div>
+      <div class="fs-group"><div class="fs-label"><i class="ti ti-coin"></i> <span data-ar="نطاق السعر (د.ك)" data-en="Price Range (KWD)">نطاق السعر (د.ك)</span></div>
+        <div class="fs-price"><input id="fPriceMin" type="number" min="0" placeholder="0"><span>—</span><input id="fPriceMax" type="number" min="0" placeholder="500"></div></div>
+      <div class="fs-group"><div class="fs-label"><i class="ti ti-star"></i> <span data-ar="التقييم" data-en="Rating">التقييم</span></div>
+        <div class="fs-chips" data-filter="rating">
+          <button class="fs-chip" onclick="pickChip(this)" data-v="4.5">4.5★+</button>
+          <button class="fs-chip" onclick="pickChip(this)" data-v="4">4.0★+</button>
+          <button class="fs-chip" onclick="pickChip(this)" data-v="3.5">3.5★+</button>
+        </div></div>
+      <div class="fs-group"><div class="fs-label"><i class="ti ti-package"></i> <span data-ar="التوفّر" data-en="Availability">التوفّر</span></div>
+        <div class="fs-chips" data-filter="avail">
+          <button class="fs-chip" onclick="pickChip(this)" data-v="instock" data-ar="متوفّر الآن" data-en="In stock">متوفّر الآن</button>
+          <button class="fs-chip" onclick="pickChip(this)" data-v="fast" data-ar="توصيل سريع" data-en="Fast delivery">توصيل سريع</button>
+        </div></div>
+      <div class="fs-group"><div class="fs-label"><i class="ti ti-discount"></i> <span data-ar="العروض" data-en="Offers">العروض</span></div>
+        <div class="fs-chips" data-filter="offers">
+          <button class="fs-chip" onclick="pickChip(this)" data-v="sale" data-ar="عليها خصم" data-en="On sale">عليها خصم</button>
+          <button class="fs-chip" onclick="pickChip(this)" data-v="new" data-ar="وصل حديثاً" data-en="New arrivals">وصل حديثاً</button>
+        </div></div>
+      <div class="fs-group"><div class="fs-label"><i class="ti ti-tag"></i> <span data-ar="الماركة" data-en="Brand">الماركة</span></div>
+        <div class="fs-chips" data-filter="brand">
+          <button class="fs-chip" onclick="pickChip(this)" data-v="apple">Apple</button>
+          <button class="fs-chip" onclick="pickChip(this)" data-v="sony">Sony</button>
+          <button class="fs-chip" onclick="pickChip(this)" data-v="ray">Ray Luxe</button>
+        </div></div>
+    </div>
+    <div class="fs-foot"><button class="fs-reset" onclick="resetFilters()" data-ar="إعادة تعيين" data-en="Reset">إعادة تعيين</button><button class="fs-apply" onclick="applyFilters()" data-ar="عرض النتائج" data-en="Show Results">عرض النتائج</button></div>
+  </div>
+</div>
 
 <script src="raf_nav.js"></script>
 <script src="raf_ads.js"></script>
@@ -647,8 +762,8 @@ function catCard(c){
   const inner=c.image?'':`<i class="ti ${c.icon}"></i>`;
   return `<div class="car-item cat-item"><a class="cat" href="raf_storespage.html?cat=${c.id}"><div class="cat-circle" style="${bg}">${inner}</div><span>${L(c)}</span></a></div>`;
 }
-/* Uses the single global RAF Product Card component (raf_card.js) */
-function offerCard(o){return `<div class="car-item pwrap">${RAFCard.product(o)}</div>`;}
+/* Uses the single global RAF Product Card component (raf_card.js) — from=home enables back-to-store */
+function offerCard(o){return `<div class="car-item pwrap">${RAFCard.product(o,{href:'raf_product.html?id='+encodeURIComponent(o.id)+'&from=home'})}</div>`;}
 function storeCard(s){return `<article class="car-item store-card" onclick="window.location='raf_store.html'">
   <div class="store-cover"></div><div class="store-body"><div class="store-logo"><i class="ti ${s.ic}"></i></div>
   <div class="store-name">${L(s)} <i class="ti ti-rosette-discount-check verify"></i></div>
@@ -662,14 +777,40 @@ function aucCard(a){return `<article class="car-item auc-card">
   <div class="auc-foot"><span class="auc-bidders"><i class="ti ti-users"></i> ${a.bidders} ${curLang()==='en'?'bidders':'مزايد'}</span>
     <a href="raf_auctions.html" class="btn-join"><i class="ti ti-gavel"></i> ${curLang()==='en'?'Join':'شارك'}</a></div></div></article>`;}
 
+/* store card variant for the "Stores with active offers" section */
+function dealStoreCard(s){var promo=s.promo||30;return `<article class="car-item store-card" onclick="window.location='raf_store.html'">
+  <div class="store-cover"><span class="store-deal-badge"><i class="ti ti-discount-check"></i> ${curLang()==='en'?('Up to '+promo+'% off'):('خصم حتى '+promo+'%')}</span></div>
+  <div class="store-body"><div class="store-logo"><i class="ti ${s.ic}"></i></div>
+  <div class="store-name">${L(s)} <i class="ti ti-rosette-discount-check verify"></i></div>
+  <div class="store-meta"><span><i class="ti ti-star-filled"></i> ${s.rate}</span><span class="dot"></span><span>${s.prod} ${curLang()==='en'?'products':'منتج'}</span><span class="dot"></span><span>${L(s.cat)}</span></div>
+  <a href="raf_store.html" class="btn-visit" onclick="event.stopPropagation()"><i class="ti ti-discount"></i> ${curLang()==='en'?'Shop offers':'تسوّق العروض'}</a></div></article>`;}
+
+/* ─── Homepage recommendation flow (comparators are algorithm/admin-ready) ─── */
+function offerQuality(o){ return parseFloat(o.rate||0)*10 + Math.min(parseInt(o.rev||0),500)/120; }  /* quality = rating + review weight, NOT discount% */
+function recommendedStores(){ return STORES.slice().sort((a,b)=> parseFloat(b.rate)-parseFloat(a.rate) || parseInt(b.prod)-parseInt(a.prod)); }
+function featuredOffers(){ return OFFERS.slice().sort((a,b)=> offerQuality(b)-offerQuality(a)); }        /* ranked by quality, not discount */
+function dealStores(){ return STORES.map(function(s,i){ return Object.assign({promo:[30,25,40,20][i]||25}, s); }).sort((a,b)=> b.promo-a.promo); }
+/* trending = discovery mix: combine trending / newest / top-rated across categories, minimise repetition */
+function trendingMix(){
+  var byRate=OFFERS.slice().sort((a,b)=>parseFloat(b.rate)-parseFloat(a.rate));
+  var newest=OFFERS.slice().reverse();
+  return {
+    viewed: OFFERS.slice(0,5),                                   /* most viewed */
+    sold:   [OFFERS[4],OFFERS[1],OFFERS[3],OFFERS[0],OFFERS[2]], /* best selling — different order */
+    liked:  byRate                                              /* highly rated / most liked */
+  };
+}
+
 function renderCarousels(){
   document.getElementById('catTrack').innerHTML=CATEGORIES.filter(c=>c.active).sort((a,b)=>a.sort-b.sort).map(catCard).join('');
-  document.getElementById('offersTrack').innerHTML=OFFERS.map(offerCard).join('')+viewAllCard('raf_offers.html');
-  document.getElementById('storesTrack').innerHTML=STORES.map(storeCard).join('')+viewAllCard('raf_storespage.html');
-  document.getElementById('aucTrack').innerHTML=AUCS.map(aucCard).join('')+viewAllCard('raf_auctions.html');
-  document.querySelector('#tab-viewed .car-track').innerHTML=TREND.viewed.map(offerCard).join('')+viewAllCard('raf_trending.html');
-  document.querySelector('#tab-sold .car-track').innerHTML=TREND.sold.map(offerCard).join('')+viewAllCard('raf_trending.html');
-  document.querySelector('#tab-liked .car-track').innerHTML=TREND.liked.map(offerCard).join('')+viewAllCard('raf_trending.html');
+  /* 1 · Recommended stores  2 · Featured offers  3 · Stores with offers  4 · Trending */
+  document.getElementById('storesTrack').innerHTML=recommendedStores().map(storeCard).join('')+viewAllCard('raf_storespage.html');
+  document.getElementById('offersTrack').innerHTML=featuredOffers().map(offerCard).join('')+viewAllCard('raf_offers.html');
+  document.getElementById('dealStoresTrack').innerHTML=dealStores().map(dealStoreCard).join('')+viewAllCard('raf_offers.html');
+  var T=trendingMix();
+  document.querySelector('#tab-viewed .car-track').innerHTML=T.viewed.map(offerCard).join('')+viewAllCard('raf_trending.html');
+  document.querySelector('#tab-sold .car-track').innerHTML=T.sold.map(offerCard).join('')+viewAllCard('raf_trending.html');
+  document.querySelector('#tab-liked .car-track').innerHTML=T.liked.map(offerCard).join('')+viewAllCard('raf_trending.html');
 }
 function carScroll(btn,dir){
   const track=btn.parentElement.querySelector('.car-track');
@@ -785,11 +926,64 @@ function applyLang(){const en=curLang()==='en';document.getElementById('langLabe
   document.querySelectorAll('[data-ar-ph]').forEach(el=>{el.placeholder=en?el.dataset.enPh:el.dataset.arPh;});}
 
 /* ===== INIT ===== */
+function featureOn(k){ if(window.RAFFeatures) return RAFFeatures.on(k); try{ return (JSON.parse(localStorage.getItem('raf_features')||'{}'))[k]===true; }catch(e){ return false; } }
 (function(){const l=localStorage.getItem('raf_lang');if(l==='en'){const r=document.getElementById('htmlRoot');r.lang='en';r.dir='ltr';}
+  /* drop promotional ad banners for disabled features (auctions/used) */
+  for(var i=ADS.length-1;i>=0;i--){ var h=ADS[i].href||''; if((/raf_auctions\.html/.test(h)&&!featureOn('auctions'))||(/raf_used\.html/.test(h)&&!featureOn('used'))) ADS.splice(i,1); }
   seedHistory();applyLang();adcRender();adcPlay();renderCarousels();updateCartBadge();tick();setInterval(tick,1000);
   if(window.RAFAds)RAFAds.mountAll(curLang());
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSearch();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSearch();closePromoPopup();}});
+  setTimeout(function(){ try{ showPromoPopup(); }catch(e){} }, 600);  /* deferred: runs after all defs are initialised */
 })();
+
+/* ===== FIRST-VISIT ADVERTISEMENT POPUP (admin-configurable) ===== */
+/* Admin model: enabled + schedule + creative. Replace with API/Admin Panel later. */
+const PROMO_POPUP={
+  enabled:true,
+  id:'welcome-2026',                         /* bump id to re-show after a new campaign */
+  start:'2026-01-01', end:'2026-12-31',      /* scheduled campaign window (YYYY-MM-DD) */
+  icon:'ti-gift',
+  badge:{ar:'حصري لك',en:'Just for you'},
+  title:{ar:'أهلاً بك في رف',en:'Welcome to RAF'},
+  sub:{ar:'اكتشف أفضل المحلات المحلية والعروض المميّزة — خصومات حصرية بانتظارك.',en:'Discover the best local stores and featured offers — exclusive deals await.'},
+  cta:{ar:'تسوّق العروض الآن',en:'Shop offers now'},
+  href:'raf_offers.html'
+};
+function showPromoPopup(){
+  var p=PROMO_POPUP; if(!p.enabled) return;
+  var today=new Date().toISOString().slice(0,10);
+  if((p.start&&today<p.start)||(p.end&&today>p.end)) return;         /* outside schedule */
+  if(localStorage.getItem('raf_promo_seen')===p.id) return;          /* respect dismissal / first-visit only */
+  var en=curLang()==='en';
+  var el=document.getElementById('promoPopup');
+  el.querySelector('.pp-icon i').className='ti '+p.icon;
+  el.querySelector('.pp-badge').textContent=en?p.badge.en:p.badge.ar;
+  el.querySelector('.pp-title').textContent=en?p.title.en:p.title.ar;
+  el.querySelector('.pp-sub').textContent=en?p.sub.en:p.sub.ar;
+  var cta=el.querySelector('.pp-cta'); cta.href=p.href; cta.querySelector('span').textContent=en?p.cta.en:p.cta.ar;
+  requestAnimationFrame(function(){ el.classList.add('show'); });
+}
+function closePromoPopup(){ var el=document.getElementById('promoPopup'); if(!el||!el.classList.contains('show'))return; el.classList.remove('show'); try{localStorage.setItem('raf_promo_seen',PROMO_POPUP.id);}catch(e){} }
+
+/* ===== SEARCH FILTERS (integrates with the search results page) ===== */
+function openFilters(e){ if(e){e.preventDefault();e.stopPropagation();} closeSearch(); requestAnimationFrame(function(){document.getElementById('filterSheet').classList.add('show');}); }
+function closeFilters(){ document.getElementById('filterSheet').classList.remove('show'); }
+function pickChip(btn){ var on=btn.classList.contains('on'); btn.parentElement.querySelectorAll('.fs-chip').forEach(function(c){c.classList.remove('on');}); if(!on)btn.classList.add('on'); }
+function resetFilters(){ document.querySelectorAll('#filterSheet .fs-chip').forEach(function(c){c.classList.remove('on');}); ['fPriceMin','fPriceMax'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';}); }
+function applyFilters(){
+  var params=new URLSearchParams();
+  document.querySelectorAll('#filterSheet .fs-chips').forEach(function(g){ var on=g.querySelector('.fs-chip.on'); if(on) params.set(g.dataset.filter, on.getAttribute('data-v')||on.textContent.trim()); });
+  var mn=(document.getElementById('fPriceMin')||{}).value, mx=(document.getElementById('fPriceMax')||{}).value;
+  if(mn)params.set('pmin',mn); if(mx)params.set('pmax',mx);
+  /* seed the results query with the most specific text selection so results filter immediately */
+  var brandEl=document.querySelector('#filterSheet [data-filter="brand"] .fs-chip.on');
+  var storeEl=document.querySelector('#filterSheet [data-filter="store"] .fs-chip.on');
+  var catEl=document.querySelector('#filterSheet [data-filter="cat"] .fs-chip.on');
+  var q=(brandEl&&brandEl.textContent.trim())||(storeEl&&(curLang()==='en'?storeEl.getAttribute('data-en'):storeEl.textContent.trim()))||(catEl&&(curLang()==='en'?catEl.getAttribute('data-en'):catEl.textContent.trim()))||((document.getElementById('navSearch')||{}).value||'').trim();
+  if(q)params.set('q',q);
+  closeFilters();
+  window.location='raf_offers.html?'+params.toString();
+}
 </script>
 </body>
 </html>

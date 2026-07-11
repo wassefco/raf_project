@@ -474,13 +474,14 @@
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <link rel="stylesheet" href="raf_theme.css">
+<script src="raf_features.js"></script>
 </head>
 <body>
 
 <!-- NAV -->
 <nav>
   <div class="nav-actions">
-    <button class="nav-icon" onclick="history.back()" title="رجوع"><i class="ti ti-arrow-right"></i></button>
+    <button class="nav-icon" onclick="if(window.__rafBackTarget){location.href=window.__rafBackTarget;}else{history.back();}" title="رجوع"><i class="ti ti-arrow-right"></i></button>
     <button class="nav-icon" onclick="window.location='raf_cart.html'">
       <i class="ti ti-shopping-cart"></i>
       <span class="cart-badge">3</span>
@@ -966,6 +967,18 @@ const PRODUCT_DATA = {
   const params  = new URLSearchParams(window.location.search);
   const id      = params.get('id') || 'P-001';
   const p       = PRODUCT_DATA[id] || PRODUCT_DATA['P-001'];
+
+  /* ── Back-to-store journey: opening a product from the Homepage makes the
+        first Back / in-app Back / Close land on the owning Store page first,
+        then normal navigation continues. ── */
+  (function(){
+    var fromHome = params.get('from') === 'home' || /raf_homepage\.html(\?|#|$)/.test(document.referrer);
+    if (!fromHome) return;
+    var storeUrl = 'raf_store.html?store=' + encodeURIComponent(p.storeSlug || '');
+    window.__rafBackTarget = storeUrl;                 /* used by in-app back/close buttons */
+    history.pushState({ rafStoreStop: 1 }, '', location.href);
+    window.addEventListener('popstate', function(){ location.replace(storeUrl); });
+  })();
 
   /* helpers */
   function starsHTML(r) {

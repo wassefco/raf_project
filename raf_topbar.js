@@ -80,9 +80,9 @@
       '<a href="raf_storespage.html"><i class="ti ti-building-store"></i> <span data-ar="المحلات" data-en="Stores">'+t('المحلات','Stores')+'</span></a>'+
       '<a href="raf_offers.html"><i class="ti ti-box"></i> <span data-ar="المنتجات" data-en="Products">'+t('المنتجات','Products')+'</span></a>'+
       '<a href="raf_offers.html"><i class="ti ti-discount"></i> <span data-ar="العروض" data-en="Offers">'+t('العروض','Offers')+'</span></a>'+
-      '<a href="raf_auctions.html"><i class="ti ti-gavel"></i> <span data-ar="المزادات" data-en="Auctions">'+t('المزادات','Auctions')+'</span></a>'+
+      '<a href="raf_auctions.html" data-feature="auctions"><i class="ti ti-gavel"></i> <span data-ar="المزادات" data-en="Auctions">'+t('المزادات','Auctions')+'</span></a>'+
       '<a href="raf_trending.html"><i class="ti ti-flame"></i> <span data-ar="الترندات" data-en="Trends">'+t('الترندات','Trends')+'</span></a>'+
-      '<a href="raf_used.html"><i class="ti ti-recycle"></i> <span data-ar="المستعمل" data-en="Used">'+t('المستعمل','Used')+'</span></a>'+
+      '<a href="raf_used.html" data-feature="used"><i class="ti ti-recycle"></i> <span data-ar="المستعمل" data-en="Used">'+t('المستعمل','Used')+'</span></a>'+
     '</div>';
     if(ms.nextSibling) nav.parentNode.insertBefore(sub, ms.nextSibling); else nav.parentNode.appendChild(sub);
     updateBadge();
