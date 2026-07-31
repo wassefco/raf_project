@@ -3,131 +3,312 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>رف — هوية رف (حسابي)</title>
+<title>رف — حسابي</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<!-- shared tokens, header, bottom nav, buttons, badges -->
 <link rel="stylesheet" href="raf_account.css">
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
+<style>
+/* ============================================================
+   PERSONAL HUB — premium account experience
+   ============================================================ */
+.hub{max-width:1120px;margin:0 auto;padding:18px clamp(14px,3.5vw,36px) 40px;}
+
+/* ---------- 1 · PROFILE HERO ---------- */
+.hero{position:relative;overflow:hidden;border-radius:26px;padding:30px clamp(20px,3vw,34px);
+  background:linear-gradient(145deg,#191510 0%,#241d13 46%,#12100b 100%);
+  border:1px solid rgba(201,168,76,.34);box-shadow:0 26px 60px -30px rgba(20,16,8,.75);color:#F3EEDD;margin-bottom:22px;}
+.hero::before{content:'';position:absolute;inset:0;background:
+  radial-gradient(620px 260px at 88% -30%,rgba(201,168,76,.28),transparent 62%),
+  radial-gradient(420px 220px at 6% 120%,rgba(201,168,76,.12),transparent 60%);pointer-events:none;}
+.hero>*{position:relative;}
+.hero-top{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.hero-av{position:relative;width:92px;height:92px;flex-shrink:0;border-radius:50%;
+  background:linear-gradient(135deg,#E7CC85,var(--gold2));display:flex;align-items:center;justify-content:center;
+  font-family:var(--fdisplay);font-size:38px;font-weight:800;color:#1C1606;
+  box-shadow:0 0 0 4px rgba(201,168,76,.2),0 14px 30px -14px rgba(0,0,0,.7);}
+.hero-av .tick{position:absolute;bottom:2px;inset-inline-end:2px;width:27px;height:27px;border-radius:50%;
+  background:var(--green);border:3px solid #191510;display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;}
+.hero-id{flex:1;min-width:190px;}
+.hero-name{font-family:var(--fdisplay);font-size:clamp(23px,3vw,30px);font-weight:800;color:#fff;line-height:1.2;}
+.hero-num{font-family:var(--fen);font-size:13px;font-weight:600;letter-spacing:2.5px;color:var(--gold);margin-top:6px;}
+.hero-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:30px;padding:6px 12px;font-size:11.5px;font-weight:700;}
+.chip i{font-size:14px;}
+.chip.ok{background:rgba(46,158,91,.16);border:1px solid rgba(46,158,91,.42);color:#7FD9A2;}
+.chip.dim{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);color:#D5CCB8;}
+.hero-set{width:44px;height:44px;flex-shrink:0;border-radius:50%;border:1px solid rgba(201,168,76,.4);
+  background:rgba(201,168,76,.1);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:20px;
+  text-decoration:none;transition:all .22s;}
+.hero-set:hover{background:var(--gold);color:#1C1606;transform:rotate(35deg);}
+
+/* loyalty */
+.loyal{margin-top:24px;padding-top:20px;border-top:1px solid rgba(201,168,76,.2);}
+.loyal-top{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:12px;}
+.tier{display:inline-flex;align-items:center;gap:8px;font-size:15px;font-weight:800;color:var(--gold);}
+.tier i{font-size:20px;}
+.tier small{display:block;font-size:11px;font-weight:500;color:#B3A98F;letter-spacing:.4px;margin-top:2px;}
+.pts{text-align:end;}
+.pts b{font-family:var(--fen);font-size:26px;font-weight:800;color:#fff;line-height:1;}
+.pts span{display:block;font-size:11px;color:#B3A98F;margin-top:4px;}
+.bar{height:9px;border-radius:8px;background:rgba(255,255,255,.11);overflow:hidden;}
+.bar>i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#E7CC85,var(--gold));
+  box-shadow:0 0 14px rgba(201,168,76,.55);width:0;transition:width 1.1s cubic-bezier(.22,1,.36,1);}
+.loyal-note{font-size:12px;color:#B3A98F;margin-top:9px;}
+
+/* ---------- section heads ---------- */
+.sh{display:flex;align-items:center;gap:10px;margin:26px 2px 13px;}
+.sh h2{font-family:var(--fdisplay);font-size:18px;font-weight:800;color:var(--ink);}
+.sh .line{flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent);}
+html[dir="ltr"] .sh .line{background:linear-gradient(270deg,var(--border),transparent);}
+
+/* ---------- 2 · QUICK ACTIONS ---------- */
+.qa{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.qa-card{position:relative;display:flex;flex-direction:column;gap:12px;padding:20px 18px;border-radius:20px;
+  background:var(--card);border:1px solid var(--border);text-decoration:none;color:var(--text);overflow:hidden;
+  box-shadow:0 1px 3px rgba(20,16,8,.05);transition:transform .24s cubic-bezier(.22,1,.36,1),box-shadow .24s,border-color .24s;}
+.qa-card::after{content:'';position:absolute;inset:0;background:radial-gradient(240px 120px at 82% -20%,var(--gold-soft),transparent 65%);opacity:0;transition:opacity .28s;}
+.qa-card:hover{transform:translateY(-5px);border-color:var(--gold);box-shadow:0 20px 38px -22px rgba(20,16,8,.45);}
+.qa-card:hover::after{opacity:1;}
+.qa-card:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+.qa-ic{position:relative;width:52px;height:52px;border-radius:16px;background:var(--gold-soft);color:var(--gold2);
+  display:flex;align-items:center;justify-content:center;font-size:25px;transition:background .24s,color .24s,transform .24s;}
+.qa-card:hover .qa-ic{background:var(--gold);color:#1C1606;transform:scale(1.06);}
+.qa-t{position:relative;font-size:15px;font-weight:700;color:var(--ink);}
+.qa-s{position:relative;font-size:12px;color:var(--text3);margin-top:3px;}
+.qa-n{position:absolute;top:16px;inset-inline-end:16px;min-width:24px;height:24px;padding:0 7px;border-radius:12px;
+  background:var(--gold);color:#1C1606;font-family:var(--fen);font-size:12px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;}
+.qa-n.alert{background:var(--red);color:#fff;}
+
+/* ---------- last order ---------- */
+.lo{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:20px;background:var(--card);
+  border:1px solid var(--border);text-decoration:none;color:var(--text);margin-bottom:14px;
+  box-shadow:0 1px 3px rgba(20,16,8,.05);transition:transform .22s,box-shadow .22s,border-color .22s;}
+.lo:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 16px 32px -20px rgba(20,16,8,.4);}
+.lo-ic{width:52px;height:52px;flex-shrink:0;border-radius:16px;background:linear-gradient(150deg,var(--bg2),var(--bg3));
+  display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--gold2);}
+.lo-b{flex:1;min-width:0;}
+.lo-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.lo-n{font-family:var(--fen);font-size:14px;font-weight:800;color:var(--ink);}
+.lo-s{font-size:12.5px;color:var(--text3);margin-top:4px;}
+.lo-total{text-align:end;flex-shrink:0;}
+.lo-total b{font-family:var(--fen);font-size:16px;font-weight:800;color:var(--gold2);}
+.lo-total span{display:block;font-size:11px;color:var(--text3);margin-top:2px;}
+.lo-thumbs{display:flex;gap:6px;margin-top:9px;}
+.lo-th{width:30px;height:30px;border-radius:9px;background:var(--bg2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text3);}
+.lo-more{font-family:var(--fen);font-size:11px;font-weight:700;color:var(--text3);align-self:center;}
+
+/* ---------- tiles (shopping / account / support) ---------- */
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.tiles.two{grid-template-columns:repeat(2,1fr);}
+.tile{display:flex;align-items:center;gap:13px;padding:16px;border-radius:18px;background:var(--card);
+  border:1px solid var(--border);text-decoration:none;color:var(--text);position:relative;
+  box-shadow:0 1px 2px rgba(20,16,8,.04);transition:transform .2s,border-color .2s,box-shadow .2s;}
+.tile:hover{transform:translateY(-3px);border-color:var(--gold);box-shadow:0 14px 28px -20px rgba(20,16,8,.4);}
+.tile:focus-visible{outline:2px solid var(--gold);outline-offset:3px;}
+.tile-ic{width:44px;height:44px;flex-shrink:0;border-radius:14px;background:var(--gold-soft);color:var(--gold2);
+  display:flex;align-items:center;justify-content:center;font-size:21px;transition:all .2s;}
+.tile:hover .tile-ic{background:var(--gold);color:#1C1606;}
+.tile-b{flex:1;min-width:0;}
+.tile-t{font-size:14.5px;font-weight:700;color:var(--ink);}
+.tile-s{font-size:12px;color:var(--text3);margin-top:2px;}
+/* chevron points in the reading-forward direction; the icon class is set in JS
+   so it never depends on transform/specificity quirks */
+.tile-go{color:var(--text3);font-size:18px;flex-shrink:0;transition:color .2s;}
+.tile:hover .tile-go{color:var(--gold2);}
+.tile-n{min-width:22px;height:22px;padding:0 7px;border-radius:11px;background:var(--red);color:#fff;
+  font-family:var(--fen);font-size:11.5px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* ---------- logout ---------- */
+.logout-wrap{margin-top:30px;padding-top:22px;border-top:1px solid var(--border);}
+.logout{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:15px;border-radius:30px;
+  background:transparent;border:1px solid rgba(217,83,79,.4);color:var(--red);font-family:var(--font);
+  font-size:14.5px;font-weight:700;text-decoration:none;cursor:pointer;transition:all .22s;}
+.logout:hover{background:var(--red);border-color:var(--red);color:#fff;}
+.logout:focus-visible{outline:2px solid var(--red);outline-offset:3px;}
+.ver{text-align:center;font-size:11.5px;color:var(--text3);margin-top:16px;}
+
+/* ---------- entrance animation ---------- */
+.rise{opacity:0;transform:translateY(14px);animation:rise .55s cubic-bezier(.22,1,.36,1) forwards;}
+@keyframes rise{to{opacity:1;transform:none;}}
+@media(prefers-reduced-motion:reduce){
+  .rise{animation:none;opacity:1;transform:none;}
+  .bar>i{transition:none;}
+  .qa-card:hover,.tile:hover,.lo:hover{transform:none;}
+}
+
+/* ---------- responsive ---------- */
+@media(max-width:900px){
+  .qa{grid-template-columns:repeat(2,1fr);}
+  .tiles,.tiles.two{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:620px){
+  .hub{padding:14px 14px 34px;}
+  .hero{padding:24px 18px;border-radius:22px;}
+  .hero-av{width:76px;height:76px;font-size:31px;}
+  .hero-top{gap:15px;}
+  .tiles,.tiles.two{grid-template-columns:1fr;}
+  .qa{gap:11px;}
+  .qa-card{padding:16px 14px;gap:10px;border-radius:17px;}
+  .qa-ic{width:44px;height:44px;font-size:21px;border-radius:14px;}
+  .qa-t{font-size:13.5px;}
+  .qa-s{display:none;}
+  .lo-total{width:100%;text-align:start;}
+}
+</style>
 <script src="raf_features.js"></script>
 </head>
 <body>
 
-<!-- TOP BAR (no search) -->
+<!-- TOP BAR -->
 <header class="ahead">
   <button type="button" class="ahead-back" onclick="goBack('raf_homepage.html')"><i class="ti ti-arrow-right"></i> <span data-ar="العودة" data-en="Back">العودة</span></button>
   <div class="ahead-title" data-ar="حسابي" data-en="My Account">حسابي</div>
   <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
 </header>
 
-<div class="wrap">
+<main class="hub">
 
-  <!-- RAF ID HEADER CARD -->
-  <div class="idcard">
-    <div class="idcard-top">
-      <div class="id-avatar" id="idAvatar">م</div>
-      <div>
-        <div class="id-name" id="idName">محمد العنزي</div>
-        <div class="id-num" id="idNum">RAF-2026-04871</div>
+  <!-- ══ 1 · PROFILE HERO ══ -->
+  <section class="hero rise" style="animation-delay:.02s" aria-labelledby="heroName">
+    <div class="hero-top">
+      <div class="hero-av" id="idAvatar" aria-hidden="true">م<span class="tick"><i class="ti ti-check"></i></span></div>
+      <div class="hero-id">
+        <h1 class="hero-name" id="idName">محمد العنزي</h1>
+        <div class="hero-num" id="idNum">RAF-2026-04871</div>
+        <div class="hero-chips">
+          <span class="chip ok"><i class="ti ti-rosette-discount-check"></i> <span data-ar="حساب موثّق" data-en="Verified">حساب موثّق</span></span>
+          <span class="chip dim"><i class="ti ti-calendar"></i> <span data-ar="عضو منذ يناير 2024" data-en="Member since Jan 2024">عضو منذ يناير 2024</span></span>
+        </div>
       </div>
-      <a href="raf_settings.html" class="idcard-set" title="الإعدادات"><i class="ti ti-settings"></i></a>
+      <a href="raf_settings.html" class="hero-set" aria-label="الإعدادات" data-ar-title="الإعدادات" data-en-title="Settings" title="الإعدادات"><i class="ti ti-settings"></i></a>
     </div>
-    <div class="id-meta">
-      <span class="id-chip verified"><i class="ti ti-rosette-discount-check"></i> <span data-ar="حساب موثّق" data-en="Verified account">حساب موثّق</span></span>
-      <span class="id-chip member"><i class="ti ti-calendar"></i> <span data-ar="عضو منذ يناير 2024" data-en="Member since Jan 2024">عضو منذ يناير 2024</span></span>
+
+    <div class="loyal">
+      <div class="loyal-top">
+        <div class="tier"><i class="ti ti-crown"></i>
+          <div><span id="tierName" data-ar="عضو ذهبي" data-en="Gold Member">عضو ذهبي</span>
+            <small id="tierNext"></small></div>
+        </div>
+        <div class="pts"><b id="ptsVal">0</b><span data-ar="نقطة مكافآت" data-en="Reward points">نقطة مكافآت</span></div>
+      </div>
+      <div class="bar" role="progressbar" id="loyalBar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="loyalFill"></i></div>
+      <div class="loyal-note" id="loyalNote"></div>
     </div>
-    <div class="stat-strip">
-      <div class="stat-cell"><div class="stat-num">12</div><div class="stat-lbl" data-ar="الطلبات" data-en="Orders">الطلبات</div></div>
-      <div class="stat-cell"><div class="stat-num">8</div><div class="stat-lbl" data-ar="المفضلة" data-en="Wishlist">المفضلة</div></div>
-      <div class="stat-cell"><div class="stat-num">1,250</div><div class="stat-lbl" data-ar="نقاط المكافآت" data-en="Reward points">نقاط المكافآت</div></div>
+  </section>
+
+  <!-- ══ 2 · QUICK ACTIONS ══ -->
+  <div class="sh rise" style="animation-delay:.08s"><h2 data-ar="إجراءات سريعة" data-en="Quick Actions">إجراءات سريعة</h2><span class="line"></span></div>
+  <section class="qa rise" style="animation-delay:.1s">
+    <a class="qa-card" href="raf_orders.html">
+      <span class="qa-n" id="qaOrders" hidden>0</span>
+      <div class="qa-ic"><i class="ti ti-shopping-bag"></i></div>
+      <div><div class="qa-t" data-ar="طلباتي" data-en="My Orders">طلباتي</div>
+        <div class="qa-s" data-ar="تتبّع وإدارة الطلبات" data-en="Track & manage">تتبّع وإدارة الطلبات</div></div>
+    </a>
+    <a class="qa-card" href="raf_wishlist.html">
+      <span class="qa-n" id="qaWish" hidden>0</span>
+      <div class="qa-ic"><i class="ti ti-heart"></i></div>
+      <div><div class="qa-t" data-ar="المفضلة" data-en="Favorites">المفضلة</div>
+        <div class="qa-s" data-ar="منتجاتك المحفوظة" data-en="Saved products">منتجاتك المحفوظة</div></div>
+    </a>
+    <a class="qa-card" href="raf_address.html">
+      <div class="qa-ic"><i class="ti ti-map-pin"></i></div>
+      <div><div class="qa-t" data-ar="عناويني" data-en="Addresses">عناويني</div>
+        <div class="qa-s" data-ar="عناوين التوصيل" data-en="Delivery addresses">عناوين التوصيل</div></div>
+    </a>
+    <a class="qa-card" href="raf_payments.html">
+      <div class="qa-ic"><i class="ti ti-credit-card"></i></div>
+      <div><div class="qa-t" data-ar="طرق الدفع" data-en="Payment Methods">طرق الدفع</div>
+        <div class="qa-s" data-ar="البطاقات المحفوظة" data-en="Saved cards">البطاقات المحفوظة</div></div>
+    </a>
+  </section>
+
+  <!-- ══ 3 · SHOPPING ══ -->
+  <div class="sh rise" style="animation-delay:.14s"><h2 data-ar="تسوّقي" data-en="Shopping">تسوّقي</h2><span class="line"></span></div>
+  <section class="rise" style="animation-delay:.16s">
+    <div id="lastOrderSlot"></div>
+    <div class="tiles">
+      <a class="tile" href="raf_rewards.html">
+        <div class="tile-ic"><i class="ti ti-gift"></i></div>
+        <div class="tile-b"><div class="tile-t" data-ar="المكافآت والولاء" data-en="Rewards & Loyalty">المكافآت والولاء</div>
+          <div class="tile-s" id="rewardsSub"></div></div>
+        <i class="ti ti-chevron-left tile-go"></i>
+      </a>
+      <a class="tile" href="raf_following.html">
+        <div class="tile-ic"><i class="ti ti-building-store"></i></div>
+        <div class="tile-b"><div class="tile-t" data-ar="المتاجر المتابَعة" data-en="Followed Stores">المتاجر المتابَعة</div>
+          <div class="tile-s" data-ar="متاجرك المفضّلة" data-en="Stores you follow">متاجرك المفضّلة</div></div>
+        <i class="ti ti-chevron-left tile-go"></i>
+      </a>
+      <a class="tile" href="raf_offers.html">
+        <div class="tile-ic"><i class="ti ti-discount"></i></div>
+        <div class="tile-b"><div class="tile-t" data-ar="العروض والكوبونات" data-en="Offers & Coupons">العروض والكوبونات</div>
+          <div class="tile-s" data-ar="عروض حصرية لك" data-en="Exclusive deals">عروض حصرية لك</div></div>
+        <i class="ti ti-chevron-left tile-go"></i>
+      </a>
+      <a class="tile" href="raf_auctions.html" data-feature="auctions">
+        <div class="tile-ic"><i class="ti ti-gavel"></i></div>
+        <div class="tile-b"><div class="tile-t" data-ar="مزاداتي" data-en="Auctions">مزاداتي</div>
+          <div class="tile-s" data-ar="مزايداتك النشطة" data-en="Your active bids">مزايداتك النشطة</div></div>
+        <i class="ti ti-chevron-left tile-go"></i>
+      </a>
     </div>
-  </div>
+  </section>
 
-  <!-- ACCOUNT -->
-  <div class="section-h" data-ar="حسابي" data-en="My Account">حسابي</div>
-  <div class="sec-grid">
-    <a class="sec-card" href="raf_personal.html">
-      <div class="sec-ic"><i class="ti ti-user"></i></div>
-      <div class="sec-body"><div class="sec-name" data-ar="المعلومات الشخصية" data-en="Personal Information">المعلومات الشخصية</div><div class="sec-sub" data-ar="الاسم، البريد، الجوال" data-en="Name, email, phone">الاسم، البريد، الجوال</div></div>
-      <i class="ti ti-chevron-left sec-arrow"></i>
+  <!-- ══ 4 · ACCOUNT ══ -->
+  <div class="sh rise" style="animation-delay:.2s"><h2 data-ar="الحساب" data-en="Account">الحساب</h2><span class="line"></span></div>
+  <section class="tiles rise" style="animation-delay:.22s">
+    <a class="tile" href="raf_personal.html">
+      <div class="tile-ic"><i class="ti ti-user"></i></div>
+      <div class="tile-b"><div class="tile-t" data-ar="المعلومات الشخصية" data-en="Personal Information">المعلومات الشخصية</div>
+        <div class="tile-s" data-ar="الاسم، البريد، الجوال" data-en="Name, email, phone">الاسم، البريد، الجوال</div></div>
+      <i class="ti ti-chevron-left tile-go"></i>
     </a>
-    <a class="sec-card" href="raf_orders.html">
-      <div class="sec-ic"><i class="ti ti-shopping-bag"></i></div>
-      <div class="sec-body"><div class="sec-name" data-ar="طلباتي" data-en="Orders">طلباتي</div><div class="sec-sub" data-ar="تتبّع وإدارة طلباتك" data-en="Track & manage orders">تتبّع وإدارة طلباتك</div></div>
-      <span class="sec-badge">2</span>
-      <i class="ti ti-chevron-left sec-arrow"></i>
+    <a class="tile" href="raf_notifications.html">
+      <div class="tile-ic"><i class="ti ti-bell"></i></div>
+      <div class="tile-b"><div class="tile-t" data-ar="الإشعارات" data-en="Notifications">الإشعارات</div>
+        <div class="tile-s" data-ar="التحديثات والتنبيهات" data-en="Updates & alerts">التحديثات والتنبيهات</div></div>
+      <span class="tile-n">3</span>
+      <i class="ti ti-chevron-left tile-go"></i>
     </a>
-    <a class="sec-card" href="raf_address.html">
-      <div class="sec-ic"><i class="ti ti-map-pin"></i></div>
-      <div class="sec-body"><div class="sec-name" data-ar="عناويني" data-en="Addresses">عناويني</div><div class="sec-sub" data-ar="عناوين التوصيل" data-en="Delivery addresses">عناوين التوصيل</div></div>
-      <i class="ti ti-chevron-left sec-arrow"></i>
+    <a class="tile" href="raf_settings.html">
+      <div class="tile-ic"><i class="ti ti-settings"></i></div>
+      <div class="tile-b"><div class="tile-t" data-ar="الإعدادات" data-en="Settings">الإعدادات</div>
+        <div class="tile-s" data-ar="اللغة والخصوصية" data-en="Language & privacy">اللغة والخصوصية</div></div>
+      <i class="ti ti-chevron-left tile-go"></i>
     </a>
-    <a class="sec-card" href="raf_payments.html">
-      <div class="sec-ic"><i class="ti ti-credit-card"></i></div>
-      <div class="sec-body"><div class="sec-name" data-ar="طرق الدفع" data-en="Payment Methods">طرق الدفع</div><div class="sec-sub" data-ar="البطاقات المحفوظة" data-en="Saved cards">البطاقات المحفوظة</div></div>
-      <i class="ti ti-chevron-left sec-arrow"></i>
-    </a>
-    <a class="sec-card" href="raf_notifications.html">
-      <div class="sec-ic"><i class="ti ti-bell"></i></div>
-      <div class="sec-body"><div class="sec-name" data-ar="الإشعارات" data-en="Notifications">الإشعارات</div><div class="sec-sub" data-ar="التحديثات والتنبيهات" data-en="Updates & alerts">التحديثات والتنبيهات</div></div>
-      <span class="sec-badge">3</span>
-      <i class="ti ti-chevron-left sec-arrow"></i>
-    </a>
-  </div>
+  </section>
 
-  <!-- SHOPPING -->
-  <div class="section-h" data-ar="تسوّقي" data-en="My Shopping">تسوّقي</div>
-  <div class="sec-grid">
-    <a class="sec-card" href="raf_wishlist.html">
-      <div class="sec-ic"><i class="ti ti-heart"></i></div>
-      <div class="sec-body"><div class="sec-name" data-ar="المفضلة" data-en="Wishlist">المفضلة</div><div class="sec-sub" data-ar="منتجاتك المحفوظة" data-en="Saved products">منتجاتك المحفوظة</div></div>
-      <i class="ti ti-chevron-left sec-arrow"></i>
+  <!-- ══ 5 · SUPPORT ══ -->
+  <div class="sh rise" style="animation-delay:.26s"><h2 data-ar="الدعم" data-en="Support">الدعم</h2><span class="line"></span></div>
+  <section class="tiles two rise" style="animation-delay:.28s">
+    <a class="tile" href="raf_support.html">
+      <div class="tile-ic"><i class="ti ti-lifebuoy"></i></div>
+      <div class="tile-b"><div class="tile-t" data-ar="مركز المساعدة" data-en="Help Center">مركز المساعدة</div>
+        <div class="tile-s" data-ar="أسئلة شائعة وإرشادات" data-en="FAQ & guides">أسئلة شائعة وإرشادات</div></div>
+      <i class="ti ti-chevron-left tile-go"></i>
     </a>
-    <a class="sec-card" href="raf_following.html">
-      <div class="sec-ic"><i class="ti ti-building-store"></i></div>
-      <div class="sec-body"><div class="sec-name" data-ar="المتاجر المتابَعة" data-en="Following Stores">المتاجر المتابَعة</div><div class="sec-sub" data-ar="متاجرك المفضّلة" data-en="Stores you follow">متاجرك المفضّلة</div></div>
-      <i class="ti ti-chevron-left sec-arrow"></i>
+    <a class="tile" href="raf_contact.html">
+      <div class="tile-ic"><i class="ti ti-headset"></i></div>
+      <div class="tile-b"><div class="tile-t" data-ar="تواصل مع الدعم" data-en="Contact Support">تواصل مع الدعم</div>
+        <div class="tile-s" data-ar="نحن هنا لمساعدتك" data-en="We're here to help">نحن هنا لمساعدتك</div></div>
+      <i class="ti ti-chevron-left tile-go"></i>
     </a>
-    <a class="sec-card" href="raf_auctions.html" data-feature="auctions">
-      <div class="sec-ic"><i class="ti ti-gavel"></i></div>
-      <div class="sec-body"><div class="sec-name" data-ar="مزاداتي" data-en="Auctions">مزاداتي</div><div class="sec-sub" data-ar="مزايداتك النشطة" data-en="Your active bids">مزايداتك النشطة</div></div>
-      <i class="ti ti-chevron-left sec-arrow"></i>
-    </a>
-    <a class="sec-card" href="raf_offers.html">
-      <div class="sec-ic"><i class="ti ti-discount"></i></div>
-      <div class="sec-body"><div class="sec-name" data-ar="العروض والتخفيضات" data-en="Offers & Promotions">العروض والتخفيضات</div><div class="sec-sub" data-ar="كوبونات وعروض حصرية" data-en="Coupons & deals">كوبونات وعروض حصرية</div></div>
-      <i class="ti ti-chevron-left sec-arrow"></i>
-    </a>
-    <a class="sec-card" href="raf_rewards.html">
-      <div class="sec-ic"><i class="ti ti-gift"></i></div>
-      <div class="sec-body"><div class="sec-name" data-ar="المكافآت والولاء" data-en="Rewards & Loyalty">المكافآت والولاء</div><div class="sec-sub" data-ar="1,250 نقطة" data-en="1,250 points">1,250 نقطة</div></div>
-      <i class="ti ti-chevron-left sec-arrow"></i>
-    </a>
-  </div>
+  </section>
 
-  <!-- SUPPORT -->
-  <div class="section-h" data-ar="المساعدة" data-en="Help">المساعدة</div>
-  <div class="sec-grid">
-    <a class="sec-card" href="raf_support.html">
-      <div class="sec-ic"><i class="ti ti-headset"></i></div>
-      <div class="sec-body"><div class="sec-name" data-ar="مركز الدعم" data-en="Support Center">مركز الدعم</div><div class="sec-sub" data-ar="مساعدة وأسئلة شائعة" data-en="Help & FAQ">مساعدة وأسئلة شائعة</div></div>
-      <i class="ti ti-chevron-left sec-arrow"></i>
-    </a>
-    <a class="sec-card" href="raf_settings.html">
-      <div class="sec-ic"><i class="ti ti-settings"></i></div>
-      <div class="sec-body"><div class="sec-name" data-ar="الإعدادات" data-en="Settings">الإعدادات</div><div class="sec-sub" data-ar="اللغة والخصوصية" data-en="Language & privacy">اللغة والخصوصية</div></div>
-      <i class="ti ti-chevron-left sec-arrow"></i>
-    </a>
-    <a class="sec-card" href="raf_login.html" style="--gd:1;">
-      <div class="sec-ic" style="background:var(--red-bg);color:var(--red);"><i class="ti ti-logout"></i></div>
-      <div class="sec-body"><div class="sec-name" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</div><div class="sec-sub" data-ar="إنهاء الجلسة" data-en="End session">إنهاء الجلسة</div></div>
-      <i class="ti ti-chevron-left sec-arrow"></i>
-    </a>
+  <!-- LOGOUT (visually separated, final action) -->
+  <div class="logout-wrap rise" style="animation-delay:.32s">
+    <a href="raf_login.html" class="logout"><i class="ti ti-logout"></i> <span data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span></a>
+    <div class="ver" data-ar="رف ماركتبليس — الإصدار 1.0" data-en="RAF Marketplace — v1.0">رف ماركتبليس — الإصدار 1.0</div>
   </div>
-
-</div>
+</main>
 
 <!-- BOTTOM NAV -->
 <nav class="app-bnav">
@@ -138,14 +319,134 @@
   <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
 
+<!-- shared data layer (orders / wishlist / cart) + account helpers -->
+<script src="raf_data.js"></script>
 <script src="raf_account.js"></script>
 <script>
-  (function(){
+/* ============================================================
+   Personal Hub — live data from the shared RAF layer.
+   Falls back safely when a store is unavailable.
+   ============================================================ */
+(function(){
+  var LOYALTY = { points: 1250, tiers: [
+    { min:0,    ar:'عضو جديد',  en:'New Member' },
+    { min:500,  ar:'عضو فضي',   en:'Silver Member' },
+    { min:1000, ar:'عضو ذهبي',  en:'Gold Member' },
+    { min:2000, ar:'عضو بلاتيني', en:'Platinum Member' }
+  ]};
+  function en(){ return document.getElementById('htmlRoot').lang === 'en'; }
+  function T(ar,e){ return en() ? e : ar; }
+  function L(o){ return (o && typeof o==='object') ? (en()?o.en:o.ar) : (o||''); }
+  function nfmt(n){ return Number(n).toLocaleString(en()?'en-US':'ar-EG'); }
+  function setBadge(el,n,alert){
+    if(!el) return;
+    if(n>0){ el.textContent = n>99?'99+':n; el.hidden=false; el.classList.toggle('alert',!!alert); }
+    else el.hidden = true;
+  }
+
+  /* ---------- profile identity (existing helper) ---------- */
+  function paintProfile(){
+    if(typeof rafProfile!=='function') return;
     var p = rafProfile();
+    var av = document.getElementById('idAvatar');
     document.getElementById('idName').textContent = p.name;
-    document.getElementById('idAvatar').textContent = p.name.charAt(0);
-    document.getElementById('idNum').textContent = p.id;
-  })();
+    document.getElementById('idNum').textContent  = p.id;
+    av.childNodes[0].nodeValue = p.name.charAt(0);   /* keep the verified tick element */
+  }
+
+  /* ---------- loyalty ---------- */
+  function paintLoyalty(){
+    var pts = LOYALTY.points, tiers = LOYALTY.tiers;
+    var idx = 0; tiers.forEach(function(t,i){ if(pts>=t.min) idx=i; });
+    var cur = tiers[idx], next = tiers[idx+1];
+    document.getElementById('tierName').textContent = L(cur);
+    document.getElementById('ptsVal').textContent = nfmt(pts);
+    var pct, note, small;
+    if(next){
+      var span = next.min - cur.min;
+      pct = Math.min(100, Math.round(((pts-cur.min)/span)*100));
+      small = T('التالي: '+L(next),'Next: '+L(next));
+      note = T(nfmt(next.min-pts)+' نقطة تفصلك عن '+L(next), nfmt(next.min-pts)+' points to '+L(next));
+    } else {
+      pct = 100;
+      small = T('أعلى مستوى','Highest tier');
+      note = T('وصلت لأعلى مستوى في برنامج المكافآت 🎉','You have reached the highest rewards tier 🎉');
+    }
+    document.getElementById('tierNext').textContent = small;
+    document.getElementById('loyalNote').textContent = note;
+    var bar = document.getElementById('loyalBar');
+    bar.setAttribute('aria-valuenow', pct);
+    bar.setAttribute('aria-label', T('تقدّم الولاء','Loyalty progress'));
+    /* setTimeout (not rAF) so the bar still fills when the page loads in a
+       background/hidden tab, where rAF callbacks never run */
+    setTimeout(function(){
+      var fill = document.getElementById('loyalFill');
+      if (fill) fill.style.width = pct + '%';
+    }, 60);
+    var rs = document.getElementById('rewardsSub');
+    if(rs) rs.textContent = T(nfmt(pts)+' نقطة متاحة', nfmt(pts)+' points available');
+  }
+
+  /* ---------- live counters ---------- */
+  function paintCounts(){
+    if(!window.RAFShop) return;
+    try{
+      var active = RAFShop.Orders.all().filter(function(o){ return o.status==='progress'; }).length;
+      setBadge(document.getElementById('qaOrders'), active);
+      setBadge(document.getElementById('qaWish'), RAFShop.Wish.count());
+      RAFShop.Cart.badge();
+    }catch(e){}
+  }
+
+  /* ---------- last order (only when one exists) ---------- */
+  function paintLastOrder(){
+    var slot = document.getElementById('lastOrderSlot');
+    if(!slot || !window.RAFShop) return;
+    var o = (RAFShop.Orders.all()||[])[0];
+    if(!o){ slot.innerHTML=''; return; }
+    var meta = (typeof statusMeta==='function') ? statusMeta(o.status) : {cls:'b-progress',ic:'ti-truck-delivery',label:''};
+    var items = o.items||[];
+    var thumbs = items.slice(0,3).map(function(it){
+      return '<span class="lo-th"><i class="ti '+(it.ic||'ti-box')+'"></i></span>';
+    }).join('') + (items.length>3 ? '<span class="lo-more">+'+(items.length-3)+'</span>' : '');
+    var href = o.status==='progress' ? 'raf_tracking.html?id='+encodeURIComponent(o.id)
+                                     : 'raf_order_details.html?id='+encodeURIComponent(o.id);
+    slot.innerHTML =
+      '<a class="lo" href="'+href+'">'
+      + '<div class="lo-ic"><i class="ti '+(o.ic||'ti-shopping-bag')+'"></i></div>'
+      + '<div class="lo-b"><div class="lo-h"><span class="lo-n">#'+o.id+'</span>'
+        + '<span class="badge '+meta.cls+'"><i class="ti '+meta.ic+'"></i> '+meta.label+'</span></div>'
+        + '<div class="lo-s">'+T('آخر طلب','Last order')+' · '+L(o.store)+' · '+L(o.date)+'</div>'
+        + '<div class="lo-thumbs">'+thumbs+'</div></div>'
+      + '<div class="lo-total"><b>'+o.total+'</b><span>'+T('د.ك','KWD')+'</span></div></a>';
+  }
+
+  /* chevrons follow the reading direction (← in RTL, → in LTR) */
+  function paintChevrons(){
+    var fwd = en() ? 'ti-chevron-right' : 'ti-chevron-left';
+    document.querySelectorAll('.tile-go').forEach(function(i){
+      i.classList.remove('ti-chevron-left','ti-chevron-right');
+      i.classList.add(fwd);
+    });
+  }
+
+  function paint(){ paintProfile(); paintLoyalty(); paintCounts(); paintLastOrder(); paintChevrons(); }
+
+  function boot(){
+    paint();
+    /* keep the hub in sync with language + shared-store changes */
+    var root = document.getElementById('htmlRoot');
+    if(root) new MutationObserver(paint).observe(root,{attributes:true,attributeFilter:['lang']});
+    document.addEventListener('raf:wish', paintCounts);
+    document.addEventListener('raf:cart', paintCounts);
+    /* keep the settings tooltip translated */
+    document.querySelectorAll('[data-ar-title]').forEach(function(el){
+      new MutationObserver(function(){ el.title = en()?el.dataset.enTitle:el.dataset.arTitle; })
+        .observe(root,{attributes:true,attributeFilter:['lang']});
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
 </script>
 </body>
 </html>

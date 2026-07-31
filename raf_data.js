@@ -162,14 +162,28 @@
       var items = lines.map(function (l) {
         var vparts = Object.keys(l.variant || {}).map(function (k) { return l.variant[k]; });
         var pre = vparts.length ? vparts.join(' · ') + ' · ' : '';
-        return { name: l.name, meta: { ar: pre + 'الكمية ' + l.qty, en: pre + 'Qty ' + l.qty }, price: l.price, ic: l.ic || 'ti-box' };
+        /* keep the readable meta string AND the structured fields the
+           Order Details view needs (store / variant / qty) */
+        return {
+          name: l.name, meta: { ar: pre + 'الكمية ' + l.qty, en: pre + 'Qty ' + l.qty },
+          price: l.price, ic: l.ic || 'ti-box',
+          store: l.store || null, variant: l.variant || {}, qty: l.qty || 1
+        };
       });
-      var subtotal = Cart.subtotal(), ship = 1.000, total = subtotal + ship;
+      var subtotal = Cart.subtotal();
+      var ship = (opts.totals && typeof opts.totals.ship === 'number') ? opts.totals.ship : 1.000;
+      var discount = (opts.totals && opts.totals.disc) || 0;
+      var tip = (opts.totals && opts.totals.tip) || 0;
+      var tax = (opts.totals && opts.totals.tax) || 0;
+      var total = Math.max(0, subtotal - discount) + ship + tip + tax;
       var first = lines[0];
       var order = {
         id: 'RAF-' + Date.now().toString().slice(-7),
         store: first.store || { ar: 'RAF', en: 'RAF' }, ic: first.ic || 'ti-shopping-bag',
         date: nowStr(), total: total.toFixed(3), status: 'progress', items: items,
+        /* invoice breakdown persisted with the order */
+        subtotal: subtotal.toFixed(3), discount: discount.toFixed(3), tax: tax.toFixed(3), tip: tip.toFixed(3),
+        coupon: (opts.totals && opts.totals.coupon) ? opts.totals.coupon.code : '',
         pay: opts.pay || { ar: 'بطاقة فيزا •••• 4821', en: 'Visa card •••• 4821' },
         addr: opts.addr || { ar: 'حولي، شارع الأمير، بناية 12، شقة 4', en: 'Hawally, Prince St, Bldg 12, Apt 4' },
         driver: { ar: 'قيد التعيين', en: 'Assigning courier' }, ship: ship.toFixed(3),

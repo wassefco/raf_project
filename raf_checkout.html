@@ -287,7 +287,8 @@
     var pay=PAYMENTS.find(function(p){return p.id===payId;})||PAYMENTS[0];
     var order=RAFShop.Orders.create({
       pay:{ar:pay.ar,en:pay.en},
-      addr:{ar:addrText(addr,'ar'),en:addrText(addr,'en')}
+      addr:{ar:addrText(addr,'ar'),en:addrText(addr,'en')},
+      totals:RAFCO.totals(items,{withTip:true})   /* real subtotal / delivery / discount / tip */
     });
     if(!order) return;
     RAFShop.Cart.clear(); RAFCO.setCoupon(null);
