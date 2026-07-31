@@ -36,6 +36,61 @@
       else a.push({ key: key, id: p.id, name: { ar: p.ar, en: p.en }, price: p.price, qty: 1, variant: variant || {}, ic: p.ic || 'ti-box', store: p.store ? { ar: pick(p.store, 'ar'), en: pick(p.store, 'en') } : null });
       Cart.write(a); return key;
     },
+
+    /* ─── ONE STORE PER ORDER (central rule — used by every add-to-cart path) ─── */
+    /* stable comparison key — always the same regardless of UI language */
+    storeOf: function (x) {
+      var s = x && x.store;
+      if (!s) return '';
+      return String((typeof s === 'object' ? (s.ar || s.en) : s) || '').trim();
+    },
+    /* localized display name for the same store */
+    storeLabel: function (x) {
+      var s = x && x.store;
+      if (!s) return '';
+      return String((typeof s === 'object' ? (isEn() ? (s.en || s.ar) : (s.ar || s.en)) : s) || '').trim();
+    },
+    /* display name for a store key already present in the cart */
+    storeLabelForKey: function (key) {
+      var hit = Cart.read().find(function (l) { return Cart.storeOf(l) === key; });
+      return hit ? Cart.storeLabel(hit) : key;
+    },
+    /* the store the cart currently belongs to, or '' when the cart is empty */
+    currentStore: function () {
+      var items = Cart.read();
+      for (var i = 0; i < items.length; i++) { var s = Cart.storeOf(items[i]); if (s) return s; }
+      return '';
+    },
+    /* true when adding this product would mix stores in one order */
+    conflicts: function (p) {
+      var cur = Cart.currentStore(), next = Cart.storeOf(p);
+      return !!(cur && next && cur !== next);
+    },
+    /* Guarded add. Never clears the cart silently — asks first.
+       Resolves { added, cleared, cancelled }. Use this everywhere instead of add(). */
+    tryAdd: function (p, variant) {
+      if (!Cart.conflicts(p)) { Cart.add(p, variant); return Promise.resolve({ added: true, cleared: false, cancelled: false }); }
+      var cur = Cart.storeLabelForKey(Cart.currentStore()), next = Cart.storeLabel(p);
+      return Cart.confirmSwitch(cur, next).then(function (ok) {
+        if (!ok) return { added: false, cleared: false, cancelled: true };
+        Cart.clear(); Cart.add(p, variant);
+        return { added: true, cleared: true, cancelled: false };
+      });
+    },
+    /* shared "different store" confirmation */
+    confirmSwitch: function (cur, next) {
+      var e = isEn();
+      return confirmDialog({
+        icon: 'ti-building-store',
+        title: e ? 'Start a new cart?' : 'بدء سلة جديدة؟',
+        msg: e
+          ? 'Your cart contains products from “' + cur + '”. RAF supports one store per order, so adding from “' + next + '” will clear your current cart.'
+          : 'سلتك تحتوي على منتجات من «' + cur + '». يدعم رف متجراً واحداً لكل طلب، لذا ستُفرَغ سلتك الحالية عند الإضافة من «' + next + '».',
+        confirmText: e ? 'Clear cart & continue' : 'إفراغ السلة والمتابعة',
+        cancelText: e ? 'Cancel' : 'إلغاء',
+        danger: true
+      });
+    },
     setQty: function (key, q) { var a = Cart.read(), i = a.findIndex(function (l) { return l.key === key; }); if (i < 0) return; if (q <= 0) a.splice(i, 1); else a[i].qty = q; Cart.write(a); },
     remove: function (key) { Cart.setQty(key, 0); },
     clear: function () { Cart.write([]); },
@@ -189,7 +244,62 @@
     return close;
   }
 
-  window.RAFShop = { Cart: Cart, Wish: Wish, Orders: Orders, search: search, catalog: CATALOG, stores: STORES, L: L, nowStr: nowStr, toast: toast, isEn: isEn };
+  /* ─────────── CONFIRM DIALOG (shared, promise-based) ─────────── */
+  function confirmDialog(o) {
+    o = o || {};
+    if (!document.getElementById('raf-dlg-style')) {
+      var st = document.createElement('style'); st.id = 'raf-dlg-style';
+      st.textContent =
+        '.raf-dlg-back{position:fixed;inset:0;z-index:5200;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(20,16,8,.55);backdrop-filter:blur(3px);opacity:0;transition:opacity .2s;font-family:"Tajawal",sans-serif;}' +
+        '.raf-dlg-back.show{opacity:1;}' +
+        '.raf-dlg{width:100%;max-width:420px;background:#fff;border:1px solid #E2DBCC;border-radius:20px;padding:28px 24px 22px;text-align:center;box-shadow:0 30px 70px -22px rgba(20,16,8,.55);transform:translateY(14px);transition:transform .24s;}' +
+        '.raf-dlg-back.show .raf-dlg{transform:none;}' +
+        '.raf-dlg-ic{width:62px;height:62px;margin:0 auto 16px;border-radius:18px;background:rgba(201,168,76,.12);display:flex;align-items:center;justify-content:center;font-size:29px;color:#A07828;}' +
+        '.raf-dlg-ic.danger{background:rgba(217,83,79,.12);color:#D9534F;}' +
+        '.raf-dlg h3{font-family:"Playfair Display",serif;font-size:21px;font-weight:800;color:#15130F;margin-bottom:10px;}' +
+        '.raf-dlg p{font-size:14px;line-height:1.75;color:#5A5650;margin-bottom:22px;}' +
+        '.raf-dlg-row{display:flex;gap:10px;}' +
+        '.raf-dlg-row button{flex:1;height:48px;border-radius:30px;font-family:"Tajawal",sans-serif;font-size:14.5px;font-weight:700;cursor:pointer;border:1px solid transparent;transition:all .2s;}' +
+        '.raf-dlg-no{background:#fff;color:#5A5650;border-color:#D8D0BE;}' +
+        '.raf-dlg-no:hover{border-color:#8A857C;}' +
+        '.raf-dlg-yes{background:#C9A84C;color:#1C1606;border-color:#A07828;}' +
+        '.raf-dlg-yes:hover{background:#A07828;color:#fff;}' +
+        '.raf-dlg-yes.danger{background:#D9534F;border-color:#B8433F;color:#fff;}' +
+        '.raf-dlg-yes.danger:hover{background:#B8433F;}';
+      document.head.appendChild(st);
+    }
+    return new Promise(function (resolve) {
+      var back = document.createElement('div'); back.className = 'raf-dlg-back';
+      back.innerHTML =
+        '<div class="raf-dlg" role="dialog" aria-modal="true">' +
+          '<div class="raf-dlg-ic' + (o.danger ? ' danger' : '') + '"><i class="ti ' + (o.icon || 'ti-alert-circle') + '"></i></div>' +
+          '<h3></h3><p></p>' +
+          '<div class="raf-dlg-row">' +
+            '<button class="raf-dlg-no"></button>' +
+            '<button class="raf-dlg-yes' + (o.danger ? ' danger' : '') + '"></button>' +
+          '</div></div>';
+      back.querySelector('h3').textContent = o.title || '';
+      back.querySelector('p').textContent = o.msg || '';
+      var no = back.querySelector('.raf-dlg-no'), yes = back.querySelector('.raf-dlg-yes');
+      no.textContent = o.cancelText || (isEn() ? 'Cancel' : 'إلغاء');
+      yes.textContent = o.confirmText || (isEn() ? 'Confirm' : 'تأكيد');
+      function close(v) {
+        back.classList.remove('show');
+        document.removeEventListener('keydown', onKey);
+        setTimeout(function () { if (back.parentNode) back.parentNode.removeChild(back); }, 220);
+        resolve(v);
+      }
+      function onKey(e) { if (e.key === 'Escape') close(false); }
+      no.onclick = function () { close(false); };
+      yes.onclick = function () { close(true); };
+      back.onclick = function (e) { if (e.target === back) close(false); };
+      document.addEventListener('keydown', onKey);
+      document.body.appendChild(back);
+      requestAnimationFrame(function () { back.classList.add('show'); });
+    });
+  }
+
+  window.RAFShop = { Cart: Cart, Wish: Wish, Orders: Orders, search: search, catalog: CATALOG, stores: STORES, L: L, nowStr: nowStr, toast: toast, isEn: isEn, confirm: confirmDialog };
 
   /* keep every tab / page in sync */
   window.addEventListener('storage', function (e) { if (e.key === LS.cart) Cart.badge(); if (e.key === LS.wish) Wish.badge(); });

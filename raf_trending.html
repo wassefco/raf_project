@@ -498,43 +498,6 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
 </footer>
 
 <script>
-/* CART STATE */
-const CK='raf_cart';
-function getCart(){return JSON.parse(localStorage.getItem(CK)||'{}');}
-function saveCart(c){localStorage.setItem(CK,JSON.stringify(c));updateBadge();}
-function updateBadge(){
-  const t=Object.values(getCart()).reduce((s,i)=>s+(i.qty||0),0);
-  document.querySelectorAll('#cartBadge,.cart-badge').forEach(b=>b.textContent=t||'0');
-}
-function qtyHTML(id,qty,name,price){
-  return `<div class="qty-ctrl">
-    <button class="qty-btn" onclick="event.stopPropagation();chQ('${id}',-1,'${encodeURIComponent(name)}','${price}',this)"><i class="ti ti-minus"></i></button>
-    <span class="qty-num">${qty}</span>
-    <button class="qty-btn" onclick="event.stopPropagation();chQ('${id}',1,'${encodeURIComponent(name)}','${price}',this)"><i class="ti ti-plus"></i></button>
-    <button class="qty-del" onclick="event.stopPropagation();delI('${id}','${encodeURIComponent(name)}','${price}',this)"><i class="ti ti-trash"></i></button>
-  </div>`;}
-function addBtnHTML(id,name,price){return `<button class="add-cart-btn" onclick="event.stopPropagation();addC('${id}','${encodeURIComponent(name)}','${price}')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>`;}
-function addC(id,name,price){
-  const cart=getCart();if(!cart[id])cart[id]={name:decodeURIComponent(name),price:parseFloat(price),qty:0};
-  cart[id].qty++;saveCart(cart);
-  const w=document.querySelector(`[data-pid="${id}"]`);if(w)w.innerHTML=qtyHTML(id,cart[id].qty,name,price);
-}
-function chQ(id,d,name,price,btn){
-  const cart=getCart();if(!cart[id])return;cart[id].qty+=d;
-  if(cart[id].qty<=0){delete cart[id];saveCart(cart);const w=btn.closest('[data-pid]');if(w)w.innerHTML=addBtnHTML(id,decodeURIComponent(name),price);return;}
-  saveCart(cart);btn.closest('.qty-ctrl').querySelector('.qty-num').textContent=cart[id].qty;
-}
-function delI(id,name,price,btn){
-  const cart=getCart();delete cart[id];saveCart(cart);
-  const w=btn.closest('[data-pid]');if(w)w.innerHTML=addBtnHTML(id,decodeURIComponent(name),price);
-}
-function initCartBtns(){
-  const cart=getCart();
-  document.querySelectorAll('[data-pid]').forEach(w=>{
-    const id=w.dataset.pid,name=w.dataset.name,price=w.dataset.price;
-    if(cart[id])w.innerHTML=qtyHTML(id,cart[id].qty,encodeURIComponent(name),price);
-  });
-}
 /* TABS */
 function switchTab(tab,btn){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
@@ -586,7 +549,7 @@ function toggleWish(btn){
   ico.className=ico.className.includes('ti-heart-filled')?'ti ti-heart':'ti ti-heart-filled';
   btn.classList.toggle('on');
 }
-window.addEventListener('DOMContentLoaded',()=>{initCartBtns();updateBadge();});
+
 </script>
 
 <!-- MOBILE APP BOTTOM NAV -->

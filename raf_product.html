@@ -1180,9 +1180,13 @@ const PRODUCT_DATA = {
     var q = parseInt((document.getElementById('qty') || {}).textContent) || 1;
     var prod = { id: pid, ar: pd.name, en: pd.name, price: pd.price, ic: pd.icon || 'ti-box',
                  store: pd.store ? { ar: pd.store, en: pd.store } : null };
-    for (var i = 0; i < q; i++) RAFShop.Cart.add(prod, variant);
-    RAFShop.Cart.badge();
-    flashBtn(btn, t('تمت الإضافة ✓','Added ✓'), '#3B6D11');
+    /* one store per order — guarded add asks before replacing another store's cart */
+    RAFShop.Cart.tryAdd(prod, variant).then(function (r) {
+      if (!r.added) return;
+      for (var i = 1; i < q; i++) RAFShop.Cart.add(prod, variant);
+      RAFShop.Cart.badge();
+      flashBtn(btn, t('تمت الإضافة ✓','Added ✓'), '#3B6D11');
+    });
   }
   function flashBtn(btn, msg, bg) {
     if (!btn) return;

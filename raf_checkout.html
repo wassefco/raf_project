@@ -47,7 +47,29 @@
         <div class="panel-h"><i class="ti ti-map-pin"></i> <span data-ar="عنوان التوصيل" data-en="Delivery address">عنوان التوصيل</span></div>
         <div class="panel-b">
           <div id="addrList"></div>
-          <a href="raf_address.html?from=checkout" class="addr-add"><i class="ti ti-plus"></i> <span data-ar="إضافة عنوان جديد" data-en="Add new address">إضافة عنوان جديد</span></a>
+
+          <!-- inline new-address form — never leaves the page -->
+          <form id="addrForm" class="addr-form" style="display:none;" onsubmit="return saveNewAddress(event)">
+            <div class="af-types" id="afTypes"></div>
+            <div class="af-grid">
+              <label class="af-f"><span data-ar="الاسم الكامل" data-en="Full name">الاسم الكامل</span><input id="afName" required data-ar-ph="محمد العنزي" data-en-ph="Mohammed Al-Anzi" placeholder="محمد العنزي"></label>
+              <label class="af-f"><span data-ar="رقم الجوال" data-en="Phone">رقم الجوال</span><input id="afPhone" required inputmode="tel" dir="ltr" data-ar-ph="+965 9XXX XXXX" data-en-ph="+965 9XXX XXXX" placeholder="+965 9XXX XXXX"></label>
+              <label class="af-f"><span data-ar="المنطقة" data-en="Area">المنطقة</span><input id="afArea" required data-ar-ph="حولي" data-en-ph="Hawally" placeholder="حولي"></label>
+              <label class="af-f"><span data-ar="القطعة" data-en="Block">القطعة</span><input id="afBlock" data-ar-ph="5" data-en-ph="5" placeholder="5"></label>
+              <label class="af-f af-wide"><span data-ar="الشارع" data-en="Street">الشارع</span><input id="afStreet" required data-ar-ph="شارع الأمير" data-en-ph="Prince St" placeholder="شارع الأمير"></label>
+              <label class="af-f"><span data-ar="المبنى" data-en="Building">المبنى</span><input id="afBuilding" data-ar-ph="12" data-en-ph="12" placeholder="12"></label>
+              <label class="af-f"><span data-ar="الطابق" data-en="Floor">الطابق</span><input id="afFloor" data-ar-ph="1" data-en-ph="1" placeholder="1"></label>
+              <label class="af-f"><span data-ar="الشقة" data-en="Apartment">الشقة</span><input id="afApt" data-ar-ph="4" data-en-ph="4" placeholder="4"></label>
+              <label class="af-f af-wide"><span data-ar="ملاحظات (اختياري)" data-en="Notes (optional)">ملاحظات (اختياري)</span><input id="afNotes" data-ar-ph="علامة مميزة قرب الموقع…" data-en-ph="A nearby landmark…" placeholder="علامة مميزة قرب الموقع…"></label>
+            </div>
+            <div class="af-err" id="afErr"></div>
+            <div class="af-actions">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="toggleAddrForm(false)" data-ar="إلغاء" data-en="Cancel">إلغاء</button>
+              <button type="submit" class="btn btn-gold btn-sm" data-ar="حفظ واستخدام" data-en="Save & use">حفظ واستخدام</button>
+            </div>
+          </form>
+
+          <button type="button" class="addr-add" id="addrAddBtn" onclick="toggleAddrForm(true)"><i class="ti ti-plus"></i> <span data-ar="إضافة عنوان جديد" data-en="Add new address">إضافة عنوان جديد</span></button>
         </div>
       </div>
 
@@ -165,6 +187,47 @@
     }).join('');
   }
   window.pickAddr=function(id){ RAFCO.set('raf_addr_sel',id); renderAddresses(); renderSummary(); };
+
+  /* ---------- inline address creation (no page reload, auto-selected) ---------- */
+  var AF_TYPES=[{v:'home',ic:'ti-home',ar:'المنزل',en:'Home'},{v:'work',ic:'ti-briefcase',ar:'العمل',en:'Work'},
+                {v:'family',ic:'ti-users',ar:'العائلة',en:'Family'},{v:'other',ic:'ti-map-pin',ar:'آخر',en:'Other'}];
+  var afType='home';
+  function renderAfTypes(){
+    document.getElementById('afTypes').innerHTML = AF_TYPES.map(function(t){
+      return '<button type="button" class="af-type'+(t.v===afType?' on':'')+'" onclick="afPickType(\''+t.v+'\')"><i class="ti '+t.ic+'"></i> '+T(t.ar,t.en)+'</button>';
+    }).join('');
+  }
+  window.afPickType=function(v){ afType=v; renderAfTypes(); };
+  window.toggleAddrForm=function(show){
+    document.getElementById('addrForm').style.display = show?'':'none';
+    document.getElementById('addrAddBtn').style.display = show?'none':'';
+    if(show){ renderAfTypes(); RAFCO.applyLang(); document.getElementById('afName').focus(); }
+    else { document.getElementById('afErr').classList.remove('show');
+           document.querySelectorAll('#addrForm input').forEach(function(i){ i.classList.remove('bad'); }); }
+  };
+  window.saveNewAddress=function(e){
+    e.preventDefault();
+    var f={name:'afName',phone:'afPhone',area:'afArea',street:'afStreet'};
+    var err=document.getElementById('afErr'), bad=false;
+    Object.keys(f).forEach(function(k){
+      var el=document.getElementById(f[k]); var v=(el.value||'').trim();
+      if(!v){ el.classList.add('bad'); bad=true; } else el.classList.remove('bad');
+    });
+    if(bad){ err.className='af-err show'; err.innerHTML='<i class="ti ti-alert-circle"></i> '+T('يرجى تعبئة الحقول المطلوبة','Please fill in the required fields'); return false; }
+    err.classList.remove('show');
+    var val=function(id){ return (document.getElementById(id).value||'').trim(); };
+    var list=RAFCO.getJSON('raf_addresses',[])||[];
+    var a={ id:'addr-'+Date.now(), type:afType, name:val('afName'), phone:val('afPhone'), area:val('afArea'),
+            block:val('afBlock'), street:val('afStreet'), building:val('afBuilding'), floor:val('afFloor'),
+            apartment:val('afApt'), notes:val('afNotes'), isDefault:list.length===0 };
+    list.push(a); RAFCO.setJSON('raf_addresses',list);
+    RAFCO.set('raf_addr_sel',a.id);                    /* auto-select the new address */
+    document.getElementById('addrForm').reset(); afType='home';
+    toggleAddrForm(false);
+    renderAddresses(); renderSummary();                /* shipping refreshed without reload */
+    RAFShop.toast(T('تمت إضافة العنوان واختياره','Address added and selected'), {icon:'ti-map-pin'});
+    return false;
+  };
 
   function renderTips(){
     var cur=RAFCO.getTip();

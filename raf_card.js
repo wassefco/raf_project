@@ -212,7 +212,22 @@
     e.preventDefault(); e.stopPropagation();
     var p = prodFromEl(btn); if (!p || isOOS(p)) return;   /* never add unavailable products */
     if (p.variants && p.variants.length) openVariants(p);  /* variants are required before adding */
-    else { Cart.add(p, {}); refresh(p.id); }
+    else guardedAdd(p, {});
+  }
+
+  /* single funnel for every add — enforces the one-store-per-order rule */
+  function guardedAdd(p, variant) {
+    if (Cart.tryAdd) {
+      return Cart.tryAdd(p, variant).then(function (r) {
+        if (r.cleared) document.querySelectorAll('.rc-card').forEach(function (c) {
+          var w = c.querySelector('.rc-cartwrap'); if (w && REG[c.dataset.id]) w.innerHTML = cartCtrlHTML(REG[c.dataset.id]);
+        });
+        else refresh(p.id);
+        return r;
+      });
+    }
+    Cart.add(p, variant); refresh(p.id);
+    return Promise.resolve({ added: true });
   }
   function inc(e, btn) { e.preventDefault(); e.stopPropagation(); var key = btn.closest('.rc-qty').dataset.key, l = Cart.line(key); if (l) { Cart.setQty(key, l.qty + 1); refresh(l.id); } }
   function dec(e, btn) { e.preventDefault(); e.stopPropagation(); var key = btn.closest('.rc-qty').dataset.key, l = Cart.line(key); if (l) { var id = l.id; Cart.setQty(key, l.qty - 1); refresh(id); } }
@@ -263,10 +278,9 @@
       var opt = g.options.find(function (o) { return String(o.v) === String(v); });
       variant[L(g.label)] = opt ? L(opt.label || opt) : v;
     });
-    Cart.add(curP, variant);
-    var id = curP.id;
+    var prod = curP;
     closeV();
-    refresh(id);
+    guardedAdd(prod, variant);
   }
   function closeV() {
     var b = document.getElementById('rcvBack'); if (!b) return;

@@ -143,6 +143,26 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex
   background:var(--bg);color:var(--text3);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;}
 .addr-add:hover{border-color:var(--gold);color:var(--gold2);background:var(--gold-soft);}
 
+/* ---------- inline new-address form ---------- */
+.addr-form{border:1px solid var(--border);border-radius:var(--rl);padding:16px;background:var(--bg);margin-bottom:10px;}
+.af-types{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.af-type{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border:1px solid var(--border2);border-radius:30px;background:var(--card);
+  color:var(--text2);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+.af-type:hover{border-color:var(--gold);}
+.af-type.on{background:var(--ink);color:#F5F0E4;border-color:var(--ink);}
+.af-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.af-f{display:flex;flex-direction:column;gap:6px;}
+.af-f.af-wide{grid-column:1/-1;}
+.af-f span{font-size:12.5px;font-weight:600;color:var(--text2);}
+.af-f input{height:44px;border:1px solid var(--border2);border-radius:var(--r);background:#FCFBF8;padding:0 13px;
+  font-family:var(--font);font-size:14px;color:var(--text);outline:none;transition:all .2s;width:100%;}
+.af-f input:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);}
+.af-f input.bad{border-color:var(--red);box-shadow:0 0 0 3px rgba(217,83,79,.12);}
+.af-err{display:none;align-items:center;gap:6px;color:var(--red);font-size:12.5px;margin-top:10px;}
+.af-err.show{display:flex;}
+.af-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;}
+@media(max-width:560px){.af-grid{grid-template-columns:1fr;}.af-actions .btn{flex:1;}}
+
 /* ---------- tip ---------- */
 .tips{display:flex;gap:8px;flex-wrap:wrap;}
 .tip{flex:1;min-width:64px;height:46px;border:1px solid var(--border2);border-radius:var(--r);background:var(--card);color:var(--text2);
