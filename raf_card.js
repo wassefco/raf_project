@@ -88,6 +88,10 @@
     .rc-cart:hover{background:var(--gold,#C9A84C);color:#1C1606;border-color:var(--gold,#C9A84C);}
     .rc-cart:active{transform:scale(.97);}
     .rc-cart i{font-size:16px;}
+    .rc-cart.rc-oos{background:var(--bg3,#E7E1D4);color:var(--text3,#8A857C);border-color:var(--border,#E2DBCC);cursor:not-allowed;}
+    .rc-cart.rc-oos:hover{background:var(--bg3,#E7E1D4);color:var(--text3,#8A857C);border-color:var(--border,#E2DBCC);}
+    .rc-card.is-oos .rc-img{filter:grayscale(1);opacity:.62;}
+    .rc-oos-tag{position:absolute;top:12px;inset-inline-end:12px;background:var(--ink,#15130F);color:#F3EFE5;font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:20px;}
     .rc-qty{width:100%;height:38px;border:1px solid var(--gold,#C9A84C);background:var(--gold-soft,rgba(201,168,76,.12));border-radius:30px;display:flex;align-items:center;justify-content:space-between;padding:0 4px;gap:4px;}
     .rc-qty .qb{width:30px;height:30px;flex:0 0 30px;border:none;border-radius:50%;background:var(--gold,#C9A84C);color:#1C1606;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
     .rc-qty .qb:hover{background:var(--gold2,#A07828);color:#fff;}
@@ -146,10 +150,17 @@
         '<span class="rc-qn">' + line.qty + '</span>' +
         '<button class="qb qplus" onclick="RAFCard.inc(event,this)" aria-label="increase"><i class="ti ti-plus"></i></button></div>';
     }
+    if (isOOS(p)) {
+      return '<button class="rc-cart rc-oos" disabled aria-disabled="true"><i class="ti ti-ban"></i> ' +
+        '<span>' + T('نفد المخزون', 'Out of Stock') + '</span></button>';
+    }
     var hasV = p.variants && p.variants.length;
     return '<button class="rc-cart" onclick="RAFCard.addClick(event,this)"><i class="ti ' + (hasV ? 'ti-adjustments-horizontal' : 'ti-shopping-cart-plus') + '"></i> ' +
       '<span>' + T('أضف للسلة', 'Add to Cart') + '</span></button>';
   }
+
+  /* a product is unavailable when stock is 0 or availability is explicitly false */
+  function isOOS(p) { return !!p && (p.stock === 0 || p.available === false || p.outOfStock === true); }
 
   /* ---------- render one card ---------- */
   function product(p, opts) {
@@ -163,9 +174,10 @@
     };
     var imgStyle = p.img ? ' style="background-image:url(\'' + p.img + '\')"' : '';
     var imgInner = p.img ? '' : '<i class="ti ' + (p.ic || 'ti-box') + '"></i>';
-    return '<article class="rc-card" data-id="' + p.id + '" data-href="' + o.href + '" onclick="RAFCard.go(this)">' +
+    return '<article class="rc-card' + (isOOS(p) ? ' is-oos' : '') + '" data-id="' + p.id + '" data-href="' + o.href + '" onclick="RAFCard.go(this)">' +
       '<div class="rc-img"' + imgStyle + '>' + imgInner +
-        (p.disc ? '<span class="rc-disc">-' + p.disc + '%</span>' : '') +
+        (isOOS(p) ? '<span class="rc-oos-tag">' + T('نفد المخزون', 'Out of Stock') + '</span>' : '') +
+        (p.disc && !isOOS(p) ? '<span class="rc-disc">-' + p.disc + '%</span>' : '') +
         (o.wish ? (function(){ var w = (window.RAFShop && RAFShop.Wish.has(p.id)); return '<button class="rc-wish' + (w ? ' on' : '') + '" onclick="RAFCard.wish(event,this)" aria-label="wishlist"><i class="ti ' + (w ? 'ti-heart-filled' : 'ti-heart') + '"></i></button>'; })() : '') +
       '</div>' +
       '<div class="rc-body">' +
@@ -198,8 +210,8 @@
 
   function addClick(e, btn) {
     e.preventDefault(); e.stopPropagation();
-    var p = prodFromEl(btn); if (!p) return;
-    if (p.variants && p.variants.length) openVariants(p);
+    var p = prodFromEl(btn); if (!p || isOOS(p)) return;   /* never add unavailable products */
+    if (p.variants && p.variants.length) openVariants(p);  /* variants are required before adding */
     else { Cart.add(p, {}); refresh(p.id); }
   }
   function inc(e, btn) { e.preventDefault(); e.stopPropagation(); var key = btn.closest('.rc-qty').dataset.key, l = Cart.line(key); if (l) { Cart.setQty(key, l.qty + 1); refresh(l.id); } }
@@ -307,7 +319,7 @@
 
   /* ---------- public API ---------- */
   window.RAFCard = {
-    upgradeAll: upgradeAll, guessVariants: guessVariants,
+    upgradeAll: upgradeAll, guessVariants: guessVariants, isOOS: isOOS,
     product: product, refresh: refresh, go: go, wish: wish,
     addClick: addClick, inc: inc, dec: dec,
     openVariants: openVariants, closeV: closeV, _pick: _pick, _confirm: _confirm,

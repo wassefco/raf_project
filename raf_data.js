@@ -58,12 +58,19 @@
     toggle: function (p) {
       var a = Wish.read(), i = a.findIndex(function (w) { return w.id === p.id; });
       if (i > -1) { a.splice(i, 1); Wish.write(a); return false; }
-      a.push({ id: p.id, ar: p.ar, en: p.en, price: p.price, old: p.old || '', disc: p.disc || 0, store: p.store || null, ic: p.ic || 'ti-box', rate: p.rate || '', rev: p.rev || '', variants: p.variants || null });
+      a.push({ id: p.id, ar: p.ar, en: p.en, price: p.price, old: p.old || '', disc: p.disc || 0, store: p.store || null, ic: p.ic || 'ti-box', rate: p.rate || '', rev: p.rev || '', variants: p.variants || null, stock: (p.stock === undefined ? null : p.stock), available: (p.available === undefined ? true : p.available) });
       Wish.write(a); return true;
     },
     remove: function (id) { Wish.write(Wish.read().filter(function (w) { return w.id !== id; })); },
+    clear: function () { Wish.write([]); },
     items: function () { return Wish.read(); },
     count: function () { return Wish.read().length; },
+    /* number of distinct stores represented in the wishlist */
+    storeCount: function () {
+      var seen = {}, n = 0;
+      Wish.read().forEach(function (w) { var s = w.store ? (w.store.ar || w.store.en || w.store) : null; if (s && !seen[s]) { seen[s] = 1; n++; } });
+      return n;
+    },
     badge: function () {
       var n = Wish.count();
       document.querySelectorAll('#wishBadge,.wish-badge').forEach(function (b) { if (n > 0) { b.textContent = n; b.style.display = 'flex'; } else b.style.display = 'none'; });
@@ -149,7 +156,40 @@
     return { q: q, products: products, stores: stores };
   }
 
-  window.RAFShop = { Cart: Cart, Wish: Wish, Orders: Orders, search: search, catalog: CATALOG, stores: STORES, L: L, nowStr: nowStr };
+  /* ─────────── TOAST (shared feedback + optional Undo) ─────────── */
+  function toast(msg, opts) {
+    opts = opts || {};
+    if (!document.getElementById('raf-toast-style')) {
+      var st = document.createElement('style'); st.id = 'raf-toast-style';
+      st.textContent =
+        '.raf-toast-wrap{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:5000;display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none;width:calc(100% - 32px);max-width:440px;}' +
+        '.raf-toast{pointer-events:auto;display:flex;align-items:center;gap:12px;width:100%;background:#15130F;color:#F3EFE5;border:1px solid rgba(201,168,76,.35);border-radius:14px;padding:13px 16px;font-family:"Tajawal",sans-serif;font-size:14px;box-shadow:0 18px 40px -18px rgba(0,0,0,.7);opacity:0;transform:translateY(10px);transition:opacity .22s,transform .22s;}' +
+        '.raf-toast.show{opacity:1;transform:none;}' +
+        '.raf-toast i.lead{font-size:19px;color:#C9A84C;flex-shrink:0;}' +
+        '.raf-toast span.msg{flex:1;line-height:1.5;}' +
+        '.raf-toast button.undo{flex-shrink:0;background:#C9A84C;color:#1C1606;border:none;border-radius:20px;padding:7px 15px;font-family:"Tajawal",sans-serif;font-weight:700;font-size:13px;cursor:pointer;}' +
+        '.raf-toast button.undo:hover{background:#e0c069;}';
+      document.head.appendChild(st);
+    }
+    var wrap = document.querySelector('.raf-toast-wrap');
+    if (!wrap) { wrap = document.createElement('div'); wrap.className = 'raf-toast-wrap'; document.body.appendChild(wrap); }
+    var el = document.createElement('div'); el.className = 'raf-toast';
+    el.innerHTML = '<i class="ti ' + (opts.icon || 'ti-circle-check') + ' lead"></i><span class="msg"></span>';
+    el.querySelector('.msg').textContent = msg;
+    if (opts.undo) {
+      var b = document.createElement('button'); b.className = 'undo';
+      b.textContent = isEn() ? 'Undo' : 'تراجع';
+      b.onclick = function () { try { opts.undo(); } catch (e) {} close(); };
+      el.appendChild(b);
+    }
+    wrap.appendChild(el);
+    requestAnimationFrame(function () { el.classList.add('show'); });
+    var t = setTimeout(close, opts.duration || (opts.undo ? 6000 : 3000));
+    function close() { clearTimeout(t); el.classList.remove('show'); setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 240); }
+    return close;
+  }
+
+  window.RAFShop = { Cart: Cart, Wish: Wish, Orders: Orders, search: search, catalog: CATALOG, stores: STORES, L: L, nowStr: nowStr, toast: toast, isEn: isEn };
 
   /* keep every tab / page in sync */
   window.addEventListener('storage', function (e) { if (e.key === LS.cart) Cart.badge(); if (e.key === LS.wish) Wish.badge(); });

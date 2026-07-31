@@ -29,12 +29,49 @@ nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.97);backdrop-
 .nav-ico:hover{border-color:var(--gold);color:var(--gold);}
 .cart-badge{position:absolute;top:-6px;left:-6px;width:18px;height:18px;background:var(--gold);color:var(--black);border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--fen);}
 /* PAGE HEADER */
-.page-header{background:var(--black);padding:36px 40px;}
-.page-header-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
-.page-title{font-size:28px;font-weight:700;color:#F5F2EC;}
+.page-header{background:linear-gradient(150deg,var(--black),#1c180f);padding:44px 40px;position:relative;overflow:hidden;}
+.page-header::after{content:'';position:absolute;inset:0;background:radial-gradient(520px 220px at 88% -20%,rgba(201,168,76,.16),transparent 62%);pointer-events:none;}
+.page-header-inner{position:relative;max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.page-kicker{font-family:var(--fen);font-size:11px;font-weight:600;letter-spacing:3.5px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.page-title{font-family:var(--fdisplay);font-size:clamp(26px,3.4vw,38px);font-weight:900;color:#F8F4EA;line-height:1.15;letter-spacing:-.3px;}
 .page-title span{color:var(--gold);}
-.page-sub{font-size:14px;color:#888;margin-top:6px;}
-.wish-count-pill{background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);border-radius:20px;padding:8px 20px;display:flex;align-items:center;gap:8px;font-size:14px;color:var(--gold);}
+.page-sub{font-size:14.5px;color:#B5AD9C;margin-top:10px;line-height:1.7;}
+.wish-count-pill{background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.34);border-radius:30px;padding:10px 20px;display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;color:var(--gold);}
+.wish-count-pill b{font-family:var(--fen);font-size:17px;font-weight:800;}
+.wish-count-pill .sep{width:1px;height:16px;background:rgba(201,168,76,.35);}
+
+/* ===== ADD-ALL CONFIRMATION MODAL ===== */
+.aa-back{position:fixed;inset:0;z-index:4200;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(20,16,8,.55);backdrop-filter:blur(3px);opacity:0;transition:opacity .2s;}
+.aa-back.show{display:flex;opacity:1;}
+.aa-card{width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 30px 70px -22px rgba(20,16,8,.55);transform:translateY(14px);transition:transform .24s;}
+.aa-back.show .aa-card{transform:none;}
+.aa-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--border);}
+.aa-head h3{font-family:var(--fdisplay);font-size:19px;font-weight:800;color:var(--text);}
+.aa-head p{font-size:13px;color:var(--text3);margin-top:3px;}
+.aa-x{width:34px;height:34px;flex-shrink:0;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--text3);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.aa-x:hover{border-color:var(--red);color:var(--red);}
+.aa-body{padding:8px 20px;overflow:auto;flex:1;}
+.aa-row{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border);}
+.aa-row:last-child{border-bottom:none;}
+.aa-thumb{width:50px;height:50px;flex-shrink:0;border-radius:10px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:23px;color:var(--gold2);}
+.aa-info{flex:1;min-width:0;}
+.aa-name{font-size:14px;font-weight:700;color:var(--text);line-height:1.4;}
+.aa-price{font-family:var(--fen);font-size:13px;font-weight:700;color:var(--gold2);margin-top:3px;}
+.aa-note{font-size:12px;color:var(--red);margin-top:5px;display:flex;align-items:center;gap:4px;}
+.aa-note.ok{color:var(--green);}
+.aa-vars{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.aa-vgroup{width:100%;}
+.aa-vlabel{font-size:11.5px;font-weight:700;color:var(--text2);margin-bottom:5px;}
+.aa-vlabel .req{color:var(--red);}
+.aa-opt{padding:6px 12px;border:1px solid var(--border);border-radius:20px;background:var(--card);color:var(--text2);font-family:var(--font);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;}
+.aa-opt:hover{border-color:var(--gold);}
+.aa-opt.on{background:var(--black);color:#F5F0E4;border-color:var(--black);}
+.aa-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;}
+.aa-cancel{flex-shrink:0;height:46px;padding:0 18px;border:1px solid var(--border);border-radius:30px;background:var(--card);color:var(--text2);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;}
+.aa-cancel:hover{border-color:var(--text3);}
+.aa-confirm{flex:1;height:46px;border:none;border-radius:30px;background:var(--gold);color:var(--black);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
+.aa-confirm:hover{background:var(--gold2);color:#fff;}
+.aa-confirm:disabled{background:var(--border);color:var(--text3);cursor:not-allowed;}
 .breadcrumb{padding:12px 40px;font-size:13px;color:var(--text3);display:flex;align-items:center;gap:6px;background:var(--bg2);border-bottom:1px solid var(--border);}
 .breadcrumb a{color:var(--text3);text-decoration:none;transition:color .2s;}
 .breadcrumb a:hover{color:var(--gold);}
@@ -85,15 +122,17 @@ nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.97);backdrop-
 .empty-sub{font-size:14px;color:var(--text3);margin-bottom:24px;}
 .btn-shop{padding:12px 28px;border:none;border-radius:var(--r);background:var(--gold);color:var(--black);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
 .btn-shop:hover{background:var(--gold2);}
-/* FOOTER */
-footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px;}
+/* FOOTER — sticky to viewport bottom on short pages, higher-contrast text */
+body{display:flex;flex-direction:column;min-height:100vh;}
+.main{flex:1 0 auto;}
+footer{background:var(--black);color:#B5AD9C;padding:48px 40px 24px;margin-top:auto;flex-shrink:0;}
 .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto 40px;}
 .footer-logo{font-family:var(--fdisplay);font-size:32px;font-weight:900;color:var(--gold);text-decoration:none;display:block;margin-bottom:12px;}
-.footer-desc{font-size:13px;color:#555;line-height:1.7;}
-.footer-col-title{font-size:13px;font-weight:700;color:#ccc;margin-bottom:16px;letter-spacing:1px;}
-.footer-link{display:block;font-size:13px;color:#555;text-decoration:none;margin-bottom:10px;transition:color .2s;}
+.footer-desc{font-size:13px;color:#B5AD9C;line-height:1.7;}
+.footer-col-title{font-size:13px;font-weight:700;color:#F3EFE5;margin-bottom:16px;letter-spacing:1px;}
+.footer-link{display:block;font-size:13px;color:#B5AD9C;text-decoration:none;margin-bottom:10px;transition:color .2s;}
 .footer-link:hover{color:var(--gold);}
-.footer-bottom{border-top:1px solid #1a1a1a;padding-top:24px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#444;max-width:1200px;margin:0 auto;}
+.footer-bottom{border-top:1px solid #2a2620;padding-top:24px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#9C948A;max-width:1200px;margin:0 auto;}
 /* ── GLOBAL MOBILE RESET ── */
 @media(max-width:768px){*{max-width:100%;}img,video,iframe{max-width:100%!important;height:auto;}table{max-width:100%;}}
 @media(max-width:900px){nav{padding:0 16px;}.nav-links{display:none;}.main{padding:20px 16px;}.page-header{padding:28px 16px;}.breadcrumb{padding:10px 16px;}.footer-grid{grid-template-columns:1fr 1fr;}}
@@ -152,19 +191,25 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
 <div class="page-header">
   <div class="page-header-inner">
     <div>
-      <div class="page-title"> <span data-ar="المفضلة" data-en="Wishlist">المفضلة</span></div>
+      <div class="page-kicker" data-ar="حسابي" data-en="My Account">حسابي</div>
+      <div class="page-title"><span data-ar="المفضلة" data-en="Wishlist">المفضلة</span></div>
       <div class="page-sub" data-ar="المنتجات التي حفظتها لشرائها لاحقاً" data-en="Products you saved to buy later">المنتجات التي حفظتها لشرائها لاحقاً</div>
     </div>
-    <div class="wish-count-pill"><i class="ti ti-heart-filled"></i> <span id="wishCountPill">5</span> منتجات محفوظة</div>
+    <div class="wish-count-pill">
+      <i class="ti ti-heart-filled"></i>
+      <b id="wishCountPill">0</b> <span data-ar="منتج" data-en="products">منتج</span>
+      <span class="sep"></span>
+      <b id="storeCountPill">0</b> <span data-ar="متجر" data-en="stores">متجر</span>
+    </div>
   </div>
 </div>
 
 <div class="breadcrumb">
-  <a href="raf_homepage.html">الرئيسية</a>
+  <a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
   <i class="ti ti-chevron-left"></i>
-  <a href="raf_account.html">حسابي</a>
+  <a href="raf_account.html" data-ar="حسابي" data-en="My Account">حسابي</a>
   <i class="ti ti-chevron-left"></i>
-  <span style="color:var(--text);">قائمة المفضلة</span>
+  <span style="color:var(--text);" data-ar="قائمة المفضلة" data-en="Wishlist">قائمة المفضلة</span>
 </div>
 
 <div class="main">
@@ -172,10 +217,10 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
   <!-- TOOLBAR -->
   <div class="toolbar" id="toolbar">
     <div class="toolbar-left">
-      <span class="count-label" id="countLabel">5 منتجات</span>
+      <span class="count-label" id="countLabel"></span>
     </div>
     <div style="display:flex;gap:8px;">
-      <button class="btn-add-all" onclick="addAllToCart()"><i class="ti ti-shopping-cart-plus"></i> <span data-ar="إضافة الكل للسلة" data-en="Add All to Cart">إضافة الكل للسلة</span></button>
+      <button class="btn-add-all" onclick="openAddAll()"><i class="ti ti-shopping-cart-plus"></i> <span data-ar="إضافة الكل للسلة" data-en="Add All to Cart">إضافة الكل للسلة</span></button>
       <button class="btn-clear" onclick="clearAll()"><i class="ti ti-trash"></i> <span data-ar="مسح الكل" data-en="Clear All">مسح الكل</span></button>
     </div>
   </div>
@@ -282,11 +327,29 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
   <!-- EMPTY STATE -->
   <div class="empty-wrap" id="emptyWrap">
     <div class="empty-ico"><i class="ti ti-heart-off"></i></div>
-    <div class="empty-title">قائمة المفضلة فارغة</div>
-    <div class="empty-sub">أضف منتجات إلى المفضلة بالنقر على أيقونة القلب في أي منتج</div>
-    <a href="raf_homepage.html" class="btn-shop"><i class="ti ti-shopping-bag"></i> تصفح المنتجات</a>
+    <div class="empty-title" data-ar="قائمة المفضلة فارغة" data-en="Your wishlist is empty">قائمة المفضلة فارغة</div>
+    <div class="empty-sub" data-ar="أضف منتجات إلى المفضلة بالنقر على أيقونة القلب في أي منتج" data-en="Add products to your wishlist by tapping the heart icon on any product">أضف منتجات إلى المفضلة بالنقر على أيقونة القلب في أي منتج</div>
+    <a href="raf_homepage.html" class="btn-shop"><i class="ti ti-shopping-bag"></i> <span data-ar="تصفح المنتجات" data-en="Browse products">تصفح المنتجات</span></a>
   </div>
 
+</div>
+
+<!-- ===== ADD ALL TO CART — CONFIRMATION MODAL ===== -->
+<div class="aa-back" id="addAllModal" onclick="if(event.target===this)closeAddAll()">
+  <div class="aa-card" role="dialog" aria-modal="true">
+    <div class="aa-head">
+      <div>
+        <h3 data-ar="إضافة الكل للسلة" data-en="Add All to Cart">إضافة الكل للسلة</h3>
+        <p id="aaSummary"></p>
+      </div>
+      <button class="aa-x" onclick="closeAddAll()" aria-label="close"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="aa-body" id="aaBody"></div>
+    <div class="aa-foot">
+      <button class="aa-cancel" onclick="closeAddAll()" data-ar="إلغاء" data-en="Cancel">إلغاء</button>
+      <button class="aa-confirm" id="aaConfirm" onclick="confirmAddAll()"></button>
+    </div>
+  </div>
 </div>
 
 <footer>
@@ -326,76 +389,9 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
 </footer>
 
 <script>
-/* CART STATE */
-const CK='raf_cart';
-function getCart(){return JSON.parse(localStorage.getItem(CK)||'{}');}
-function saveCart(c){localStorage.setItem(CK,JSON.stringify(c));updateBadge();}
-function updateBadge(){
-  const t=Object.values(getCart()).reduce((s,i)=>s+(i.qty||0),0);
-  document.querySelectorAll('#cartBadge,.cart-badge').forEach(b=>b.textContent=t||'0');
-}
-function qtyHTML(id,qty,name,price){
-  return `<div class="qty-ctrl">
-    <button class="qty-btn" onclick="event.stopPropagation();chQ('${id}',-1,'${encodeURIComponent(name)}','${price}',this)"><i class="ti ti-minus"></i></button>
-    <span class="qty-num">${qty}</span>
-    <button class="qty-btn" onclick="event.stopPropagation();chQ('${id}',1,'${encodeURIComponent(name)}','${price}',this)"><i class="ti ti-plus"></i></button>
-    <button class="qty-del" onclick="event.stopPropagation();delI('${id}','${encodeURIComponent(name)}','${price}',this)"><i class="ti ti-trash"></i></button>
-  </div>`;}
-function addBtnHTML(id,name,price){return `<button class="add-cart-btn" onclick="event.stopPropagation();addC('${id}','${encodeURIComponent(name)}','${price}')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>`;}
-function addC(id,name,price){
-  const cart=getCart();if(!cart[id])cart[id]={name:decodeURIComponent(name),price:parseFloat(price),qty:0};
-  cart[id].qty++;saveCart(cart);
-  const w=document.querySelector(`[data-pid="${id}"]`);if(w)w.innerHTML=qtyHTML(id,cart[id].qty,name,price);
-}
-function chQ(id,d,name,price,btn){
-  const cart=getCart();if(!cart[id])return;cart[id].qty+=d;
-  if(cart[id].qty<=0){delete cart[id];saveCart(cart);const w=btn.closest('[data-pid]');if(w)w.innerHTML=addBtnHTML(id,decodeURIComponent(name),price);return;}
-  saveCart(cart);btn.closest('.qty-ctrl').querySelector('.qty-num').textContent=cart[id].qty;
-}
-function delI(id,name,price,btn){
-  const cart=getCart();delete cart[id];saveCart(cart);
-  const w=btn.closest('[data-pid]');if(w)w.innerHTML=addBtnHTML(id,decodeURIComponent(name),price);
-}
-function initCartBtns(){
-  const cart=getCart();
-  document.querySelectorAll('[data-pid]').forEach(w=>{
-    const id=w.dataset.pid,name=w.dataset.name,price=w.dataset.price;
-    if(cart[id])w.innerHTML=qtyHTML(id,cart[id].qty,encodeURIComponent(name),price);
-  });
-}
-/* WISHLIST ACTIONS */
-let wishCount=5;
-function removeItem(id){
-  const card=document.getElementById('wi-'+id);
-  if(!card)return;
-  card.classList.add('removing');
-  setTimeout(()=>{card.remove();wishCount--;updateWishCount();checkEmpty();},300);
-}
-function updateWishCount(){
-  document.getElementById('wishCountPill').textContent=wishCount;
-  document.getElementById('countLabel').textContent=wishCount+' منتجات';
-}
-function checkEmpty(){
-  if(wishCount<=0){
-    document.getElementById('emptyWrap').classList.add('show');
-    document.getElementById('toolbar').style.display='none';
-  }
-}
-function clearAll(){
-  if(!confirm('هل تريد مسح جميع المنتجات من المفضلة؟'))return;
-  document.querySelectorAll('#wishGrid .prod-card').forEach(c=>{c.classList.add('removing');setTimeout(()=>c.remove(),300);});
-  wishCount=0;
-  setTimeout(()=>{updateWishCount();checkEmpty();},350);
-}
-function addAllToCart(){
-  document.querySelectorAll('#wishGrid [data-pid]').forEach(w=>{
-    const id=w.dataset.pid,name=w.dataset.name,price=w.dataset.price;
-    const cart=getCart();if(!cart[id])cart[id]={name,price:parseFloat(price),qty:0};
-    cart[id].qty++;saveCart(cart);
-    w.innerHTML=qtyHTML(id,cart[id].qty,encodeURIComponent(name),price);
-  });
-}
-window.addEventListener('DOMContentLoaded',()=>{initCartBtns();updateBadge();});
+/* Cart & wishlist state live in the shared RAF data layer (raf_data.js).
+   All legacy per-page cart logic was removed — it used an incompatible
+   object schema that overwrote the shared array-based cart. */
 /* LANG */
 function toggleLang(){
   const r=document.getElementById('htmlRoot');
@@ -426,25 +422,145 @@ function applyLang(){
 <script src="raf_data.js"></script>
 <script src="raf_card.js"></script>
 <script>
-  (function(){
-    function render(){
-      if(!window.RAFShop || !window.RAFCard) return;
-      var en = document.getElementById('htmlRoot').lang === 'en';
-      var items = RAFShop.Wish.items();
-      var grid = document.getElementById('wishGrid');
-      if(!grid) return;
-      if(!items.length){
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:56px 20px;color:#8A857C;">'
-          + '<i class="ti ti-heart" style="font-size:46px;color:#C9A84C;display:block;margin-bottom:12px;"></i>'
-          + '<div style="font-size:15px;font-weight:700;color:#15130F;margin-bottom:6px;">'+(en?'Your wishlist is empty':'قائمة مفضّلتك فارغة')+'</div>'
-          + '<a href="raf_homepage.html" style="color:#A07828;text-decoration:none;font-weight:600;">'+(en?'Browse products':'تصفّح المنتجات')+'</a></div>';
-        return;
+/* ============================================================
+   FAVOURITES — powered entirely by the shared RAF data layer
+   ============================================================ */
+(function(){
+  function en(){ return document.getElementById('htmlRoot').lang === 'en'; }
+  function T(ar,e){ return en() ? e : ar; }
+  function L(o){ return (o && typeof o==='object') ? (en()?o.en:o.ar) : (o||''); }
+  function oos(p){ return window.RAFCard ? RAFCard.isOOS(p) : (p.stock===0||p.available===false); }
+  function needsVariants(p){ return !!(p.variants && p.variants.length); }
+
+  /* ---------- counters + empty state (real values) ---------- */
+  function refreshCounts(){
+    var items = RAFShop.Wish.items();
+    var n = items.length, s = RAFShop.Wish.storeCount();
+    document.getElementById('wishCountPill').textContent = n;
+    document.getElementById('storeCountPill').textContent = s;
+    document.getElementById('countLabel').textContent =
+      n + ' ' + T(n===1?'منتج':'منتجات','product'+(n===1?'':'s')) + ' · ' +
+      s + ' ' + T(s===1?'متجر':'متاجر','store'+(s===1?'':'s'));
+    document.getElementById('toolbar').style.display = n ? '' : 'none';
+    document.getElementById('emptyWrap').classList.toggle('show', n===0);
+    document.getElementById('wishGrid').style.display = n ? '' : 'none';
+    /* live wishlist badge everywhere on the page */
+    document.querySelectorAll('#wishBadge,.wish-badge').forEach(function(b){
+      if(n>0){ b.textContent=n; b.style.display='flex'; } else { b.style.display='none'; }
+    });
+  }
+
+  /* ---------- grid ---------- */
+  function render(){
+    if(!window.RAFShop || !window.RAFCard) return;
+    var grid = document.getElementById('wishGrid'); if(!grid) return;
+    grid.innerHTML = RAFShop.Wish.items().map(function(p){ return RAFCard.product(p); }).join('');
+    refreshCounts();
+  }
+
+  /* ---------- Clear All ---------- */
+  window.clearAll = function(){
+    var items = RAFShop.Wish.items();
+    if(!items.length) return;
+    if(!confirm(T('هل تريد مسح جميع المنتجات من المفضلة؟','Remove all products from your wishlist?'))) return;
+    var backup = items.slice();
+    RAFShop.Wish.clear(); render();
+    RAFShop.toast(T('تم مسح المفضلة','Wishlist cleared'), { icon:'ti-trash', undo:function(){ RAFShop.Wish.write(backup); render(); } });
+  };
+
+  /* ---------- Add All to Cart (confirmation + variants + merge) ---------- */
+  var aaState = [];
+  window.openAddAll = function(){
+    var items = RAFShop.Wish.items(); if(!items.length) return;
+    aaState = items.map(function(p){ return { p:p, sel:{}, skip:oos(p) }; });
+    var avail = aaState.filter(function(r){ return !r.skip; }).length;
+    var skipped = aaState.length - avail;
+
+    document.getElementById('aaSummary').textContent =
+      T('سيتم إضافة ','Adding ') + avail + T(' من أصل ',' of ') + aaState.length + T(' منتج','products') +
+      (skipped ? T(' · '+skipped+' غير متوفر سيتم تخطيه',' · '+skipped+' unavailable will be skipped') : '');
+
+    document.getElementById('aaBody').innerHTML = aaState.map(function(r,i){
+      var p = r.p;
+      var vars = needsVariants(p) && !r.skip ? p.variants.map(function(g,gi){
+        return '<div class="aa-vgroup"><div class="aa-vlabel">'+L(g.label)+' <span class="req">*</span></div><div class="aa-vars">'
+          + g.options.map(function(op){ return '<button class="aa-opt" onclick="aaPick('+i+','+gi+',this,\''+String(op.v).replace(/'/g,"\\'")+'\')">'+L(op.label||op)+'</button>'; }).join('')
+          + '</div></div>';
+      }).join('') : '';
+      var note = r.skip
+        ? '<div class="aa-note"><i class="ti ti-ban"></i> '+T('غير متوفر — سيتم تخطيه','Unavailable — will be skipped')+'</div>'
+        : (needsVariants(p) ? '<div class="aa-note" id="aaNote'+i+'"><i class="ti ti-alert-circle"></i> '+T('اختر الخيارات المطلوبة','Select the required options')+'</div>' : '');
+      return '<div class="aa-row"'+(r.skip?' style="opacity:.55"':'')+'>'
+        + '<div class="aa-thumb"><i class="ti '+(p.ic||'ti-box')+'"></i></div>'
+        + '<div class="aa-info"><div class="aa-name">'+L(p)+'</div>'
+        + '<div class="aa-price">'+p.price+' '+T('د.ك','KWD')+'</div>'
+        + note + vars + '</div></div>';
+    }).join('');
+
+    updateAaBtn();
+    document.getElementById('addAllModal').classList.add('show');
+  };
+  window.closeAddAll = function(){ document.getElementById('addAllModal').classList.remove('show'); };
+
+  window.aaPick = function(i,gi,btn,v){
+    btn.parentElement.querySelectorAll('.aa-opt').forEach(function(b){ b.classList.remove('on'); });
+    btn.classList.add('on');
+    aaState[i].sel['g'+gi] = v;
+    var r = aaState[i], done = r.p.variants.every(function(_,k){ return r.sel['g'+k]!=null; });
+    var note = document.getElementById('aaNote'+i);
+    if(note){ note.className = 'aa-note' + (done?' ok':''); note.innerHTML = '<i class="ti ti-'+(done?'circle-check':'alert-circle')+'"></i> ' + (done?T('جاهز للإضافة','Ready to add'):T('اختر الخيارات المطلوبة','Select the required options')); }
+    updateAaBtn();
+  };
+
+  function readyRows(){
+    return aaState.filter(function(r){
+      if(r.skip) return false;
+      if(!needsVariants(r.p)) return true;
+      return r.p.variants.every(function(_,k){ return r.sel['g'+k]!=null; });   /* variants required */
+    });
+  }
+  function updateAaBtn(){
+    var btn = document.getElementById('aaConfirm'), n = readyRows().length;
+    btn.disabled = n===0;
+    btn.textContent = n ? T('أضف '+n+' للسلة','Add '+n+' to Cart') : T('اختر الخيارات المطلوبة','Select required options');
+  }
+
+  window.confirmAddAll = function(){
+    var rows = readyRows(); if(!rows.length) return;
+    /* MERGE into the existing cart — RAFShop.Cart.add never clears or overwrites,
+       and de-duplicates by product+variant key (RAF cart logic). */
+    rows.forEach(function(r){
+      var variant = {};
+      if(needsVariants(r.p)){
+        r.p.variants.forEach(function(g,gi){
+          var v = r.sel['g'+gi];
+          var opt = g.options.find(function(o){ return String(o.v)===String(v); });
+          variant[L(g.label)] = opt ? L(opt.label||opt) : v;
+        });
       }
-      grid.innerHTML = items.map(function(p){ return RAFCard.product(p); }).join('');
-    }
-    function boot(){ render(); document.addEventListener('raf:wish', render); }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
-  })();
+      RAFShop.Cart.add(r.p, variant);
+    });
+    var skipped = aaState.filter(function(r){ return r.skip; }).length;
+    var incomplete = aaState.length - skipped - rows.length;
+    closeAddAll();
+    RAFShop.Cart.badge(); render();           /* cart + wishlist badges update instantly */
+    var msg = T('تمت إضافة '+rows.length+' منتج إلى السلة','Added '+rows.length+' product'+(rows.length===1?'':'s')+' to your cart');
+    if(skipped) msg += T(' · تم تخطي '+skipped+' غير متوفر',' · skipped '+skipped+' unavailable');
+    if(incomplete) msg += T(' · '+incomplete+' بحاجة لاختيار الخيارات',' · '+incomplete+' need options');
+    RAFShop.toast(msg, { icon:'ti-shopping-cart-plus' });
+  };
+
+  /* ---------- boot + live sync ---------- */
+  function boot(){
+    render();
+    document.addEventListener('raf:wish', render);   /* instant badge/counter update on add/remove */
+    document.addEventListener('raf:cart', function(){ RAFShop.Cart.badge(); });
+    var root = document.getElementById('htmlRoot');
+    if(root) new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeAddAll(); });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
 </script>
 </body>
 </html>
