@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — إتمام الطلب</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="raf_checkout.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+</head>
+<body>
+
+<header class="co-head">
+  <a href="raf_cart.html" class="co-back"><i class="ti ti-arrow-right"></i> <span data-ar="السلة" data-en="Cart">السلة</span></a>
+  <div class="co-title" data-ar="إتمام الطلب" data-en="Checkout">إتمام الطلب</div>
+  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
+</header>
+
+<div class="steps">
+  <div class="steps-inner">
+    <div class="step done"><div class="step-dot"><i class="ti ti-check" style="font-size:15px"></i></div><div class="step-lbl" data-ar="السلة" data-en="Cart">السلة</div><div class="step-bar done"></div></div>
+    <div class="step on"><div class="step-dot">2</div><div class="step-lbl" data-ar="العنوان" data-en="Address">العنوان</div><div class="step-bar"></div></div>
+    <div class="step on"><div class="step-dot">3</div><div class="step-lbl" data-ar="الدفع" data-en="Payment">الدفع</div><div class="step-bar"></div></div>
+    <div class="step"><div class="step-dot">4</div><div class="step-lbl" data-ar="التأكيد" data-en="Confirmation">التأكيد</div><div class="step-bar"></div></div>
+    <div class="step"><div class="step-dot">5</div><div class="step-lbl" data-ar="التتبع" data-en="Tracking">التتبع</div></div>
+  </div>
+</div>
+
+<main class="co-wrap">
+  <!-- EMPTY GUARD -->
+  <div class="empty" id="coEmpty" style="display:none;">
+    <div class="empty-ic"><i class="ti ti-shopping-cart-off"></i></div>
+    <div class="empty-t" data-ar="لا يوجد ما يمكن دفعه" data-en="Nothing to check out">لا يوجد ما يمكن دفعه</div>
+    <div class="empty-s" data-ar="سلتك فارغة — أضف منتجات أولاً ثم عد لإتمام الطلب." data-en="Your cart is empty — add products first, then come back to check out.">سلتك فارغة — أضف منتجات أولاً ثم عد لإتمام الطلب.</div>
+    <div class="empty-actions"><a href="raf_homepage.html" class="btn btn-gold"><i class="ti ti-building-store"></i> <span data-ar="ابدأ التسوق" data-en="Start shopping">ابدأ التسوق</span></a></div>
+  </div>
+
+  <div class="co-grid" id="coGrid">
+    <div>
+      <!-- ADDRESS -->
+      <div class="panel">
+        <div class="panel-h"><i class="ti ti-map-pin"></i> <span data-ar="عنوان التوصيل" data-en="Delivery address">عنوان التوصيل</span></div>
+        <div class="panel-b">
+          <div id="addrList"></div>
+          <a href="raf_address.html?from=checkout" class="addr-add"><i class="ti ti-plus"></i> <span data-ar="إضافة عنوان جديد" data-en="Add new address">إضافة عنوان جديد</span></a>
+        </div>
+      </div>
+
+      <!-- DRIVER TIP -->
+      <div class="panel">
+        <div class="panel-h"><i class="ti ti-coin"></i> <span data-ar="إكرامية السائق" data-en="Driver tip">إكرامية السائق</span><span class="side" data-ar="اختياري" data-en="Optional">اختياري</span></div>
+        <div class="panel-b">
+          <div class="tips" id="tipRow"></div>
+          <label style="display:flex;align-items:center;gap:9px;margin-top:14px;font-size:13px;color:var(--text2);cursor:pointer;">
+            <input type="checkbox" id="tipInvoice" onchange="saveTipInvoice()" style="width:17px;height:17px;accent-color:var(--gold);">
+            <span data-ar="إظهار الإكرامية في الفاتورة" data-en="Show tip on the invoice">إظهار الإكرامية في الفاتورة</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- DRIVER INSTRUCTIONS -->
+      <div class="panel">
+        <div class="panel-h"><i class="ti ti-message-2"></i> <span data-ar="تعليمات للسائق" data-en="Driver instructions">تعليمات للسائق</span><span class="side" data-ar="اختياري" data-en="Optional">اختياري</span></div>
+        <div class="panel-b">
+          <textarea class="notes" id="driverNotes" oninput="saveDriverNotes()" data-ar-ph="مثال: اتصل عند الوصول، الباب الجانبي…" data-en-ph="e.g. Call on arrival, use the side door…" placeholder="مثال: اتصل عند الوصول، الباب الجانبي…"></textarea>
+        </div>
+      </div>
+
+      <!-- PAYMENT -->
+      <div class="panel">
+        <div class="panel-h"><i class="ti ti-credit-card"></i> <span data-ar="طريقة الدفع" data-en="Payment method">طريقة الدفع</span></div>
+        <div class="panel-b" id="payList"></div>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary">
+      <div class="panel">
+        <div class="panel-h"><i class="ti ti-receipt"></i> <span data-ar="ملخص الفاتورة" data-en="Invoice summary">ملخص الفاتورة</span></div>
+        <div class="panel-b" id="sumItems" style="border-bottom:1px solid var(--border);"></div>
+        <div class="panel-b" id="sumBody"></div>
+        <div class="panel-b" style="border-top:1px solid var(--border);">
+          <div id="payErr"></div>
+          <button class="btn btn-gold btn-block" id="payBtn" onclick="payNow()">
+            <i class="ti ti-lock"></i> <span id="payLabel"></span>
+          </button>
+          <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:12px;color:var(--text3);">
+            <i class="ti ti-shield-check" style="color:var(--green);"></i>
+            <span data-ar="دفع آمن ومحمي بالكامل" data-en="Secure, fully protected payment">دفع آمن ومحمي بالكامل</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="foot-in">
+    <a href="raf_homepage.html" class="foot-logo"><img src="assets/branding/logo-light.svg" alt="RAF Marketplace"></a>
+    <div class="foot-txt" data-ar="جميع الحقوق محفوظة © 2026 رف" data-en="All rights reserved © 2026 RAF">جميع الحقوق محفوظة © 2026 رف</div>
+    <div class="foot-links">
+      <a href="raf_returns.html" data-ar="سياسة الإرجاع" data-en="Returns">سياسة الإرجاع</a>
+      <a href="raf_privacy.html" data-ar="الخصوصية" data-en="Privacy">الخصوصية</a>
+      <a href="raf_terms.html" data-ar="الشروط" data-en="Terms">الشروط</a>
+    </div>
+  </div>
+</footer>
+
+<nav class="app-bnav">
+  <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
+  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفّح" data-en="Browse">تصفّح</span></a>
+  <a href="raf_cart.html" class="bnav-cart on"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
+  <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
+  <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
+</nav>
+
+<script src="raf_data.js"></script>
+<script src="raf_checkout.js"></script>
+<script>
+/* ============================================================
+   CHECKOUT (steps 2–3) — address · tip · instructions · payment
+   ============================================================ */
+(function(){
+  var T=RAFCO.T, L=RAFCO.L, money=RAFCO.money;
+  var TIPS=[0,0.500,1.000,2.000];
+  var PAYMENTS=[
+    {id:'cod',  ic:'ti-cash',         ar:'الدفع عند الاستلام', en:'Cash on delivery', sAr:'نقداً عند وصول الطلب',  sEn:'Pay in cash on arrival'},
+    {id:'knet', ic:'ti-credit-card',  ar:'كي-نت',              en:'K-Net',            sAr:'بطاقة الدفع الكويتية',  sEn:'Kuwaiti debit card'},
+    {id:'visa', ic:'ti-brand-visa',   ar:'بطاقة ائتمانية',      en:'Credit card',      sAr:'فيزا / ماستركارد',      sEn:'Visa / Mastercard'}
+  ];
+
+  function addresses(){
+    var a = RAFCO.getJSON('raf_addresses', null);
+    if(a && a.length) return a;
+    /* seeded default so checkout always has a usable address */
+    var def=[{id:'addr-1',type:'home',name:'محمد العنزي',phone:'+965 9123 4567',area:'حولي',block:'5',street:'شارع الأمير',building:'12',floor:'1',apartment:'4',notes:'',isDefault:true}];
+    RAFCO.setJSON('raf_addresses',def); return def;
+  }
+  /* lang: undefined = current UI language, or force 'ar' / 'en' (labels only —
+     the address itself is stored exactly as the customer entered it) */
+  function addrText(a, lang){
+    var e = lang ? lang==='en' : RAFCO.en();
+    var lb = function(ar,en){ return e?en:ar; };
+    return [a.area, a.block?lb('ق','Block ')+a.block:'', a.street, a.building?lb('م','Bldg ')+a.building:'', a.floor?lb('ط','Floor ')+a.floor:'', a.apartment?lb('ش','Apt ')+a.apartment:'']
+      .filter(Boolean).join(e?', ':'، ');
+  }
+
+  function renderAddresses(){
+    var list=addresses();
+    var sel=RAFCO.get('raf_addr_sel', (list.find(function(a){return a.isDefault;})||list[0]||{}).id||'');
+    document.getElementById('addrList').innerHTML = list.map(function(a){
+      var icons={home:'ti-home',work:'ti-briefcase',family:'ti-users',other:'ti-map-pin'};
+      var names={home:{ar:'المنزل',en:'Home'},work:{ar:'العمل',en:'Work'},family:{ar:'العائلة',en:'Family'},other:{ar:'آخر',en:'Other'}};
+      return '<div class="addr'+(a.id===sel?' on':'')+'" onclick="pickAddr(\''+a.id+'\')">'
+        + '<div class="addr-radio"></div>'
+        + '<div class="addr-ic"><i class="ti '+(icons[a.type]||'ti-map-pin')+'"></i></div>'
+        + '<div class="addr-b"><div class="addr-t">'+L(names[a.type]||names.other)
+          + (a.isDefault?' <span class="addr-tag">'+T('افتراضي','Default')+'</span>':'')+'</div>'
+        + '<div class="addr-x">'+addrText(a)+'<br>'+(a.name||'')+' · '+(a.phone||'')+'</div></div></div>';
+    }).join('');
+  }
+  window.pickAddr=function(id){ RAFCO.set('raf_addr_sel',id); renderAddresses(); renderSummary(); };
+
+  function renderTips(){
+    var cur=RAFCO.getTip();
+    document.getElementById('tipRow').innerHTML = TIPS.map(function(v){
+      return '<button class="tip'+(Math.abs(cur-v)<0.0001?' on':'')+'" onclick="pickTip('+v+')">'+(v===0?T('بدون','None'):money(v))+'</button>';
+    }).join('');
+    document.getElementById('tipInvoice').checked = RAFCO.get('raf_tip_invoice','1')==='1';
+  }
+  window.pickTip=function(v){ RAFCO.setTip(v); renderTips(); renderSummary(); };
+  window.saveTipInvoice=function(){ RAFCO.set('raf_tip_invoice', document.getElementById('tipInvoice').checked?'1':'0'); renderSummary(); };
+  window.saveDriverNotes=function(){ RAFCO.set('raf_driver_notes', document.getElementById('driverNotes').value); };
+
+  function renderPayments(){
+    var sel=RAFCO.get('raf_pay_sel','cod');
+    document.getElementById('payList').innerHTML = PAYMENTS.map(function(p){
+      return '<div class="pay'+(p.id===sel?' on':'')+'" onclick="pickPay(\''+p.id+'\')">'
+        + '<div class="pay-radio"></div><div class="pay-ic"><i class="ti '+p.ic+'"></i></div>'
+        + '<div><div class="pay-n">'+T(p.ar,p.en)+'</div><div class="pay-s">'+T(p.sAr,p.sEn)+'</div></div></div>';
+    }).join('');
+  }
+  window.pickPay=function(id){ RAFCO.set('raf_pay_sel',id); renderPayments(); renderSummary(); };
+
+  function renderSummary(){
+    var items=RAFShop.Cart.items();
+    var showTip = RAFCO.get('raf_tip_invoice','1')==='1';
+    var t=RAFCO.totals(items,{withTip:true});
+    document.getElementById('sumItems').innerHTML = items.map(function(l){
+      return '<div class="sum-row"><span style="max-width:70%">'+L(l.name)+' <b style="color:var(--text3)">×'+l.qty+'</b></span><span>'+money(RAFCO.price(l)*l.qty)+'</span></div>';
+    }).join('');
+    document.getElementById('sumBody').innerHTML =
+        '<div class="sum-row"><span>'+T('المجموع','Subtotal')+'</span><span>'+money(t.sub)+' '+T('د.ك','KWD')+'</span></div>'
+      + '<div class="sum-row"><span>'+T('التوصيل','Delivery')+'</span>'+(t.ship===0?'<span class="free">'+T('مجاني','Free')+'</span>':'<span>'+money(t.ship)+'</span>')+'</div>'
+      + (t.disc>0?'<div class="sum-row disc"><span>'+T('خصم الكوبون','Coupon')+' ('+t.coupon.code+')</span><span>− '+money(t.disc)+'</span></div>':'')
+      + (t.tip>0&&showTip?'<div class="sum-row"><span>'+T('إكرامية السائق','Driver tip')+'</span><span>'+money(t.tip)+'</span></div>':'')
+      + '<div class="sum-row total"><span>'+T('الإجمالي','Total')+'</span><b>'+money(t.total)+' '+T('د.ك','KWD')+'</b></div>';
+    document.getElementById('payLabel').textContent = T('ادفع '+money(t.total)+' د.ك','Pay '+money(t.total)+' KWD');
+  }
+
+  /* ---------- pay: validate stock, create the order, go to confirmation+tracking ---------- */
+  window.payNow=function(){
+    var items=RAFShop.Cart.items();
+    var err=document.getElementById('payErr');
+    if(!items.length) return;
+    var oos=items.filter(RAFCO.isOOS);
+    if(oos.length){                                   /* stock validated before payment */
+      err.innerHTML='<div class="alert warn"><i class="ti ti-alert-triangle"></i><div>'+T('بعض المنتجات لم تعد متوفرة. عد إلى السلة لتعديلها.','Some items are no longer available. Return to the cart to update them.')+'</div></div>';
+      return;
+    }
+    var list=addresses(), selId=RAFCO.get('raf_addr_sel','');
+    var addr=list.find(function(a){return a.id===selId;})||list[0];
+    if(!addr){
+      err.innerHTML='<div class="alert warn"><i class="ti ti-alert-triangle"></i><div>'+T('اختر عنوان التوصيل أولاً','Select a delivery address first')+'</div></div>';
+      return;
+    }
+    err.innerHTML='';
+    var payId=RAFCO.get('raf_pay_sel','cod');
+    var pay=PAYMENTS.find(function(p){return p.id===payId;})||PAYMENTS[0];
+    var order=RAFShop.Orders.create({
+      pay:{ar:pay.ar,en:pay.en},
+      addr:{ar:addrText(addr,'ar'),en:addrText(addr,'en')}
+    });
+    if(!order) return;
+    RAFShop.Cart.clear(); RAFCO.setCoupon(null);
+    try{ localStorage.removeItem('raf_order_notes'); localStorage.removeItem('raf_driver_notes'); localStorage.removeItem('raf_tip'); }catch(e){}
+    RAFShop.Cart.badge();
+    window.location='raf_tracking.html?id='+encodeURIComponent(order.id)+'&new=1';
+  };
+
+  function boot(){
+    var items=RAFShop.Cart.items();
+    var has=items.length>0;
+    document.getElementById('coEmpty').style.display=has?'none':'';
+    document.getElementById('coGrid').style.display=has?'':'none';
+    if(!has){ RAFShop.Cart.badge(); return; }
+    document.getElementById('driverNotes').value=RAFCO.get('raf_driver_notes','');
+    renderAddresses(); renderTips(); renderPayments(); renderSummary();
+    RAFCO.applyLang(); RAFShop.Cart.badge();
+    var root=document.getElementById('htmlRoot');
+    if(root) new MutationObserver(function(){ renderAddresses(); renderTips(); renderPayments(); renderSummary(); })
+      .observe(root,{attributes:true,attributeFilter:['lang']});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
+</body>
+</html>

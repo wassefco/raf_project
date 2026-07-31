@@ -332,9 +332,32 @@ function applyLang(){
   var en=function(){return document.getElementById('htmlRoot').lang==='en';};
   var t=function(ar,e){return en()?e:ar;};
   var L=function(o){return RAFShop.L(o);};
-  var id=new URLSearchParams(location.search).get('id');
+  var qs=new URLSearchParams(location.search);
+  var id=qs.get('id');
   var o=id?RAFShop.Orders.get(id):null;
   if(!o) return; /* unknown id → keep the default sample */
+
+  /* ===== Order Confirmation merged into this page (arriving from checkout) ===== */
+  if(qs.get('new')==='1'){
+    var host=document.querySelector('.order-header')||document.querySelector('main')||document.body;
+    var b=document.createElement('div');
+    b.style.cssText='background:linear-gradient(150deg,#15130F,#1c180f);border:1px solid rgba(46,158,91,.4);border-radius:18px;padding:26px 22px;margin-bottom:18px;text-align:center;color:#F3EFE5;';
+    b.innerHTML='<div style="width:70px;height:70px;margin:0 auto 16px;border-radius:50%;background:rgba(46,158,91,.16);border:1px solid rgba(46,158,91,.45);display:flex;align-items:center;justify-content:center;font-size:34px;color:#5FD08A;"><i class="ti ti-check"></i></div>'
+      +'<div style="font-family:\'Playfair Display\',serif;font-size:24px;font-weight:800;color:#fff;margin-bottom:8px;">'+t('تم تأكيد طلبك!','Order confirmed!')+'</div>'
+      +'<div style="font-size:14px;color:#c9c0ad;line-height:1.7;margin-bottom:16px;">'+t('شكراً لك — يمكنك متابعة حالة طلبك لحظة بلحظة من هنا.','Thank you — you can follow your order status live right here.')+'</div>'
+      +'<div style="display:inline-flex;flex-wrap:wrap;gap:8px;justify-content:center;">'
+        +'<span style="background:rgba(201,168,76,.14);border:1px solid rgba(201,168,76,.4);color:#C9A84C;border-radius:20px;padding:7px 15px;font-size:13px;font-weight:700;">#'+o.id+'</span>'
+        +'<span style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:7px 15px;font-size:13px;">'+o.total+' '+t('د.ك','KWD')+'</span>'
+        +'<span style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:7px 15px;font-size:13px;">'+L(o.pay)+'</span>'
+      +'</div>'
+      +'<div style="margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
+        +'<a href="raf_orders.html" style="display:inline-flex;align-items:center;gap:7px;background:#C9A84C;color:#1C1606;border-radius:30px;padding:11px 22px;text-decoration:none;font-weight:700;font-size:14px;"><i class="ti ti-receipt"></i> '+t('طلباتي','My orders')+'</a>'
+        +'<a href="raf_homepage.html" style="display:inline-flex;align-items:center;gap:7px;background:transparent;color:#F3EFE5;border:1px solid rgba(201,168,76,.5);border-radius:30px;padding:11px 22px;text-decoration:none;font-weight:700;font-size:14px;"><i class="ti ti-building-store"></i> '+t('متابعة التسوق','Keep shopping')+'</a>'
+      +'</div>';
+    host.parentNode.insertBefore(b, host);
+    /* progress stepper reaches its final states on this page */
+    history.replaceState({}, '', 'raf_tracking.html?id='+encodeURIComponent(o.id));
+  }
 
   var oid=document.querySelector('.order-id'); if(oid)oid.innerHTML='<span class="order-id-lbl">'+t('رقم الطلب','Order No.')+'</span>#'+o.id;
   var si=document.getElementById('orderSearch'); if(si)si.value=o.id;

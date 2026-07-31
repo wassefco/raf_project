@@ -3,623 +3,334 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>رف — السلة والدفع</title>
+<title>رف — السلة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<style>
-:root{
-  --bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;
-  --gold:#C9A84C;--gold2:#A07828;
-  --black:#0A0A0A;--text:#0A0A0A;--text2:#555;--text3:#888;
-  --border:#D8D3C8;
-  --green:#2E7D32;--green-bg:#E8F5E9;
-  --red:#C62828;--red-bg:#FFEBEE;
-  --r:8px;--rl:12px;
-  --font:'Tajawal',sans-serif;
-  --fdisplay:'Playfair Display',serif;
-  --fen:'DM Sans',sans-serif;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-html{overflow-x:hidden;}
-body{background:var(--bg);color:var(--text);font-family:var(--font);max-width:100%;overflow-x:hidden;}
-
-/* NAV */
-nav{background:rgba(245,242,236,.97);border-bottom:1px solid rgba(201,168,76,.3);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;position:sticky;top:0;z-index:100;}
-.nav-logo{font-family:var(--fdisplay);font-size:28px;font-weight:900;color:var(--gold);text-decoration:none;}
-.nav-logo span{color:var(--text);font-size:11px;font-family:var(--fen);font-weight:300;letter-spacing:3px;display:block;margin-top:-6px;}
-.btn-ghost{padding:8px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
-.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
-.lang-btn{padding:7px 14px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--fen);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.5px;}
-.lang-btn:hover{border-color:var(--gold);color:var(--gold);}
-
-/* BREADCRUMB */
-.breadcrumb{padding:14px 40px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text3);border-bottom:1px solid var(--border);background:var(--card);}
-.breadcrumb a{color:var(--text3);text-decoration:none;}
-.breadcrumb a:hover{color:var(--gold);}
-
-/* LAYOUT */
-.layout{max-width:680px;margin:0 auto;padding:32px 40px;}
-
-/* SECTION */
-.section{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px;}
-.sec-head{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.sec-title{font-size:15px;font-weight:700;display:flex;align-items:center;gap:10px;}
-.sec-title i{font-size:19px;color:var(--gold);}
-
-/* CART ITEMS */
-.cart-item{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;gap:14px;align-items:flex-start;}
-.cart-item:last-child{border-bottom:none;}
-.item-img{width:72px;height:72px;border-radius:var(--r);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--border);flex-shrink:0;}
-.item-info{flex:1;}
-.item-store{font-size:11px;color:var(--gold2);margin-bottom:3px;}
-.item-name{font-size:14px;font-weight:500;margin-bottom:4px;}
-.item-meta{font-size:12px;color:var(--text3);margin-bottom:10px;}
-.item-bot{display:flex;align-items:center;gap:10px;}
-.qty-row{display:flex;align-items:center;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;}
-.qty-btn{width:32px;height:32px;border:none;background:var(--bg2);color:var(--text2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:background .15s;}
-.qty-btn:hover{background:var(--gold);color:var(--black);}
-.qty-num{width:38px;height:32px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border-right:1px solid var(--border);border-left:1px solid var(--border);}
-.rm-btn{padding:5px 10px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text3);font-size:12px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px;font-family:var(--font);}
-.rm-btn:hover{border-color:var(--red);color:var(--red);}
-.item-price{font-size:16px;font-weight:700;color:var(--gold);flex-shrink:0;font-family:var(--fen);align-self:center;}
-
-/* FORM FIELDS */
-.form-body{padding:20px;}
-.field{margin-bottom:16px;}
-.field:last-child{margin-bottom:0;}
-.field-lbl{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:7px;display:block;}
-.select-field{width:100%;padding:11px 16px;border:1px solid var(--border);border-radius:var(--r);background:var(--card);color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color .2s;cursor:pointer;appearance:auto;}
-.select-field:focus{border-color:var(--gold);}
-.addr-detail{margin-top:8px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);font-size:13px;color:var(--text2);line-height:1.7;display:none;}
-.addr-detail.show{display:block;}
-
-/* COUPON */
-.coupon-row{display:flex;gap:8px;}
-.coupon-input{flex:1;padding:11px 16px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color .2s;}
-.coupon-input:focus{border-color:var(--gold);}
-.coupon-input::placeholder{color:var(--text3);}
-.coupon-btn{padding:11px 20px;background:var(--black);color:var(--bg);border:none;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;white-space:nowrap;}
-.coupon-btn:hover{background:var(--gold);color:var(--black);}
-.coupon-ok{display:none;align-items:center;gap:8px;padding:10px 14px;background:var(--green-bg);border:1px solid rgba(46,125,50,.15);border-radius:var(--r);margin-top:10px;font-size:13px;color:var(--green);}
-.coupon-ok.show{display:flex;}
-
-/* PAYMENT */
-.pay-options{padding:16px 20px;display:flex;flex-direction:column;gap:10px;}
-.pay-opt{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;transition:all .2s;}
-.pay-opt:hover{border-color:var(--gold);}
-.pay-opt.on{border-color:var(--gold);background:rgba(201,168,76,.04);}
-.pay-radio{width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
-.pay-opt.on .pay-radio{border-color:var(--gold);background:var(--gold);}
-.pay-opt.on .pay-radio::after{content:'';width:6px;height:6px;border-radius:50%;background:white;}
-.pay-ico{width:40px;height:28px;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--text2);flex-shrink:0;}
-.pay-name{font-size:14px;font-weight:500;}
-.pay-sub{font-size:12px;color:var(--text3);margin-top:2px;}
-.later-btns{display:flex;gap:7px;margin-top:7px;}
-.later-btn{padding:5px 13px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text3);cursor:pointer;background:transparent;font-family:var(--font);transition:all .15s;}
-.later-btn.on,.later-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.06);}
-
-/* CONFIRM BTN */
-.confirm-row{padding:16px 20px;border-top:1px solid var(--border);}
-.btn-confirm{width:100%;padding:14px;background:var(--gold);border:none;border-radius:var(--r);color:var(--black);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
-.btn-confirm:hover{background:var(--gold2);}
-
-/* SUMMARY */
-.summary{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;position:sticky;top:84px;}
-.sum-head{padding:16px 20px;border-bottom:1px solid var(--border);}
-.sum-title{font-size:15px;font-weight:700;}
-.sum-items{padding:16px 20px;border-bottom:1px solid var(--border);}
-.sum-item{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
-.sum-item:last-child{margin-bottom:0;}
-.sum-img{width:44px;height:44px;border-radius:var(--r);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--border);flex-shrink:0;}
-.sum-name{font-size:12px;font-weight:500;flex:1;line-height:1.4;}
-.sum-meta{font-size:11px;color:var(--text3);margin-top:2px;}
-.sum-price{font-size:13px;font-weight:700;color:var(--gold);font-family:var(--fen);}
-.sum-calc{padding:16px 20px;border-bottom:1px solid var(--border);}
-.calc-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:8px;}
-.calc-row:last-child{margin-bottom:0;}
-.calc-discount{color:var(--green);}
-.calc-total{font-size:16px;font-weight:700;color:var(--text);padding-top:12px;margin-top:4px;border-top:1px solid var(--border);display:flex;justify-content:space-between;}
-.calc-total span:last-child{color:var(--gold);}
-.sum-btn-wrap{padding:16px 20px;}
-.btn-sum{width:100%;padding:14px;background:var(--black);border:none;border-radius:var(--r);color:var(--bg);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
-.btn-sum:hover{background:var(--gold);color:var(--black);}
-.secure{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;font-size:11px;color:var(--text3);}
-
-/* SUCCESS */
-.success-wrap{display:none;max-width:500px;margin:60px auto;padding:0 40px;}
-.success-box{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:48px 32px;text-align:center;}
-.success-ico{width:72px;height:72px;border-radius:50%;background:var(--green-bg);display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--green);margin:0 auto 20px;}
-.success-title{font-family:var(--fdisplay);font-size:26px;font-weight:700;margin-bottom:8px;}
-.success-sub{font-size:14px;color:var(--text3);margin-bottom:24px;line-height:1.7;}
-.success-num{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:14px 20px;margin-bottom:24px;font-size:14px;}
-.success-btns{display:flex;gap:10px;}
-.success-btns button{flex:1;padding:12px;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
-.sbtn-p{background:var(--gold);border:none;color:var(--black);}
-.sbtn-p:hover{background:var(--gold2);}
-.sbtn-g{background:transparent;border:1px solid var(--border);color:var(--text2);}
-.sbtn-g:hover{border-color:var(--gold);color:var(--gold);}
-
-footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px 40px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--text3);margin-top:40px;}
-
-/* ── GLOBAL MOBILE RESET ── */
-@media(max-width:768px){*{max-width:100%;}img,video,iframe{max-width:100%!important;height:auto;}table{max-width:100%;}}
-
-/* ===== RESPONSIVE ===== */
-@media(max-width:768px){
-  nav{padding:0 16px;}
-  .breadcrumb{padding:10px 16px;font-size:12px;}
-  .layout{padding:16px;}
-  .cart-item{flex-wrap:wrap;gap:10px;}
-  .item-img{width:60px;height:60px;font-size:22px;}
-  .item-price{flex:0 0 100%;text-align:left;}
-  .item-bot{flex-wrap:wrap;}
-  .coupon-row{flex-direction:column;}
-  .summary{position:static;margin-top:16px;}
-  footer{padding:16px;flex-direction:column;gap:8px;text-align:center;}
-}
-@media(max-width:480px){
-  .layout{padding:10px;}
-  .form-body{padding:14px;}
-  .pay-opt{padding:10px 12px;}
-  .success-wrap{padding:0 16px;}
-  .success-btns{flex-direction:column;}
-  .success-btns button{width:100%;}
-  .later-btns{flex-wrap:wrap;}
-}
-
-  /* ===== APP BOTTOM NAV ===== */
-  .app-bnav{display:none;}
-  @media (max-width:1024px), (max-height:500px){
-    body{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))!important;}
-    footer{display:none!important;}
-    .app-bnav{display:flex;position:fixed;top:auto;bottom:0;left:0;right:0;height:56px;background:#fff;border-top:1px solid #e8e4dc;box-shadow:0 -2px 16px rgba(0,0,0,.06);z-index:998;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);align-items:stretch;}
-    .bnav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#aaa;font-size:10px;font-family:'Tajawal',sans-serif;font-weight:500;transition:color .15s;border:none;background:transparent;cursor:pointer;padding:0;}
-    .bnav-tab i{font-size:22px;line-height:1;}
-    .bnav-tab.on{color:#C9A84C;}
-    .bnav-cart{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;text-decoration:none;font-size:10px;font-family:'Tajawal',sans-serif;color:#aaa;padding-bottom:4px;}
-    .bnav-cart-ring{width:44px;height:44px;border-radius:50%;background:#C9A84C;display:flex;align-items:center;justify-content:center;font-size:20px;color:#0A0A0A;margin-top:-14px;box-shadow:0 4px 14px rgba(201,168,76,.3);}
-    .bnav-cart.on .bnav-cart-ring{background:#A07828;}
-    nav a.btn-ghost,nav a.btn-gold,nav .btn-ghost,nav .btn-gold{display:none!important;}
-  }
-</style>
-<link rel="stylesheet" href="raf_header.css">
+<link rel="stylesheet" href="raf_checkout.css">
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
-<link rel="stylesheet" href="raf_theme.css">
 <script src="raf_features.js"></script>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <div style="display:flex;align-items:center;gap:8px;">
-    <button class="lang-btn" onclick="toggleLang()" data-ar="EN" data-en="ع">EN</button>
-    <a href="raf_homepage.html" class="btn-ghost"><i class="ti ti-arrow-right"></i> <span data-ar="متابعة التسوق" data-en="Continue Shopping">متابعة التسوق</span></a>
-  </div>
-  <a href="raf_homepage.html" class="nav-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace" class="brand-logo"></a>
-</nav>
+<header class="co-head">
+  <button type="button" class="co-back" onclick="goBack()"><i class="ti ti-arrow-right"></i> <span data-ar="متابعة التسوق" data-en="Continue shopping">متابعة التسوق</span></button>
+  <div class="co-title" data-ar="سلة التسوق" data-en="Shopping Cart">سلة التسوق</div>
+  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
+</header>
 
-<!-- BREADCRUMB -->
-<div class="breadcrumb" id="breadcrumb">
-  <a href="raf_homepage.html">الرئيسية</a>
-  <i class="ti ti-chevron-left"></i>
-  <span style="color:var(--text);">السلة والدفع</span>
+<!-- PROGRESS: Cart → Address → Payment → Confirmation → Tracking -->
+<div class="steps" id="stepBar">
+  <div class="steps-inner">
+    <div class="step on"><div class="step-dot">1</div><div class="step-lbl" data-ar="السلة" data-en="Cart">السلة</div><div class="step-bar"></div></div>
+    <div class="step"><div class="step-dot">2</div><div class="step-lbl" data-ar="العنوان" data-en="Address">العنوان</div><div class="step-bar"></div></div>
+    <div class="step"><div class="step-dot">3</div><div class="step-lbl" data-ar="الدفع" data-en="Payment">الدفع</div><div class="step-bar"></div></div>
+    <div class="step"><div class="step-dot">4</div><div class="step-lbl" data-ar="التأكيد" data-en="Confirmation">التأكيد</div><div class="step-bar"></div></div>
+    <div class="step"><div class="step-dot">5</div><div class="step-lbl" data-ar="التتبع" data-en="Tracking">التتبع</div></div>
+  </div>
 </div>
 
-<!-- MAIN LAYOUT -->
-<div class="layout" id="main-layout">
-
-  <div>
-
-    <!-- 1. CART ITEMS -->
-    <div class="section">
-      <div class="sec-head">
-        <div class="sec-title"><i class="ti ti-shopping-cart"></i> السلة</div>
-        <span style="font-size:12px;color:var(--text3);" id="cart-count">3 منتجات</span>
-      </div>
-      <!-- cart rows rendered from the shared RAF cart (raf_data.js) -->
-      <div id="cartItems"></div>
-      <div id="cart-empty" style="display:none;text-align:center;padding:40px 20px;color:var(--text3);">
-        <i class="ti ti-shopping-cart-off" style="font-size:44px;color:var(--gold);display:block;margin-bottom:12px;"></i>
-        <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;" data-ar="سلتك فارغة" data-en="Your cart is empty">سلتك فارغة</div>
-        <a href="raf_homepage.html" style="color:var(--gold2);text-decoration:none;font-weight:600;" data-ar="تصفّح المنتجات" data-en="Browse products">تصفّح المنتجات</a>
-      </div>
+<main class="co-wrap">
+  <!-- EMPTY STATE -->
+  <div class="empty" id="cartEmpty" style="display:none;">
+    <div class="empty-ic"><i class="ti ti-shopping-cart-off"></i></div>
+    <div class="empty-t" data-ar="سلتك فارغة" data-en="Your cart is empty">سلتك فارغة</div>
+    <div class="empty-s" data-ar="لم تُضِف أي منتج بعد. اكتشف أفضل المحلات والعروض وابدأ التسوق الآن." data-en="You haven't added anything yet. Explore the best stores and offers and start shopping.">لم تُضِف أي منتج بعد. اكتشف أفضل المحلات والعروض وابدأ التسوق الآن.</div>
+    <div class="empty-actions">
+      <a href="raf_homepage.html" class="btn btn-gold"><i class="ti ti-building-store"></i> <span data-ar="تصفّح المحلات" data-en="Browse stores">تصفّح المحلات</span></a>
+      <a href="raf_wishlist.html" class="btn btn-ghost"><i class="ti ti-heart"></i> <span data-ar="المفضلة" data-en="Wishlist">المفضلة</span></a>
     </div>
-
-    <!-- 2. ADDRESS -->
-    <div class="section">
-      <div class="sec-head">
-        <div class="sec-title"><i class="ti ti-map-pin"></i> عنوان التوصيل</div>
-      </div>
-      <div class="form-body">
-        <div class="field">
-          <label class="field-lbl">اختر العنوان</label>
-          <select class="select-field" id="addrSelect" onchange="showAddr(this)">
-            <option value="">— اختر عنواناً —</option>
-            <!-- populated from localStorage by JS -->
-            <option value="__new">＋ إضافة عنوان جديد</option>
-          </select>
-          <div class="addr-detail" id="addr-detail"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 3. COUPON -->
-    <div class="section">
-      <div class="sec-head">
-        <div class="sec-title"><i class="ti ti-discount"></i> كوبون الخصم</div>
-        <span style="font-size:12px;color:var(--text3);">اختياري</span>
-      </div>
-      <div class="form-body">
-        <div class="coupon-row">
-          <input type="text" class="coupon-input" placeholder="أدخل رمز الكوبون" id="couponInput">
-          <button class="coupon-btn" onclick="applyCoupon()">تطبيق</button>
-        </div>
-        <div class="coupon-ok" id="couponOk">
-          <i class="ti ti-circle-check" style="font-size:18px;"></i>
-          تم تطبيق الكوبون — خصم 10% على الطلب
-        </div>
-      </div>
-    </div>
-
-    <!-- 4. INVOICE DETAILS -->
-    <div class="section">
-      <div class="sec-head">
-        <div class="sec-title"><i class="ti ti-receipt"></i> تفاصيل الفاتورة</div>
-      </div>
-      <div class="form-body">
-        <div style="display:flex;flex-direction:column;gap:0;">
-          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;">
-            <span style="color:var(--text2);" id="inv-count-lbl">المجموع (3 منتجات)</span>
-            <span style="font-weight:500;font-family:var(--fen);" id="inv-sub">75.500 د.ك</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;">
-            <span style="color:var(--text3);">التوصيل</span>
-            <span style="color:var(--green);font-weight:500;">مجاني</span>
-          </div>
-          <div id="inv-disc-row" style="display:none;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;">
-            <span style="color:var(--green);">خصم الكوبون</span>
-            <span style="color:var(--green);font-weight:500;">- 7.550 د.ك</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;padding:14px 0;font-size:16px;font-weight:700;">
-            <span>الإجمالي</span>
-            <span style="color:var(--gold);font-family:var(--fen);" id="inv-total">75.500 د.ك</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 5. PAYMENT -->
-    <div class="section">
-      <div class="sec-head">
-        <div class="sec-title"><i class="ti ti-credit-card"></i> طريقة الدفع</div>
-      </div>
-      <div class="pay-options">
-        <div class="pay-opt on" onclick="selPay(this)">
-          <div class="pay-radio"></div>
-          <div class="pay-ico"><i class="ti ti-cash"></i></div>
-          <div>
-            <div class="pay-name">الدفع عند الاستلام</div>
-            <div class="pay-sub">نقداً لدى وصول الطلب</div>
-          </div>
-        </div>
-        <div class="pay-opt" onclick="selPay(this)">
-          <div class="pay-radio"></div>
-          <div class="pay-ico" style="background:#1B4F8A;border-color:#1B4F8A;">
-            <span style="font-size:11px;font-weight:800;color:white;font-family:var(--fen);">K</span>
-          </div>
-          <div>
-            <div class="pay-name">K-Net</div>
-            <div class="pay-sub">بطاقة الدفع الكويتية</div>
-          </div>
-        </div>
-        <div class="pay-opt" onclick="selPay(this)">
-          <div class="pay-radio"></div>
-          <div class="pay-ico"><i class="ti ti-calendar-due"></i></div>
-          <div style="flex:1;">
-            <div class="pay-name">اشتري الآن وادفع لاحقاً</div>
-            <div class="pay-sub">قسّم دفعتك بدون فوائد</div>
-            <div class="later-btns">
-              <button class="later-btn on" onclick="selLater(this,event)">Tabby</button>
-              <button class="later-btn" onclick="selLater(this,event)">Tamara</button>
-              <button class="later-btn" onclick="selLater(this,event)">Taly</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 5. CONFIRM BTN -->
-    <div class="section">
-      <div class="confirm-row">
-        <button class="btn-confirm" onclick="confirmOrder()">
-          <i class="ti ti-lock"></i> تأكيد الطلب — 75.500 د.ك
-        </button>
-        <div class="secure" style="margin-top:12px;">
-          <i class="ti ti-shield-check" style="color:var(--green);"></i>
-          دفع آمن ومحمي
-        </div>
-      </div>
-    </div>
-
   </div>
 
+  <div class="co-grid" id="cartGrid">
+    <!-- LEFT -->
+    <div>
+      <div id="stockAlert"></div>
+      <div id="storeGroups"></div>
 
-</div>
+      <!-- CROSS-SELL (same stores) -->
+      <div class="panel" id="xsPanel" style="display:none;">
+        <div class="panel-h"><i class="ti ti-sparkles"></i> <span data-ar="أضف من نفس المتجر" data-en="Add from the same store">أضف من نفس المتجر</span></div>
+        <div class="panel-b"><div class="xs-track" id="xsTrack"></div></div>
+      </div>
 
-<!-- SUCCESS -->
-<div class="success-wrap" id="success">
-  <div class="success-box">
-    <div class="success-ico"><i class="ti ti-check"></i></div>
-    <div class="success-title">تم تأكيد طلبك!</div>
-    <p class="success-sub">شكراً لك — سيتم تجهيز طلبك وإرسال تحديثات عبر واتساب.</p>
-    <div class="success-num">
-      رقم الطلب: <strong>#ORD-1285</strong><br>
-      <span style="font-size:12px;color:var(--text3);margin-top:4px;display:block;">الإجمالي: 75.500 د.ك — الدفع عند الاستلام</span>
+      <!-- COUPON -->
+      <div class="panel">
+        <div class="panel-h"><i class="ti ti-discount"></i> <span data-ar="كوبون الخصم" data-en="Discount coupon">كوبون الخصم</span><span class="side" data-ar="اختياري" data-en="Optional">اختياري</span></div>
+        <div class="panel-b">
+          <div class="coupon">
+            <input id="couponInput" type="text" data-ar-ph="أدخل رمز الكوبون" data-en-ph="Enter coupon code" placeholder="أدخل رمز الكوبون">
+            <button onclick="applyCoupon()" data-ar="تطبيق" data-en="Apply">تطبيق</button>
+          </div>
+          <div class="msg" id="couponMsg"></div>
+        </div>
+      </div>
+
+      <!-- NOTES -->
+      <div class="panel">
+        <div class="panel-h"><i class="ti ti-note"></i> <span data-ar="ملاحظات الطلب" data-en="Order notes">ملاحظات الطلب</span><span class="side" data-ar="اختياري" data-en="Optional">اختياري</span></div>
+        <div class="panel-b">
+          <textarea class="notes" id="orderNotes" oninput="saveNotes()" data-ar-ph="أي تعليمات خاصة بالطلب أو التغليف…" data-en-ph="Any special instructions for your order or packaging…" placeholder="أي تعليمات خاصة بالطلب أو التغليف…"></textarea>
+        </div>
+      </div>
     </div>
-    <div class="success-btns">
-      <button class="sbtn-p" onclick="window.location='raf_tracking.html'">تتبع الطلب</button>
-      <button class="sbtn-g" onclick="window.location='raf_homepage.html'">العودة للتسوق</button>
+
+    <!-- RIGHT — sticky invoice summary -->
+    <div class="summary">
+      <div class="panel">
+        <div class="panel-h"><i class="ti ti-receipt"></i> <span data-ar="تفاصيل الفاتورة" data-en="Invoice details">تفاصيل الفاتورة</span></div>
+        <div class="panel-b" id="sumBody"></div>
+        <div class="panel-b" style="border-top:1px solid var(--border);padding-top:14px;">
+          <button class="btn btn-gold btn-block" id="checkoutBtn" onclick="goCheckout()">
+            <i class="ti ti-lock"></i> <span data-ar="متابعة للدفع" data-en="Proceed to checkout">متابعة للدفع</span>
+          </button>
+          <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:12px;color:var(--text3);">
+            <i class="ti ti-shield-check" style="color:var(--green);"></i>
+            <span data-ar="دفع آمن ومحمي بالكامل" data-en="Secure, fully protected payment">دفع آمن ومحمي بالكامل</span>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+</main>
+
+<!-- VARIANT EDIT SHEET -->
+<div class="ve-back" id="veSheet" onclick="if(event.target===this)closeVE()">
+  <div class="ve-card" role="dialog" aria-modal="true">
+    <div class="ve-h"><h3 data-ar="تعديل الخيارات" data-en="Edit options">تعديل الخيارات</h3><button class="ve-x" onclick="closeVE()" aria-label="close"><i class="ti ti-x"></i></button></div>
+    <div class="ve-b" id="veBody"></div>
+    <div class="ve-f"><button class="btn btn-gold btn-block" id="veSave" onclick="saveVE()" data-ar="حفظ التغييرات" data-en="Save changes">حفظ التغييرات</button></div>
   </div>
 </div>
 
 <footer>
-  <div>جميع الحقوق محفوظة © 2026 رف</div>
-  <a href="raf_homepage.html"><img src="assets/branding/logo-light.svg" alt="RAF Marketplace" class="brand-logo-foot"></a>
+  <div class="foot-in">
+    <a href="raf_homepage.html" class="foot-logo"><img src="assets/branding/logo-light.svg" alt="RAF Marketplace"></a>
+    <div class="foot-txt" data-ar="جميع الحقوق محفوظة © 2026 رف" data-en="All rights reserved © 2026 RAF">جميع الحقوق محفوظة © 2026 رف</div>
+    <div class="foot-links">
+      <a href="raf_returns.html" data-ar="سياسة الإرجاع" data-en="Returns">سياسة الإرجاع</a>
+      <a href="raf_privacy.html" data-ar="الخصوصية" data-en="Privacy">الخصوصية</a>
+      <a href="raf_terms.html" data-ar="الشروط" data-en="Terms">الشروط</a>
+    </div>
+  </div>
 </footer>
 
-<script src="raf_data.js"></script>
-<script>
-  function T(ar,en){ return (document.getElementById('htmlRoot').lang==='en') ? en : ar; }
-
-  /* ---- Render cart rows from the shared RAF cart ---- */
-  function cartRowHTML(l){
-    var meta = Object.keys(l.variant||{}).map(function(k){ return k+': '+l.variant[k]; }).join(' — ');
-    return '<div class="cart-item" data-key="'+l.key+'" data-unit="'+l.price+'">'
-      + '<div class="item-img"><i class="ti '+(l.ic||'ti-box')+'"></i></div>'
-      + '<div class="item-info">'
-        + (l.store ? '<div class="item-store">'+RAFShop.L(l.store)+'</div>' : '')
-        + '<div class="item-name">'+RAFShop.L(l.name)+'</div>'
-        + (meta ? '<div class="item-meta">'+meta+'</div>' : '')
-        + '<div class="item-bot"><div class="qty-row">'
-          + '<button class="qty-btn" onclick="chQty(this,-1)"><i class="ti ti-minus" style="font-size:12px;"></i></button>'
-          + '<div class="qty-num">'+l.qty+'</div>'
-          + '<button class="qty-btn" onclick="chQty(this,1)"><i class="ti ti-plus" style="font-size:12px;"></i></button>'
-        + '</div><button class="rm-btn" onclick="rmItem(this)"><i class="ti ti-trash" style="font-size:12px;"></i> '+T('حذف','Remove')+'</button></div>'
-      + '</div>'
-      + '<div class="item-price">'+(parseFloat(l.price)*l.qty).toFixed(3)+'</div></div>';
-  }
-  function renderCart(){
-    var box = document.getElementById('cartItems');
-    var items = RAFShop.Cart.items();
-    box.innerHTML = items.map(cartRowHTML).join('');
-    recalcTotal();
-  }
-
-  /* ---- Qty change: sync shared cart + row + totals ---- */
-  function chQty(btn, d) {
-    const row   = btn.closest('.cart-item');
-    const qNum  = row.querySelector('.qty-num');
-    const priceEl = row.querySelector('.item-price');
-    const unit  = parseFloat(row.dataset.unit);
-
-    let qty = parseInt(qNum.textContent) + d;
-    if (qty < 1) qty = 1;
-    if (row.dataset.key) RAFShop.Cart.setQty(row.dataset.key, qty);
-    qNum.textContent = qty;
-    priceEl.textContent = (unit * qty).toFixed(3);
-    recalcTotal();
-  }
-
-  /* ---- Remove item ---- */
-  function rmItem(btn) {
-    const item = btn.closest('.cart-item');
-    if (item.dataset.key) RAFShop.Cart.remove(item.dataset.key);
-    // Animate out
-    item.style.transition = 'opacity .25s, max-height .3s';
-    item.style.overflow = 'hidden';
-    item.style.opacity  = '0';
-    item.style.maxHeight = item.offsetHeight + 'px';
-    setTimeout(() => {
-      item.style.maxHeight = '0';
-      item.style.padding   = '0';
-      item.style.border    = 'none';
-    }, 50);
-    setTimeout(() => {
-      item.remove();
-      recalcTotal();
-    }, 320);
-  }
-
-  /* ---- Recalculate totals ---- */
-  let couponApplied = false;
-  function recalcTotal() {
-    const items = document.querySelectorAll('.cart-item');
-    let sub = 0;
-    items.forEach(item => {
-      const priceEl = item.querySelector('.item-price');
-      sub += parseFloat(priceEl.textContent) || 0;
-    });
-
-    const count = items.length;
-    // Update count label
-    const countEl = document.getElementById('cart-count');
-    if (countEl) countEl.textContent = count + ' منتجات';
-    const invCount = document.getElementById('inv-count-lbl');
-    if (invCount) invCount.textContent = 'المجموع (' + count + ' منتجات)';
-
-    // Update subtotal
-    const invSub = document.getElementById('inv-sub');
-    if (invSub) invSub.textContent = sub.toFixed(3) + ' د.ك';
-
-    // Apply coupon discount if active
-    let total = sub;
-    if (couponApplied) {
-      total = sub * 0.9;
-      const discRow = document.getElementById('inv-disc-row');
-      if (discRow) {
-        discRow.style.display = 'flex';
-        const discVal = discRow.querySelector('span:last-child');
-        if (discVal) discVal.textContent = '- ' + (sub * 0.1).toFixed(3) + ' د.ك';
-      }
-    }
-
-    // Update final total
-    const invTotal = document.getElementById('inv-total');
-    if (invTotal) invTotal.textContent = total.toFixed(3) + ' د.ك';
-
-    // Update confirm button
-    const confirmBtn = document.querySelector('.btn-confirm');
-    if (confirmBtn) {
-      if (count === 0) {
-        confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<i class="ti ti-shopping-cart"></i> السلة فارغة';
-        confirmBtn.style.background = 'var(--border)';
-      } else {
-        confirmBtn.disabled = false;
-        confirmBtn.style.background = '';
-        confirmBtn.innerHTML = '<i class="ti ti-lock"></i> تأكيد الطلب — ' + total.toFixed(3) + ' د.ك';
-      }
-    }
-
-    // Show empty state if needed
-    const emptyState = document.getElementById('cart-empty');
-    if (emptyState) emptyState.style.display = count === 0 ? 'block' : 'none';
-  }
-
-  /* ---- Address ---- */
-  function loadAddrOptions() {
-    const sel = document.getElementById('addrSelect');
-    if (!sel) return;
-    try {
-      const list = JSON.parse(localStorage.getItem('raf_addresses')) || [];
-      const ICONS = {home:'🏠',work:'💼',family:'👨‍👩‍👧',other:'📍'};
-      // Remove all except last option (+ add new)
-      while (sel.options.length > 1) sel.remove(1);
-      // Insert addresses before the "add new" option
-      const addNewOpt = sel.options[0]; // placeholder "—"
-      list.forEach((addr,i) => {
-        const lbl = `${ICONS[addr.type]||'📍'} ${addr.area}، ${addr.street}${addr.isDefault?' (افتراضي)':''}`;
-        const opt = new Option(lbl, addr.id);
-        if (addr.isDefault) opt.selected = true;
-        sel.add(opt, sel.options[sel.length - 1] < 0 ? undefined : undefined);
-        // insert before last option "add new"
-        sel.insertBefore(opt, sel.options[sel.options.length - 1]);
-      });
-      // Pre-show default
-      if (sel.value && sel.value !== '__new' && sel.value !== '') showAddr(sel);
-    } catch(e) {}
-  }
-
-  function showAddr(sel) {
-    const detail = document.getElementById('addr-detail');
-    if (sel.value === '__new') {
-      window.location = 'raf_address.html?from=cart';
-      return;
-    }
-    if (!sel.value) { detail.classList.remove('show'); return; }
-    try {
-      const list = JSON.parse(localStorage.getItem('raf_addresses')) || [];
-      const addr = list.find(a => a.id === sel.value);
-      if (addr) {
-        detail.textContent = `${addr.area}، ق${addr.block}، ${addr.street}${addr.building?'، م'+addr.building:''}${addr.floor?'، ط'+addr.floor:''}${addr.apartment?'، ش'+addr.apartment:''}\n${addr.phone}${addr.notes?'\n'+addr.notes:''}`;
-        detail.classList.add('show');
-      }
-    } catch(e) {
-      detail.classList.remove('show');
-    }
-  }
-
-  /* ---- Coupon ---- */
-  function applyCoupon() {
-    const v = document.getElementById('couponInput').value.trim().toUpperCase();
-    const validCodes = ['WELCOME20', 'FLASH10', 'VIP30', 'RAMADAN25'];
-    if (!v) return;
-    if (validCodes.includes(v) || v.length >= 4) {
-      couponApplied = true;
-      document.getElementById('couponOk').classList.add('show');
-      document.getElementById('inv-disc-row').style.display = 'flex';
-      recalcTotal();
-    } else {
-      document.getElementById('couponOk').classList.remove('show');
-    }
-  }
-
-  /* ---- Payment ---- */
-  function selPay(el) {
-    document.querySelectorAll('.pay-opt').forEach(p => p.classList.remove('on'));
-    el.classList.add('on');
-  }
-
-  function selLater(btn, e) {
-    e.stopPropagation();
-    document.querySelectorAll('.later-btn').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-  }
-
-  /* ---- Init ---- */
-  document.addEventListener('DOMContentLoaded', function(){ renderCart(); loadAddrOptions(); });
-
-  /* ---- Confirm: create a REAL order, clear cart, show success ---- */
-  function confirmOrder() {
-    if (!RAFShop.Cart.count()) return;
-    // selected payment method
-    var payEl = document.querySelector('.pay-opt.on .pay-name');
-    var payName = payEl ? payEl.textContent.trim() : 'الدفع عند الاستلام';
-    // selected address (optional)
-    var addr = null;
-    try {
-      var sel = document.getElementById('addrSelect');
-      if (sel && sel.value && sel.value !== '__new') {
-        var list = JSON.parse(localStorage.getItem('raf_addresses')) || [];
-        var a = list.find(function(x){ return x.id === sel.value; });
-        if (a) { var s = a.area+'، '+a.street+(a.building?'، م'+a.building:''); addr = { ar: s, en: s }; }
-      }
-    } catch(e){}
-
-    var order = RAFShop.Orders.create({ pay: { ar: payName, en: payName }, addr: addr });
-    if (!order) return;
-    RAFShop.Cart.clear();
-    RAFShop.Cart.badge();
-
-    // fill success panel with the real order
-    var numEl = document.querySelector('.success-num strong'); if (numEl) numEl.textContent = '#' + order.id;
-    var subEl = document.querySelector('.success-num span'); if (subEl) subEl.textContent = T('الإجمالي: ','Total: ') + order.total + T(' د.ك — ',' KWD — ') + payName;
-    var trackBtn = document.querySelector('.success-btns .sbtn-p'); if (trackBtn) trackBtn.setAttribute('onclick', "window.location='raf_tracking.html?id=" + order.id + "'");
-
-    document.getElementById('main-layout').style.display = 'none';
-    var bc = document.getElementById('breadcrumb'); if (bc) bc.style.display = 'none';
-    document.getElementById('success').style.display = 'block';
-    window.scrollTo(0, 0);
-  }
-  /* LANG */
-  function toggleLang(){
-    const r=document.getElementById('htmlRoot');
-    const isAr=r.lang==='ar';
-    r.lang=isAr?'en':'ar';r.dir=isAr?'ltr':'rtl';
-    localStorage.setItem('raf_lang',isAr?'en':'ar');
-    applyLang();
-  }
-  function applyLang(){
-    const en=document.getElementById('htmlRoot').lang==='en';
-    document.querySelectorAll('[data-ar]').forEach(el=>{el.textContent=en?el.dataset.en:el.dataset.ar;});
-  }
-  (function(){const l=localStorage.getItem('raf_lang');if(l){const r=document.getElementById('htmlRoot');r.lang=l;r.dir=l==='en'?'ltr':'rtl';}applyLang();})();
-</script>
-
-<!-- MOBILE APP BOTTOM NAV -->
 <nav class="app-bnav">
   <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
-  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفح" data-en="Browse">تصفح</span></a>
+  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفّح" data-en="Browse">تصفّح</span></a>
   <a href="raf_cart.html" class="bnav-cart on"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
   <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
-<script src="raf_topbar.js"></script>
-<script src="raf_nav.js"></script>
-<script src="raf_search.js"></script>
+
+<script src="raf_data.js"></script>
+<script src="raf_card.js"></script>
+<script src="raf_checkout.js"></script>
+<script>
+/* ============================================================
+   CART (step 1) — items · cross-sell · coupon · notes · summary
+   Cart state is persisted in the shared RAF data layer, so it
+   survives refresh and login.
+   ============================================================ */
+(function(){
+  var en = RAFCO.en, T = RAFCO.T, L = RAFCO.L, money = RAFCO.money;
+  /* Arabic count agreement: 1 منتج · 2 منتجان · 3–10 منتجات · 11+ منتجاً */
+  function plural(n){ return n===1?'منتج':(n===2?'منتجان':(n<=10?'منتجات':'منتجاً')); }
+
+  /* ---------- render ---------- */
+  function render(){
+    var items = RAFShop.Cart.items();
+    document.getElementById('cartEmpty').style.display = items.length ? 'none' : '';
+    document.getElementById('cartGrid').style.display  = items.length ? '' : 'none';
+    document.getElementById('stepBar').style.display   = items.length ? '' : 'none';
+    if(!items.length){ RAFShop.Cart.badge(); return; }
+
+    /* group by store (item 12) */
+    var groups = RAFCO.groupByStore(items);
+    document.getElementById('storeGroups').innerHTML = groups.map(function(g){
+      var sub = g.items.reduce(function(s,l){ return s + RAFCO.price(l)*l.qty; },0);
+      var ship = RAFCO.shipFor(sub);
+      return '<div class="store-group">'
+        + '<div class="store-bar"><div class="ic"><i class="ti ti-building-store"></i></div><b>'+g.name+'</b>'
+          + '<div class="store-ship">'
+            + (ship===0 ? '<span class="free">'+T('توصيل مجاني','Free delivery')+'</span>'
+                        : T('التوصيل ','Delivery ')+money(ship)+' '+T('د.ك','KWD')+' · '+T('مجاني فوق ','free over ')+money(RAFCO.FREE_OVER))
+            + '<br><i class="ti ti-clock" style="font-size:11px"></i> '+T('يصل خلال 24–48 ساعة','Arrives in 24–48h')
+          + '</div></div>'
+        + g.items.map(rowHTML).join('')
+        + '</div>';
+    }).join('');
+
+    renderSummary(items);
+    renderCrossSell(groups);
+    RAFShop.Cart.badge();
+    RAFCO.applyLang();
+  }
+
+  function rowHTML(l){
+    var p = RAFCO.catalogFor(l.id);
+    var out = RAFCO.isOOS(l);
+    var vars = Object.keys(l.variant||{});
+    return '<div class="ci" data-key="'+l.key+'">'
+      + '<div class="ci-img"><i class="ti '+(l.ic||'ti-box')+'"></i></div>'
+      + '<div class="ci-main">'
+        + '<div class="ci-name">'+L(l.name)+'</div>'
+        + (out ? '<div class="ci-oos"><i class="ti ti-ban"></i> '+T('غير متوفر حالياً','Currently unavailable')+'</div>' : '')
+        + (vars.length
+            ? '<div class="ci-vars">'+vars.map(function(k){
+                return '<span class="ci-var" onclick="editVariants(\''+l.key+'\')">'+k+': <b>'+l.variant[k]+'</b> <i class="ti ti-pencil"></i></span>';
+              }).join('')+'</div>'
+            : (p && p.variants ? '<div class="ci-vars"><span class="ci-var" onclick="editVariants(\''+l.key+'\')"><i class="ti ti-plus"></i> '+T('اختر الخيارات','Choose options')+'</span></div>' : ''))
+        + '<div class="ci-bot">'
+          + '<div class="qty"><button onclick="chQty(\''+l.key+'\',-1)" aria-label="-"><i class="ti ti-minus"></i></button>'
+          + '<span>'+l.qty+'</span>'
+          + '<button onclick="chQty(\''+l.key+'\',1)" aria-label="+"><i class="ti ti-plus"></i></button></div>'
+          + '<button class="ci-rm" onclick="removeLine(\''+l.key+'\')"><i class="ti ti-trash"></i> '+T('حذف','Remove')+'</button>'
+          + '<div class="ci-price"><b>'+money(RAFCO.price(l)*l.qty)+' <small>'+T('د.ك','KWD')+'</small></b>'
+            + (l.qty>1 ? '<small>'+money(RAFCO.price(l))+' × '+l.qty+'</small>' : '') + '</div>'
+        + '</div></div></div>';
+  }
+
+  /* ---------- summary (live) ---------- */
+  function renderSummary(items){
+    var t = RAFCO.totals(items);
+    var oos = items.filter(RAFCO.isOOS).length;
+    document.getElementById('sumBody').innerHTML =
+        '<div class="sum-row"><span>'+T('المجموع ('+t.count+' '+plural(t.count)+')','Subtotal ('+t.count+' item'+(t.count===1?'':'s')+')')+'</span><span>'+money(t.sub)+' '+T('د.ك','KWD')+'</span></div>'
+      + '<div class="sum-row"><span>'+T('التوصيل','Delivery')+'</span>'
+        + (t.ship===0 ? '<span class="free">'+T('مجاني','Free')+'</span>' : '<span>'+money(t.ship)+' '+T('د.ك','KWD')+'</span>')+'</div>'
+      + (t.disc>0 ? '<div class="sum-row disc"><span>'+T('خصم الكوبون','Coupon discount')+'</span><span>− '+money(t.disc)+' '+T('د.ك','KWD')+'</span></div>' : '')
+      + '<div class="sum-row total"><span>'+T('الإجمالي','Total')+'</span><b>'+money(t.total)+' '+T('د.ك','KWD')+'</b></div>';
+
+    /* stock validation surfaced before checkout (item 11) */
+    document.getElementById('stockAlert').innerHTML = oos
+      ? '<div class="alert warn"><i class="ti ti-alert-triangle"></i><div>'+T('يوجد '+oos+' منتج غير متوفر في سلتك. يرجى حذفه للمتابعة إلى الدفع.','There '+(oos===1?'is':'are')+' '+oos+' unavailable product'+(oos===1?'':'s')+' in your cart. Please remove '+(oos===1?'it':'them')+' to continue.')+'</div></div>'
+      : '';
+    var btn = document.getElementById('checkoutBtn');
+    btn.disabled = oos>0;
+  }
+
+  /* ---------- cross-sell from the same stores ---------- */
+  function renderCrossSell(groups){
+    if(!window.RAFCard) return;
+    var inCart = {}; RAFShop.Cart.items().forEach(function(l){ inCart[l.id]=1; });
+    var names = groups.map(function(g){ return g.name; });
+    var recs = RAFCO.CATALOG.filter(function(p){
+      return !inCart[p.id] && names.indexOf(L(p.store))>-1;
+    }).slice(0,8);
+    if(!recs.length){ document.getElementById('xsPanel').style.display='none'; return; }
+    document.getElementById('xsPanel').style.display='';
+    document.getElementById('xsTrack').innerHTML = recs.map(function(p){
+      return '<div class="xs">'+RAFCard.product(p,{rating:false})+'</div>';
+    }).join('');
+  }
+
+  /* ---------- actions ---------- */
+  window.chQty = function(key,d){
+    var l = RAFShop.Cart.line(key); if(!l) return;
+    if(l.qty+d<=0){ removeLine(key); return; }
+    RAFShop.Cart.setQty(key, l.qty+d); render();
+  };
+  window.removeLine = function(key){
+    var l = RAFShop.Cart.line(key); if(!l) return;
+    var backup = JSON.parse(JSON.stringify(l));
+    RAFShop.Cart.remove(key); render();
+    RAFShop.toast(T('تم حذف المنتج من السلة','Item removed from cart'), { icon:'ti-trash', undo:function(){
+      var a = RAFShop.Cart.read(); a.push(backup); RAFShop.Cart.write(a); render();
+    }});
+  };
+
+  /* ---------- edit size/color inside the cart (item 4) ---------- */
+  var veKey=null, veSel={};
+  window.editVariants = function(key){
+    var l = RAFShop.Cart.line(key); if(!l) return;
+    var p = RAFCO.catalogFor(l.id);
+    if(!p || !p.variants || !p.variants.length){
+      RAFShop.toast(T('لا توجد خيارات لهذا المنتج','This product has no options'), {icon:'ti-info-circle'}); return;
+    }
+    veKey=key; veSel={};
+    document.getElementById('veBody').innerHTML = p.variants.map(function(g,gi){
+      var cur = (l.variant||{})[L(g.label)];
+      return '<div class="ve-g"><div class="ve-l">'+L(g.label)+'</div><div class="ve-opts">'
+        + g.options.map(function(o){
+            var lbl = L(o.label||o), on = (cur===lbl);
+            if(on) veSel['g'+gi]=String(o.v);
+            return '<button class="ve-o'+(on?' on':'')+'" onclick="vePick('+gi+',this,\''+String(o.v).replace(/'/g,"\\'")+'\')">'+lbl+'</button>';
+          }).join('')
+        + '</div></div>';
+    }).join('');
+    document.getElementById('veSheet').classList.add('show');
+  };
+  window.vePick = function(gi,btn,v){
+    btn.parentElement.querySelectorAll('.ve-o').forEach(function(b){ b.classList.remove('on'); });
+    btn.classList.add('on'); veSel['g'+gi]=v;
+  };
+  window.closeVE = function(){ document.getElementById('veSheet').classList.remove('show'); };
+  window.saveVE = function(){
+    var l = RAFShop.Cart.line(veKey); if(!l) return closeVE();
+    var p = RAFCO.catalogFor(l.id);
+    var variant = {};
+    p.variants.forEach(function(g,gi){
+      var v = veSel['g'+gi];
+      var opt = g.options.find(function(o){ return String(o.v)===String(v); });
+      if(opt) variant[L(g.label)] = L(opt.label||opt);
+    });
+    if(Object.keys(variant).length !== p.variants.length){
+      RAFShop.toast(T('اختر كل الخيارات المطلوبة','Select all required options'), {icon:'ti-alert-circle'}); return;
+    }
+    /* re-key the line; merge if an identical variant already exists (no duplicates) */
+    var a = RAFShop.Cart.read();
+    var newKey = l.id + '|' + Object.keys(variant).sort().map(function(k){ return k+':'+variant[k]; }).join(',');
+    var i = a.findIndex(function(x){ return x.key===veKey; });
+    var dup = a.findIndex(function(x){ return x.key===newKey && x.key!==veKey; });
+    if(dup>-1){ a[dup].qty += a[i].qty; a.splice(i,1); }
+    else { a[i].key = newKey; a[i].variant = variant; }
+    RAFShop.Cart.write(a);
+    closeVE(); render();
+    RAFShop.toast(T('تم تحديث الخيارات','Options updated'), {icon:'ti-circle-check'});
+  };
+
+  /* ---------- coupon ---------- */
+  window.applyCoupon = function(){
+    var v = (document.getElementById('couponInput').value||'').trim().toUpperCase();
+    var msg = document.getElementById('couponMsg');
+    if(!v){ msg.className='msg err show'; msg.innerHTML='<i class="ti ti-alert-circle"></i> '+T('أدخل رمز الكوبون','Enter a coupon code'); return; }
+    var ok = RAFCO.COUPONS[v];
+    if(!ok){
+      RAFCO.setCoupon(null);
+      msg.className='msg err show'; msg.innerHTML='<i class="ti ti-circle-x"></i> '+T('رمز الكوبون غير صالح','Invalid coupon code');
+    } else {
+      RAFCO.setCoupon({code:v, pct:ok});
+      msg.className='msg ok show'; msg.innerHTML='<i class="ti ti-circle-check"></i> '+T('تم تطبيق الكوبون — خصم '+ok+'%','Coupon applied — '+ok+'% off');
+    }
+    render();
+  };
+
+  window.saveNotes = function(){ RAFCO.set('raf_order_notes', document.getElementById('orderNotes').value); };
+  window.goCheckout = function(){
+    var items = RAFShop.Cart.items();
+    if(!items.length) return;
+    if(items.some(RAFCO.isOOS)){ RAFShop.toast(T('احذف المنتجات غير المتوفرة أولاً','Remove unavailable items first'), {icon:'ti-alert-triangle'}); return; }
+    window.location='raf_checkout.html';
+  };
+  window.goBack = function(){ if(history.length>1) history.back(); else window.location='raf_homepage.html'; };
+
+  /* ---------- boot ---------- */
+  function boot(){
+    var c = RAFCO.getCoupon();
+    if(c){ var m=document.getElementById('couponMsg'); document.getElementById('couponInput').value=c.code;
+      m.className='msg ok show'; m.innerHTML='<i class="ti ti-circle-check"></i> '+T('تم تطبيق الكوبون — خصم '+c.pct+'%','Coupon applied — '+c.pct+'% off'); }
+    document.getElementById('orderNotes').value = RAFCO.get('raf_order_notes','');
+    render();
+    document.addEventListener('raf:cart', function(){ RAFShop.Cart.badge(); });
+    var root=document.getElementById('htmlRoot');
+    if(root) new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
+    document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeVE(); });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
 </body>
 </html>
