@@ -170,7 +170,11 @@
     var o = {
       wish: opts.wish !== false, store: opts.store !== false,
       rating: opts.rating !== false, cart: opts.cart !== false,
-      href: opts.href || p.href || 'raf_product.html?id=' + encodeURIComponent(p.id)
+      /* Multi-store listings open the lightweight Quick Order page.
+         Single-store contexts (e.g. the Store page) pass opts.href or
+         opts.hrefFor(p) to go straight to full Product Details instead. */
+      href: (typeof opts.hrefFor === 'function' ? opts.hrefFor(p) : null) ||
+            opts.href || p.href || 'raf_quick.html?id=' + encodeURIComponent(p.id)
     };
     var imgStyle = p.img ? ' style="background-image:url(\'' + p.img + '\')"' : '';
     var imgInner = p.img ? '' : '<i class="ti ' + (p.ic || 'ti-box') + '"></i>';
@@ -196,7 +200,15 @@
   }
 
   /* ---------- interactions ---------- */
-  function go(card) { var h = card.getAttribute('data-href'); if (h) window.location = h; }
+  /* Multi-store cards target raf_quick.* → open the Quick Order bottom sheet
+     in place (it also warms the Store page in the background). Single-store
+     cards target raf_product.html and navigate normally. */
+  function isQuickTarget(h) { return /raf_quick\.(html|js)?/.test(h || ''); }
+  function go(card) {
+    var h = card.getAttribute('data-href');
+    if (window.RAFQuick && isQuickTarget(h)) { RAFQuick.open(card.dataset.id); return; }
+    if (h) window.location = h;
+  }
   function wish(e, btn) {
     e.preventDefault(); e.stopPropagation();
     var p = prodFromEl(btn), on;
@@ -211,6 +223,10 @@
   function addClick(e, btn) {
     e.preventDefault(); e.stopPropagation();
     var p = prodFromEl(btn); if (!p || isOOS(p)) return;   /* never add unavailable products */
+    /* on multi-store listings "Add to Cart" opens Quick Order too, so the
+       customer reviews options and continues inside that store */
+    var card = btn.closest('.rc-card');
+    if (window.RAFQuick && card && isQuickTarget(card.getAttribute('data-href'))) { RAFQuick.open(p.id); return; }
     if (p.variants && p.variants.length) openVariants(p);  /* variants are required before adding */
     else guardedAdd(p, {});
   }

@@ -658,7 +658,9 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 <script src="raf_nav.js"></script>
 <script src="raf_ads.js"></script>
 <script src="raf_data.js"></script>
+<script src="raf_catalog.js"></script>
 <script src="raf_card.js"></script>
+<script src="raf_quick.js"></script>
 <script>
 /* ===== ADMIN-READY DATA (replace with API later) ===== */
 /* Advertising slides — structured for admin-managed ad data */
@@ -762,8 +764,9 @@ function catCard(c){
   const inner=c.image?'':`<i class="ti ${c.icon}"></i>`;
   return `<div class="car-item cat-item"><a class="cat" href="raf_storespage.html?cat=${c.id}"><div class="cat-circle" style="${bg}">${inner}</div><span>${L(c)}</span></a></div>`;
 }
-/* Uses the single global RAF Product Card component (raf_card.js) — from=home enables back-to-store */
-function offerCard(o){return `<div class="car-item pwrap">${RAFCard.product(o,{href:'raf_product.html?id='+encodeURIComponent(o.id)+'&from=home'})}</div>`;}
+/* Uses the single global RAF Product Card component (raf_card.js).
+   The homepage is a multi-store listing → products open the Quick Order page. */
+function offerCard(o){return `<div class="car-item pwrap">${RAFCard.product(o)}</div>`;}
 function storeCard(s){return `<article class="car-item store-card" onclick="window.location='raf_store.html'">
   <div class="store-cover"></div><div class="store-body"><div class="store-logo"><i class="ti ${s.ic}"></i></div>
   <div class="store-name">${L(s)} <i class="ti ti-rosette-discount-check verify"></i></div>

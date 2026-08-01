@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="raf_account.css">
 <style>
 :root{--bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;--gold:#C9A84C;--gold2:#A07828;--black:#0A0A0A;--text:#0A0A0A;--text2:#555;--text3:#888;--border:#D8D3C8;--r:8px;--rl:12px;--font:'Tajawal',sans-serif;--fdisplay:'Playfair Display',serif;--fen:'DM Sans',sans-serif;--green:#2E7D32;--red:#C62828;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -122,20 +123,16 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <link rel="stylesheet" href="raf_theme.css">
 <script src="raf_features.js"></script>
+<script src="raf_account.js"></script>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <div class="nav-actions">
-    <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
-    <button class="nav-ico" onclick="goBack()" title="رجوع"><i class="ti ti-arrow-right"></i></button>
-    <button class="nav-ico" onclick="window.location='raf_cart.html'"><i class="ti ti-shopping-cart"></i></button>
-    <a href="raf_account.html" class="btn-ghost"><i class="ti ti-user"></i> <span data-ar="حسابي" data-en="My Account">حسابي</span></a>
-  </div>
-  <div></div>
-  <a href="raf_homepage.html" class="nav-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace" class="brand-logo"></a>
-</nav>
+<!-- STANDARD ACCOUNT HEADER (shared across the module) -->
+<header class="ahead">
+  <button type="button" class="ahead-back" data-fallback="raf_account.html"><i class="ti ti-arrow-right"></i> <span data-ar="العودة" data-en="Back">العودة</span></button>
+  <div class="ahead-title" data-ar="عناويني" data-en="My Addresses">عناويني</div>
+  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
+</header>
 
 <!-- BREADCRUMB -->
 <div class="breadcrumb">
@@ -228,16 +225,6 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
 </div><!-- /main -->
 
 <!-- FOOTER -->
-<footer>
-  <div class="footer-bottom">
-    <div data-ar="جميع الحقوق محفوظة © 2026 رف" data-en="All Rights Reserved © 2026 Raf">جميع الحقوق محفوظة © 2026 رف</div>
-    <div style="display:flex;gap:16px;color:rgba(255,255,255,.45);">
-      <a href="raf_privacy.html" style="color:rgba(255,255,255,.45);text-decoration:none;" data-ar="سياسة الخصوصية" data-en="Privacy Policy">سياسة الخصوصية</a>
-      <a href="raf_terms.html" style="color:rgba(255,255,255,.45);text-decoration:none;" data-ar="الشروط والأحكام" data-en="Terms">الشروط والأحكام</a>
-    </div>
-  </div>
-</footer>
-
 <script>
 const ADDR_KEY = 'raf_addresses';
 

@@ -76,8 +76,37 @@
     });
   }
   window.initBackHeader = initBackHeader;
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initBackHeader);
-  else initBackHeader();
+
+  /* ---------- SHARED ACCOUNT FOOTER ----------
+     One footer for the whole Account module, injected once per page so no
+     page carries its own copy. Pages that already ship a .afoot are skipped. */
+  function initFooter() {
+    if (document.querySelector('.afoot')) return;
+    var en = curLang() === 'en';
+    var f = document.createElement('footer');
+    f.className = 'afoot';
+    f.innerHTML =
+      '<div class="afoot-in">' +
+        '<a href="raf_homepage.html" class="afoot-logo" aria-label="RAF Marketplace">' +
+          '<img src="assets/branding/logo-light.svg" alt="RAF Marketplace"></a>' +
+        '<div class="afoot-txt" data-ar="جميع الحقوق محفوظة © 2026 رف" data-en="All rights reserved © 2026 RAF">' +
+          (en ? 'All rights reserved © 2026 RAF' : 'جميع الحقوق محفوظة © 2026 رف') + '</div>' +
+        '<div class="afoot-links">' +
+          '<a href="raf_support.html" data-ar="الدعم" data-en="Support">' + (en ? 'Support' : 'الدعم') + '</a>' +
+          '<a href="raf_returns.html" data-ar="سياسة الإرجاع" data-en="Returns">' + (en ? 'Returns' : 'سياسة الإرجاع') + '</a>' +
+          '<a href="raf_privacy.html" data-ar="الخصوصية" data-en="Privacy">' + (en ? 'Privacy' : 'الخصوصية') + '</a>' +
+          '<a href="raf_terms.html" data-ar="الشروط" data-en="Terms">' + (en ? 'Terms' : 'الشروط') + '</a>' +
+        '</div>' +
+      '</div>';
+    /* sits before the fixed bottom nav so document order stays logical */
+    var bnav = document.querySelector('nav.app-bnav');
+    if (bnav) bnav.parentNode.insertBefore(f, bnav); else document.body.appendChild(f);
+  }
+  window.initAccountFooter = initFooter;
+
+  function initChrome() { initBackHeader(); initFooter(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initChrome);
+  else initChrome();
 
   /* ---------- RAF ID PROFILE (from sign-up) ---------- */
   window.rafProfile = function () {

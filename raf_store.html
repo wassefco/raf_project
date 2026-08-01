@@ -777,7 +777,11 @@
       /* tag every card with the owning store so the one-store-per-order rule
          can detect cross-store adds; the store line stays hidden (single-store page) */
       var name = (document.querySelector('.store-hero-name') || {}).textContent || '';
-      RAFCard.upgradeAll({ selector:'.product-card', storeName: name.trim(), opts:{ store:false } });
+      /* single-store context → open the full Product Details page, not Quick Order */
+      RAFCard.upgradeAll({
+        selector:'.product-card', storeName: name.trim(),
+        opts:{ store:false, hrefFor:function(p){ return 'raf_product.html?id=' + encodeURIComponent(p.id); } }
+      });
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', up); else up();
   })();
