@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — العروض والكوبونات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="raf_account.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<style>
+/* ===== Customer Offers Center ===== */
+.tabs{display:flex;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:30px;padding:5px;margin-bottom:20px;}
+.tab{flex:1;height:40px;border:none;border-radius:30px;background:transparent;color:var(--text2);
+  font-family:var(--font);font-size:13.5px;font-weight:700;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;justify-content:center;gap:7px;}
+.tab i{font-size:17px;}
+.tab.on{background:var(--ink);color:#F5F0E4;box-shadow:0 4px 12px -4px rgba(20,16,8,.45);}
+.tab:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+/* coupon ticket */
+.cp{position:relative;display:flex;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);
+  box-shadow:var(--sh);margin-bottom:14px;overflow:hidden;transition:border-color .2s,transform .2s,box-shadow .2s;}
+.cp:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 16px 32px -22px rgba(20,16,8,.4);}
+.cp.used,.cp.expired{opacity:.62;}
+.cp.used:hover,.cp.expired:hover{transform:none;border-color:var(--border);box-shadow:var(--sh);}
+/* left value stub */
+.cp-stub{position:relative;flex:0 0 104px;background:linear-gradient(150deg,var(--gold),var(--gold2));color:#1C1606;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:16px 8px;text-align:center;}
+.cp.used .cp-stub,.cp.expired .cp-stub{background:linear-gradient(150deg,#B9B2A3,#8A857C);color:#fff;}
+.cp-val{font-family:var(--fen);font-size:26px;font-weight:800;line-height:1;}
+.cp-val small{font-size:14px;font-weight:700;}
+.cp-vlbl{font-size:10.5px;font-weight:700;opacity:.85;}
+/* perforation */
+.cp-stub::after{content:'';position:absolute;top:0;bottom:0;inset-inline-end:-6px;width:12px;
+  background:radial-gradient(circle at 50% 6px,transparent 0 5px,var(--card) 5px) 0 0/12px 16px repeat-y;}
+.cp-b{flex:1;min-width:0;padding:15px 17px;}
+.cp-top{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+.cp-t{font-size:15px;font-weight:800;color:var(--ink);line-height:1.35;}
+.cp-d{font-size:12.5px;color:var(--text3);margin-top:4px;line-height:1.6;}
+.cp-status{margin-inline-start:auto;flex-shrink:0;}
+/* meta rows */
+.cp-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px;}
+.cp-chip{display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:20px;padding:5px 10px;font-size:11.5px;color:var(--text2);}
+.cp-chip i{font-size:13px;color:var(--gold2);}
+.cp-chip.warn{background:var(--red-bg);border-color:rgba(217,83,79,.3);color:var(--red);}
+.cp-chip.warn i{color:var(--red);}
+/* code + actions */
+.cp-actions{display:flex;align-items:center;gap:9px;margin-top:13px;flex-wrap:wrap;}
+.cp-code{display:inline-flex;align-items:center;gap:9px;border:1.5px dashed var(--border2);border-radius:10px;
+  background:var(--bg);padding:9px 13px;font-family:var(--fen);font-size:14px;font-weight:800;letter-spacing:1.5px;
+  color:var(--ink);cursor:pointer;transition:all .2s;}
+.cp-code:hover{border-color:var(--gold);background:var(--gold-soft);}
+.cp-code:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.cp-code i{font-size:15px;color:var(--text3);}
+.cp-code.copied{border-color:var(--green);background:var(--green-bg);color:var(--green);}
+.cp-code.copied i{color:var(--green);}
+.cp-apply{height:38px;padding:0 16px;border-radius:30px;border:1px solid var(--gold2);background:var(--gold);color:#1C1606;
+  font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;
+  display:inline-flex;align-items:center;gap:6px;}
+.cp-apply:hover{background:var(--gold2);color:#fff;}
+.cp-apply:disabled{background:var(--bg3);color:var(--text3);border-color:var(--border);cursor:not-allowed;}
+.cp-more{background:none;border:none;color:var(--gold2);font-family:var(--font);font-size:12.5px;font-weight:700;
+  cursor:pointer;display:inline-flex;align-items:center;gap:5px;padding:6px 4px;}
+.cp-more:hover{text-decoration:underline;}
+/* expandable details */
+.cp-det{display:none;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border);}
+.cp-det.show{display:block;}
+.cp-det ul{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.cp-det li{display:flex;gap:9px;font-size:12.5px;color:var(--text2);line-height:1.65;}
+.cp-det li i{color:var(--gold2);font-size:15px;flex-shrink:0;margin-top:1px;}
+.cp-stores{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.cp-store{font-size:11.5px;background:var(--gold-soft);color:var(--gold2);border-radius:20px;padding:4px 10px;font-weight:600;}
+
+/* personal offer card */
+.of{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);
+  box-shadow:var(--sh);padding:16px;margin-bottom:14px;text-decoration:none;color:var(--text);transition:all .2s;}
+.of:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 16px 32px -22px rgba(20,16,8,.4);}
+.of-ic{width:56px;height:56px;flex-shrink:0;border-radius:16px;background:var(--gold-soft);color:var(--gold2);
+  display:flex;align-items:center;justify-content:center;font-size:26px;}
+.of-b{flex:1;min-width:0;}
+.of-t{font-size:15px;font-weight:700;color:var(--ink);}
+.of-s{font-size:12.5px;color:var(--text3);margin-top:4px;line-height:1.6;}
+.of-go{color:var(--text3);font-size:19px;flex-shrink:0;}
+
+.pane{display:none;}
+.pane.on{display:block;}
+@media(max-width:560px){
+  .cp{flex-direction:column;}
+  .cp-stub{flex:0 0 auto;flex-direction:row;gap:9px;padding:12px;}
+  .cp-stub::after{top:auto;bottom:-6px;inset-inline-end:0;left:0;right:0;width:auto;height:12px;
+    background:radial-gradient(circle at 6px 50%,transparent 0 5px,var(--card) 5px) 0 0/16px 12px repeat-x;}
+  .cp-val{font-size:22px;}
+  .tab span{display:none;}
+}
+</style>
+<script src="raf_features.js"></script>
+</head>
+<body>
+
+<header class="ahead">
+  <button type="button" class="ahead-back" data-fallback="raf_account.html"><i class="ti ti-arrow-right"></i> <span data-ar="العودة" data-en="Back">العودة</span></button>
+  <div class="ahead-title" data-ar="العروض والكوبونات" data-en="Offers &amp; Coupons">العروض والكوبونات</div>
+  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
+</header>
+
+<div class="wrap">
+  <div class="tabs" role="tablist">
+    <button class="tab on" role="tab" id="tabCoupons" onclick="showPane('coupons',this)">
+      <i class="ti ti-ticket"></i> <span data-ar="كوبوناتي" data-en="My Coupons">كوبوناتي</span>
+    </button>
+    <button class="tab" role="tab" id="tabOffers" onclick="showPane('offers',this)">
+      <i class="ti ti-discount"></i> <span data-ar="عروض لك" data-en="Offers for You">عروض لك</span>
+    </button>
+  </div>
+
+  <div class="pane on" id="pane-coupons"><div id="couponList"></div></div>
+  <div class="pane" id="pane-offers"><div id="offerList"></div></div>
+</div>
+
+<nav class="app-bnav">
+  <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
+  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفّح" data-en="Browse">تصفّح</span></a>
+  <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
+  <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
+  <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
+</nav>
+
+<script src="raf_data.js"></script>
+<script src="raf_account.js"></script>
+<script>
+/* ============================================================
+   CUSTOMER OFFERS CENTER — coupons + personalised offers
+   Coupon codes stay in sync with the cart's accepted codes.
+   ============================================================ */
+(function(){
+  function en(){ return document.getElementById('htmlRoot').lang==='en'; }
+  function T(ar,e){ return en()?e:ar; }
+  function L(o){ return (o&&typeof o==='object')?(en()?o.en:o.ar):(o||''); }
+
+  /* status is derived, never hardcoded */
+  var TODAY = new Date();
+  var COUPONS = [
+    { code:'WELCOME20', pct:20, used:false, expires:'2026-12-31', min:10,
+      title:{ar:'خصم ترحيبي',en:'Welcome discount'},
+      desc:{ar:'خصم 20% على أول طلب لك من رف.',en:'20% off your first RAF order.'},
+      scope:{ar:'كل المتاجر',en:'All stores'}, stores:[{ar:'كل المتاجر',en:'All stores'}] },
+    { code:'FLASH10', pct:10, used:false, expires:'2026-09-30', min:15,
+      title:{ar:'عروض الفلاش',en:'Flash deals'},
+      desc:{ar:'خصم 10% على العروض المميزة.',en:'10% off featured offers.'},
+      scope:{ar:'أزياء · إلكترونيات',en:'Fashion · Electronics'},
+      stores:[{ar:'كازا مود',en:'Casa Mode'},{ar:'تك هاوس',en:'Tech House'}] },
+    { code:'VIP30', pct:30, used:false, expires:'2026-08-15', min:40,
+      title:{ar:'كوبون كبار العملاء',en:'VIP coupon'},
+      desc:{ar:'خصم 30% عند الشراء بقيمة 40 د.ك أو أكثر.',en:'30% off when you spend 40 KWD or more.'},
+      scope:{ar:'عطور · مجوهرات',en:'Perfume · Jewelry'},
+      stores:[{ar:'دار العود',en:'Dar Aloud'},{ar:'لمسة ذهب',en:'Lamsa Gold'}] },
+    { code:'RAMADAN25', pct:25, used:true, expires:'2026-04-10', min:20,
+      title:{ar:'عرض رمضان',en:'Ramadan offer'},
+      desc:{ar:'خصم 25% خلال شهر رمضان.',en:'25% off during Ramadan.'},
+      scope:{ar:'كل المتاجر',en:'All stores'}, stores:[{ar:'كل المتاجر',en:'All stores'}] },
+    { code:'SUMMER15', pct:15, used:false, expires:'2026-06-01', min:0,
+      title:{ar:'تخفيضات الصيف',en:'Summer sale'},
+      desc:{ar:'خصم 15% على تشكيلة الصيف.',en:'15% off the summer collection.'},
+      scope:{ar:'أزياء',en:'Fashion'}, stores:[{ar:'كازا مود',en:'Casa Mode'}] }
+  ];
+
+  var OFFERS = [
+    { ic:'ti-truck-delivery', href:'raf_offers.html',
+      t:{ar:'توصيل مجاني هذا الأسبوع',en:'Free delivery this week'},
+      s:{ar:'على كل الطلبات فوق 25 د.ك من المتاجر المشاركة.',en:'On all orders above 25 KWD from participating stores.'} },
+    { ic:'ti-flame', href:'raf_offers.html',
+      t:{ar:'تخفيضات تصل إلى 70%',en:'Up to 70% off'},
+      s:{ar:'أفضل العروض الموسمية من متاجرك المفضلة.',en:'The best seasonal deals from your favourite stores.'} },
+    { ic:'ti-building-store', href:'raf_storespage.html',
+      t:{ar:'عروض المتاجر التي تتابعها',en:'Deals from stores you follow'},
+      s:{ar:'اكتشف أحدث التخفيضات من متاجرك المتابَعة.',en:'Discover the newest markdowns from stores you follow.'} }
+  ];
+
+  function status(c){
+    if(c.used) return 'used';
+    return (new Date(c.expires) < TODAY) ? 'expired' : 'active';
+  }
+  function statusChip(st){
+    if(st==='active')  return '<span class="badge b-delivered"><i class="ti ti-circle-check"></i> '+T('صالح','Active')+'</span>';
+    if(st==='used')    return '<span class="badge b-gold"><i class="ti ti-check"></i> '+T('مُستخدم','Used')+'</span>';
+    return '<span class="badge b-cancelled"><i class="ti ti-clock-x"></i> '+T('منتهي','Expired')+'</span>';
+  }
+  function fmtDate(iso){
+    var d=new Date(iso);
+    var mAr=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    var mEn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return en() ? (mEn[d.getMonth()]+' '+d.getDate()+', '+d.getFullYear())
+                : (d.getDate()+' '+mAr[d.getMonth()]+' '+d.getFullYear());
+  }
+  function daysLeft(iso){ return Math.ceil((new Date(iso)-TODAY)/86400000); }
+
+  function couponHTML(c,i){
+    var st=status(c), active=st==='active', dl=daysLeft(c.expires);
+    var soon = active && dl<=14;
+    return '<article class="cp '+st+'">'
+      + '<div class="cp-stub"><div class="cp-val">'+c.pct+'<small>%</small></div>'
+        + '<div class="cp-vlbl">'+T('خصم','OFF')+'</div></div>'
+      + '<div class="cp-b">'
+        + '<div class="cp-top"><div><div class="cp-t">'+L(c.title)+'</div>'
+          + '<div class="cp-d">'+L(c.desc)+'</div></div>'
+          + '<span class="cp-status">'+statusChip(st)+'</span></div>'
+        + '<div class="cp-meta">'
+          + '<span class="cp-chip'+(soon?' warn':'')+'"><i class="ti ti-calendar-event"></i> '
+            + (st==='expired' ? T('انتهى في ','Expired ')+fmtDate(c.expires)
+               : T('ينتهي في ','Expires ')+fmtDate(c.expires) + (soon?' · '+T(dl+' يوم متبقٍ',dl+' days left'):''))
+          + '</span>'
+          + (c.min>0 ? '<span class="cp-chip"><i class="ti ti-shopping-cart"></i> '+T('حد أدنى '+c.min+' د.ك','Min. '+c.min+' KWD')+'</span>' : '')
+          + '<span class="cp-chip"><i class="ti ti-category"></i> '+L(c.scope)+'</span>'
+        + '</div>'
+        + '<div class="cp-actions">'
+          + '<button class="cp-code" onclick="copyCode(this,\''+c.code+'\')" '+(active?'':'disabled')+'>'
+            + '<i class="ti ti-copy"></i><span>'+c.code+'</span></button>'
+          + (active ? '<button class="cp-apply" onclick="applyCoupon(\''+c.code+'\','+c.pct+')"><i class="ti ti-check"></i> '+T('تطبيق','Apply')+'</button>' : '')
+          + '<button class="cp-more" onclick="toggleDet('+i+',this)"><span>'+T('التفاصيل','Details')+'</span> <i class="ti ti-chevron-down"></i></button>'
+        + '</div>'
+        + '<div class="cp-det" id="det'+i+'"><ul>'
+          + '<li><i class="ti ti-percentage"></i><span>'+T('قيمة الخصم: ','Discount: ')+c.pct+'%</span></li>'
+          + '<li><i class="ti ti-shopping-cart"></i><span>'+(c.min>0?T('الحد الأدنى للطلب: '+c.min+' د.ك','Minimum order: '+c.min+' KWD'):T('لا يوجد حد أدنى للطلب','No minimum order'))+'</span></li>'
+          + '<li><i class="ti ti-calendar-event"></i><span>'+T('تاريخ الانتهاء: ','Expiry date: ')+fmtDate(c.expires)+'</span></li>'
+          + '<li><i class="ti ti-building-store"></i><div><span>'+T('المتاجر والفئات المدعومة:','Supported stores & categories:')+'</span>'
+            + '<div class="cp-stores">'+c.stores.map(function(s){return '<span class="cp-store">'+L(s)+'</span>';}).join('')+'</div></div></li>'
+          + '<li><i class="ti ti-info-circle"></i><span>'+T('لا يمكن دمج الكوبون مع عروض أخرى.','Cannot be combined with other promotions.')+'</span></li>'
+        + '</ul></div>'
+      + '</div></article>';
+  }
+
+  function render(){
+    var list=document.getElementById('couponList');
+    var active=COUPONS.filter(function(c){return status(c)==='active';});
+    var rest=COUPONS.filter(function(c){return status(c)!=='active';});
+    if(!COUPONS.length){
+      list.innerHTML=emptyHTML('ti-ticket-off',T('لا توجد كوبونات','No coupons yet'),
+        T('ستظهر كوبوناتك هنا فور حصولك عليها.','Your coupons will appear here once you receive them.'));
+    } else {
+      list.innerHTML = active.map(couponHTML).join('')
+        + (rest.length ? '<div class="section-h" style="margin-top:26px;">'+T('كوبونات سابقة','Past coupons')+'</div>'
+             + rest.map(function(c,i){return couponHTML(c,i+active.length);}).join('') : '');
+    }
+    document.getElementById('offerList').innerHTML = OFFERS.length
+      ? OFFERS.map(function(o){
+          return '<a class="of" href="'+o.href+'"><div class="of-ic"><i class="ti '+o.ic+'"></i></div>'
+            + '<div class="of-b"><div class="of-t">'+L(o.t)+'</div><div class="of-s">'+L(o.s)+'</div></div>'
+            + '<i class="ti '+(en()?'ti-chevron-right':'ti-chevron-left')+' of-go"></i></a>';
+        }).join('')
+      : emptyHTML('ti-discount-off',T('لا توجد عروض حالياً','No offers right now'),
+          T('تابع متاجرك المفضلة لتصلك عروض مخصصة لك.','Follow your favourite stores to get personalised offers.'));
+  }
+  function emptyHTML(ic,t,s){
+    return '<div class="empty"><i class="ti '+ic+'"></i><div class="empty-t">'+t+'</div><div>'+s+'</div>'
+      + '<a href="raf_offers.html" class="btn btn-gold" style="margin-top:18px;"><i class="ti ti-discount"></i> '
+      + T('تصفّح العروض','Browse offers')+'</a></div>';
+  }
+
+  /* ---------- actions ---------- */
+  window.showPane=function(id,btn){
+    document.querySelectorAll('.pane').forEach(function(p){p.classList.remove('on');});
+    document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('on');t.setAttribute('aria-selected','false');});
+    document.getElementById('pane-'+id).classList.add('on');
+    btn.classList.add('on'); btn.setAttribute('aria-selected','true');
+  };
+  window.toggleDet=function(i,btn){
+    var d=document.getElementById('det'+i), open=d.classList.toggle('show');
+    btn.querySelector('i').className='ti ti-chevron-'+(open?'up':'down');
+    btn.querySelector('span').textContent=open?T('إخفاء التفاصيل','Hide details'):T('التفاصيل','Details');
+  };
+  window.copyCode=function(btn,code){
+    function done(){
+      btn.classList.add('copied');
+      btn.querySelector('i').className='ti ti-check';
+      if(window.RAFShop&&RAFShop.toast) RAFShop.toast(T('تم نسخ الكوبون '+code,'Coupon '+code+' copied'),{icon:'ti-copy'});
+      setTimeout(function(){ btn.classList.remove('copied'); btn.querySelector('i').className='ti ti-copy'; },1800);
+    }
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(code).then(done).catch(fallback);
+    } else fallback();
+    function fallback(){
+      var ta=document.createElement('textarea'); ta.value=code; ta.setAttribute('readonly','');
+      ta.style.cssText='position:absolute;left:-9999px'; document.body.appendChild(ta);
+      ta.select(); try{document.execCommand('copy');}catch(e){} document.body.removeChild(ta); done();
+    }
+  };
+  /* applying stores the coupon for the cart, then sends the user there */
+  window.applyCoupon=function(code,pct){
+    try{ localStorage.setItem('raf_coupon',JSON.stringify({code:code,pct:pct})); }catch(e){}
+    if(window.RAFShop&&RAFShop.toast) RAFShop.toast(T('تم تطبيق '+code+' على سلتك','Applied '+code+' to your cart'),{icon:'ti-discount-check'});
+    setTimeout(function(){ window.location='raf_cart.html'; },600);
+  };
+
+  function boot(){
+    render();
+    var root=document.getElementById('htmlRoot');
+    if(root) new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
+</body>
+</html>

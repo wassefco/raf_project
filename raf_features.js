@@ -11,7 +11,9 @@
    ============================================================ */
 (function () {
   var KEY = 'raf_features';
-  var DEFAULTS = { auctions: false, used: false };
+  /* loyalty = Gold Membership / reward points. Temporarily OFF; the full
+     implementation stays in place and re-enables with RAFFeatures.enable('loyalty') */
+  var DEFAULTS = { auctions: false, used: false, loyalty: false };
   function read() { try { return Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { return Object.assign({}, DEFAULTS); } }
   var flags = read();
 
@@ -25,7 +27,7 @@
 
   /* guard: block direct navigation to a disabled feature page */
   var page = (location.pathname.split('/').pop() || '').toLowerCase();
-  var GUARDED = { 'raf_auctions.html': 'auctions', 'raf_used.html': 'used' };
+  var GUARDED = { 'raf_auctions.html': 'auctions', 'raf_used.html': 'used', 'raf_rewards.html': 'loyalty' };
   if (GUARDED[page] && flags[GUARDED[page]] !== true) { location.replace('raf_homepage.html'); return; }
 
   /* hide every element flagged for a currently-disabled feature */

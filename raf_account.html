@@ -190,7 +190,9 @@ html[dir="ltr"] .sh .line{background:linear-gradient(270deg,var(--border),transp
       <a href="raf_settings.html" class="hero-set" aria-label="الإعدادات" data-ar-title="الإعدادات" data-en-title="Settings" title="الإعدادات"><i class="ti ti-settings"></i></a>
     </div>
 
-    <div class="loyal">
+    <!-- Gold Membership / loyalty — temporarily disabled via the admin feature
+         flag (RAFFeatures.enable('loyalty') restores it untouched) -->
+    <div class="loyal" data-feature="loyalty">
       <div class="loyal-top">
         <div class="tier"><i class="ti ti-crown"></i>
           <div><span id="tierName" data-ar="عضو ذهبي" data-en="Gold Member">عضو ذهبي</span>
@@ -235,7 +237,7 @@ html[dir="ltr"] .sh .line{background:linear-gradient(270deg,var(--border),transp
   <section class="rise" style="animation-delay:.16s">
     <div id="lastOrderSlot"></div>
     <div class="tiles">
-      <a class="tile" href="raf_rewards.html">
+      <a class="tile" href="raf_rewards.html" data-feature="loyalty">
         <div class="tile-ic"><i class="ti ti-gift"></i></div>
         <div class="tile-b"><div class="tile-t" data-ar="المكافآت والولاء" data-en="Rewards & Loyalty">المكافآت والولاء</div>
           <div class="tile-s" id="rewardsSub"></div></div>
@@ -247,10 +249,10 @@ html[dir="ltr"] .sh .line{background:linear-gradient(270deg,var(--border),transp
           <div class="tile-s" data-ar="متاجرك المفضّلة" data-en="Stores you follow">متاجرك المفضّلة</div></div>
         <i class="ti ti-chevron-left tile-go"></i>
       </a>
-      <a class="tile" href="raf_offers.html">
-        <div class="tile-ic"><i class="ti ti-discount"></i></div>
+      <a class="tile" href="raf_coupons.html">
+        <div class="tile-ic"><i class="ti ti-ticket"></i></div>
         <div class="tile-b"><div class="tile-t" data-ar="العروض والكوبونات" data-en="Offers & Coupons">العروض والكوبونات</div>
-          <div class="tile-s" data-ar="عروض حصرية لك" data-en="Exclusive deals">عروض حصرية لك</div></div>
+          <div class="tile-s" data-ar="كوبوناتك وعروضك الحصرية" data-en="Your coupons & exclusive deals">كوبوناتك وعروضك الحصرية</div></div>
         <i class="ti ti-chevron-left tile-go"></i>
       </a>
       <a class="tile" href="raf_auctions.html" data-feature="auctions">
@@ -355,7 +357,9 @@ html[dir="ltr"] .sh .line{background:linear-gradient(270deg,var(--border),transp
   }
 
   /* ---------- loyalty ---------- */
+  function loyaltyOn(){ return !window.RAFFeatures || RAFFeatures.on('loyalty'); }
   function paintLoyalty(){
+    if(!loyaltyOn()) return;            /* Gold Membership temporarily disabled */
     var pts = LOYALTY.points, tiers = LOYALTY.tiers;
     var idx = 0; tiers.forEach(function(t,i){ if(pts>=t.min) idx=i; });
     var cur = tiers[idx], next = tiers[idx+1];

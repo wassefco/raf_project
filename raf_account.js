@@ -28,13 +28,56 @@
   })();
 
   /* ---------- BACK (real navigation history) ----------
-     Returns to the actual previous page. Falls back only when there is
-     no in-tab history (e.g. opened directly via a deep link). */
+     Always returns to the ACTUAL previous page. `history.length` alone is
+     unreliable (it counts the whole tab session), so we also require a
+     same-origin referrer, and guard with a timeout in case back() is a no-op
+     (e.g. the entry was replaced). Falls back only for direct/deep links. */
   window.goBack = function (fallback) {
-    if (window.history.length > 1) { window.history.back(); }
-    else { window.location.href = fallback || 'raf_homepage.html'; }
+    var dest = fallback || 'raf_account.html';
+    var sameOrigin = !!document.referrer && document.referrer.indexOf(location.origin) === 0;
+    var isSelf = sameOrigin && document.referrer.split('#')[0] === location.href.split('#')[0];
+    if (sameOrigin && !isSelf && history.length > 1) {
+      var t = setTimeout(function () { location.href = dest; }, 450);
+      window.addEventListener('pagehide', function () { clearTimeout(t); }, { once: true });
+      history.back();
+    } else {
+      location.href = dest;
+    }
     return false;
   };
+
+  /* ---------- SHARED BACK HEADER ----------
+     One implementation for every Account page. Normalises whatever markup a
+     page shipped with (link or button) into the same control, label and
+     behaviour, so the module reads as one unified experience.
+     A page keeps its own fallback target via the original href / data-fallback. */
+  function initBackHeader() {
+    document.querySelectorAll('header.ahead .ahead-back').forEach(function (el) {
+      /* keep whatever fallback the page already declared:
+         data-fallback → href (links) → goBack('…') in the existing onclick */
+      var onclickAttr = el.getAttribute('onclick') || '';
+      var fromOnclick = (onclickAttr.match(/goBack\(\s*['"]([^'"]+)['"]/) || [])[1];
+      var fallback = el.getAttribute('data-fallback') ||
+                     (el.tagName === 'A' ? el.getAttribute('href') : null) ||
+                     fromOnclick ||
+                     'raf_account.html';
+      /* re-use the element when it is already a button; swap links for buttons */
+      var btn = el;
+      if (el.tagName === 'A') {
+        btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = el.className;
+        el.parentNode.replaceChild(btn, el);
+      }
+      btn.setAttribute('data-fallback', fallback);
+      btn.onclick = function () { return goBack(fallback); };
+      btn.innerHTML = '<i class="ti ti-arrow-right"></i> ' +
+        '<span data-ar="العودة" data-en="Back">' + (curLang() === 'en' ? 'Back' : 'العودة') + '</span>';
+    });
+  }
+  window.initBackHeader = initBackHeader;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initBackHeader);
+  else initBackHeader();
 
   /* ---------- RAF ID PROFILE (from sign-up) ---------- */
   window.rafProfile = function () {

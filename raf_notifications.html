@@ -11,12 +11,24 @@
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
-<style>.unread{position:relative;}.unread::after{content:'';position:absolute;top:50%;inset-inline-start:14px;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:var(--gold);} .nrow{padding-inline-start:32px;}</style>
+<style>
+.unread{position:relative;}
+.unread::after{content:'';position:absolute;top:22px;inset-inline-start:14px;width:8px;height:8px;border-radius:50%;background:var(--gold);}
+.nrow{padding-inline-start:32px;align-items:flex-start;}
+.n-act{display:inline-flex;align-items:center;gap:6px;margin-top:9px;height:34px;padding:0 14px;border-radius:30px;
+  border:1px solid var(--border2);background:var(--card);color:var(--text2);font-family:var(--font);font-size:12.5px;
+  font-weight:700;text-decoration:none;cursor:pointer;transition:all .2s;}
+.n-act:hover{border-color:var(--gold);color:var(--gold2);background:var(--gold-soft);}
+.n-act:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.n-act i{font-size:15px;}
+.n-act.primary{background:var(--gold);border-color:var(--gold2);color:#1C1606;}
+.n-act.primary:hover{background:var(--gold2);color:#fff;}
+</style>
 <script src="raf_features.js"></script>
 </head>
 <body>
 <header class="ahead">
-  <a href="raf_account.html" class="ahead-back"><i class="ti ti-arrow-right"></i> <span data-ar="هوية رف" data-en="RAF ID">هوية رف</span></a>
+  <button type="button" class="ahead-back" data-fallback="raf_account.html"><i class="ti ti-arrow-right"></i> <span data-ar="العودة" data-en="Back">العودة</span></button>
   <div class="ahead-title" data-ar="الإشعارات" data-en="Notifications">الإشعارات</div>
   <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
 </header>
@@ -24,20 +36,15 @@
 <div class="wrap">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
     <div class="section-h" style="margin:0;" data-ar="أحدث التنبيهات" data-en="Latest alerts">أحدث التنبيهات</div>
-    <button class="btn btn-ghost btn-sm" data-ar="تعليم الكل كمقروء" data-en="Mark all read">تعليم الكل كمقروء</button>
+    <button class="btn btn-ghost btn-sm" id="markAll" onclick="markAllRead()" data-ar="تعليم الكل كمقروء" data-en="Mark all read">تعليم الكل كمقروء</button>
   </div>
 
-  <div class="panel">
-    <div class="row nrow unread"><div class="row-ic" style="background:var(--blue-bg);color:var(--blue)"><i class="ti ti-truck-delivery"></i></div>
-      <div class="row-body"><div class="row-lbl" data-ar="طلبك ‎#ORD-1284 في الطريق" data-en="Order #ORD-1284 is on the way">طلبك ‎#ORD-1284 في الطريق</div><div class="row-sub" data-ar="منذ 10 دقائق" data-en="10 minutes ago">منذ 10 دقائق</div></div></div>
-    <div class="row nrow unread"><div class="row-ic" style="background:var(--amber-bg);color:var(--amber)"><i class="ti ti-discount"></i></div>
-      <div class="row-body"><div class="row-lbl" data-ar="عرض حصري من Casa Mode — خصم 25%" data-en="Exclusive 25% off from Casa Mode">عرض حصري من Casa Mode — خصم 25%</div><div class="row-sub" data-ar="منذ ساعة" data-en="1 hour ago">منذ ساعة</div></div></div>
-    <div class="row nrow unread"><div class="row-ic" style="background:var(--gold-soft);color:var(--gold2)"><i class="ti ti-gift"></i></div>
-      <div class="row-body"><div class="row-lbl" data-ar="ربحت 120 نقطة مكافآت" data-en="You earned 120 reward points">ربحت 120 نقطة مكافآت</div><div class="row-sub" data-ar="منذ ساعتين" data-en="2 hours ago">منذ ساعتين</div></div></div>
-    <div class="row nrow"><div class="row-ic" style="background:var(--green-bg);color:var(--green)"><i class="ti ti-building-store"></i></div>
-      <div class="row-body"><div class="row-lbl" data-ar="متجر جديد انضم — Nova Shoes" data-en="New store joined — Nova Shoes">متجر جديد انضم — Nova Shoes</div><div class="row-sub" data-ar="منذ 3 ساعات" data-en="3 hours ago">منذ 3 ساعات</div></div></div>
-    <div class="row nrow"><div class="row-ic"><i class="ti ti-circle-check"></i></div>
-      <div class="row-body"><div class="row-lbl" data-ar="تم تسليم طلبك ‎#ORD-1280 بنجاح" data-en="Order #ORD-1280 delivered successfully">تم تسليم طلبك ‎#ORD-1280 بنجاح</div><div class="row-sub" data-ar="أمس" data-en="Yesterday">أمس</div></div></div>
+  <!-- actionable notifications: each row navigates to its related destination -->
+  <div class="panel" id="notifList"></div>
+  <div class="empty" id="notifEmpty" style="display:none;">
+    <i class="ti ti-bell-off"></i>
+    <div class="empty-t" data-ar="لا توجد إشعارات" data-en="No notifications">لا توجد إشعارات</div>
+    <div data-ar="سنعلمك فور وجود جديد يخص طلباتك وعروضك." data-en="We'll let you know as soon as there's news about your orders and offers."></div>
   </div>
 </div>
 
@@ -49,6 +56,97 @@
   <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
 
+<script src="raf_data.js"></script>
 <script src="raf_account.js"></script>
+<script>
+/* ============================================================
+   ACTIONABLE NOTIFICATIONS — every alert routes to its destination
+   ============================================================ */
+(function(){
+  function en(){ return document.getElementById('htmlRoot').lang==='en'; }
+  function T(ar,e){ return en()?e:ar; }
+  function L(o){ return (o&&typeof o==='object')?(en()?o.en:o.ar):(o||''); }
+  function loyaltyOn(){ return !window.RAFFeatures || RAFFeatures.on('loyalty'); }
+
+  /* type → icon + colour + action, so behaviour is consistent per category */
+  var TYPES = {
+    order:   { ic:'ti-truck-delivery', bg:'var(--blue-bg)',   fg:'var(--blue)',
+               act:{ar:'تتبّع الطلب',en:'Track Order'},   icon:'ti-map-pin',  primary:true },
+    delivered:{ic:'ti-circle-check',   bg:'var(--green-bg)',  fg:'var(--green)',
+               act:{ar:'عرض التفاصيل',en:'View Details'}, icon:'ti-eye' },
+    promo:   { ic:'ti-discount',       bg:'var(--amber-bg)',  fg:'var(--amber)',
+               act:{ar:'زيارة المتجر',en:'Go to Store'},  icon:'ti-building-store', primary:true },
+    coupon:  { ic:'ti-ticket',         bg:'var(--gold-soft)', fg:'var(--gold2)',
+               act:{ar:'استخدم الكوبون',en:'Use Coupon'}, icon:'ti-ticket',  primary:true },
+    product: { ic:'ti-package',        bg:'var(--gold-soft)', fg:'var(--gold2)',
+               act:{ar:'عرض المنتج',en:'View Product'},   icon:'ti-eye' },
+    store:   { ic:'ti-building-store', bg:'var(--green-bg)',  fg:'var(--green)',
+               act:{ar:'زيارة المتجر',en:'Go to Store'},  icon:'ti-arrow-left' },
+    reward:  { ic:'ti-gift',           bg:'var(--gold-soft)', fg:'var(--gold2)',
+               act:{ar:'عرض المكافآت',en:'View Rewards'}, icon:'ti-gift', feature:'loyalty' }
+  };
+
+  var NOTIFS = [
+    { type:'order', unread:true, href:'raf_tracking.html?id=ORD-1284',
+      t:{ar:'طلبك ‎#ORD-1284 في الطريق',en:'Order #ORD-1284 is on the way'},
+      s:{ar:'منذ 10 دقائق',en:'10 minutes ago'} },
+    { type:'promo', unread:true, href:'raf_store.html?store=casa-mode',
+      t:{ar:'عرض حصري من Casa Mode — خصم 25%',en:'Exclusive 25% off from Casa Mode'},
+      s:{ar:'منذ ساعة',en:'1 hour ago'} },
+    { type:'coupon', unread:true, href:'raf_coupons.html',
+      t:{ar:'كوبون جديد بانتظارك — خصم 20%',en:'A new coupon is waiting — 20% off'},
+      s:{ar:'منذ 90 دقيقة',en:'90 minutes ago'} },
+    { type:'reward', unread:true, href:'raf_rewards.html',
+      t:{ar:'ربحت 120 نقطة مكافآت',en:'You earned 120 reward points'},
+      s:{ar:'منذ ساعتين',en:'2 hours ago'} },
+    { type:'product', unread:false, href:'raf_product.html?id=P-001',
+      t:{ar:'عاد للمخزون: قميص أوفرسايز كلاسيك',en:'Back in stock: Classic Oversize Shirt'},
+      s:{ar:'منذ 3 ساعات',en:'3 hours ago'} },
+    { type:'store', unread:false, href:'raf_storespage.html',
+      t:{ar:'متجر جديد انضم — Nova Shoes',en:'New store joined — Nova Shoes'},
+      s:{ar:'منذ 4 ساعات',en:'4 hours ago'} },
+    { type:'delivered', unread:false, href:'raf_order_details.html?id=ORD-1280',
+      t:{ar:'تم تسليم طلبك ‎#ORD-1280 بنجاح',en:'Order #ORD-1280 delivered successfully'},
+      s:{ar:'أمس',en:'Yesterday'} }
+  ];
+
+  function rowHTML(n,i){
+    var k=TYPES[n.type]||TYPES.store;
+    return '<div class="row nrow'+(n.unread?' unread':'')+'">'
+      + '<div class="row-ic" style="background:'+k.bg+';color:'+k.fg+'"><i class="ti '+k.ic+'"></i></div>'
+      + '<div class="row-body"><div class="row-lbl">'+L(n.t)+'</div>'
+        + '<div class="row-sub">'+L(n.s)+'</div>'
+        + '<a class="n-act'+(k.primary?' primary':'')+'" href="'+n.href+'" onclick="markRead('+i+')">'
+          + '<i class="ti '+k.icon+'"></i> '+L(k.act)+'</a>'
+      + '</div></div>';
+  }
+
+  function visible(){
+    return NOTIFS.filter(function(n){
+      var k=TYPES[n.type]||{};
+      return !(k.feature==='loyalty' && !loyaltyOn());   /* hide reward alerts while loyalty is off */
+    });
+  }
+  function render(){
+    var list=visible();
+    document.getElementById('notifList').innerHTML = list.map(rowHTML).join('');
+    document.getElementById('notifList').style.display = list.length?'':'none';
+    document.getElementById('notifEmpty').style.display = list.length?'none':'';
+    var unread=list.filter(function(n){return n.unread;}).length;
+    var btn=document.getElementById('markAll');
+    if(btn) btn.disabled = unread===0;
+  }
+  window.markRead=function(i){ if(NOTIFS[i]) NOTIFS[i].unread=false; };
+  window.markAllRead=function(){ NOTIFS.forEach(function(n){n.unread=false;}); render();
+    if(window.RAFShop&&RAFShop.toast) RAFShop.toast(T('تم تعليم الكل كمقروء','All marked as read'),{icon:'ti-checks'}); };
+
+  function boot(){
+    render();
+    var root=document.getElementById('htmlRoot');
+    if(root) new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
 </body>
 </html>

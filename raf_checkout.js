@@ -8,7 +8,9 @@
 
   var SHIP = 1.000;        /* per-store delivery fee */
   var FREE_OVER = 25.000;  /* free delivery threshold (per order subtotal) */
-  var COUPONS = { WELCOME20: 20, FLASH10: 10, VIP30: 30, RAMADAN25: 25 };
+  /* single source of truth for valid codes — shared by the cart and the
+     Offers Center so a coupon behaves identically from either entry point */
+  var COUPONS = { WELCOME20: 20, FLASH10: 10, VIP30: 30, RAMADAN25: 25, SUMMER15: 15 };
 
   function root() { return document.getElementById('htmlRoot') || document.documentElement; }
   function en() { return root().lang === 'en'; }
