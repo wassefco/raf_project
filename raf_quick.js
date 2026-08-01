@@ -16,6 +16,12 @@
 
   var P=null, sel={}, qty=1, prefetched=null, busy=false;
 
+  /* availability resolved by the shared rule (same as every listing card) */
+  function isOOS(p){
+    if(window.RAFShop && RAFShop.Stock) return RAFShop.Stock.isOOS(p);
+    return !!p && (p.stock===0 || p.available===false);
+  }
+
   /* ---------- styles ---------- */
   function css(){
     if(document.getElementById('rq-css')) return;
@@ -124,7 +130,7 @@
 
   /* ---------- render ---------- */
   function html(){
-    var out = P.stock === 0;
+    var out = isOOS(P);
     var saved = P.old ? (parseFloat(P.old) - parseFloat(P.price)) : 0;
     return '<div class="rq" role="dialog" aria-modal="true" aria-label="'+T('طلب سريع','Quick Order')+'">'
       + '<button class="rq-x" aria-label="'+T('إغلاق','Close')+'"><i class="ti ti-x"></i></button>'
@@ -154,11 +160,11 @@
       + '</div>'
       + '<div class="rq-f"><div class="rq-tot"><small>'+T('الإجمالي','Total')+'</small><b id="rqTot">'+money(parseFloat(P.price)*qty)+'</b></div>'
         + '<button class="rq-add" id="rqAdd" '+(out?'disabled':'')+'><i class="ti ti-shopping-cart-plus"></i> <span>'
-        + (out?T('غير متوفر','Unavailable'):T('أضف ومتابعة التسوق','Add & continue shopping'))+'</span></button></div>'
+        + (out?T('نفدت الكمية','Sold Out'):T('أضف ومتابعة التسوق','Add & continue shopping'))+'</span></button></div>'
       + '</div>';
   }
   function stockHTML(){
-    if(P.stock===0) return '<div class="rq-stock out"><i class="ti ti-ban"></i> '+T('نفد المخزون','Out of stock')+'</div>';
+    if(isOOS(P))    return '<div class="rq-stock out"><i class="ti ti-ban"></i> '+T('نفدت الكمية','Sold Out')+'</div>';
     if(P.stock<=5)  return '<div class="rq-stock low"><i class="ti ti-flame"></i> '+T('بقي '+P.stock+' قطع فقط','Only '+P.stock+' left')+'</div>';
     return '<div class="rq-stock ok"><i class="ti ti-circle-check"></i> '+T('متوفر','In stock')+'</div>';
   }
@@ -229,7 +235,7 @@
   }
 
   function addAndGo(){
-    if(busy||!P||P.stock===0) return;
+    if(busy||!P||isOOS(P)) return;
     var variant={};
     if(P.variants){
       for(var gi=0;gi<P.variants.length;gi++){
@@ -254,8 +260,11 @@
     }).catch(function(){ busy=false; if(btn) btn.disabled=false; });
   }
 
-  /* whether the sheet was completed by adding or by closing, the customer
-     continues inside the same store (page is already warm) */
+  /* Whether the sheet was completed by adding or by closing, the customer
+     continues inside the same store. The Store page is already the page
+     underneath (opened at the same time as the sheet), so closing simply
+     dismisses the sheet — no further navigation or loading. */
+  function onStorePage(){ return /raf_store\.html$/i.test(location.pathname); }
   function finish(added){
     if(!backEl) return;
     var url=storeUrl();
@@ -265,8 +274,34 @@
     var el=backEl; backEl=null;
     setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); },300);
     if(lastFocus&&lastFocus.focus) try{ lastFocus.focus(); }catch(e){}
-    setTimeout(function(){ location.href=url; }, added?600:180);
+    /* only navigate when the sheet was opened somewhere other than the store */
+    if(!onStorePage()) setTimeout(function(){ location.href=url; }, added?600:180);
   }
 
-  window.RAFQuick={ open:open, close:function(){ finish(false); }, isOpen:function(){ return !!backEl; } };
+  /* URL a multi-store product card navigates to: the Store page, with the
+     sheet requested via ?quick= so both happen in one step. */
+  function urlFor(p){
+    var name=(p && p.store && (p.store.en||p.store.ar)) || (p && p.store) || '';
+    var slug=(window.RAFCatalog&&RAFCatalog.slugFor)?RAFCatalog.slugFor(name):'';
+    if(!slug && window.RAFCatalog){ var c=RAFCatalog.get(p.id); if(c) slug=c.slug||''; }
+    return 'raf_store.html?store='+encodeURIComponent(slug)+'&quick='+encodeURIComponent(p.id);
+  }
+
+  /* Store page: open the sheet on top when arriving with ?quick=<id> */
+  function autoOpen(){
+    var id=new URLSearchParams(location.search).get('quick');
+    if(!id) return;
+    /* drop the param so a refresh doesn't reopen the sheet */
+    try{
+      var u=new URL(location.href); u.searchParams.delete('quick');
+      history.replaceState({},'',u.pathname+(u.search||'')+u.hash);
+    }catch(e){}
+    var go=function(){ open(id); };
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',go);
+    else setTimeout(go,40);
+  }
+
+  window.RAFQuick={ open:open, close:function(){ finish(false); }, isOpen:function(){ return !!backEl; },
+                    urlFor:urlFor, autoOpen:autoOpen };
+  autoOpen();
 })();

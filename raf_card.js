@@ -91,7 +91,8 @@
     .rc-cart.rc-oos{background:var(--bg3,#E7E1D4);color:var(--text3,#8A857C);border-color:var(--border,#E2DBCC);cursor:not-allowed;}
     .rc-cart.rc-oos:hover{background:var(--bg3,#E7E1D4);color:var(--text3,#8A857C);border-color:var(--border,#E2DBCC);}
     .rc-card.is-oos .rc-img{filter:grayscale(1);opacity:.62;}
-    .rc-oos-tag{position:absolute;top:12px;inset-inline-end:12px;background:var(--ink,#15130F);color:#F3EFE5;font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:20px;}
+    .rc-oos-tag{position:absolute;top:12px;inset-inline-end:12px;display:inline-flex;align-items:center;gap:5px;background:var(--ink,#15130F);color:#F3EFE5;font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:20px;box-shadow:0 4px 12px -4px rgba(20,16,8,.5);}
+    .rc-oos-tag i{font-size:13px;}
     .rc-qty{width:100%;height:38px;border:1px solid var(--gold,#C9A84C);background:var(--gold-soft,rgba(201,168,76,.12));border-radius:30px;display:flex;align-items:center;justify-content:space-between;padding:0 4px;gap:4px;}
     .rc-qty .qb{width:30px;height:30px;flex:0 0 30px;border:none;border-radius:50%;background:var(--gold,#C9A84C);color:#1C1606;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
     .rc-qty .qb:hover{background:var(--gold2,#A07828);color:#fff;}
@@ -152,15 +153,20 @@
     }
     if (isOOS(p)) {
       return '<button class="rc-cart rc-oos" disabled aria-disabled="true"><i class="ti ti-ban"></i> ' +
-        '<span>' + T('نفد المخزون', 'Out of Stock') + '</span></button>';
+        '<span>' + T('نفدت الكمية', 'Sold Out') + '</span></button>';
     }
     var hasV = p.variants && p.variants.length;
     return '<button class="rc-cart" onclick="RAFCard.addClick(event,this)"><i class="ti ' + (hasV ? 'ti-adjustments-horizontal' : 'ti-shopping-cart-plus') + '"></i> ' +
       '<span>' + T('أضف للسلة', 'Add to Cart') + '</span></button>';
   }
 
-  /* a product is unavailable when stock is 0 or availability is explicitly false */
-  function isOOS(p) { return !!p && (p.stock === 0 || p.available === false || p.outOfStock === true); }
+  /* Availability comes from the shared resolver so a stale wishlist/search
+     snapshot can never disagree with the live catalog. Standalone fallback
+     kept for pages that render cards without the data layer. */
+  function isOOS(p) {
+    if (window.RAFShop && RAFShop.Stock) return RAFShop.Stock.isOOS(p);
+    return !!p && (p.stock === 0 || p.available === false || p.outOfStock === true);
+  }
 
   /* ---------- render one card ---------- */
   function product(p, opts) {
@@ -180,7 +186,7 @@
     var imgInner = p.img ? '' : '<i class="ti ' + (p.ic || 'ti-box') + '"></i>';
     return '<article class="rc-card' + (isOOS(p) ? ' is-oos' : '') + '" data-id="' + p.id + '" data-href="' + o.href + '" onclick="RAFCard.go(this)">' +
       '<div class="rc-img"' + imgStyle + '>' + imgInner +
-        (isOOS(p) ? '<span class="rc-oos-tag">' + T('نفد المخزون', 'Out of Stock') + '</span>' : '') +
+        (isOOS(p) ? '<span class="rc-oos-tag"><i class="ti ti-ban"></i> ' + T('نفدت الكمية', 'Sold Out') + '</span>' : '') +
         (p.disc && !isOOS(p) ? '<span class="rc-disc">-' + p.disc + '%</span>' : '') +
         (o.wish ? (function(){ var w = (window.RAFShop && RAFShop.Wish.has(p.id)); return '<button class="rc-wish' + (w ? ' on' : '') + '" onclick="RAFCard.wish(event,this)" aria-label="wishlist"><i class="ti ' + (w ? 'ti-heart-filled' : 'ti-heart') + '"></i></button>'; })() : '') +
       '</div>' +
@@ -200,13 +206,49 @@
   }
 
   /* ---------- interactions ---------- */
-  /* Multi-store cards target raf_quick.* → open the Quick Order bottom sheet
-     in place (it also warms the Store page in the background). Single-store
-     cards target raf_product.html and navigate normally. */
+  /* Multi-store cards target raf_quick.* → go straight to the owning Store
+     page and request the Quick Order sheet in the same step, so the store is
+     already the page behind the sheet. Single-store cards target
+     raf_product.html and navigate normally. */
   function isQuickTarget(h) { return /raf_quick\.(html|js)?/.test(h || ''); }
+  /* actually open the sheet / navigate to the owning store */
+  function openQuick(p) {
+    /* already inside the store → just open the sheet, no navigation */
+    if (/raf_store\.html$/i.test(location.pathname)) { RAFQuick.open(p.id); return; }
+    window.location = RAFQuick.urlFor(p);
+  }
+  /* ONE STORE PER ORDER — when the cart belongs to another store the customer
+     is asked BEFORE anything opens or navigates. Cancelling leaves them exactly
+     where they are: no Quick Order sheet, no store change, cart untouched. */
+  function quickFlow(p) {
+    if (!window.RAFQuick || !p) return false;
+    if (window.RAFQuick.isOpen && RAFQuick.isOpen()) return true;
+    var Sh = window.RAFShop;
+    /* a sold-out product can't be added, so it must never prompt to clear the
+       cart — browsing it is still allowed */
+    if (Sh && Sh.Cart.conflicts && !isOOS(p) && Sh.Cart.conflicts(p)) {
+      var cur = Sh.Cart.storeLabelForKey(Sh.Cart.currentStore()), next = Sh.Cart.storeLabel(p);
+      Sh.Cart.confirmSwitch(cur, next).then(function (ok) {
+        if (!ok) return;                       /* cancelled → stay put, nothing opens */
+        Sh.Cart.clear();                       /* confirmed → start the new store's cart */
+        refreshAll();
+        openQuick(p);
+      });
+      return true;                             /* handled — never fall through to navigation */
+    }
+    openQuick(p);
+    return true;
+  }
+  /* re-render every card's cart control (after the cart is cleared) */
+  function refreshAll() {
+    document.querySelectorAll('.rc-card').forEach(function (c) {
+      var w = c.querySelector('.rc-cartwrap');
+      if (w && REG[c.dataset.id]) w.innerHTML = cartCtrlHTML(REG[c.dataset.id]);
+    });
+  }
   function go(card) {
     var h = card.getAttribute('data-href');
-    if (window.RAFQuick && isQuickTarget(h)) { RAFQuick.open(card.dataset.id); return; }
+    if (isQuickTarget(h) && quickFlow(REG[card.dataset.id])) return;
     if (h) window.location = h;
   }
   function wish(e, btn) {
@@ -223,22 +265,24 @@
   function addClick(e, btn) {
     e.preventDefault(); e.stopPropagation();
     var p = prodFromEl(btn); if (!p || isOOS(p)) return;   /* never add unavailable products */
-    /* on multi-store listings "Add to Cart" opens Quick Order too, so the
-       customer reviews options and continues inside that store */
+    /* on multi-store listings "Add to Cart" follows the same flow: land on the
+       Store page with Quick Order open on top */
     var card = btn.closest('.rc-card');
-    if (window.RAFQuick && card && isQuickTarget(card.getAttribute('data-href'))) { RAFQuick.open(p.id); return; }
+    if (card && isQuickTarget(card.getAttribute('data-href')) && quickFlow(p)) return;
     if (p.variants && p.variants.length) openVariants(p);  /* variants are required before adding */
     else guardedAdd(p, {});
   }
 
-  /* single funnel for every add — enforces the one-store-per-order rule */
+  /* single funnel for every add — enforces availability + one-store-per-order */
   function guardedAdd(p, variant) {
+    if (isOOS(p)) {
+      if (window.RAFShop && RAFShop.toast) RAFShop.toast(T('نفدت كمية هذا المنتج', 'This product is sold out'), { icon: 'ti-ban' });
+      refresh(p.id);
+      return Promise.resolve({ added: false, oos: true });
+    }
     if (Cart.tryAdd) {
       return Cart.tryAdd(p, variant).then(function (r) {
-        if (r.cleared) document.querySelectorAll('.rc-card').forEach(function (c) {
-          var w = c.querySelector('.rc-cartwrap'); if (w && REG[c.dataset.id]) w.innerHTML = cartCtrlHTML(REG[c.dataset.id]);
-        });
-        else refresh(p.id);
+        if (r.cleared) refreshAll(); else refresh(p.id);
         return r;
       });
     }

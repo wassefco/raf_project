@@ -268,6 +268,9 @@
     display: flex; align-items: center; justify-content: center; gap: 8px;
   }
   .btn-add-cart:hover { background: var(--gray-5); color: var(--black); }
+  /* Sold Out — action disabled, styling made obviously inert */
+  .btn-add-cart.is-oos,
+  .btn-add-cart.is-oos:hover { background: var(--gray-2); color: var(--gray-4); border-color: var(--gray-3); cursor: not-allowed; box-shadow: none; opacity: .85; }
   .btn-wishlist {
     width: 56px; height: 56px;
     border: 1px solid var(--gray-2); border-radius: var(--radius);
@@ -1155,14 +1158,43 @@ const PRODUCT_DATA = {
     }
   }
 
+  /* ---------- availability (shared rule) ----------
+     Availability must describe the product actually on screen: unknown ids
+     fall back to P-001 here exactly as the renderer does, and the page's own
+     stock figure is passed to the shared resolver as the fallback. */
+  function curId() {
+    var id = new URLSearchParams(location.search).get('id') || 'P-001';
+    return (typeof PRODUCT_DATA !== 'undefined' && PRODUCT_DATA[id]) ? id : 'P-001';
+  }
+  function productIsOOS() {
+    var id = curId();
+    var pd = (typeof PRODUCT_DATA !== 'undefined') ? PRODUCT_DATA[id] : null;
+    if (!(window.RAFShop && RAFShop.Stock)) return !!(pd && pd.stock === 0);
+    return RAFShop.Stock.isOOS({ id: id, stock: pd ? pd.stock : null });
+  }
+  /* Sold Out products show a disabled "Sold Out" button instead of Add to Cart */
+  function applyAvailability() {
+    var btn = document.querySelector('.btn-add-cart');
+    if (!btn) return;
+    var en = (document.getElementById('htmlRoot') || document.documentElement).lang === 'en';
+    if (!productIsOOS()) {
+      btn.disabled = false; btn.removeAttribute('aria-disabled'); btn.classList.remove('is-oos');
+      btn.innerHTML = '<i class="ti ti-shopping-cart"></i> ' + (en ? 'Add to Cart' : 'أضف للسلة');
+      return;
+    }
+    btn.disabled = true; btn.setAttribute('aria-disabled', 'true'); btn.classList.add('is-oos');
+    btn.innerHTML = '<i class="ti ti-ban"></i> ' + (en ? 'Sold Out' : 'نفدت الكمية');
+  }
+
   // Add to cart
   function addToCart() {
     var en = (document.getElementById('htmlRoot') || document.documentElement).lang === 'en';
     var t = function(ar,e){ return en ? e : ar; };
-    var pid = new URLSearchParams(location.search).get('id') || 'P-001';
+    var pid = curId();
     var pd = (typeof PRODUCT_DATA !== 'undefined' && PRODUCT_DATA[pid]) ? PRODUCT_DATA[pid] : null;
     if (!pd || !window.RAFShop) return;
     var btn = document.querySelector('.btn-add-cart');
+    if (productIsOOS()) { applyAvailability(); return; }   /* never add a sold-out product */
 
     /* enforce required variant selection */
     var variant = {};
@@ -1193,8 +1225,16 @@ const PRODUCT_DATA = {
     var en = (document.getElementById('htmlRoot') || document.documentElement).lang === 'en';
     btn.innerHTML = '<i class="ti ti-check"></i> ' + msg;
     btn.style.background = bg; btn.style.color = 'white';
-    setTimeout(function(){ btn.innerHTML = '<i class="ti ti-shopping-cart"></i> ' + (en ? 'Add to Cart' : 'أضف للسلة'); btn.style.background=''; btn.style.color=''; }, 1600);
+    setTimeout(function(){ btn.style.background=''; btn.style.color=''; applyAvailability(); }, 1600);
   }
+
+  /* keep the Sold Out state correct on load and when the language flips */
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyAvailability);
+  else applyAvailability();
+  (function(){
+    var r = document.getElementById('htmlRoot');
+    if (r) new MutationObserver(applyAvailability).observe(r, { attributes:true, attributeFilter:['lang'] });
+  })();
 
   // Tabs
   function switchTab(id, btn) {
@@ -1226,6 +1266,7 @@ const PRODUCT_DATA = {
 <script src="raf_search.js"></script>
 <!-- ===== Global RAF Product Card — Related / Similar / Recommended products ===== -->
 <script src="raf_data.js"></script>
+<script src="raf_catalog.js"></script>
 <script src="raf_card.js"></script>
 <script>
 (function(){

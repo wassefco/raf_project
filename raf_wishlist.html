@@ -554,7 +554,7 @@ function applyLang(){
 
     document.getElementById('aaSummary').textContent =
       T('سيتم إضافة ','Adding ') + avail + T(' من أصل ',' of ') + aaState.length + T(' منتج','products') +
-      (skipped ? T(' · '+skipped+' غير متوفر سيتم تخطيه',' · '+skipped+' unavailable will be skipped') : '');
+      (skipped ? T(' · '+skipped+' نفدت كميته سيتم تخطيه',' · '+skipped+' sold out will be skipped') : '');
 
     /* store picker + one-store-per-order notice */
     var cur = RAFShop.Cart.currentStore();
@@ -578,7 +578,7 @@ function applyLang(){
           + '</div></div>';
       }).join('') : '';
       var note = r.skip
-        ? '<div class="aa-note"><i class="ti ti-ban"></i> '+T('غير متوفر — سيتم تخطيه','Unavailable — will be skipped')+'</div>'
+        ? '<div class="aa-note"><i class="ti ti-ban"></i> '+T('نفدت الكمية — سيتم تخطيه','Sold Out — will be skipped')+'</div>'
         : (needsVariants(p) ? '<div class="aa-note" id="aaNote'+i+'"><i class="ti ti-alert-circle"></i> '+T('اختر الخيارات المطلوبة','Select the required options')+'</div>' : '');
       return '<div class="aa-row"'+(r.skip?' style="opacity:.55"':'')+'>'
         + '<div class="aa-thumb"><i class="ti '+(p.ic||'ti-box')+'"></i></div>'
@@ -649,7 +649,7 @@ function applyLang(){
     RAFShop.Cart.badge(); render();           /* cart + wishlist badges update instantly */
     var msg = T('تمت إضافة '+rows.length+' منتج إلى السلة','Added '+rows.length+' product'+(rows.length===1?'':'s')+' to your cart');
     if(cleared) msg = T('تم بدء سلة جديدة · ','New cart started · ') + msg;
-    if(skipped) msg += T(' · تم تخطي '+skipped+' غير متوفر',' · skipped '+skipped+' unavailable');
+    if(skipped) msg += T(' · تم تخطي '+skipped+' نفدت كميته',' · skipped '+skipped+' sold out');
     if(incomplete) msg += T(' · '+incomplete+' بحاجة لاختيار الخيارات',' · '+incomplete+' need options');
     RAFShop.toast(msg, { icon:'ti-shopping-cart-plus' });
   }

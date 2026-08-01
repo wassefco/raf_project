@@ -22,6 +22,40 @@
     return { ar: d.getDate() + ' ' + mAr[d.getMonth()] + '، ' + h12 + ':' + mm + ap, en: mEn[d.getMonth()] + ' ' + d.getDate() + ', ' + h12 + ':' + mm + ' ' + apE };
   }
 
+  /* ─────────── AVAILABILITY (single source of truth) ───────────
+     Product objects reach the UI from many places — listings, search results
+     and the wishlist — and some of them carry no stock field, or a snapshot
+     taken when the item was favourited. Resolving against the live catalog by
+     id keeps every surface (Home · Store · Categories · Search · Favorites)
+     showing the same Sold Out state from one rule. */
+  var Stock = {
+    /* live stock for a product, or null when genuinely unknown */
+    of: function (p) {
+      if (!p) return null;
+      var live = window.RAFCatalog && RAFCatalog.get ? RAFCatalog.get(p.id) : null;
+      if (live && live.stock != null) return live.stock;
+      return (p.stock == null ? null : p.stock);
+    },
+    /* Sold out when any source says so — availability fails closed, so a
+       product is never offered for sale while one source still calls it
+       unavailable. A missing/null stock field is "unknown", not "in stock". */
+    isOOS: function (p) {
+      if (!p) return false;
+      if (p.available === false || p.outOfStock === true) return true;
+      if (p.stock === 0) return true;          /* the caller's own figure */
+      return Stock.of(p) === 0;                /* the live catalog */
+    },
+    /* merge the live availability back onto a product object (non-mutating) */
+    sync: function (p) {
+      if (!p) return p;
+      var s = Stock.of(p);
+      p.stock = s;
+      p.available = !Stock.isOOS(p);
+      return p;
+    },
+    label: function (p) { return Stock.isOOS(p) ? (isEn() ? 'Sold Out' : 'نفدت الكمية') : ''; }
+  };
+
   /* ─────────── CART ─────────── */
   function vsig(v) { v = v || {}; return Object.keys(v).sort().map(function (k) { return k + ':' + v[k]; }).join(','); }
   function keyOf(id, v) { return id + '|' + vsig(v); }
@@ -31,6 +65,9 @@
     line: function (key) { return Cart.read().find(function (l) { return l.key === key; }); },
     firstForProduct: function (id) { return Cart.read().find(function (l) { return l.id === id; }); },
     add: function (p, variant) {
+      /* safety net: a sold-out product can never enter the cart, whichever
+         path calls this (listing, Quick Order, Favorites, Add All) */
+      if (Stock.isOOS(p)) return null;
       var a = Cart.read(), key = keyOf(p.id, variant), ex = a.find(function (l) { return l.key === key; });
       if (ex) ex.qty++;
       else a.push({ key: key, id: p.id, name: { ar: p.ar, en: p.en }, price: p.price, qty: 1, variant: variant || {}, ic: p.ic || 'ti-box', store: p.store ? { ar: pick(p.store, 'ar'), en: pick(p.store, 'en') } : null });
@@ -69,6 +106,9 @@
     /* Guarded add. Never clears the cart silently — asks first.
        Resolves { added, cleared, cancelled }. Use this everywhere instead of add(). */
     tryAdd: function (p, variant) {
+      /* availability is checked before the store rule — a sold-out product must
+         never trigger a "clear your cart" prompt */
+      if (Stock.isOOS(p)) return Promise.resolve({ added: false, cleared: false, cancelled: false, oos: true });
       if (!Cart.conflicts(p)) { Cart.add(p, variant); return Promise.resolve({ added: true, cleared: false, cancelled: false }); }
       var cur = Cart.storeLabelForKey(Cart.currentStore()), next = Cart.storeLabel(p);
       return Cart.confirmSwitch(cur, next).then(function (ok) {
@@ -313,7 +353,7 @@
     });
   }
 
-  window.RAFShop = { Cart: Cart, Wish: Wish, Orders: Orders, search: search, catalog: CATALOG, stores: STORES, L: L, nowStr: nowStr, toast: toast, isEn: isEn, confirm: confirmDialog };
+  window.RAFShop = { Cart: Cart, Wish: Wish, Stock: Stock, Orders: Orders, search: search, catalog: CATALOG, stores: STORES, L: L, nowStr: nowStr, toast: toast, isEn: isEn, confirm: confirmDialog };
 
   /* keep every tab / page in sync */
   window.addEventListener('storage', function (e) { if (e.key === LS.cart) Cart.badge(); if (e.key === LS.wish) Wish.badge(); });

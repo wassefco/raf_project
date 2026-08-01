@@ -43,6 +43,9 @@
   ];
   /* multi-store search results open the lightweight Quick Order page */
   function prodHref(p){ return p.sku ? 'raf_quick.html?id='+encodeURIComponent(p.sku) : 'raf_quick.html'; }
+  /* availability from the shared rule, so search agrees with every listing */
+  function isOOS(p){ return !!(window.RAFShop && RAFShop.Stock && RAFShop.Stock.isOOS({ id:p.sku, stock:p.stock })); }
+  function oosTag(p){ return isOOS(p) ? '<span class="rs-oos">'+(en()?'Sold Out':'نفدت الكمية')+'</span>' : ''; }
   var STORES = [
     {ic:'ti-device-mobile',ar:'تك هاوس',en:'Tech House',rate:'4.8',prod:'320'},
     {ic:'ti-spray',ar:'دار العود',en:'Dar Aloud',rate:'4.9',prod:'180'},
@@ -97,6 +100,8 @@
     '.rs-thumb{width:42px;height:42px;border-radius:10px;background:linear-gradient(150deg,#EDE8DC,#E7E1D4);display:flex;align-items:center;justify-content:center;font-size:21px;color:#A07828;flex-shrink:0;}'+
     '.rs-thumb.store{border-radius:50%;}.rs-thumb.cat{border-radius:50%;background:rgba(201,168,76,.12);}'+
     '.rs-info{flex:1;min-width:0;}.rs-name{font-size:13.5px;font-weight:600;color:#0A0A0A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'+
+    '.rs-item.is-oos .rs-thumb{filter:grayscale(1);opacity:.6;}'+
+    '.rs-oos{display:inline-block;margin-inline-start:7px;background:#15130F;color:#F3EFE5;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;vertical-align:middle;}'+
     '.rs-meta{font-size:11.5px;color:#8A857C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.rs-go{color:#8A857C;font-size:16px;flex-shrink:0;}'+
     '.rs-none{text-align:center;color:#8A857C;font-size:13px;padding:16px;}';
     var s=document.createElement('style'); s.id='raf-search-css'; s.textContent=c; document.head.appendChild(s);
@@ -126,7 +131,7 @@
     var grp=function(t,ic,items){return items.length?'<div class="rs-block"><div class="rs-head"><h4><i class="ti '+ic+'"></i> '+t+'</h4></div>'+items.join('')+'</div>':'';};
     var html=quickHTML();
     html+=grp(en()?'Categories':'الفئات','ti-category',cats.map(function(c){return '<a class="rs-item" href="raf_storespage.html?cat='+c.id+'"><div class="rs-thumb cat"><i class="ti '+c.icon+'"></i></div><div class="rs-info"><div class="rs-name">'+L(c)+'</div><div class="rs-meta">'+(en()?'Category':'فئة')+'</div></div><i class="ti ti-arrow-left rs-go"></i></a>';}));
-    html+=grp(en()?'Products':'المنتجات','ti-box',prods.map(function(p){return '<a class="rs-item" href="'+prodHref(p)+'"><div class="rs-thumb"><i class="ti '+p.ic+'"></i></div><div class="rs-info"><div class="rs-name">'+L(p)+'</div><div class="rs-meta">'+L(p.store)+' · '+p.price+' KWD</div></div><i class="ti ti-arrow-left rs-go"></i></a>';}));
+    html+=grp(en()?'Products':'المنتجات','ti-box',prods.map(function(p){return '<a class="rs-item'+(isOOS(p)?' is-oos':'')+'" href="'+prodHref(p)+'"><div class="rs-thumb"><i class="ti '+p.ic+'"></i></div><div class="rs-info"><div class="rs-name">'+L(p)+oosTag(p)+'</div><div class="rs-meta">'+L(p.store)+' · '+p.price+' KWD</div></div><i class="ti ti-arrow-left rs-go"></i></a>';}));
     html+=grp(en()?'Stores':'المحلات','ti-building-store',stores.map(function(s){return '<a class="rs-item" href="raf_store.html"><div class="rs-thumb store"><i class="ti '+s.ic+'"></i></div><div class="rs-info"><div class="rs-name">'+L(s)+'</div><div class="rs-meta">'+s.prod+' '+(en()?'products':'منتج')+' · ★ '+s.rate+'</div></div><i class="ti ti-arrow-left rs-go"></i></a>';}));
     if(!cats.length&&!prods.length&&!stores.length) html+='<div class="rs-none">'+(en()?'No matches found':'لا نتائج مطابقة')+'</div>';
     html+='<div class="rs-recent" style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);margin-top:6px;" onclick="RAFSearch.run(\''+encodeURIComponent(q)+'\')"><span><i class="ti ti-search" style="color:#A07828"></i> '+(en()?'Search for':'ابحث عن')+' &quot;'+q+'&quot;</span><i class="ti ti-arrow-left" style="color:#A07828"></i></div>';
