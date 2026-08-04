@@ -611,6 +611,7 @@
 </nav>
 
 <script src="raf_topbar.js"></script>
+<script src="raf_notify.js"></script>
 <script src="raf_nav.js"></script>
 <script src="raf_search.js"></script>
 <script src="raf_data.js"></script>
@@ -1081,21 +1082,30 @@ function switchTab(id, btn){
 /* -----------------------------------------------
    FOLLOW / SHARE
 ----------------------------------------------- */
-function followKey(){ return 'raf_follow_' + SLUG; }
+/* Followed stores live in the shared list and are managed from the
+   Favorites page — this button only reads and writes that one source. */
+function followRecord(){
+  return { slug: SLUG, name: STORE.name, cat: STORE.cat, ic: STORE.icon,
+           products: STORE.products, rating: STORE.rating };
+}
+function isFollowing(){ return !!(window.RAFShop && RAFShop.Follow.has(SLUG)); }
 function syncFollowBtn(){
-  var on = localStorage.getItem(followKey()) === '1';
+  var on = isFollowing();
   var btn = document.getElementById('followBtn');
+  if (!btn) return;
   btn.classList.toggle('on', on);
+  btn.setAttribute('aria-pressed', on ? 'true' : 'false');
   btn.querySelector('i').className = 'ti ' + (on ? 'ti-heart-filled' : 'ti-heart');
   btn.querySelector('span').textContent = on ? T('تتابعه', 'Following') : T('تابع المحل', 'Follow store');
 }
 function toggleFollow(){
-  var on = localStorage.getItem(followKey()) === '1';
-  localStorage.setItem(followKey(), on ? '0' : '1');
+  if (!window.RAFShop) return;
+  var on = RAFShop.Follow.toggle(followRecord());
   syncFollowBtn();
-  if (window.RAFShop && RAFShop.toast){
-    RAFShop.toast(on ? T('تم إلغاء المتابعة', 'Unfollowed') : T('تتابع ' + STORE.name + ' الآن', 'Now following ' + STORE.name),
-                  { icon: on ? 'ti-heart-off' : 'ti-heart-filled' });
+  if (RAFShop.toast){
+    RAFShop.toast(on ? T('تتابع ' + STORE.name + ' الآن', 'Now following ' + STORE.name)
+                     : T('تم إلغاء المتابعة', 'Unfollowed'),
+                  { icon: on ? 'ti-heart-filled' : 'ti-heart-off' });
   }
 }
 function shareStore(){

@@ -658,6 +658,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 <script src="raf_nav.js"></script>
 <script src="raf_ads.js"></script>
 <script src="raf_data.js"></script>
+<script src="raf_notify.js"></script>
 <script src="raf_catalog.js"></script>
 <script src="raf_card.js"></script>
 <script src="raf_quick.js"></script>
@@ -672,15 +673,17 @@ const ADS=[
   {type:{ar:'حملة موسمية',en:'Seasonal Campaign'},pic:'ti-confetti',title:{ar:'تخفيضات الموسم الكبرى',en:'The Big Seasonal Sale'},sub:{ar:'أفضل العروض من كل المحلات في مكان واحد.',en:'The best deals across all stores in one place.'},chips:[{ar:'كل الفئات',en:'All categories'},{ar:'حتى 70%',en:'Up to 70%'}],promo:'-70%',brand:{ar:'رف',en:'RAF',ic:'ti-discount'},cta:{ar:'تصفّح الحملة',en:'Browse Campaign'},href:'raf_offers.html',g:'radial-gradient(circle at 78% 35%,#3a1e5f,#0a0a0a)'}
 ];
 /* Categories — full admin model: name/icon/image/cover/sort/active */
+/* Categories map 1:1 onto the category keys the Products page filters by
+   (raf_offers.html?cat=<id>), so every category opens a real, populated list. */
 const CATEGORIES=[
   {id:'electronics',ar:'إلكترونيات',en:'Electronics',icon:'ti-device-mobile',image:'',cover:'',sort:1,active:true},
   {id:'fashion',ar:'أزياء',en:'Fashion',icon:'ti-hanger',image:'',cover:'',sort:2,active:true},
-  {id:'perfume',ar:'عطور',en:'Perfume',icon:'ti-spray',image:'',cover:'',sort:3,active:true},
-  {id:'watches',ar:'ساعات',en:'Watches',icon:'ti-clock-hour-4',image:'',cover:'',sort:4,active:true},
-  {id:'jewelry',ar:'مجوهرات',en:'Jewelry',icon:'ti-diamond',image:'',cover:'',sort:5,active:true},
-  {id:'kids',ar:'أطفال',en:'Kids',icon:'ti-baby-carriage',image:'',cover:'',sort:6,active:true},
-  {id:'home',ar:'المنزل والمطبخ',en:'Home & Kitchen',icon:'ti-home',image:'',cover:'',sort:7,active:true},
-  {id:'sports',ar:'رياضة',en:'Sports',icon:'ti-ball-football',image:'',cover:'',sort:8,active:true}
+  {id:'shoes',ar:'أحذية',en:'Shoes',icon:'ti-shoe',image:'',cover:'',sort:3,active:true},
+  {id:'bags',ar:'حقائب',en:'Bags',icon:'ti-backpack',image:'',cover:'',sort:4,active:true},
+  {id:'watches',ar:'ساعات',en:'Watches',icon:'ti-clock-hour-4',image:'',cover:'',sort:5,active:true},
+  {id:'perfume',ar:'عطور',en:'Perfume',icon:'ti-spray',image:'',cover:'',sort:6,active:true},
+  {id:'jewelry',ar:'مجوهرات',en:'Jewelry',icon:'ti-diamond',image:'',cover:'',sort:7,active:true},
+  {id:'accessories',ar:'إكسسوارات',en:'Accessories',icon:'ti-sunglasses',image:'',cover:'',sort:8,active:true}
 ];
 const OFFERS=[
   {id:'P-EARBUDS',ic:'ti-device-mobile',ar:'سماعات لاسلكية فاخرة',en:'Premium Wireless Earbuds',store:{ar:'تك هاوس',en:'Tech House'},price:'24.500',old:'35.000',disc:30,rate:'4.8',rev:'320'},
@@ -695,11 +698,13 @@ const OFFERS=[
     variants:[{label:{ar:'اللون',en:'Color'},options:[{v:'black',label:{ar:'أسود',en:'Black'}},{v:'white',label:{ar:'أبيض',en:'White'}}]},
               {label:{ar:'السعة',en:'Storage'},options:[{v:'std',label:{ar:'قياسي',en:'Standard'}},{v:'plus',label:{ar:'بلس (ذاكرة)',en:'Plus (memory)'}}]}]}
 ];
+/* each store carries the slug its Store page is registered under, so the
+   carousel opens the right storefront instead of always the default one */
 const STORES=[
-  {ic:'ti-device-mobile',ar:'تك هاوس',en:'Tech House',rate:'4.8',prod:'320',cat:{ar:'إلكترونيات',en:'Electronics'}},
-  {ic:'ti-spray',ar:'دار العود',en:'Dar Aloud',rate:'4.9',prod:'180',cat:{ar:'عطور',en:'Perfume'}},
-  {ic:'ti-hanger',ar:'كازا مود',en:'Casa Mode',rate:'4.7',prod:'450',cat:{ar:'أزياء',en:'Fashion'}},
-  {ic:'ti-diamond',ar:'لمسة ذهب',en:'Lamsa Gold',rate:'5.0',prod:'95',cat:{ar:'مجوهرات',en:'Jewelry'}}
+  {slug:'techzone',ic:'ti-device-mobile',ar:'تك هاوس',en:'TechZone',rate:'4.8',prod:'312',cat:{ar:'إلكترونيات',en:'Electronics'}},
+  {slug:'casa-mode',ic:'ti-hanger',ar:'كازا مود',en:'Casa Mode',rate:'4.9',prod:'284',cat:{ar:'أزياء',en:'Fashion'}},
+  {slug:'sole-co',ic:'ti-shoe',ar:'سول آند كو',en:'Sole & Co',rate:'4.7',prod:'156',cat:{ar:'أحذية',en:'Shoes'}},
+  {slug:'glam-store',ic:'ti-diamond',ar:'جلام ستور',en:'Glam Store',rate:'4.9',prod:'167',cat:{ar:'إكسسوارات وساعات',en:'Accessories & Watches'}}
 ];
 const AUCS=[
   {ic:'ti-clock-hour-4',ar:'ساعة فاخرة محدودة',en:'Limited Luxury Watch',bid:'145.000',bidders:23,sec:8130},
@@ -762,12 +767,13 @@ function viewAllCard(href,extraClass){return `<a class="view-all-card ${extraCla
 function catCard(c){
   const bg=c.image?`background-image:url('${c.image}')`:'';
   const inner=c.image?'':`<i class="ti ${c.icon}"></i>`;
-  return `<div class="car-item cat-item"><a class="cat" href="raf_storespage.html?cat=${c.id}"><div class="cat-circle" style="${bg}">${inner}</div><span>${L(c)}</span></a></div>`;
+  /* categories open the Products page filtered to that category */
+  return `<div class="car-item cat-item"><a class="cat" href="raf_offers.html?cat=${c.id}"><div class="cat-circle" style="${bg}">${inner}</div><span>${L(c)}</span></a></div>`;
 }
 /* Uses the single global RAF Product Card component (raf_card.js).
    The homepage is a multi-store listing → products open the Quick Order page. */
 function offerCard(o){return `<div class="car-item pwrap">${RAFCard.product(o)}</div>`;}
-function storeCard(s){return `<article class="car-item store-card" onclick="window.location='raf_store.html'">
+function storeCard(s){return `<article class="car-item store-card" onclick="window.location='raf_store.html?store=${s.slug}'">
   <div class="store-cover"></div><div class="store-body"><div class="store-logo"><i class="ti ${s.ic}"></i></div>
   <div class="store-name">${L(s)} <i class="ti ti-rosette-discount-check verify"></i></div>
   <div class="store-meta"><span><i class="ti ti-star-filled"></i> ${s.rate}</span><span class="dot"></span><span>${s.prod} ${curLang()==='en'?'products':'منتج'}</span><span class="dot"></span><span>${L(s.cat)}</span></div>
@@ -781,7 +787,7 @@ function aucCard(a){return `<article class="car-item auc-card">
     <a href="raf_auctions.html" class="btn-join"><i class="ti ti-gavel"></i> ${curLang()==='en'?'Join':'شارك'}</a></div></div></article>`;}
 
 /* store card variant for the "Stores with active offers" section */
-function dealStoreCard(s){var promo=s.promo||30;return `<article class="car-item store-card" onclick="window.location='raf_store.html'">
+function dealStoreCard(s){var promo=s.promo||30;return `<article class="car-item store-card" onclick="window.location='raf_store.html?store=${s.slug||'casa-mode'}'">
   <div class="store-cover"><span class="store-deal-badge"><i class="ti ti-discount-check"></i> ${curLang()==='en'?('Up to '+promo+'% off'):('خصم حتى '+promo+'%')}</span></div>
   <div class="store-body"><div class="store-logo"><i class="ti ${s.ic}"></i></div>
   <div class="store-name">${L(s)} <i class="ti ti-rosette-discount-check verify"></i></div>

@@ -114,6 +114,16 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
   .flash-banner{padding:10px 12px;gap:8px;}
   .search-inp input{width:100%;}
 }
+/* category chip rail (homepage categories land here via ?cat=) */
+#rc-cats{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 0 4px;margin:0 0 16px;}
+#rc-cats::-webkit-scrollbar{display:none;}
+.rc-cat{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border:1px solid #D8D0BE;
+  border-radius:30px;background:#fff;color:#5A5650;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .18s;white-space:nowrap;}
+.rc-cat i{font-size:16px;color:#A07828;}
+.rc-cat:hover{border-color:#C9A84C;color:#A07828;}
+.rc-cat.on{background:#15130F;border-color:#15130F;color:#F5F0E4;}
+.rc-cat.on i{color:#C9A84C;}
 .lang-btn{padding:6px 12px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text3);font-family:var(--fen);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;letter-spacing:1px;display:inline-flex;align-items:center;gap:5px;}
 .lang-btn:hover{border-color:var(--gold);color:var(--gold);}
 .lang-btn .lang-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block;}
@@ -562,6 +572,7 @@ setInterval(tick,1000);
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
 <script src="raf_topbar.js"></script>
+<script src="raf_notify.js"></script>
 <script src="raf_nav.js"></script>
 <script src="raf_search.js"></script>
 <script src="raf_ads.js"></script>
@@ -588,20 +599,85 @@ setInterval(tick,1000);
     {id:'P-007',ic:'ti-hanger',ar:'فستان سهرة بولدر',en:'Boulder Evening Dress',store:{ar:'Casa Mode',en:'Casa Mode'},price:'30.000',old:'60.000',disc:50,rate:'4.7',rev:'44',
       variants:[{label:{ar:'المقاس',en:'Size'},options:SZ(['S','M','L'])},{label:{ar:'اللون',en:'Color'},options:[{v:'red',label:{ar:'أحمر',en:'Red'}},{v:'black',label:{ar:'أسود',en:'Black'}}]}]},
     {id:'P-008',ic:'ti-headphones',ar:'سماعة Sony WH-1000XM5',en:'Sony WH-1000XM5',store:{ar:'TechZone',en:'TechZone'},price:'35.750',old:'55.000',disc:35,rate:'4.9',rev:'201',
-      variants:[{label:{ar:'اللون',en:'Color'},options:[{v:'black',label:{ar:'أسود',en:'Black'}},{v:'silver',label:{ar:'فضي',en:'Silver'}}]}]}
+      variants:[{label:{ar:'اللون',en:'Color'},options:[{v:'black',label:{ar:'أسود',en:'Black'}},{v:'silver',label:{ar:'فضي',en:'Silver'}}]}]},
+    {id:'P-PERFUME',ic:'ti-spray',ar:'عطر شرقي فاخر',en:'Luxury Oriental Perfume',store:{ar:'دار العود',en:'Dar Aloud'},price:'42.000',old:'60.000',disc:30,rate:'4.9',rev:'215',
+      variants:[{label:{ar:'الحجم',en:'Size'},options:[{v:'50',label:{ar:'50 مل',en:'50 ml'}},{v:'100',label:{ar:'100 مل',en:'100 ml'}},{v:'150',label:{ar:'150 مل',en:'150 ml'}}]}]},
+    {id:'P-WATCH',ic:'ti-clock-hour-4',ar:'ساعة كلاسيكية جلد',en:'Classic Leather Watch',store:{ar:'تايم بوكس',en:'Time Box'},price:'68.000',old:'85.000',disc:20,rate:'4.7',rev:'142',
+      variants:[{label:{ar:'اللون',en:'Color'},options:[{v:'brown',label:{ar:'جلد بني',en:'Brown Leather'}},{v:'black',label:{ar:'جلد أسود',en:'Black Leather'}}]}]},
+    {id:'P-RING',ic:'ti-diamond',ar:'خاتم فضة مرصّع',en:'Studded Silver Ring',store:{ar:'لمسة ذهب',en:'Lamsa Gold'},price:'33.000',old:'45.000',disc:27,rate:'4.9',rev:'76',
+      variants:[{label:{ar:'المقاس',en:'Size'},options:SZ(['16','17','18','19'])}]}
   ];
+  /* one canonical category key per product — shared with the homepage carousel */
+  var CAT_OF = {
+    'P-001':'fashion','P-007':'fashion',
+    'P-002':'shoes',
+    'P-003':'electronics','P-008':'electronics',
+    'P-004':'accessories',
+    'P-005':'bags',
+    'P-006':'watches','P-WATCH':'watches',
+    'P-PERFUME':'perfume',
+    'P-RING':'jewelry'
+  };
+  var CATS = [
+    {k:'electronics', ar:'إلكترونيات', en:'Electronics', ic:'ti-device-mobile'},
+    {k:'fashion',     ar:'أزياء',      en:'Fashion',     ic:'ti-hanger'},
+    {k:'shoes',       ar:'أحذية',      en:'Shoes',       ic:'ti-shoe'},
+    {k:'bags',        ar:'حقائب',      en:'Bags',        ic:'ti-backpack'},
+    {k:'watches',     ar:'ساعات',      en:'Watches',     ic:'ti-clock-hour-4'},
+    {k:'perfume',     ar:'عطور',       en:'Perfume',     ic:'ti-spray'},
+    {k:'jewelry',     ar:'مجوهرات',    en:'Jewelry',     ic:'ti-diamond'},
+    {k:'accessories', ar:'إكسسوارات',  en:'Accessories', ic:'ti-sunglasses'}
+  ];
+  P.forEach(function(p){ p.cat = CAT_OF[p.id] || ''; });
+  /* active category comes from ?cat= (homepage carousel) and can be changed
+     with the chips below the heading */
+  var activeCat = (new URLSearchParams(location.search).get('cat') || '').trim();
+  if (activeCat && !CATS.some(function(c){ return c.k === activeCat; })) activeCat = '';
+  window.rafPickCat = function(k){
+    activeCat = k;
+    try { var u = new URL(location.href);
+      if (k) u.searchParams.set('cat', k); else u.searchParams.delete('cat');
+      history.replaceState({}, '', u.pathname + (u.search || '') + u.hash);
+    } catch(e){}
+    render();
+  };
+
+  function chipsHTML(en){
+    var all = '<button class="rc-cat'+(activeCat?'':' on')+'" onclick="rafPickCat(\'\')">'+(en?'All':'الكل')+'</button>';
+    return all + CATS.map(function(c){
+      return '<button class="rc-cat'+(activeCat===c.k?' on':'')+'" onclick="rafPickCat(\''+c.k+'\')">'+
+        '<i class="ti '+c.ic+'"></i> '+(en?c.en:c.ar)+'</button>';
+    }).join('');
+  }
+
   function render(){
     var g=document.getElementById('prodGrid'); if(!g) return;
     var en=document.getElementById('htmlRoot').lang==='en';
     var q=(new URLSearchParams(location.search).get('q')||'').trim().toLowerCase();
     var list=P;
-    if(q){ list=P.filter(function(p){ return (p.ar+' '+p.en+' '+(p.store?p.store.ar+' '+p.store.en:'')+' '+p.id).toLowerCase().indexOf(q)>-1; }); }
+    if(activeCat){ list=list.filter(function(p){ return p.cat===activeCat; }); }
+    if(q){ list=list.filter(function(p){ return (p.ar+' '+p.en+' '+(p.store?p.store.ar+' '+p.store.en:'')+' '+p.id).toLowerCase().indexOf(q)>-1; }); }
+
+    /* category chip rail, kept directly above the grid */
+    var chips=document.getElementById('rc-cats');
+    if(!chips){ chips=document.createElement('div'); chips.id='rc-cats'; g.parentNode.insertBefore(chips,g); }
+    chips.innerHTML=chipsHTML(en);
+
     var rc=document.getElementById('rc-results');
-    if(q){ if(!rc){ rc=document.createElement('div'); rc.id='rc-results'; rc.style.cssText='margin:0 0 16px;font-size:14px;font-weight:600;color:#5A5650;'; g.parentNode.insertBefore(rc,g); }
-      rc.textContent=(en?'Search results for ':'نتائج البحث عن ')+'“'+q+'” — '+list.length; }
+    var label='';
+    if(q) label=(en?'Search results for ':'نتائج البحث عن ')+'“'+q+'” — '+list.length;
+    else if(activeCat){
+      var c=CATS.filter(function(x){return x.k===activeCat;})[0];
+      label=(en?c.en:c.ar)+' — '+list.length+' '+(en?(list.length===1?'product':'products'):'منتج');
+    }
+    if(label){ if(!rc){ rc=document.createElement('div'); rc.id='rc-results'; rc.style.cssText='margin:0 0 16px;font-size:14px;font-weight:700;color:#15130F;'; chips.parentNode.insertBefore(rc,g); }
+      rc.textContent=label; }
     else if(rc){ rc.remove(); }
+
+    var emptyMsg = q ? ((en?'No results for':'لا توجد نتائج لـ')+' “'+q+'”')
+                     : (en?'No products in this category yet':'لا توجد منتجات في هذه الفئة بعد');
     g.innerHTML = list.length ? list.map(function(p){ return RAFCard.product(p); }).join('')
-      : '<div style="grid-column:1/-1;text-align:center;padding:52px 20px;color:#8A857C;"><i class="ti ti-search-off" style="font-size:46px;color:#C9A84C;display:block;margin-bottom:12px;"></i><div style="font-size:15px;font-weight:700;color:#15130F;">'+(en?'No results for':'لا توجد نتائج لـ')+' “'+q+'”</div></div>';
+      : '<div style="grid-column:1/-1;text-align:center;padding:52px 20px;color:#8A857C;"><i class="ti ti-search-off" style="font-size:46px;color:#C9A84C;display:block;margin-bottom:12px;"></i><div style="font-size:15px;font-weight:700;color:#15130F;">'+emptyMsg+'</div></div>';
   }
   render();
   new MutationObserver(render).observe(document.getElementById('htmlRoot'),{attributes:true,attributeFilter:['lang']});

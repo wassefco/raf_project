@@ -6,7 +6,7 @@
    ============================================================ */
 (function () {
   if (window.RAFShop) return;
-  var LS = { cart: 'raf_cart', wish: 'raf_wish', orders: 'raf_orders' };
+  var LS = { cart: 'raf_cart', wish: 'raf_wish', orders: 'raf_orders', follow: 'raf_follow' };
 
   function read(k, def) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? def : v; } catch (e) { return def; } }
   function write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
@@ -169,6 +169,46 @@
     badge: function () {
       var n = Wish.count();
       document.querySelectorAll('#wishBadge,.wish-badge').forEach(function (b) { if (n > 0) { b.textContent = n; b.style.display = 'flex'; } else b.style.display = 'none'; });
+    }
+  };
+
+  /* ─────────── FOLLOWED STORES ───────────
+     Followed stores are managed from the Favorites page only. One list keyed
+     by store slug, so any page can follow/unfollow without its own storage. */
+  var Follow = {
+    read: function () { var a = read(LS.follow, []); return Array.isArray(a) ? a : []; },
+    write: function (a) { write(LS.follow, a); Follow.badge(); document.dispatchEvent(new CustomEvent('raf:follow')); },
+    has: function (slug) { return Follow.read().some(function (s) { return s.slug === slug; }); },
+    get: function (slug) { return Follow.read().find(function (s) { return s.slug === slug; }); },
+    /* store = { slug, name:{ar,en}|string, cat:{ar,en}, ic, products, rating } */
+    add: function (store) {
+      if (!store || !store.slug || Follow.has(store.slug)) return false;
+      var a = Follow.read();
+      a.push({
+        slug: store.slug,
+        name: store.name || store.slug,
+        cat: store.cat || null,
+        ic: store.ic || 'ti-building-store',
+        products: store.products == null ? null : store.products,
+        rating: store.rating || ''
+      });
+      Follow.write(a);
+      return true;
+    },
+    remove: function (slug) { Follow.write(Follow.read().filter(function (s) { return s.slug !== slug; })); },
+    toggle: function (store) {
+      if (!store || !store.slug) return false;
+      if (Follow.has(store.slug)) { Follow.remove(store.slug); return false; }
+      Follow.add(store); return true;
+    },
+    clear: function () { Follow.write([]); },
+    items: function () { return Follow.read(); },
+    count: function () { return Follow.read().length; },
+    badge: function () {
+      var n = Follow.count();
+      document.querySelectorAll('#followBadge,.follow-badge').forEach(function (b) {
+        if (n > 0) { b.textContent = n; b.style.display = 'flex'; } else b.style.display = 'none';
+      });
     }
   };
 
@@ -353,10 +393,10 @@
     });
   }
 
-  window.RAFShop = { Cart: Cart, Wish: Wish, Stock: Stock, Orders: Orders, search: search, catalog: CATALOG, stores: STORES, L: L, nowStr: nowStr, toast: toast, isEn: isEn, confirm: confirmDialog };
+  window.RAFShop = { Cart: Cart, Wish: Wish, Follow: Follow, Stock: Stock, Orders: Orders, search: search, catalog: CATALOG, stores: STORES, L: L, nowStr: nowStr, toast: toast, isEn: isEn, confirm: confirmDialog };
 
   /* keep every tab / page in sync */
-  window.addEventListener('storage', function (e) { if (e.key === LS.cart) Cart.badge(); if (e.key === LS.wish) Wish.badge(); });
-  function boot() { Cart.badge(); Wish.badge(); }
+  window.addEventListener('storage', function (e) { if (e.key === LS.cart) Cart.badge(); if (e.key === LS.wish) Wish.badge(); if (e.key === LS.follow) Follow.badge(); });
+  function boot() { Cart.badge(); Wish.badge(); Follow.badge(); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

@@ -177,6 +177,35 @@ footer{background:var(--black);color:#B5AD9C;padding:48px 40px 24px;margin-top:a
     .bnav-cart.on .bnav-cart-ring{background:#A07828;}
     nav a.btn-ghost,nav a.btn-gold,nav .btn-ghost,nav .btn-gold{display:none!important;}
   }
+/* ===== FOLLOWED STORES (managed from Favorites only) ===== */
+.fstores{margin-top:44px;padding-top:32px;border-top:1px solid var(--border);}
+.fstores-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
+.fstores-title{display:flex;align-items:center;gap:9px;font-family:var(--fdisplay);font-size:21px;font-weight:800;color:var(--black);}
+.fstores-title>i{font-size:22px;color:var(--gold2);}
+.fstores-count{font-family:var(--fen);font-size:12px;font-weight:800;color:var(--gold2);background:rgba(201,168,76,.14);
+  border:1px solid rgba(201,168,76,.3);border-radius:20px;padding:2px 9px;}
+.fstores-browse{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--gold2);text-decoration:none;}
+.fstores-browse:hover{text-decoration:underline;}
+.fstores-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.fstore{display:flex;align-items:center;gap:13px;padding:15px 16px;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--rl);transition:border-color .2s,box-shadow .2s;}
+.fstore:hover{border-color:var(--gold);box-shadow:0 8px 24px -14px rgba(20,16,8,.3);}
+.fstore-logo{width:48px;height:48px;flex-shrink:0;border-radius:14px;background:linear-gradient(150deg,var(--bg2),#E7E1D4);
+  display:flex;align-items:center;justify-content:center;font-size:23px;color:var(--gold2);text-decoration:none;}
+.fstore-b{flex:1;min-width:0;}
+.fstore-n{display:flex;align-items:center;gap:5px;font-size:14.5px;font-weight:800;color:var(--black);text-decoration:none;}
+.fstore-n:hover{color:var(--gold2);}
+.fstore-n i{font-size:14px;color:var(--gold);}
+.fstore-s{font-size:12px;color:var(--text3);margin-top:3px;}
+.fstore-x{width:38px;height:38px;flex-shrink:0;border:1px solid var(--border);border-radius:50%;background:transparent;
+  color:var(--text3);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.fstore-x:hover{border-color:var(--red);color:var(--red);background:var(--red-bg);}
+.fstores-empty{display:none;text-align:center;padding:34px 20px;border:1px dashed var(--border);border-radius:var(--rl);background:var(--card);}
+.fstores-empty.show{display:block;}
+.fstores-empty>i{font-size:38px;color:var(--border);display:block;margin-bottom:12px;}
+.fse-t{font-size:16px;font-weight:800;color:var(--black);margin-bottom:6px;}
+.fse-s{font-size:13px;color:var(--text3);line-height:1.7;margin-bottom:16px;}
+@media(max-width:560px){.fstores-grid{grid-template-columns:1fr;}.fstores-title{font-size:18px;}}
 </style>
 <link rel="stylesheet" href="raf_header.css">
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
@@ -369,6 +398,25 @@ footer{background:var(--black);color:#B5AD9C;padding:48px 40px 24px;margin-top:a
     </div>
   </div>
 
+  <!-- FOLLOWED STORES — managed here only -->
+  <section class="fstores" id="followSection">
+    <div class="fstores-head">
+      <div class="fstores-title">
+        <i class="ti ti-building-store"></i>
+        <span data-ar="المتاجر المتابَعة" data-en="Followed Stores">المتاجر المتابَعة</span>
+        <span class="fstores-count" id="followCount">0</span>
+      </div>
+      <a class="fstores-browse" href="raf_storespage.html"><span data-ar="تصفّح المتاجر" data-en="Browse stores">تصفّح المتاجر</span> <i class="ti ti-arrow-left" id="fstoresArrow"></i></a>
+    </div>
+    <div class="fstores-grid" id="followGrid"></div>
+    <div class="fstores-empty" id="followEmpty">
+      <i class="ti ti-building-store"></i>
+      <div class="fse-t" data-ar="لا تتابع أي متجر بعد" data-en="You are not following any store yet">لا تتابع أي متجر بعد</div>
+      <div class="fse-s" data-ar="اضغط «تابع المحل» في صفحة أي متجر ليظهر هنا." data-en="Tap “Follow store” on any store page and it will appear here.">اضغط «تابع المحل» في صفحة أي متجر ليظهر هنا.</div>
+      <a href="raf_storespage.html" class="btn-shop ghost"><i class="ti ti-compass"></i> <span data-ar="اكتشف المتاجر" data-en="Discover stores">اكتشف المتاجر</span></a>
+    </div>
+  </section>
+
 </div>
 
 <!-- ===== ADD ALL TO CART — CONFIRMATION MODAL ===== -->
@@ -453,6 +501,7 @@ function applyLang(){
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
 <script src="raf_topbar.js"></script>
+<script src="raf_notify.js"></script>
 <script src="raf_nav.js"></script>
 <script src="raf_search.js"></script>
 <!-- Global RAF Product Card — replace legacy wishlist cards -->
@@ -497,7 +546,45 @@ function applyLang(){
     grid.innerHTML = items.map(function(p){ return RAFCard.product(p); }).join('');
     if(!items.length) renderSuggestions();
     refreshCounts();
+    renderFollowed();
   }
+
+  /* ---------- followed stores (single source: RAFShop.Follow) ---------- */
+  function renderFollowed(){
+    var grid = document.getElementById('followGrid');
+    var empty = document.getElementById('followEmpty');
+    if(!grid || !empty || !window.RAFShop) return;
+    var stores = RAFShop.Follow.items();
+    document.getElementById('followCount').textContent = stores.length;
+    document.getElementById('fstoresArrow').className = 'ti ' + (en() ? 'ti-arrow-right' : 'ti-arrow-left');
+    empty.classList.toggle('show', stores.length === 0);
+    grid.innerHTML = stores.map(function(s){
+      var href = 'raf_store.html?store=' + encodeURIComponent(s.slug);
+      var meta = [];
+      if(s.cat) meta.push(L(s.cat));
+      if(s.products != null) meta.push(s.products + ' ' + T('منتج','products'));
+      if(s.rating) meta.push('★ ' + s.rating);
+      return '<div class="fstore">'+
+        '<a class="fstore-logo" href="'+href+'"><i class="ti '+(s.ic||'ti-building-store')+'"></i></a>'+
+        '<div class="fstore-b">'+
+          '<a class="fstore-n" href="'+href+'">'+L(s.name)+' <i class="ti ti-rosette-discount-check"></i></a>'+
+          '<div class="fstore-s">'+meta.join(' · ')+'</div>'+
+        '</div>'+
+        '<button class="fstore-x" onclick="unfollowStore(\''+String(s.slug).replace(/'/g,"\\'")+'\')" '+
+          'title="'+T('إلغاء المتابعة','Unfollow')+'" aria-label="'+T('إلغاء المتابعة','Unfollow')+'"><i class="ti ti-heart-off"></i></button>'+
+      '</div>';
+    }).join('');
+  }
+  window.unfollowStore = function(slug){
+    var s = RAFShop.Follow.get(slug);
+    if(!s) return;
+    RAFShop.Follow.remove(slug);
+    renderFollowed();
+    RAFShop.toast(T('تم إلغاء متابعة '+L(s.name),'Unfollowed '+L(s.name)), {
+      icon:'ti-heart-off',
+      undo:function(){ RAFShop.Follow.add(s); renderFollowed(); }
+    });
+  };
 
   /* suggested products shown inside the empty state */
   function renderSuggestions(){
@@ -658,6 +745,7 @@ function applyLang(){
   function boot(){
     render();
     document.addEventListener('raf:wish', render);   /* instant badge/counter update on add/remove */
+    document.addEventListener('raf:follow', renderFollowed);
     document.addEventListener('raf:cart', function(){ RAFShop.Cart.badge(); });
     var root = document.getElementById('htmlRoot');
     if(root) new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});

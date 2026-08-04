@@ -1,475 +1,283 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>رف — صفحة المنتج</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
-  :root {
-    --black: #F5F2EC;
-    --gold: #C9A84C;
-    --gold-light: #A07828;
-    --gold-dim: #C9A84C;
-    --white: #0A0A0A;
-    --white-pure: #0A0A0A;
-    --gray-1: #E8E4DC;
-    --gray-2: #D8D3C8;
-    --gray-3: #C0BAB0;
-    --gray-4: #666666;
-    --gray-5: #333333;
-    --font-ar: 'Tajawal', sans-serif;
-    --font-en: 'DM Sans', sans-serif;
-    --font-display: 'Playfair Display', serif;
-    --radius: 4px;
-    --radius-lg: 12px;
+  /* RAF design tokens — page now uses the standard (non-inverted) convention */
+  :root{
+    --bg:#F5F2EC; --bg2:#EDE8DC; --bg3:#E7E1D4; --card:#FFFFFF;
+    --gold:#C9A84C; --gold2:#A07828; --gold-soft:rgba(201,168,76,.12);
+    --ink:#15130F; --text:#0A0A0A; --text2:#5A5650; --text3:#8A857C;
+    --border:#E2DBCC; --border2:#D8D0BE;
+    --green:#2E9E5B; --green-bg:#E8F5E9; --red:#D9534F; --red-bg:#FDECEA;
+    --font-ar:'Tajawal',sans-serif; --font-en:'DM Sans',sans-serif; --font-display:'Playfair Display',serif;
+    --r:10px; --rl:16px; --rxl:22px;
+    --sh-sm:0 2px 10px rgba(20,16,8,.06);
+    --sh:0 18px 44px -22px rgba(20,16,8,.32);
+    --wrap:1240px; --pad:32px;
   }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{overflow-x:hidden;scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-ar);overflow-x:hidden;max-width:100%;}
+  .wrap{max-width:var(--wrap);margin:0 auto;padding:0 var(--pad);}
+  img{max-width:100%;}
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* ── NAV ── */
+  nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.95);backdrop-filter:blur(12px);
+    border-bottom:1px solid rgba(201,168,76,.3);padding:0 var(--pad);display:flex;align-items:center;justify-content:space-between;height:64px;}
+  .nav-logo{font-family:var(--font-display);font-size:26px;font-weight:900;color:var(--gold);text-decoration:none;}
+  .nav-center{display:flex;align-items:center;gap:6px;}
+  .nav-center a{color:var(--text3);text-decoration:none;font-size:14px;padding:6px 10px;border-radius:var(--r);transition:color .2s;}
+  .nav-center a:hover{color:var(--ink);}
+  .nav-actions{display:flex;align-items:center;gap:8px;}
+  .nav-icon{width:40px;height:40px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text3);
+    font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;transition:all .2s;}
+  .nav-icon:hover{border-color:var(--gold);color:var(--gold);}
+  .cart-badge{position:absolute;top:-5px;inset-inline-end:-5px;min-width:17px;height:17px;padding:0 4px;background:var(--gold);
+    color:#1C1606;border-radius:20px;font-family:var(--font-en);font-size:10px;font-weight:800;display:none;align-items:center;justify-content:center;}
+  .btn-ghost{padding:8px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);
+    font-family:var(--font-ar);font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+  .btn-ghost:hover{border-color:var(--gold);color:var(--gold2);}
+  .btn-gold{padding:8px 20px;border:none;border-radius:var(--r);background:var(--gold);color:#1C1606;font-family:var(--font-ar);
+    font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
+  .btn-gold:hover{background:var(--gold2);color:#fff;}
+  .brand-logo{height:30px;} .brand-logo-foot{height:26px;}
 
-  html { overflow-x: hidden; }
-  body {
-    background: var(--black);
-    color: var(--white);
-    font-family: var(--font-ar);
-    overflow-x: hidden;
-    max-width: 100%;
-  }
+  /* ── BREADCRUMB ── */
+  .breadcrumb{max-width:var(--wrap);margin:0 auto;padding:14px var(--pad);display:flex;align-items:center;gap:7px;
+    font-size:12.5px;color:var(--text3);flex-wrap:wrap;}
+  .breadcrumb a{color:var(--text3);text-decoration:none;transition:color .2s;}
+  .breadcrumb a:hover{color:var(--gold2);}
+  .breadcrumb i{font-size:14px;opacity:.55;}
+  .breadcrumb .bc-cur{color:var(--ink);font-weight:700;}
 
-  /* NAV */
-  nav {
-    position: sticky; top: 0; z-index: 100;
-    background: rgba(245,242,236,0.95);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(201,168,76,0.3);
-    padding: 0 24px;
-    display: flex; align-items: center; justify-content: space-between;
-    height: 64px;
-  }
-  .nav-logo {
-    font-family: var(--font-display);
-    font-size: 28px; font-weight: 900;
-    color: var(--gold); letter-spacing: -1px;
-    text-decoration: none;
-  }
-  .nav-logo span { color: var(--gray-4); font-size: 12px; font-family: var(--font-en); font-weight: 300; letter-spacing: 3px; display: block; margin-top: -6px; }
-  .nav-actions { display: flex; align-items: center; gap: 8px; }
-  .btn-ghost {
-    padding: 8px 16px; border: 1px solid var(--gray-2);
-    border-radius: var(--radius); background: transparent;
-    color: var(--white); font-family: var(--font-ar);
-    font-size: 13px; cursor: pointer; transition: all 0.2s;
-    text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
-  }
-  .btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
-  .btn-gold {
-    padding: 8px 20px; border: none;
-    border-radius: var(--radius); background: var(--gold);
-    color: var(--black); font-family: var(--font-ar);
-    font-size: 13px; font-weight: 700; cursor: pointer;
-    transition: all 0.2s; text-decoration: none;
-    display: inline-flex; align-items: center; gap: 6px;
-  }
-  .btn-gold:hover { background: var(--gold-light); color: var(--black); }
-  .nav-icon {
-    width: 40px; height: 40px;
-    display: flex; align-items: center; justify-content: center;
-    border-radius: var(--radius); border: 1px solid var(--gray-2);
-    color: var(--gray-4); cursor: pointer; transition: all 0.2s;
-    position: relative; background: transparent; font-size: 18px;
-  }
-  .nav-icon:hover { border-color: var(--gold); color: var(--gold); }
-  .cart-badge {
-    position: absolute; top: -4px; right: -4px;
-    width: 16px; height: 16px; background: var(--gold);
-    border-radius: 50%; font-size: 10px; color: var(--black);
-    font-weight: 700; display: flex; align-items: center; justify-content: center;
-  }
+  /* ── PRODUCT LAYOUT ── */
+  .player{max-width:var(--wrap);margin:0 auto 56px;padding:0 var(--pad);
+    display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:44px;align-items:start;}
 
-  /* BREADCRUMB */
-  .breadcrumb {
-    padding: 16px 40px;
-    display: flex; align-items: center; gap: 8px;
-    font-size: 13px; color: var(--gray-4);
-    border-bottom: 1px solid var(--gray-2);
-  }
-  .breadcrumb a { color: var(--gray-4); text-decoration: none; transition: color 0.2s; }
-  .breadcrumb a:hover { color: var(--gold); }
-  .breadcrumb i { font-size: 12px; }
+  /* ── GALLERY ── */
+  .gal{position:sticky;top:88px;}
+  .gal-stage{position:relative;aspect-ratio:1/1;border-radius:var(--rxl);overflow:hidden;
+    background:linear-gradient(150deg,var(--bg2),var(--bg3));border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;box-shadow:var(--sh);}
+  .gal-stage::after{content:'';position:absolute;inset:0;
+    background:radial-gradient(ellipse 60% 55% at 50% 22%,rgba(255,255,255,.55),transparent 62%);pointer-events:none;}
+  .gal-icon{font-size:150px;color:var(--gold2);line-height:1;transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .2s;}
+  .gal-stage.swap .gal-icon{opacity:0;transform:scale(.9);}
+  .gal-tag{position:absolute;top:18px;inset-inline-start:18px;z-index:2;background:var(--red);color:#fff;
+    font-family:var(--font-en);font-size:12.5px;font-weight:800;padding:6px 12px;border-radius:30px;box-shadow:0 6px 16px -6px rgba(217,83,79,.8);}
+  .gal-oos{position:absolute;top:18px;inset-inline-end:18px;z-index:2;background:var(--ink);color:#F3EFE5;
+    font-size:12px;font-weight:700;padding:6px 13px;border-radius:30px;display:none;align-items:center;gap:6px;}
+  .gal-oos.show{display:inline-flex;}
+  .gal-stage.is-oos .gal-icon{filter:grayscale(1);opacity:.5;}
+  .gal-float{position:absolute;bottom:18px;inset-inline-end:18px;z-index:2;display:flex;gap:9px;}
+  .gal-fbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,.92);
+    backdrop-filter:blur(6px);color:var(--text2);font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:all .2s;box-shadow:var(--sh-sm);}
+  .gal-fbtn:hover{border-color:var(--gold);color:var(--gold2);transform:translateY(-2px);}
+  .gal-fbtn.on{background:var(--red);border-color:var(--red);color:#fff;}
+  .gal-thumbs{display:flex;gap:11px;margin-top:14px;}
+  .gthumb{flex:1;aspect-ratio:1/1;max-width:92px;border-radius:var(--rl);border:1.5px solid var(--border);
+    background:linear-gradient(150deg,var(--bg2),var(--bg3));display:flex;align-items:center;justify-content:center;
+    font-size:30px;color:var(--gold2);cursor:pointer;transition:all .2s;}
+  .gthumb:hover{border-color:var(--gold);}
+  .gthumb.on{border-color:var(--ink);border-width:2px;background:var(--card);}
 
-  /* PRODUCT LAYOUT */
-  .product-layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px;
-  }
+  /* ── PURCHASE PANEL ── */
+  .pbuy{min-width:0;}
+  .store-chip{display:inline-flex;align-items:center;gap:9px;padding:7px 14px 7px 8px;border:1px solid var(--border);
+    border-radius:30px;background:var(--card);text-decoration:none;transition:all .2s;margin-bottom:16px;}
+  [dir="rtl"] .store-chip{padding:7px 8px 7px 14px;}
+  .store-chip:hover{border-color:var(--gold);box-shadow:var(--sh-sm);}
+  .store-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(150deg,var(--bg2),var(--bg3));
+    display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--gold2);flex-shrink:0;}
+  .store-nm{font-size:13.5px;font-weight:700;color:var(--ink);}
+  .store-vf{color:var(--gold);font-size:16px;}
+  .ptitle{font-family:var(--font-display);font-size:36px;font-weight:800;line-height:1.2;color:var(--ink);letter-spacing:-.4px;}
+  .prate{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:14px;font-size:13px;color:var(--text2);}
+  .stars{display:inline-flex;gap:2px;}
+  .stars .star{color:var(--gold);font-size:16px;}
+  .stars .star.empty{color:var(--border2);}
+  .prate b{font-family:var(--font-en);font-size:14px;font-weight:800;color:var(--ink);}
+  .prate .sep{color:var(--border2);}
+  .prate a{color:var(--text2);text-decoration:underline;text-underline-offset:3px;cursor:pointer;}
+  .prate a:hover{color:var(--gold2);}
+  .prate .sold{color:var(--gold2);font-weight:700;}
 
-  /* GALLERY */
-  .gallery { padding-left: 40px; }
-  .main-img {
-    width: 100%; aspect-ratio: 1;
-    background: var(--gray-1);
-    border: 1px solid var(--gray-2);
-    border-radius: var(--radius-lg);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 12px; position: relative; overflow: hidden;
-  }
-  .main-img-icon { font-size: 100px; color: var(--gray-3); }
-  .img-tag {
-    position: absolute; top: 16px; right: 16px;
-    padding: 5px 12px; border-radius: 4px;
-    font-size: 12px; font-weight: 700;
-    background: #E05555; color: white;
-  }
-  .video-btn {
-    position: absolute; bottom: 16px; left: 16px;
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 16px; border-radius: 20px;
-    background: rgba(10,10,10,0.7); border: none;
-    color: white; font-family: var(--font-ar);
-    font-size: 13px; cursor: pointer;
-    transition: background 0.2s;
-  }
-  .video-btn:hover { background: rgba(10,10,10,0.9); }
-  .thumbnails {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
-  }
-  .thumb {
-    aspect-ratio: 1;
-    background: var(--gray-1);
-    border: 1px solid var(--gray-2);
-    border-radius: var(--radius);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all 0.2s; font-size: 24px; color: var(--gray-3);
-  }
-  .thumb:hover, .thumb.active {
-    border-color: var(--gold);
-  }
-  .thumb.active { box-shadow: 0 0 0 2px var(--gold); }
+  .pprice{margin-top:22px;padding:20px 22px;border:1px solid var(--border);border-radius:var(--rl);
+    background:var(--card);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .pprice-l{font-size:11.5px;color:var(--text3);margin-bottom:5px;}
+  .pprice-v{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;}
+  .pprice-n{font-family:var(--font-en);font-size:34px;font-weight:800;color:var(--ink);line-height:1;}
+  .pprice-c{font-size:13px;font-weight:700;color:var(--text3);}
+  .pprice-o{font-family:var(--font-en);font-size:15px;color:var(--text3);text-decoration:line-through;}
+  .pprice-save{background:var(--green-bg);color:var(--green);font-size:12.5px;font-weight:800;padding:7px 13px;border-radius:30px;}
 
-  /* PRODUCT INFO */
-  .product-info { padding-right: 20px; }
-  .store-link {
-    display: inline-flex; align-items: center; gap: 8px;
-    text-decoration: none; margin-bottom: 16px;
-  }
-  .store-avatar {
-    width: 32px; height: 32px;
-    background: var(--gray-1); border: 1px solid var(--gray-2);
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 14px; color: var(--gold);
-  }
-  .store-name-link { font-size: 13px; color: var(--gray-4); transition: color 0.2s; }
-  .store-link:hover .store-name-link { color: var(--gold); }
-  .store-verified { font-size: 14px; color: var(--gold); }
+  .opt{margin-top:26px;}
+  .opt-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+  .opt-t{font-size:13.5px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:6px;}
+  .opt-t .req{color:var(--red);}
+  .opt-sel{font-size:12.5px;color:var(--text3);font-weight:600;}
+  .opt-row{display:flex;flex-wrap:wrap;gap:9px;}
+  .obtn{min-width:52px;height:44px;padding:0 15px;border:1.5px solid var(--border2);border-radius:12px;background:var(--card);
+    color:var(--text2);font-family:var(--font-ar);font-size:14px;font-weight:700;cursor:pointer;transition:all .18s;}
+  .obtn:hover:not(.out){border-color:var(--gold);color:var(--gold2);}
+  .obtn.selected{background:var(--ink);border-color:var(--ink);color:#F5F0E4;}
+  .obtn.out{opacity:.4;cursor:not-allowed;text-decoration:line-through;}
+  .cbtn{width:44px;height:44px;border-radius:50%;border:2px solid var(--border2);cursor:pointer;transition:all .18s;position:relative;}
+  .cbtn:hover{transform:scale(1.07);}
+  .cbtn.selected{border-color:var(--ink);box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--ink);}
+  .qty-wrap{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .qty{display:inline-flex;align-items:center;border:1.5px solid var(--border2);border-radius:30px;overflow:hidden;background:var(--card);}
+  .qty button{width:44px;height:44px;border:none;background:transparent;color:var(--text2);font-size:17px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:background .15s;}
+  .qty button:hover:not(:disabled){background:var(--gold-soft);color:var(--gold2);}
+  .qty button:disabled{opacity:.35;cursor:not-allowed;}
+  .qty span{min-width:46px;text-align:center;font-family:var(--font-en);font-size:16px;font-weight:800;color:var(--ink);}
+  .stock-l{font-size:13px;color:var(--text2);display:inline-flex;align-items:center;gap:6px;}
+  .stock-l i{font-size:15px;}
+  .stock-l.ok{color:var(--green);} .stock-l.low{color:#C8791E;} .stock-l.out{color:var(--red);}
 
-  .product-title {
-    font-family: var(--font-display);
-    font-size: 32px; font-weight: 700;
-    line-height: 1.2; margin-bottom: 16px;
-    color: var(--white-pure);
-  }
+  /* actions */
+  .acts{margin-top:26px;display:flex;gap:11px;}
+  .btn-cart{flex:1;height:56px;border:1px solid var(--ink);border-radius:30px;background:var(--ink);color:#F5F0E4;
+    font-family:var(--font-ar);font-size:15.5px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;
+    justify-content:center;gap:9px;transition:all .2s;box-shadow:0 14px 30px -16px rgba(20,16,8,.9);}
+  .btn-cart:hover:not(:disabled){background:#241F17;}
+  .btn-cart:active:not(:disabled){transform:scale(.985);}
+  .btn-cart:disabled,.btn-cart.is-oos{background:var(--bg3);border-color:var(--border);color:var(--text3);box-shadow:none;cursor:not-allowed;}
+  .btn-ico{width:56px;height:56px;flex-shrink:0;border:1px solid var(--border2);border-radius:50%;background:var(--card);
+    color:var(--text2);font-size:21px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+  .btn-ico:hover{border-color:var(--gold);color:var(--gold2);}
+  .btn-ico.on{background:var(--red);border-color:var(--red);color:#fff;}
+  .btn-buy{width:100%;margin-top:11px;height:56px;border:1px solid var(--gold2);border-radius:30px;background:var(--gold);
+    color:#1C1606;font-family:var(--font-ar);font-size:15.5px;font-weight:800;cursor:pointer;display:inline-flex;
+    align-items:center;justify-content:center;gap:9px;transition:all .2s;box-shadow:0 14px 30px -16px rgba(201,168,76,.95);}
+  .btn-buy:hover:not(:disabled){background:var(--gold2);color:#fff;}
+  .btn-buy:disabled{background:var(--bg3);border-color:var(--border);color:var(--text3);box-shadow:none;cursor:not-allowed;}
+  .opt-hint{font-size:12.5px;color:var(--red);margin-top:10px;min-height:17px;display:flex;align-items:center;gap:6px;}
 
-  .rating-row {
-    display: flex; align-items: center; gap: 12px;
-    margin-bottom: 20px;
-  }
-  .stars { display: flex; gap: 3px; }
-  .star { color: var(--gold); font-size: 16px; }
-  .star.empty { color: var(--gray-3); }
-  .rating-num { font-size: 15px; font-weight: 700; color: var(--white); }
-  .rating-count { font-size: 13px; color: var(--gray-4); }
-  .rating-sep { color: var(--gray-3); }
+  .pills{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:24px;}
+  .pill{display:flex;align-items:center;gap:10px;padding:13px 15px;border:1px solid var(--border);border-radius:var(--rl);
+    background:var(--card);font-size:12.5px;font-weight:600;color:var(--text2);}
+  .pill i{font-size:19px;color:var(--gold2);flex-shrink:0;}
 
-  .price-row {
-    display: flex; align-items: baseline; gap: 12px;
-    margin-bottom: 28px; padding: 20px;
-    background: var(--gray-1); border-radius: var(--radius-lg);
-    border: 1px solid var(--gray-2);
-  }
-  .price-main { font-size: 32px; font-weight: 700; color: var(--gold); font-family: var(--font-en); }
-  .price-currency { font-size: 16px; color: var(--gray-4); font-family: var(--font-ar); }
-  .price-old { font-size: 18px; color: var(--gray-4); text-decoration: line-through; font-family: var(--font-en); }
-  .price-save {
-    margin-right: auto;
-    padding: 4px 12px; border-radius: 20px;
-    background: rgba(224,85,85,0.1); border: 1px solid rgba(224,85,85,0.2);
-    color: #E05555; font-size: 12px; font-weight: 700;
-  }
+  /* ── TABS ── */
+  .tabs{max-width:var(--wrap);margin:0 auto 56px;padding:0 var(--pad);}
+  .tabnav{display:flex;gap:4px;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+  .tabnav::-webkit-scrollbar{display:none;}
+  .tabbtn{padding:15px 20px;border:none;background:none;font-family:var(--font-ar);font-size:14.5px;font-weight:700;
+    color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;white-space:nowrap;}
+  .tabbtn.active{color:var(--ink);border-bottom-color:var(--gold);}
+  .tabbtn:hover{color:var(--ink);}
+  .tabc{display:none;padding-top:30px;}
+  .tabc.active{display:block;}
 
-  .option-section { margin-bottom: 24px; }
-  .option-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .option-title { font-size: 14px; font-weight: 700; color: var(--white); }
-  .option-selected { font-size: 13px; color: var(--gold); }
-  .options-row { display: flex; gap: 8px; flex-wrap: wrap; }
-  .option-btn {
-    padding: 10px 20px; border: 1px solid var(--gray-2);
-    border-radius: var(--radius); background: transparent;
-    color: var(--white); font-family: var(--font-ar);
-    font-size: 14px; cursor: pointer; transition: all 0.2s;
-    min-width: 52px; text-align: center;
-  }
-  .option-btn:hover { border-color: var(--gold); color: var(--gold); }
-  .option-btn.selected {
-    border-color: var(--gold); color: var(--gold);
-    background: rgba(201,168,76,0.1);
-    font-weight: 700;
-  }
-  .option-btn.out { opacity: 0.4; cursor: not-allowed; text-decoration: line-through; }
+  .desc-t{font-size:15px;line-height:2;color:var(--text2);max-width:760px;}
+  .feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:11px;margin-top:24px;}
+  .feat{display:flex;align-items:center;gap:11px;padding:15px 17px;border:1px solid var(--border);border-radius:var(--rl);
+    background:var(--card);font-size:13.5px;font-weight:600;color:var(--text2);}
+  .feat i{font-size:20px;color:var(--gold2);flex-shrink:0;}
+  .spec-tbl{width:100%;max-width:760px;border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;background:var(--card);}
+  .spec-row{display:flex;border-bottom:1px solid var(--border);}
+  .spec-row:last-child{border-bottom:none;}
+  .spec-row:nth-child(odd){background:#FCFAF6;}
+  .spec-k{flex:0 0 42%;padding:15px 18px;font-size:13.5px;font-weight:700;color:var(--ink);}
+  .spec-v{flex:1;padding:15px 18px;font-size:13.5px;color:var(--text2);border-inline-start:1px solid var(--border);}
 
-  .color-btn {
-    width: 36px; height: 36px; border-radius: 50%;
-    border: 2px solid transparent; cursor: pointer;
-    transition: all 0.2s; position: relative;
-  }
-  .color-btn.selected {
-    box-shadow: 0 0 0 3px var(--black), 0 0 0 5px var(--gold);
-  }
+  .rsum{display:flex;gap:34px;align-items:center;flex-wrap:wrap;padding:28px;border:1px solid var(--border);
+    border-radius:var(--rxl);background:var(--card);margin-bottom:26px;}
+  .rbig{text-align:center;flex-shrink:0;}
+  .rbig-n{font-family:var(--font-en);font-size:52px;font-weight:800;color:var(--ink);line-height:1;}
+  .rbig-c{font-size:12.5px;color:var(--text3);margin-top:8px;}
+  .rbars{flex:1;min-width:240px;display:flex;flex-direction:column;gap:8px;}
+  .rbar{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text3);}
+  .rbar-k{width:32px;flex-shrink:0;font-family:var(--font-en);font-weight:700;display:flex;align-items:center;gap:3px;}
+  .rbar-k i{font-size:11px;color:var(--gold);}
+  .rbar-t{flex:1;height:7px;border-radius:5px;background:var(--bg2);overflow:hidden;}
+  .rbar-f{height:100%;border-radius:5px;background:var(--gold);}
+  .rbar-p{width:38px;flex-shrink:0;text-align:end;font-family:var(--font-en);}
+  .rlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;}
+  .rcard{padding:20px 22px;border:1px solid var(--border);border-radius:var(--rl);background:var(--card);}
+  .rhead{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+  .rav{width:42px;height:42px;border-radius:50%;background:var(--gold-soft);color:var(--gold2);display:flex;
+    align-items:center;justify-content:center;font-size:17px;font-weight:800;flex-shrink:0;}
+  .rnm{font-size:14px;font-weight:800;color:var(--ink);}
+  .rdt{font-size:11.5px;color:var(--text3);margin-top:2px;}
+  .rst{margin-inline-start:auto;display:inline-flex;gap:2px;}
+  .rst i{font-size:14px;color:var(--gold);}
+  .rst i.empty{color:var(--border2);}
+  .rtx{font-size:13.5px;line-height:1.85;color:var(--text2);}
+  .rverified{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--green);margin-top:10px;}
 
-  .qty-row {
-    display: flex; align-items: center; gap: 0;
-    border: 1px solid var(--gray-2); border-radius: var(--radius);
-    overflow: hidden; width: fit-content;
-  }
-  .qty-btn {
-    width: 44px; height: 44px;
-    background: var(--gray-1); border: none;
-    color: var(--white); font-size: 18px;
-    cursor: pointer; transition: background 0.2s;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .qty-btn:hover { background: var(--gray-2); }
-  .qty-num {
-    width: 60px; height: 44px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; font-weight: 700; color: var(--white);
-    border-right: 1px solid var(--gray-2);
-    border-left: 1px solid var(--gray-2);
-  }
+  /* ── RELATED ── */
+  .rel{max-width:var(--wrap);margin:0 auto 70px;padding:0 var(--pad);}
+  .sec-h{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
+  .sec-k{font-family:var(--font-en);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold2);
+    font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+  .sec-k::before{content:'';width:22px;height:1px;background:var(--gold);}
+  .sec-t{font-family:var(--font-display);font-size:27px;font-weight:800;color:var(--ink);}
+  .rel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:18px;}
 
-  .action-row {
-    display: flex; gap: 12px; margin-top: 28px; margin-bottom: 20px;
-  }
-  .btn-add-cart {
-    flex: 1; padding: 16px;
-    background: var(--white-pure); border: none;
-    border-radius: var(--radius); color: var(--black);
-    font-family: var(--font-ar); font-size: 16px; font-weight: 700;
-    cursor: pointer; transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .btn-add-cart:hover { background: var(--gray-5); color: var(--black); }
-  /* Sold Out — action disabled, styling made obviously inert */
-  .btn-add-cart.is-oos,
-  .btn-add-cart.is-oos:hover { background: var(--gray-2); color: var(--gray-4); border-color: var(--gray-3); cursor: not-allowed; box-shadow: none; opacity: .85; }
-  .btn-wishlist {
-    width: 56px; height: 56px;
-    border: 1px solid var(--gray-2); border-radius: var(--radius);
-    background: transparent; color: var(--gray-4);
-    font-size: 22px; cursor: pointer; transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .btn-wishlist:hover { border-color: #E05555; color: #E05555; }
-  .btn-wishlist.active { border-color: #E05555; color: #E05555; background: rgba(224,85,85,0.05); }
+  /* ── STICKY MOBILE BAR ── */
+  .sticky-buy{display:none;position:fixed;left:0;right:0;bottom:0;z-index:970;background:var(--card);
+    border-top:1px solid var(--border);box-shadow:0 -6px 24px -12px rgba(20,16,8,.3);
+    padding:10px 14px;gap:10px;align-items:center;}
+  .sb-price{flex-shrink:0;}
+  .sb-price small{display:block;font-size:10px;color:var(--text3);}
+  .sb-price b{font-family:var(--font-en);font-size:17px;font-weight:800;color:var(--ink);}
+  .sb-cart{flex:1;height:48px;border:1px solid var(--ink);border-radius:30px;background:var(--ink);color:#F5F0E4;
+    font-family:var(--font-ar);font-size:14px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;}
+  .sb-cart:disabled{background:var(--bg3);border-color:var(--border);color:var(--text3);cursor:not-allowed;}
+  .sb-buy{flex:1;height:48px;border:1px solid var(--gold2);border-radius:30px;background:var(--gold);color:#1C1606;
+    font-family:var(--font-ar);font-size:14px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:7px;}
+  .sb-buy:disabled{background:var(--bg3);border-color:var(--border);color:var(--text3);cursor:not-allowed;}
 
-  .btn-buy-now {
-    width: 100%; padding: 16px;
-    background: var(--gold); border: none;
-    border-radius: var(--radius); color: var(--black);
-    font-family: var(--font-ar); font-size: 16px; font-weight: 700;
-    cursor: pointer; transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    margin-bottom: 20px;
-  }
-  .btn-buy-now:hover { background: var(--gold-light); }
+  /* ── FOOTER ── */
+  footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px var(--pad);display:flex;align-items:center;
+    justify-content:space-between;gap:14px;font-size:12px;color:var(--text3);flex-wrap:wrap;}
+  footer a{color:var(--text3);text-decoration:none;font-size:12px;}
+  footer a:hover{color:var(--gold2);}
 
-  .info-pills {
-    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;
-  }
-  .info-pill {
-    display: flex; align-items: center; gap: 6px;
-    padding: 8px 14px; border-radius: 20px;
-    background: var(--gray-1); border: 1px solid var(--gray-2);
-    font-size: 12px; color: var(--gray-4);
-  }
-  .info-pill i { color: var(--gold); font-size: 15px; }
+  /* ── RESPONSIVE ── */
+  @media(max-width:1100px){:root{--pad:24px;} .player{grid-template-columns:1fr;gap:34px;} .gal{position:static;}
+    .gal-stage{max-width:520px;margin:0 auto;} .gal-thumbs{max-width:520px;margin:14px auto 0;justify-content:center;}
+    .ptitle{font-size:30px;}}
+  @media(max-width:900px){.nav-center{display:none;}}
+  @media(max-width:768px){:root{--pad:16px;}
+    .ptitle{font-size:25px;} .pprice-n{font-size:29px;} .gal-icon{font-size:110px;}
+    .pills{grid-template-columns:1fr;} .rsum{padding:20px;gap:20px;} .rbig-n{font-size:42px;}
+    .rel-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
+    .spec-k{flex:0 0 45%;padding:13px 14px;} .spec-v{padding:13px 14px;}
+    /* primary actions move to a persistent bar */
+    .acts,.btn-buy{display:none;}
+    .sticky-buy{display:flex;bottom:calc(56px + env(safe-area-inset-bottom,0px));}
+    body{padding-bottom:calc(140px + env(safe-area-inset-bottom,0px))!important;}}
+  @media(max-width:420px){.rel-grid{grid-template-columns:repeat(2,1fr);gap:10px;} .sb-price{display:none;}}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;}}
 
-  .divider { height: 1px; background: var(--gray-2); margin: 28px 0; }
-
-  /* TABS */
-  .tabs { max-width: 1200px; margin: 0 auto; padding: 0 40px 60px; }
-  .tab-nav {
-    display: flex; border-bottom: 1px solid var(--gray-2);
-    margin-bottom: 32px; gap: 0;
-  }
-  .tab-btn {
-    padding: 14px 24px; background: none; border: none;
-    color: var(--gray-4); font-family: var(--font-ar);
-    font-size: 14px; cursor: pointer; transition: all 0.2s;
-    border-bottom: 2px solid transparent; margin-bottom: -1px;
-    font-weight: 500;
-  }
-  .tab-btn.active { color: var(--white); border-bottom-color: var(--gold); }
-  .tab-btn:hover { color: var(--white); }
-
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-
-  /* DESCRIPTION */
-  .desc-text {
-    font-size: 15px; line-height: 1.9; color: var(--gray-4);
-    max-width: 700px;
-  }
-  .desc-features {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 12px; margin-top: 24px;
-  }
-  .desc-feature {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 16px; background: var(--gray-1);
-    border-radius: var(--radius); border: 1px solid var(--gray-2);
-    font-size: 13px; color: var(--white);
-  }
-  .desc-feature i { color: var(--gold); font-size: 18px; flex-shrink: 0; }
-
-  /* REVIEWS */
-  .reviews-summary {
-    display: flex; gap: 40px; align-items: center;
-    padding: 24px; background: var(--gray-1);
-    border-radius: var(--radius-lg); border: 1px solid var(--gray-2);
-    margin-bottom: 28px;
-  }
-  .review-big-num {
-    font-family: var(--font-display);
-    font-size: 56px; font-weight: 900; color: var(--gold);
-    line-height: 1;
-  }
-  .review-bars { flex: 1; }
-  .bar-row {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 6px; font-size: 12px; color: var(--gray-4);
-  }
-  .bar-track {
-    flex: 1; height: 6px; background: var(--gray-2);
-    border-radius: 3px; overflow: hidden;
-  }
-  .bar-fill { height: 100%; background: var(--gold); border-radius: 3px; }
-  .review-card {
-    padding: 20px; background: var(--gray-1);
-    border: 1px solid var(--gray-2); border-radius: var(--radius-lg);
-    margin-bottom: 12px;
-  }
-  .review-header {
-    display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
-  }
-  .reviewer-avatar {
-    width: 40px; height: 40px; border-radius: 50%;
-    background: var(--gray-2); display: flex; align-items: center;
-    justify-content: center; font-size: 16px; color: var(--gold);
-    font-weight: 700;
-  }
-  .reviewer-name { font-size: 14px; font-weight: 700; color: var(--white); }
-  .review-date { font-size: 12px; color: var(--gray-4); margin-top: 2px; }
-  .review-stars { display: flex; gap: 2px; margin-right: auto; }
-  .review-text { font-size: 14px; color: var(--gray-4); line-height: 1.7; }
-
-  /* SIMILAR PRODUCTS */
-  .similar-section {
-    max-width: 1200px; margin: 0 auto;
-    padding: 0 40px 60px;
-    border-top: 1px solid var(--gray-2);
-  }
-  .similar-title {
-    font-family: var(--font-display);
-    font-size: 24px; font-weight: 700;
-    margin: 40px 0 24px; color: var(--white-pure);
-  }
-  .similar-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
-  }
-  .similar-card {
-    background: var(--gray-1); border: 1px solid var(--gray-2);
-    border-radius: var(--radius-lg); overflow: hidden;
-    cursor: pointer; transition: all 0.25s;
-  }
-  .similar-card:hover {
-    border-color: var(--gold-dim);
-    transform: translateY(-4px);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.1);
-  }
-  .similar-img {
-    height: 180px; background: var(--gray-2);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 40px; color: var(--gray-3);
-  }
-  .similar-info { padding: 14px; }
-  .similar-name { font-size: 13px; font-weight: 500; color: var(--white); margin-bottom: 6px; }
-  .similar-price { font-size: 15px; font-weight: 700; color: var(--gold); }
-
-  /* FOOTER */
-  footer {
-    background: var(--gray-1);
-    border-top: 1px solid var(--gray-2);
-    padding: 32px 40px;
-    display: flex; align-items: center; justify-content: space-between;
-    font-size: 12px; color: var(--gray-4);
-  }
-
-  /* ── GLOBAL MOBILE RESET ── */
-  @media (max-width: 768px) {
-    * { max-width: 100%; }
-    img, video, iframe { max-width: 100% !important; height: auto; }
-    table { max-width: 100%; }
-  }
-
-  @media (max-width: 768px) {
-    .product-layout { grid-template-columns: 1fr; padding: 20px; gap: 32px; }
-    .gallery { padding-left: 0; }
-    .product-info { padding-right: 0; }
-    .similar-grid { grid-template-columns: repeat(2, 1fr); }
-    .tabs { padding: 0 20px 40px; }
-    .similar-section { padding: 0 20px 40px; }
-    .breadcrumb { padding: 12px 20px; }
-    nav { padding: 0 16px; }
-    .product-layout { padding: 16px; }
-    .tabs { padding: 0 16px 32px; }
-  }
-  /* Collapse desktop center menu in the tablet-portrait gap so the nav never overflows */
-  @media (max-width: 900px) {
-    .nav-center { display: none !important; }
-  }
-  @media (max-width: 480px) {
-    .similar-grid { grid-template-columns: 1fr; }
-    .product-actions { flex-direction: column; }
-    .nav-links { display: none; }
-    footer { padding: 16px; flex-direction: column; gap: 8px; text-align: center; }
-    .product-layout { padding: 12px; }
-    .thumbnails { grid-template-columns: repeat(4, 1fr); }
-    .product-title { font-size: 24px; }
-  }
-
-  /* ===== APP BOTTOM NAV ===== */
+  /* ── APP BOTTOM NAV ── */
   .app-bnav{display:none;}
   @media (max-width:1024px), (max-height:500px){
-    body{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))!important;}
+    body{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px));}
     footer{display:none!important;}
-    .app-bnav{display:flex;position:fixed;top:auto;bottom:0;left:0;right:0;height:56px;background:#fff;border-top:1px solid #e8e4dc;box-shadow:0 -2px 16px rgba(0,0,0,.06);z-index:998;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);align-items:stretch;}
-    .bnav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#aaa;font-size:10px;font-family:'Tajawal',sans-serif;font-weight:500;transition:color .15s;border:none;background:transparent;cursor:pointer;padding:0;}
+    .app-bnav{display:flex;position:fixed;top:auto;bottom:0;left:0;right:0;height:56px;background:#fff;border-top:1px solid #e8e4dc;
+      box-shadow:0 -2px 16px rgba(0,0,0,.06);z-index:998;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);align-items:stretch;}
+    .bnav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;
+      color:#aaa;font-size:10px;font-family:'Tajawal',sans-serif;font-weight:500;transition:color .15s;border:none;background:transparent;cursor:pointer;padding:0;}
     .bnav-tab i{font-size:22px;line-height:1;}
     .bnav-tab.on{color:#C9A84C;}
-    .bnav-cart{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;text-decoration:none;font-size:10px;font-family:'Tajawal',sans-serif;color:#aaa;padding-bottom:4px;}
-    .bnav-cart-ring{width:44px;height:44px;border-radius:50%;background:#C9A84C;display:flex;align-items:center;justify-content:center;font-size:20px;color:#0A0A0A;margin-top:-14px;box-shadow:0 4px 14px rgba(201,168,76,.3);}
-    .bnav-cart.on .bnav-cart-ring{background:#A07828;}
-    nav a.btn-ghost,nav a.btn-gold,nav .btn-ghost,nav .btn-gold{display:none!important;}
+    .bnav-cart{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;text-decoration:none;
+      font-size:10px;font-family:'Tajawal',sans-serif;color:#aaa;padding-bottom:4px;}
+    .bnav-cart-ring{width:44px;height:44px;border-radius:50%;background:#C9A84C;display:flex;align-items:center;justify-content:center;
+      font-size:20px;color:#0A0A0A;margin-top:-14px;box-shadow:0 4px 14px rgba(201,168,76,.3);}
+    nav a.btn-ghost,nav a.btn-gold{display:none!important;}
   }
 </style>
 <link rel="stylesheet" href="raf_header.css">
@@ -480,778 +288,196 @@
 <script src="raf_features.js"></script>
 </head>
 <body>
-
 <!-- NAV -->
 <nav>
   <div class="nav-actions">
-    <button class="nav-icon" onclick="if(window.__rafBackTarget){location.href=window.__rafBackTarget;}else{history.back();}" title="رجوع"><i class="ti ti-arrow-right"></i></button>
-    <button class="nav-icon" onclick="window.location='raf_cart.html'">
-      <i class="ti ti-shopping-cart"></i>
-      <span class="cart-badge">3</span>
-    </button>
-    <button class="nav-icon" onclick="window.location='raf_account.html'"><i class="ti ti-heart"></i></button>
-    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> تسجيل الدخول</a>
-    <a href="raf_login.html" class="btn-gold">إنشاء حساب</a>
+    <button class="nav-icon" onclick="goBackSmart()" title="رجوع"><i class="ti ti-arrow-right" id="backIcon"></i></button>
+    <button class="nav-icon" onclick="window.location='raf_cart.html'"><i class="ti ti-shopping-cart"></i><span class="cart-badge"></span></button>
+    <button class="nav-icon" onclick="window.location='raf_wishlist.html'"><i class="ti ti-heart"></i></button>
+    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> <span data-ar="تسجيل الدخول" data-en="Sign in">تسجيل الدخول</span></a>
+    <a href="raf_login.html" class="btn-gold" data-ar="إنشاء حساب" data-en="Sign up">إنشاء حساب</a>
   </div>
-  <div class="nav-center" style="display:flex;align-items:center;gap:8px;">
-    <a href="raf_storespage.html" style="color:var(--gray-4);text-decoration:none;font-size:14px;">المحلات</a>
-    <span style="color:var(--gray-3);">·</span>
-    <a href="raf_offers.html" style="color:var(--gray-4);text-decoration:none;font-size:14px;">العروض</a>
-    <span style="color:var(--gray-3);">·</span>
-    <a href="raf_trending.html" style="color:var(--gray-4);text-decoration:none;font-size:14px;">الترندات</a>
-    <span style="color:var(--gray-3);">·</span>
-    <a href="raf_used.html" style="color:var(--gray-4);text-decoration:none;font-size:14px;">المستعملات</a>
-    <span style="color:var(--gray-3);">·</span>
-    <a href="raf_auctions.html" style="color:var(--gray-4);text-decoration:none;font-size:14px;">المزادات</a>
+  <div class="nav-center">
+    <a href="raf_storespage.html" data-ar="المحلات" data-en="Stores">المحلات</a>
+    <a href="raf_offers.html" data-ar="العروض" data-en="Offers">العروض</a>
+    <a href="raf_trending.html" data-ar="الترندات" data-en="Trends">الترندات</a>
+    <a href="raf_used.html" data-feature="used" data-ar="المستعملات" data-en="Used">المستعملات</a>
+    <a href="raf_auctions.html" data-feature="auctions" data-ar="المزادات" data-en="Auctions">المزادات</a>
   </div>
-  <a href="raf_homepage.html" class="nav-logo">
-    رف
-    <span>RAF MARKETPLACE</span>
-  </a>
+  <a href="raf_homepage.html" class="nav-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace" class="brand-logo"></a>
 </nav>
 
 <!-- BREADCRUMB -->
 <div class="breadcrumb">
-  <a href="raf_homepage.html">الرئيسية</a>
-  <i class="ti ti-chevron-left"></i>
-  <a href="raf_homepage.html" id="bc-cat">ملابس</a>
-  <i class="ti ti-chevron-left"></i>
-  <a href="raf_store.html?store=casa-mode" id="bc-store">Casa Mode</a>
-  <i class="ti ti-chevron-left"></i>
-  <span style="color:var(--white);" id="bc-product">قميص أوفرسايز كلاسيك</span>
+  <a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
+  <i class="ti ti-chevron-left bc-sep"></i>
+  <a href="raf_offers.html" id="bcCat">ملابس</a>
+  <i class="ti ti-chevron-left bc-sep"></i>
+  <a href="raf_store.html?store=casa-mode" id="bcStore">Casa Mode</a>
+  <i class="ti ti-chevron-left bc-sep"></i>
+  <span class="bc-cur" id="bcProduct">قميص أوفرسايز كلاسيك</span>
 </div>
 
-<!-- PRODUCT LAYOUT -->
-<div class="product-layout">
-
+<!-- PRODUCT -->
+<div class="player">
   <!-- GALLERY -->
-  <div class="gallery">
-    <div class="main-img">
-      <i class="ti ti-shirt main-img-icon" id="main-icon"></i>
-      <span class="img-tag" id="discount-tag">-20%</span>
-      <button class="video-btn">
-        <i class="ti ti-player-play-filled"></i> شاهد الفيديو
-      </button>
-    </div>
-    <div class="thumbnails">
-      <div class="thumb active"><i class="ti ti-shirt"></i></div>
-      <div class="thumb"><i class="ti ti-shirt"></i></div>
-      <div class="thumb"><i class="ti ti-shirt"></i></div>
-      <div class="thumb" style="background:var(--gray-2); font-size:14px; font-weight:700; color:var(--gray-4);">
-        <i class="ti ti-player-play"></i>
+  <div class="gal">
+    <div class="gal-stage" id="galStage">
+      <span class="gal-tag" id="galTag">-20%</span>
+      <span class="gal-oos" id="galOOS"><i class="ti ti-ban"></i> <span data-ar="نفدت الكمية" data-en="Sold Out">نفدت الكمية</span></span>
+      <i class="ti ti-shirt gal-icon" id="galIcon"></i>
+      <div class="gal-float">
+        <button class="gal-fbtn" id="favBtnG" onclick="toggleWishlist()" aria-label="favorite"><i class="ti ti-heart" id="favIconG"></i></button>
+        <button class="gal-fbtn" onclick="shareProduct()" aria-label="share"><i class="ti ti-share"></i></button>
       </div>
     </div>
+    <div class="gal-thumbs" id="galThumbs"></div>
   </div>
 
-  <!-- PRODUCT INFO -->
-  <div class="product-info">
-
-    <!-- Store -->
-    <a href="raf_store.html?store=casa-mode" class="store-link" id="prod-store-link">
-      <div class="store-avatar"><i class="ti ti-hanger" id="prod-store-icon"></i></div>
-      <span class="store-name-link" id="prod-store-name">Casa Mode</span>
-      <i class="ti ti-rosette-discount-check store-verified"></i>
+  <!-- PURCHASE PANEL -->
+  <div class="pbuy">
+    <a class="store-chip" id="storeChip" href="raf_store.html?store=casa-mode">
+      <span class="store-av"><i class="ti ti-hanger" id="storeIcon"></i></span>
+      <span class="store-nm" id="storeName">Casa Mode</span>
+      <i class="ti ti-rosette-discount-check store-vf" title="متجر موثّق"></i>
     </a>
 
-    <!-- Title -->
-    <h1 class="product-title">قميص أوفرسايز كلاسيك</h1>
+    <h1 class="ptitle" id="pTitle">قميص أوفرسايز كلاسيك</h1>
 
-    <!-- Rating -->
-    <div class="rating-row">
-      <div class="stars">
-        <i class="ti ti-star-filled star"></i>
-        <i class="ti ti-star-filled star"></i>
-        <i class="ti ti-star-filled star"></i>
-        <i class="ti ti-star-filled star"></i>
-        <i class="ti ti-star-half-filled star"></i>
-      </div>
-      <span class="rating-num">4.8</span>
-      <span class="rating-sep">·</span>
-      <span class="rating-count">128 تقييم</span>
-      <span class="rating-sep">·</span>
-      <span class="rating-count" style="color:var(--gold);">342 مبيعة</span>
+    <div class="prate">
+      <span class="stars" id="pStars"></span>
+      <b id="pRate">4.8</b>
+      <span class="sep">·</span>
+      <a onclick="switchTab('reviews', document.getElementById('tabReviewsBtn'))" id="pReviews">128 تقييم</a>
+      <span class="sep">·</span>
+      <span class="sold" id="pSales">342 مبيعة</span>
     </div>
 
-    <!-- Price -->
-    <div class="price-row">
+    <div class="pprice">
       <div>
-        <div style="font-size:12px;color:var(--gray-4);margin-bottom:4px;">السعر</div>
-        <div style="display:flex;align-items:baseline;gap:6px;">
-          <span class="price-main">12.000</span>
-          <span class="price-currency">د.ك</span>
-          <span class="price-old">15.000</span>
+        <div class="pprice-l" data-ar="السعر" data-en="Price">السعر</div>
+        <div class="pprice-v">
+          <span class="pprice-n" id="pPrice">12.000</span>
+          <span class="pprice-c" data-ar="د.ك" data-en="KWD">د.ك</span>
+          <span class="pprice-o" id="pOld">15.000</span>
         </div>
       </div>
-      <span class="price-save">وفّرت 3.000 د.ك</span>
+      <span class="pprice-save" id="pSave"></span>
     </div>
 
-    <!-- Size -->
-    <div class="option-section" id="sizes-section">
-      <div class="option-header">
-        <span class="option-title">المقاس</span>
-        <span class="option-selected">S — مختار</span>
+    <!-- options injected -->
+    <div id="optSize" class="opt" style="display:none;">
+      <div class="opt-h">
+        <span class="opt-t"><span data-ar="المقاس" data-en="Size">المقاس</span> <span class="req">*</span></span>
+        <span class="opt-sel" id="selSize"></span>
       </div>
-      <div class="options-row">
-        <button class="option-btn" onclick="selectSize(this)">XS</button>
-        <button class="option-btn selected" onclick="selectSize(this)">S</button>
-        <button class="option-btn" onclick="selectSize(this)">M</button>
-        <button class="option-btn" onclick="selectSize(this)">L</button>
-        <button class="option-btn" onclick="selectSize(this)">XL</button>
-        <button class="option-btn out" title="نفد المخزون">XXL</button>
-      </div>
+      <div class="opt-row" id="rowSize"></div>
     </div>
 
-    <!-- Color -->
-    <div class="option-section">
-      <div class="option-header">
-        <span class="option-title">اللون</span>
-        <span class="option-selected">أبيض — مختار</span>
+    <div id="optColor" class="opt" style="display:none;">
+      <div class="opt-h">
+        <span class="opt-t"><span data-ar="اللون" data-en="Color">اللون</span> <span class="req">*</span></span>
+        <span class="opt-sel" id="selColor"></span>
       </div>
-      <div class="options-row">
-        <button class="color-btn selected" style="background:#F5F5F5;border-color:#ccc;" onclick="selectColor(this,'أبيض')" title="أبيض"></button>
-        <button class="color-btn" style="background:#1A1A1A;" onclick="selectColor(this,'أسود')" title="أسود"></button>
-        <button class="color-btn" style="background:#C9A84C;" onclick="selectColor(this,'ذهبي')" title="ذهبي"></button>
-        <button class="color-btn" style="background:#8B7355;" onclick="selectColor(this,'بيج')" title="بيج"></button>
-      </div>
+      <div class="opt-row" id="rowColor"></div>
     </div>
 
-    <!-- Quantity -->
-    <div class="option-section">
-      <div class="option-title" style="margin-bottom:12px;">الكمية</div>
-      <div style="display:flex;align-items:center;gap:16px;">
-        <div class="qty-row">
-          <button class="qty-btn" onclick="changeQty(-1)"><i class="ti ti-minus"></i></button>
-          <div class="qty-num" id="qty">1</div>
-          <button class="qty-btn" onclick="changeQty(1)"><i class="ti ti-plus"></i></button>
+    <div class="opt">
+      <div class="opt-h"><span class="opt-t" data-ar="الكمية" data-en="Quantity">الكمية</span></div>
+      <div class="qty-wrap">
+        <div class="qty">
+          <button onclick="changeQty(-1)" id="qtyMinus" aria-label="-"><i class="ti ti-minus"></i></button>
+          <span id="qty">1</span>
+          <button onclick="changeQty(1)" id="qtyPlus" aria-label="+"><i class="ti ti-plus"></i></button>
         </div>
-        <span style="font-size:13px;color:var(--gray-4);" id="stock-label">المتاح: 15 قطعة</span>
+        <span class="stock-l" id="stockLabel"></span>
       </div>
     </div>
 
-    <!-- Actions -->
-    <div class="action-row">
-      <button class="btn-add-cart" onclick="addToCart()">
-        <i class="ti ti-shopping-cart"></i> أضف للسلة
-      </button>
-      <button class="btn-wishlist" id="wishlistBtn" onclick="toggleWishlist()">
-        <i class="ti ti-heart" id="wishlistIcon"></i>
-      </button>
+    <div class="acts">
+      <button class="btn-cart" id="btnCart" onclick="addToCart()"><i class="ti ti-shopping-cart"></i> <span data-ar="أضف للسلة" data-en="Add to Cart">أضف للسلة</span></button>
+      <button class="btn-ico" id="favBtn" onclick="toggleWishlist()" aria-label="favorite"><i class="ti ti-heart" id="favIcon"></i></button>
+      <button class="btn-ico" onclick="shareProduct()" aria-label="share"><i class="ti ti-share"></i></button>
     </div>
+    <button class="btn-buy" id="btnBuy" onclick="buyNow()"><i class="ti ti-bolt"></i> <span data-ar="اشترِ الآن" data-en="Buy Now">اشترِ الآن</span></button>
+    <div class="opt-hint" id="optHint"></div>
 
-    <button class="btn-buy-now">
-      <i class="ti ti-bolt"></i> اشتري الآن
-    </button>
-
-    <!-- Info Pills -->
-    <div class="info-pills">
-      <div class="info-pill"><i class="ti ti-truck"></i> توصيل سريع</div>
-      <div class="info-pill"><i class="ti ti-refresh"></i> إرجاع خلال 7 أيام</div>
-      <div class="info-pill"><i class="ti ti-shield-check"></i> منتج أصلي</div>
-      <div class="info-pill"><i class="ti ti-cash"></i> دفع عند الاستلام</div>
+    <div class="pills">
+      <div class="pill"><i class="ti ti-truck-delivery"></i> <span data-ar="توصيل سريع خلال 24 ساعة" data-en="Fast delivery within 24 hours">توصيل سريع خلال 24 ساعة</span></div>
+      <div class="pill"><i class="ti ti-refresh"></i> <span data-ar="إرجاع مجاني خلال 7 أيام" data-en="Free returns within 7 days">إرجاع مجاني خلال 7 أيام</span></div>
+      <div class="pill"><i class="ti ti-shield-check"></i> <span data-ar="منتج أصلي مضمون" data-en="Guaranteed authentic">منتج أصلي مضمون</span></div>
+      <div class="pill"><i class="ti ti-cash"></i> <span data-ar="الدفع عند الاستلام" data-en="Cash on delivery">الدفع عند الاستلام</span></div>
     </div>
-
   </div>
 </div>
 
 <!-- TABS -->
 <div class="tabs">
-  <div class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('desc', this)">تفاصيل المنتج</button>
-    <button class="tab-btn" id="reviews-tab-btn" onclick="switchTab('reviews', this)">التقييمات (128)</button>
-    <button class="tab-btn" onclick="switchTab('returns', this)">الإرجاع والاستبدال</button>
+  <div class="tabnav">
+    <button class="tabbtn active" onclick="switchTab('desc', this)" data-ar="تفاصيل المنتج" data-en="Details">تفاصيل المنتج</button>
+    <button class="tabbtn" onclick="switchTab('specs', this)" data-ar="المواصفات" data-en="Specifications">المواصفات</button>
+    <button class="tabbtn" id="tabReviewsBtn" onclick="switchTab('reviews', this)">التقييمات (128)</button>
+    <button class="tabbtn" onclick="switchTab('returns', this)" data-ar="الإرجاع والاستبدال" data-en="Returns">الإرجاع والاستبدال</button>
   </div>
 
-  <!-- DESCRIPTION -->
-  <div class="tab-content active" id="desc">
-    <p class="desc-text">
-      قميص أوفرسايز كلاسيك من Casa Mode — مصنوع من قطن 100% عالي الجودة بقصة مريحة وأنيقة تناسب جميع الأوقات. مثالي للإطلالات اليومية والكاجوال مع سهولة التنسيق مع مختلف القطع.
-    </p>
-    <div class="desc-features">
-      <div class="desc-feature"><i class="ti ti-leaf"></i> قطن 100% طبيعي</div>
-      <div class="desc-feature"><i class="ti ti-wash"></i> قابل للغسيل بالغسالة</div>
-      <div class="desc-feature"><i class="ti ti-ruler"></i> قصة أوفرسايز مريحة</div>
-      <div class="desc-feature"><i class="ti ti-sun"></i> مناسب لجميع المواسم</div>
-      <div class="desc-feature"><i class="ti ti-palette"></i> ألوان ثابتة لا تبهت</div>
-      <div class="desc-feature"><i class="ti ti-award"></i> ضمان الجودة</div>
-    </div>
+  <div class="tabc active" id="desc">
+    <p class="desc-t" id="descText"></p>
+    <div class="feats" id="descFeats"></div>
   </div>
 
-  <!-- REVIEWS -->
-  <div class="tab-content" id="reviews">
-    <div class="reviews-summary">
-      <div style="text-align:center;">
-        <div class="review-big-num">4.8</div>
-        <div class="stars" style="justify-content:center;margin:8px 0;">
-          <i class="ti ti-star-filled star"></i>
-          <i class="ti ti-star-filled star"></i>
-          <i class="ti ti-star-filled star"></i>
-          <i class="ti ti-star-filled star"></i>
-          <i class="ti ti-star-half-filled star"></i>
-        </div>
-        <div style="font-size:12px;color:var(--gray-4);">128 تقييم</div>
-      </div>
-      <div class="review-bars">
-        <div class="bar-row"><span style="width:16px;">5</span><i class="ti ti-star-filled" style="color:var(--gold);font-size:11px;"></i><div class="bar-track"><div class="bar-fill" style="width:75%;"></div></div><span>75%</span></div>
-        <div class="bar-row"><span style="width:16px;">4</span><i class="ti ti-star-filled" style="color:var(--gold);font-size:11px;"></i><div class="bar-track"><div class="bar-fill" style="width:18%;"></div></div><span>18%</span></div>
-        <div class="bar-row"><span style="width:16px;">3</span><i class="ti ti-star-filled" style="color:var(--gold);font-size:11px;"></i><div class="bar-track"><div class="bar-fill" style="width:5%;"></div></div><span>5%</span></div>
-        <div class="bar-row"><span style="width:16px;">2</span><i class="ti ti-star-filled" style="color:var(--gold);font-size:11px;"></i><div class="bar-track"><div class="bar-fill" style="width:2%;"></div></div><span>2%</span></div>
-        <div class="bar-row"><span style="width:16px;">1</span><i class="ti ti-star-filled" style="color:var(--gold);font-size:11px;"></i><div class="bar-track"><div class="bar-fill" style="width:0%;"></div></div><span>0%</span></div>
-      </div>
-    </div>
-
-    <div class="review-card">
-      <div class="review-header">
-        <div class="reviewer-avatar">م</div>
-        <div>
-          <div class="reviewer-name">محمد العنزي</div>
-          <div class="review-date">منذ 3 أيام</div>
-        </div>
-        <div class="review-stars">
-          <i class="ti ti-star-filled" style="color:var(--gold);font-size:14px;"></i>
-          <i class="ti ti-star-filled" style="color:var(--gold);font-size:14px;"></i>
-          <i class="ti ti-star-filled" style="color:var(--gold);font-size:14px;"></i>
-          <i class="ti ti-star-filled" style="color:var(--gold);font-size:14px;"></i>
-          <i class="ti ti-star-filled" style="color:var(--gold);font-size:14px;"></i>
-        </div>
-      </div>
-      <p class="review-text">جودة ممتازة والمقاس دقيق جداً. التوصيل وصل بسرعة والتغليف كان أنيق. راضي جداً عن الشراء وبرجع أطلب.</p>
-    </div>
-
-    <div class="review-card">
-      <div class="review-header">
-        <div class="reviewer-avatar">ن</div>
-        <div>
-          <div class="reviewer-name">نورة الرشيدي</div>
-          <div class="review-date">منذ أسبوع</div>
-        </div>
-        <div class="review-stars">
-          <i class="ti ti-star-filled" style="color:var(--gold);font-size:14px;"></i>
-          <i class="ti ti-star-filled" style="color:var(--gold);font-size:14px;"></i>
-          <i class="ti ti-star-filled" style="color:var(--gold);font-size:14px;"></i>
-          <i class="ti ti-star-filled" style="color:var(--gold);font-size:14px;"></i>
-          <i class="ti ti-star" style="color:var(--gray-3);font-size:14px;"></i>
-        </div>
-      </div>
-      <p class="review-text">القميص حلو وخامته كويسة. اللون طلع أفتح شوي من الصورة بس في المجمل راضية عنه.</p>
-    </div>
-
-    <div class="review-card">
-      <div class="review-header">
-        <div class="reviewer-avatar">ف</div>
-        <div>
-          <div class="reviewer-name">فهد المطيري</div>
-          <div class="review-date">منذ أسبوعين</div>
-        </div>
-        <div class="review-stars">
-          <i class="ti ti-star-filled" style="color:var(--gold);font-size:14px;"></i>
-          <i class="ti ti-star-filled" style="color:var(--gold);font-size:14px;"></i>
-          <i class="ti ti-star-filled" style="color:var(--gold);font-size:14px;"></i>
-          <i class="ti ti-star-filled" style="color:var(--gold);font-size:14px;"></i>
-          <i class="ti ti-star-filled" style="color:var(--gold);font-size:14px;"></i>
-        </div>
-      </div>
-      <p class="review-text">أفضل قميص اشتريته من رف. الأوفرسايز مريح جداً والقطن ناعم. طلبت 3 ألوان.</p>
-    </div>
+  <div class="tabc" id="specs">
+    <div class="spec-tbl" id="specTable"></div>
   </div>
 
-  <!-- RETURNS -->
-  <div class="tab-content" id="returns">
-    <div style="max-width:600px;">
-      <div class="desc-feature" style="margin-bottom:12px;padding:16px;">
-        <i class="ti ti-refresh" style="font-size:22px;"></i>
-        <div>
-          <div style="font-weight:700;margin-bottom:4px;">إرجاع خلال 7 أيام</div>
-          <div style="font-size:13px;color:var(--gray-4);">يمكنك إرجاع المنتج خلال 7 أيام من تاريخ الاستلام بشرط أن يكون بحالته الأصلية.</div>
-        </div>
+  <div class="tabc" id="reviews">
+    <div class="rsum">
+      <div class="rbig">
+        <div class="rbig-n" id="rvBig">4.8</div>
+        <div class="stars" id="rvStars" style="justify-content:center;margin-top:8px;"></div>
+        <div class="rbig-c" id="rvCount"></div>
       </div>
-      <div class="desc-feature" style="margin-bottom:12px;padding:16px;">
-        <i class="ti ti-exchange" style="font-size:22px;"></i>
-        <div>
-          <div style="font-weight:700;margin-bottom:4px;">استبدال مجاني</div>
-          <div style="font-size:13px;color:var(--gray-4);">استبدال مجاني في حال وجود عيب في المنتج أو خطأ في الطلب.</div>
-        </div>
-      </div>
-      <div class="desc-feature" style="padding:16px;">
-        <i class="ti ti-headset" style="font-size:22px;"></i>
-        <div>
-          <div style="font-weight:700;margin-bottom:4px;">تواصل مع الدعم</div>
-          <div style="font-size:13px;color:var(--gray-4);">لأي استفسار تواصل مع دعم رف وسنساعدك فوراً.</div>
-        </div>
-      </div>
+      <div class="rbars" id="rvBars"></div>
+    </div>
+    <div class="rlist" id="rvList"></div>
+  </div>
+
+  <div class="tabc" id="returns">
+    <div class="feats" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
+      <div class="feat"><i class="ti ti-refresh"></i><div><div style="font-weight:800;color:var(--ink);margin-bottom:4px;" data-ar="إرجاع خلال 7 أيام" data-en="7-day returns">إرجاع خلال 7 أيام</div><div style="font-size:12.5px;color:var(--text3);font-weight:500;" data-ar="يمكنك إرجاع المنتج خلال 7 أيام من تاريخ الاستلام بشرط أن يكون بحالته الأصلية." data-en="Return the product within 7 days of delivery, provided it is in its original condition.">يمكنك إرجاع المنتج خلال 7 أيام من تاريخ الاستلام بشرط أن يكون بحالته الأصلية.</div></div></div>
+      <div class="feat"><i class="ti ti-exchange"></i><div><div style="font-weight:800;color:var(--ink);margin-bottom:4px;" data-ar="استبدال مجاني" data-en="Free exchange">استبدال مجاني</div><div style="font-size:12.5px;color:var(--text3);font-weight:500;" data-ar="استبدال مجاني في حال وجود عيب في المنتج أو خطأ في الطلب." data-en="Free exchange if the product is defective or the order was incorrect.">استبدال مجاني في حال وجود عيب في المنتج أو خطأ في الطلب.</div></div></div>
+      <div class="feat"><i class="ti ti-headset"></i><div><div style="font-weight:800;color:var(--ink);margin-bottom:4px;" data-ar="تواصل مع الدعم" data-en="Contact support">تواصل مع الدعم</div><div style="font-size:12.5px;color:var(--text3);font-weight:500;" data-ar="لأي استفسار تواصل مع دعم رف وسنساعدك فوراً." data-en="For any question, contact RAF support and we will help you right away.">لأي استفسار تواصل مع دعم رف وسنساعدك فوراً.</div></div></div>
     </div>
   </div>
 </div>
 
-<!-- SIMILAR PRODUCTS -->
-<div class="similar-section">
-  <div class="similar-title">منتجات مشابهة</div>
-  <div class="similar-grid">
-    <div class="similar-card">
-      <div class="similar-img"><i class="ti ti-shirt"></i></div>
-      <div class="similar-info">
-        <div class="similar-name">قميص لينن بريميوم</div>
-        <div class="similar-price">18.000 د.ك</div>
-      </div>
+<!-- RELATED -->
+<div class="rel">
+  <div class="sec-h">
+    <div>
+      <div class="sec-k" data-ar="قد يعجبك أيضاً" data-en="You may also like">قد يعجبك أيضاً</div>
+      <div class="sec-t" data-ar="منتجات مشابهة" data-en="Related products">منتجات مشابهة</div>
     </div>
-    <div class="similar-card">
-      <div class="similar-img"><i class="ti ti-shirt"></i></div>
-      <div class="similar-info">
-        <div class="similar-name">تيشيرت بيسك كلاسيك</div>
-        <div class="similar-price">8.500 د.ك</div>
-      </div>
-    </div>
-    <div class="similar-card">
-      <div class="similar-img"><i class="ti ti-shirt"></i></div>
-      <div class="similar-info">
-        <div class="similar-name">قميص بولو فاخر</div>
-        <div class="similar-price">22.000 د.ك</div>
-      </div>
-    </div>
-    <div class="similar-card">
-      <div class="similar-img"><i class="ti ti-shirt"></i></div>
-      <div class="similar-info">
-        <div class="similar-name">هودي أوفرسايز</div>
-        <div class="similar-price">25.000 د.ك</div>
-      </div>
-    </div>
+    <a class="btn-ghost" id="relStoreLink" href="raf_store.html?store=casa-mode"><span data-ar="تصفح المتجر" data-en="Visit store">تصفح المتجر</span> <i class="ti ti-arrow-left" id="relArrow"></i></a>
   </div>
+  <div class="rel-grid" id="relGrid"></div>
+</div>
+
+<!-- STICKY MOBILE ACTION BAR -->
+<div class="sticky-buy">
+  <div class="sb-price"><small data-ar="الإجمالي" data-en="Total">الإجمالي</small><b id="sbTotal">12.000</b></div>
+  <button class="sb-cart" id="sbCart" onclick="addToCart()"><i class="ti ti-shopping-cart"></i> <span data-ar="أضف للسلة" data-en="Add">أضف للسلة</span></button>
+  <button class="sb-buy" id="sbBuy" onclick="buyNow()"><i class="ti ti-bolt"></i> <span data-ar="اشترِ الآن" data-en="Buy Now">اشترِ الآن</span></button>
 </div>
 
 <!-- FOOTER -->
 <footer>
-  <div>جميع الحقوق محفوظة © 2026 رف</div>
+  <div data-ar="جميع الحقوق محفوظة © 2026 رف" data-en="All rights reserved © 2026 RAF">جميع الحقوق محفوظة © 2026 رف</div>
   <div style="display:flex;gap:16px;">
-    <a href="raf_privacy.html" style="color:var(--gray-4);text-decoration:none;font-size:12px;">سياسة الخصوصية</a>
-    <a href="raf_terms.html" style="color:var(--gray-4);text-decoration:none;font-size:12px;">الشروط والأحكام</a>
+    <a href="raf_privacy.html" data-ar="سياسة الخصوصية" data-en="Privacy Policy">سياسة الخصوصية</a>
+    <a href="raf_terms.html" data-ar="الشروط والأحكام" data-en="Terms &amp; Conditions">الشروط والأحكام</a>
   </div>
   <a href="raf_homepage.html"><img src="assets/branding/logo-light.svg" alt="RAF Marketplace" class="brand-logo-foot"></a>
 </footer>
-
-<script>
-/* ============================================================
-   PRODUCT DATA — keyed by product ID
-   ============================================================ */
-const PRODUCT_DATA = {
-  'P-001': {
-    name: 'قميص أوفرسايز كلاسيك',
-    store: 'Casa Mode', storeSlug: 'casa-mode', storeIcon: 'ti-hanger',
-    breadcrumbCat: 'ملابس',
-    icon: 'ti-shirt',
-    price: '12.000', oldPrice: '15.000', discount: '-20%', save: 'وفّرت 3.000 د.ك',
-    rating: 4.8, reviews: 128, sales: 342,
-    sizes: ['XS','S','M','L','XL','XXL'], outSizes: ['XXL'], defaultSize: 'S',
-    colors: [
-      {name:'أبيض', hex:'#F5F5F5', border:'#ccc'},
-      {name:'أسود', hex:'#1A1A1A'},
-      {name:'ذهبي', hex:'#C9A84C'},
-      {name:'بيج',  hex:'#8B7355'}
-    ], defaultColor: 'أبيض',
-    stock: 15,
-    desc: 'قميص أوفرسايز كلاسيك من Casa Mode — مصنوع من قطن 100% عالي الجودة بقصة مريحة وأنيقة تناسب جميع الأوقات. مثالي للإطلالات اليومية والكاجوال مع سهولة التنسيق مع مختلف القطع.',
-    features: [
-      {icon:'ti-leaf', text:'قطن 100% طبيعي'},{icon:'ti-wash', text:'قابل للغسيل بالغسالة'},
-      {icon:'ti-ruler', text:'قصة أوفرسايز مريحة'},{icon:'ti-sun', text:'مناسب لجميع المواسم'},
-      {icon:'ti-palette', text:'ألوان ثابتة لا تبهت'},{icon:'ti-award', text:'ضمان الجودة'}
-    ],
-    reviewBars: [75,18,5,2,0]
-  },
-  'P-002': {
-    name: 'حذاء سنيكرز ليدر فاخر',
-    store: 'Sole & Co', storeSlug: 'sole-co', storeIcon: 'ti-shoe',
-    breadcrumbCat: 'أحذية',
-    icon: 'ti-shoe',
-    price: '35.000', oldPrice: '45.000', discount: '-22%', save: 'وفّرت 10.000 د.ك',
-    rating: 4.7, reviews: 94, sales: 210,
-    sizes: ['39','40','41','42','43','44','45'], outSizes: ['45'], defaultSize: '42',
-    colors: [
-      {name:'أبيض', hex:'#F5F5F5', border:'#ccc'},
-      {name:'أسود', hex:'#1A1A1A'},
-      {name:'رمادي',hex:'#888888'}
-    ], defaultColor: 'أبيض',
-    stock: 8,
-    desc: 'حذاء سنيكرز ليدر فاخر من Sole & Co — مصنوع من جلد أصلي عالي الجودة مع نعل مريح وتصميم عصري أنيق. مثالي للإطلالات الكاجوال والرسمية على حدٍّ سواء.',
-    features: [
-      {icon:'ti-star', text:'جلد أصلي 100%'},{icon:'ti-shoe', text:'نعل مريح ومتين'},
-      {icon:'ti-brush', text:'تصميم عصري'},{icon:'ti-award', text:'ضمان الجودة'},
-      {icon:'ti-recycle', text:'مواد صديقة للبيئة'},{icon:'ti-shield-check', text:'منتج أصلي معتمد'}
-    ],
-    reviewBars: [70,20,7,3,0]
-  },
-  'P-003': {
-    name: 'سماعات لاسلكية بريميوم',
-    store: 'TechZone', storeSlug: 'techzone', storeIcon: 'ti-device-laptop',
-    breadcrumbCat: 'إلكترونيات',
-    icon: 'ti-headphones',
-    price: '28.000', oldPrice: null, discount: null, save: null,
-    rating: 4.9, reviews: 256, sales: 520,
-    sizes: null, outSizes: [], defaultSize: null,
-    colors: [
-      {name:'أسود', hex:'#1A1A1A'},
-      {name:'أبيض', hex:'#F5F5F5', border:'#ccc'},
-      {name:'أزرق', hex:'#2D5BE3'}
-    ], defaultColor: 'أسود',
-    stock: 22,
-    desc: 'سماعات لاسلكية بريميوم من TechZone — جودة صوت استثنائية مع تقنية إلغاء الضوضاء النشط وبطارية تدوم 40 ساعة. تصميم مريح للاستخدام اليومي الطويل.',
-    features: [
-      {icon:'ti-wifi', text:'بلوتوث 5.3'},{icon:'ti-battery-charging', text:'بطارية 40 ساعة'},
-      {icon:'ti-ear', text:'إلغاء ضوضاء نشط'},{icon:'ti-microphone', text:'ميكروفون عالي الوضوح'},
-      {icon:'ti-device-floppy', text:'ذاكرة 5 أجهزة'},{icon:'ti-award', text:'ضمان سنتين'}
-    ],
-    reviewBars: [85,12,2,1,0]
-  },
-  'P-004': {
-    name: 'ساعة يد فاخرة كلاسيك',
-    store: 'Luxe Accessories', storeSlug: 'luxe-accessories', storeIcon: 'ti-diamond',
-    breadcrumbCat: 'إكسسوارات',
-    icon: 'ti-watch',
-    price: '85.000', oldPrice: '110.000', discount: '-23%', save: 'وفّرت 25.000 د.ك',
-    rating: 4.9, reviews: 47, sales: 83,
-    sizes: null, outSizes: [], defaultSize: null,
-    colors: [
-      {name:'ذهبي', hex:'#C9A84C'},
-      {name:'فضي',  hex:'#C0C0C0'},
-      {name:'أسود', hex:'#1A1A1A'}
-    ], defaultColor: 'ذهبي',
-    stock: 5,
-    desc: 'ساعة يد فاخرة كلاسيك من Luxe Accessories — تصميم أنيق يجمع بين الأصالة والعصرية. هيكل من الستانلس ستيل مع زجاج سفايرو مقاوم للخدش وآلية دقيقة تضمن الدقة.',
-    features: [
-      {icon:'ti-diamond', text:'زجاج سفايرو'},{icon:'ti-shield', text:'مقاومة الماء 50م'},
-      {icon:'ti-clock', text:'آلية سويسرية'},{icon:'ti-award', text:'ضمان سنتين'},
-      {icon:'ti-gift', text:'تأتي في علبة هدية'},{icon:'ti-star', text:'إصدار محدود'}
-    ],
-    reviewBars: [88,10,2,0,0]
-  },
-  'P-005': {
-    name: 'تراكسوت رياضي فاخر',
-    store: 'Urban Thread', storeSlug: 'urban-thread', storeIcon: 'ti-run',
-    breadcrumbCat: 'رياضة',
-    icon: 'ti-run',
-    price: '42.000', oldPrice: '52.000', discount: '-19%', save: 'وفّرت 10.000 د.ك',
-    rating: 4.6, reviews: 71, sales: 155,
-    sizes: ['S','M','L','XL','XXL'], outSizes: [], defaultSize: 'M',
-    colors: [
-      {name:'أسود', hex:'#1A1A1A'},
-      {name:'رمادي',hex:'#555555'},
-      {name:'كحلي', hex:'#1B2A4A'}
-    ], defaultColor: 'أسود',
-    stock: 12,
-    desc: 'تراكسوت رياضي فاخر من Urban Thread — مصنوع من قماش مرن خفيف الوزن يمنحك حرية الحركة الكاملة. مناسب للجيم والركض والأنشطة الرياضية اليومية.',
-    features: [
-      {icon:'ti-wind', text:'قماش خفيف وسريع الجفاف'},{icon:'ti-arrows-move', text:'مرونة عالية'},
-      {icon:'ti-sun', text:'حماية UV'},{icon:'ti-wash', text:'سهل العناية'},
-      {icon:'ti-pocket', text:'جيوب عملية'},{icon:'ti-award', text:'ضمان الجودة'}
-    ],
-    reviewBars: [65,22,10,3,0]
-  },
-  'P-006': {
-    name: 'سيت عناية بالبشرة الفاخر',
-    store: 'Glam Store', storeSlug: 'glam-store', storeIcon: 'ti-sparkles',
-    breadcrumbCat: 'جمال',
-    icon: 'ti-sparkles',
-    price: '19.500', oldPrice: '26.000', discount: '-25%', save: 'وفّرت 6.500 د.ك',
-    rating: 4.8, reviews: 183, sales: 412,
-    sizes: null, outSizes: [], defaultSize: null,
-    colors: null, defaultColor: null,
-    stock: 30,
-    desc: 'سيت عناية بالبشرة الفاخر من Glam Store — مجموعة متكاملة تضم غسول ومرطب وسيروم بتركيبة طبية مُختبرة. مناسبة لجميع أنواع البشرة ومعتمدة من الجمعية الكويتية للجلدية.',
-    features: [
-      {icon:'ti-leaf', text:'مكونات طبيعية 100%'},{icon:'ti-shield-check', text:'خالي من الباربان'},
-      {icon:'ti-skin', text:'مناسب لجميع أنواع البشرة'},{icon:'ti-award', text:'معتمد طبياً'},
-      {icon:'ti-recycle', text:'تغليف صديق للبيئة'},{icon:'ti-gift', text:'علبة هدية أنيقة'}
-    ],
-    reviewBars: [78,16,4,2,0]
-  }
-};
-
-/* ============================================================
-   INIT — read ?id= param and inject correct product data
-   ============================================================ */
-(function initProduct() {
-  const params  = new URLSearchParams(window.location.search);
-  const id      = params.get('id') || 'P-001';
-  const p       = PRODUCT_DATA[id] || PRODUCT_DATA['P-001'];
-
-  /* ── Back-to-store journey: opening a product from the Homepage makes the
-        first Back / in-app Back / Close land on the owning Store page first,
-        then normal navigation continues. ── */
-  (function(){
-    var fromHome = params.get('from') === 'home' || /raf_homepage\.html(\?|#|$)/.test(document.referrer);
-    if (!fromHome) return;
-    var storeUrl = 'raf_store.html?store=' + encodeURIComponent(p.storeSlug || '');
-    window.__rafBackTarget = storeUrl;                 /* used by in-app back/close buttons */
-    history.pushState({ rafStoreStop: 1 }, '', location.href);
-    window.addEventListener('popstate', function(){ location.replace(storeUrl); });
-  })();
-
-  /* helpers */
-  function starsHTML(r) {
-    let h = '';
-    for (let i = 1; i <= 5; i++) {
-      if (r >= i)         h += '<i class="ti ti-star-filled star"></i>';
-      else if (r >= i-0.5) h += '<i class="ti ti-star-half-filled star"></i>';
-      else                 h += '<i class="ti ti-star star empty"></i>';
-    }
-    return h;
-  }
-  /* page title */
-  document.title = 'رف — ' + p.name;
-
-  /* breadcrumb */
-  const bcCat = document.getElementById('bc-cat');
-  if (bcCat) bcCat.textContent = p.breadcrumbCat;
-  const bcStore = document.getElementById('bc-store');
-  if (bcStore) { bcStore.textContent = p.store; bcStore.href = 'raf_store.html?store=' + p.storeSlug; }
-  const bcProd = document.getElementById('bc-product');
-  if (bcProd) bcProd.textContent = p.name;
-
-  /* main icon */
-  const mainIcon = document.getElementById('main-icon');
-  if (mainIcon) mainIcon.className = 'ti ' + p.icon + ' main-img-icon';
-
-  /* discount tag */
-  const discTag = document.getElementById('discount-tag');
-  if (discTag) {
-    if (p.discount) { discTag.textContent = p.discount; discTag.style.display = ''; }
-    else discTag.style.display = 'none';
-  }
-
-  /* store link */
-  const storeLink = document.getElementById('prod-store-link');
-  if (storeLink) storeLink.href = 'raf_store.html?store=' + p.storeSlug;
-  const storeIcon = document.getElementById('prod-store-icon');
-  if (storeIcon) storeIcon.className = 'ti ' + p.storeIcon;
-  const storeName = document.getElementById('prod-store-name');
-  if (storeName) storeName.textContent = p.store;
-
-  /* product title */
-  const titleEl = document.querySelector('.product-title');
-  if (titleEl) titleEl.textContent = p.name;
-
-  /* rating */
-  const starsEl = document.querySelector('.stars');
-  if (starsEl) starsEl.innerHTML = starsHTML(p.rating);
-  const ratingNum = document.querySelector('.rating-num');
-  if (ratingNum) ratingNum.textContent = p.rating.toFixed(1);
-  const ratingCounts = document.querySelectorAll('.rating-count');
-  if (ratingCounts[0]) ratingCounts[0].textContent = p.reviews + ' تقييم';
-  if (ratingCounts[1]) ratingCounts[1].textContent = p.sales + ' مبيعة';
-
-  /* price */
-  const priceMain = document.querySelector('.price-main');
-  if (priceMain) priceMain.textContent = p.price;
-  const priceOld = document.querySelector('.price-old');
-  if (priceOld) { if (p.oldPrice) { priceOld.textContent = p.oldPrice; priceOld.style.display = ''; } else priceOld.style.display = 'none'; }
-  const priceSave = document.querySelector('.price-save');
-  if (priceSave) { if (p.save) { priceSave.textContent = p.save; priceSave.style.display = ''; } else priceSave.style.display = 'none'; }
-
-  /* sizes */
-  const sizesSection = document.getElementById('sizes-section');
-  if (sizesSection) {
-    if (!p.sizes) {
-      sizesSection.style.display = 'none';
-    } else {
-      const sizeLabel = sizesSection.querySelector('.option-selected');
-      if (sizeLabel) sizeLabel.textContent = p.defaultSize + ' — مختار';
-      const sizesRow = sizesSection.querySelector('.options-row');
-      if (sizesRow) {
-        sizesRow.innerHTML = p.sizes.map(s => {
-          const out = p.outSizes.includes(s);
-          return `<button class="option-btn${s === p.defaultSize ? ' selected' : ''}${out ? ' out' : ''}" onclick="selectSize(this)"${out ? ' title="نفد المخزون"' : ''}>${s}</button>`;
-        }).join('');
-      }
-    }
-  }
-
-  /* colors */
-  const colorSections = document.querySelectorAll('.option-section');
-  // colorSections[0] = sizes (handled above), colorSections[1] = colors
-  const colorSection = colorSections[1];
-  if (colorSection) {
-    if (!p.colors) {
-      colorSection.style.display = 'none';
-    } else {
-      const colorLabel = colorSection.querySelector('.option-selected');
-      if (colorLabel) colorLabel.textContent = p.defaultColor + ' — مختار';
-      const colorsRow = colorSection.querySelector('.options-row');
-      if (colorsRow) {
-        colorsRow.innerHTML = p.colors.map(c => {
-          const borderStyle = c.border ? `border-color:${c.border};` : '';
-          const sel = c.name === p.defaultColor ? ' selected' : '';
-          return `<button class="color-btn${sel}" style="background:${c.hex};${borderStyle}" onclick="selectColor(this,'${c.name}')" title="${c.name}"></button>`;
-        }).join('');
-      }
-    }
-  }
-
-  /* stock & qty max */
-  const stockLbl = document.getElementById('stock-label');
-  if (stockLbl) stockLbl.textContent = 'المتاح: ' + p.stock + ' قطعة';
-
-  /* description */
-  const descText = document.querySelector('.desc-text');
-  if (descText) descText.textContent = p.desc;
-  const descFeatures = document.querySelector('.desc-features');
-  if (descFeatures && p.features) {
-    descFeatures.innerHTML = p.features.map(f =>
-      `<div class="desc-feature"><i class="ti ${f.icon}"></i> ${f.text}</div>`
-    ).join('');
-  }
-
-  /* reviews tab label */
-  const revTabBtn = document.getElementById('reviews-tab-btn');
-  if (revTabBtn) revTabBtn.textContent = 'التقييمات (' + p.reviews + ')';
-
-  /* reviews summary */
-  const reviewBigNum = document.querySelector('.review-big-num');
-  if (reviewBigNum) reviewBigNum.textContent = p.rating.toFixed(1);
-  const revSummaryStars = document.querySelector('.reviews-summary .stars');
-  if (revSummaryStars) revSummaryStars.innerHTML = starsHTML(p.rating);
-  const revSummaryCount = document.querySelector('.reviews-summary div[style*="font-size:12px"]');
-  if (revSummaryCount) revSummaryCount.textContent = p.reviews + ' تقييم';
-  const barFills = document.querySelectorAll('.bar-fill');
-  p.reviewBars.forEach((pct, i) => { if (barFills[i]) barFills[i].style.width = pct + '%'; });
-  const barPcts = document.querySelectorAll('.bar-row span:last-child');
-  p.reviewBars.forEach((pct, i) => { if (barPcts[i]) barPcts[i].textContent = pct + '%'; });
-
-  /* similar products — update store references */
-  document.querySelectorAll('.similar-card').forEach(card => {
-    card.style.cursor = 'pointer';
-  });
-})();
-
-  // Size selection
-  function selectSize(btn) {
-    if (btn.classList.contains('out')) return;
-    const section = btn.closest('.option-section');
-    section.querySelectorAll('.option-btn:not(.out)').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    const lbl = section.querySelector('.option-selected');
-    if (lbl) lbl.textContent = btn.textContent + ' — مختار';
-  }
-
-  // Color selection
-  function selectColor(btn, name) {
-    document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    document.querySelectorAll('.option-selected')[1].textContent = name + ' — مختار';
-  }
-
-  // Quantity
-  let qty = 1;
-  function changeQty(delta) {
-    const pid = new URLSearchParams(window.location.search).get('id') || 'P-001';
-    const maxStock = (PRODUCT_DATA[pid] || PRODUCT_DATA['P-001']).stock;
-    qty = Math.max(1, Math.min(maxStock, qty + delta));
-    document.getElementById('qty').textContent = qty;
-  }
-
-  // Wishlist
-  function toggleWishlist() {
-    const btn = document.getElementById('wishlistBtn');
-    const icon = document.getElementById('wishlistIcon');
-    if (btn.classList.contains('active')) {
-      btn.classList.remove('active');
-      icon.className = 'ti ti-heart';
-    } else {
-      btn.classList.add('active');
-      icon.className = 'ti ti-heart-filled';
-    }
-  }
-
-  /* ---------- availability (shared rule) ----------
-     Availability must describe the product actually on screen: unknown ids
-     fall back to P-001 here exactly as the renderer does, and the page's own
-     stock figure is passed to the shared resolver as the fallback. */
-  function curId() {
-    var id = new URLSearchParams(location.search).get('id') || 'P-001';
-    return (typeof PRODUCT_DATA !== 'undefined' && PRODUCT_DATA[id]) ? id : 'P-001';
-  }
-  function productIsOOS() {
-    var id = curId();
-    var pd = (typeof PRODUCT_DATA !== 'undefined') ? PRODUCT_DATA[id] : null;
-    if (!(window.RAFShop && RAFShop.Stock)) return !!(pd && pd.stock === 0);
-    return RAFShop.Stock.isOOS({ id: id, stock: pd ? pd.stock : null });
-  }
-  /* Sold Out products show a disabled "Sold Out" button instead of Add to Cart */
-  function applyAvailability() {
-    var btn = document.querySelector('.btn-add-cart');
-    if (!btn) return;
-    var en = (document.getElementById('htmlRoot') || document.documentElement).lang === 'en';
-    if (!productIsOOS()) {
-      btn.disabled = false; btn.removeAttribute('aria-disabled'); btn.classList.remove('is-oos');
-      btn.innerHTML = '<i class="ti ti-shopping-cart"></i> ' + (en ? 'Add to Cart' : 'أضف للسلة');
-      return;
-    }
-    btn.disabled = true; btn.setAttribute('aria-disabled', 'true'); btn.classList.add('is-oos');
-    btn.innerHTML = '<i class="ti ti-ban"></i> ' + (en ? 'Sold Out' : 'نفدت الكمية');
-  }
-
-  // Add to cart
-  function addToCart() {
-    var en = (document.getElementById('htmlRoot') || document.documentElement).lang === 'en';
-    var t = function(ar,e){ return en ? e : ar; };
-    var pid = curId();
-    var pd = (typeof PRODUCT_DATA !== 'undefined' && PRODUCT_DATA[pid]) ? PRODUCT_DATA[pid] : null;
-    if (!pd || !window.RAFShop) return;
-    var btn = document.querySelector('.btn-add-cart');
-    if (productIsOOS()) { applyAvailability(); return; }   /* never add a sold-out product */
-
-    /* enforce required variant selection */
-    var variant = {};
-    if (pd.sizes && pd.sizes.length) {
-      var sizeSel = document.querySelector('#sizes-section .option-btn.selected:not(.out)');
-      if (!sizeSel) { flashBtn(btn, t('اختر المقاس أولاً','Select a size first'), '#B22'); return; }
-      variant[t('المقاس','Size')] = sizeSel.textContent.trim();
-    }
-    if (pd.colors && pd.colors.length) {
-      var colorSel = document.querySelector('.color-btn.selected');
-      if (!colorSel) { flashBtn(btn, t('اختر اللون أولاً','Select a color first'), '#B22'); return; }
-      variant[t('اللون','Color')] = colorSel.getAttribute('title') || pd.defaultColor || '';
-    }
-
-    var q = parseInt((document.getElementById('qty') || {}).textContent) || 1;
-    var prod = { id: pid, ar: pd.name, en: pd.name, price: pd.price, ic: pd.icon || 'ti-box',
-                 store: pd.store ? { ar: pd.store, en: pd.store } : null };
-    /* one store per order — guarded add asks before replacing another store's cart */
-    RAFShop.Cart.tryAdd(prod, variant).then(function (r) {
-      if (!r.added) return;
-      for (var i = 1; i < q; i++) RAFShop.Cart.add(prod, variant);
-      RAFShop.Cart.badge();
-      flashBtn(btn, t('تمت الإضافة ✓','Added ✓'), '#3B6D11');
-    });
-  }
-  function flashBtn(btn, msg, bg) {
-    if (!btn) return;
-    var en = (document.getElementById('htmlRoot') || document.documentElement).lang === 'en';
-    btn.innerHTML = '<i class="ti ti-check"></i> ' + msg;
-    btn.style.background = bg; btn.style.color = 'white';
-    setTimeout(function(){ btn.style.background=''; btn.style.color=''; applyAvailability(); }, 1600);
-  }
-
-  /* keep the Sold Out state correct on load and when the language flips */
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', applyAvailability);
-  else applyAvailability();
-  (function(){
-    var r = document.getElementById('htmlRoot');
-    if (r) new MutationObserver(applyAvailability).observe(r, { attributes:true, attributeFilter:['lang'] });
-  })();
-
-  // Tabs
-  function switchTab(id, btn) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    btn.classList.add('active');
-  }
-
-  // Thumbnails
-  document.querySelectorAll('.thumb').forEach(t => {
-    t.addEventListener('click', () => {
-      document.querySelectorAll('.thumb').forEach(x => x.classList.remove('active'));
-      t.classList.add('active');
-    });
-  });
-</script>
 
 <!-- MOBILE APP BOTTOM NAV -->
 <nav class="app-bnav">
@@ -1261,26 +487,649 @@ const PRODUCT_DATA = {
   <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
+
 <script src="raf_topbar.js"></script>
+<script src="raf_notify.js"></script>
 <script src="raf_nav.js"></script>
 <script src="raf_search.js"></script>
-<!-- ===== Global RAF Product Card — Related / Similar / Recommended products ===== -->
 <script src="raf_data.js"></script>
 <script src="raf_catalog.js"></script>
 <script src="raf_card.js"></script>
 <script>
+/* ============================================================
+   PRODUCT DATA — bilingual, keyed by product id.
+   Ids not listed here are resolved from the shared RAFCatalog,
+   so every listing link lands on the right product.
+   ============================================================ */
+var PRODUCT_DATA = {
+  'P-001': {
+    name:{ar:'قميص أوفرسايز كلاسيك',en:'Classic Oversize Shirt'},
+    store:'Casa Mode', storeSlug:'casa-mode', storeIcon:'ti-hanger',
+    cat:{ar:'ملابس',en:'Fashion'}, icon:'ti-shirt', gallery:['ti-shirt','ti-hanger','ti-shirt-filled'],
+    price:'12.000', oldPrice:'15.000', discount:'-20%',
+    rating:4.8, reviews:128, sales:342, stock:15,
+    sizes:['XS','S','M','L','XL','XXL'], outSizes:['XXL'], defaultSize:'S',
+    colors:[{ar:'أبيض',en:'White',hex:'#F5F5F5',border:'#ccc'},{ar:'أسود',en:'Black',hex:'#1A1A1A'},
+            {ar:'ذهبي',en:'Gold',hex:'#C9A84C'},{ar:'بيج',en:'Beige',hex:'#8B7355'}], defaultColor:0,
+    desc:{ar:'قميص أوفرسايز كلاسيك من Casa Mode — مصنوع من قطن 100% عالي الجودة بقصّة مريحة وأنيقة تناسب جميع الأوقات. مثالي للإطلالات اليومية والكاجوال مع سهولة التنسيق مع مختلف القطع.',
+          en:'A classic oversize shirt from Casa Mode — made of premium 100% cotton with a relaxed, elegant cut for any occasion. Ideal for everyday and casual looks, and easy to pair with anything.'},
+    features:[{i:'ti-leaf',ar:'قطن 100% طبيعي',en:'100% natural cotton'},{i:'ti-wash',ar:'قابل للغسل بالغسالة',en:'Machine washable'},
+              {i:'ti-ruler',ar:'قصّة أوفرسايز مريحة',en:'Relaxed oversize fit'},{i:'ti-sun',ar:'مناسب لجميع المواسم',en:'Suitable for all seasons'},
+              {i:'ti-palette',ar:'ألوان ثابتة لا تبهت',en:'Fade-resistant colours'},{i:'ti-award',ar:'ضمان الجودة',en:'Quality guaranteed'}],
+    specs:[{k:{ar:'الخامة',en:'Material'},v:{ar:'قطن 100%',en:'100% cotton'}},
+           {k:{ar:'القصّة',en:'Fit'},v:{ar:'أوفرسايز',en:'Oversize'}},
+           {k:{ar:'بلد الصنع',en:'Made in'},v:{ar:'تركيا',en:'Turkey'}},
+           {k:{ar:'العناية',en:'Care'},v:{ar:'غسيل بارد 30°',en:'Cold wash 30°'}},
+           {k:{ar:'المقاسات المتاحة',en:'Available sizes'},v:{ar:'XS – XL',en:'XS – XL'}}],
+    reviewBars:[75,18,5,2,0],
+    revs:[{n:{ar:'محمد العنزي',en:'Mohammed Al-Anzi'},d:{ar:'منذ 3 أيام',en:'3 days ago'},s:5,
+           t:{ar:'جودة ممتازة والمقاس دقيق جداً. التوصيل وصل بسرعة والتغليف كان أنيق. راضٍ جداً عن الشراء وسأعيد الطلب.',
+              en:'Excellent quality and the sizing is spot on. Delivery was fast and the packaging was elegant. Very happy — I will order again.'}},
+          {n:{ar:'نورة الرشيدي',en:'Noura Al-Rashidi'},d:{ar:'منذ أسبوع',en:'A week ago'},s:4,
+           t:{ar:'القميص جميل وخامته جيدة. اللون جاء أفتح قليلاً من الصورة، لكن بشكل عام أنا راضية عنه.',
+              en:'Lovely shirt and the fabric is good. The colour came out slightly lighter than the photo, but overall I am happy with it.'}},
+          {n:{ar:'فهد المطيري',en:'Fahad Al-Mutairi'},d:{ar:'منذ أسبوعين',en:'Two weeks ago'},s:5,
+           t:{ar:'أفضل قميص اشتريته من رف. القصّة الأوفرسايز مريحة جداً والقطن ناعم. طلبت ثلاثة ألوان.',
+              en:'The best shirt I have bought on RAF. The oversize cut is very comfortable and the cotton is soft. I ordered three colours.'}}],
+    related:['P-005','P-007','P-JACKET','P-002']
+  },
+  'P-002': {
+    name:{ar:'حذاء سنيكرز جلد فاخر',en:'Premium Leather Sneakers'},
+    store:'Sole & Co', storeSlug:'sole-co', storeIcon:'ti-shoe',
+    cat:{ar:'أحذية',en:'Footwear'}, icon:'ti-shoe', gallery:['ti-shoe','ti-run','ti-shoe'],
+    price:'35.000', oldPrice:'45.000', discount:'-22%',
+    rating:4.7, reviews:94, sales:210, stock:8,
+    sizes:['39','40','41','42','43','44','45'], outSizes:['45'], defaultSize:'42',
+    colors:[{ar:'أبيض',en:'White',hex:'#F5F5F5',border:'#ccc'},{ar:'أسود',en:'Black',hex:'#1A1A1A'},
+            {ar:'رمادي',en:'Grey',hex:'#888888'}], defaultColor:0,
+    desc:{ar:'حذاء سنيكرز جلد فاخر من Sole & Co — مصنوع من جلد أصلي عالي الجودة مع نعل مريح وتصميم عصري أنيق. مثالي للإطلالات الكاجوال والرسمية على حدٍّ سواء.',
+          en:'Premium leather sneakers from Sole & Co — crafted from genuine high-grade leather with a cushioned sole and a sharp modern design. Equally at home with casual and smart outfits.'},
+    features:[{i:'ti-star',ar:'جلد أصلي 100%',en:'100% genuine leather'},{i:'ti-shoe',ar:'نعل مريح ومتين',en:'Cushioned durable sole'},
+              {i:'ti-brush',ar:'تصميم عصري',en:'Modern design'},{i:'ti-award',ar:'ضمان الجودة',en:'Quality guaranteed'},
+              {i:'ti-recycle',ar:'مواد صديقة للبيئة',en:'Eco-friendly materials'},{i:'ti-shield-check',ar:'منتج أصلي معتمد',en:'Certified authentic'}],
+    specs:[{k:{ar:'الخامة',en:'Material'},v:{ar:'جلد طبيعي',en:'Genuine leather'}},
+           {k:{ar:'النعل',en:'Sole'},v:{ar:'مطاط EVA',en:'EVA rubber'}},
+           {k:{ar:'بلد الصنع',en:'Made in'},v:{ar:'البرتغال',en:'Portugal'}},
+           {k:{ar:'الإغلاق',en:'Closure'},v:{ar:'رباط',en:'Lace-up'}},
+           {k:{ar:'المقاسات المتاحة',en:'Available sizes'},v:{ar:'39 – 44',en:'39 – 44'}}],
+    reviewBars:[70,20,7,3,0],
+    revs:[{n:{ar:'عبدالله الصالح',en:'Abdullah Al-Saleh'},d:{ar:'منذ 5 أيام',en:'5 days ago'},s:5,
+           t:{ar:'جلد ممتاز ومريح من أول لبسة. المقاس مضبوط تماماً.',en:'Excellent leather and comfortable from the first wear. The size is exactly right.'}},
+          {n:{ar:'سارة العجمي',en:'Sara Al-Ajmi'},d:{ar:'منذ 10 أيام',en:'10 days ago'},s:5,
+           t:{ar:'اشتريته هدية وأعجب صاحبه كثيراً. التغليف كان راقياً.',en:'I bought it as a gift and he loved it. The packaging was very refined.'}},
+          {n:{ar:'يوسف الخالدي',en:'Youssef Al-Khalidi'},d:{ar:'منذ شهر',en:'A month ago'},s:4,
+           t:{ar:'الحذاء جميل ومريح، لكن أنصح بطلب مقاس أكبر بنصف رقم.',en:'Nice and comfortable, but I recommend ordering half a size up.'}}],
+    related:['P-001','P-JACKET','P-005','P-004']
+  },
+  'P-003': {
+    name:{ar:'سماعات لاسلكية بريميوم',en:'Premium Wireless Earbuds'},
+    store:'TechZone', storeSlug:'techzone', storeIcon:'ti-device-laptop',
+    cat:{ar:'إلكترونيات',en:'Electronics'}, icon:'ti-headphones', gallery:['ti-headphones','ti-device-mobile','ti-battery-charging'],
+    price:'28.000', oldPrice:null, discount:null,
+    rating:4.9, reviews:256, sales:520, stock:22,
+    sizes:null, outSizes:[], defaultSize:null,
+    colors:[{ar:'أسود',en:'Black',hex:'#1A1A1A'},{ar:'أبيض',en:'White',hex:'#F5F5F5',border:'#ccc'},
+            {ar:'أزرق',en:'Blue',hex:'#2D5BE3'}], defaultColor:0,
+    desc:{ar:'سماعات لاسلكية بريميوم من TechZone — جودة صوت استثنائية مع تقنية إلغاء الضوضاء النشط وبطارية تدوم 40 ساعة. تصميم مريح للاستخدام اليومي الطويل.',
+          en:'Premium wireless earbuds from TechZone — exceptional sound with active noise cancelling and a 40-hour battery. Designed for comfort through long days of listening.'},
+    features:[{i:'ti-wifi',ar:'بلوتوث 5.3',en:'Bluetooth 5.3'},{i:'ti-battery-charging',ar:'بطارية 40 ساعة',en:'40-hour battery'},
+              {i:'ti-ear',ar:'إلغاء ضوضاء نشط',en:'Active noise cancelling'},{i:'ti-microphone',ar:'ميكروفون عالي الوضوح',en:'High-clarity microphone'},
+              {i:'ti-device-floppy',ar:'ذاكرة 5 أجهزة',en:'Remembers 5 devices'},{i:'ti-award',ar:'ضمان سنتان',en:'2-year warranty'}],
+    specs:[{k:{ar:'الاتصال',en:'Connectivity'},v:{ar:'بلوتوث 5.3',en:'Bluetooth 5.3'}},
+           {k:{ar:'عمر البطارية',en:'Battery life'},v:{ar:'40 ساعة مع العلبة',en:'40 hours with case'}},
+           {k:{ar:'مقاومة الماء',en:'Water resistance'},v:{ar:'IPX5',en:'IPX5'}},
+           {k:{ar:'الشحن',en:'Charging'},v:{ar:'USB-C وشحن لاسلكي',en:'USB-C and wireless'}},
+           {k:{ar:'الضمان',en:'Warranty'},v:{ar:'سنتان',en:'2 years'}}],
+    reviewBars:[85,12,2,1,0],
+    revs:[{n:{ar:'خالد الفهد',en:'Khaled Al-Fahad'},d:{ar:'منذ يومين',en:'2 days ago'},s:5,
+           t:{ar:'عزل الضوضاء ممتاز وجودة الصوت تفوق السعر بكثير.',en:'The noise cancelling is excellent and the sound quality punches well above the price.'}},
+          {n:{ar:'ريم السبيعي',en:'Reem Al-Subaie'},d:{ar:'منذ أسبوع',en:'A week ago'},s:5,
+           t:{ar:'البطارية تدوم فعلاً طوال الأسبوع. أنصح بها بشدة.',en:'The battery genuinely lasts all week. Highly recommended.'}},
+          {n:{ar:'ناصر العتيبي',en:'Nasser Al-Otaibi'},d:{ar:'منذ 3 أسابيع',en:'3 weeks ago'},s:5,
+           t:{ar:'مريحة في الأذن ولا تسبب ألماً بعد ساعات طويلة.',en:'Comfortable in the ear with no soreness even after long sessions.'}}],
+    related:['P-EARBUDS','P-008','P-HEADPHONES','P-006']
+  },
+  'P-004': {
+    name:{ar:'ساعة يد كلاسيكية فاخرة',en:'Luxury Classic Wristwatch'},
+    store:'Luxe Accessories', storeSlug:'luxe-accessories', storeIcon:'ti-diamond',
+    cat:{ar:'إكسسوارات',en:'Accessories'}, icon:'ti-watch', gallery:['ti-watch','ti-clock-hour-4','ti-diamond'],
+    price:'85.000', oldPrice:'110.000', discount:'-23%',
+    rating:4.9, reviews:47, sales:83, stock:5,
+    sizes:null, outSizes:[], defaultSize:null,
+    colors:[{ar:'ذهبي',en:'Gold',hex:'#C9A84C'},{ar:'فضي',en:'Silver',hex:'#C0C0C0'},
+            {ar:'أسود',en:'Black',hex:'#1A1A1A'}], defaultColor:0,
+    desc:{ar:'ساعة يد كلاسيكية فاخرة من Luxe Accessories — تصميم أنيق يجمع بين الأصالة والعصرية. هيكل من الستانلس ستيل مع زجاج سفير مقاوم للخدش وآلية دقيقة تضمن الدقة.',
+          en:'A luxury classic wristwatch from Luxe Accessories — an elegant design balancing heritage and modernity. Stainless steel case with scratch-resistant sapphire glass and a precise movement.'},
+    features:[{i:'ti-diamond',ar:'زجاج سفير',en:'Sapphire glass'},{i:'ti-shield',ar:'مقاومة الماء 50 متراً',en:'50m water resistance'},
+              {i:'ti-clock',ar:'آلية سويسرية',en:'Swiss movement'},{i:'ti-award',ar:'ضمان سنتان',en:'2-year warranty'},
+              {i:'ti-gift',ar:'تأتي في علبة هدية',en:'Comes in a gift box'},{i:'ti-star',ar:'إصدار محدود',en:'Limited edition'}],
+    specs:[{k:{ar:'الهيكل',en:'Case'},v:{ar:'ستانلس ستيل 316L',en:'316L stainless steel'}},
+           {k:{ar:'الزجاج',en:'Glass'},v:{ar:'سفير مقاوم للخدش',en:'Scratch-resistant sapphire'}},
+           {k:{ar:'الآلية',en:'Movement'},v:{ar:'سويسرية أوتوماتيكية',en:'Swiss automatic'}},
+           {k:{ar:'قطر المينا',en:'Case diameter'},v:{ar:'41 مم',en:'41 mm'}},
+           {k:{ar:'مقاومة الماء',en:'Water resistance'},v:{ar:'50 متراً',en:'50 metres'}}],
+    reviewBars:[88,10,2,0,0],
+    revs:[{n:{ar:'بدر القحطاني',en:'Badr Al-Qahtani'},d:{ar:'منذ 4 أيام',en:'4 days ago'},s:5,
+           t:{ar:'ساعة أنيقة جداً وتفاصيلها دقيقة. تستحق سعرها.',en:'A very elegant watch with fine detailing. Worth every dinar.'}},
+          {n:{ar:'هيا الدوسري',en:'Haya Al-Dosari'},d:{ar:'منذ أسبوعين',en:'Two weeks ago'},s:5,
+           t:{ar:'علبة الهدية راقية جداً وأعطتها لوالدي وأعجبته.',en:'The gift box is beautifully presented. I gave it to my father and he loved it.'}},
+          {n:{ar:'طلال المري',en:'Talal Al-Marri'},d:{ar:'منذ شهر',en:'A month ago'},s:5,
+           t:{ar:'الوزن مريح على المعصم والزجاج لم يُخدش إطلاقاً.',en:'It sits comfortably on the wrist and the glass has not scratched at all.'}}],
+    related:['P-006','P-WATCH','P-002','P-001']
+  },
+  'P-005': {
+    name:{ar:'تراكسوت رياضي فاخر',en:'Premium Sports Tracksuit'},
+    store:'Urban Thread', storeSlug:'urban-thread', storeIcon:'ti-run',
+    cat:{ar:'رياضة',en:'Sportswear'}, icon:'ti-run', gallery:['ti-run','ti-shirt','ti-hanger'],
+    price:'42.000', oldPrice:'52.000', discount:'-19%',
+    rating:4.6, reviews:71, sales:155, stock:12,
+    sizes:['S','M','L','XL','XXL'], outSizes:[], defaultSize:'M',
+    colors:[{ar:'أسود',en:'Black',hex:'#1A1A1A'},{ar:'رمادي',en:'Grey',hex:'#555555'},
+            {ar:'كحلي',en:'Navy',hex:'#1B2A4A'}], defaultColor:0,
+    desc:{ar:'تراكسوت رياضي فاخر من Urban Thread — مصنوع من قماش مرن خفيف الوزن يمنحك حرية الحركة الكاملة. مناسب للنادي والجري والأنشطة الرياضية اليومية.',
+          en:'A premium tracksuit from Urban Thread — made from lightweight stretch fabric that gives you full freedom of movement. Built for the gym, running and everyday training.'},
+    features:[{i:'ti-wind',ar:'قماش خفيف وسريع الجفاف',en:'Lightweight, quick-dry fabric'},{i:'ti-arrows-move',ar:'مرونة عالية',en:'High stretch'},
+              {i:'ti-sun',ar:'حماية من الأشعة فوق البنفسجية',en:'UV protection'},{i:'ti-wash',ar:'سهل العناية',en:'Easy care'},
+              {i:'ti-box',ar:'جيوب عملية',en:'Practical pockets'},{i:'ti-award',ar:'ضمان الجودة',en:'Quality guaranteed'}],
+    specs:[{k:{ar:'الخامة',en:'Material'},v:{ar:'بوليستر 88% / إيلاستان 12%',en:'88% polyester / 12% elastane'}},
+           {k:{ar:'القصّة',en:'Fit'},v:{ar:'رياضية مريحة',en:'Athletic regular'}},
+           {k:{ar:'العناية',en:'Care'},v:{ar:'غسيل بارد 30°',en:'Cold wash 30°'}},
+           {k:{ar:'الاستخدام',en:'Best for'},v:{ar:'الجري والنادي',en:'Running and gym'}},
+           {k:{ar:'المقاسات المتاحة',en:'Available sizes'},v:{ar:'S – XXL',en:'S – XXL'}}],
+    reviewBars:[65,22,10,3,0],
+    revs:[{n:{ar:'سعود الحربي',en:'Saud Al-Harbi'},d:{ar:'منذ 6 أيام',en:'6 days ago'},s:5,
+           t:{ar:'خفيف جداً ومريح في التمرين. لا يحبس الحرارة.',en:'Very light and comfortable to train in. It does not trap heat.'}},
+          {n:{ar:'دانة العلي',en:'Dana Al-Ali'},d:{ar:'منذ أسبوعين',en:'Two weeks ago'},s:4,
+           t:{ar:'الخامة ممتازة، لكن المقاس يميل للكبر قليلاً.',en:'Great fabric, though it runs slightly large.'}},
+          {n:{ar:'مشاري البلوشي',en:'Mishari Al-Balushi'},d:{ar:'منذ شهر',en:'A month ago'},s:5,
+           t:{ar:'غسلته عدة مرات ولم يتغير لونه أو مقاسه.',en:'I have washed it several times and neither the colour nor the fit has changed.'}}],
+    related:['P-002','P-001','P-JACKET','P-007']
+  },
+  'P-006': {
+    name:{ar:'طقم العناية بالبشرة الفاخر',en:'Luxury Skincare Set'},
+    store:'Glam Store', storeSlug:'glam-store', storeIcon:'ti-sparkles',
+    cat:{ar:'الجمال والعناية',en:'Beauty & Care'}, icon:'ti-sparkles', gallery:['ti-sparkles','ti-droplet','ti-gift'],
+    price:'19.500', oldPrice:'26.000', discount:'-25%',
+    rating:4.8, reviews:183, sales:412, stock:30,
+    sizes:null, outSizes:[], defaultSize:null,
+    colors:null, defaultColor:null,
+    desc:{ar:'طقم العناية بالبشرة الفاخر من Glam Store — مجموعة متكاملة تضم غسولاً ومرطباً وسيروماً بتركيبة مُختبرة طبياً. مناسبة لجميع أنواع البشرة.',
+          en:'A luxury skincare set from Glam Store — a complete routine of cleanser, moisturiser and serum in a dermatologically tested formulation. Suitable for all skin types.'},
+    features:[{i:'ti-leaf',ar:'مكونات طبيعية 100%',en:'100% natural ingredients'},{i:'ti-shield-check',ar:'خالٍ من البارابين',en:'Paraben-free'},
+              {i:'ti-heart',ar:'مناسب لجميع أنواع البشرة',en:'Suitable for all skin types'},{i:'ti-award',ar:'مُختبر طبياً',en:'Dermatologically tested'},
+              {i:'ti-recycle',ar:'تغليف صديق للبيئة',en:'Eco-friendly packaging'},{i:'ti-gift',ar:'علبة هدية أنيقة',en:'Elegant gift box'}],
+    specs:[{k:{ar:'محتويات الطقم',en:'Set contents'},v:{ar:'غسول · مرطب · سيروم',en:'Cleanser · Moisturiser · Serum'}},
+           {k:{ar:'نوع البشرة',en:'Skin type'},v:{ar:'جميع الأنواع',en:'All skin types'}},
+           {k:{ar:'الحجم',en:'Size'},v:{ar:'3 × 50 مل',en:'3 × 50 ml'}},
+           {k:{ar:'خالٍ من',en:'Free from'},v:{ar:'البارابين والكحول',en:'Parabens and alcohol'}},
+           {k:{ar:'الصلاحية',en:'Shelf life'},v:{ar:'24 شهراً',en:'24 months'}}],
+    reviewBars:[78,16,4,2,0],
+    revs:[{n:{ar:'لطيفة الشمري',en:'Latifa Al-Shammari'},d:{ar:'منذ 3 أيام',en:'3 days ago'},s:5,
+           t:{ar:'بشرتي أصبحت أنعم خلال أسبوعين. المنتجات لطيفة جداً.',en:'My skin felt softer within two weeks. The products are very gentle.'}},
+          {n:{ar:'أحمد الكندري',en:'Ahmed Al-Kandari'},d:{ar:'منذ أسبوع',en:'A week ago'},s:5,
+           t:{ar:'اشتريته هدية لزوجتي وأعجبها كثيراً. التغليف راقٍ.',en:'I bought it as a gift for my wife and she loved it. Beautifully packaged.'}},
+          {n:{ar:'شيخة المطوع',en:'Sheikha Al-Mutawa'},d:{ar:'منذ شهر',en:'A month ago'},s:4,
+           t:{ar:'السيروم ممتاز، وأتمنى لو كانت العبوة أكبر قليلاً.',en:'The serum is excellent — I only wish the bottle were a little larger.'}}],
+    related:['P-004','P-003','P-WATCH','P-PERFUME']
+  }
+};
+</script>
+
+<script>
+/* ============================================================
+   PRODUCT PAGE
+   Routing preserved: ?id=<pid>  ·  ?from=home back-to-store journey
+   Business logic preserved: required options before adding, one store
+   per order via RAFShop.Cart.tryAdd, shared Sold Out rule, global card.
+   ============================================================ */
+
+/* ---------- language ---------- */
+function root(){ return document.getElementById('htmlRoot') || document.documentElement; }
+function isEn(){ return root().lang === 'en'; }
+function T(ar,en){ return isEn() ? en : ar; }
+function L(o){ return (o && typeof o === 'object') ? (isEn() ? (o.en||o.ar) : (o.ar||o.en)) : (o || ''); }
+
+/* ---------- product resolution ----------
+   Rich page content when the id is known here; otherwise the shared catalog
+   supplies it, so links from any listing land on the right product. */
+var GENERIC_FEATURES = [
+  {i:'ti-shield-check',ar:'منتج أصلي مضمون',en:'Guaranteed authentic'},
+  {i:'ti-truck-delivery',ar:'توصيل سريع داخل الكويت',en:'Fast delivery across Kuwait'},
+  {i:'ti-refresh',ar:'إرجاع خلال 7 أيام',en:'7-day returns'},
+  {i:'ti-award',ar:'ضمان الجودة',en:'Quality guaranteed'}
+];
+function fromCatalog(id){
+  if (!(window.RAFCatalog && RAFCatalog.get)) return null;
+  var c = RAFCatalog.get(id);
+  if (!c) return null;
+  var disc = c.disc ? '-' + c.disc + '%' : null;
+  return {
+    name:{ar:c.ar,en:c.en}, store:L(c.store), storeSlug:c.slug || 'casa-mode', storeIcon:'ti-building-store',
+    cat:{ar:'منتجات',en:'Products'}, icon:c.ic || 'ti-box', gallery:[c.ic||'ti-box','ti-box','ti-package'],
+    price:c.price, oldPrice:c.old || null, discount:disc,
+    rating:parseFloat(c.rate) || 4.6, reviews:parseInt(c.rev) || 0, sales:(parseInt(c.rev)||0) * 2, stock:c.stock,
+    variants:c.variants || null,
+    desc:c.desc || {ar:'منتج أصلي من ' + L(c.store) + ' متوفر عبر رف مع ضمان الجودة والتوصيل السريع داخل الكويت.',
+                    en:'An authentic product from ' + L(c.store) + ', available on RAF with a quality guarantee and fast delivery across Kuwait.'},
+    features:GENERIC_FEATURES,
+    specs:[{k:{ar:'المتجر',en:'Store'},v:{ar:L(c.store),en:L(c.store)}},
+           {k:{ar:'رقم المنتج',en:'Product code'},v:{ar:id,en:id}},
+           {k:{ar:'التوصيل',en:'Delivery'},v:{ar:'خلال 24 ساعة',en:'Within 24 hours'}},
+           {k:{ar:'الإرجاع',en:'Returns'},v:{ar:'خلال 7 أيام',en:'Within 7 days'}}],
+    reviewBars:[72,19,6,2,1], revs:[], related:[]
+  };
+}
+function resolveId(){
+  var id = new URLSearchParams(location.search).get('id') || 'P-001';
+  return id;
+}
+var PID = resolveId();
+var P = PRODUCT_DATA[PID] || fromCatalog(PID) || PRODUCT_DATA['P-001'];
+if (!PRODUCT_DATA[PID] && !fromCatalog(PID)) PID = 'P-001';
+
+/* ---------- options: one normalised shape for both sources ---------- */
+var OPTS = [], SEL = {};
+function buildOpts(){
+  OPTS = [];
+  if (P.sizes && P.sizes.length){
+    OPTS.push({ key:'size', label:{ar:'المقاس',en:'Size'}, type:'chip',
+      values:P.sizes.map(function(s){ return { ar:s, en:s, out:(P.outSizes||[]).indexOf(s) > -1 }; }),
+      def:Math.max(0, P.sizes.indexOf(P.defaultSize)) });
+  }
+  if (P.colors && P.colors.length){
+    OPTS.push({ key:'color', label:{ar:'اللون',en:'Color'}, type:'color',
+      values:P.colors.slice(), def:P.defaultColor || 0 });
+  }
+  if (P.variants && P.variants.length){
+    P.variants.forEach(function(g, gi){
+      var isColor = g.options.some(function(o){ return !!o.hex; });
+      OPTS.push({ key:'v' + gi, label:g.label, type:isColor ? 'color' : 'chip',
+        values:g.options.map(function(o){
+          var lb = o.label || o;
+          return { ar:(lb.ar || lb), en:(lb.en || lb.ar || lb), hex:o.hex, out:false };
+        }), def:0 });
+    });
+  }
+  OPTS.forEach(function(o){ if (SEL[o.key] == null) SEL[o.key] = o.def; });
+}
+
+/* ---------- availability (shared rule) ---------- */
+function isOOS(){
+  if (window.RAFShop && RAFShop.Stock) return RAFShop.Stock.isOOS({ id:PID, stock:P.stock });
+  return P.stock === 0;
+}
+
+/* ---------- helpers ---------- */
+function starsHTML(r, cls){
+  var h = '';
+  for (var i = 1; i <= 5; i++){
+    if (r >= i) h += '<i class="ti ti-star-filled ' + cls + '"></i>';
+    else if (r >= i - 0.5) h += '<i class="ti ti-star-half-filled ' + cls + '"></i>';
+    else h += '<i class="ti ti-star ' + cls + ' empty"></i>';
+  }
+  return h;
+}
+function money(n){ return (Math.round(n * 1000) / 1000).toFixed(3); }
+function qtyVal(){ return parseInt(document.getElementById('qty').textContent) || 1; }
+
+/* ---------- render ---------- */
+function render(){
+  var en = isEn();
+  document.title = T('رف — ', 'RAF — ') + L(P.name);
+
+  /* breadcrumb */
+  document.querySelectorAll('.bc-sep').forEach(function(i){
+    i.className = 'ti bc-sep ' + (en ? 'ti-chevron-right' : 'ti-chevron-left');
+  });
+  document.getElementById('bcCat').textContent = L(P.cat);
+  var bs = document.getElementById('bcStore');
+  bs.textContent = P.store; bs.href = 'raf_store.html?store=' + encodeURIComponent(P.storeSlug);
+  document.getElementById('bcProduct').textContent = L(P.name);
+
+  /* gallery */
+  var gal = P.gallery && P.gallery.length ? P.gallery : [P.icon];
+  document.getElementById('galIcon').className = 'ti ' + gal[0] + ' gal-icon';
+  document.getElementById('galThumbs').innerHTML = gal.map(function(ic, i){
+    return '<button class="gthumb' + (i === 0 ? ' on' : '') + '" onclick="pickThumb(' + i + ',\'' + ic + '\')" aria-label="view ' + (i+1) + '"><i class="ti ' + ic + '"></i></button>';
+  }).join('');
+  var tag = document.getElementById('galTag');
+  if (P.discount && !isOOS()){ tag.textContent = P.discount; tag.style.display = ''; } else tag.style.display = 'none';
+  document.getElementById('galOOS').classList.toggle('show', isOOS());
+  document.getElementById('galStage').classList.toggle('is-oos', isOOS());
+
+  /* store */
+  var sc = document.getElementById('storeChip');
+  sc.href = 'raf_store.html?store=' + encodeURIComponent(P.storeSlug);
+  document.getElementById('storeIcon').className = 'ti ' + P.storeIcon;
+  document.getElementById('storeName').textContent = P.store;
+  var rl = document.getElementById('relStoreLink');
+  rl.href = 'raf_store.html?store=' + encodeURIComponent(P.storeSlug);
+  document.getElementById('relArrow').className = 'ti ' + (en ? 'ti-arrow-right' : 'ti-arrow-left');
+
+  /* identity */
+  document.getElementById('pTitle').textContent = L(P.name);
+  document.getElementById('pStars').innerHTML = starsHTML(P.rating, 'star');
+  document.getElementById('pRate').textContent = P.rating.toFixed(1);
+  document.getElementById('pReviews').textContent = T(P.reviews + ' تقييم', P.reviews + ' review' + (P.reviews === 1 ? '' : 's'));
+  document.getElementById('pSales').textContent = T(P.sales + ' مبيعة', P.sales + ' sold');
+
+  /* price */
+  document.getElementById('pPrice').textContent = P.price;
+  var old = document.getElementById('pOld');
+  if (P.oldPrice){ old.textContent = P.oldPrice; old.style.display = ''; } else old.style.display = 'none';
+  var save = document.getElementById('pSave');
+  if (P.oldPrice){
+    var d = parseFloat(P.oldPrice) - parseFloat(P.price);
+    save.textContent = T('وفّرت ' + money(d) + ' د.ك', 'You save ' + money(d) + ' KWD');
+    save.style.display = '';
+  } else save.style.display = 'none';
+
+  renderOptions();
+  renderStock();
+  renderTabs();
+  renderReviews();
+  renderRelated();
+  applyAvailability();
+  syncWishlist();
+  updateTotal();
+}
+
+/* options */
+function renderOptions(){
+  var sizeBox = document.getElementById('optSize'), colorBox = document.getElementById('optColor');
+  sizeBox.style.display = 'none'; colorBox.style.display = 'none';
+  /* remove any dynamic groups from a previous render */
+  document.querySelectorAll('.opt-dyn').forEach(function(n){ n.remove(); });
+  /* dynamic groups are appended after this marker in catalog order */
+  var anchor = colorBox;
+
+  OPTS.forEach(function(o){
+    var sel = SEL[o.key], v = o.values[sel];
+    if (o.key === 'size' || o.key === 'color'){
+      var box = o.key === 'size' ? sizeBox : colorBox;
+      box.style.display = '';
+      box.querySelector('.opt-sel').textContent = v ? L(v) : T('اختر', 'Choose');
+      box.querySelector('.opt-row').innerHTML = optionButtons(o);
+    } else {
+      var wrap = document.createElement('div');
+      wrap.className = 'opt opt-dyn';
+      wrap.innerHTML = '<div class="opt-h"><span class="opt-t">' + L(o.label) + ' <span class="req">*</span></span>' +
+        '<span class="opt-sel">' + (v ? L(v) : '') + '</span></div>' +
+        '<div class="opt-row">' + optionButtons(o) + '</div>';
+      anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
+      anchor = wrap;
+    }
+  });
+}
+function optionButtons(o){
+  return o.values.map(function(v, i){
+    var on = SEL[o.key] === i ? ' selected' : '';
+    if (o.type === 'color'){
+      var bd = v.border ? 'border-color:' + v.border + ';' : '';
+      return '<button class="cbtn' + on + '" style="background:' + (v.hex || '#ddd') + ';' + bd + '" title="' + L(v) +
+             '" onclick="pickOpt(\'' + o.key + '\',' + i + ')" aria-label="' + L(v) + '"></button>';
+    }
+    return '<button class="obtn' + on + (v.out ? ' out' : '') + '"' + (v.out ? ' disabled title="' + T('نفدت الكمية','Sold out') + '"' : '') +
+           ' onclick="pickOpt(\'' + o.key + '\',' + i + ')">' + L(v) + '</button>';
+  }).join('');
+}
+function pickOpt(key, i){
+  var o = OPTS.find(function(x){ return x.key === key; });
+  if (!o || o.values[i].out) return;
+  SEL[key] = i;
+  renderOptions();
+  hint('');
+}
+function pickThumb(i, ic){
+  var stage = document.getElementById('galStage'), icon = document.getElementById('galIcon');
+  document.querySelectorAll('.gthumb').forEach(function(t, k){ t.classList.toggle('on', k === i); });
+  stage.classList.add('swap');
+  setTimeout(function(){ icon.className = 'ti ' + ic + ' gal-icon'; stage.classList.remove('swap'); }, 160);
+}
+
+/* stock + quantity */
+function renderStock(){
+  var el = document.getElementById('stockLabel'), s = P.stock;
+  if (isOOS()){ el.className = 'stock-l out'; el.innerHTML = '<i class="ti ti-ban"></i> ' + T('نفدت الكمية','Sold out'); }
+  else if (s != null && s <= 5){ el.className = 'stock-l low'; el.innerHTML = '<i class="ti ti-flame"></i> ' + T('بقي ' + s + ' قطع فقط','Only ' + s + ' left'); }
+  else { el.className = 'stock-l ok'; el.innerHTML = '<i class="ti ti-circle-check"></i> ' + T('متوفر — ' + s + ' قطعة','In stock — ' + s + ' available'); }
+  syncQtyBtns();
+}
+function changeQty(d){
+  var max = (P.stock == null || P.stock === 0) ? 1 : P.stock;
+  var q = Math.max(1, Math.min(max, qtyVal() + d));
+  document.getElementById('qty').textContent = q;
+  syncQtyBtns(); updateTotal();
+}
+function syncQtyBtns(){
+  var q = qtyVal(), max = (P.stock == null || P.stock === 0) ? 1 : P.stock;
+  document.getElementById('qtyMinus').disabled = q <= 1 || isOOS();
+  document.getElementById('qtyPlus').disabled = q >= max || isOOS();
+}
+function updateTotal(){
+  document.getElementById('sbTotal').textContent = money(parseFloat(P.price) * qtyVal());
+}
+
+/* tabs content */
+function renderTabs(){
+  document.getElementById('descText').textContent = L(P.desc);
+  document.getElementById('descFeats').innerHTML = (P.features || []).map(function(f){
+    return '<div class="feat"><i class="ti ' + f.i + '"></i> ' + T(f.ar, f.en) + '</div>';
+  }).join('');
+  document.getElementById('specTable').innerHTML = (P.specs || []).map(function(s){
+    return '<div class="spec-row"><div class="spec-k">' + L(s.k) + '</div><div class="spec-v">' + L(s.v) + '</div></div>';
+  }).join('');
+  document.getElementById('tabReviewsBtn').textContent = T('التقييمات (' + P.reviews + ')', 'Reviews (' + P.reviews + ')');
+}
+
+/* reviews */
+function renderReviews(){
+  document.getElementById('rvBig').textContent = P.rating.toFixed(1);
+  document.getElementById('rvStars').innerHTML = starsHTML(P.rating, 'star');
+  document.getElementById('rvCount').textContent = T(P.reviews + ' تقييم', P.reviews + ' review' + (P.reviews === 1 ? '' : 's'));
+  document.getElementById('rvBars').innerHTML = (P.reviewBars || []).map(function(pct, i){
+    return '<div class="rbar"><span class="rbar-k">' + (5 - i) + ' <i class="ti ti-star-filled"></i></span>' +
+      '<span class="rbar-t"><span class="rbar-f" style="width:' + pct + '%"></span></span>' +
+      '<span class="rbar-p">' + pct + '%</span></div>';
+  }).join('');
+  var list = document.getElementById('rvList');
+  if (!P.revs || !P.revs.length){
+    list.innerHTML = '<div class="rcard" style="text-align:center;color:var(--text3);">' +
+      T('لا توجد مراجعات مكتوبة لهذا المنتج بعد.', 'No written reviews for this product yet.') + '</div>';
+    return;
+  }
+  list.innerHTML = P.revs.map(function(r){
+    var nm = L(r.n);
+    return '<div class="rcard"><div class="rhead">' +
+      '<div class="rav">' + nm.charAt(0) + '</div>' +
+      '<div><div class="rnm">' + nm + '</div><div class="rdt">' + L(r.d) + '</div></div>' +
+      '<div class="rst">' + starsHTML(r.s, '') + '</div></div>' +
+      '<p class="rtx">' + L(r.t) + '</p>' +
+      '<div class="rverified"><i class="ti ti-rosette-discount-check"></i> ' + T('شراء موثّق', 'Verified purchase') + '</div></div>';
+  }).join('');
+}
+
+/* related — rendered with the global RAF card */
+function renderRelated(){
+  var grid = document.getElementById('relGrid');
+  if (!grid || !window.RAFCard) return;
+  var ids = (P.related && P.related.length) ? P.related : ['P-001','P-002','P-003','P-004'];
+  var items = ids.filter(function(id){ return id !== PID; }).map(function(id){
+    if (window.RAFCatalog && RAFCatalog.get){ var c = RAFCatalog.get(id); if (c) return c; }
+    var d = PRODUCT_DATA[id];
+    if (!d) return null;
+    return { id:id, ar:d.name.ar, en:d.name.en, price:d.price, old:d.oldPrice || '', ic:d.icon,
+             rate:String(d.rating), rev:String(d.reviews), stock:d.stock,
+             store:{ ar:d.store, en:d.store } };
+  }).filter(Boolean).slice(0, 4);
+  grid.innerHTML = items.map(function(p){
+    return RAFCard.product(p, { hrefFor:function(x){ return 'raf_product.html?id=' + encodeURIComponent(x.id); } });
+  }).join('');
+}
+
+/* ---------- Sold Out state on the primary actions ---------- */
+function applyAvailability(){
+  var out = isOOS();
+  var cart = document.getElementById('btnCart'), buy = document.getElementById('btnBuy');
+  var sbc = document.getElementById('sbCart'), sbb = document.getElementById('sbBuy');
+  [cart, sbc].forEach(function(b){
+    if (!b) return;
+    b.disabled = out; b.classList.toggle('is-oos', out);
+    b.innerHTML = out ? '<i class="ti ti-ban"></i> <span>' + T('نفدت الكمية','Sold Out') + '</span>'
+                      : '<i class="ti ti-shopping-cart"></i> <span>' + T('أضف للسلة','Add to Cart') + '</span>';
+  });
+  [buy, sbb].forEach(function(b){
+    if (!b) return;
+    b.disabled = out;
+    b.innerHTML = '<i class="ti ti-bolt"></i> <span>' + T('اشترِ الآن','Buy Now') + '</span>';
+  });
+  syncQtyBtns();
+}
+
+/* ---------- required options → variant ---------- */
+function hint(msg){
+  var h = document.getElementById('optHint');
+  h.innerHTML = msg ? '<i class="ti ti-alert-circle"></i> ' + msg : '';
+}
+function buildVariant(){
+  var variant = {};
+  for (var i = 0; i < OPTS.length; i++){
+    var o = OPTS[i], sel = SEL[o.key];
+    if (sel == null || !o.values[sel] || o.values[sel].out){
+      hint(T('اختر ' + L(o.label) + ' أولاً', 'Please select ' + L(o.label) + ' first'));
+      return null;
+    }
+    variant[L(o.label)] = L(o.values[sel]);
+  }
+  hint('');
+  return variant;
+}
+function cartProduct(){
+  return { id:PID, ar:P.name.ar, en:P.name.en, price:P.price, old:P.oldPrice || '',
+           ic:P.icon || 'ti-box', rate:String(P.rating), rev:String(P.reviews), stock:P.stock,
+           store:{ ar:P.store, en:P.store } };
+}
+
+/* Add to cart — one store per order enforced centrally by tryAdd */
+function addToCart(then){
+  if (isOOS() || !window.RAFShop) return;
+  var variant = buildVariant();
+  if (!variant) return;
+  var q = qtyVal();
+  var prod = cartProduct();
+  RAFShop.Cart.tryAdd(prod, variant).then(function(r){
+    if (!r.added) return;
+    for (var i = 1; i < q; i++) RAFShop.Cart.add(prod, variant);
+    RAFShop.Cart.badge();
+    if (typeof then === 'function') { then(); return; }
+    RAFShop.toast(T('تمت الإضافة إلى السلة','Added to your cart'), { icon:'ti-circle-check' });
+    flash(document.getElementById('btnCart'));
+    flash(document.getElementById('sbCart'));
+  });
+}
+function flash(btn){
+  if (!btn || btn.disabled) return;
+  var html = btn.innerHTML;
+  btn.innerHTML = '<i class="ti ti-check"></i> <span>' + T('تمت الإضافة','Added') + '</span>';
+  setTimeout(function(){ applyAvailability(); }, 1500);
+}
+/* Buy Now — same guarded add, then the Cart page so the customer always
+   reviews the order before entering checkout */
+function buyNow(){
+  if (isOOS()) return;
+  addToCart(function(){ location.href = 'raf_cart.html'; });
+}
+
+/* ---------- favourites (shared wishlist) ---------- */
+function syncWishlist(){
+  var on = !!(window.RAFShop && RAFShop.Wish.has(PID));
+  [['favBtn','favIcon'],['favBtnG','favIconG']].forEach(function(pair){
+    var b = document.getElementById(pair[0]), i = document.getElementById(pair[1]);
+    if (!b || !i) return;
+    b.classList.toggle('on', on);
+    i.className = 'ti ' + (on ? 'ti-heart-filled' : 'ti-heart');
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+}
+function toggleWishlist(){
+  if (!window.RAFShop) return;
+  var on = RAFShop.Wish.toggle(cartProduct());
+  syncWishlist();
+  RAFShop.toast(on ? T('تمت الإضافة إلى المفضلة','Added to favorites') : T('تمت الإزالة من المفضلة','Removed from favorites'),
+                { icon: on ? 'ti-heart-filled' : 'ti-heart-off' });
+}
+
+/* ---------- share ---------- */
+function shareProduct(){
+  var url = location.href, title = L(P.name);
+  if (navigator.share){ navigator.share({ title:title, url:url }).catch(function(){}); return; }
+  if (navigator.clipboard){
+    navigator.clipboard.writeText(url).then(function(){
+      if (window.RAFShop) RAFShop.toast(T('تم نسخ رابط المنتج','Product link copied'), { icon:'ti-link' });
+    }).catch(function(){});
+  }
+}
+
+/* ---------- tabs ---------- */
+function switchTab(id, btn){
+  document.querySelectorAll('.tabc').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.tabbtn').forEach(function(b){ b.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id === 'reviews') document.querySelector('.tabs').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+/* ---------- back-to-store journey (preserved) ---------- */
+function goBackSmart(){
+  if (window.__rafBackTarget){ location.href = window.__rafBackTarget; return; }
+  history.back();
+}
+
+/* ---------- language ---------- */
+function applyLang(){
+  var en = isEn();
+  document.querySelectorAll('[data-ar]').forEach(function(el){
+    var t = el.getAttribute('data-' + (en ? 'en' : 'ar'));
+    if (t !== null) el.textContent = t;
+  });
+  var lbl = document.getElementById('langLabel'); if (lbl) lbl.textContent = en ? 'ع' : 'EN';
+  /* the shared topbar may replace this page's nav, so the back icon is optional */
+  var bi = document.getElementById('backIcon');
+  if (bi) bi.className = 'ti ' + (en ? 'ti-arrow-left' : 'ti-arrow-right');
+  render();
+}
+window.toggleLang = function(){
+  var r = root(), en = r.lang === 'en';
+  r.lang = en ? 'ar' : 'en';
+  r.dir  = en ? 'rtl' : 'ltr';
+  localStorage.setItem('raf_lang', r.lang);
+  applyLang();
+};
+
+/* ---------- boot ---------- */
 (function(){
-  var fashion=[{label:{ar:'المقاس',en:'Size'},options:['S','M','L','XL'].map(function(v){return {v:v.toLowerCase(),label:{ar:v,en:v}};})},
-               {label:{ar:'اللون',en:'Color'},options:[{v:'white',label:{ar:'أبيض',en:'White'}},{v:'black',label:{ar:'أسود',en:'Black'}},{v:'navy',label:{ar:'كحلي',en:'Navy'}}]}];
-  var SIMILAR=[
-    {id:'S-101',ic:'ti-shirt',ar:'قميص لينن بريميوم',en:'Premium Linen Shirt',store:{ar:'Casa Mode',en:'Casa Mode'},price:'18.000',old:'24.000',disc:25,rate:'4.7',rev:'86',variants:fashion},
-    {id:'S-102',ic:'ti-shirt',ar:'تيشيرت بيسك كلاسيك',en:'Classic Basic Tee',store:{ar:'Casa Mode',en:'Casa Mode'},price:'8.500',old:'12.000',disc:29,rate:'4.6',rev:'152',variants:fashion},
-    {id:'S-103',ic:'ti-shirt',ar:'قميص بولو فاخر',en:'Premium Polo Shirt',store:{ar:'Casa Mode',en:'Casa Mode'},price:'22.000',old:'28.000',disc:21,rate:'4.8',rev:'64',variants:fashion},
-    {id:'S-104',ic:'ti-hanger',ar:'هودي أوفرسايز',en:'Oversize Hoodie',store:{ar:'Casa Mode',en:'Casa Mode'},price:'25.000',old:'32.000',disc:22,rate:'4.9',rev:'110',variants:fashion}
-  ];
-  function render(){var g=document.querySelector('.similar-grid');if(g&&window.RAFCard)g.innerHTML=SIMILAR.map(function(p){return RAFCard.product(p);}).join('');}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',render);else render();
-  var r=document.getElementById('htmlRoot');if(r)new MutationObserver(render).observe(r,{attributes:true,attributeFilter:['lang']});
+  var params = new URLSearchParams(location.search);
+  /* opening a product from the Homepage makes the first Back land on the
+     owning Store page before normal history resumes */
+  (function(){
+    var fromHome = params.get('from') === 'home' || /raf_homepage\.html(\?|#|$)/.test(document.referrer);
+    if (!fromHome) return;
+    var storeUrl = 'raf_store.html?store=' + encodeURIComponent(P.storeSlug || '');
+    window.__rafBackTarget = storeUrl;
+    history.pushState({ rafStoreStop:1 }, '', location.href);
+    window.addEventListener('popstate', function(){ location.replace(storeUrl); });
+  })();
+
+  var l = localStorage.getItem('raf_lang');
+  if (l === 'en'){ var r = root(); r.lang = 'en'; r.dir = 'ltr'; }
+
+  function boot(){
+    buildOpts();
+    applyLang();
+    if (window.RAFShop){ RAFShop.Cart.badge(); RAFShop.Wish.badge(); }
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+  document.addEventListener('raf:wish', syncWishlist);
 })();
 </script>
 </body>
