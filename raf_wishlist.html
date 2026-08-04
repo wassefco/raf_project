@@ -177,8 +177,15 @@ footer{background:var(--black);color:#B5AD9C;padding:48px 40px 24px;margin-top:a
     .bnav-cart.on .bnav-cart-ring{background:#A07828;}
     nav a.btn-ghost,nav a.btn-gold,nav .btn-ghost,nav .btn-gold{display:none!important;}
   }
+/* ===== SECTION RHYTHM — Followed Stores · Favorite Products · Recommended ===== */
+.sec-divider{margin:40px 0 18px;padding-top:30px;border-top:1px solid var(--border);}
+.sec-head-2{display:flex;align-items:center;gap:9px;font-family:var(--fdisplay);font-size:21px;font-weight:800;color:var(--black);}
+.sec-head-2>i{font-size:22px;color:var(--gold2);}
+@media(max-width:560px){.sec-head-2{font-size:18px;}.sec-divider{margin:30px 0 14px;padding-top:24px;}}
+
 /* ===== FOLLOWED STORES (managed from Favorites only) ===== */
-.fstores{margin-top:44px;padding-top:32px;border-top:1px solid var(--border);}
+/* first section on the page — no leading rule above it */
+.fstores{margin-top:0;padding-top:0;border-top:none;}
 .fstores-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
 .fstores-title{display:flex;align-items:center;gap:9px;font-family:var(--fdisplay);font-size:21px;font-weight:800;color:var(--black);}
 .fstores-title>i{font-size:22px;color:var(--gold2);}
@@ -261,114 +268,45 @@ footer{background:var(--black);color:#B5AD9C;padding:48px 40px 24px;margin-top:a
 
 <div class="main">
 
+  <!-- ══ 1 · FOLLOWED STORES ══ -->
+  <section class="fstores" id="followSection">
+    <div class="fstores-head">
+      <div class="fstores-title">
+        <i class="ti ti-building-store"></i>
+        <span data-ar="المتاجر المتابَعة" data-en="Followed Stores">المتاجر المتابَعة</span>
+        <span class="fstores-count" id="followCount">0</span>
+      </div>
+      <a class="fstores-browse" href="raf_storespage.html"><span data-ar="تصفّح المتاجر" data-en="Browse stores">تصفّح المتاجر</span> <i class="ti ti-arrow-left" id="fstoresArrow"></i></a>
+    </div>
+    <div class="fstores-grid" id="followGrid"></div>
+    <div class="fstores-empty" id="followEmpty">
+      <i class="ti ti-building-store"></i>
+      <div class="fse-t" data-ar="لا تتابع أي متجر بعد" data-en="You are not following any store yet">لا تتابع أي متجر بعد</div>
+      <div class="fse-s" data-ar="اضغط «تابع المحل» في صفحة أي متجر ليظهر هنا." data-en="Tap “Follow store” on any store page and it will appear here.">اضغط «تابع المحل» في صفحة أي متجر ليظهر هنا.</div>
+      <a href="raf_storespage.html" class="btn-shop ghost"><i class="ti ti-compass"></i> <span data-ar="اكتشف المتاجر" data-en="Discover stores">اكتشف المتاجر</span></a>
+    </div>
+  </section>
+
+  <!-- ══ 2 · FAVORITE PRODUCTS ══ -->
+  <div class="sec-divider">
+    <div class="sec-head-2">
+      <i class="ti ti-heart-filled"></i>
+      <span data-ar="المنتجات المفضلة" data-en="Favorite Products">المنتجات المفضلة</span>
+    </div>
+  </div>
+
   <!-- TOOLBAR -->
   <div class="toolbar" id="toolbar">
     <div class="toolbar-left">
       <span class="count-label"><i class="ti ti-heart-filled"></i><span id="countLabel"></span></span>
     </div>
     <div style="display:flex;gap:8px;">
-      <button class="btn-add-all" onclick="openAddAll()"><i class="ti ti-shopping-cart-plus"></i> <span data-ar="إضافة الكل للسلة" data-en="Add All to Cart">إضافة الكل للسلة</span></button>
       <button class="btn-clear" onclick="clearAll()"><i class="ti ti-trash"></i> <span data-ar="مسح الكل" data-en="Clear All">مسح الكل</span></button>
     </div>
   </div>
 
   <!-- PRODUCTS GRID -->
   <div class="prod-grid" id="wishGrid">
-
-    <!-- ITEM 1 -->
-    <div class="prod-card" onclick="window.location='raf_product.html'" id="wi-P-001">
-      <div class="prod-img">
-        <i class="ti ti-shirt"></i>
-        <span class="prod-num">P-001</span>
-        <span class="disc-badge">-30%</span>
-        <button class="remove-btn" onclick="event.stopPropagation();removeItem('P-001')" title="إزالة من المفضلة"><i class="ti ti-heart-filled"></i></button>
-      </div>
-      <div class="prod-body">
-        <div class="prod-name">قميص أوفرسايز كلاسيك</div>
-        <div class="prod-store"><i class="ti ti-building-store" style="font-size:11px;"></i> Casa Mode</div>
-        <div class="prod-rating"><i class="ti ti-star-filled"></i> 4.8 <span>(124)</span></div>
-        <div class="prod-price-row"><span class="price-old">17.000</span><span class="price-new">12.000 د.ك</span></div>
-        <div class="cart-btn-wrap" data-pid="P-001" data-name="قميص أوفرسايز كلاسيك" data-price="12.000">
-          <button class="add-cart-btn" onclick="event.stopPropagation();addC('P-001','قميص أوفرسايز كلاسيك','12.000')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ITEM 2 -->
-    <div class="prod-card" onclick="window.location='raf_product.html'" id="wi-P-002">
-      <div class="prod-img">
-        <i class="ti ti-shoe"></i>
-        <span class="prod-num">P-002</span>
-        <button class="remove-btn" onclick="event.stopPropagation();removeItem('P-002')" title="إزالة من المفضلة"><i class="ti ti-heart-filled"></i></button>
-      </div>
-      <div class="prod-body">
-        <div class="prod-name">حذاء رياضي Air Comfort</div>
-        <div class="prod-store"><i class="ti ti-building-store" style="font-size:11px;"></i> Sole & Co</div>
-        <div class="prod-rating"><i class="ti ti-star-filled"></i> 4.7 <span>(89)</span></div>
-        <div class="prod-price-row"><span class="price-new">28.500 د.ك</span></div>
-        <div class="cart-btn-wrap" data-pid="P-002" data-name="حذاء رياضي Air Comfort" data-price="28.500">
-          <button class="add-cart-btn" onclick="event.stopPropagation();addC('P-002','حذاء رياضي Air Comfort','28.500')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ITEM 3 -->
-    <div class="prod-card" onclick="window.location='raf_product.html'" id="wi-P-004">
-      <div class="prod-img">
-        <i class="ti ti-sunglasses"></i>
-        <span class="prod-num">P-004</span>
-        <span class="disc-badge">-40%</span>
-        <button class="remove-btn" onclick="event.stopPropagation();removeItem('P-004')" title="إزالة من المفضلة"><i class="ti ti-heart-filled"></i></button>
-      </div>
-      <div class="prod-body">
-        <div class="prod-name">نظارة شمسية Ray Luxe</div>
-        <div class="prod-store"><i class="ti ti-building-store" style="font-size:11px;"></i> Luxe Accessories</div>
-        <div class="prod-rating"><i class="ti ti-star-filled"></i> 4.6 <span>(67)</span></div>
-        <div class="prod-price-row"><span class="price-old">58.000</span><span class="price-new">35.000 د.ك</span></div>
-        <div class="cart-btn-wrap" data-pid="P-004" data-name="نظارة شمسية Ray Luxe" data-price="35.000">
-          <button class="add-cart-btn" onclick="event.stopPropagation();addC('P-004','نظارة شمسية Ray Luxe','35.000')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ITEM 4 -->
-    <div class="prod-card" onclick="window.location='raf_product.html'" id="wi-P-006">
-      <div class="prod-img">
-        <i class="ti ti-watch"></i>
-        <span class="prod-num">P-006</span>
-        <span class="disc-badge">-20%</span>
-        <button class="remove-btn" onclick="event.stopPropagation();removeItem('P-006')" title="إزالة من المفضلة"><i class="ti ti-heart-filled"></i></button>
-      </div>
-      <div class="prod-body">
-        <div class="prod-name">ساعة ذكية Premium</div>
-        <div class="prod-store"><i class="ti ti-building-store" style="font-size:11px;"></i> Glam Store</div>
-        <div class="prod-rating"><i class="ti ti-star-filled"></i> 4.8 <span>(98)</span></div>
-        <div class="prod-price-row"><span class="price-old">94.000</span><span class="price-new">75.000 د.ك</span></div>
-        <div class="cart-btn-wrap" data-pid="P-006" data-name="ساعة ذكية Premium" data-price="75.000">
-          <button class="add-cart-btn" onclick="event.stopPropagation();addC('P-006','ساعة ذكية Premium','75.000')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ITEM 5 -->
-    <div class="prod-card" onclick="window.location='raf_product.html'" id="wi-P-008">
-      <div class="prod-img">
-        <i class="ti ti-headphones"></i>
-        <span class="prod-num">P-008</span>
-        <span class="disc-badge">-35%</span>
-        <button class="remove-btn" onclick="event.stopPropagation();removeItem('P-008')" title="إزالة من المفضلة"><i class="ti ti-heart-filled"></i></button>
-      </div>
-      <div class="prod-body">
-        <div class="prod-name">سماعة Sony WH-1000XM5</div>
-        <div class="prod-store"><i class="ti ti-building-store" style="font-size:11px;"></i> TechZone</div>
-        <div class="prod-rating"><i class="ti ti-star-filled"></i> 4.9 <span>(201)</span></div>
-        <div class="prod-price-row"><span class="price-old">55.000</span><span class="price-new">35.750 د.ك</span></div>
-        <div class="cart-btn-wrap" data-pid="P-008" data-name="سماعة Sony WH-1000XM5" data-price="35.750">
-          <button class="add-cart-btn" onclick="event.stopPropagation();addC('P-008','سماعة Sony WH-1000XM5','35.750')"><i class="ti ti-shopping-cart-plus"></i> أضف للسلة</button>
-        </div>
-      </div>
-    </div>
-
   </div><!-- /prod-grid -->
 
   <!-- EMPTY STATE — illustration + CTA + suggested products -->
@@ -391,50 +329,19 @@ footer{background:var(--black);color:#B5AD9C;padding:48px 40px 24px;margin-top:a
       <a href="raf_homepage.html" class="btn-shop"><i class="ti ti-shopping-bag"></i> <span data-ar="تصفح المنتجات" data-en="Browse products">تصفح المنتجات</span></a>
       <a href="raf_offers.html" class="btn-shop ghost"><i class="ti ti-discount"></i> <span data-ar="شاهد العروض" data-en="View offers">شاهد العروض</span></a>
     </div>
-    <!-- suggested products -->
-    <div class="sugg" id="suggWrap" style="display:none;">
-      <div class="sugg-h"><i class="ti ti-sparkles"></i> <span data-ar="مقترحة لك" data-en="Suggested for you">مقترحة لك</span></div>
-      <div class="prod-grid" id="suggGrid"></div>
-    </div>
   </div>
 
-  <!-- FOLLOWED STORES — managed here only -->
-  <section class="fstores" id="followSection">
-    <div class="fstores-head">
-      <div class="fstores-title">
-        <i class="ti ti-building-store"></i>
-        <span data-ar="المتاجر المتابَعة" data-en="Followed Stores">المتاجر المتابَعة</span>
-        <span class="fstores-count" id="followCount">0</span>
+  <!-- ══ 3 · RECOMMENDED FOR YOU ══ -->
+  <section class="sugg" id="suggWrap">
+    <div class="sec-divider">
+      <div class="sec-head-2">
+        <i class="ti ti-sparkles"></i>
+        <span data-ar="مقترحة لك" data-en="Recommended for You">مقترحة لك</span>
       </div>
-      <a class="fstores-browse" href="raf_storespage.html"><span data-ar="تصفّح المتاجر" data-en="Browse stores">تصفّح المتاجر</span> <i class="ti ti-arrow-left" id="fstoresArrow"></i></a>
     </div>
-    <div class="fstores-grid" id="followGrid"></div>
-    <div class="fstores-empty" id="followEmpty">
-      <i class="ti ti-building-store"></i>
-      <div class="fse-t" data-ar="لا تتابع أي متجر بعد" data-en="You are not following any store yet">لا تتابع أي متجر بعد</div>
-      <div class="fse-s" data-ar="اضغط «تابع المحل» في صفحة أي متجر ليظهر هنا." data-en="Tap “Follow store” on any store page and it will appear here.">اضغط «تابع المحل» في صفحة أي متجر ليظهر هنا.</div>
-      <a href="raf_storespage.html" class="btn-shop ghost"><i class="ti ti-compass"></i> <span data-ar="اكتشف المتاجر" data-en="Discover stores">اكتشف المتاجر</span></a>
-    </div>
+    <div class="prod-grid" id="suggGrid"></div>
   </section>
 
-</div>
-
-<!-- ===== ADD ALL TO CART — CONFIRMATION MODAL ===== -->
-<div class="aa-back" id="addAllModal" onclick="if(event.target===this)closeAddAll()">
-  <div class="aa-card" role="dialog" aria-modal="true">
-    <div class="aa-head">
-      <div>
-        <h3 data-ar="إضافة الكل للسلة" data-en="Add All to Cart">إضافة الكل للسلة</h3>
-        <p id="aaSummary"></p>
-      </div>
-      <button class="aa-x" onclick="closeAddAll()" aria-label="close"><i class="ti ti-x"></i></button>
-    </div>
-    <div class="aa-body" id="aaBody"></div>
-    <div class="aa-foot">
-      <button class="aa-cancel" onclick="closeAddAll()" data-ar="إلغاء" data-en="Cancel">إلغاء</button>
-      <button class="aa-confirm" id="aaConfirm" onclick="confirmAddAll()"></button>
-    </div>
-  </div>
 </div>
 
 <footer>
@@ -505,8 +412,10 @@ function applyLang(){
 <script src="raf_nav.js"></script>
 <script src="raf_search.js"></script>
 <!-- Global RAF Product Card — replace legacy wishlist cards -->
+<script src="raf_source.js"></script>
 <script src="raf_data.js"></script>
 <script src="raf_catalog.js"></script>
+<script src="raf_rules.js"></script>
 <script src="raf_card.js"></script>
 <script src="raf_quick.js"></script>
 <script>
@@ -517,8 +426,6 @@ function applyLang(){
   function en(){ return document.getElementById('htmlRoot').lang === 'en'; }
   function T(ar,e){ return en() ? e : ar; }
   function L(o){ return (o && typeof o==='object') ? (en()?o.en:o.ar) : (o||''); }
-  function oos(p){ return window.RAFCard ? RAFCard.isOOS(p) : (p.stock===0||p.available===false); }
-  function needsVariants(p){ return !!(p.variants && p.variants.length); }
 
   /* ---------- counters + empty state (real values) ---------- */
   function refreshCounts(){
@@ -542,12 +449,21 @@ function applyLang(){
   function render(){
     if(!window.RAFShop || !window.RAFCard) return;
     var grid = document.getElementById('wishGrid'); if(!grid) return;
-    var items = RAFShop.Wish.items();
-    grid.innerHTML = items.map(function(p){ return RAFCard.product(p); }).join('');
-    if(!items.length) renderSuggestions();
+    /* re-sync each saved product against the live catalog so price, stock and
+       availability in Favorites always match the rest of the marketplace */
+    var items = RAFShop.Wish.items().map(function(p){
+      return RAFShop.Stock ? RAFShop.Stock.sync(Object.assign({}, p)) : p;
+    });
+    /* every favourite opens its own Product Details page by product id */
+    grid.innerHTML = items.map(function(p){
+      return RAFCard.product(p, { hrefFor: productHref });
+    }).join('');
+    renderSuggestions();          /* recommendations are their own section now */
     refreshCounts();
     renderFollowed();
   }
+  /* single place that decides where a favourite navigates */
+  function productHref(p){ return 'raf_product.html?id=' + encodeURIComponent(p.id); }
 
   /* ---------- followed stores (single source: RAFShop.Follow) ---------- */
   function renderFollowed(){
@@ -586,17 +502,24 @@ function applyLang(){
     });
   };
 
-  /* suggested products shown inside the empty state */
+  /* ---------- Recommended for You (own section, always visible) ---------- */
   function renderSuggestions(){
     var wrap = document.getElementById('suggWrap'), g = document.getElementById('suggGrid');
     if(!wrap || !g) return;
-    /* RAFShop.catalog entries use `sku`; normalise to the card's product shape */
-    var picks = (RAFShop.catalog || []).slice(0,4).map(function(p){
-      return { id:p.id||p.sku, ar:p.ar, en:p.en, price:p.price, ic:p.ic, store:p.store };
-    });
+    var saved = {};
+    RAFShop.Wish.items().forEach(function(w){ saved[w.id] = 1; });
+    /* prefer the richer shared catalog, skip anything already saved, and
+       resolve live availability like every other listing */
+    var picks = (RAFShop.catalog || [])
+      .map(function(p){ return { id:p.id||p.sku, ar:p.ar, en:p.en, price:p.price, ic:p.ic, store:p.store }; })
+      .filter(function(p){ return p.id && !saved[p.id]; })
+      .map(function(p){ return RAFShop.Stock ? RAFShop.Stock.sync(p) : p; })
+      .slice(0,4);
     if(!picks.length){ wrap.style.display='none'; return; }
     wrap.style.display='';
-    g.innerHTML = picks.map(function(p){ return RAFCard.product(p); }).join('');
+    g.innerHTML = picks.map(function(p){
+      return RAFCard.product(p, { hrefFor: productHref });
+    }).join('');
   }
 
   /* ---------- Clear All ---------- */
@@ -609,138 +532,6 @@ function applyLang(){
     RAFShop.toast(T('تم مسح المفضلة','Wishlist cleared'), { icon:'ti-trash', undo:function(){ RAFShop.Wish.write(backup); render(); } });
   };
 
-  /* ---------- Add All to Cart (confirmation + variants + merge) ---------- */
-  var aaState = [], aaStore = '';
-  /* stores represented in the wishlist (one store per order → pick one) */
-  function wishStores(){
-    var seen = {}, out = [];
-    RAFShop.Wish.items().forEach(function(p){
-      var s = RAFShop.Cart.storeOf(p) || T('غير محدد','Unspecified');
-      if(!seen[s]){ seen[s]=1; out.push(s); }
-    });
-    return out;
-  }
-  window.openAddAll = function(){
-    var all = RAFShop.Wish.items(); if(!all.length) return;
-    var stores = wishStores();
-    /* default to the store already in the cart, else the first store */
-    var cur = RAFShop.Cart.currentStore();
-    if(!aaStore || stores.indexOf(aaStore)<0) aaStore = (cur && stores.indexOf(cur)>-1) ? cur : stores[0];
-    buildAddAll(stores);
-    document.getElementById('addAllModal').classList.add('show');
-  };
-  window.aaPickStore = function(s){ aaStore = s; buildAddAll(wishStores()); };
-
-  function buildAddAll(stores){
-    var items = RAFShop.Wish.items().filter(function(p){
-      return (RAFShop.Cart.storeOf(p) || T('غير محدد','Unspecified')) === aaStore;
-    });
-    aaState = items.map(function(p){ return { p:p, sel:{}, skip:oos(p) }; });
-    var avail = aaState.filter(function(r){ return !r.skip; }).length;
-    var skipped = aaState.length - avail;
-
-    document.getElementById('aaSummary').textContent =
-      T('سيتم إضافة ','Adding ') + avail + T(' من أصل ',' of ') + aaState.length + T(' منتج','products') +
-      (skipped ? T(' · '+skipped+' نفدت كميته سيتم تخطيه',' · '+skipped+' sold out will be skipped') : '');
-
-    /* store picker + one-store-per-order notice */
-    var cur = RAFShop.Cart.currentStore();
-    var head = '';
-    if(stores.length > 1){
-      head = '<div class="aa-stores"><div class="aa-vlabel">'+T('اختر المتجر (طلب واحد لكل متجر)','Choose a store (one store per order)')+'</div><div class="aa-vars">'
-        + stores.map(function(s){ return '<button class="aa-opt'+(s===aaStore?' on':'')+'" onclick="aaPickStore(\''+s.replace(/'/g,"\\'")+'\')">'+s+'</button>'; }).join('')
-        + '</div></div>';
-    }
-    if(cur && cur !== aaStore){
-      head += '<div class="aa-warn"><i class="ti ti-alert-triangle"></i> '
-        + T('سلتك تحتوي منتجات من «'+cur+'». المتابعة ستفرغ السلة الحالية.','Your cart has items from “'+cur+'”. Continuing will clear it.')
-        + '</div>';
-    }
-
-    document.getElementById('aaBody').innerHTML = head + aaState.map(function(r,i){
-      var p = r.p;
-      var vars = needsVariants(p) && !r.skip ? p.variants.map(function(g,gi){
-        return '<div class="aa-vgroup"><div class="aa-vlabel">'+L(g.label)+' <span class="req">*</span></div><div class="aa-vars">'
-          + g.options.map(function(op){ return '<button class="aa-opt" onclick="aaPick('+i+','+gi+',this,\''+String(op.v).replace(/'/g,"\\'")+'\')">'+L(op.label||op)+'</button>'; }).join('')
-          + '</div></div>';
-      }).join('') : '';
-      var note = r.skip
-        ? '<div class="aa-note"><i class="ti ti-ban"></i> '+T('نفدت الكمية — سيتم تخطيه','Sold Out — will be skipped')+'</div>'
-        : (needsVariants(p) ? '<div class="aa-note" id="aaNote'+i+'"><i class="ti ti-alert-circle"></i> '+T('اختر الخيارات المطلوبة','Select the required options')+'</div>' : '');
-      return '<div class="aa-row"'+(r.skip?' style="opacity:.55"':'')+'>'
-        + '<div class="aa-thumb"><i class="ti '+(p.ic||'ti-box')+'"></i></div>'
-        + '<div class="aa-info"><div class="aa-name">'+L(p)+'</div>'
-        + '<div class="aa-price">'+p.price+' '+T('د.ك','KWD')+'</div>'
-        + note + vars + '</div></div>';
-    }).join('');
-
-    updateAaBtn();
-  }
-  window.closeAddAll = function(){ document.getElementById('addAllModal').classList.remove('show'); };
-
-  window.aaPick = function(i,gi,btn,v){
-    btn.parentElement.querySelectorAll('.aa-opt').forEach(function(b){ b.classList.remove('on'); });
-    btn.classList.add('on');
-    aaState[i].sel['g'+gi] = v;
-    var r = aaState[i], done = r.p.variants.every(function(_,k){ return r.sel['g'+k]!=null; });
-    var note = document.getElementById('aaNote'+i);
-    if(note){ note.className = 'aa-note' + (done?' ok':''); note.innerHTML = '<i class="ti ti-'+(done?'circle-check':'alert-circle')+'"></i> ' + (done?T('جاهز للإضافة','Ready to add'):T('اختر الخيارات المطلوبة','Select the required options')); }
-    updateAaBtn();
-  };
-
-  function readyRows(){
-    return aaState.filter(function(r){
-      if(r.skip) return false;
-      if(!needsVariants(r.p)) return true;
-      return r.p.variants.every(function(_,k){ return r.sel['g'+k]!=null; });   /* variants required */
-    });
-  }
-  function updateAaBtn(){
-    var btn = document.getElementById('aaConfirm'), n = readyRows().length;
-    btn.disabled = n===0;
-    btn.textContent = n ? T('أضف '+n+' للسلة','Add '+n+' to Cart') : T('اختر الخيارات المطلوبة','Select required options');
-  }
-
-  window.confirmAddAll = function(){
-    var rows = readyRows(); if(!rows.length) return;
-    var cur = RAFShop.Cart.currentStore();
-    /* one store per order — ask before replacing another store's cart (never silent) */
-    if(cur && cur !== aaStore){
-      RAFShop.Cart.confirmSwitch(cur, aaStore).then(function(ok){
-        if(!ok) return;
-        RAFShop.Cart.clear();
-        doAddAll(rows, true);
-      });
-      return;
-    }
-    doAddAll(rows, false);
-  };
-
-  function doAddAll(rows, cleared){
-    /* MERGE into the existing cart — Cart.add never clears or overwrites,
-       and de-duplicates by product+variant key (RAF cart logic). */
-    rows.forEach(function(r){
-      var variant = {};
-      if(needsVariants(r.p)){
-        r.p.variants.forEach(function(g,gi){
-          var v = r.sel['g'+gi];
-          var opt = g.options.find(function(o){ return String(o.v)===String(v); });
-          variant[L(g.label)] = opt ? L(opt.label||opt) : v;
-        });
-      }
-      RAFShop.Cart.add(r.p, variant);
-    });
-    var skipped = aaState.filter(function(r){ return r.skip; }).length;
-    var incomplete = aaState.length - skipped - rows.length;
-    closeAddAll();
-    RAFShop.Cart.badge(); render();           /* cart + wishlist badges update instantly */
-    var msg = T('تمت إضافة '+rows.length+' منتج إلى السلة','Added '+rows.length+' product'+(rows.length===1?'':'s')+' to your cart');
-    if(cleared) msg = T('تم بدء سلة جديدة · ','New cart started · ') + msg;
-    if(skipped) msg += T(' · تم تخطي '+skipped+' نفدت كميته',' · skipped '+skipped+' sold out');
-    if(incomplete) msg += T(' · '+incomplete+' بحاجة لاختيار الخيارات',' · '+incomplete+' need options');
-    RAFShop.toast(msg, { icon:'ti-shopping-cart-plus' });
-  }
-
   /* ---------- boot + live sync ---------- */
   function boot(){
     render();
@@ -749,7 +540,6 @@ function applyLang(){
     document.addEventListener('raf:cart', function(){ RAFShop.Cart.badge(); });
     var root = document.getElementById('htmlRoot');
     if(root) new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
-    document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeAddAll(); });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

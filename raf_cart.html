@@ -44,6 +44,8 @@
     </div>
   </div>
 
+  <div id="syncNotice" style="display:none;max-width:1180px;margin:0 auto 14px;padding:0 clamp(14px,3vw,28px);"></div>
+
   <div class="co-grid" id="cartGrid">
     <!-- LEFT -->
     <div>
@@ -125,7 +127,10 @@
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
 
+<script src="raf_source.js"></script>
 <script src="raf_data.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_rules.js"></script>
 <script src="raf_card.js"></script>
 <script src="raf_checkout.js"></script>
 <script>
@@ -317,12 +322,34 @@
   };
   window.goBack = function(){ if(history.length>1) history.back(); else window.location='raf_homepage.html'; };
 
+  /* ---------- re-sync against the central source whenever the cart opens ----------
+     Prices, names, stock and store status are re-read; anything that moved is
+     reported to the shopper instead of changing their basket silently. */
+  function syncOnOpen(){
+    if (!window.RAFRules) return;
+    var res = RAFRules.syncCart();
+    var box = document.getElementById('syncNotice');
+    if (!box) return;
+    if (!res.changed){ box.innerHTML = ''; box.style.display = 'none'; return; }
+    var rows = []
+      .concat(res.removed.map(function(r){ return { ic:'ti-trash', t:r.name + ' — ' + r.message }; }))
+      .concat(res.changes.map(function(c){ return { ic:'ti-refresh', t:c.name + ' — ' + c.message }; }));
+    box.style.display = '';
+    box.innerHTML = '<div class="alert warn"><i class="ti ti-alert-triangle"></i><div>'
+      + '<b>' + T('تم تحديث سلتك','Your cart was updated') + '</b>'
+      + '<ul style="margin:6px 0 0;padding-inline-start:18px;">'
+      + rows.map(function(r){ return '<li>' + r.t + '</li>'; }).join('')
+      + '</ul></div></div>';
+    RAFShop.Cart.badge();
+  }
+
   /* ---------- boot ---------- */
   function boot(){
     var c = RAFCO.getCoupon();
     if(c){ var m=document.getElementById('couponMsg'); document.getElementById('couponInput').value=c.code;
       m.className='msg ok show'; m.innerHTML='<i class="ti ti-circle-check"></i> '+T('تم تطبيق الكوبون — خصم '+c.pct+'%','Coupon applied — '+c.pct+'% off'); }
     document.getElementById('orderNotes').value = RAFCO.get('raf_order_notes','');
+    syncOnOpen();
     render();
     document.addEventListener('raf:cart', function(){ RAFShop.Cart.badge(); });
     var root=document.getElementById('htmlRoot');

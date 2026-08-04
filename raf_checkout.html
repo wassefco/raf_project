@@ -141,7 +141,10 @@
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
 
+<script src="raf_source.js"></script>
 <script src="raf_data.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_rules.js"></script>
 <script src="raf_checkout.js"></script>
 <script>
 /* ============================================================
@@ -267,34 +270,120 @@
   }
 
   /* ---------- pay: validate stock, create the order, go to confirmation+tracking ---------- */
-  window.payNow=function(){
-    var items=RAFShop.Cart.items();
+  /* ---------- Quick Checkout confirmation ----------
+     Shown before payment (or before placing a cash order). Resolves true to
+     continue, false to go back and edit the cart. If the customer does
+     nothing for 5 seconds it continues on its own. */
+  var QC_SECONDS = 5;
+  function quickConfirm(pay){
+    return new Promise(function(resolve){
+      if(document.getElementById('qcBack')) return resolve(true);
+      var items=RAFShop.Cart.items();
+      var totals=RAFCO.totals(items,{withTip:true});
+      var count=items.reduce(function(s,l){ return s+(l.qty||1); },0);
+      var isCash=/cod|cash/i.test((pay&&pay.id)||'');
+      var storeName=(RAFCO.groupByStore(items)[0]||{}).name||'';
+
+      var back=document.createElement('div');
+      back.id='qcBack'; back.className='qc-back';
+      back.innerHTML=
+        '<div class="qc" role="dialog" aria-modal="true" aria-labelledby="qcTitle">'
+          + '<div class="qc-h"><div class="qc-ic"><i class="ti ti-receipt-2"></i></div>'
+            + '<div><h3 id="qcTitle">'+T('تأكيد الطلب','Confirm your order')+'</h3>'
+            + '<p>'+(isCash?T('سيتم إنشاء الطلب والدفع عند الاستلام.','Your order will be placed — pay on delivery.')
+                          :T('سيتم تحويلك لإتمام الدفع.','You will continue to payment.'))+'</p></div></div>'
+          + '<div class="qc-b">'
+            + '<div class="qc-row"><span>'+T('المتجر','Store')+'</span><b>'+storeName+'</b></div>'
+            + '<div class="qc-row"><span>'+T('المنتجات','Items')+'</span><b>'+count+'</b></div>'
+            + '<div class="qc-row"><span>'+T('طريقة الدفع','Payment')+'</span><b>'+(pay?L(pay):'')+'</b></div>'
+            + '<div class="qc-row total"><span>'+T('الإجمالي','Total')+'</span><b>'+money(totals.total)+' '+T('د.ك','KWD')+'</b></div>'
+          + '</div>'
+          + '<div class="qc-f">'
+            + '<button class="qc-edit" id="qcEdit"><i class="ti ti-arrow-back-up"></i> '+T('تعديل الطلب','Edit Order')+'</button>'
+            + '<button class="qc-go" id="qcGo">'+T('متابعة','Continue')
+              + ' <span class="qc-count" id="qcCount">'+QC_SECONDS+'</span></button>'
+          + '</div>'
+        + '</div>';
+      document.body.appendChild(back);
+      requestAnimationFrame(function(){ back.classList.add('show'); });
+      setTimeout(function(){ back.classList.add('show'); },30);   /* hidden-tab safe */
+
+      var left=QC_SECONDS, timer=setInterval(tick,1000), done=false;
+      function tick(){
+        left--;
+        var el=document.getElementById('qcCount');
+        if(el) el.textContent=left;
+        if(left<=0) finish(true);           /* no action for 5s → continue */
+      }
+      function finish(go){
+        if(done) return; done=true;
+        clearInterval(timer);
+        document.removeEventListener('keydown',onKey);
+        back.classList.remove('show');
+        setTimeout(function(){ if(back.parentNode) back.parentNode.removeChild(back); },200);
+        resolve(go);
+      }
+      function onKey(e){ if(e.key==='Escape') finish(false); }
+      document.getElementById('qcEdit').onclick=function(){ finish(false); };
+      document.getElementById('qcGo').onclick=function(){ finish(true); };
+      back.onclick=function(e){ if(e.target===back) finish(false); };
+      document.addEventListener('keydown',onKey);
+      window.__qcFinish=finish;             /* test hook */
+    });
+  }
+
+  function showPayErrors(errors){
     var err=document.getElementById('payErr');
-    if(!items.length) return;
-    var oos=items.filter(RAFCO.isOOS);
-    if(oos.length){                                   /* stock validated before payment */
-      err.innerHTML='<div class="alert warn"><i class="ti ti-alert-triangle"></i><div>'+T('بعض المنتجات لم تعد متوفرة. عد إلى السلة لتعديلها.','Some items are no longer available. Return to the cart to update them.')+'</div></div>';
-      return;
-    }
+    err.innerHTML='<div class="alert warn"><i class="ti ti-alert-triangle"></i><div>'
+      + '<b>'+T('تعذّر إتمام الطلب','Order could not be placed')+'</b>'
+      + '<ul style="margin:6px 0 0;padding-inline-start:18px;">'
+      + errors.map(function(e){ return '<li>'+(e.name?e.name+' — ':'')+e.message+'</li>'; }).join('')
+      + '</ul>'
+      + '<a href="raf_cart.html" style="display:inline-block;margin-top:8px;font-weight:700;color:#A07828;">'
+      + T('العودة إلى السلة','Return to cart')+'</a>'
+      + '</div></div>';
+  }
+
+  window.payNow=function(){
+    var err=document.getElementById('payErr');
+    /* an in-flight order blocks repeat clicks / slow connections */
+    if(window.RAFRules && RAFRules.isPlacing()) return;
+
     var list=addresses(), selId=RAFCO.get('raf_addr_sel','');
     var addr=list.find(function(a){return a.id===selId;})||list[0];
     if(!addr){
       err.innerHTML='<div class="alert warn"><i class="ti ti-alert-triangle"></i><div>'+T('اختر عنوان التوصيل أولاً','Select a delivery address first')+'</div></div>';
       return;
     }
-    err.innerHTML='';
     var payId=RAFCO.get('raf_pay_sel','cod');
     var pay=PAYMENTS.find(function(p){return p.id===payId;})||PAYMENTS[0];
-    var order=RAFShop.Orders.create({
-      pay:{ar:pay.ar,en:pay.en},
-      addr:{ar:addrText(addr,'ar'),en:addrText(addr,'en')},
-      totals:RAFCO.totals(items,{withTip:true})   /* real subtotal / delivery / discount / tip */
+
+    /* Quick Checkout confirmation — Edit Order or Continue, auto-continues
+       after 5s so a distracted customer is never stuck */
+    quickConfirm(pay).then(function(go){
+      if(!go){ window.location='raf_cart.html'; return; }
+      err.innerHTML='';
+      var btn=document.getElementById('payBtn');
+      if(btn){ btn.disabled=true; btn.dataset.busy='1'; }
+
+      var totals=RAFCO.totals(RAFShop.Cart.items(),{withTip:true});
+      RAFRules.placeOrder({
+        pay:{ar:pay.ar,en:pay.en},
+        addr:{ar:addrText(addr,'ar'),en:addrText(addr,'en')},
+        totals:totals
+      }).then(function(res){
+        if(!res.ok){
+          if(btn){ btn.disabled=false; delete btn.dataset.busy; }
+          if(!res.duplicate) showPayErrors(res.errors||[]);
+          if(res.sync && res.sync.changed) render();
+          return;
+        }
+        RAFCO.setCoupon(null);
+        RAFShop.Cart.badge();
+        /* payment succeeded → wait for the store to accept the order */
+        window.location='raf_pending.html?id='+encodeURIComponent(res.order.id);
+      });
     });
-    if(!order) return;
-    RAFShop.Cart.clear(); RAFCO.setCoupon(null);
-    try{ localStorage.removeItem('raf_order_notes'); localStorage.removeItem('raf_driver_notes'); localStorage.removeItem('raf_tip'); }catch(e){}
-    RAFShop.Cart.badge();
-    window.location='raf_tracking.html?id='+encodeURIComponent(order.id)+'&new=1';
   };
 
   function boot(){

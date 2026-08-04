@@ -19,40 +19,22 @@
   /* inputs to upgrade (by id) + any [data-raf-search-input] */
   var INPUT_IDS = ['prodSearch','storeSearch','auctSearch','trendSearch','usedSearch','navSearch','siteSearch'];
 
-  /* shared catalog for live suggestions (admin/API-ready) */
-  var CATEGORIES = [
-    {id:'electronics',ar:'إلكترونيات',en:'Electronics',icon:'ti-device-mobile'},
-    {id:'fashion',ar:'أزياء',en:'Fashion',icon:'ti-hanger'},
-    {id:'perfume',ar:'عطور',en:'Perfume',icon:'ti-spray'},
-    {id:'watches',ar:'ساعات',en:'Watches',icon:'ti-clock-hour-4'},
-    {id:'jewelry',ar:'مجوهرات',en:'Jewelry',icon:'ti-diamond'},
-    {id:'kids',ar:'أطفال',en:'Kids',icon:'ti-baby-carriage'},
-    {id:'home',ar:'المنزل والمطبخ',en:'Home & Kitchen',icon:'ti-home'},
-    {id:'sports',ar:'رياضة',en:'Sports',icon:'ti-ball-football'}
-  ];
-  /* sku links a suggestion to the shared catalog so it can open Quick Order */
-  var PRODUCTS = [
-    {sku:'P-EARBUDS',ic:'ti-device-mobile',ar:'سماعات لاسلكية فاخرة',en:'Premium Wireless Earbuds',store:{ar:'تك هاوس',en:'Tech House'},price:'24.500'},
-    {sku:'P-PERFUME',ic:'ti-spray',ar:'عطر شرقي فاخر',en:'Luxury Oriental Perfume',store:{ar:'دار العود',en:'Dar Aloud'},price:'42.000'},
-    {sku:'P-WATCH',ic:'ti-clock-hour-4',ar:'ساعة كلاسيكية جلد',en:'Classic Leather Watch',store:{ar:'تايم بوكس',en:'Time Box'},price:'68.000'},
-    {sku:'P-JACKET',ic:'ti-hanger',ar:'جاكيت شتوي عصري',en:'Modern Winter Jacket',store:{ar:'كازا مود',en:'Casa Mode'},price:'29.900'},
-    {sku:'P-HEADPHONES',ic:'ti-headphones',ar:'سماعة رأس احترافية',en:'Pro Headphones',store:{ar:'تك هاوس',en:'Tech House'},price:'38.000'},
-    {sku:'P-006',ic:'ti-diamond',ar:'خاتم فضة مرصّع',en:'Studded Silver Ring',store:{ar:'لمسة ذهب',en:'Lamsa Gold'},price:'33.000'},
-    {sku:'P-002',ic:'ti-shoe',ar:'حذاء رياضي خفيف',en:'Lightweight Sneakers',store:{ar:'ستيب',en:'Step'},price:'19.500'},
-    {sku:'P-005',ic:'ti-briefcase',ar:'حقيبة يد جلدية',en:'Leather Handbag',store:{ar:'مود',en:'Mood'},price:'55.000'}
-  ];
+  /* categories come from the central authority — only ones with real products */
+  function CATEGORIES_LIST(){
+    if (!window.RAFCatalog || !RAFCatalog.categories) return [];
+    return RAFCatalog.categories().map(function(c){ return { id:c.k, ar:c.ar, en:c.en, icon:c.ic }; });
+  }
+  /* Suggestions come from the central authority. The previous local copy had
+     drifted — it reused P-002/P-006 for entirely different products, so a search
+     result could open an unrelated product page. */
+  function catalog(){ return (window.RAFShop && RAFShop.catalog) || []; }
+  function PRODUCTS(){ return catalog(); }
   /* multi-store search results open the lightweight Quick Order page */
   function prodHref(p){ return p.sku ? 'raf_quick.html?id='+encodeURIComponent(p.sku) : 'raf_quick.html'; }
   /* availability from the shared rule, so search agrees with every listing */
   function isOOS(p){ return !!(window.RAFShop && RAFShop.Stock && RAFShop.Stock.isOOS({ id:p.sku, stock:p.stock })); }
   function oosTag(p){ return isOOS(p) ? '<span class="rs-oos">'+(en()?'Sold Out':'نفدت الكمية')+'</span>' : ''; }
-  var STORES = [
-    {ic:'ti-device-mobile',ar:'تك هاوس',en:'Tech House',rate:'4.8',prod:'320'},
-    {ic:'ti-spray',ar:'دار العود',en:'Dar Aloud',rate:'4.9',prod:'180'},
-    {ic:'ti-hanger',ar:'كازا مود',en:'Casa Mode',rate:'4.7',prod:'450'},
-    {ic:'ti-diamond',ar:'لمسة ذهب',en:'Lamsa Gold',rate:'5.0',prod:'95'},
-    {ic:'ti-clock-hour-4',ar:'تايم بوكس',en:'Time Box',rate:'4.7',prod:'140'}
-  ];
+  function STORES(){ return (window.RAFShop && RAFShop.stores) || []; }
   var POPULAR = [{ar:'آيفون',en:'iPhone'},{ar:'عطر',en:'Perfume'},{ar:'ساعة ذكية',en:'Smart Watch'},{ar:'حذاء رياضي',en:'Sneakers'},{ar:'حقيبة',en:'Bag'},{ar:'سماعات',en:'Earbuds'}];
   var QUICK = [
     {ar:'المنتجات',en:'Products',ic:'ti-box',href:'raf_offers.html'},
@@ -120,19 +102,19 @@
     html+=POPULAR.map(function(p){return '<span class="rs-tag" onclick="RAFSearch.run(\''+encodeURIComponent(L(p))+'\')"><i class="ti ti-flame"></i> '+L(p)+'</span>';}).join('')+'</div></div>';
     if(views.length){
       html+='<div class="rs-block"><div class="rs-head"><h4><i class="ti ti-eye"></i> '+(en()?'Browsing History':'شاهدت مؤخراً')+'</h4></div><div class="rs-hist">';
-      html+=views.map(function(v){return '<a class="rs-hcard '+v.type+'" href="'+(v.type==='store'?'raf_store.html':prodHref(v))+'"><div class="rs-hthumb"><i class="ti '+v.ic+'"></i></div><div class="rs-hname">'+L(v)+'</div></a>';}).join('')+'</div></div>';
+      html+=views.map(function(v){return '<a class="rs-hcard '+v.type+'" href="'+(v.type==='store'?'raf_store.html?store='+encodeURIComponent(v.slug||''):prodHref(v))+'"><div class="rs-hthumb"><i class="ti '+v.ic+'"></i></div><div class="rs-hname">'+L(v)+'</div></a>';}).join('')+'</div></div>';
     }
     ov.innerHTML=html;
   }
   function renderSuggestions(q){
     var ql=q.toLowerCase();
     var m=function(o){return ((o.ar||'')+' '+(o.en||'')).toLowerCase().indexOf(ql)!==-1;};
-    var cats=CATEGORIES.filter(m).slice(0,4), prods=PRODUCTS.filter(m).slice(0,4), stores=STORES.filter(m).slice(0,3);
+    var cats=CATEGORIES_LIST().filter(m).slice(0,4), prods=PRODUCTS().filter(m).slice(0,4), stores=STORES().filter(m).slice(0,3);
     var grp=function(t,ic,items){return items.length?'<div class="rs-block"><div class="rs-head"><h4><i class="ti '+ic+'"></i> '+t+'</h4></div>'+items.join('')+'</div>':'';};
     var html=quickHTML();
-    html+=grp(en()?'Categories':'الفئات','ti-category',cats.map(function(c){return '<a class="rs-item" href="raf_storespage.html?cat='+c.id+'"><div class="rs-thumb cat"><i class="ti '+c.icon+'"></i></div><div class="rs-info"><div class="rs-name">'+L(c)+'</div><div class="rs-meta">'+(en()?'Category':'فئة')+'</div></div><i class="ti ti-arrow-left rs-go"></i></a>';}));
+    html+=grp(en()?'Categories':'الفئات','ti-category',cats.map(function(c){return '<a class="rs-item" href="raf_offers.html?cat='+c.id+'"><div class="rs-thumb cat"><i class="ti '+c.icon+'"></i></div><div class="rs-info"><div class="rs-name">'+L(c)+'</div><div class="rs-meta">'+(en()?'Category':'فئة')+'</div></div><i class="ti ti-arrow-left rs-go"></i></a>';}));
     html+=grp(en()?'Products':'المنتجات','ti-box',prods.map(function(p){return '<a class="rs-item'+(isOOS(p)?' is-oos':'')+'" href="'+prodHref(p)+'"><div class="rs-thumb"><i class="ti '+p.ic+'"></i></div><div class="rs-info"><div class="rs-name">'+L(p)+oosTag(p)+'</div><div class="rs-meta">'+L(p.store)+' · '+p.price+' KWD</div></div><i class="ti ti-arrow-left rs-go"></i></a>';}));
-    html+=grp(en()?'Stores':'المحلات','ti-building-store',stores.map(function(s){return '<a class="rs-item" href="raf_store.html"><div class="rs-thumb store"><i class="ti '+s.ic+'"></i></div><div class="rs-info"><div class="rs-name">'+L(s)+'</div><div class="rs-meta">'+s.prod+' '+(en()?'products':'منتج')+' · ★ '+s.rate+'</div></div><i class="ti ti-arrow-left rs-go"></i></a>';}));
+    html+=grp(en()?'Stores':'المحلات','ti-building-store',stores.map(function(s){return '<a class="rs-item" href="raf_store.html?store='+encodeURIComponent(s.slug||'')+'"><div class="rs-thumb store"><i class="ti '+s.ic+'"></i></div><div class="rs-info"><div class="rs-name">'+L(s)+'</div><div class="rs-meta">'+s.prod+' '+(en()?'products':'منتج')+' · ★ '+s.rate+'</div></div><i class="ti ti-arrow-left rs-go"></i></a>';}));
     if(!cats.length&&!prods.length&&!stores.length) html+='<div class="rs-none">'+(en()?'No matches found':'لا نتائج مطابقة')+'</div>';
     html+='<div class="rs-recent" style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);margin-top:6px;" onclick="RAFSearch.run(\''+encodeURIComponent(q)+'\')"><span><i class="ti ti-search" style="color:#A07828"></i> '+(en()?'Search for':'ابحث عن')+' &quot;'+q+'&quot;</span><i class="ti ti-arrow-left" style="color:#A07828"></i></div>';
     ov.innerHTML=html;

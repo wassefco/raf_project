@@ -657,9 +657,11 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 
 <script src="raf_nav.js"></script>
 <script src="raf_ads.js"></script>
+<script src="raf_source.js"></script>
 <script src="raf_data.js"></script>
 <script src="raf_notify.js"></script>
 <script src="raf_catalog.js"></script>
+<script src="raf_rules.js"></script>
 <script src="raf_card.js"></script>
 <script src="raf_quick.js"></script>
 <script>
@@ -675,37 +677,11 @@ const ADS=[
 /* Categories — full admin model: name/icon/image/cover/sort/active */
 /* Categories map 1:1 onto the category keys the Products page filters by
    (raf_offers.html?cat=<id>), so every category opens a real, populated list. */
-const CATEGORIES=[
-  {id:'electronics',ar:'إلكترونيات',en:'Electronics',icon:'ti-device-mobile',image:'',cover:'',sort:1,active:true},
-  {id:'fashion',ar:'أزياء',en:'Fashion',icon:'ti-hanger',image:'',cover:'',sort:2,active:true},
-  {id:'shoes',ar:'أحذية',en:'Shoes',icon:'ti-shoe',image:'',cover:'',sort:3,active:true},
-  {id:'bags',ar:'حقائب',en:'Bags',icon:'ti-backpack',image:'',cover:'',sort:4,active:true},
-  {id:'watches',ar:'ساعات',en:'Watches',icon:'ti-clock-hour-4',image:'',cover:'',sort:5,active:true},
-  {id:'perfume',ar:'عطور',en:'Perfume',icon:'ti-spray',image:'',cover:'',sort:6,active:true},
-  {id:'jewelry',ar:'مجوهرات',en:'Jewelry',icon:'ti-diamond',image:'',cover:'',sort:7,active:true},
-  {id:'accessories',ar:'إكسسوارات',en:'Accessories',icon:'ti-sunglasses',image:'',cover:'',sort:8,active:true}
-];
-const OFFERS=[
-  {id:'P-EARBUDS',ic:'ti-device-mobile',ar:'سماعات لاسلكية فاخرة',en:'Premium Wireless Earbuds',store:{ar:'تك هاوس',en:'Tech House'},price:'24.500',old:'35.000',disc:30,rate:'4.8',rev:'320'},
-  {id:'P-PERFUME',ic:'ti-spray',ar:'عطر شرقي فاخر',en:'Luxury Oriental Perfume',store:{ar:'دار العود',en:'Dar Aloud'},price:'42.000',old:'60.000',disc:30,rate:'4.9',rev:'215',
-    variants:[{label:{ar:'الحجم',en:'Size'},options:[{v:'50',label:{ar:'50 مل',en:'50 ml'}},{v:'100',label:{ar:'100 مل',en:'100 ml'}},{v:'150',label:{ar:'150 مل',en:'150 ml'}}]}]},
-  {id:'P-WATCH',ic:'ti-clock-hour-4',ar:'ساعة كلاسيكية جلد',en:'Classic Leather Watch',store:{ar:'تايم بوكس',en:'Time Box'},price:'68.000',old:'85.000',disc:20,rate:'4.7',rev:'142',
-    variants:[{label:{ar:'اللون / الخامة',en:'Color / Material'},options:[{v:'brown',label:{ar:'جلد بني',en:'Brown Leather'}},{v:'black',label:{ar:'جلد أسود',en:'Black Leather'}}]}]},
-  {id:'P-JACKET',ic:'ti-hanger',ar:'جاكيت شتوي عصري',en:'Modern Winter Jacket',store:{ar:'كازا مود',en:'Casa Mode'},price:'29.900',old:'45.000',disc:33,rate:'4.6',rev:'98',
-    variants:[{label:{ar:'المقاس',en:'Size'},options:[{v:'s',label:{ar:'S',en:'S'}},{v:'m',label:{ar:'M',en:'M'}},{v:'l',label:{ar:'L',en:'L'}},{v:'xl',label:{ar:'XL',en:'XL'}}]},
-              {label:{ar:'اللون',en:'Color'},options:[{v:'black',label:{ar:'أسود',en:'Black'}},{v:'navy',label:{ar:'كحلي',en:'Navy'}},{v:'olive',label:{ar:'زيتي',en:'Olive'}}]}]},
-  {id:'P-HEADPHONES',ic:'ti-headphones',ar:'سماعة رأس احترافية',en:'Pro Headphones',store:{ar:'تك هاوس',en:'Tech House'},price:'38.000',old:'52.000',disc:27,rate:'4.8',rev:'410',
-    variants:[{label:{ar:'اللون',en:'Color'},options:[{v:'black',label:{ar:'أسود',en:'Black'}},{v:'white',label:{ar:'أبيض',en:'White'}}]},
-              {label:{ar:'السعة',en:'Storage'},options:[{v:'std',label:{ar:'قياسي',en:'Standard'}},{v:'plus',label:{ar:'بلس (ذاكرة)',en:'Plus (memory)'}}]}]}
-];
+const CATEGORIES=RAFCatalog.categories().map(function(c,i){return {id:c.k,ar:c.ar,en:c.en,icon:c.ic,image:"",cover:"",sort:c.sort||i+1,active:true};});
+const OFFERS=RAFCatalog.list({onSale:true}).slice(0,10);
 /* each store carries the slug its Store page is registered under, so the
    carousel opens the right storefront instead of always the default one */
-const STORES=[
-  {slug:'techzone',ic:'ti-device-mobile',ar:'تك هاوس',en:'TechZone',rate:'4.8',prod:'312',cat:{ar:'إلكترونيات',en:'Electronics'}},
-  {slug:'casa-mode',ic:'ti-hanger',ar:'كازا مود',en:'Casa Mode',rate:'4.9',prod:'284',cat:{ar:'أزياء',en:'Fashion'}},
-  {slug:'sole-co',ic:'ti-shoe',ar:'سول آند كو',en:'Sole & Co',rate:'4.7',prod:'156',cat:{ar:'أحذية',en:'Shoes'}},
-  {slug:'glam-store',ic:'ti-diamond',ar:'جلام ستور',en:'Glam Store',rate:'4.9',prod:'167',cat:{ar:'إكسسوارات وساعات',en:'Accessories & Watches'}}
-];
+const STORES=RAFCatalog.stores().slice(0,6).map(function(s){return {slug:s.slug,ic:s.ic,ar:s.name.ar,en:s.name.en,rate:s.rating,prod:String(s.productCount),cat:s.cat,sponsored:!!s.sponsored};});
 const AUCS=[
   {ic:'ti-clock-hour-4',ar:'ساعة فاخرة محدودة',en:'Limited Luxury Watch',bid:'145.000',bidders:23,sec:8130},
   {ic:'ti-diamond',ar:'سوار ذهب عيار 21',en:'21K Gold Bracelet',bid:'320.000',bidders:41,sec:5460},

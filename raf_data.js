@@ -277,31 +277,37 @@
     }
   };
 
-  /* ─────────── SEARCH CATALOG ─────────── */
-  var CATALOG = [
-    { sku: 'P-EARBUDS', ar: 'سماعات لاسلكية فاخرة', en: 'Premium Wireless Earbuds', store: { ar: 'تك هاوس', en: 'Tech House' }, price: '24.500', ic: 'ti-device-mobile' },
-    { sku: 'P-PERFUME', ar: 'عطر شرقي فاخر', en: 'Luxury Oriental Perfume', store: { ar: 'دار العود', en: 'Dar Aloud' }, price: '42.000', ic: 'ti-spray' },
-    { sku: 'P-WATCH', ar: 'ساعة كلاسيكية جلد', en: 'Classic Leather Watch', store: { ar: 'تايم بوكس', en: 'Time Box' }, price: '68.000', ic: 'ti-clock-hour-4' },
-    { sku: 'P-JACKET', ar: 'جاكيت شتوي عصري', en: 'Modern Winter Jacket', store: { ar: 'كازا مود', en: 'Casa Mode' }, price: '29.900', ic: 'ti-hanger' },
-    { sku: 'P-001', ar: 'قميص أوفرسايز كلاسيك', en: 'Classic Oversize Shirt', store: { ar: 'Casa Mode', en: 'Casa Mode' }, price: '12.000', ic: 'ti-shirt' },
-    { sku: 'P-002', ar: 'حذاء رياضي Air Comfort', en: 'Air Comfort Sneakers', store: { ar: 'Sole & Co', en: 'Sole & Co' }, price: '28.500', ic: 'ti-shoe' },
-    { sku: 'P-003', ar: 'iPhone 16 Pro', en: 'iPhone 16 Pro', store: { ar: 'TechZone', en: 'TechZone' }, price: '189.000', ic: 'ti-device-mobile' },
-    { sku: 'P-004', ar: 'نظارة شمسية Ray Luxe', en: 'Ray Luxe Sunglasses', store: { ar: 'Luxe Accessories', en: 'Luxe Accessories' }, price: '35.000', ic: 'ti-sunglasses' },
-    { sku: 'P-006', ar: 'ساعة ذكية Premium', en: 'Premium Smartwatch', store: { ar: 'Glam Store', en: 'Glam Store' }, price: '75.000', ic: 'ti-watch' },
-    { sku: 'P-008', ar: 'سماعة Sony WH-1000XM5', en: 'Sony WH-1000XM5', store: { ar: 'TechZone', en: 'TechZone' }, price: '35.750', ic: 'ti-headphones' }
-  ];
-  var STORES = [
-    { ar: 'تك هاوس', en: 'Tech House', cat: { ar: 'إلكترونيات', en: 'Electronics' }, ic: 'ti-device-mobile' },
-    { ar: 'دار العود', en: 'Dar Aloud', cat: { ar: 'عطور', en: 'Perfume' }, ic: 'ti-spray' },
-    { ar: 'كازا مود', en: 'Casa Mode', cat: { ar: 'أزياء', en: 'Fashion' }, ic: 'ti-hanger' },
-    { ar: 'Sole & Co', en: 'Sole & Co', cat: { ar: 'أحذية', en: 'Shoes' }, ic: 'ti-shoe' },
-    { ar: 'Glam Store', en: 'Glam Store', cat: { ar: 'إكسسوارات', en: 'Accessories' }, ic: 'ti-diamond' }
-  ];
+  /* ─────────── SEARCH CATALOG ───────────
+     Now derived from the central authority instead of a local copy, so search
+     results, prices and store names can never drift from the rest of the site.
+     Shape is unchanged (`sku` + flat fields) for existing callers. */
+  function catalogList() {
+    if (!window.RAFSource) return [];
+    return RAFSource.products({}).map(function (p) {
+      var s = p.storeRef || RAFSource.store(p.store);
+      return {
+        sku: p.id, id: p.id, ar: p.name.ar, en: p.name.en,
+        store: s ? { ar: s.name.ar, en: s.name.en } : null,
+        slug: p.store, price: p.price, old: p.old || '', disc: p.disc || 0,
+        ic: p.ic || 'ti-box', rate: p.rate || '', rev: p.rev || '',
+        stock: p.stock, cat: p.cat, sponsored: !!p.sponsored
+      };
+    });
+  }
+  function storeList() {
+    if (!window.RAFSource) return [];
+    return RAFSource.stores({}).map(function (s) {
+      return { slug: s.slug, ar: s.name.ar, en: s.name.en, cat: s.cat, ic: s.ic,
+               rate: s.rating, prod: s.productCount, sponsored: !!s.sponsored };
+    });
+  }
   function search(q) {
     q = (q || '').trim().toLowerCase();
     if (!q) return { q: q, products: [], stores: [] };
-    var products = CATALOG.filter(function (p) { return (p.ar + ' ' + p.en + ' ' + p.sku + ' ' + p.store.ar + ' ' + p.store.en).toLowerCase().indexOf(q) > -1; });
-    var stores = STORES.filter(function (s) { return (s.ar + ' ' + s.en).toLowerCase().indexOf(q) > -1; });
+    var products = catalogList().filter(function (p) {
+      return (p.ar + ' ' + p.en + ' ' + p.sku + ' ' + (p.store ? p.store.ar + ' ' + p.store.en : '')).toLowerCase().indexOf(q) > -1;
+    });
+    var stores = storeList().filter(function (s) { return (s.ar + ' ' + s.en).toLowerCase().indexOf(q) > -1; });
     return { q: q, products: products, stores: stores };
   }
 
@@ -393,7 +399,11 @@
     });
   }
 
-  window.RAFShop = { Cart: Cart, Wish: Wish, Follow: Follow, Stock: Stock, Orders: Orders, search: search, catalog: CATALOG, stores: STORES, L: L, nowStr: nowStr, toast: toast, isEn: isEn, confirm: confirmDialog };
+  window.RAFShop = { Cart: Cart, Wish: Wish, Follow: Follow, Stock: Stock, Orders: Orders, search: search, L: L, nowStr: nowStr, toast: toast, isEn: isEn, confirm: confirmDialog };
+  /* `catalog` and `stores` stay readable as arrays for existing callers, but are
+     now live views over the central authority rather than stored copies */
+  Object.defineProperty(window.RAFShop, 'catalog', { get: catalogList, enumerable: true });
+  Object.defineProperty(window.RAFShop, 'stores',  { get: storeList,  enumerable: true });
 
   /* keep every tab / page in sync */
   window.addEventListener('storage', function (e) { if (e.key === LS.cart) Cart.badge(); if (e.key === LS.wish) Wish.badge(); if (e.key === LS.follow) Follow.badge(); });

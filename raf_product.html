@@ -492,8 +492,10 @@
 <script src="raf_notify.js"></script>
 <script src="raf_nav.js"></script>
 <script src="raf_search.js"></script>
+<script src="raf_source.js"></script>
 <script src="raf_data.js"></script>
 <script src="raf_catalog.js"></script>
+<script src="raf_rules.js"></script>
 <script src="raf_card.js"></script>
 <script>
 /* ============================================================
@@ -503,14 +505,8 @@
    ============================================================ */
 var PRODUCT_DATA = {
   'P-001': {
-    name:{ar:'قميص أوفرسايز كلاسيك',en:'Classic Oversize Shirt'},
-    store:'Casa Mode', storeSlug:'casa-mode', storeIcon:'ti-hanger',
-    cat:{ar:'ملابس',en:'Fashion'}, icon:'ti-shirt', gallery:['ti-shirt','ti-hanger','ti-shirt-filled'],
-    price:'12.000', oldPrice:'15.000', discount:'-20%',
-    rating:4.8, reviews:128, sales:342, stock:15,
-    sizes:['XS','S','M','L','XL','XXL'], outSizes:['XXL'], defaultSize:'S',
-    colors:[{ar:'أبيض',en:'White',hex:'#F5F5F5',border:'#ccc'},{ar:'أسود',en:'Black',hex:'#1A1A1A'},
-            {ar:'ذهبي',en:'Gold',hex:'#C9A84C'},{ar:'بيج',en:'Beige',hex:'#8B7355'}], defaultColor:0,
+    gallery:['ti-shirt','ti-hanger','ti-shirt-filled'],
+    sales:342,
     desc:{ar:'قميص أوفرسايز كلاسيك من Casa Mode — مصنوع من قطن 100% عالي الجودة بقصّة مريحة وأنيقة تناسب جميع الأوقات. مثالي للإطلالات اليومية والكاجوال مع سهولة التنسيق مع مختلف القطع.',
           en:'A classic oversize shirt from Casa Mode — made of premium 100% cotton with a relaxed, elegant cut for any occasion. Ideal for everyday and casual looks, and easy to pair with anything.'},
     features:[{i:'ti-leaf',ar:'قطن 100% طبيعي',en:'100% natural cotton'},{i:'ti-wash',ar:'قابل للغسل بالغسالة',en:'Machine washable'},
@@ -534,14 +530,8 @@ var PRODUCT_DATA = {
     related:['P-005','P-007','P-JACKET','P-002']
   },
   'P-002': {
-    name:{ar:'حذاء سنيكرز جلد فاخر',en:'Premium Leather Sneakers'},
-    store:'Sole & Co', storeSlug:'sole-co', storeIcon:'ti-shoe',
-    cat:{ar:'أحذية',en:'Footwear'}, icon:'ti-shoe', gallery:['ti-shoe','ti-run','ti-shoe'],
-    price:'35.000', oldPrice:'45.000', discount:'-22%',
-    rating:4.7, reviews:94, sales:210, stock:8,
-    sizes:['39','40','41','42','43','44','45'], outSizes:['45'], defaultSize:'42',
-    colors:[{ar:'أبيض',en:'White',hex:'#F5F5F5',border:'#ccc'},{ar:'أسود',en:'Black',hex:'#1A1A1A'},
-            {ar:'رمادي',en:'Grey',hex:'#888888'}], defaultColor:0,
+    gallery:['ti-shoe','ti-run','ti-shoe'],
+    sales:210,
     desc:{ar:'حذاء سنيكرز جلد فاخر من Sole & Co — مصنوع من جلد أصلي عالي الجودة مع نعل مريح وتصميم عصري أنيق. مثالي للإطلالات الكاجوال والرسمية على حدٍّ سواء.',
           en:'Premium leather sneakers from Sole & Co — crafted from genuine high-grade leather with a cushioned sole and a sharp modern design. Equally at home with casual and smart outfits.'},
     features:[{i:'ti-star',ar:'جلد أصلي 100%',en:'100% genuine leather'},{i:'ti-shoe',ar:'نعل مريح ومتين',en:'Cushioned durable sole'},
@@ -562,14 +552,8 @@ var PRODUCT_DATA = {
     related:['P-001','P-JACKET','P-005','P-004']
   },
   'P-003': {
-    name:{ar:'سماعات لاسلكية بريميوم',en:'Premium Wireless Earbuds'},
-    store:'TechZone', storeSlug:'techzone', storeIcon:'ti-device-laptop',
-    cat:{ar:'إلكترونيات',en:'Electronics'}, icon:'ti-headphones', gallery:['ti-headphones','ti-device-mobile','ti-battery-charging'],
-    price:'28.000', oldPrice:null, discount:null,
-    rating:4.9, reviews:256, sales:520, stock:22,
-    sizes:null, outSizes:[], defaultSize:null,
-    colors:[{ar:'أسود',en:'Black',hex:'#1A1A1A'},{ar:'أبيض',en:'White',hex:'#F5F5F5',border:'#ccc'},
-            {ar:'أزرق',en:'Blue',hex:'#2D5BE3'}], defaultColor:0,
+    gallery:['ti-headphones','ti-device-mobile','ti-battery-charging'],
+    sales:520,
     desc:{ar:'سماعات لاسلكية بريميوم من TechZone — جودة صوت استثنائية مع تقنية إلغاء الضوضاء النشط وبطارية تدوم 40 ساعة. تصميم مريح للاستخدام اليومي الطويل.',
           en:'Premium wireless earbuds from TechZone — exceptional sound with active noise cancelling and a 40-hour battery. Designed for comfort through long days of listening.'},
     features:[{i:'ti-wifi',ar:'بلوتوث 5.3',en:'Bluetooth 5.3'},{i:'ti-battery-charging',ar:'بطارية 40 ساعة',en:'40-hour battery'},
@@ -590,14 +574,8 @@ var PRODUCT_DATA = {
     related:['P-EARBUDS','P-008','P-HEADPHONES','P-006']
   },
   'P-004': {
-    name:{ar:'ساعة يد كلاسيكية فاخرة',en:'Luxury Classic Wristwatch'},
-    store:'Luxe Accessories', storeSlug:'luxe-accessories', storeIcon:'ti-diamond',
-    cat:{ar:'إكسسوارات',en:'Accessories'}, icon:'ti-watch', gallery:['ti-watch','ti-clock-hour-4','ti-diamond'],
-    price:'85.000', oldPrice:'110.000', discount:'-23%',
-    rating:4.9, reviews:47, sales:83, stock:5,
-    sizes:null, outSizes:[], defaultSize:null,
-    colors:[{ar:'ذهبي',en:'Gold',hex:'#C9A84C'},{ar:'فضي',en:'Silver',hex:'#C0C0C0'},
-            {ar:'أسود',en:'Black',hex:'#1A1A1A'}], defaultColor:0,
+    gallery:['ti-watch','ti-clock-hour-4','ti-diamond'],
+    sales:83,
     desc:{ar:'ساعة يد كلاسيكية فاخرة من Luxe Accessories — تصميم أنيق يجمع بين الأصالة والعصرية. هيكل من الستانلس ستيل مع زجاج سفير مقاوم للخدش وآلية دقيقة تضمن الدقة.',
           en:'A luxury classic wristwatch from Luxe Accessories — an elegant design balancing heritage and modernity. Stainless steel case with scratch-resistant sapphire glass and a precise movement.'},
     features:[{i:'ti-diamond',ar:'زجاج سفير',en:'Sapphire glass'},{i:'ti-shield',ar:'مقاومة الماء 50 متراً',en:'50m water resistance'},
@@ -618,14 +596,8 @@ var PRODUCT_DATA = {
     related:['P-006','P-WATCH','P-002','P-001']
   },
   'P-005': {
-    name:{ar:'تراكسوت رياضي فاخر',en:'Premium Sports Tracksuit'},
-    store:'Urban Thread', storeSlug:'urban-thread', storeIcon:'ti-run',
-    cat:{ar:'رياضة',en:'Sportswear'}, icon:'ti-run', gallery:['ti-run','ti-shirt','ti-hanger'],
-    price:'42.000', oldPrice:'52.000', discount:'-19%',
-    rating:4.6, reviews:71, sales:155, stock:12,
-    sizes:['S','M','L','XL','XXL'], outSizes:[], defaultSize:'M',
-    colors:[{ar:'أسود',en:'Black',hex:'#1A1A1A'},{ar:'رمادي',en:'Grey',hex:'#555555'},
-            {ar:'كحلي',en:'Navy',hex:'#1B2A4A'}], defaultColor:0,
+    gallery:['ti-run','ti-shirt','ti-hanger'],
+    sales:155,
     desc:{ar:'تراكسوت رياضي فاخر من Urban Thread — مصنوع من قماش مرن خفيف الوزن يمنحك حرية الحركة الكاملة. مناسب للنادي والجري والأنشطة الرياضية اليومية.',
           en:'A premium tracksuit from Urban Thread — made from lightweight stretch fabric that gives you full freedom of movement. Built for the gym, running and everyday training.'},
     features:[{i:'ti-wind',ar:'قماش خفيف وسريع الجفاف',en:'Lightweight, quick-dry fabric'},{i:'ti-arrows-move',ar:'مرونة عالية',en:'High stretch'},
@@ -646,13 +618,8 @@ var PRODUCT_DATA = {
     related:['P-002','P-001','P-JACKET','P-007']
   },
   'P-006': {
-    name:{ar:'طقم العناية بالبشرة الفاخر',en:'Luxury Skincare Set'},
-    store:'Glam Store', storeSlug:'glam-store', storeIcon:'ti-sparkles',
-    cat:{ar:'الجمال والعناية',en:'Beauty & Care'}, icon:'ti-sparkles', gallery:['ti-sparkles','ti-droplet','ti-gift'],
-    price:'19.500', oldPrice:'26.000', discount:'-25%',
-    rating:4.8, reviews:183, sales:412, stock:30,
-    sizes:null, outSizes:[], defaultSize:null,
-    colors:null, defaultColor:null,
+    gallery:['ti-sparkles','ti-droplet','ti-gift'],
+    sales:412,
     desc:{ar:'طقم العناية بالبشرة الفاخر من Glam Store — مجموعة متكاملة تضم غسولاً ومرطباً وسيروماً بتركيبة مُختبرة طبياً. مناسبة لجميع أنواع البشرة.',
           en:'A luxury skincare set from Glam Store — a complete routine of cleanser, moisturiser and serum in a dermatologically tested formulation. Suitable for all skin types.'},
     features:[{i:'ti-leaf',ar:'مكونات طبيعية 100%',en:'100% natural ingredients'},{i:'ti-shield-check',ar:'خالٍ من البارابين',en:'Paraben-free'},
@@ -698,34 +665,47 @@ var GENERIC_FEATURES = [
   {i:'ti-refresh',ar:'إرجاع خلال 7 أيام',en:'7-day returns'},
   {i:'ti-award',ar:'ضمان الجودة',en:'Quality guaranteed'}
 ];
-function fromCatalog(id){
+/* Commercial + operational fields always come from the central authority.
+   Editorial content (gallery, description, features, specs, reviews, curated
+   related list) stays page-local in PRODUCT_DATA and is layered on top. */
+function compose(id){
   if (!(window.RAFCatalog && RAFCatalog.get)) return null;
   var c = RAFCatalog.get(id);
   if (!c) return null;
-  var disc = c.disc ? '-' + c.disc + '%' : null;
+  var e = PRODUCT_DATA[id] || {};
+  var s = (window.RAFSource && RAFSource.store(c.slug)) || null;
+  var catRec = (window.RAFCatalog.categories ? RAFCatalog.categories({populatedOnly:false}) : [])
+                 .filter(function(x){ return x.k === c.cat; })[0];
   return {
-    name:{ar:c.ar,en:c.en}, store:L(c.store), storeSlug:c.slug || 'casa-mode', storeIcon:'ti-building-store',
-    cat:{ar:'منتجات',en:'Products'}, icon:c.ic || 'ti-box', gallery:[c.ic||'ti-box','ti-box','ti-package'],
-    price:c.price, oldPrice:c.old || null, discount:disc,
-    rating:parseFloat(c.rate) || 4.6, reviews:parseInt(c.rev) || 0, sales:(parseInt(c.rev)||0) * 2, stock:c.stock,
-    variants:c.variants || null,
-    desc:c.desc || {ar:'منتج أصلي من ' + L(c.store) + ' متوفر عبر رف مع ضمان الجودة والتوصيل السريع داخل الكويت.',
-                    en:'An authentic product from ' + L(c.store) + ', available on RAF with a quality guarantee and fast delivery across Kuwait.'},
-    features:GENERIC_FEATURES,
-    specs:[{k:{ar:'المتجر',en:'Store'},v:{ar:L(c.store),en:L(c.store)}},
-           {k:{ar:'رقم المنتج',en:'Product code'},v:{ar:id,en:id}},
-           {k:{ar:'التوصيل',en:'Delivery'},v:{ar:'خلال 24 ساعة',en:'Within 24 hours'}},
-           {k:{ar:'الإرجاع',en:'Returns'},v:{ar:'خلال 7 أيام',en:'Within 7 days'}}],
-    reviewBars:[72,19,6,2,1], revs:[], related:[]
+    id: id,
+    /* ---- central (commercial / operational) ---- */
+    name: { ar:c.ar, en:c.en },
+    storeName: c.store || { ar:"RAF", en:"RAF" },
+    store: L(c.store), storeSlug: c.slug, storeIcon: s ? s.ic : "ti-building-store",
+    cat: catRec ? { ar:catRec.ar, en:catRec.en } : { ar:"منتجات", en:"Products" },
+    icon: c.ic || "ti-box",
+    price: c.price, oldPrice: c.old || null, discount: c.disc ? "-" + c.disc + "%" : null,
+    stock: c.stock, status: c.status, sponsored: !!c.sponsored,
+    variants: c.variants || null,
+    rating: parseFloat(c.rate) || 4.6, reviews: parseInt(c.rev) || 0,
+    /* ---- page-local (editorial) ---- */
+    sales: e.sales || (parseInt(c.rev) || 0) * 2,
+    gallery: e.gallery || [c.ic || "ti-box", "ti-box", "ti-package"],
+    desc: e.desc || { ar:"منتج أصلي من " + L(c.store) + " متوفر عبر رف مع ضمان الجودة والتوصيل السريع داخل الكويت.",
+                      en:"An authentic product from " + L(c.store) + ", available on RAF with a quality guarantee and fast delivery across Kuwait." },
+    features: e.features || GENERIC_FEATURES,
+    specs: e.specs || [{k:{ar:"المتجر",en:"Store"},v:{ar:L(c.store),en:L(c.store)}},
+                       {k:{ar:"رقم المنتج",en:"Product code"},v:{ar:id,en:id}},
+                       {k:{ar:"التوصيل",en:"Delivery"},v:{ar:"خلال 24 ساعة",en:"Within 24 hours"}},
+                       {k:{ar:"الإرجاع",en:"Returns"},v:{ar:"خلال 7 أيام",en:"Within 7 days"}}],
+    reviewBars: e.reviewBars || [72,19,6,2,1],
+    revs: e.revs || [],
+    related: e.related || []
   };
 }
-function resolveId(){
-  var id = new URLSearchParams(location.search).get('id') || 'P-001';
-  return id;
-}
-var PID = resolveId();
-var P = PRODUCT_DATA[PID] || fromCatalog(PID) || PRODUCT_DATA['P-001'];
-if (!PRODUCT_DATA[PID] && !fromCatalog(PID)) PID = 'P-001';
+var PID = new URLSearchParams(location.search).get("id") || "P-001";
+var P = compose(PID);
+if (!P) { PID = "P-001"; P = compose(PID); }
 
 /* ---------- options: one normalised shape for both sources ---------- */
 var OPTS = [], SEL = {};
@@ -1005,9 +985,12 @@ function buildVariant(){
   return variant;
 }
 function cartProduct(){
+  /* the store key must be the canonical bilingual pair, not the localized
+     label — otherwise the one-store-per-order check would treat the same
+     store as two different ones after a language switch */
   return { id:PID, ar:P.name.ar, en:P.name.en, price:P.price, old:P.oldPrice || '',
            ic:P.icon || 'ti-box', rate:String(P.rating), rev:String(P.reviews), stock:P.stock,
-           store:{ ar:P.store, en:P.store } };
+           store:{ ar:P.storeName.ar, en:P.storeName.en } };
 }
 
 /* Add to cart — one store per order enforced centrally by tryAdd */

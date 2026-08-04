@@ -24,30 +24,20 @@
   function getJSON(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
   function setJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 
-  /* ---------- catalog (variants + stock, used for in-cart editing) ---------- */
-  var SIZES = function (arr) { return arr.map(function (v) { return { v: String(v).toLowerCase(), label: { ar: String(v), en: String(v) } }; }); };
-  var COLORS = [{ v: 'white', label: { ar: 'أبيض', en: 'White' } }, { v: 'black', label: { ar: 'أسود', en: 'Black' } }, { v: 'navy', label: { ar: 'كحلي', en: 'Navy' } }];
-  var CATALOG = [
-    { id: 'P-001', ar: 'قميص أوفرسايز كلاسيك', en: 'Classic Oversize Shirt', price: '12.000', old: '17.000', disc: 30, ic: 'ti-shirt', rate: '4.8', rev: '124', stock: 9, store: { ar: 'Casa Mode', en: 'Casa Mode' },
-      variants: [{ label: { ar: 'المقاس', en: 'Size' }, options: SIZES(['S', 'M', 'L', 'XL']) }, { label: { ar: 'اللون', en: 'Color' }, options: COLORS }] },
-    { id: 'P-007', ar: 'فستان سهرة بولدر', en: 'Boulder Evening Dress', price: '30.000', old: '60.000', disc: 50, ic: 'ti-hanger', rate: '4.7', rev: '44', stock: 6, store: { ar: 'Casa Mode', en: 'Casa Mode' },
-      variants: [{ label: { ar: 'المقاس', en: 'Size' }, options: SIZES(['S', 'M', 'L']) }] },
-    { id: 'P-005', ar: 'حقيبة يد جلد طبيعي', en: 'Genuine Leather Handbag', price: '35.700', old: '42.000', disc: 15, ic: 'ti-backpack', rate: '4.9', rev: '152', stock: 4, store: { ar: 'Casa Mode', en: 'Casa Mode' } },
-    { id: 'P-EARBUDS', ar: 'سماعات لاسلكية فاخرة', en: 'Premium Wireless Earbuds', price: '24.500', old: '35.000', disc: 30, ic: 'ti-device-mobile', rate: '4.8', rev: '320', stock: 12, store: { ar: 'تك هاوس', en: 'Tech House' } },
-    { id: 'P-HEADPHONES', ar: 'سماعة رأس احترافية', en: 'Pro Headphones', price: '38.000', old: '52.000', disc: 27, ic: 'ti-headphones', rate: '4.8', rev: '410', stock: 7, store: { ar: 'تك هاوس', en: 'Tech House' },
-      variants: [{ label: { ar: 'اللون', en: 'Color' }, options: [{ v: 'black', label: { ar: 'أسود', en: 'Black' } }, { v: 'white', label: { ar: 'أبيض', en: 'White' } }] }] },
-    { id: 'P-PERFUME', ar: 'عطر شرقي فاخر', en: 'Luxury Oriental Perfume', price: '42.000', old: '60.000', disc: 30, ic: 'ti-spray', rate: '4.9', rev: '215', stock: 15, store: { ar: 'دار العود', en: 'Dar Aloud' },
-      variants: [{ label: { ar: 'الحجم', en: 'Size' }, options: [{ v: '50', label: { ar: '50 مل', en: '50 ml' } }, { v: '100', label: { ar: '100 مل', en: '100 ml' } }] }] },
-    { id: 'P-WATCH', ar: 'ساعة كلاسيكية جلد', en: 'Classic Leather Watch', price: '68.000', old: '85.000', disc: 20, ic: 'ti-clock-hour-4', rate: '4.7', rev: '142', stock: 3, store: { ar: 'تايم بوكس', en: 'Time Box' },
-      variants: [{ label: { ar: 'اللون / الخامة', en: 'Color / Material' }, options: [{ v: 'brown', label: { ar: 'جلد بني', en: 'Brown Leather' } }, { v: 'black', label: { ar: 'جلد أسود', en: 'Black Leather' } }] }] }
-  ];
-  function catalogFor(id) { return CATALOG.find(function (p) { return p.id === id; }) || null; }
+  /* ---------- catalog (variants + stock, used for in-cart editing) ----------
+     Reads the central authority. The local copy this replaced had drifted out
+     of sync — it still listed stock for products the marketplace had marked
+     sold out, which let checkout accept an unavailable item. */
+  function catalogFor(id) { return (window.RAFCatalog && RAFCatalog.get) ? RAFCatalog.get(id) : null; }
+  function catalogAll() { return (window.RAFCatalog && RAFCatalog.list) ? RAFCatalog.list({ visibleOnly:false }) : []; }
 
-  /* a cart line is unavailable when its catalog entry is out of stock */
+  /* a cart line is unavailable when the central record says so */
   function isOOS(l) {
+    if (!l) return false;
+    if (window.RAFShop && RAFShop.Stock) return RAFShop.Stock.isOOS({ id: l.id, stock: l.stock, available: l.available });
     if (l.available === false || l.stock === 0) return true;
     var p = catalogFor(l.id);
-    return !!(p && (p.stock === 0 || p.available === false));
+    return !!(p && p.stock === 0);
   }
 
   /* ---------- grouping ---------- */
@@ -110,8 +100,10 @@
 
   window.RAFCO = {
     en: en, T: T, L: L, money: money, price: price,
+    /* live view — kept readable as an array for existing callers */
+    get CATALOG() { return catalogAll(); },
     get: get, set: set, getJSON: getJSON, setJSON: setJSON,
-    CATALOG: CATALOG, catalogFor: catalogFor, isOOS: isOOS,
+    catalogFor: catalogFor, isOOS: isOOS,
     groupByStore: groupByStore, totals: totals,
     SHIP: SHIP, FREE_OVER: FREE_OVER, shipFor: shipFor,
     COUPONS: COUPONS, getCoupon: getCoupon, setCoupon: setCoupon,

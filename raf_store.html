@@ -614,8 +614,10 @@
 <script src="raf_notify.js"></script>
 <script src="raf_nav.js"></script>
 <script src="raf_search.js"></script>
+<script src="raf_source.js"></script>
 <script src="raf_data.js"></script>
 <script src="raf_catalog.js"></script>
+<script src="raf_rules.js"></script>
 <script src="raf_card.js"></script>
 <!-- Quick Order sheet opens on top of this page when arriving with ?quick=<id> -->
 <script src="raf_quick.js"></script>
@@ -662,144 +664,67 @@ window.toggleLang = function(){
 /* -----------------------------------------------
    STORE DATA MAP — slug matches RAFCatalog.slugFor
 ----------------------------------------------- */
-var STORE_DATA = {
-  'casa-mode': {
-    name: 'Casa Mode', icon: 'ti-hanger', num: '#001',
-    cat: { ar: 'ملابس وأزياء', en: 'Fashion & Apparel' },
-    rating: '4.9', orders: '1,284', followers: '3.2K',
-    desc: { ar: 'متجر Casa Mode للملابس والأزياء العصرية — نقدم أحدث صيحات الموضة بجودة عالية وأسعار منافسة. نخدم الكويت منذ 2019.',
-            en: 'Casa Mode brings contemporary fashion to Kuwait — the latest trends in premium quality at competitive prices. Serving since 2019.' },
-    status: 'open', products: 284, satisfaction: '98%',
-    reviewCount: 128, reviewScore: '4.9',
-    cats: [ { k:'shirts', ar:'قمصان', en:'Shirts' }, { k:'trousers', ar:'بناطيل', en:'Trousers' },
-            { k:'dresses', ar:'فساتين', en:'Dresses' }, { k:'hoodies', ar:'هودي', en:'Hoodies' } ],
-    items: [
-      { id:'P-001', ar:'قميص أوفرسايز كلاسيك', en:'Classic Oversize Shirt', price:'12.000', old:'17.000', disc:30, rate:'4.8', rev:'124', ic:'ti-shirt', cat:'shirts', stock:15 },
-      { id:'P-007', ar:'فستان سهرة بولدر', en:'Boulder Evening Dress', price:'30.000', old:'60.000', disc:50, rate:'4.7', rev:'44', ic:'ti-hanger', cat:'dresses', stock:4 },
-      { id:'P-005', ar:'حقيبة يد جلد طبيعي', en:'Genuine Leather Handbag', price:'35.700', old:'42.000', disc:15, rate:'4.9', rev:'152', ic:'ti-backpack', cat:'dresses', stock:7 },
-      { id:'P-JACKET', ar:'جاكيت شتوي عصري', en:'Modern Winter Jacket', price:'29.900', old:'45.000', disc:33, rate:'4.6', rev:'98', ic:'ti-hanger', cat:'hoodies', stock:11 },
-      { id:'CM-11', ar:'قميص لينن بريميوم', en:'Premium Linen Shirt', price:'18.000', old:'', disc:0, rate:'4.7', rev:'86', ic:'ti-shirt', cat:'shirts', stock:12 },
-      { id:'CM-12', ar:'بنطلون كاجوال واسع', en:'Wide-Leg Casual Trousers', price:'18.700', old:'22.000', disc:15, rate:'4.9', rev:'73', ic:'ti-hanger', cat:'trousers', stock:9 },
-      { id:'CM-13', ar:'هودي أوفرسايز فاخر', en:'Luxe Oversize Hoodie', price:'25.000', old:'', disc:0, rate:'4.6', rev:'58', ic:'ti-shirt', cat:'hoodies', stock:6 },
-      { id:'CM-14', ar:'تيشيرت بيسك كلاسيك', en:'Classic Basic Tee', price:'8.500', old:'', disc:0, rate:'4.8', rev:'201', ic:'ti-shirt', cat:'shirts', stock:22 },
-      { id:'CM-15', ar:'قميص بولو فاخر', en:'Premium Polo Shirt', price:'21.600', old:'24.000', disc:10, rate:'4.7', rev:'64', ic:'ti-shirt', cat:'shirts', stock:0 },
-      { id:'CM-16', ar:'بنطلون جينز سليم', en:'Slim Fit Jeans', price:'23.000', old:'', disc:0, rate:'4.5', rev:'41', ic:'ti-hanger', cat:'trousers', stock:14 },
-      { id:'CM-17', ar:'فستان صيفي مطبوع', en:'Printed Summer Dress', price:'26.500', old:'34.000', disc:22, rate:'4.8', rev:'92', ic:'ti-hanger', cat:'dresses', stock:8 },
-      { id:'CM-18', ar:'سويتشيرت قطن عضوي', en:'Organic Cotton Sweatshirt', price:'19.900', old:'', disc:0, rate:'4.4', rev:'37', ic:'ti-shirt', cat:'hoodies', stock:10 }
-    ]
-  },
-  'sole-co': {
-    name: 'Sole & Co', icon: 'ti-shoe', num: '#002',
-    cat: { ar: 'أحذية ورياضة', en: 'Footwear & Sport' },
-    rating: '4.7', orders: '892', followers: '2.1K',
-    desc: { ar: 'متجر Sole & Co للأحذية الرياضية والكاجوال — أفضل ماركات الأحذية العالمية والمحلية في الكويت بأسعار تنافسية.',
-            en: 'Sole & Co for sport and casual footwear — the best global and local shoe brands in Kuwait at competitive prices.' },
-    status: 'open', products: 156, satisfaction: '95%',
-    reviewCount: 94, reviewScore: '4.7',
-    cats: [ { k:'sport', ar:'رياضي', en:'Sport' }, { k:'casual', ar:'كاجوال', en:'Casual' }, { k:'formal', ar:'رسمي', en:'Formal' } ],
-    items: [
-      { id:'P-002', ar:'حذاء رياضي Air Comfort', en:'Air Comfort Sneakers', price:'28.500', old:'38.000', disc:25, rate:'4.7', rev:'89', ic:'ti-shoe', cat:'sport', stock:9 },
-      { id:'SC-11', ar:'حذاء جري خفيف', en:'Lightweight Running Shoes', price:'32.000', old:'', disc:0, rate:'4.6', rev:'54', ic:'ti-shoe', cat:'sport', stock:11 },
-      { id:'SC-12', ar:'حذاء كاجوال جلد', en:'Leather Casual Shoes', price:'26.000', old:'34.000', disc:23, rate:'4.8', rev:'77', ic:'ti-shoe', cat:'casual', stock:7 },
-      { id:'SC-13', ar:'حذاء رسمي أوكسفورد', en:'Oxford Formal Shoes', price:'45.000', old:'', disc:0, rate:'4.9', rev:'38', ic:'ti-shoe', cat:'formal', stock:5 },
-      { id:'SC-14', ar:'حذاء تدريب متعدد', en:'Cross Training Shoes', price:'35.500', old:'42.000', disc:15, rate:'4.5', rev:'62', ic:'ti-shoe', cat:'sport', stock:0 },
-      { id:'SC-15', ar:'سنيكرز كلاسيك أبيض', en:'Classic White Sneakers', price:'22.900', old:'', disc:0, rate:'4.7', rev:'145', ic:'ti-shoe', cat:'casual', stock:18 },
-      { id:'SC-16', ar:'حذاء لوفر جلد سويدي', en:'Suede Leather Loafers', price:'38.000', old:'48.000', disc:21, rate:'4.6', rev:'29', ic:'ti-shoe', cat:'formal', stock:6 },
-      { id:'SC-17', ar:'شبشب رياضي مريح', en:'Comfort Sport Slides', price:'9.500', old:'', disc:0, rate:'4.4', rev:'96', ic:'ti-shoe', cat:'casual', stock:25 }
-    ]
-  },
-  'techzone': {
-    name: 'TechZone', icon: 'ti-device-mobile', num: '#003',
-    cat: { ar: 'هواتف وإلكترونيات', en: 'Phones & Electronics' },
-    rating: '4.8', orders: '2,140', followers: '5.8K',
-    desc: { ar: 'TechZone — وجهتك الأولى للهواتف والأجهزة الإلكترونية في الكويت. أجهزة أصلية بضمان رسمي وأفضل الأسعار.',
-            en: 'TechZone — your first destination for phones and electronics in Kuwait. Genuine devices with official warranty at the best prices.' },
-    status: 'open', products: 312, satisfaction: '97%',
-    reviewCount: 317, reviewScore: '4.8',
-    cats: [ { k:'phones', ar:'هواتف', en:'Phones' }, { k:'audio', ar:'صوتيات', en:'Audio' },
-            { k:'tablets', ar:'أجهزة لوحية', en:'Tablets' }, { k:'accessories', ar:'اكسسوارات', en:'Accessories' } ],
-    items: [
-      { id:'P-003', ar:'iPhone 16 Pro', en:'iPhone 16 Pro', price:'189.000', old:'220.000', disc:15, rate:'5.0', rev:'210', ic:'ti-device-mobile', cat:'phones', stock:6 },
-      { id:'P-EARBUDS', ar:'سماعات لاسلكية فاخرة', en:'Premium Wireless Earbuds', price:'24.500', old:'35.000', disc:30, rate:'4.8', rev:'320', ic:'ti-device-mobile', cat:'audio', stock:14 },
-      { id:'P-HEADPHONES', ar:'سماعة رأس احترافية', en:'Pro Headphones', price:'38.000', old:'52.000', disc:27, rate:'4.8', rev:'410', ic:'ti-headphones', cat:'audio', stock:0 },
-      { id:'P-008', ar:'سماعة Sony WH-1000XM5', en:'Sony WH-1000XM5', price:'35.750', old:'55.000', disc:35, rate:'4.9', rev:'201', ic:'ti-headphones', cat:'audio', stock:5 },
-      { id:'TZ-11', ar:'تابلت 11 بوصة', en:'11-inch Tablet', price:'135.000', old:'', disc:0, rate:'4.6', rev:'88', ic:'ti-device-tablet', cat:'tablets', stock:9 },
-      { id:'TZ-12', ar:'شاحن سريع 65 واط', en:'65W Fast Charger', price:'12.500', old:'18.000', disc:30, rate:'4.7', rev:'156', ic:'ti-plug', cat:'accessories', stock:32 },
-      { id:'TZ-13', ar:'باور بانك 20000 مللي', en:'20,000mAh Power Bank', price:'16.900', old:'', disc:0, rate:'4.5', rev:'104', ic:'ti-battery-3', cat:'accessories', stock:21 },
-      { id:'TZ-14', ar:'هاتف ذكي متوسط الفئة', en:'Mid-Range Smartphone', price:'78.000', old:'95.000', disc:18, rate:'4.4', rev:'67', ic:'ti-device-mobile', cat:'phones', stock:12 },
-      { id:'TZ-15', ar:'ساعة ذكية رياضية', en:'Sport Smartwatch', price:'42.000', old:'', disc:0, rate:'4.6', rev:'93', ic:'ti-watch', cat:'accessories', stock:8 },
-      { id:'TZ-16', ar:'مكبر صوت بلوتوث', en:'Bluetooth Speaker', price:'19.500', old:'26.000', disc:25, rate:'4.7', rev:'128', ic:'ti-device-speaker', cat:'audio', stock:0 },
-      { id:'TZ-17', ar:'تابلت للأطفال 8 بوصة', en:"8-inch Kids' Tablet", price:'52.000', old:'', disc:0, rate:'4.3', rev:'45', ic:'ti-device-tablet', cat:'tablets', stock:15 },
-      { id:'TZ-18', ar:'حافظة هاتف مضادة للصدمات', en:'Rugged Phone Case', price:'5.900', old:'8.500', disc:31, rate:'4.5', rev:'187', ic:'ti-device-mobile', cat:'accessories', stock:44 }
-    ]
-  },
-  'luxe-accessories': {
-    name: 'Luxe Accessories', icon: 'ti-sunglasses', num: '#004',
-    cat: { ar: 'اكسسوارات فاخرة', en: 'Luxury Accessories' },
-    rating: '4.6', orders: '648', followers: '1.4K',
-    desc: { ar: 'Luxe Accessories — اكسسوارات فاخرة من أفضل الماركات العالمية. نظارات، حقائب، وساعات بتصاميم راقية.',
-            en: 'Luxe Accessories — refined pieces from the finest global brands. Eyewear, bags and watches with elegant design.' },
-    status: 'open', products: 98, satisfaction: '93%',
-    reviewCount: 62, reviewScore: '4.6',
-    cats: [ { k:'eyewear', ar:'نظارات', en:'Eyewear' }, { k:'bags', ar:'حقائب', en:'Bags' }, { k:'watches', ar:'ساعات', en:'Watches' } ],
-    items: [
-      { id:'P-004', ar:'نظارة شمسية Ray Luxe', en:'Ray Luxe Sunglasses', price:'35.000', old:'58.000', disc:40, rate:'4.6', rev:'67', ic:'ti-sunglasses', cat:'eyewear', stock:12 },
-      { id:'LX-11', ar:'نظارة طبية إطار معدني', en:'Metal Frame Eyeglasses', price:'28.000', old:'', disc:0, rate:'4.4', rev:'31', ic:'ti-sunglasses', cat:'eyewear', stock:9 },
-      { id:'LX-12', ar:'حقيبة كتف جلد فاخر', en:'Luxury Leather Shoulder Bag', price:'62.000', old:'78.000', disc:20, rate:'4.8', rev:'54', ic:'ti-backpack', cat:'bags', stock:5 },
-      { id:'LX-13', ar:'محفظة جلد كلاسيكية', en:'Classic Leather Wallet', price:'18.500', old:'', disc:0, rate:'4.7', rev:'88', ic:'ti-wallet', cat:'bags', stock:17 },
-      { id:'LX-14', ar:'ساعة يد بتصميم مينيمال', en:'Minimalist Wristwatch', price:'54.000', old:'70.000', disc:23, rate:'4.5', rev:'42', ic:'ti-clock-hour-4', cat:'watches', stock:0 },
-      { id:'LX-15', ar:'حزام جلد طبيعي', en:'Genuine Leather Belt', price:'14.900', old:'', disc:0, rate:'4.6', rev:'73', ic:'ti-hanger', cat:'bags', stock:20 },
-      { id:'LX-16', ar:'نظارة شمسية بولارايزد', en:'Polarised Sunglasses', price:'41.000', old:'52.000', disc:21, rate:'4.7', rev:'59', ic:'ti-sunglasses', cat:'eyewear', stock:7 },
-      { id:'LX-17', ar:'ساعة جلد كلاسيكية', en:'Classic Leather Watch', price:'68.000', old:'85.000', disc:20, rate:'4.9', rev:'96', ic:'ti-clock-hour-4', cat:'watches', stock:4 }
-    ]
-  },
-  'urban-thread': {
-    name: 'Urban Thread', icon: 'ti-shirt', num: '#005',
-    cat: { ar: 'ملابس كاجوال', en: 'Casual Wear' },
-    rating: '4.5', orders: '420', followers: '980',
-    desc: { ar: 'Urban Thread — ملابس كاجوال عصرية للشباب. أسلوب حياة مريح ومعاصر بأسعار في متناول الجميع.',
-            en: 'Urban Thread — modern casual wear for a younger crowd. Comfortable, contemporary style at accessible prices.' },
-    status: 'closed', products: 74, satisfaction: '90%',
-    reviewCount: 48, reviewScore: '4.5',
-    cats: [ { k:'tees', ar:'تيشيرتات', en:'T-shirts' }, { k:'sweats', ar:'سويتشيرتات', en:'Sweatshirts' }, { k:'shorts', ar:'شورتات', en:'Shorts' } ],
-    items: [
-      { id:'UT-11', ar:'تيشيرت جرافيك مطبوع', en:'Graphic Print Tee', price:'9.900', old:'14.000', disc:29, rate:'4.5', rev:'112', ic:'ti-shirt', cat:'tees', stock:26 },
-      { id:'UT-12', ar:'تيشيرت قطن أساسي', en:'Essential Cotton Tee', price:'7.500', old:'', disc:0, rate:'4.6', rev:'204', ic:'ti-shirt', cat:'tees', stock:38 },
-      { id:'UT-13', ar:'سويتشيرت بغطاء رأس', en:'Hooded Sweatshirt', price:'21.000', old:'28.000', disc:25, rate:'4.4', rev:'67', ic:'ti-shirt', cat:'sweats', stock:14 },
-      { id:'UT-14', ar:'شورت رياضي كوول', en:'Cool Sport Shorts', price:'14.000', old:'', disc:0, rate:'4.5', rev:'58', ic:'ti-hanger', cat:'shorts', stock:19 },
-      { id:'UT-15', ar:'سويتشيرت كروبد', en:'Cropped Sweatshirt', price:'18.500', old:'24.000', disc:23, rate:'4.3', rev:'34', ic:'ti-shirt', cat:'sweats', stock:0 },
-      { id:'UT-16', ar:'شورت جينز كاجوال', en:'Casual Denim Shorts', price:'16.900', old:'', disc:0, rate:'4.2', rev:'41', ic:'ti-hanger', cat:'shorts', stock:11 },
-      { id:'UT-17', ar:'تيشيرت أوفرسايز', en:'Oversized Tee', price:'11.500', old:'15.000', disc:23, rate:'4.7', rev:'89', ic:'ti-shirt', cat:'tees', stock:23 },
-      { id:'UT-18', ar:'جاكيت جينز خفيف', en:'Light Denim Jacket', price:'32.000', old:'', disc:0, rate:'4.6', rev:'52', ic:'ti-hanger', cat:'sweats', stock:8 }
-    ]
-  },
-  'glam-store': {
-    name: 'Glam Store', icon: 'ti-diamond', num: '#006',
-    cat: { ar: 'اكسسوارات وساعات', en: 'Accessories & Watches' },
-    rating: '4.9', orders: '1,052', followers: '2.9K',
-    desc: { ar: 'Glam Store — اكسسوارات فاخرة وساعات ذكية بريميوم. لأن التفاصيل هي ما يصنع الفارق في إطلالتك.',
-            en: 'Glam Store — luxury accessories and premium smartwatches. Because the details are what set your look apart.' },
-    status: 'open', products: 167, satisfaction: '99%',
-    reviewCount: 204, reviewScore: '4.9',
-    cats: [ { k:'smart', ar:'ساعات ذكية', en:'Smartwatches' }, { k:'jewel', ar:'مجوهرات', en:'Jewellery' }, { k:'acc', ar:'اكسسوارات', en:'Accessories' } ],
-    items: [
-      { id:'P-006', ar:'ساعة ذكية Premium', en:'Premium Smartwatch', price:'75.000', old:'94.000', disc:20, rate:'4.8', rev:'98', ic:'ti-watch', cat:'smart', stock:10 },
-      { id:'GS-11', ar:'خاتم فضة مرصّع', en:'Studded Silver Ring', price:'33.000', old:'', disc:0, rate:'4.9', rev:'76', ic:'ti-diamond', cat:'jewel', stock:12 },
-      { id:'GS-12', ar:'سوار ذهبي رفيع', en:'Fine Gold Bracelet', price:'58.000', old:'72.000', disc:19, rate:'4.9', rev:'54', ic:'ti-diamond', cat:'jewel', stock:6 },
-      { id:'GS-13', ar:'ساعة ذكية نسائية', en:"Women's Smartwatch", price:'62.000', old:'', disc:0, rate:'4.7', rev:'83', ic:'ti-watch', cat:'smart', stock:9 },
-      { id:'GS-14', ar:'قلادة لؤلؤ كلاسيكية', en:'Classic Pearl Necklace', price:'44.500', old:'56.000', disc:21, rate:'4.8', rev:'47', ic:'ti-diamond', cat:'jewel', stock:0 },
-      { id:'GS-15', ar:'حزام ساعة جلد بديل', en:'Spare Leather Watch Strap', price:'11.000', old:'', disc:0, rate:'4.5', rev:'121', ic:'ti-clock-hour-4', cat:'acc', stock:34 },
-      { id:'GS-16', ar:'أقراط ذهبية صغيرة', en:'Petite Gold Earrings', price:'27.500', old:'35.000', disc:21, rate:'4.8', rev:'92', ic:'ti-diamond', cat:'jewel', stock:15 },
-      { id:'GS-17', ar:'علبة مجوهرات فاخرة', en:'Luxury Jewellery Box', price:'19.900', old:'', disc:0, rate:'4.6', rev:'38', ic:'ti-box', cat:'acc', stock:13 }
-    ]
-  }
-};
+/* Store data now comes from the central authority — this page no longer keeps
+   its own copy of stores or their products. Shape is unchanged for the
+   renderers below. */
+var STORE_DATA = (function(){
+  var map = {};
+  RAFCatalog.stores({ visibleOnly:false }).forEach(function(s){
+    map[s.slug] = {
+      name: RAFCatalog.lang()==="en" ? s.name.en : s.name.ar,
+      slug: s.slug, icon: s.ic, num: s.num, cat: s.cat,
+      rating: s.rating, orders: s.orders, followers: s.followers,
+      desc: s.desc, status: s.status === "open" ? "open" : "closed",
+      products: s.productCount, satisfaction: s.satisfaction,
+      reviewCount: s.reviewCount, reviewScore: s.reviewScore,
+      cats: RAFCatalog.categories().filter(function(c){ return (s.cats||[]).indexOf(c.k) > -1; })
+                     .map(function(c){ return { k:c.k, ar:c.ar, en:c.en }; }),
+      items: RAFCatalog.list({ store:s.slug, visibleOnly:false }).map(function(p){
+        return { id:p.id, ar:p.ar, en:p.en, price:p.price, old:p.old, disc:p.disc,
+                 rate:p.rate, rev:p.rev, ic:p.ic, cat:p.cat, stock:p.stock, variants:p.variants };
+      })
+    };
+  });
+  return map;
+})();
 
 /* -----------------------------------------------
    STATE
 ----------------------------------------------- */
 var SLUG  = new URLSearchParams(location.search).get('store') || 'casa-mode';
 var STORE = STORE_DATA[SLUG] || STORE_DATA['casa-mode'];
+
+/* ---------- Store Status Policy ----------
+   A suspended or deleted store is not browsable at all: the page shows the
+   reason instead of the storefront. A temporarily closed store stays
+   viewable (with its banner) but cannot be ordered from. */
+function applyStorePolicy(){
+  if (!window.RAFRules) return true;
+  var notice = RAFRules.StorePolicy.guard(SLUG);
+  if (!notice) return true;
+  document.title = T('رف — ', 'RAF — ') + notice.title;
+  document.body.innerHTML =
+    '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px;'
+    + 'font-family:var(--font,\'Tajawal\',sans-serif);background:var(--bg,#F5F2EC);">'
+    + '<div style="max-width:460px;text-align:center;background:#fff;border:1px solid #E2DBCC;'
+    + 'border-radius:22px;padding:38px 30px;box-shadow:0 18px 44px -22px rgba(20,16,8,.32);">'
+      + '<div style="width:70px;height:70px;margin:0 auto 18px;border-radius:22px;display:flex;'
+      + 'align-items:center;justify-content:center;font-size:33px;background:rgba(217,83,79,.12);color:#D9534F;">'
+      + '<i class="ti ti-building-store-off"></i></div>'
+      + '<h1 style="font-family:var(--fdisplay,serif);font-size:23px;font-weight:800;color:#15130F;margin-bottom:10px;">'
+      + notice.title + '</h1>'
+      + '<p style="font-size:14px;line-height:1.8;color:#5A5650;margin-bottom:24px;">' + notice.msg + '</p>'
+      + '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">'
+        + '<a href="raf_storespage.html" style="height:46px;padding:0 22px;border-radius:30px;background:#15130F;'
+        + 'color:#F5F0E4;font-size:14px;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:7px;">'
+        + '<i class="ti ti-compass"></i> ' + T('تصفّح المتاجر','Browse stores') + '</a>'
+        + '<a href="raf_homepage.html" style="height:46px;padding:0 22px;border-radius:30px;background:#fff;'
+        + 'border:1px solid #D8D0BE;color:#5A5650;font-size:14px;font-weight:700;text-decoration:none;'
+        + 'display:inline-flex;align-items:center;gap:7px;"><i class="ti ti-home"></i> '
+        + T('الرئيسية','Home') + '</a>'
+      + '</div></div></div>';
+  return false;
+}
 var PAGE_SIZE = 8;
 var shown = PAGE_SIZE;
 
@@ -1128,6 +1053,7 @@ function shareStore(){
   var l = localStorage.getItem('raf_lang');
   if (l === 'en'){ var r = root(); r.lang = 'en'; r.dir = 'ltr'; }
   function boot(){
+    if (!applyStorePolicy()) return;   /* suspended/deleted stores never render */
     applyLang();                       /* renders store, chips, sheet and grid */
     if (window.RAFShop) RAFShop.Cart.badge();
   }

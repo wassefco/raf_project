@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="htmlRoot">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — بانتظار قبول المتجر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="stylesheet" href="raf_checkout.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<style>
+  .pend{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg,#F5F2EC);}
+  .pend-card{width:100%;max-width:520px;background:var(--card,#fff);border:1px solid var(--border,#E2DBCC);
+    border-radius:26px;padding:34px 30px;text-align:center;box-shadow:0 26px 60px -30px rgba(20,16,8,.5);}
+  .pend-ring{position:relative;width:118px;height:118px;margin:0 auto 22px;}
+  .pend-ring svg{transform:rotate(-90deg);}
+  .pend-ring .trk{stroke:var(--bg2,#EDE8DC);}
+  .pend-ring .bar{stroke:var(--gold,#C9A84C);stroke-linecap:round;transition:stroke-dashoffset 1s linear;}
+  .pend-ring .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .pend-ring .mid b{font-family:var(--fen,'DM Sans',sans-serif);font-size:25px;font-weight:800;color:var(--ink,#15130F);line-height:1;}
+  .pend-ring .mid span{font-size:10.5px;color:var(--text3,#8A857C);margin-top:3px;}
+  .pend h1{font-family:var(--fdisplay,'Playfair Display',serif);font-size:24px;font-weight:800;color:var(--ink,#15130F);margin-bottom:9px;}
+  .pend p{font-size:14px;line-height:1.85;color:var(--text2,#5A5650);margin-bottom:20px;}
+  .pend-order{display:inline-flex;align-items:center;gap:7px;background:var(--gold-soft,rgba(201,168,76,.12));
+    border:1px solid rgba(201,168,76,.3);border-radius:30px;padding:7px 15px;font-family:var(--fen,'DM Sans',sans-serif);
+    font-size:13px;font-weight:800;color:var(--gold2,#A07828);margin-bottom:20px;}
+  .pend-steps{display:flex;flex-direction:column;gap:11px;text-align:start;margin-bottom:22px;}
+  .pend-step{display:flex;align-items:center;gap:11px;padding:12px 14px;border:1px solid var(--border,#E2DBCC);
+    border-radius:14px;background:#FCFAF6;font-size:13px;color:var(--text2,#5A5650);}
+  .pend-step i{font-size:19px;flex-shrink:0;color:var(--text3,#8A857C);}
+  .pend-step.on{border-color:var(--gold,#C9A84C);background:var(--gold-soft,rgba(201,168,76,.12));color:var(--ink,#15130F);font-weight:700;}
+  .pend-step.on i{color:var(--gold2,#A07828);}
+  .pend-step.done i{color:var(--green,#2E9E5B);}
+  .pend-acts{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .pend-acts a,.pend-acts button{height:48px;padding:0 22px;border-radius:30px;font-family:var(--font,'Tajawal',sans-serif);
+    font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:7px;transition:all .2s;}
+  .pend-primary{background:var(--ink,#15130F);color:#F5F0E4;border:1px solid var(--ink,#15130F);}
+  .pend-primary:hover{background:#241F17;}
+  .pend-ghost{background:var(--card,#fff);color:var(--text2,#5A5650);border:1px solid var(--border2,#D8D0BE);}
+  .pend-ghost:hover{border-color:var(--red,#D9534F);color:var(--red,#D9534F);}
+  .pend-note{font-size:12px;color:var(--text3,#8A857C);margin-top:16px;line-height:1.7;}
+  .pend-state{display:none;}
+  .pend-state.show{display:block;}
+  .st-ic{width:76px;height:76px;margin:0 auto 18px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:36px;}
+  .st-ic.ok{background:rgba(46,158,91,.12);color:var(--green,#2E9E5B);}
+  .st-ic.bad{background:rgba(217,83,79,.12);color:var(--red,#D9534F);}
+  .refund{display:flex;align-items:flex-start;gap:10px;text-align:start;background:rgba(46,158,91,.08);
+    border:1px solid rgba(46,158,91,.28);border-radius:14px;padding:13px 15px;font-size:13px;color:#2E7D32;
+    line-height:1.7;margin-bottom:20px;}
+  .refund i{font-size:19px;flex-shrink:0;}
+  @media(max-width:480px){.pend-card{padding:26px 20px;}.pend-acts a,.pend-acts button{width:100%;justify-content:center;}}
+  @media(prefers-reduced-motion:reduce){.pend-ring .bar{transition:none;}}
+</style>
+</head>
+<body>
+
+<div class="pend">
+  <div class="pend-card">
+
+    <!-- WAITING -->
+    <div class="pend-state show" id="stWait">
+      <div class="pend-ring">
+        <svg width="118" height="118" viewBox="0 0 118 118">
+          <circle class="trk" cx="59" cy="59" r="52" fill="none" stroke-width="8"></circle>
+          <circle class="bar" id="ring" cx="59" cy="59" r="52" fill="none" stroke-width="8"
+                  stroke-dasharray="326.7" stroke-dashoffset="0"></circle>
+        </svg>
+        <div class="mid"><b id="clock">5:00</b><span data-ar="متبقية" data-en="remaining">متبقية</span></div>
+      </div>
+      <h1 data-ar="بانتظار قبول المتجر" data-en="Waiting for the store">بانتظار قبول المتجر</h1>
+      <p data-ar="تم استلام دفعتك بنجاح. ننتظر الآن تأكيد المتجر لطلبك."
+         data-en="Your payment went through. We are waiting for the store to accept your order.">تم استلام دفعتك بنجاح. ننتظر الآن تأكيد المتجر لطلبك.</p>
+      <div class="pend-order"><i class="ti ti-receipt"></i> <span id="ordNo">—</span></div>
+      <div class="pend-steps">
+        <div class="pend-step done"><i class="ti ti-circle-check"></i> <span data-ar="تم الدفع بنجاح" data-en="Payment received">تم الدفع بنجاح</span></div>
+        <div class="pend-step on"><i class="ti ti-clock-hour-4"></i> <span data-ar="بانتظار قبول المتجر" data-en="Awaiting store acceptance">بانتظار قبول المتجر</span></div>
+        <div class="pend-step"><i class="ti ti-tools-kitchen-2"></i> <span data-ar="تجهيز الطلب" data-en="Order preparation">تجهيز الطلب</span></div>
+        <div class="pend-step"><i class="ti ti-truck-delivery"></i> <span data-ar="التوصيل إليك" data-en="Delivery to you">التوصيل إليك</span></div>
+      </div>
+      <div class="pend-acts">
+        <button class="pend-ghost" onclick="cancelOrder()"><i class="ti ti-x"></i> <span data-ar="إلغاء الطلب" data-en="Cancel order">إلغاء الطلب</span></button>
+      </div>
+      <div class="pend-note" data-ar="إذا لم يقبل المتجر خلال 5 دقائق، سيُلغى الطلب تلقائياً ويُعاد المبلغ كاملاً."
+           data-en="If the store does not accept within 5 minutes, the order is cancelled automatically and refunded in full.">إذا لم يقبل المتجر خلال 5 دقائق، سيُلغى الطلب تلقائياً ويُعاد المبلغ كاملاً.</div>
+    </div>
+
+    <!-- ACCEPTED -->
+    <div class="pend-state" id="stOk">
+      <div class="st-ic ok"><i class="ti ti-circle-check"></i></div>
+      <h1 data-ar="قبل المتجر طلبك" data-en="Your order was accepted">قبل المتجر طلبك</h1>
+      <p data-ar="بدأ المتجر بتجهيز طلبك. يمكنك متابعة حالته لحظة بلحظة."
+         data-en="The store has started preparing your order. You can follow it in real time.">بدأ المتجر بتجهيز طلبك. يمكنك متابعة حالته لحظة بلحظة.</p>
+      <div class="pend-order"><i class="ti ti-receipt"></i> <span class="ordNo">—</span></div>
+      <div class="pend-acts">
+        <a class="pend-primary" id="trackLink" href="#"><i class="ti ti-map-pin"></i> <span data-ar="تتبّع الطلب" data-en="Track order">تتبّع الطلب</span></a>
+      </div>
+    </div>
+
+    <!-- TIMED OUT -->
+    <div class="pend-state" id="stFail">
+      <div class="st-ic bad"><i class="ti ti-clock-off"></i></div>
+      <h1 data-ar="تم إلغاء الطلب" data-en="Order cancelled">تم إلغاء الطلب</h1>
+      <p data-ar="لم يقبل المتجر طلبك خلال 5 دقائق، لذلك تم إلغاؤه تلقائياً."
+         data-en="The store did not accept your order within 5 minutes, so it was cancelled automatically.">لم يقبل المتجر طلبك خلال 5 دقائق، لذلك تم إلغاؤه تلقائياً.</p>
+      <div class="refund"><i class="ti ti-cash-banknote"></i>
+        <span data-ar="تمت إعادة المبلغ بالكامل إلى طريقة الدفع الأصلية. قد يستغرق ظهوره حتى 3 أيام عمل."
+              data-en="You have been refunded in full to your original payment method. It may take up to 3 business days to appear.">تمت إعادة المبلغ بالكامل إلى طريقة الدفع الأصلية. قد يستغرق ظهوره حتى 3 أيام عمل.</span></div>
+      <div class="pend-order"><i class="ti ti-receipt"></i> <span class="ordNo">—</span></div>
+      <div class="pend-acts">
+        <a class="pend-primary" href="raf_homepage.html"><i class="ti ti-shopping-bag"></i> <span data-ar="تسوّق مجدداً" data-en="Shop again">تسوّق مجدداً</span></a>
+        <a class="pend-ghost" href="raf_orders.html"><i class="ti ti-receipt"></i> <span data-ar="طلباتي" data-en="My orders">طلباتي</span></a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="raf_source.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_rules.js"></script>
+<script src="raf_checkout.js"></script>
+<script>
+/* ============================================================
+   ORDER PENDING — the store has 5 minutes to accept.
+   Accepted  → normal order flow continues (tracking).
+   Timed out → order cancelled, customer refunded and notified.
+   The countdown is anchored to a stored deadline, so closing the
+   tab or reloading cannot extend or restart the window.
+   ============================================================ */
+(function(){
+  var WINDOW_MS = 5 * 60 * 1000;
+  var LS = 'raf_pending';
+  var CIRC = 326.7;
+
+  function root(){ return document.getElementById('htmlRoot') || document.documentElement; }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn()?en:ar; }
+  function applyLang(){
+    var en=isEn();
+    document.querySelectorAll('[data-ar]').forEach(function(el){
+      var t=el.getAttribute('data-'+(en?'en':'ar')); if(t!==null) el.textContent=t;
+    });
+    document.title = T('رف — بانتظار قبول المتجر','RAF — Waiting for the store');
+  }
+  window.toggleLang=function(){
+    var r=root(), en=r.lang==='en';
+    r.lang=en?'ar':'en'; r.dir=en?'rtl':'ltr';
+    try{ localStorage.setItem('raf_lang', r.lang); }catch(e){}
+    applyLang();
+  };
+
+  var ORDER_ID = new URLSearchParams(location.search).get('id') || '';
+  function state(){
+    try{ var s=JSON.parse(localStorage.getItem(LS)||'{}'); return (s && s.id===ORDER_ID) ? s : null; }catch(e){ return null; }
+  }
+  function save(s){ try{ localStorage.setItem(LS, JSON.stringify(s)); }catch(e){} }
+  function clear(){ try{ localStorage.removeItem(LS); }catch(e){} }
+
+  function setOrderNo(){
+    document.getElementById('ordNo').textContent = ORDER_ID || '—';
+    document.querySelectorAll('.ordNo').forEach(function(n){ n.textContent = ORDER_ID || '—'; });
+    var t=document.getElementById('trackLink');
+    if(t) t.href='raf_tracking.html?id='+encodeURIComponent(ORDER_ID)+'&new=1';
+  }
+  function show(id){
+    ['stWait','stOk','stFail'].forEach(function(k){
+      document.getElementById(k).classList.toggle('show', k===id);
+    });
+  }
+
+  /* ---- outcomes ---- */
+  function accept(){
+    var s=state(); if(!s || s.done) return;
+    s.done='accepted'; save(s);
+    setOrderStatus('progress');
+    show('stOk');
+    notify(T('قبل المتجر طلبك '+ORDER_ID,'Store accepted order '+ORDER_ID), 'raf_tracking.html?id='+encodeURIComponent(ORDER_ID));
+  }
+  function timeout(){
+    var s=state(); if(!s || s.done) return;
+    s.done='timeout'; save(s);
+    cancelAndRefund('timeout');
+    show('stFail');
+  }
+  window.cancelOrder=function(){
+    var s=state(); if(!s || s.done) return;
+    s.done='cancelled'; save(s);
+    cancelAndRefund('customer');
+    document.querySelector('#stFail h1').textContent=T('تم إلغاء الطلب','Order cancelled');
+    document.querySelector('#stFail p').textContent=T('تم إلغاء طلبك بناءً على طلبك.','Your order was cancelled at your request.');
+    show('stFail');
+  };
+
+  /* mark the order cancelled, restore its stock and record the refund */
+  function cancelAndRefund(why){
+    setOrderStatus('cancelled');
+    restoreStock();
+    if(window.RAFRules) RAFRules.Reserve.release();
+    notify(why==='timeout'
+      ? T('تم إلغاء الطلب '+ORDER_ID+' تلقائياً وإعادة المبلغ','Order '+ORDER_ID+' was auto-cancelled and refunded')
+      : T('تم إلغاء الطلب '+ORDER_ID+' وإعادة المبلغ','Order '+ORDER_ID+' was cancelled and refunded'),
+      'raf_order_details.html?id='+encodeURIComponent(ORDER_ID));
+  }
+  function setOrderStatus(st){
+    if(!window.RAFShop) return;
+    try{
+      var all=RAFShop.Orders.all();
+      var i=all.findIndex(function(o){ return o.id===ORDER_ID; });
+      if(i<0) return;
+      all[i].status=st;
+      if(st==='cancelled'){
+        all[i].refunded=true;
+        all[i].tl=[{k:'placed',t:{ar:'تم استلام الطلب',en:'Order placed'},time:all[i].date,s:'done'},
+                   {k:'cancel',t:{ar:'أُلغي الطلب وأُعيد المبلغ',en:'Cancelled and refunded'},time:RAFShop.nowStr(),s:'cancel'}];
+      }
+      localStorage.setItem('raf_orders', JSON.stringify(all));
+    }catch(e){}
+  }
+  /* a cancelled order returns its units to the shelf */
+  function restoreStock(){
+    if(!window.RAFSource || !window.RAFShop) return;
+    var s=state(); if(!s || !s.items) return;
+    Object.keys(s.items).forEach(function(pid){
+      var p=RAFSource.product(pid);
+      if(p && p.stock!=null) RAFSource.updateProduct(pid,{ stock:p.stock + s.items[pid] });
+    });
+  }
+  /* surface the outcome in the notification centre */
+  function notify(text, href){
+    try{
+      var a=JSON.parse(localStorage.getItem('raf_notif_extra')||'[]');
+      a.unshift({ id:'ord-'+ORDER_ID+'-'+Date.now(), t:{ar:text,en:text}, href:href, ts:Date.now() });
+      localStorage.setItem('raf_notif_extra', JSON.stringify(a.slice(0,20)));
+    }catch(e){}
+  }
+
+  /* ---- countdown anchored to a stored deadline ---- */
+  var timer=null;
+  function tick(){
+    var s=state(); if(!s) return;
+    var left=Math.max(0, s.deadline - Date.now());
+    var m=Math.floor(left/60000), sec=Math.floor((left%60000)/1000);
+    var c=document.getElementById('clock');
+    if(c) c.textContent = m+':'+(sec<10?'0':'')+sec;
+    var ring=document.getElementById('ring');
+    if(ring) ring.style.strokeDashoffset = String(CIRC * (1 - left/WINDOW_MS));
+    if(left<=0){ clearInterval(timer); timeout(); }
+  }
+
+  function boot(){
+    var l=null; try{ l=localStorage.getItem('raf_lang'); }catch(e){}
+    if(l==='en'){ var r=root(); r.lang='en'; r.dir='ltr'; }
+    applyLang(); setOrderNo();
+
+    if(!ORDER_ID){ location.replace('raf_orders.html'); return; }
+
+    var s=state();
+    if(!s){
+      /* first arrival: snapshot what was ordered so a cancellation can
+         put the stock back, then start the acceptance window */
+      var items={};
+      try{
+        var o=RAFShop.Orders.get(ORDER_ID);
+        (o&&o.items||[]).forEach(function(it){ if(it.id) items[it.id]=(items[it.id]||0)+(it.qty||1); });
+      }catch(e){}
+      s={ id:ORDER_ID, deadline:Date.now()+WINDOW_MS, items:items, done:null };
+      save(s);
+    }
+    if(s.done==='accepted'){ show('stOk'); return; }
+    if(s.done){ show('stFail'); return; }
+
+    show('stWait'); tick(); timer=setInterval(tick,1000);
+
+    /* the merchant app accepts through this hook (or another tab does) */
+    window.__acceptOrder = accept;
+    window.addEventListener('storage', function(e){
+      if(e.key==='raf_order_accept' && e.newValue===ORDER_ID) accept();
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+</body>
+</html>
