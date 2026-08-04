@@ -1,37 +1,47 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>رف — صفحة المحل</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
   :root {
     --bg: #F5F2EC;
     --bg2: #EDE8DC;
+    --bg3: #E7E1D4;
     --card: #FFFFFF;
     --gold: #C9A84C;
     --gold2: #A07828;
+    --gold-soft: rgba(201,168,76,.12);
+    --ink: #15130F;
     --black: #0A0A0A;
     --text: #0A0A0A;
-    --text2: #555;
-    --text3: #888;
-    --border: #D8D3C8;
-    --green: #2E7D32;
+    --text2: #5A5650;
+    --text3: #8A857C;
+    --border: #E2DBCC;
+    --border2: #D8D0BE;
+    --green: #2E9E5B;
     --green-bg: #E8F5E9;
-    --red: #C62828;
+    --red: #D9534F;
     --red-bg: #FFEBEE;
     --r: 8px;
     --rl: 12px;
+    --rxl: 20px;
     --font: 'Tajawal', sans-serif;
     --fdisplay: 'Playfair Display', serif;
     --fen: 'DM Sans', sans-serif;
+    --sh: 0 18px 44px -22px rgba(20,16,8,.34);
+    --sh-sm: 0 2px 10px rgba(20,16,8,.08);
+    --wrap: 1200px;
+    --pad: 40px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { overflow-x: hidden; }
   body { background: var(--bg); color: var(--text); font-family: var(--font); max-width: 100%; overflow-x: hidden; }
+  .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--pad); }
 
   /* NAV */
   nav {
@@ -39,12 +49,11 @@
     background: rgba(245,242,236,0.95);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(201,168,76,0.3);
-    padding: 0 40px;
+    padding: 0 var(--pad);
     display: flex; align-items: center; justify-content: space-between;
     height: 64px;
   }
   .nav-logo { font-family: var(--fdisplay); font-size: 28px; font-weight: 900; color: var(--gold); text-decoration: none; }
-  .nav-logo span { color: var(--text); font-size: 11px; font-family: var(--fen); font-weight: 300; letter-spacing: 3px; display: block; margin-top: -6px; }
   .nav-links { display: flex; align-items: center; gap: 8px; }
   .nav-link { color: var(--text3); text-decoration: none; font-size: 14px; padding: 6px 12px; border-radius: var(--r); transition: color .2s; }
   .nav-link:hover { color: var(--text); }
@@ -55,215 +64,332 @@
   .btn-gold:hover { background: var(--gold2); }
   .nav-ico { width: 40px; height: 40px; border: 1px solid var(--border); border-radius: var(--r); display: flex; align-items: center; justify-content: center; color: var(--text3); cursor: pointer; background: transparent; font-size: 18px; position: relative; transition: all .2s; }
   .nav-ico:hover { border-color: var(--gold); color: var(--gold); }
-  .cart-badge { position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; background: var(--gold); border-radius: 50%; font-size: 10px; color: var(--black); font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .cart-badge { position: absolute; top: -4px; inset-inline-end: -4px; min-width: 16px; height: 16px; background: var(--gold); border-radius: 50%; font-size: 10px; color: var(--black); font-weight: 700; display: none; align-items: center; justify-content: center; }
 
   /* BREADCRUMB */
-  .breadcrumb { padding: 14px 40px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text3); border-bottom: 1px solid var(--border); background: var(--card); }
+  .breadcrumb { padding: 13px var(--pad); display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text3); background: var(--card); border-bottom: 1px solid var(--border); }
   .breadcrumb a { color: var(--text3); text-decoration: none; transition: color .2s; }
   .breadcrumb a:hover { color: var(--gold); }
+  .breadcrumb .bc-cur { color: var(--text); font-weight: 700; }
+  .breadcrumb i { font-size: 14px; opacity: .6; }
 
-  /* STORE HERO */
-  .store-hero {
-    background: var(--black);
-    position: relative; overflow: hidden;
-    height: 220px;
-  }
-  .hero-pattern {
+  /* ══════════ STORE HERO — premium branded storefront ══════════ */
+  .shero { position: relative; background: var(--ink); overflow: hidden; }
+  .shero-mesh {
     position: absolute; inset: 0;
-    background-image: linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
-    background-size: 50px 50px;
+    background-image:
+      linear-gradient(rgba(201,168,76,.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,.05) 1px, transparent 1px);
+    background-size: 46px 46px;
+    mask-image: radial-gradient(ellipse 90% 100% at 50% 0%, #000 20%, transparent 78%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 100% at 50% 0%, #000 20%, transparent 78%);
   }
-  .hero-glow {
+  .shero-glow {
     position: absolute; inset: 0;
-    background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(201,168,76,0.08) 0%, transparent 70%);
+    background:
+      radial-gradient(ellipse 46% 62% at 78% 12%, rgba(201,168,76,.20) 0%, transparent 66%),
+      radial-gradient(ellipse 40% 56% at 14% 88%, rgba(201,168,76,.10) 0%, transparent 68%);
   }
-  .store-hero-content {
-    position: relative; z-index: 2;
-    max-width: 1200px; margin: 0 auto;
-    padding: 0 40px;
-    height: 100%; display: flex; align-items: flex-end;
-    padding-bottom: 0;
-  }
-  .store-avatar-wrap {
-    position: relative; margin-bottom: -40px;
-  }
-  .store-avatar {
-    width: 100px; height: 100px;
-    background: var(--bg2);
-    border: 3px solid var(--gold);
-    border-radius: var(--rl);
+  .shero-inner { position: relative; z-index: 2; max-width: var(--wrap); margin: 0 auto; padding: 40px var(--pad) 44px; }
+  .shero-grid { display: flex; align-items: flex-start; gap: 26px; }
+
+  /* crest */
+  .crest-wrap { position: relative; flex-shrink: 0; }
+  .crest {
+    width: 108px; height: 108px; border-radius: 24px;
+    background: linear-gradient(150deg, #FBF7EC, #E3D9BF);
     display: flex; align-items: center; justify-content: center;
-    font-size: 40px; color: var(--gold);
+    font-size: 46px; color: var(--gold2);
+    box-shadow: 0 0 0 1px rgba(201,168,76,.55), 0 20px 44px -18px rgba(0,0,0,.7);
   }
-  .store-verified-badge {
-    position: absolute; bottom: -6px; right: -6px;
-    width: 24px; height: 24px;
-    background: var(--gold); border-radius: 50%;
+  .crest-verify {
+    position: absolute; bottom: -7px; inset-inline-end: -7px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--gold); color: #1C1606;
     display: flex; align-items: center; justify-content: center;
-    font-size: 13px; color: var(--black);
-    border: 2px solid var(--black);
+    font-size: 16px; border: 3px solid var(--ink);
   }
-  .store-hero-info { padding: 0 20px 16px; flex: 1; }
-  .store-hero-name { font-family: var(--fdisplay); font-size: 28px; font-weight: 700; color: #F5F2EC; margin-bottom: 6px; }
-  .store-hero-meta { display: flex; align-items: center; gap: 14px; }
-  .store-hero-tag { font-size: 12px; color: var(--gold); background: rgba(201,168,76,0.15); padding: 3px 10px; border-radius: 20px; border: 0.5px solid rgba(201,168,76,0.3); }
-  .store-hero-stat { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #888; }
-  .store-hero-stat i { font-size: 14px; }
-  .store-hero-actions { display: flex; align-items: flex-end; gap: 10px; padding-bottom: 20px; }
-  .btn-follow { padding: 10px 20px; border: 1px solid rgba(201,168,76,0.5); border-radius: var(--r); background: transparent; color: var(--gold); font-family: var(--font); font-size: 13px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 6px; }
-  .btn-follow:hover { background: rgba(201,168,76,0.1); }
-  .btn-share { width: 40px; height: 40px; border: 1px solid #333; border-radius: var(--r); background: transparent; color: #888; font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+
+  /* identity */
+  .shero-id { flex: 1; min-width: 0; }
+  .shero-eyebrow { display: inline-flex; align-items: center; gap: 6px; font-family: var(--fen); font-size: 10.5px; font-weight: 700; letter-spacing: 2.4px; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+  .shero-eyebrow i { font-size: 13px; letter-spacing: 0; }
+  .shero-name { font-family: var(--fdisplay); font-size: 40px; font-weight: 800; line-height: 1.12; color: #F7F3E9; letter-spacing: -.4px; }
+  .shero-num { font-family: var(--fen); font-size: 14px; font-weight: 500; color: var(--gold); letter-spacing: 1px; }
+  .shero-tags { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .stag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 13px; border-radius: 30px;
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
+    font-size: 12.5px; font-weight: 600; color: #CFC9BC;
+  }
+  .stag i { font-size: 14px; color: var(--gold); }
+  .stag.cat { background: var(--gold-soft); border-color: rgba(201,168,76,.36); color: var(--gold); }
+  .stag b { font-family: var(--fen); font-weight: 700; color: #F2EEE4; }
+  .stag.open { background: rgba(46,158,91,.14); border-color: rgba(46,158,91,.36); color: #7FD3A2; }
+  .stag.closed { background: rgba(217,83,79,.14); border-color: rgba(217,83,79,.36); color: #F0A6A4; }
+  .stag.open i, .stag.closed i { font-size: 8px; }
+  .shero-desc { margin-top: 16px; font-size: 14px; line-height: 1.8; color: #A9A296; max-width: 640px; }
+
+  /* actions */
+  .shero-act { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .btn-follow {
+    height: 44px; padding: 0 22px; border-radius: 30px; border: 1px solid var(--gold);
+    background: var(--gold); color: #1C1606;
+    font-family: var(--font); font-size: 13.5px; font-weight: 700; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 7px; transition: all .2s;
+    box-shadow: 0 12px 26px -14px rgba(201,168,76,.9);
+  }
+  .btn-follow:hover { background: var(--gold2); border-color: var(--gold2); color: #fff; }
+  .btn-follow.on { background: transparent; color: var(--gold); }
+  .btn-follow.on:hover { background: rgba(201,168,76,.12); color: var(--gold); }
+  .btn-share {
+    width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18);
+    background: rgba(255,255,255,.05); color: #CFC9BC; font-size: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all .2s;
+  }
   .btn-share:hover { border-color: var(--gold); color: var(--gold); }
 
-  /* STORE INFO BAR */
-  .store-info-bar {
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-    padding: 0 40px;
-    max-width: 100%;
+  /* social */
+  .shero-social { display: flex; gap: 8px; margin-top: 18px; }
+  .social-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.04);
+    display: flex; align-items: center; justify-content: center;
+    color: #A9A296; font-size: 16px; cursor: pointer; transition: all .2s; text-decoration: none;
   }
-  .store-info-inner {
-    max-width: 1200px; margin: 0 auto;
-    padding: 52px 0 16px;
-    display: flex; align-items: flex-start; gap: 32px;
+  .social-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
+
+  /* ══════════ TRUST STRIP ══════════ */
+  .trust {
+    max-width: var(--wrap); margin: -26px auto 0; padding: 0 var(--pad);
+    position: relative; z-index: 5;
   }
-  .store-desc { flex: 1; font-size: 14px; color: var(--text2); line-height: 1.7; max-width: 500px; }
-  .store-stats { display: flex; gap: 28px; }
-  .store-stat { text-align: center; }
-  .store-stat-num { font-size: 22px; font-weight: 700; color: var(--text); font-family: var(--fen); }
-  .store-stat-lbl { font-size: 11px; color: var(--text3); margin-top: 2px; }
-  .store-hours { display: flex; align-items: center; gap: 8px; font-size: 13px; }
-  .status-open { color: var(--green); background: var(--green-bg); padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
-  .status-closed { color: var(--red); background: var(--red-bg); padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
-  .hours-text { font-size: 12px; color: var(--text3); }
-
-  /* SOCIAL ROW */
-  .social-row { display: flex; gap: 8px; margin-top: 10px; }
-  .social-btn { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: var(--r); display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 15px; cursor: pointer; transition: all .2s; text-decoration: none; }
-  .social-btn:hover { border-color: var(--gold); color: var(--gold); }
-
-  /* STORE NAV TABS */
-  .store-tabs {
-    background: var(--card);
-    border-bottom: 1px solid var(--border);
-    position: sticky; top: 64px; z-index: 50;
+  .trust-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--rxl);
+    box-shadow: var(--sh); display: grid; grid-template-columns: repeat(4, 1fr); overflow: hidden;
   }
-  .store-tabs-inner {
-    max-width: 1200px; margin: 0 auto;
-    padding: 0 40px;
-    display: flex; align-items: center; justify-content: space-between;
+  .trust-item { padding: 18px 20px; display: flex; align-items: center; gap: 12px; border-inline-end: 1px solid var(--border); }
+  .trust-item:last-child { border-inline-end: none; }
+  .trust-ico {
+    width: 42px; height: 42px; flex-shrink: 0; border-radius: 13px;
+    background: var(--gold-soft); color: var(--gold2);
+    display: flex; align-items: center; justify-content: center; font-size: 21px;
   }
-  .tabs-row { display: flex; }
-  .store-tab { padding: 14px 18px; font-size: 14px; color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all .2s; font-weight: 500; }
-  .store-tab.on { color: var(--text); border-bottom-color: var(--gold); }
-  .store-tab:hover { color: var(--text); }
+  .trust-v { font-family: var(--fen); font-size: 17px; font-weight: 800; color: var(--ink); line-height: 1.2; }
+  .trust-l { font-size: 11.5px; color: var(--text3); margin-top: 2px; }
 
-  /* FILTER BAR */
-  .filter-bar {
-    max-width: 1200px; margin: 24px auto 0;
-    padding: 0 40px;
-    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  /* ══════════ TABS ══════════ */
+  .stabs { background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 64px; z-index: 50; margin-top: 30px; }
+  .stabs-inner { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--pad); display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .stabs-inner::-webkit-scrollbar { display: none; }
+  .stab {
+    padding: 15px 18px; font-size: 14px; font-weight: 600; color: var(--text3);
+    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: all .2s; white-space: nowrap; background: none; border-top: 0; border-inline: 0; font-family: var(--font);
   }
-  .search-mini {
-    display: flex; align-items: center; gap: 0;
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: var(--r); overflow: hidden; transition: border-color .2s;
-    flex: 1; max-width: 320px;
+  .stab.on { color: var(--ink); border-bottom-color: var(--gold); }
+  .stab:hover { color: var(--ink); }
+
+  /* ══════════ FILTER SYSTEM ══════════ */
+  .fbar { max-width: var(--wrap); margin: 26px auto 0; padding: 0 var(--pad); }
+  .fbar-row { display: flex; align-items: center; gap: 10px; }
+  .fchips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; flex: 1; padding: 2px 0; }
+  .fchips::-webkit-scrollbar { display: none; }
+  .fchip {
+    flex-shrink: 0; padding: 8px 17px; border: 1px solid var(--border2); border-radius: 30px;
+    background: var(--card); color: var(--text2); font-family: var(--font); font-size: 13px;
+    font-weight: 600; cursor: pointer; transition: all .18s; white-space: nowrap;
   }
-  .search-mini:focus-within { border-color: var(--gold); }
-  .search-mini i { padding: 0 12px; color: var(--text3); font-size: 16px; }
-  .search-mini input { flex: 1; border: none; outline: none; background: transparent; font-family: var(--font); font-size: 14px; color: var(--text); padding: 10px 0; }
-  .search-mini input::placeholder { color: var(--text3); }
-  .filter-chip { padding: 7px 16px; border: 1px solid var(--border); border-radius: 20px; background: transparent; color: var(--text3); font-family: var(--font); font-size: 13px; cursor: pointer; transition: all .2s; }
-  .filter-chip:hover, .filter-chip.on { border-color: var(--gold); color: var(--gold); background: rgba(201,168,76,0.06); }
-  .sort-select { padding: 8px 14px; border: 1px solid var(--border); border-radius: var(--r); background: var(--card); color: var(--text2); font-family: var(--font); font-size: 13px; cursor: pointer; outline: none; margin-right: auto; }
+  .fchip:hover { border-color: var(--gold); color: var(--gold2); }
+  .fchip.on { background: var(--ink); border-color: var(--ink); color: #F5F0E4; }
+  .btn-filter {
+    flex-shrink: 0; height: 38px; padding: 0 17px; border: 1px solid var(--border2); border-radius: 30px;
+    background: var(--card); color: var(--ink); font-family: var(--font); font-size: 13px; font-weight: 700;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: all .18s;
+  }
+  .btn-filter:hover { border-color: var(--gold); color: var(--gold2); }
+  .btn-filter.has { background: var(--gold-soft); border-color: var(--gold); color: var(--gold2); }
+  .btn-filter i { font-size: 17px; }
+  .fcount {
+    min-width: 19px; height: 19px; padding: 0 5px; border-radius: 20px; background: var(--gold); color: #1C1606;
+    font-family: var(--fen); font-size: 11px; font-weight: 800; display: none; align-items: center; justify-content: center;
+  }
+  .btn-filter.has .fcount { display: flex; }
 
-  /* PRODUCTS GRID */
-  .products-section { max-width: 1200px; margin: 24px auto 60px; padding: 0 40px; }
-  .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
-  .product-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--rl); overflow: hidden; cursor: pointer; transition: all .25s; position: relative; }
-  .product-card:hover { border-color: rgba(201,168,76,0.5); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
-  .product-img { height: 220px; background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 48px; color: var(--bg); position: relative; }
-  .product-img i { color: var(--border); }
-  .product-wish { position: absolute; top: 10px; left: 10px; width: 30px; height: 30px; background: rgba(245,242,236,0.85); border: none; border-radius: 50%; color: var(--text3); cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: all .2s; }
-  .product-wish:hover { color: #E05555; }
-  .product-sale { position: absolute; top: 10px; right: 10px; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; background: #E05555; color: white; }
-  .product-info { padding: 14px; }
-  .product-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 8px; line-height: 1.4; }
-  .product-bottom { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
-  .product-price { font-size: 16px; font-weight: 700; color: var(--gold); }
-  .product-price-old { font-size: 12px; color: var(--text3); text-decoration: line-through; margin-right: 5px; }
-  .product-rating { display: flex; align-items: center; gap: 3px; font-size: 12px; color: var(--text3); }
-  .product-rating i { color: var(--gold); font-size: 12px; }
-  .add-cart { width: 100%; padding: 9px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r); color: var(--text); font-family: var(--font); font-size: 13px; cursor: pointer; transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
-  .add-cart:hover { background: var(--gold); color: var(--black); border-color: var(--gold); font-weight: 700; }
-  /* qty stepper (direct cart control from card) */
-  .qty-ctrl { display: flex; align-items: center; justify-content: space-between; width: 100%; border: 1px solid var(--gold); background: rgba(201,168,76,.10); border-radius: var(--r); padding: 4px; gap: 4px; }
-  .qty-ctrl .qty-btn { width: 30px; height: 30px; flex: 0 0 30px; border: none; border-radius: 7px; background: var(--gold); color: var(--black); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .15s; }
-  .qty-ctrl .qty-btn:hover { background: var(--gold2, #A07828); color: #fff; }
-  .qty-ctrl .qty-btn:active { transform: scale(.88); }
-  .qty-ctrl .qty-btn i { font-size: 15px; }
-  .qty-ctrl .qty-num { flex: 1; text-align: center; font-weight: 800; font-size: 14px; color: var(--text); font-family: var(--font); }
+  /* active filter pills */
+  .factive { display: none; flex-wrap: wrap; gap: 7px; margin-top: 12px; }
+  .factive.show { display: flex; }
+  .fpill {
+    display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px 5px 12px;
+    border-radius: 30px; background: var(--bg2); border: 1px solid var(--border);
+    font-size: 12px; font-weight: 600; color: var(--text2);
+  }
+  [dir="rtl"] .fpill { padding: 5px 12px 5px 8px; }
+  .fpill button { width: 18px; height: 18px; border: none; border-radius: 50%; background: var(--border2); color: var(--ink); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .fpill button:hover { background: var(--red); color: #fff; }
+  .fclear { border: none; background: none; color: var(--gold2); font-family: var(--font); font-size: 12.5px; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 5px 4px; }
 
-  /* POLICY SECTION */
-  .policy-section { max-width: 1200px; margin: 0 auto 60px; padding: 0 40px; display: none; }
-  .policy-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-  .policy-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--rl); padding: 24px; }
-  .policy-icon { font-size: 28px; color: var(--gold); margin-bottom: 12px; }
-  .policy-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
-  .policy-text { font-size: 13px; color: var(--text2); line-height: 1.7; }
+  .fmeta { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; }
+  .fresults { font-size: 13px; color: var(--text3); }
+  .fresults b { font-family: var(--fen); color: var(--ink); font-weight: 800; }
 
-  /* REVIEWS SECTION */
-  .reviews-section { max-width: 1200px; margin: 0 auto 60px; padding: 0 40px; display: none; }
+  /* filter sheet */
+  .fsheet-back {
+    position: fixed; inset: 0; z-index: 5300; display: flex; align-items: center; justify-content: center;
+    background: rgba(20,16,8,.55); backdrop-filter: blur(3px);
+    opacity: 0; visibility: hidden; transition: opacity .24s, visibility .24s; padding: 24px;
+  }
+  .fsheet-back.show { opacity: 1; visibility: visible; }
+  .fsheet {
+    width: 100%; max-width: 480px; max-height: 88vh; overflow: hidden auto;
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--rxl);
+    box-shadow: 0 34px 80px -26px rgba(20,16,8,.6);
+    transform: translateY(16px) scale(.98); transition: transform .28s cubic-bezier(.22,1,.36,1);
+    font-family: var(--font);
+  }
+  .fsheet-back.show .fsheet { transform: none; }
+  .fsheet-head {
+    position: sticky; top: 0; background: var(--card); z-index: 3;
+    display: flex; align-items: center; gap: 12px; padding: 18px 20px; border-bottom: 1px solid var(--border);
+  }
+  .fsheet-head h3 { font-family: var(--fdisplay); font-size: 20px; font-weight: 800; color: var(--ink); flex: 1; }
+  .fsheet-x { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg); color: var(--text2); font-size: 17px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .fsheet-x:hover { border-color: var(--red); color: var(--red); }
+  .fsheet-body { padding: 4px 20px 20px; }
+  .fgrp { padding: 18px 0; border-bottom: 1px solid var(--border); }
+  .fgrp:last-child { border-bottom: none; }
+  .fgrp-l { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 800; color: var(--ink); margin-bottom: 12px; }
+  .fgrp-l i { font-size: 16px; color: var(--gold2); }
+  .fopts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .fopt {
+    padding: 9px 15px; border: 1.5px solid var(--border2); border-radius: 11px; background: var(--card);
+    color: var(--text2); font-family: var(--font); font-size: 13px; font-weight: 700; cursor: pointer; transition: all .18s;
+  }
+  .fopt:hover { border-color: var(--gold); color: var(--gold2); }
+  .fopt.on { background: var(--ink); border-color: var(--ink); color: #F5F0E4; }
+  .ftoggle {
+    display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px;
+    border: 1.5px solid var(--border2); border-radius: 13px; background: var(--card);
+    font-family: var(--font); font-size: 13.5px; font-weight: 700; color: var(--text2);
+    cursor: pointer; transition: all .18s; text-align: start;
+  }
+  .ftoggle + .ftoggle { margin-top: 9px; }
+  .ftoggle:hover { border-color: var(--gold); }
+  .ftoggle.on { border-color: var(--ink); background: var(--bg2); color: var(--ink); }
+  .ftoggle i.lead { font-size: 19px; color: var(--gold2); flex-shrink: 0; }
+  .ftoggle .tx { flex: 1; }
+  .fbox {
+    width: 22px; height: 22px; flex-shrink: 0; border-radius: 7px; border: 1.5px solid var(--border2);
+    display: flex; align-items: center; justify-content: center; font-size: 14px; color: transparent; transition: all .18s;
+  }
+  .ftoggle.on .fbox { background: var(--gold); border-color: var(--gold); color: #1C1606; }
+  .fsheet-foot {
+    position: sticky; bottom: 0; background: var(--card); border-top: 1px solid var(--border);
+    padding: 14px 20px; padding-bottom: calc(14px + env(safe-area-inset-bottom,0px));
+    display: flex; gap: 10px;
+  }
+  .fsheet-foot button { height: 48px; border-radius: 30px; font-family: var(--font); font-size: 14.5px; font-weight: 700; cursor: pointer; transition: all .2s; }
+  .fbtn-reset { flex: 0 0 auto; padding: 0 22px; border: 1px solid var(--border2); background: var(--card); color: var(--text2); }
+  .fbtn-reset:hover { border-color: var(--text3); }
+  .fbtn-apply { flex: 1; border: 1px solid var(--gold2); background: var(--gold); color: #1C1606; box-shadow: 0 10px 22px -12px rgba(201,168,76,.8); }
+  .fbtn-apply:hover { background: var(--gold2); color: #fff; }
+
+  /* ══════════ PRODUCTS ══════════ */
+  .psec { max-width: var(--wrap); margin: 18px auto 60px; padding: 0 var(--pad); }
+  .pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+  .pempty { text-align: center; padding: 60px 20px; color: var(--text3); }
+  .pempty i { font-size: 46px; color: var(--border2); display: block; margin-bottom: 14px; }
+  .pempty-t { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+  .pempty-s { font-size: 13.5px; line-height: 1.7; margin-bottom: 18px; }
+  .btn-more {
+    display: block; margin: 30px auto 0; padding: 13px 38px; border: 1px solid var(--border2); border-radius: 30px;
+    background: var(--card); color: var(--text2); font-family: var(--font); font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all .2s;
+  }
+  .btn-more:hover { border-color: var(--gold); color: var(--gold2); background: var(--gold-soft); }
+
+  /* ══════════ REVIEWS / POLICY ══════════ */
+  .rsec, .polsec { max-width: var(--wrap); margin: 26px auto 60px; padding: 0 var(--pad); display: none; }
+  .rscore {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--rxl); padding: 30px;
+    display: flex; align-items: center; gap: 30px; flex-wrap: wrap;
+  }
+  .rscore-big { text-align: center; flex-shrink: 0; }
+  .rscore-n { font-family: var(--fen); font-size: 52px; font-weight: 800; color: var(--ink); line-height: 1; }
+  .rscore-stars { color: var(--gold); font-size: 16px; margin-top: 8px; letter-spacing: 2px; }
+  .rscore-c { font-size: 12.5px; color: var(--text3); margin-top: 7px; }
+  .rbars { flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 8px; }
+  .rbar { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--text3); }
+  .rbar-k { width: 34px; flex-shrink: 0; font-family: var(--fen); font-weight: 700; }
+  .rbar-t { flex: 1; height: 7px; border-radius: 5px; background: var(--bg2); overflow: hidden; }
+  .rbar-f { height: 100%; border-radius: 5px; background: var(--gold); }
+  .rbar-p { width: 38px; flex-shrink: 0; text-align: end; font-family: var(--fen); }
+  .polgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .polcard { background: var(--card); border: 1px solid var(--border); border-radius: var(--rxl); padding: 26px; }
+  .polico { width: 46px; height: 46px; border-radius: 14px; background: var(--gold-soft); color: var(--gold2); display: flex; align-items: center; justify-content: center; font-size: 23px; margin-bottom: 14px; }
+  .poltitle { font-size: 15.5px; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
+  .poltext { font-size: 13.5px; color: var(--text2); line-height: 1.8; }
 
   /* CLOSED BANNER */
   .closed-banner {
-    background: var(--red-bg); border: 1px solid rgba(198,40,40,0.2);
-    border-radius: var(--rl); padding: 14px 20px;
-    display: flex; align-items: center; gap: 12px;
-    margin: 24px auto 0; max-width: 1200px; padding-left: 40px; padding-right: 40px;
-    display: none;
+    display: none; align-items: center; gap: 13px;
+    max-width: var(--wrap); margin: 22px auto 0; padding: 15px 20px;
+    background: var(--red-bg); border: 1px solid rgba(217,83,79,.25); border-radius: var(--rl);
   }
-  .closed-banner i { color: var(--red); font-size: 20px; }
-  .closed-banner-text { font-size: 14px; color: var(--red); font-weight: 500; }
-  .closed-banner-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .closed-banner.show { display: flex; }
+  .closed-banner i { color: var(--red); font-size: 21px; flex-shrink: 0; }
+  .cb-t { font-size: 14px; color: var(--red); font-weight: 700; }
+  .cb-s { font-size: 12.5px; color: var(--text3); margin-top: 2px; }
 
   /* FOOTER */
-  footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 24px 40px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text3); }
+  footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 24px var(--pad); display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text3); }
+  .brand-logo { height: 30px; }
+  .brand-logo-foot { height: 26px; }
 
-  /* ── GLOBAL MOBILE RESET ── */
+  /* ══════════ RESPONSIVE ══════════ */
   @media (max-width: 768px) {
     * { max-width: 100%; }
     img, video, iframe { max-width: 100% !important; height: auto; }
-    table { max-width: 100%; }
   }
-
+  @media (max-width: 1024px) {
+    :root { --pad: 22px; }
+    .trust-card { grid-template-columns: repeat(2, 1fr); }
+    .trust-item:nth-child(2) { border-inline-end: none; }
+    .trust-item:nth-child(-n+2) { border-bottom: 1px solid var(--border); }
+    .polgrid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 900px) { .nav-links { display: none; } }
   @media (max-width: 768px) {
-    nav { padding: 0 16px; }
-    .store-hero-content { padding: 0 16px; }
-    .store-info-inner { flex-direction: column; padding: 52px 16px 16px; gap: 16px; }
-    .store-tabs-inner { padding: 0 16px; }
-    .filter-bar { padding: 0 16px; }
-    .products-section { padding: 0 16px; }
-    .products-grid { grid-template-columns: repeat(2,1fr); }
-    .store-stats { gap: 16px; }
-    .policy-grid { grid-template-columns: 1fr; }
-    .filter-bar { flex-wrap: wrap; gap: 8px; }
-    .store-tabs { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
-    .store-tabs::-webkit-scrollbar { display: none; }
-  }
-  /* Collapse desktop center menu in the tablet-portrait gap so the nav never overflows */
-  @media (max-width: 900px) {
-    .nav-links { display: none; }
+    :root { --pad: 16px; }
+    .shero-inner { padding: 28px var(--pad) 38px; }
+    .shero-grid { flex-direction: column; gap: 18px; }
+    .crest { width: 84px; height: 84px; border-radius: 20px; font-size: 36px; }
+    .crest-verify { width: 26px; height: 26px; font-size: 14px; }
+    .shero-name { font-size: 30px; }
+    .shero-desc { font-size: 13.5px; margin-top: 14px; }
+    .shero-act { width: 100%; }
+    .btn-follow { flex: 1; justify-content: center; }
+    .stabs { top: 56px; }
+    .stab { padding: 13px 15px; font-size: 13.5px; }
+    /* two product cards per row on mobile */
+    .pgrid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .polgrid { grid-template-columns: 1fr; }
+    .rscore { padding: 22px; gap: 20px; }
+    .rscore-n { font-size: 42px; }
+    /* filter panel becomes a bottom sheet */
+    .fsheet-back { align-items: flex-end; padding: 0; }
+    .fsheet { max-width: 100%; max-height: 90vh; border-radius: 24px 24px 0 0; border-bottom: none; transform: translateY(100%); }
+    .fsheet-back.show .fsheet { transform: none; }
   }
   @media (max-width: 480px) {
-    .products-grid { grid-template-columns: 1fr; }
-    .store-stats { flex-wrap: wrap; gap: 12px; }
-    .filter-bar { flex-direction: column; gap: 6px; }
+    /* stays two-up — never one card per row */
+    .pgrid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .trust-card { grid-template-columns: repeat(2, 1fr); }
+    .shero-name { font-size: 26px; }
     footer { padding: 16px; flex-direction: column; gap: 8px; text-align: center; }
-    .store-info-inner { padding: 48px 12px 12px; }
-    .store-hero-content { padding: 0 12px; }
   }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 
   /* ===== APP BOTTOM NAV ===== */
   .app-bnav{display:none;}
@@ -293,469 +419,187 @@
 <nav>
   <div class="nav-actions">
     <button class="nav-ico" onclick="history.back()" title="رجوع"><i class="ti ti-arrow-right"></i></button>
-    <button class="nav-ico" onclick="window.location='raf_cart.html'"><i class="ti ti-shopping-cart"></i><span class="cart-badge">3</span></button>
-    <button class="nav-ico" onclick="window.location='raf_account.html'"><i class="ti ti-heart"></i></button>
-    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> تسجيل الدخول</a>
-    <a href="raf_login.html" class="btn-gold">إنشاء حساب</a>
+    <button class="nav-ico" onclick="window.location='raf_cart.html'"><i class="ti ti-shopping-cart"></i><span class="cart-badge"></span></button>
+    <button class="nav-ico" onclick="window.location='raf_wishlist.html'"><i class="ti ti-heart"></i></button>
+    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> <span data-ar="تسجيل الدخول" data-en="Sign in">تسجيل الدخول</span></a>
+    <a href="raf_login.html" class="btn-gold" data-ar="إنشاء حساب" data-en="Sign up">إنشاء حساب</a>
   </div>
   <div class="nav-links">
-    <a href="raf_storespage.html" class="nav-link">المحلات</a>
-    <a href="raf_offers.html" class="nav-link">العروض</a>
-    <a href="raf_trending.html" class="nav-link">الترندات</a>
-    <a href="raf_used.html" class="nav-link">المستعملات</a>
-    <a href="raf_auctions.html" class="nav-link">المزادات</a>
+    <a href="raf_storespage.html" class="nav-link" data-ar="المحلات" data-en="Stores">المحلات</a>
+    <a href="raf_offers.html" class="nav-link" data-ar="العروض" data-en="Offers">العروض</a>
+    <a href="raf_trending.html" class="nav-link" data-ar="الترندات" data-en="Trends">الترندات</a>
+    <a href="raf_used.html" class="nav-link" data-feature="used" data-ar="المستعملات" data-en="Used">المستعملات</a>
+    <a href="raf_auctions.html" class="nav-link" data-feature="auctions" data-ar="المزادات" data-en="Auctions">المزادات</a>
   </div>
   <a href="raf_homepage.html" class="nav-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace" class="brand-logo"></a>
 </nav>
 
 <!-- BREADCRUMB -->
 <div class="breadcrumb">
-  <a href="raf_homepage.html">الرئيسية</a>
-  <i class="ti ti-chevron-left"></i>
-  <a href="raf_storespage.html">المحلات</a>
-  <i class="ti ti-chevron-left"></i>
-  <span style="color:var(--text);">Casa Mode</span>
+  <a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
+  <i class="ti ti-chevron-left bc-sep"></i>
+  <a href="raf_storespage.html" data-ar="المحلات" data-en="Stores">المحلات</a>
+  <i class="ti ti-chevron-left bc-sep"></i>
+  <span class="bc-cur">Casa Mode</span>
 </div>
 
-<!-- STORE HERO -->
-<div class="store-hero">
-  <div class="hero-pattern"></div>
-  <div class="hero-glow"></div>
-  <div class="store-hero-content">
-    <div class="store-avatar-wrap">
-      <div class="store-avatar"><i class="ti ti-hanger"></i></div>
-      <div class="store-verified-badge"><i class="ti ti-check"></i></div>
-    </div>
-    <div class="store-hero-info">
-      <div class="store-hero-name">Casa Mode</div>
-      <div class="store-hero-meta">
-        <span class="store-hero-tag">ملابس وأزياء</span>
-        <div class="store-hero-stat"><i class="ti ti-star-filled" style="color:var(--gold);"></i> 4.9</div>
-        <div class="store-hero-stat"><i class="ti ti-shopping-bag"></i> 1,284 طلب</div>
-        <div class="store-hero-stat"><i class="ti ti-users"></i> 3.2K متابع</div>
+<!-- ══════════ STORE HERO ══════════ -->
+<header class="shero">
+  <div class="shero-mesh"></div>
+  <div class="shero-glow"></div>
+  <div class="shero-inner">
+    <div class="shero-grid">
+      <div class="crest-wrap">
+        <div class="crest"><i class="ti ti-hanger" id="crestIcon"></i></div>
+        <div class="crest-verify" title="متجر موثّق"><i class="ti ti-check"></i></div>
+      </div>
+
+      <div class="shero-id">
+        <div class="shero-eyebrow"><i class="ti ti-rosette-discount-check"></i> <span data-ar="متجر موثّق في رف" data-en="Verified RAF Store">متجر موثّق في رف</span></div>
+        <h1 class="shero-name store-hero-name">Casa Mode <span class="shero-num" id="storeNum">#001</span></h1>
+
+        <div class="shero-tags">
+          <span class="stag cat" id="tagCat"><i class="ti ti-category-2"></i> <span></span></span>
+          <span class="stag"><i class="ti ti-star-filled"></i> <b id="tagRate">4.9</b></span>
+          <span class="stag"><i class="ti ti-shopping-bag"></i> <b id="tagOrders">1,284</b> <span data-ar="طلب" data-en="orders">طلب</span></span>
+          <span class="stag"><i class="ti ti-users"></i> <b id="tagFollowers">3.2K</b> <span data-ar="متابع" data-en="followers">متابع</span></span>
+          <span class="stag open" id="tagStatus"><i class="ti ti-circle-filled"></i> <span></span></span>
+        </div>
+
+        <p class="shero-desc" id="storeDesc"></p>
+
+        <div class="shero-social">
+          <a class="social-btn" title="Instagram"><i class="ti ti-brand-instagram"></i></a>
+          <a class="social-btn" title="TikTok"><i class="ti ti-brand-tiktok"></i></a>
+          <a class="social-btn" title="WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>
+          <a class="social-btn" title="X"><i class="ti ti-brand-x"></i></a>
+        </div>
+      </div>
+
+      <div class="shero-act">
+        <button class="btn-follow" id="followBtn" onclick="toggleFollow()"><i class="ti ti-heart"></i> <span data-ar="تابع المحل" data-en="Follow store">تابع المحل</span></button>
+        <button class="btn-share" onclick="shareStore()" title="مشاركة"><i class="ti ti-share"></i></button>
       </div>
     </div>
-    <div class="store-hero-actions">
-      <button class="btn-follow"><i class="ti ti-heart"></i> تابع المحل</button>
-      <button class="btn-share"><i class="ti ti-share"></i></button>
+  </div>
+</header>
+
+<!-- ══════════ TRUST STRIP ══════════ -->
+<section class="trust">
+  <div class="trust-card">
+    <div class="trust-item">
+      <div class="trust-ico"><i class="ti ti-box"></i></div>
+      <div><div class="trust-v" id="trProducts">284</div><div class="trust-l" data-ar="منتج متوفر" data-en="Products">منتج متوفر</div></div>
     </div>
+    <div class="trust-item">
+      <div class="trust-ico"><i class="ti ti-mood-happy"></i></div>
+      <div><div class="trust-v" id="trSat">98%</div><div class="trust-l" data-ar="رضا العملاء" data-en="Satisfaction">رضا العملاء</div></div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-ico"><i class="ti ti-truck-delivery"></i></div>
+      <div><div class="trust-v" data-ar="24 ساعة" data-en="24 hours">24 ساعة</div><div class="trust-l" data-ar="توصيل داخل الكويت" data-en="Delivery in Kuwait">توصيل داخل الكويت</div></div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-ico"><i class="ti ti-refresh"></i></div>
+      <div><div class="trust-v" data-ar="7 أيام" data-en="7 days">7 أيام</div><div class="trust-l" data-ar="إرجاع مجاني" data-en="Free returns">إرجاع مجاني</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSED BANNER -->
+<div class="closed-banner" id="closedBanner">
+  <i class="ti ti-clock-off"></i>
+  <div>
+    <div class="cb-t" data-ar="المحل مغلق حالياً" data-en="This store is currently closed">المحل مغلق حالياً</div>
+    <div class="cb-s" data-ar="يمكنك التصفح والإضافة للسلة، وسيتم تجهيز طلبك عند فتح المحل." data-en="You can still browse and add to cart — your order will be prepared once the store reopens.">يمكنك التصفح والإضافة للسلة، وسيتم تجهيز طلبك عند فتح المحل.</div>
   </div>
 </div>
 
-<!-- STORE INFO BAR -->
-<div class="store-info-bar">
-  <div class="store-info-inner">
-    <div>
-      <p class="store-desc">متجر Casa Mode للملابس والأزياء العصرية — نقدم أحدث صيحات الموضة بجودة عالية وأسعار منافسة. نخدم الكويت منذ 2019.</p>
-      <div class="social-row">
-        <a class="social-btn" title="إنستغرام"><i class="ti ti-brand-instagram"></i></a>
-        <a class="social-btn" title="تيك توك"><i class="ti ti-brand-tiktok"></i></a>
-        <a class="social-btn" title="واتساب"><i class="ti ti-brand-whatsapp"></i></a>
-        <a class="social-btn" title="تويتر"><i class="ti ti-brand-x"></i></a>
-      </div>
-    </div>
-    <div class="store-stats">
-      <div class="store-stat">
-        <div class="store-stat-num">284</div>
-        <div class="store-stat-lbl">منتج</div>
-      </div>
-      <div class="store-stat">
-        <div class="store-stat-num">4.9</div>
-        <div class="store-stat-lbl">تقييم</div>
-      </div>
-      <div class="store-stat">
-        <div class="store-stat-num">98%</div>
-        <div class="store-stat-lbl">رضا العملاء</div>
-      </div>
-    </div>
-    <div style="min-width:180px;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <span class="status-open"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مفتوح الآن</span>
-        <span class="hours-text">يغلق الساعة 11م</span>
-      </div>
-      <div style="font-size:12px;color:var(--text3);margin-bottom:4px;">السبت – الخميس: 10ص – 11م</div>
-      <div style="font-size:12px;color:var(--text3);">الجمعة: 2م – 11م</div>
-    </div>
+<!-- ══════════ TABS ══════════ -->
+<div class="stabs">
+  <div class="stabs-inner">
+    <button class="stab on" onclick="switchTab('products', this)" data-ar="المنتجات" data-en="Products">المنتجات</button>
+    <button class="stab" onclick="switchTab('reviews', this)" id="tabReviewsBtn">التقييمات (128)</button>
+    <button class="stab" onclick="switchTab('policy', this)" data-ar="سياسة الإرجاع" data-en="Return policy">سياسة الإرجاع</button>
   </div>
 </div>
 
-<!-- STORE TABS -->
-<div class="store-tabs">
-  <div class="store-tabs-inner">
-    <div class="tabs-row">
-      <div class="store-tab on" onclick="switchTab('products', this)">المنتجات</div>
-      <div class="store-tab" onclick="switchTab('reviews', this)">التقييمات (128)</div>
-      <div class="store-tab" onclick="switchTab('policy', this)">سياسة الإرجاع</div>
-    </div>
-  </div>
-</div>
-
-<!-- FILTER BAR -->
-<div class="filter-bar" id="filter-bar">
-  <div class="search-mini">
-    <i class="ti ti-search"></i>
-    <input type="text" placeholder="ابحث في المنتجات...">
-  </div>
-  <button class="filter-chip on" onclick="filterCat(this)">الكل</button>
-  <button class="filter-chip" onclick="filterCat(this)">قمصان</button>
-  <button class="filter-chip" onclick="filterCat(this)">بناطيل</button>
-  <button class="filter-chip" onclick="filterCat(this)">فساتين</button>
-  <button class="filter-chip" onclick="filterCat(this)">عروض</button>
-  <select class="sort-select">
-    <option>الأكثر مبيعاً</option>
-    <option>الأحدث</option>
-    <option>السعر: الأقل</option>
-    <option>السعر: الأعلى</option>
-    <option>الأعلى تقييماً</option>
-  </select>
-</div>
-
-<!-- PRODUCTS SECTION -->
-<div class="products-section" id="tab-products">
-  <div class="products-grid" id="products-grid">
-
-    <div class="product-card" onclick="window.location='raf_product.html?id=P-001'" style="cursor:pointer;">
-      <div class="product-img">
-        <i class="ti ti-shirt"></i>
-        <button class="product-wish"><i class="ti ti-heart"></i></button>
-        <span class="product-sale">-20%</span>
-      </div>
-      <div class="product-info">
-        <div class="product-name">قميص أوفرسايز كلاسيك</div>
-        <div class="product-bottom">
-          <div><span class="product-price-old">15.000</span><span class="product-price">12.000 د.ك</span></div>
-          <div class="product-rating"><i class="ti ti-star-filled"></i> 4.8</div>
-        </div>
-        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
-      </div>
-    </div>
-
-    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
-      <div class="product-img"><i class="ti ti-shirt"></i><button class="product-wish"><i class="ti ti-heart"></i></button></div>
-      <div class="product-info">
-        <div class="product-name">قميص لينن بريميوم</div>
-        <div class="product-bottom">
-          <div><span class="product-price">18.000 د.ك</span></div>
-          <div class="product-rating"><i class="ti ti-star-filled"></i> 4.7</div>
-        </div>
-        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
-      </div>
-    </div>
-
-    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
-      <div class="product-img">
-        <i class="ti ti-shirt"></i>
-        <button class="product-wish"><i class="ti ti-heart"></i></button>
-        <span class="product-sale">-15%</span>
-      </div>
-      <div class="product-info">
-        <div class="product-name">بنطلون كاجوال واسع</div>
-        <div class="product-bottom">
-          <div><span class="product-price-old">22.000</span><span class="product-price">18.700 د.ك</span></div>
-          <div class="product-rating"><i class="ti ti-star-filled"></i> 4.9</div>
-        </div>
-        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
-      </div>
-    </div>
-
-    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
-      <div class="product-img"><i class="ti ti-shirt"></i><button class="product-wish"><i class="ti ti-heart"></i></button></div>
-      <div class="product-info">
-        <div class="product-name">هودي أوفرسايز فاخر</div>
-        <div class="product-bottom">
-          <div><span class="product-price">25.000 د.ك</span></div>
-          <div class="product-rating"><i class="ti ti-star-filled"></i> 4.6</div>
-        </div>
-        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
-      </div>
-    </div>
-
-    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
-      <div class="product-img"><i class="ti ti-shirt"></i><button class="product-wish"><i class="ti ti-heart"></i></button></div>
-      <div class="product-info">
-        <div class="product-name">تيشيرت بيسك كلاسيك</div>
-        <div class="product-bottom">
-          <div><span class="product-price">8.500 د.ك</span></div>
-          <div class="product-rating"><i class="ti ti-star-filled"></i> 4.8</div>
-        </div>
-        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
-      </div>
-    </div>
-
-    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
-      <div class="product-img">
-        <i class="ti ti-shirt"></i>
-        <button class="product-wish"><i class="ti ti-heart"></i></button>
-        <span class="product-sale">جديد</span>
-      </div>
-      <div class="product-info">
-        <div class="product-name">جاكيت شتوي خفيف</div>
-        <div class="product-bottom">
-          <div><span class="product-price">45.000 د.ك</span></div>
-          <div class="product-rating"><i class="ti ti-star-filled"></i> 5.0</div>
-        </div>
-        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
-      </div>
-    </div>
-
-    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
-      <div class="product-img"><i class="ti ti-shirt"></i><button class="product-wish"><i class="ti ti-heart"></i></button></div>
-      <div class="product-info">
-        <div class="product-name">شورت رياضي كوول</div>
-        <div class="product-bottom">
-          <div><span class="product-price">14.000 د.ك</span></div>
-          <div class="product-rating"><i class="ti ti-star-filled"></i> 4.5</div>
-        </div>
-        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
-      </div>
-    </div>
-
-    <div class="product-card" onclick="window.location='raf_product.html'" style="cursor:pointer;">
-      <div class="product-img">
-        <i class="ti ti-shirt"></i>
-        <button class="product-wish"><i class="ti ti-heart"></i></button>
-        <span class="product-sale">-10%</span>
-      </div>
-      <div class="product-info">
-        <div class="product-name">قميص بولو فاخر</div>
-        <div class="product-bottom">
-          <div><span class="product-price-old">24.000</span><span class="product-price">21.600 د.ك</span></div>
-          <div class="product-rating"><i class="ti ti-star-filled"></i> 4.7</div>
-        </div>
-        <button class="add-cart" onclick="event.stopPropagation()"><i class="ti ti-plus"></i> أضف للسلة</button>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- LOAD MORE -->
-  <div style="text-align:center;margin-top:32px;">
-    <button style="padding:12px 36px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:14px;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">
-      عرض المزيد (276 منتج)
+<!-- ══════════ FILTER BAR ══════════ -->
+<div class="fbar" id="filter-bar">
+  <div class="fbar-row">
+    <div class="fchips" id="catChips"></div>
+    <button class="btn-filter" id="filterBtn" onclick="openFilters()">
+      <i class="ti ti-adjustments-horizontal"></i>
+      <span data-ar="تصفية" data-en="Filters">تصفية</span>
+      <span class="fcount" id="filterCount">0</span>
     </button>
   </div>
-</div>
-
-<!-- REVIEWS SECTION -->
-<div class="reviews-section" id="tab-reviews" style="display:none;">
-  <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:32px;text-align:center;color:var(--text3);">
-    <i class="ti ti-star" style="font-size:40px;color:var(--gold);margin-bottom:12px;display:block;"></i>
-    <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;">128 تقييم</div>
-    <div style="font-size:14px;">متوسط التقييم: <strong style="color:var(--gold);">4.9 / 5</strong></div>
+  <div class="factive" id="activePills"></div>
+  <div class="fmeta">
+    <div class="fresults" id="resultCount"></div>
   </div>
 </div>
 
-<!-- POLICY SECTION -->
-<div class="policy-section" id="tab-policy" style="display:none;">
-  <div class="policy-grid">
-    <div class="policy-card">
-      <div class="policy-icon"><i class="ti ti-refresh"></i></div>
-      <div class="policy-title">سياسة الإرجاع</div>
-      <div class="policy-text">يمكن إرجاع المنتج خلال 7 أيام من تاريخ الاستلام بشرط أن يكون بحالته الأصلية وغير مستخدم مع الكرت والتاغ.</div>
+<!-- ══════════ PRODUCTS ══════════ -->
+<section class="psec" id="tab-products">
+  <div class="pgrid" id="products-grid"></div>
+  <div id="emptyState"></div>
+  <button class="btn-more" id="loadMore" onclick="loadMore()" style="display:none;"></button>
+</section>
+
+<!-- ══════════ REVIEWS ══════════ -->
+<section class="rsec" id="tab-reviews">
+  <div class="rscore">
+    <div class="rscore-big">
+      <div class="rscore-n" id="rvScore">4.9</div>
+      <div class="rscore-stars" id="rvStars">★★★★★</div>
+      <div class="rscore-c" id="rvCount"></div>
     </div>
-    <div class="policy-card">
-      <div class="policy-icon"><i class="ti ti-exchange"></i></div>
-      <div class="policy-title">الاستبدال</div>
-      <div class="policy-text">استبدال مجاني في حال وجود عيب مصنعي أو خطأ في الطلب. يتم التواصل مع دعم رف لتنسيق عملية الاستبدال.</div>
+    <div class="rbars" id="rvBars"></div>
+  </div>
+</section>
+
+<!-- ══════════ POLICY ══════════ -->
+<section class="polsec" id="tab-policy">
+  <div class="polgrid">
+    <div class="polcard">
+      <div class="polico"><i class="ti ti-refresh"></i></div>
+      <div class="poltitle" data-ar="سياسة الإرجاع" data-en="Return policy">سياسة الإرجاع</div>
+      <div class="poltext" data-ar="يمكن إرجاع المنتج خلال 7 أيام من تاريخ الاستلام بشرط أن يكون بحالته الأصلية وغير مستخدم مع الكرت والتاغ." data-en="Products may be returned within 7 days of delivery, provided they are unused and in their original condition with tags attached.">يمكن إرجاع المنتج خلال 7 أيام من تاريخ الاستلام بشرط أن يكون بحالته الأصلية وغير مستخدم مع الكرت والتاغ.</div>
     </div>
-    <div class="policy-card">
-      <div class="policy-icon"><i class="ti ti-headset"></i></div>
-      <div class="policy-title">الدعم والمساعدة</div>
-      <div class="policy-text">لأي استفسار أو شكوى تواصل مع دعم رف مباشرة وسيتم الرد خلال 24 ساعة من أيام العمل.</div>
+    <div class="polcard">
+      <div class="polico"><i class="ti ti-exchange"></i></div>
+      <div class="poltitle" data-ar="الاستبدال" data-en="Exchanges">الاستبدال</div>
+      <div class="poltext" data-ar="استبدال مجاني في حال وجود عيب مصنعي أو خطأ في الطلب. يتم التواصل مع دعم رف لتنسيق عملية الاستبدال." data-en="Free exchange for manufacturing defects or incorrect orders. Contact RAF support to arrange the exchange.">استبدال مجاني في حال وجود عيب مصنعي أو خطأ في الطلب. يتم التواصل مع دعم رف لتنسيق عملية الاستبدال.</div>
+    </div>
+    <div class="polcard">
+      <div class="polico"><i class="ti ti-headset"></i></div>
+      <div class="poltitle" data-ar="الدعم والمساعدة" data-en="Support">الدعم والمساعدة</div>
+      <div class="poltext" data-ar="لأي استفسار أو شكوى تواصل مع دعم رف مباشرة وسيتم الرد خلال 24 ساعة من أيام العمل." data-en="For any question or complaint, contact RAF support directly — we reply within 24 working hours.">لأي استفسار أو شكوى تواصل مع دعم رف مباشرة وسيتم الرد خلال 24 ساعة من أيام العمل.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ FILTER SHEET ══════════ -->
+<div class="fsheet-back" id="fsheetBack" onclick="if(event.target===this)closeFilters()">
+  <div class="fsheet" role="dialog" aria-modal="true" aria-label="تصفية المنتجات">
+    <div class="fsheet-head">
+      <h3 data-ar="تصفية المنتجات" data-en="Filter products">تصفية المنتجات</h3>
+      <button class="fsheet-x" onclick="closeFilters()" aria-label="إغلاق"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="fsheet-body" id="fsheetBody"></div>
+    <div class="fsheet-foot">
+      <button class="fbtn-reset" onclick="resetFilters()" data-ar="إعادة تعيين" data-en="Reset">إعادة تعيين</button>
+      <button class="fbtn-apply" onclick="applyFilters()" id="applyBtn"></button>
     </div>
   </div>
 </div>
 
 <!-- FOOTER -->
 <footer>
-  <div>جميع الحقوق محفوظة © 2026 رف</div>
+  <div data-ar="جميع الحقوق محفوظة © 2026 رف" data-en="All rights reserved © 2026 RAF">جميع الحقوق محفوظة © 2026 رف</div>
   <a href="raf_homepage.html"><img src="assets/branding/logo-light.svg" alt="RAF Marketplace" class="brand-logo-foot"></a>
 </footer>
-
-<script>
-  /* -----------------------------------------------
-     STORE DATA MAP
-     Each store has its own slug (URL ?store=slug)
-  ----------------------------------------------- */
-  const STORE_DATA = {
-    'casa-mode': {
-      name: 'Casa Mode', icon: 'ti-hanger', cat: 'ملابس وأزياء', num: '#001',
-      rating: '4.9', orders: '1,284', followers: '3.2K',
-      desc: 'متجر Casa Mode للملابس والأزياء العصرية — نقدم أحدث صيحات الموضة بجودة عالية وأسعار منافسة. نخدم الكويت منذ 2019.',
-      status: 'open', products: 284, satisfaction: '98%',
-      filters: ['قمصان', 'بناطيل', 'فساتين', 'هودي'],
-      reviewCount: 128, reviewScore: '4.9', productId: 'P-001'
-    },
-    'sole-co': {
-      name: 'Sole & Co', icon: 'ti-shoe', cat: 'أحذية ورياضة', num: '#002',
-      rating: '4.7', orders: '892', followers: '2.1K',
-      desc: 'متجر Sole & Co للأحذية الرياضية والكاجوال — أفضل ماركات الأحذية العالمية والمحلية في الكويت بأسعار تنافسية.',
-      status: 'open', products: 156, satisfaction: '95%',
-      filters: ['رياضي', 'كاجوال', 'رسمي', 'عروض'],
-      reviewCount: 94, reviewScore: '4.7', productId: 'P-002'
-    },
-    'techzone': {
-      name: 'TechZone', icon: 'ti-device-mobile', cat: 'هواتف وإلكترونيات', num: '#003',
-      rating: '4.8', orders: '2,140', followers: '5.8K',
-      desc: 'TechZone — وجهتك الأولى للهواتف والأجهزة الإلكترونية في الكويت. أجهزة أصلية بضمان رسمي وأفضل الأسعار.',
-      status: 'open', products: 312, satisfaction: '97%',
-      filters: ['هواتف', 'أجهزة لوحية', 'اكسسوارات', 'عروض'],
-      reviewCount: 317, reviewScore: '4.8', productId: 'P-003'
-    },
-    'luxe-accessories': {
-      name: 'Luxe Accessories', icon: 'ti-sunglasses', cat: 'اكسسوارات فاخرة', num: '#004',
-      rating: '4.6', orders: '648', followers: '1.4K',
-      desc: 'Luxe Accessories — اكسسوارات فاخرة من أفضل الماركات العالمية. نظارات، حقائب، وساعات بتصاميم راقية.',
-      status: 'open', products: 98, satisfaction: '93%',
-      filters: ['نظارات', 'حقائب', 'ساعات', 'عروض'],
-      reviewCount: 62, reviewScore: '4.6', productId: 'P-004'
-    },
-    'urban-thread': {
-      name: 'Urban Thread', icon: 'ti-shirt', cat: 'ملابس كاجوال', num: '#005',
-      rating: '4.5', orders: '420', followers: '980',
-      desc: 'Urban Thread — ملابس كاجوال عصرية للشباب. أسلوب حياة مريح ومعاصر بأسعار في متناول الجميع.',
-      status: 'closed', products: 74, satisfaction: '90%',
-      filters: ['تيشيرتات', 'سويتشيرتات', 'شورتات', 'عروض'],
-      reviewCount: 48, reviewScore: '4.5', productId: 'P-005'
-    },
-    'glam-store': {
-      name: 'Glam Store', icon: 'ti-diamond', cat: 'اكسسوارات وساعات', num: '#006',
-      rating: '4.9', orders: '1,052', followers: '2.9K',
-      desc: 'Glam Store — اكسسوارات فاخرة وساعات ذكية بريميوم. لأن التفاصيل هي ما يصنع الفارق في إطلالتك.',
-      status: 'open', products: 167, satisfaction: '99%',
-      filters: ['اكسسوارات', 'ساعات ذكية', 'مجوهرات', 'عروض'],
-      reviewCount: 204, reviewScore: '4.9', productId: 'P-006'
-    }
-  };
-
-  /* -----------------------------------------------
-     INIT — read URL param and inject store data
-  ----------------------------------------------- */
-  (function initStore() {
-    const params = new URLSearchParams(window.location.search);
-    const slug   = params.get('store') || 'casa-mode';
-    const s      = STORE_DATA[slug] || STORE_DATA['casa-mode'];
-
-    // Page title
-    document.title = 'رف — ' + s.name;
-
-    // Breadcrumb store name
-    const bcStore = document.querySelector('.breadcrumb span[style]');
-    if (bcStore) bcStore.textContent = s.name;
-
-    // Store avatar icon
-    const avatarIcon = document.querySelector('.store-avatar i');
-    if (avatarIcon) avatarIcon.className = 'ti ' + s.icon;
-
-    // Store hero name
-    const heroName = document.querySelector('.store-hero-name');
-    if (heroName) heroName.textContent = s.name;
-
-    // Store num in hero name (append)
-    heroName.innerHTML = s.name + ' <span style="font-size:14px;color:var(--gold);font-family:\'DM Sans\',sans-serif;font-weight:400;">' + s.num + '</span>';
-
-    // Hero meta: category tag
-    const catTag = document.querySelector('.store-hero-tag');
-    if (catTag) catTag.textContent = s.cat;
-
-    // Hero stats: rating, orders, followers
-    const heroStats = document.querySelectorAll('.store-hero-stat');
-    if (heroStats[0]) heroStats[0].innerHTML = '<i class="ti ti-star-filled" style="color:var(--gold);"></i> ' + s.rating;
-    if (heroStats[1]) heroStats[1].innerHTML = '<i class="ti ti-shopping-bag"></i> ' + s.orders + ' طلب';
-    if (heroStats[2]) heroStats[2].innerHTML = '<i class="ti ti-users"></i> ' + s.followers + ' متابع';
-
-    // Store description
-    const descEl = document.querySelector('.store-desc');
-    if (descEl) descEl.textContent = s.desc;
-
-    // Store stats block (products, rating, satisfaction)
-    const statNums = document.querySelectorAll('.store-stat-num');
-    if (statNums[0]) statNums[0].textContent = s.products;
-    if (statNums[1]) statNums[1].textContent = s.rating;
-    if (statNums[2]) statNums[2].textContent = s.satisfaction;
-
-    // Status: open / closed
-    const statusWrap = document.querySelector('.store-hours');
-    if (statusWrap) {
-      if (s.status === 'closed') {
-        statusWrap.innerHTML = '<span class="status-closed"><i class="ti ti-circle-filled" style="font-size:8px;margin-left:4px;"></i> مغلق حالياً</span>';
-      } else {
-        statusWrap.innerHTML = '<span class="status-open"><i class="ti ti-circle-filled" style="font-size:8px;"></i> مفتوح الآن</span><span class="hours-text">يغلق الساعة 11م</span>';
-      }
-    }
-
-    // Reviews tab label
-    const reviewTab = document.querySelectorAll('.store-tab')[1];
-    if (reviewTab) reviewTab.textContent = 'التقييمات (' + s.reviewCount + ')';
-
-    // Reviews section
-    const reviewsBox = document.querySelector('#tab-reviews div');
-    if (reviewsBox) {
-      reviewsBox.innerHTML = '<i class="ti ti-star" style="font-size:40px;color:var(--gold);margin-bottom:12px;display:block;"></i>' +
-        '<div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;">' + s.reviewCount + ' تقييم</div>' +
-        '<div style="font-size:14px;">متوسط التقييم: <strong style="color:var(--gold);">' + s.reviewScore + ' / 5</strong></div>';
-    }
-
-    // Filter chips (category-specific)
-    const filterBar = document.getElementById('filter-bar');
-    if (filterBar) {
-      const existing = filterBar.querySelectorAll('.filter-chip');
-      existing.forEach(c => c.remove());
-      // Re-insert: الكل first
-      const allChip = document.createElement('button');
-      allChip.className = 'filter-chip on';
-      allChip.textContent = 'الكل';
-      allChip.onclick = function() { filterCat(this); };
-      filterBar.insertBefore(allChip, filterBar.querySelector('.sort-select'));
-      s.filters.forEach(f => {
-        const chip = document.createElement('button');
-        chip.className = 'filter-chip';
-        chip.textContent = f;
-        chip.onclick = function() { filterCat(this); };
-        filterBar.insertBefore(chip, filterBar.querySelector('.sort-select'));
-      });
-    }
-
-    // Wire all product cards to this store's main product page
-    const grid = document.getElementById('products-grid');
-    if (grid && s.productId) {
-      grid.querySelectorAll('.product-card').forEach(card => {
-        card.onclick = function() { window.location = 'raf_product.html?id=' + s.productId; };
-      });
-    }
-  })();
-
-  /* -----------------------------------------------
-     TAB SWITCHING
-  ----------------------------------------------- */
-  function switchTab(id, btn) {
-    document.querySelectorAll('.store-tab').forEach(t => t.classList.remove('on'));
-    btn.classList.add('on');
-    document.getElementById('tab-products').style.display = id === 'products' ? 'block' : 'none';
-    document.getElementById('tab-reviews').style.display  = id === 'reviews'  ? 'block' : 'none';
-    document.getElementById('tab-policy').style.display   = id === 'policy'   ? 'block' : 'none';
-    document.getElementById('filter-bar').style.display   = id === 'products' ? 'flex'  : 'none';
-  }
-
-  function filterCat(btn) {
-    document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-  }
-
-  document.querySelectorAll('.product-wish').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const i = btn.querySelector('i');
-      if (i.classList.contains('ti-heart')) {
-        i.classList.replace('ti-heart', 'ti-heart-filled');
-        btn.style.color = '#E05555';
-      } else {
-        i.classList.replace('ti-heart-filled', 'ti-heart');
-        btn.style.color = '';
-      }
-    });
-  });
-</script>
 
 <!-- MOBILE APP BOTTOM NAV -->
 <nav class="app-bnav">
@@ -765,29 +609,523 @@
   <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
+
 <script src="raf_topbar.js"></script>
 <script src="raf_nav.js"></script>
 <script src="raf_search.js"></script>
-<!-- Global RAF Product Card — replace legacy store product cards (store element disabled: single store) -->
 <script src="raf_data.js"></script>
+<script src="raf_catalog.js"></script>
 <script src="raf_card.js"></script>
 <!-- Quick Order sheet opens on top of this page when arriving with ?quick=<id> -->
-<script src="raf_catalog.js"></script>
 <script src="raf_quick.js"></script>
+
 <script>
-  (function(){
-    function up(){
-      /* tag every card with the owning store so the one-store-per-order rule
-         can detect cross-store adds; the store line stays hidden (single-store page) */
-      var name = (document.querySelector('.store-hero-name') || {}).textContent || '';
-      /* single-store context → open the full Product Details page, not Quick Order */
-      RAFCard.upgradeAll({
-        selector:'.product-card', storeName: name.trim(),
-        opts:{ store:false, hrefFor:function(p){ return 'raf_product.html?id=' + encodeURIComponent(p.id); } }
-      });
+/* ============================================================
+   RAF STORE PAGE
+   Routing preserved: ?store=<slug>  ·  ?quick=<id> (raf_quick.js)
+   Single Store Shopping preserved: every product carries its owning
+   store, and adds funnel through RAFShop.Cart.tryAdd via RAFCard.
+   ============================================================ */
+
+/* ---------- language ---------- */
+function root(){ return document.getElementById('htmlRoot') || document.documentElement; }
+function curLang(){ return root().lang === 'en' ? 'en' : 'ar'; }
+function isEn(){ return curLang() === 'en'; }
+function T(ar, en){ return isEn() ? en : ar; }
+function L(o){ return (o && typeof o === 'object') ? (isEn() ? o.en : o.ar) : (o || ''); }
+
+function applyLang(){
+  var en = isEn();
+  document.querySelectorAll('[data-ar]').forEach(function(el){
+    var t = el.getAttribute('data-' + (en ? 'en' : 'ar'));
+    if (t !== null) el.textContent = t;
+  });
+  var lbl = document.getElementById('langLabel'); if (lbl) lbl.textContent = en ? 'ع' : 'EN';
+  /* breadcrumb chevrons follow reading direction */
+  document.querySelectorAll('.bc-sep').forEach(function(i){
+    i.className = 'ti bc-sep ' + (en ? 'ti-chevron-right' : 'ti-chevron-left');
+  });
+  renderStore();          /* store copy + tab labels */
+  renderCatChips();
+  renderFilterSheet();
+  render();               /* product grid re-renders in the new language */
+}
+window.toggleLang = function(){
+  var r = root(), en = r.lang === 'en';
+  r.lang = en ? 'ar' : 'en';
+  r.dir  = en ? 'rtl' : 'ltr';
+  localStorage.setItem('raf_lang', r.lang);
+  applyLang();
+};
+
+/* -----------------------------------------------
+   STORE DATA MAP — slug matches RAFCatalog.slugFor
+----------------------------------------------- */
+var STORE_DATA = {
+  'casa-mode': {
+    name: 'Casa Mode', icon: 'ti-hanger', num: '#001',
+    cat: { ar: 'ملابس وأزياء', en: 'Fashion & Apparel' },
+    rating: '4.9', orders: '1,284', followers: '3.2K',
+    desc: { ar: 'متجر Casa Mode للملابس والأزياء العصرية — نقدم أحدث صيحات الموضة بجودة عالية وأسعار منافسة. نخدم الكويت منذ 2019.',
+            en: 'Casa Mode brings contemporary fashion to Kuwait — the latest trends in premium quality at competitive prices. Serving since 2019.' },
+    status: 'open', products: 284, satisfaction: '98%',
+    reviewCount: 128, reviewScore: '4.9',
+    cats: [ { k:'shirts', ar:'قمصان', en:'Shirts' }, { k:'trousers', ar:'بناطيل', en:'Trousers' },
+            { k:'dresses', ar:'فساتين', en:'Dresses' }, { k:'hoodies', ar:'هودي', en:'Hoodies' } ],
+    items: [
+      { id:'P-001', ar:'قميص أوفرسايز كلاسيك', en:'Classic Oversize Shirt', price:'12.000', old:'17.000', disc:30, rate:'4.8', rev:'124', ic:'ti-shirt', cat:'shirts', stock:15 },
+      { id:'P-007', ar:'فستان سهرة بولدر', en:'Boulder Evening Dress', price:'30.000', old:'60.000', disc:50, rate:'4.7', rev:'44', ic:'ti-hanger', cat:'dresses', stock:4 },
+      { id:'P-005', ar:'حقيبة يد جلد طبيعي', en:'Genuine Leather Handbag', price:'35.700', old:'42.000', disc:15, rate:'4.9', rev:'152', ic:'ti-backpack', cat:'dresses', stock:7 },
+      { id:'P-JACKET', ar:'جاكيت شتوي عصري', en:'Modern Winter Jacket', price:'29.900', old:'45.000', disc:33, rate:'4.6', rev:'98', ic:'ti-hanger', cat:'hoodies', stock:11 },
+      { id:'CM-11', ar:'قميص لينن بريميوم', en:'Premium Linen Shirt', price:'18.000', old:'', disc:0, rate:'4.7', rev:'86', ic:'ti-shirt', cat:'shirts', stock:12 },
+      { id:'CM-12', ar:'بنطلون كاجوال واسع', en:'Wide-Leg Casual Trousers', price:'18.700', old:'22.000', disc:15, rate:'4.9', rev:'73', ic:'ti-hanger', cat:'trousers', stock:9 },
+      { id:'CM-13', ar:'هودي أوفرسايز فاخر', en:'Luxe Oversize Hoodie', price:'25.000', old:'', disc:0, rate:'4.6', rev:'58', ic:'ti-shirt', cat:'hoodies', stock:6 },
+      { id:'CM-14', ar:'تيشيرت بيسك كلاسيك', en:'Classic Basic Tee', price:'8.500', old:'', disc:0, rate:'4.8', rev:'201', ic:'ti-shirt', cat:'shirts', stock:22 },
+      { id:'CM-15', ar:'قميص بولو فاخر', en:'Premium Polo Shirt', price:'21.600', old:'24.000', disc:10, rate:'4.7', rev:'64', ic:'ti-shirt', cat:'shirts', stock:0 },
+      { id:'CM-16', ar:'بنطلون جينز سليم', en:'Slim Fit Jeans', price:'23.000', old:'', disc:0, rate:'4.5', rev:'41', ic:'ti-hanger', cat:'trousers', stock:14 },
+      { id:'CM-17', ar:'فستان صيفي مطبوع', en:'Printed Summer Dress', price:'26.500', old:'34.000', disc:22, rate:'4.8', rev:'92', ic:'ti-hanger', cat:'dresses', stock:8 },
+      { id:'CM-18', ar:'سويتشيرت قطن عضوي', en:'Organic Cotton Sweatshirt', price:'19.900', old:'', disc:0, rate:'4.4', rev:'37', ic:'ti-shirt', cat:'hoodies', stock:10 }
+    ]
+  },
+  'sole-co': {
+    name: 'Sole & Co', icon: 'ti-shoe', num: '#002',
+    cat: { ar: 'أحذية ورياضة', en: 'Footwear & Sport' },
+    rating: '4.7', orders: '892', followers: '2.1K',
+    desc: { ar: 'متجر Sole & Co للأحذية الرياضية والكاجوال — أفضل ماركات الأحذية العالمية والمحلية في الكويت بأسعار تنافسية.',
+            en: 'Sole & Co for sport and casual footwear — the best global and local shoe brands in Kuwait at competitive prices.' },
+    status: 'open', products: 156, satisfaction: '95%',
+    reviewCount: 94, reviewScore: '4.7',
+    cats: [ { k:'sport', ar:'رياضي', en:'Sport' }, { k:'casual', ar:'كاجوال', en:'Casual' }, { k:'formal', ar:'رسمي', en:'Formal' } ],
+    items: [
+      { id:'P-002', ar:'حذاء رياضي Air Comfort', en:'Air Comfort Sneakers', price:'28.500', old:'38.000', disc:25, rate:'4.7', rev:'89', ic:'ti-shoe', cat:'sport', stock:9 },
+      { id:'SC-11', ar:'حذاء جري خفيف', en:'Lightweight Running Shoes', price:'32.000', old:'', disc:0, rate:'4.6', rev:'54', ic:'ti-shoe', cat:'sport', stock:11 },
+      { id:'SC-12', ar:'حذاء كاجوال جلد', en:'Leather Casual Shoes', price:'26.000', old:'34.000', disc:23, rate:'4.8', rev:'77', ic:'ti-shoe', cat:'casual', stock:7 },
+      { id:'SC-13', ar:'حذاء رسمي أوكسفورد', en:'Oxford Formal Shoes', price:'45.000', old:'', disc:0, rate:'4.9', rev:'38', ic:'ti-shoe', cat:'formal', stock:5 },
+      { id:'SC-14', ar:'حذاء تدريب متعدد', en:'Cross Training Shoes', price:'35.500', old:'42.000', disc:15, rate:'4.5', rev:'62', ic:'ti-shoe', cat:'sport', stock:0 },
+      { id:'SC-15', ar:'سنيكرز كلاسيك أبيض', en:'Classic White Sneakers', price:'22.900', old:'', disc:0, rate:'4.7', rev:'145', ic:'ti-shoe', cat:'casual', stock:18 },
+      { id:'SC-16', ar:'حذاء لوفر جلد سويدي', en:'Suede Leather Loafers', price:'38.000', old:'48.000', disc:21, rate:'4.6', rev:'29', ic:'ti-shoe', cat:'formal', stock:6 },
+      { id:'SC-17', ar:'شبشب رياضي مريح', en:'Comfort Sport Slides', price:'9.500', old:'', disc:0, rate:'4.4', rev:'96', ic:'ti-shoe', cat:'casual', stock:25 }
+    ]
+  },
+  'techzone': {
+    name: 'TechZone', icon: 'ti-device-mobile', num: '#003',
+    cat: { ar: 'هواتف وإلكترونيات', en: 'Phones & Electronics' },
+    rating: '4.8', orders: '2,140', followers: '5.8K',
+    desc: { ar: 'TechZone — وجهتك الأولى للهواتف والأجهزة الإلكترونية في الكويت. أجهزة أصلية بضمان رسمي وأفضل الأسعار.',
+            en: 'TechZone — your first destination for phones and electronics in Kuwait. Genuine devices with official warranty at the best prices.' },
+    status: 'open', products: 312, satisfaction: '97%',
+    reviewCount: 317, reviewScore: '4.8',
+    cats: [ { k:'phones', ar:'هواتف', en:'Phones' }, { k:'audio', ar:'صوتيات', en:'Audio' },
+            { k:'tablets', ar:'أجهزة لوحية', en:'Tablets' }, { k:'accessories', ar:'اكسسوارات', en:'Accessories' } ],
+    items: [
+      { id:'P-003', ar:'iPhone 16 Pro', en:'iPhone 16 Pro', price:'189.000', old:'220.000', disc:15, rate:'5.0', rev:'210', ic:'ti-device-mobile', cat:'phones', stock:6 },
+      { id:'P-EARBUDS', ar:'سماعات لاسلكية فاخرة', en:'Premium Wireless Earbuds', price:'24.500', old:'35.000', disc:30, rate:'4.8', rev:'320', ic:'ti-device-mobile', cat:'audio', stock:14 },
+      { id:'P-HEADPHONES', ar:'سماعة رأس احترافية', en:'Pro Headphones', price:'38.000', old:'52.000', disc:27, rate:'4.8', rev:'410', ic:'ti-headphones', cat:'audio', stock:0 },
+      { id:'P-008', ar:'سماعة Sony WH-1000XM5', en:'Sony WH-1000XM5', price:'35.750', old:'55.000', disc:35, rate:'4.9', rev:'201', ic:'ti-headphones', cat:'audio', stock:5 },
+      { id:'TZ-11', ar:'تابلت 11 بوصة', en:'11-inch Tablet', price:'135.000', old:'', disc:0, rate:'4.6', rev:'88', ic:'ti-device-tablet', cat:'tablets', stock:9 },
+      { id:'TZ-12', ar:'شاحن سريع 65 واط', en:'65W Fast Charger', price:'12.500', old:'18.000', disc:30, rate:'4.7', rev:'156', ic:'ti-plug', cat:'accessories', stock:32 },
+      { id:'TZ-13', ar:'باور بانك 20000 مللي', en:'20,000mAh Power Bank', price:'16.900', old:'', disc:0, rate:'4.5', rev:'104', ic:'ti-battery-3', cat:'accessories', stock:21 },
+      { id:'TZ-14', ar:'هاتف ذكي متوسط الفئة', en:'Mid-Range Smartphone', price:'78.000', old:'95.000', disc:18, rate:'4.4', rev:'67', ic:'ti-device-mobile', cat:'phones', stock:12 },
+      { id:'TZ-15', ar:'ساعة ذكية رياضية', en:'Sport Smartwatch', price:'42.000', old:'', disc:0, rate:'4.6', rev:'93', ic:'ti-watch', cat:'accessories', stock:8 },
+      { id:'TZ-16', ar:'مكبر صوت بلوتوث', en:'Bluetooth Speaker', price:'19.500', old:'26.000', disc:25, rate:'4.7', rev:'128', ic:'ti-device-speaker', cat:'audio', stock:0 },
+      { id:'TZ-17', ar:'تابلت للأطفال 8 بوصة', en:"8-inch Kids' Tablet", price:'52.000', old:'', disc:0, rate:'4.3', rev:'45', ic:'ti-device-tablet', cat:'tablets', stock:15 },
+      { id:'TZ-18', ar:'حافظة هاتف مضادة للصدمات', en:'Rugged Phone Case', price:'5.900', old:'8.500', disc:31, rate:'4.5', rev:'187', ic:'ti-device-mobile', cat:'accessories', stock:44 }
+    ]
+  },
+  'luxe-accessories': {
+    name: 'Luxe Accessories', icon: 'ti-sunglasses', num: '#004',
+    cat: { ar: 'اكسسوارات فاخرة', en: 'Luxury Accessories' },
+    rating: '4.6', orders: '648', followers: '1.4K',
+    desc: { ar: 'Luxe Accessories — اكسسوارات فاخرة من أفضل الماركات العالمية. نظارات، حقائب، وساعات بتصاميم راقية.',
+            en: 'Luxe Accessories — refined pieces from the finest global brands. Eyewear, bags and watches with elegant design.' },
+    status: 'open', products: 98, satisfaction: '93%',
+    reviewCount: 62, reviewScore: '4.6',
+    cats: [ { k:'eyewear', ar:'نظارات', en:'Eyewear' }, { k:'bags', ar:'حقائب', en:'Bags' }, { k:'watches', ar:'ساعات', en:'Watches' } ],
+    items: [
+      { id:'P-004', ar:'نظارة شمسية Ray Luxe', en:'Ray Luxe Sunglasses', price:'35.000', old:'58.000', disc:40, rate:'4.6', rev:'67', ic:'ti-sunglasses', cat:'eyewear', stock:12 },
+      { id:'LX-11', ar:'نظارة طبية إطار معدني', en:'Metal Frame Eyeglasses', price:'28.000', old:'', disc:0, rate:'4.4', rev:'31', ic:'ti-sunglasses', cat:'eyewear', stock:9 },
+      { id:'LX-12', ar:'حقيبة كتف جلد فاخر', en:'Luxury Leather Shoulder Bag', price:'62.000', old:'78.000', disc:20, rate:'4.8', rev:'54', ic:'ti-backpack', cat:'bags', stock:5 },
+      { id:'LX-13', ar:'محفظة جلد كلاسيكية', en:'Classic Leather Wallet', price:'18.500', old:'', disc:0, rate:'4.7', rev:'88', ic:'ti-wallet', cat:'bags', stock:17 },
+      { id:'LX-14', ar:'ساعة يد بتصميم مينيمال', en:'Minimalist Wristwatch', price:'54.000', old:'70.000', disc:23, rate:'4.5', rev:'42', ic:'ti-clock-hour-4', cat:'watches', stock:0 },
+      { id:'LX-15', ar:'حزام جلد طبيعي', en:'Genuine Leather Belt', price:'14.900', old:'', disc:0, rate:'4.6', rev:'73', ic:'ti-hanger', cat:'bags', stock:20 },
+      { id:'LX-16', ar:'نظارة شمسية بولارايزد', en:'Polarised Sunglasses', price:'41.000', old:'52.000', disc:21, rate:'4.7', rev:'59', ic:'ti-sunglasses', cat:'eyewear', stock:7 },
+      { id:'LX-17', ar:'ساعة جلد كلاسيكية', en:'Classic Leather Watch', price:'68.000', old:'85.000', disc:20, rate:'4.9', rev:'96', ic:'ti-clock-hour-4', cat:'watches', stock:4 }
+    ]
+  },
+  'urban-thread': {
+    name: 'Urban Thread', icon: 'ti-shirt', num: '#005',
+    cat: { ar: 'ملابس كاجوال', en: 'Casual Wear' },
+    rating: '4.5', orders: '420', followers: '980',
+    desc: { ar: 'Urban Thread — ملابس كاجوال عصرية للشباب. أسلوب حياة مريح ومعاصر بأسعار في متناول الجميع.',
+            en: 'Urban Thread — modern casual wear for a younger crowd. Comfortable, contemporary style at accessible prices.' },
+    status: 'closed', products: 74, satisfaction: '90%',
+    reviewCount: 48, reviewScore: '4.5',
+    cats: [ { k:'tees', ar:'تيشيرتات', en:'T-shirts' }, { k:'sweats', ar:'سويتشيرتات', en:'Sweatshirts' }, { k:'shorts', ar:'شورتات', en:'Shorts' } ],
+    items: [
+      { id:'UT-11', ar:'تيشيرت جرافيك مطبوع', en:'Graphic Print Tee', price:'9.900', old:'14.000', disc:29, rate:'4.5', rev:'112', ic:'ti-shirt', cat:'tees', stock:26 },
+      { id:'UT-12', ar:'تيشيرت قطن أساسي', en:'Essential Cotton Tee', price:'7.500', old:'', disc:0, rate:'4.6', rev:'204', ic:'ti-shirt', cat:'tees', stock:38 },
+      { id:'UT-13', ar:'سويتشيرت بغطاء رأس', en:'Hooded Sweatshirt', price:'21.000', old:'28.000', disc:25, rate:'4.4', rev:'67', ic:'ti-shirt', cat:'sweats', stock:14 },
+      { id:'UT-14', ar:'شورت رياضي كوول', en:'Cool Sport Shorts', price:'14.000', old:'', disc:0, rate:'4.5', rev:'58', ic:'ti-hanger', cat:'shorts', stock:19 },
+      { id:'UT-15', ar:'سويتشيرت كروبد', en:'Cropped Sweatshirt', price:'18.500', old:'24.000', disc:23, rate:'4.3', rev:'34', ic:'ti-shirt', cat:'sweats', stock:0 },
+      { id:'UT-16', ar:'شورت جينز كاجوال', en:'Casual Denim Shorts', price:'16.900', old:'', disc:0, rate:'4.2', rev:'41', ic:'ti-hanger', cat:'shorts', stock:11 },
+      { id:'UT-17', ar:'تيشيرت أوفرسايز', en:'Oversized Tee', price:'11.500', old:'15.000', disc:23, rate:'4.7', rev:'89', ic:'ti-shirt', cat:'tees', stock:23 },
+      { id:'UT-18', ar:'جاكيت جينز خفيف', en:'Light Denim Jacket', price:'32.000', old:'', disc:0, rate:'4.6', rev:'52', ic:'ti-hanger', cat:'sweats', stock:8 }
+    ]
+  },
+  'glam-store': {
+    name: 'Glam Store', icon: 'ti-diamond', num: '#006',
+    cat: { ar: 'اكسسوارات وساعات', en: 'Accessories & Watches' },
+    rating: '4.9', orders: '1,052', followers: '2.9K',
+    desc: { ar: 'Glam Store — اكسسوارات فاخرة وساعات ذكية بريميوم. لأن التفاصيل هي ما يصنع الفارق في إطلالتك.',
+            en: 'Glam Store — luxury accessories and premium smartwatches. Because the details are what set your look apart.' },
+    status: 'open', products: 167, satisfaction: '99%',
+    reviewCount: 204, reviewScore: '4.9',
+    cats: [ { k:'smart', ar:'ساعات ذكية', en:'Smartwatches' }, { k:'jewel', ar:'مجوهرات', en:'Jewellery' }, { k:'acc', ar:'اكسسوارات', en:'Accessories' } ],
+    items: [
+      { id:'P-006', ar:'ساعة ذكية Premium', en:'Premium Smartwatch', price:'75.000', old:'94.000', disc:20, rate:'4.8', rev:'98', ic:'ti-watch', cat:'smart', stock:10 },
+      { id:'GS-11', ar:'خاتم فضة مرصّع', en:'Studded Silver Ring', price:'33.000', old:'', disc:0, rate:'4.9', rev:'76', ic:'ti-diamond', cat:'jewel', stock:12 },
+      { id:'GS-12', ar:'سوار ذهبي رفيع', en:'Fine Gold Bracelet', price:'58.000', old:'72.000', disc:19, rate:'4.9', rev:'54', ic:'ti-diamond', cat:'jewel', stock:6 },
+      { id:'GS-13', ar:'ساعة ذكية نسائية', en:"Women's Smartwatch", price:'62.000', old:'', disc:0, rate:'4.7', rev:'83', ic:'ti-watch', cat:'smart', stock:9 },
+      { id:'GS-14', ar:'قلادة لؤلؤ كلاسيكية', en:'Classic Pearl Necklace', price:'44.500', old:'56.000', disc:21, rate:'4.8', rev:'47', ic:'ti-diamond', cat:'jewel', stock:0 },
+      { id:'GS-15', ar:'حزام ساعة جلد بديل', en:'Spare Leather Watch Strap', price:'11.000', old:'', disc:0, rate:'4.5', rev:'121', ic:'ti-clock-hour-4', cat:'acc', stock:34 },
+      { id:'GS-16', ar:'أقراط ذهبية صغيرة', en:'Petite Gold Earrings', price:'27.500', old:'35.000', disc:21, rate:'4.8', rev:'92', ic:'ti-diamond', cat:'jewel', stock:15 },
+      { id:'GS-17', ar:'علبة مجوهرات فاخرة', en:'Luxury Jewellery Box', price:'19.900', old:'', disc:0, rate:'4.6', rev:'38', ic:'ti-box', cat:'acc', stock:13 }
+    ]
+  }
+};
+
+/* -----------------------------------------------
+   STATE
+----------------------------------------------- */
+var SLUG  = new URLSearchParams(location.search).get('store') || 'casa-mode';
+var STORE = STORE_DATA[SLUG] || STORE_DATA['casa-mode'];
+var PAGE_SIZE = 8;
+var shown = PAGE_SIZE;
+
+/* committed filters (what the grid is showing) */
+var F = { cat: 'all', price: 'any', rating: 'any', inStock: false, onSale: false };
+/* draft filters (edited inside the sheet, committed on Apply) */
+var D = Object.assign({}, F);
+
+var PRICE_BANDS = [
+  { k:'any',   ar:'كل الأسعار', en:'Any price' },
+  { k:'u15',   ar:'أقل من 15',  en:'Under 15',  max:15 },
+  { k:'15-35', ar:'15 – 35',    en:'15 – 35',   min:15, max:35 },
+  { k:'35-70', ar:'35 – 70',    en:'35 – 70',   min:35, max:70 },
+  { k:'70p',   ar:'70 فأكثر',   en:'70 & above', min:70 }
+];
+var RATINGS = [
+  { k:'any', ar:'الكل',      en:'Any' },
+  { k:'4.5', ar:'4.5 فأعلى', en:'4.5 & up', min:4.5 },
+  { k:'4.0', ar:'4.0 فأعلى', en:'4.0 & up', min:4.0 }
+];
+
+/* -----------------------------------------------
+   STORE RENDER (hero · trust · tabs · reviews)
+----------------------------------------------- */
+function renderStore(){
+  var s = STORE;
+  document.title = T('رف — ', 'RAF — ') + s.name;
+
+  var bc = document.querySelector('.bc-cur'); if (bc) bc.textContent = s.name;
+  var ci = document.getElementById('crestIcon'); if (ci) ci.className = 'ti ' + s.icon;
+
+  /* keep the store name node intact — other components read it */
+  var nameEl = document.querySelector('.shero-name');
+  if (nameEl) nameEl.innerHTML = s.name + ' <span class="shero-num" id="storeNum">' + s.num + '</span>';
+
+  document.querySelector('#tagCat span').textContent = L(s.cat);
+  document.getElementById('tagRate').textContent = s.rating;
+  document.getElementById('tagOrders').textContent = s.orders;
+  document.getElementById('tagFollowers').textContent = s.followers;
+
+  var st = document.getElementById('tagStatus'), open = s.status !== 'closed';
+  st.className = 'stag ' + (open ? 'open' : 'closed');
+  st.querySelector('span').textContent = open ? T('مفتوح الآن', 'Open now') : T('مغلق حالياً', 'Closed now');
+  document.getElementById('closedBanner').classList.toggle('show', !open);
+
+  document.getElementById('storeDesc').textContent = L(s.desc);
+  document.getElementById('trProducts').textContent = s.products;
+  document.getElementById('trSat').textContent = s.satisfaction;
+
+  document.getElementById('tabReviewsBtn').textContent =
+    T('التقييمات (' + s.reviewCount + ')', 'Reviews (' + s.reviewCount + ')');
+
+  /* reviews summary */
+  document.getElementById('rvScore').textContent = s.reviewScore;
+  var full = Math.round(parseFloat(s.reviewScore));
+  document.getElementById('rvStars').textContent = '★★★★★'.slice(0, full) + '☆☆☆☆☆'.slice(0, 5 - full);
+  document.getElementById('rvCount').textContent =
+    T('بناءً على ' + s.reviewCount + ' تقييم', 'Based on ' + s.reviewCount + ' reviews');
+  var dist = [78, 15, 4, 2, 1];
+  document.getElementById('rvBars').innerHTML = dist.map(function(p, i){
+    return '<div class="rbar"><span class="rbar-k">' + (5 - i) + ' ★</span>' +
+      '<span class="rbar-t"><span class="rbar-f" style="width:' + p + '%"></span></span>' +
+      '<span class="rbar-p">' + p + '%</span></div>';
+  }).join('');
+
+  syncFollowBtn();
+}
+
+/* -----------------------------------------------
+   FILTERS
+----------------------------------------------- */
+function allCats(){ return [{ k:'all', ar:'الكل', en:'All' }].concat(STORE.cats); }
+
+function renderCatChips(){
+  document.getElementById('catChips').innerHTML = allCats().map(function(c){
+    return '<button class="fchip' + (F.cat === c.k ? ' on' : '') + '" data-k="' + c.k + '" onclick="pickCat(\'' + c.k + '\')">' + L(c) + '</button>';
+  }).join('');
+}
+function pickCat(k){ F.cat = k; D.cat = k; shown = PAGE_SIZE; renderCatChips(); render(); }
+
+function renderFilterSheet(){
+  var body = document.getElementById('fsheetBody');
+  function opts(list, sel, fn){
+    return list.map(function(o){
+      return '<button class="fopt' + (sel === o.k ? ' on' : '') + '" onclick="' + fn + '(\'' + o.k + '\')">' + L(o) + '</button>';
+    }).join('');
+  }
+  body.innerHTML =
+    '<div class="fgrp"><div class="fgrp-l"><i class="ti ti-category-2"></i> ' + T('الفئة', 'Category') + '</div>' +
+      '<div class="fopts">' + opts(allCats(), D.cat, 'dCat') + '</div></div>' +
+    '<div class="fgrp"><div class="fgrp-l"><i class="ti ti-coin"></i> ' + T('نطاق السعر (د.ك)', 'Price range (KWD)') + '</div>' +
+      '<div class="fopts">' + opts(PRICE_BANDS, D.price, 'dPrice') + '</div></div>' +
+    '<div class="fgrp"><div class="fgrp-l"><i class="ti ti-star"></i> ' + T('التقييم', 'Rating') + '</div>' +
+      '<div class="fopts">' + opts(RATINGS, D.rating, 'dRating') + '</div></div>' +
+    '<div class="fgrp"><div class="fgrp-l"><i class="ti ti-adjustments-check"></i> ' + T('خيارات إضافية', 'More options') + '</div>' +
+      '<button class="ftoggle' + (D.inStock ? ' on' : '') + '" onclick="dToggle(\'inStock\')">' +
+        '<i class="ti ti-package lead"></i><span class="tx">' + T('المتوفر فقط', 'In stock only') + '</span>' +
+        '<span class="fbox"><i class="ti ti-check"></i></span></button>' +
+      '<button class="ftoggle' + (D.onSale ? ' on' : '') + '" onclick="dToggle(\'onSale\')">' +
+        '<i class="ti ti-discount-2 lead"></i><span class="tx">' + T('عليها خصم', 'On sale') + '</span>' +
+        '<span class="fbox"><i class="ti ti-check"></i></span></button></div>';
+
+  updateApplyBtn();
+}
+function dCat(k){ D.cat = k; renderFilterSheet(); }
+function dPrice(k){ D.price = k; renderFilterSheet(); }
+function dRating(k){ D.rating = k; renderFilterSheet(); }
+function dToggle(k){ D[k] = !D[k]; renderFilterSheet(); }
+
+function updateApplyBtn(){
+  var n = matches(D).length;
+  document.getElementById('applyBtn').textContent =
+    n ? T('عرض ' + n + ' منتج', 'Show ' + n + ' product' + (n === 1 ? '' : 's'))
+      : T('لا توجد نتائج', 'No results');
+}
+
+function openFilters(){
+  D = Object.assign({}, F);
+  renderFilterSheet();
+  document.getElementById('fsheetBack').classList.add('show');
+  document.body.style.overflow = 'hidden';
+  document.addEventListener('keydown', onSheetKey);
+}
+function closeFilters(){
+  document.getElementById('fsheetBack').classList.remove('show');
+  document.body.style.overflow = '';
+  document.removeEventListener('keydown', onSheetKey);
+}
+function onSheetKey(e){ if (e.key === 'Escape') closeFilters(); }
+function applyFilters(){ F = Object.assign({}, D); shown = PAGE_SIZE; renderCatChips(); render(); closeFilters(); }
+function resetFilters(){ D = { cat:'all', price:'any', rating:'any', inStock:false, onSale:false }; renderFilterSheet(); }
+function clearAll(){ F = { cat:'all', price:'any', rating:'any', inStock:false, onSale:false }; shown = PAGE_SIZE; renderCatChips(); render(); }
+
+/* how many filters differ from the default */
+function activeCount(f){
+  var n = 0;
+  if (f.cat !== 'all') n++;
+  if (f.price !== 'any') n++;
+  if (f.rating !== 'any') n++;
+  if (f.inStock) n++;
+  if (f.onSale) n++;
+  return n;
+}
+
+/* the filter predicate — one place, used by the grid and the live Apply count */
+function matches(f){
+  return STORE.items.filter(function(p){
+    if (f.cat !== 'all' && p.cat !== f.cat) return false;
+    var band = PRICE_BANDS.find(function(b){ return b.k === f.price; });
+    if (band){
+      var v = parseFloat(p.price);
+      if (band.min != null && v < band.min) return false;
+      if (band.max != null && v >= band.max) return false;
     }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', up); else up();
-  })();
+    var r = RATINGS.find(function(x){ return x.k === f.rating; });
+    if (r && r.min != null && parseFloat(p.rate || 0) < r.min) return false;
+    if (f.inStock && isOOS(p)) return false;
+    if (f.onSale && !(p.disc > 0)) return false;
+    return true;
+  });
+}
+/* availability via the shared rule so Sold Out is consistent everywhere */
+function isOOS(p){
+  if (window.RAFShop && RAFShop.Stock) return RAFShop.Stock.isOOS(p);
+  return p.stock === 0;
+}
+
+/* Required variant selection is preserved: real options come from the shared
+   catalog when the product exists there, otherwise they are inferred from the
+   product name exactly as every other listing does. */
+function variantsFor(p){
+  if (p.variants) return p.variants;
+  if (window.RAFCatalog && RAFCatalog.get){
+    var c = RAFCatalog.get(p.id);
+    if (c && c.variants && c.variants.length) return c.variants;
+  }
+  if (window.RAFCard && RAFCard.guessVariants) return RAFCard.guessVariants(p.cat || '', (p.ar || '') + ' ' + (p.en || ''));
+  return null;
+}
+
+/* active-filter pills */
+function renderPills(){
+  var wrap = document.getElementById('activePills'), out = [];
+  function pill(label, clear){
+    return '<span class="fpill">' + label + '<button onclick="' + clear + '" aria-label="' + T('إزالة', 'Remove') + '"><i class="ti ti-x"></i></button></span>';
+  }
+  if (F.cat !== 'all'){
+    var c = allCats().find(function(x){ return x.k === F.cat; });
+    if (c) out.push(pill(L(c), "pickCat('all')"));
+  }
+  if (F.price !== 'any'){
+    var b = PRICE_BANDS.find(function(x){ return x.k === F.price; });
+    if (b) out.push(pill(L(b) + ' ' + T('د.ك', 'KWD'), "clearOne('price')"));
+  }
+  if (F.rating !== 'any'){
+    var r = RATINGS.find(function(x){ return x.k === F.rating; });
+    if (r) out.push(pill('★ ' + L(r), "clearOne('rating')"));
+  }
+  if (F.inStock) out.push(pill(T('المتوفر فقط', 'In stock only'), "clearOne('inStock')"));
+  if (F.onSale)  out.push(pill(T('عليها خصم', 'On sale'), "clearOne('onSale')"));
+
+  if (out.length) out.push('<button class="fclear" onclick="clearAll()">' + T('مسح الكل', 'Clear all') + '</button>');
+  wrap.innerHTML = out.join('');
+  wrap.classList.toggle('show', out.length > 0);
+}
+function clearOne(k){
+  if (k === 'inStock' || k === 'onSale') F[k] = false; else F[k] = 'any';
+  shown = PAGE_SIZE; render();
+}
+
+/* -----------------------------------------------
+   PRODUCT GRID
+   Rendered with the global RAF card so cart, wishlist,
+   variants, Sold Out and the one-store rule all behave
+   exactly as they do on every other listing.
+----------------------------------------------- */
+function render(){
+  var list = matches(F);
+  var grid = document.getElementById('products-grid');
+  var slice = list.slice(0, shown);
+
+  if (window.RAFCard){
+    grid.innerHTML = slice.map(function(p){
+      /* tag the owning store so Cart.storeOf() can enforce one store per order,
+         and keep the store line hidden (single-store context) */
+      var prod = Object.assign({}, p, { store: { ar: STORE.name, en: STORE.name } });
+      prod.variants = variantsFor(p);   /* required options are still enforced before adding */
+      return RAFCard.product(prod, {
+        store: false,
+        hrefFor: function(x){ return 'raf_product.html?id=' + encodeURIComponent(x.id); }
+      });
+    }).join('');
+  }
+
+  /* empty state */
+  var empty = document.getElementById('emptyState');
+  if (!list.length){
+    empty.innerHTML =
+      '<div class="pempty"><i class="ti ti-search-off"></i>' +
+      '<div class="pempty-t">' + T('لا توجد منتجات مطابقة', 'No matching products') + '</div>' +
+      '<div class="pempty-s">' + T('جرّب تعديل خيارات التصفية للعثور على ما تبحث عنه.', 'Try adjusting your filters to find what you are looking for.') + '</div>' +
+      '<button class="btn-more" style="margin:0 auto;" onclick="clearAll()">' + T('مسح عوامل التصفية', 'Clear filters') + '</button></div>';
+  } else {
+    empty.innerHTML = '';
+  }
+
+  /* result count */
+  document.getElementById('resultCount').innerHTML =
+    isEn() ? '<b>' + list.length + '</b> product' + (list.length === 1 ? '' : 's')
+           : '<b>' + list.length + '</b> منتج';
+
+  /* load more */
+  var more = document.getElementById('loadMore');
+  var rest = list.length - slice.length;
+  more.style.display = rest > 0 ? 'block' : 'none';
+  if (rest > 0) more.textContent = T('عرض المزيد (' + rest + ')', 'Load more (' + rest + ')');
+
+  /* filter button state */
+  var n = activeCount(F), btn = document.getElementById('filterBtn');
+  btn.classList.toggle('has', n > 0);
+  document.getElementById('filterCount').textContent = n;
+
+  renderPills();
+  if (window.RAFCard) RAFCard.badge();
+}
+function loadMore(){ shown += PAGE_SIZE; render(); }
+
+/* -----------------------------------------------
+   TABS
+----------------------------------------------- */
+function switchTab(id, btn){
+  document.querySelectorAll('.stab').forEach(function(t){ t.classList.remove('on'); });
+  btn.classList.add('on');
+  document.getElementById('tab-products').style.display = id === 'products' ? 'block' : 'none';
+  document.getElementById('tab-reviews').style.display  = id === 'reviews'  ? 'block' : 'none';
+  document.getElementById('tab-policy').style.display   = id === 'policy'   ? 'block' : 'none';
+  document.getElementById('filter-bar').style.display   = id === 'products' ? 'block' : 'none';
+}
+
+/* -----------------------------------------------
+   FOLLOW / SHARE
+----------------------------------------------- */
+function followKey(){ return 'raf_follow_' + SLUG; }
+function syncFollowBtn(){
+  var on = localStorage.getItem(followKey()) === '1';
+  var btn = document.getElementById('followBtn');
+  btn.classList.toggle('on', on);
+  btn.querySelector('i').className = 'ti ' + (on ? 'ti-heart-filled' : 'ti-heart');
+  btn.querySelector('span').textContent = on ? T('تتابعه', 'Following') : T('تابع المحل', 'Follow store');
+}
+function toggleFollow(){
+  var on = localStorage.getItem(followKey()) === '1';
+  localStorage.setItem(followKey(), on ? '0' : '1');
+  syncFollowBtn();
+  if (window.RAFShop && RAFShop.toast){
+    RAFShop.toast(on ? T('تم إلغاء المتابعة', 'Unfollowed') : T('تتابع ' + STORE.name + ' الآن', 'Now following ' + STORE.name),
+                  { icon: on ? 'ti-heart-off' : 'ti-heart-filled' });
+  }
+}
+function shareStore(){
+  var url = location.href;
+  if (navigator.share){
+    navigator.share({ title: STORE.name, url: url }).catch(function(){});
+    return;
+  }
+  if (navigator.clipboard){
+    navigator.clipboard.writeText(url).then(function(){
+      if (window.RAFShop && RAFShop.toast) RAFShop.toast(T('تم نسخ رابط المحل', 'Store link copied'), { icon:'ti-link' });
+    }).catch(function(){});
+  }
+}
+
+/* -----------------------------------------------
+   BOOT
+----------------------------------------------- */
+(function(){
+  var l = localStorage.getItem('raf_lang');
+  if (l === 'en'){ var r = root(); r.lang = 'en'; r.dir = 'ltr'; }
+  function boot(){
+    applyLang();                       /* renders store, chips, sheet and grid */
+    if (window.RAFShop) RAFShop.Cart.badge();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+  /* keep the grid in sync when the cart changes elsewhere on the page */
+  document.addEventListener('raf:cart', function(){ if (window.RAFCard) RAFCard.badge(); });
+})();
 </script>
 </body>
 </html>
