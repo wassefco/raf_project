@@ -16,15 +16,22 @@
   function injectCSS(){
     if(document.getElementById('raf-topbar-css')) return;
     var c=
-    'nav:not(.app-bnav):not(.top){background:rgba(245,242,236,.9)!important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid #E2DBCC!important;display:flex!important;align-items:center;justify-content:center;padding:0 28px!important;gap:0!important;z-index:200;}'+
+    /* position/top included so the header is self-contained and does not depend
+       on each host page still declaring its own nav{} rule */
+    'nav:not(.app-bnav):not(.top){position:sticky;top:0;background:rgba(245,242,236,.9)!important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid #E2DBCC!important;display:flex!important;align-items:center;justify-content:center;padding:0 28px!important;gap:0!important;z-index:200;}'+
     '.rtb-inner{width:100%;max-width:1300px;height:100%;display:flex;align-items:center;gap:24px;}'+
-    '.rtb-logo{flex-shrink:0;display:inline-flex;align-items:center;}.rtb-logo img{height:56px;width:auto;display:block;}'+
+    /* colour set explicitly so the header never inherits host-page link styling */
+    '.rtb-logo{flex-shrink:0;display:inline-flex;align-items:center;color:#15130F;text-decoration:none;}.rtb-logo img{height:56px;width:auto;display:block;}'+
     '.rtb-search{flex:1;max-width:1000px;position:relative;}'+
-    '.rtb-search input{width:100%;height:52px;border:1.5px solid #D8D3C8;background:#fff;border-radius:14px;padding:0 54px 0 18px;font-family:"Tajawal",sans-serif;font-size:15px;color:#0A0A0A;outline:none;transition:border-color .2s,box-shadow .2s;box-shadow:0 4px 16px rgba(20,16,8,.06);}'+
+    '.rtb-search input{width:100%;height:52px;border:1.5px solid #D8D3C8;background:#fff;border-radius:14px;padding:0 102px 0 18px;font-family:"Tajawal",sans-serif;font-size:15px;color:#0A0A0A;outline:none;transition:border-color .2s,box-shadow .2s;box-shadow:0 4px 16px rgba(20,16,8,.06);}'+
+    '[dir="ltr"] .rtb-search input{padding:0 18px 0 102px;}'+
     '.rtb-search input::placeholder{color:#8A857C;}'+
     '.rtb-search input:focus{border-color:#C9A84C;box-shadow:0 0 0 4px rgba(201,168,76,.12);}'+
-    '.rtb-search>button{position:absolute;top:6px;right:6px;width:40px;height:40px;border:none;border-radius:11px;background:#C9A84C;color:#0A0A0A;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:background .2s;}'+
+    '.rtb-search>button{position:absolute;top:6px;inset-inline-end:6px;width:40px;height:40px;border:none;border-radius:11px;background:#C9A84C;color:#0A0A0A;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:background .2s;}'+
     '.rtb-search>button:hover{background:#A07828;}'+
+    /* filter entry point — same control on every page */
+    '.rtb-search>button.rtb-filter{inset-inline-end:52px;background:transparent;color:#5A5650;border:1.5px solid #D8D3C8;width:42px;}'+
+    '.rtb-search>button.rtb-filter:hover{border-color:#C9A84C;color:#A07828;background:rgba(201,168,76,.1);}'+
     '.rtb-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}'+
     '.rtb-ico{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#15130F;cursor:pointer;background:transparent;position:relative;font-size:20px;transition:all .2s;text-decoration:none;}'+
     '.rtb-ico:hover{background:rgba(201,168,76,.12);color:#A07828;}'+
@@ -44,9 +51,12 @@
       'nav:not(.app-bnav):not(.top){padding:0 14px!important;}.rtb-inner{gap:12px;}.rtb-search{display:none;}.rtb-subnav{display:none;}.rtb-account-l{display:none;}.rtb-account{padding:0 14px;}.rtb-logo img{height:42px;}'+
       '.rtb-msearch{display:block;background:rgba(245,242,236,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #E2DBCC;padding:10px 14px;}'+
       '.rtb-msearch form{position:relative;max-width:680px;margin:0 auto;}'+
-      '.rtb-msearch input{width:100%;height:46px;border:1.5px solid #D8D3C8;background:#fff;border-radius:13px;padding:0 48px 0 16px;font-family:"Tajawal",sans-serif;font-size:14.5px;color:#0A0A0A;outline:none;box-shadow:0 2px 10px rgba(20,16,8,.05);}'+
+      '.rtb-msearch input{width:100%;height:46px;border:1.5px solid #D8D3C8;background:#fff;border-radius:13px;padding:0 92px 0 16px;font-family:"Tajawal",sans-serif;font-size:14.5px;color:#0A0A0A;outline:none;box-shadow:0 2px 10px rgba(20,16,8,.05);}'+
+      '[dir="ltr"] .rtb-msearch input{padding:0 16px 0 92px;}'+
       '.rtb-msearch input:focus{border-color:#C9A84C;box-shadow:0 0 0 3px rgba(201,168,76,.12);}'+
-      '.rtb-msearch button{position:absolute;top:5px;right:5px;width:36px;height:36px;border:none;border-radius:10px;background:#C9A84C;color:#0A0A0A;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;}'+
+      '.rtb-msearch button{position:absolute;top:5px;inset-inline-end:5px;width:36px;height:36px;border:none;border-radius:10px;background:#C9A84C;color:#0A0A0A;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;}'+
+      '.rtb-msearch button.rtb-mfilter{inset-inline-end:47px;background:transparent;color:#5A5650;border:1.5px solid #D8D3C8;width:38px;}'+
+      '.rtb-msearch button.rtb-mfilter:hover{border-color:#C9A84C;color:#A07828;}'+
     '}'+
     /* tablet + mobile (≤1024): language lives in the hamburger; cart/wishlist/account live in the bottom nav → remove from header */
     '@media(max-width:1024px){.rtb-lang{display:none!important;}.rtb-actions .rtb-ico,.rtb-actions .rtb-account{display:none!important;}}'+
@@ -64,7 +74,9 @@
     nav.innerHTML =
       '<div class="rtb-inner">'+
         '<a href="raf_homepage.html" class="rtb-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace"></a>'+
-        '<form class="rtb-search" onsubmit="return RAFTopbar.submit(event)"><input id="navSearch" type="text" autocomplete="off" placeholder="'+ph+'"><button type="submit" aria-label="search"><i class="ti ti-search"></i></button></form>'+
+        '<form class="rtb-search" onsubmit="return RAFTopbar.submit(event)"><input id="navSearch" type="text" autocomplete="off" placeholder="'+ph+'">'+
+          '<button type="button" class="rtb-filter" onclick="RAFTopbar.filters(event)" aria-label="'+t('تصفية','Filter')+'" title="'+t('تصفية','Filter')+'"><i class="ti ti-adjustments-horizontal"></i></button>'+
+          '<button type="submit" aria-label="'+t('بحث','Search')+'"><i class="ti ti-search"></i></button></form>'+
         '<div class="rtb-actions">'+
           '<button class="rtb-lang" onclick="RAFTopbar.lang()"><span class="dot"></span><span id="langLabel" class="rtb-lang-l">'+(en()?'ع':'EN')+'</span></button>'+
           '<a href="raf_wishlist.html" class="rtb-ico" title="'+t('المفضلة','Wishlist')+'"><i class="ti ti-heart"></i></a>'+
@@ -73,7 +85,9 @@
         '</div>'+
       '</div>';
     var ms=document.createElement('div'); ms.className='rtb-msearch';
-    ms.innerHTML='<form onsubmit="return RAFTopbar.submitM(event)"><input id="navSearchM" data-raf-search-input type="text" autocomplete="off" placeholder="'+ph+'"><button type="submit" aria-label="search"><i class="ti ti-search"></i></button></form>';
+    ms.innerHTML='<form onsubmit="return RAFTopbar.submitM(event)"><input id="navSearchM" data-raf-search-input type="text" autocomplete="off" placeholder="'+ph+'">'+
+      '<button type="button" class="rtb-mfilter" onclick="RAFTopbar.filters(event)" aria-label="'+t('تصفية','Filter')+'"><i class="ti ti-adjustments-horizontal"></i></button>'+
+      '<button type="submit" aria-label="'+t('بحث','Search')+'"><i class="ti ti-search"></i></button></form>';
     if(nav.nextSibling) nav.parentNode.insertBefore(ms, nav.nextSibling); else nav.parentNode.appendChild(ms);
     var sub=document.createElement('div'); sub.className='rtb-subnav';
     sub.innerHTML='<div class="rtb-sub-inner">'+
@@ -92,12 +106,42 @@
   var API={
     submit:function(e){ e.preventDefault(); var inp=document.getElementById('navSearch'); var q=(inp&&inp.value||'').trim(); if(window.RAFSearch&&RAFSearch.close)RAFSearch.close(); if(q){ try{var a=JSON.parse(localStorage.getItem('raf_recent_searches')||'[]');a=a.filter(function(x){return x!==q;});a.unshift(q);localStorage.setItem('raf_recent_searches',JSON.stringify(a.slice(0,6)));}catch(_){ } window.location='raf_offers.html?q='+encodeURIComponent(q); } return false; },
     submitM:function(e){ e.preventDefault(); var inp=document.getElementById('navSearchM'); var q=(inp&&inp.value||'').trim(); if(window.RAFSearch&&RAFSearch.close)RAFSearch.close(); if(q){ try{var a=JSON.parse(localStorage.getItem('raf_recent_searches')||'[]');a=a.filter(function(x){return x!==q;});a.unshift(q);localStorage.setItem('raf_recent_searches',JSON.stringify(a.slice(0,6)));}catch(_){ } window.location='raf_offers.html?q='+encodeURIComponent(q); } return false; },
-    lang:function(){ if(window.toggleLang){ toggleLang(); } var l=document.querySelector('.rtb-lang-l'); if(l)l.textContent=en()?'ع':'EN'; },
+    /* Filter control. Pages that own a filter sheet (homepage, store) open it
+       in place; everywhere else it leads to the Products page, where the real
+       category/price filtering lives. Same control on every page either way. */
+    filters:function(e){
+      if(e){ e.preventDefault(); e.stopPropagation(); }
+      if(window.RAFSearch && RAFSearch.close) RAFSearch.close();
+      if(typeof window.openFilters==='function' && !window.__rtbFilterRouting){ window.openFilters(e); return false; }
+      window.location='raf_offers.html';
+      return false;
+    },
+    lang:function(){ if(window.toggleLang){ toggleLang(); } API.retext(); },
+    /* Placeholders, titles and aria-labels are baked in at build time, so they
+       need re-translating whenever the language flips. */
+    retext:function(){
+      var ph=t('ابحث عن منتجات، محلات، أو ماركات…','Search products, stores or brands…');
+      ['navSearch','navSearchM'].forEach(function(id){ var i=document.getElementById(id); if(i) i.placeholder=ph; });
+      document.querySelectorAll('.rtb-filter,.rtb-mfilter').forEach(function(b){
+        b.setAttribute('aria-label',t('تصفية','Filter')); b.setAttribute('title',t('تصفية','Filter'));
+      });
+      document.querySelectorAll('.rtb-search>button[type="submit"],.rtb-msearch button[type="submit"]').forEach(function(b){
+        b.setAttribute('aria-label',t('بحث','Search'));
+      });
+      var w=document.querySelector('.rtb-actions a[href="raf_wishlist.html"]'); if(w) w.title=t('المفضلة','Wishlist');
+      var c=document.querySelector('.rtb-actions a[href="raf_cart.html"]');     if(c) c.title=t('السلة','Cart');
+      var l=document.querySelector('.rtb-lang-l'); if(l) l.textContent=en()?'ع':'EN';
+    },
     refresh:updateBadge
   };
   global.RAFTopbar=API;
 
-  function init(){ injectCSS(); build(); }
+  function init(){
+    injectCSS(); build();
+    /* keep header text in the active language however the page switches it */
+    var r=document.getElementById('htmlRoot')||document.documentElement;
+    new MutationObserver(function(){ API.retext(); }).observe(r,{attributes:true,attributeFilter:['lang']});
+  }
   /* run immediately (script is at end of <body>, header nav already parsed) so
      this executes BEFORE raf_nav.js injects its hamburger into the new header. */
   init();
