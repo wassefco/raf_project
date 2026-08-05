@@ -245,6 +245,9 @@
         /* keep the readable meta string AND the structured fields the
            Order Details view needs (store / variant / qty) */
         return {
+          /* the product id travels with the order line so cancellations can
+             put the stock back and re-orders can resolve the product */
+          id: l.id,
           name: l.name, meta: { ar: pre + 'الكمية ' + l.qty, en: pre + 'Qty ' + l.qty },
           price: l.price, ic: l.ic || 'ti-box',
           store: l.store || null, variant: l.variant || {}, qty: l.qty || 1

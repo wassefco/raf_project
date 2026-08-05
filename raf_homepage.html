@@ -156,20 +156,11 @@ nav{position:sticky;top:0;z-index:200;background:rgba(245,242,236,.9);backdrop-f
 .subnav a.hot{color:var(--gold2);font-weight:700;}
 
 /* ============ HERO ============ */
-.hero{background:linear-gradient(160deg,#FBF9F4 0%,var(--bg) 50%,var(--bg2) 100%);overflow:hidden;border-bottom:1px solid var(--border);}
-.hero .wrap{padding-top:26px;padding-bottom:40px;}
-/* premium hero — centered RAF logo + brand statement */
-.hero-logo-band{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:28px 0 40px;margin-bottom:22px;text-align:center;}
-.hero-brand{display:inline-flex;align-items:center;}
-.hero-brand img{height:220px;width:auto;display:block;}
-.hero-statement{max-width:660px;padding:0 16px;}
-.hero-tagline{margin:0;font-family:var(--font-ar);font-size:clamp(19px,2.5vw,27px);font-weight:700;color:var(--ink);line-height:1.35;}
-html[lang="en"] .hero-tagline{font-family:var(--font-en);text-transform:uppercase;letter-spacing:3px;font-weight:600;font-size:clamp(15px,2vw,21px);}
-.hero-cats{margin:10px 0 0;font-family:var(--font-ar);font-size:clamp(13px,1.6vw,15.5px);font-weight:600;color:var(--gold2);letter-spacing:1px;line-height:1.5;}
-html[lang="en"] .hero-cats{font-family:var(--font-en);text-transform:uppercase;letter-spacing:2.5px;font-size:clamp(11px,1.4vw,13px);}
-@media(max-width:860px){.hero-logo-band{gap:16px;padding:20px 0 30px;}.hero-brand img{height:162px;}}
-@media(max-width:600px){.hero-logo-band{gap:12px;padding:12px 0 22px;}.hero-brand img{height:112px;}}
-@media(max-height:520px) and (orientation:landscape){.hero-logo-band{gap:10px;padding:8px 0 16px;}.hero-brand img{height:86px;}}
+/* mobile search band — collapses completely on desktop so it adds no whitespace */
+.msearch-band{display:none;}
+.msearch-band .wrap{padding-top:12px;padding-bottom:0;}
+/* hero banner (ad carousel) now sits directly under Categories */
+.hero-banner .wrap{padding-top:0;padding-bottom:34px;}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:50px;padding:0 24px;border-radius:30px;font-family:var(--font-ar);font-size:14.5px;font-weight:700;cursor:pointer;border:none;transition:all .22s;white-space:nowrap;}
 .btn-gold{background:var(--gold);color:var(--black);box-shadow:var(--sh-gold);}
 .btn-gold:hover{background:var(--gold2);transform:translateY(-2px);}
@@ -351,6 +342,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   nav{gap:12px;padding:0 14px;}
   .nav-search{display:none;}
   .mobile-search{display:block;}
+  .msearch-band{display:block;}
   .subnav{display:none;}
   .hero .wrap{padding-top:18px;padding-bottom:30px;}
   .btn-account span{display:none;}.btn-account{padding:0 14px;}
@@ -424,6 +416,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 </style>
 <link rel="stylesheet" href="raf_header.css">
 <script src="raf_features.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
 </head>
 <body>
 
@@ -461,8 +454,8 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   </div>
 </div>
 
-<!-- ============ HERO ============ -->
-<section class="hero">
+<!-- ============ MOBILE SEARCH (functional; hidden on desktop) ============ -->
+<div class="msearch-band">
   <div class="wrap">
     <div class="mobile-search" id="mSearchWrap">
       <form onsubmit="return doSearchM(event)">
@@ -472,30 +465,8 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
       </form>
       <div class="search-overlay" id="searchOverlayM"></div>
     </div>
-    <div class="hero-logo-band">
-      <a href="raf_homepage.html" class="hero-brand" aria-label="RAF Marketplace"><img src="assets/branding/logo.svg" alt="RAF Marketplace"></a>
-      <div class="hero-statement">
-        <p class="hero-tagline" data-ar="كل ما تحب، في مكان واحد" data-en="LOCAL BRANDS, ENDLESS CHOICES">كل ما تحب، في مكان واحد</p>
-        <p class="hero-cats" data-ar="أزياء | عطور | إكسسوارات | وأكثر" data-en="FASHION | PERFUME | ACCESSORIES | AND MORE">أزياء | عطور | إكسسوارات | وأكثر</p>
-      </div>
-    </div>
-    <!-- FULL-WIDTH AD CAROUSEL (admin-ready) -->
-    <div class="adc" id="adc" onmouseenter="adcPause()" onmouseleave="adcPlay()">
-      <div class="adc-viewport"><div class="adc-track" id="adcTrack"></div></div>
-      <button class="adc-arrow prev" onclick="adcGo(-1)" aria-label="prev"><i class="ti ti-chevron-right"></i></button>
-      <button class="adc-arrow next" onclick="adcGo(1)" aria-label="next"><i class="ti ti-chevron-left"></i></button>
-      <div class="adc-dots" id="adcDots"></div>
-    </div>
   </div>
-</section>
-
-<!-- ============ TRUST ============ -->
-<section class="trust"><div class="wrap"><div class="trust-grid">
-  <div class="trust-item"><div class="trust-ico"><i class="ti ti-truck-delivery"></i></div><div><b data-ar="توصيل سريع" data-en="Fast Delivery">توصيل سريع</b><span data-ar="خلال 24-48 ساعة" data-en="Within 24-48h">خلال 24-48 ساعة</span></div></div>
-  <div class="trust-item"><div class="trust-ico"><i class="ti ti-rosette-discount-check"></i></div><div><b data-ar="منتجات أصلية" data-en="Authentic Products">منتجات أصلية</b><span data-ar="مضمونة 100%" data-en="100% guaranteed">مضمونة 100%</span></div></div>
-  <div class="trust-item"><div class="trust-ico"><i class="ti ti-shield-lock"></i></div><div><b data-ar="دفع آمن" data-en="Secure Payments">دفع آمن</b><span data-ar="حماية كاملة" data-en="Fully protected">حماية كاملة</span></div></div>
-  <div class="trust-item"><div class="trust-ico"><i class="ti ti-headset"></i></div><div><b data-ar="دعم 24/7" data-en="24/7 Support">دعم 24/7</b><span data-ar="فريق متواجد دائماً" data-en="Always available">فريق متواجد دائماً</span></div></div>
-</div></div></section>
+</div>
 
 <!-- ============ CATEGORIES ============ -->
 <section class="sec" id="categories"><div class="wrap">
@@ -507,13 +478,23 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   </div>
 </div></section>
 
+<!-- ============ HERO BANNER · AD CAROUSEL (moved up; unchanged) ============ -->
+<section class="hero-banner"><div class="wrap">
+  <div class="adc" id="adc" onmouseenter="adcPause()" onmouseleave="adcPlay()">
+    <div class="adc-viewport"><div class="adc-track" id="adcTrack"></div></div>
+    <button class="adc-arrow prev" onclick="adcGo(-1)" aria-label="prev"><i class="ti ti-chevron-right"></i></button>
+    <button class="adc-arrow next" onclick="adcGo(1)" aria-label="next"><i class="ti ti-chevron-left"></i></button>
+    <div class="adc-dots" id="adcDots"></div>
+  </div>
+</div></section>
+
 <div class="ad-slot wrap" data-ad-slot="after-categories"></div>
 
-<!-- ============ SECTION 1 · RECOMMENDED STORES ============ -->
+<!-- ============ SECTION 1 · FEATURED STORES ============ -->
 <section class="sec"><div class="wrap">
-  <div class="sec-head"><div><div class="sec-kicker">RECOMMENDED</div><h2 class="sec-title" data-ar="محلات مختارة لك" data-en="Recommended for You">محلات مختارة لك</h2></div>
-    <a class="sec-link" href="raf_storespage.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
-  <div class="car"><div class="car-track" id="storesTrack"></div>
+  <div class="sec-head"><div><div class="sec-kicker">ON SALE NOW</div><h2 class="sec-title" data-ar="محلات لديها عروض" data-en="Stores with Offers">محلات لديها عروض</h2></div>
+    <a class="sec-link" href="raf_offers.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
+  <div class="car"><div class="car-track" id="dealStoresTrack"></div>
     <button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button>
     <button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button>
   </div>
@@ -531,18 +512,8 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 
 <div class="ad-slot wrap" data-ad-slot="after-offers"></div>
 
-<!-- ============ SECTION 3 · STORES WITH ACTIVE OFFERS ============ -->
+<!-- ============ SECTION 3 · TRENDING PRODUCTS ============ -->
 <section class="sec"><div class="wrap">
-  <div class="sec-head"><div><div class="sec-kicker">ON SALE NOW</div><h2 class="sec-title" data-ar="محلات لديها عروض" data-en="Stores with Offers">محلات لديها عروض</h2></div>
-    <a class="sec-link" href="raf_offers.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
-  <div class="car"><div class="car-track" id="dealStoresTrack"></div>
-    <button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button>
-    <button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button>
-  </div>
-</div></section>
-
-<!-- ============ SECTION 4 · TRENDING PRODUCTS ============ -->
-<section class="sec" style="background:var(--bg2);"><div class="wrap">
   <div class="sec-head"><div><div class="sec-kicker">TRENDING</div><h2 class="sec-title" data-ar="الأكثر رواجاً" data-en="What's Trending">الأكثر رواجاً</h2></div>
     <a class="sec-link" href="raf_trending.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
   <div class="tabs">
@@ -556,6 +527,24 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 </div></section>
 
 <div class="ad-slot wrap" data-ad-slot="after-trending"></div>
+
+<!-- ============ SECTION 4 · RECOMMENDED FOR YOU ============ -->
+<section class="sec" style="background:var(--bg2);"><div class="wrap">
+  <div class="sec-head"><div><div class="sec-kicker">RECOMMENDED</div><h2 class="sec-title" data-ar="محلات مختارة لك" data-en="Recommended for You">محلات مختارة لك</h2></div>
+    <a class="sec-link" href="raf_storespage.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
+  <div class="car"><div class="car-track" id="storesTrack"></div>
+    <button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button>
+    <button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button>
+  </div>
+</div></section>
+
+<!-- ============ TRUST ============ -->
+<section class="trust"><div class="wrap"><div class="trust-grid">
+  <div class="trust-item"><div class="trust-ico"><i class="ti ti-truck-delivery"></i></div><div><b data-ar="توصيل سريع" data-en="Fast Delivery">توصيل سريع</b><span data-ar="خلال 24-48 ساعة" data-en="Within 24-48h">خلال 24-48 ساعة</span></div></div>
+  <div class="trust-item"><div class="trust-ico"><i class="ti ti-rosette-discount-check"></i></div><div><b data-ar="منتجات أصلية" data-en="Authentic Products">منتجات أصلية</b><span data-ar="مضمونة 100%" data-en="100% guaranteed">مضمونة 100%</span></div></div>
+  <div class="trust-item"><div class="trust-ico"><i class="ti ti-shield-lock"></i></div><div><b data-ar="دفع آمن" data-en="Secure Payments">دفع آمن</b><span data-ar="حماية كاملة" data-en="Fully protected">حماية كاملة</span></div></div>
+  <div class="trust-item"><div class="trust-ico"><i class="ti ti-headset"></i></div><div><b data-ar="دعم 24/7" data-en="24/7 Support">دعم 24/7</b><span data-ar="فريق متواجد دائماً" data-en="Always available">فريق متواجد دائماً</span></div></div>
+</div></div></section>
 
 <!-- ============ CTA ============ -->
 <section class="cta-strip"><div class="wrap">

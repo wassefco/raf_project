@@ -1,53 +1,269 @@
 /* ==========================================================================
- * RAF Marketplace — UNIFIED DESIGN SYSTEM (single source of truth)
+ * RAF Marketplace — UNIFIED DESIGN SYSTEM
  * --------------------------------------------------------------------------
- * Linked AFTER each page's inline <style>. SAFE layer: it only harmonizes
- * NON-conflicting tokens (radius scale, premium shadows, additive accents)
- * and exposes premium component classes (rafx-*) for redesigns to adopt.
+ * Linked AFTER each page's own <style>, so it is the last word on tokens and
+ * on the handful of component classes that had been copy-pasted across pages.
+ * That is what lets one file standardize 47 pages without rewriting them.
  *
- * IMPORTANT: it deliberately does NOT override core colour tokens
- * (--black/--white/--bg/--card/--text/--gold) because some legacy pages use
- * an inverted convention (e.g. product page: --black=cream). Overriding those
- * would break their colours. Colour unification is handled per-page in the
- * redesign phase, not here.
- * ==========================================================================*/
+ * SCOPE RULE
+ *   Everything colour-related is scoped to html:not([data-ui="admin"]).
+ *   The back-office pages (management, permissions) run a dark palette using
+ *   the same token names, so they opt out with <html data-ui="admin">.
+ *
+ * WHAT THIS FILE OWNS
+ *   1. Canonical tokens        — colour, radius, shadow, spacing, type scale
+ *   2. Base / a11y defaults    — focus rings, touch targets, motion
+ *   3. Legacy class harmonizer — .btn-gold/.btn-ghost/.nav-ico/.chip/footer…
+ *   4. Shared components       — rafx-* (buttons, badges, empty, skeleton,
+ *                                inputs, modal, sheet, section heads)
+ * ========================================================================== */
 
-/* ---- 1) SAFE TOKEN HARMONIZATION (radius + shadows + additive accents) --- */
-:root{
-  /* unified radius scale (was 8/12 or 4/12 on legacy pages) */
-  --r:10px; --rl:16px; --rxl:22px; --radius:8px; --radius-lg:16px;
-  /* warm premium shadow language (homepage) — additive, pages didn't define these */
-  --sh-sm:0 2px 10px rgba(20,16,8,.05);
-  --sh:0 8px 30px rgba(20,16,8,.08);
-  --sh-gold:0 14px 40px rgba(201,168,76,.22);
-  /* additive accents used by the component library */
-  --ink:#15130F; --gold2:#A07828; --gold-soft:rgba(201,168,76,.12); --bg3:#E7E1D4; --border2:#D8D3C8;
+/* ══════════════ 1 · CANONICAL TOKENS ══════════════ */
+html:not([data-ui="admin"]){
+  /* surfaces */
+  --bg:#F5F2EC; --bg2:#EDE8DC; --bg3:#E7E1D4; --card:#FFFFFF;
+  /* brand */
+  --gold:#C9A84C; --gold2:#A07828; --gold-soft:rgba(201,168,76,.12);
+  /* ink + text ramp */
+  --ink:#15130F; --text:#0A0A0A; --text2:#5A5650; --text3:#8A857C;
+  /* lines */
+  --border:#E2DBCC; --border2:#D8D0BE;
+  /* status */
+  --green:#2E9E5B; --green-bg:#E8F5E9;
+  --red:#D9534F;   --red-bg:#FDECEA;
+  --amber:#C8791E; --amber-bg:#FFF4E5;
+  --info:#2F6FA8;  --info-bg:#EAF2F9;
 }
 
-/* ---- 2) REUSABLE PREMIUM COMPONENTS (opt-in: rafx-*; self-contained) ----- */
-.rafx-sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;flex-wrap:wrap;}
-.rafx-kicker{font-family:var(--font-en,'DM Sans',sans-serif);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold2);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
-.rafx-kicker::before{content:'';width:22px;height:1px;background:var(--gold,#C9A84C);}
-.rafx-title{font-family:var(--font-display,'Playfair Display',serif);font-size:clamp(23px,2.4vw,30px);font-weight:900;color:var(--ink);line-height:1.1;}
-.rafx-link{font-size:13px;color:var(--gold2);font-weight:700;display:inline-flex;align-items:center;gap:5px;transition:gap .2s,color .2s;white-space:nowrap;text-decoration:none;}
-.rafx-link:hover{gap:9px;color:var(--gold,#C9A84C);}
+:root{
+  /* radius scale — one ramp everywhere */
+  --r:10px; --rl:16px; --rxl:22px; --rpill:30px;
+  --radius:10px; --radius-lg:16px;
+  /* warm shadow language */
+  --sh-sm:0 2px 10px rgba(20,16,8,.05);
+  --sh:0 8px 30px rgba(20,16,8,.08);
+  --sh-lg:0 18px 44px -22px rgba(20,16,8,.32);
+  --sh-gold:0 14px 40px rgba(201,168,76,.22);
+  /* spacing ramp */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:22px; --s6:30px; --s7:44px;
+  /* type */
+  --font-ar:'Tajawal',sans-serif; --font-en:'DM Sans',sans-serif;
+  --font-display:'Playfair Display',serif;
+  --fs-xs:11.5px; --fs-sm:12.5px; --fs-md:14px; --fs-lg:16px; --fs-xl:19px;
+  /* layout */
+  --wrap:1240px;
+  /* motion */
+  --ease:cubic-bezier(.22,1,.36,1); --dur:.22s;
+}
 
-.rafx-card{background:var(--card,#FFFFFF);border:1px solid var(--border,#E2DBCC);border-radius:var(--rl);overflow:hidden;box-shadow:var(--sh-sm);transition:transform .22s,box-shadow .22s,border-color .22s;}
-.rafx-card:hover{transform:translateY(-5px);box-shadow:var(--sh);border-color:var(--border2);}
+/* ══════════════ 2 · BASE + ACCESSIBILITY ══════════════ */
+html:not([data-ui="admin"]) body{ -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
 
-.rafx-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 26px;border-radius:30px;font-family:var(--font-ar,'Tajawal',sans-serif);font-size:14.5px;font-weight:700;cursor:pointer;border:none;transition:all .22s;white-space:nowrap;text-decoration:none;}
-.rafx-btn-gold{background:var(--gold,#C9A84C);color:#0A0A0A;box-shadow:var(--sh-gold);}
-.rafx-btn-gold:hover{background:var(--gold2);transform:translateY(-2px);}
-.rafx-btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--ink);}
-.rafx-btn-ghost:hover{background:var(--ink);color:#F5F2EC;}
-.rafx-btn-soft{background:var(--bg2,#EDE8DC);color:var(--ink);}
-.rafx-btn-soft:hover{background:var(--gold,#C9A84C);color:#0A0A0A;}
+/* one visible focus style for the whole product */
+html:not([data-ui="admin"]) :focus-visible{
+  outline:2px solid var(--gold); outline-offset:2px; border-radius:4px;
+}
+html:not([data-ui="admin"]) :focus:not(:focus-visible){ outline:none; }
 
-.rafx-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700;}
+/* interactive targets never fall below the comfortable tap size */
+html:not([data-ui="admin"]) button,
+html:not([data-ui="admin"]) .btn,
+html:not([data-ui="admin"]) [role="button"]{ min-height:40px; }
+@media(pointer:coarse){
+  html:not([data-ui="admin"]) button,
+  html:not([data-ui="admin"]) .btn,
+  html:not([data-ui="admin"]) [role="button"]{ min-height:44px; }
+}
+/* icon-only controls stay square rather than being stretched by the rule above */
+html:not([data-ui="admin"]) .nav-ico,
+html:not([data-ui="admin"]) .rtb-ico,
+html:not([data-ui="admin"]) .rn-bell,
+html:not([data-ui="admin"]) .qty button,
+html:not([data-ui="admin"]) .qb,
+html:not([data-ui="admin"]) .rcv-x{ min-height:0; }
+
+html:not([data-ui="admin"]) ::selection{ background:var(--gold-soft); color:var(--ink); }
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{ animation-duration:.01ms!important; animation-iteration-count:1!important;
+    transition-duration:.01ms!important; scroll-behavior:auto!important; }
+}
+
+/* ══════════════ 3 · LEGACY CLASS HARMONIZER ══════════════
+   These class names were duplicated across many pages with slightly
+   different padding, radius and colour. Normalising them here makes the
+   product consistent without touching every file. Layout is untouched —
+   only the visual language. */
+/* --- buttons --- */
+html:not([data-ui="admin"]) .btn-gold{
+  border-radius:var(--rpill); background:var(--gold); color:#1C1606;
+  font-family:var(--font-ar); font-weight:700; border:1px solid var(--gold2);
+  transition:background var(--dur),color var(--dur),box-shadow var(--dur);
+}
+html:not([data-ui="admin"]) .btn-gold:hover{ background:var(--gold2); color:#fff; }
+html:not([data-ui="admin"]) .btn-ghost{
+  border-radius:var(--rpill); background:transparent; color:var(--text2);
+  border:1px solid var(--border2); font-family:var(--font-ar); font-weight:600;
+  transition:border-color var(--dur),color var(--dur);
+}
+html:not([data-ui="admin"]) .btn-ghost:hover{ border-color:var(--gold); color:var(--gold2); }
+
+/* --- header icon buttons --- */
+html:not([data-ui="admin"]) .nav-ico{
+  border-radius:50%; border:1px solid var(--border); color:var(--text2);
+  background:transparent; transition:all var(--dur);
+}
+html:not([data-ui="admin"]) .nav-ico:hover{ border-color:var(--gold); color:var(--gold2); background:var(--gold-soft); }
+
+/* --- chips / filter pills --- */
+html:not([data-ui="admin"]) .chip,
+html:not([data-ui="admin"]) .fs-chip,
+html:not([data-ui="admin"]) .filter-chip{
+  border-radius:var(--rpill); border:1px solid var(--border2);
+  background:var(--card); color:var(--text2);
+  font-family:var(--font-ar); font-weight:600; transition:all .18s;
+}
+html:not([data-ui="admin"]) .chip:hover,
+html:not([data-ui="admin"]) .fs-chip:hover,
+html:not([data-ui="admin"]) .filter-chip:hover{ border-color:var(--gold); color:var(--gold2); }
+html:not([data-ui="admin"]) .chip.on,
+html:not([data-ui="admin"]) .fs-chip.on,
+html:not([data-ui="admin"]) .filter-chip.on{ background:var(--ink); border-color:var(--ink); color:#F5F0E4; }
+
+/* --- breadcrumb --- */
+html:not([data-ui="admin"]) .breadcrumb{ color:var(--text3); font-size:var(--fs-sm); }
+html:not([data-ui="admin"]) .breadcrumb a{ color:var(--text3); text-decoration:none; transition:color var(--dur); }
+html:not([data-ui="admin"]) .breadcrumb a:hover{ color:var(--gold2); }
+
+/* --- inputs --- */
+html:not([data-ui="admin"]) input[type="text"],
+html:not([data-ui="admin"]) input[type="search"],
+html:not([data-ui="admin"]) input[type="email"],
+html:not([data-ui="admin"]) input[type="tel"],
+html:not([data-ui="admin"]) input[type="number"],
+html:not([data-ui="admin"]) input[type="password"],
+html:not([data-ui="admin"]) textarea,
+html:not([data-ui="admin"]) select{ font-family:var(--font-ar); color:var(--text); }
+html:not([data-ui="admin"]) input::placeholder,
+html:not([data-ui="admin"]) textarea::placeholder{ color:var(--text3); }
+
+/* --- cards --- */
+html:not([data-ui="admin"]) .prod-card,
+html:not([data-ui="admin"]) .store-card{ border-radius:var(--rl); border-color:var(--border); }
+
+/* --- footer ---
+   Light flow-page footers use the standard text ramp. The shared marketing
+   footer sits on near-black, where the original #555/#444 text measured
+   2.0–2.7:1 — well under WCAG AA — so it gets a lighter ramp that clears 7:1. */
+html:not([data-ui="admin"]) footer{ border-top:1px solid var(--border); color:var(--text2); font-size:var(--fs-sm); }
+html:not([data-ui="admin"]) footer a{ color:var(--text2); text-decoration:none; transition:color var(--dur); }
+html:not([data-ui="admin"]) footer a:hover{ color:var(--gold2); }
+
+html:not([data-ui="admin"]) footer[data-raf-footer]{ color:#A9A296; }
+html:not([data-ui="admin"]) footer[data-raf-footer] .footer-desc,
+html:not([data-ui="admin"]) footer[data-raf-footer] .footer-link,
+html:not([data-ui="admin"]) footer[data-raf-footer] .footer-bottom,
+html:not([data-ui="admin"]) footer[data-raf-footer] .footer-bottom div{ color:#A9A296; }
+html:not([data-ui="admin"]) footer[data-raf-footer] .footer-col-title{ color:#F0EBE0; }
+html:not([data-ui="admin"]) footer[data-raf-footer] a:hover{ color:var(--gold); }
+
+/* ══════════════ 4 · SHARED COMPONENTS (rafx-*) ══════════════ */
+
+/* section heads */
+.rafx-sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--s4);margin-bottom:var(--s5);flex-wrap:wrap;}
+.rafx-kicker{font-family:var(--font-en);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold2);font-weight:700;margin-bottom:var(--s2);display:flex;align-items:center;gap:var(--s2);}
+.rafx-kicker::before{content:'';width:22px;height:1px;background:var(--gold);}
+.rafx-title{font-family:var(--font-display);font-size:clamp(23px,2.4vw,30px);font-weight:800;color:var(--ink);line-height:1.15;}
+.rafx-link{font-size:13px;color:var(--gold2);font-weight:700;display:inline-flex;align-items:center;gap:5px;transition:gap var(--dur),color var(--dur);white-space:nowrap;text-decoration:none;}
+.rafx-link:hover{gap:9px;color:var(--gold);}
+
+/* surface */
+.rafx-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;box-shadow:var(--sh-sm);transition:transform var(--dur),box-shadow var(--dur),border-color var(--dur);}
+.rafx-card:hover{transform:translateY(-4px);box-shadow:var(--sh);border-color:var(--border2);}
+
+/* buttons */
+.rafx-btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);height:48px;padding:0 26px;border-radius:var(--rpill);font-family:var(--font-ar);font-size:14.5px;font-weight:700;cursor:pointer;border:1px solid transparent;transition:all var(--dur);white-space:nowrap;text-decoration:none;}
+.rafx-btn:disabled,.rafx-btn[aria-disabled="true"]{background:var(--bg3);color:var(--text3);border-color:var(--border);box-shadow:none;cursor:not-allowed;transform:none;}
+.rafx-btn-gold{background:var(--gold);color:#1C1606;border-color:var(--gold2);box-shadow:var(--sh-gold);}
+.rafx-btn-gold:hover:not(:disabled){background:var(--gold2);color:#fff;}
+.rafx-btn-ink{background:var(--ink);color:#F5F0E4;border-color:var(--ink);}
+.rafx-btn-ink:hover:not(:disabled){background:#241F17;}
+.rafx-btn-ghost{background:var(--card);color:var(--text2);border-color:var(--border2);}
+.rafx-btn-ghost:hover:not(:disabled){border-color:var(--gold);color:var(--gold2);}
+.rafx-btn-soft{background:var(--bg2);color:var(--ink);}
+.rafx-btn-soft:hover:not(:disabled){background:var(--gold);color:#1C1606;}
+.rafx-btn-sm{height:40px;padding:0 18px;font-size:13px;}
+.rafx-btn-block{width:100%;}
+
+/* icon button */
+.rafx-iconbtn{width:44px;height:44px;flex-shrink:0;border-radius:50%;border:1px solid var(--border2);background:var(--card);color:var(--text2);font-size:19px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all var(--dur);}
+.rafx-iconbtn:hover{border-color:var(--gold);color:var(--gold2);}
+
+/* status badges */
+.rafx-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:var(--rpill);font-size:var(--fs-xs);font-weight:700;line-height:1.6;}
+.rafx-badge i{font-size:13px;}
 .rafx-badge-gold{background:var(--gold-soft);color:var(--gold2);}
-.rafx-badge-red{background:rgba(217,83,79,.1);color:#D9534F;}
-.rafx-badge-green{background:rgba(62,156,106,.12);color:#3E9C6A;}
+.rafx-badge-red{background:var(--red-bg);color:var(--red);}
+.rafx-badge-green{background:var(--green-bg);color:var(--green);}
+.rafx-badge-amber{background:var(--amber-bg);color:var(--amber);}
+.rafx-badge-info{background:var(--info-bg);color:var(--info);}
+.rafx-badge-ink{background:var(--ink);color:#F3EFE5;}
 
-.rafx-wrap{max-width:1300px;margin:0 auto;padding:0 24px;}
+/* empty state */
+.rafx-empty{text-align:center;padding:var(--s7) var(--s5);color:var(--text3);}
+.rafx-empty-ic{width:76px;height:76px;margin:0 auto var(--s4);border-radius:24px;background:var(--bg2);color:var(--gold2);display:flex;align-items:center;justify-content:center;font-size:34px;}
+.rafx-empty-t{font-size:17px;font-weight:800;color:var(--ink);margin-bottom:6px;}
+.rafx-empty-s{font-size:13.5px;line-height:1.8;max-width:420px;margin:0 auto var(--s5);}
+.rafx-empty-acts{display:flex;gap:var(--s3);justify-content:center;flex-wrap:wrap;}
+@media(max-width:480px){.rafx-empty-acts .rafx-btn{width:100%;}}
+
+/* loading skeleton */
+@keyframes rafx-shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+.rafx-skel{background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 37%,var(--bg2) 63%);background-size:400% 100%;animation:rafx-shimmer 1.3s ease-in-out infinite;border-radius:var(--r);}
+.rafx-skel-text{height:12px;margin-bottom:8px;}
+.rafx-skel-title{height:18px;width:60%;margin-bottom:12px;}
+.rafx-skel-card{height:280px;border-radius:var(--rl);}
+.rafx-spinner{width:22px;height:22px;border:2.5px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:rafx-spin .7s linear infinite;display:inline-block;}
+@keyframes rafx-spin{to{transform:rotate(360deg);}}
+
+/* form field */
+.rafx-field{margin-bottom:var(--s4);}
+.rafx-label{display:block;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:7px;}
+.rafx-label .req{color:var(--red);}
+.rafx-input,.rafx-select,.rafx-textarea{
+  width:100%;min-height:48px;padding:12px 15px;border:1.5px solid var(--border2);border-radius:var(--r);
+  background:var(--card);font-family:var(--font-ar);font-size:14px;color:var(--text);outline:none;
+  transition:border-color var(--dur),box-shadow var(--dur);
+}
+.rafx-input:focus,.rafx-select:focus,.rafx-textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);}
+.rafx-input[aria-invalid="true"]{border-color:var(--red);}
+.rafx-textarea{min-height:96px;resize:vertical;line-height:1.7;}
+.rafx-select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--text3) 50%),linear-gradient(135deg,var(--text3) 50%,transparent 50%);background-position:calc(100% - 19px) 21px,calc(100% - 14px) 21px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-inline-end:40px;}
+[dir="rtl"] .rafx-select{background-position:19px 21px,24px 21px;padding-inline-end:15px;padding-inline-start:40px;}
+.rafx-hint{font-size:12px;color:var(--text3);margin-top:6px;}
+.rafx-error{font-size:12px;color:var(--red);margin-top:6px;display:flex;align-items:center;gap:5px;}
+
+/* modal + bottom sheet */
+.rafx-overlay{position:fixed;inset:0;z-index:5000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(20,16,8,.55);backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity var(--dur),visibility var(--dur);}
+.rafx-overlay.show{opacity:1;visibility:visible;}
+.rafx-modal{width:100%;max-width:440px;max-height:88vh;overflow:auto;background:var(--card);border:1px solid var(--border);border-radius:var(--rxl);box-shadow:0 30px 70px -24px rgba(20,16,8,.55);transform:translateY(14px);transition:transform var(--dur) var(--ease);font-family:var(--font-ar);}
+.rafx-overlay.show .rafx-modal{transform:none;}
+.rafx-modal-h{display:flex;align-items:center;gap:var(--s3);padding:18px 20px;border-bottom:1px solid var(--border);}
+.rafx-modal-h h3{flex:1;font-family:var(--font-display);font-size:19px;font-weight:800;color:var(--ink);}
+.rafx-modal-b{padding:18px 20px;}
+.rafx-modal-f{display:flex;gap:var(--s3);padding:0 20px 20px;}
+@media(max-width:560px){
+  .rafx-overlay{align-items:flex-end;padding:0;}
+  .rafx-modal{max-width:100%;border-radius:var(--rxl) var(--rxl) 0 0;border-bottom:none;transform:translateY(100%);max-height:90vh;}
+  .rafx-overlay.show .rafx-modal{transform:none;}
+  .rafx-modal-f{flex-direction:column-reverse;padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));}
+  .rafx-modal-f .rafx-btn{width:100%;}
+}
+
+/* layout helpers */
+.rafx-wrap{max-width:var(--wrap);margin:0 auto;padding:0 24px;}
 .rafx-sec{padding:48px 0;}
 @media(max-width:680px){.rafx-sec{padding:34px 0;}.rafx-wrap{padding:0 16px;}}
+
+/* directional icon helper — flips arrows for LTR without extra markup */
+[dir="ltr"] .rafx-flip{transform:scaleX(-1);}

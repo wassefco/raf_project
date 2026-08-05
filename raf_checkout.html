@@ -12,6 +12,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <script src="raf_features.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
 </head>
 <body>
 
@@ -387,11 +388,24 @@
   };
 
   function boot(){
+    /* re-read the source before showing totals, then hold the stock for the
+       duration of this checkout so another shopper cannot take it mid-flow */
+    if(window.RAFRules){
+      var sync=RAFRules.syncCart();
+      if(sync.changed && sync.removed.length + sync.changes.length){
+        var e=document.getElementById('payErr');
+        if(e) e.innerHTML='<div class="alert warn"><i class="ti ti-alert-triangle"></i><div><b>'
+          + T('تم تحديث سلتك','Your cart was updated')+'</b><ul style="margin:6px 0 0;padding-inline-start:18px;">'
+          + sync.removed.concat(sync.changes).map(function(c){ return '<li>'+c.name+' — '+c.message+'</li>'; }).join('')
+          + '</ul></div></div>';
+      }
+    }
     var items=RAFShop.Cart.items();
     var has=items.length>0;
     document.getElementById('coEmpty').style.display=has?'none':'';
     document.getElementById('coGrid').style.display=has?'':'none';
     if(!has){ RAFShop.Cart.badge(); return; }
+    if(window.RAFRules) RAFRules.Reserve.hold(items);
     document.getElementById('driverNotes').value=RAFCO.get('raf_driver_notes','');
     renderAddresses(); renderTips(); renderPayments(); renderSummary();
     RAFCO.applyLang(); RAFShop.Cart.badge();

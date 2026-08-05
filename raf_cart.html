@@ -12,6 +12,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <script src="raf_features.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
 </head>
 <body>
 
@@ -241,10 +242,19 @@
   window.removeLine = function(key){
     var l = RAFShop.Cart.line(key); if(!l) return;
     var backup = JSON.parse(JSON.stringify(l));
-    RAFShop.Cart.remove(key); render();
+    RAFShop.Cart.remove(key);
+    /* removing the last item resets the whole cart state — coupon, tip, notes
+       and any stock hold — so nothing stale survives into the next basket */
+    var emptied = RAFShop.Cart.count() === 0;
+    if(emptied && window.RAFRules) RAFRules.resetCartState();
+    render();
     RAFShop.toast(T('تم حذف المنتج من السلة','Item removed from cart'), { icon:'ti-trash', undo:function(){
       var a = RAFShop.Cart.read(); a.push(backup); RAFShop.Cart.write(a); render();
     }});
+    if(emptied){
+      var m=document.getElementById('couponMsg'); if(m){ m.className='msg'; m.innerHTML=''; }
+      var ci=document.getElementById('couponInput'); if(ci) ci.value='';
+    }
   };
 
   /* ---------- edit size/color inside the cart (item 4) ---------- */
