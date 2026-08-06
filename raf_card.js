@@ -290,7 +290,21 @@
     Cart.add(p, variant); refresh(p.id);
     return Promise.resolve({ added: true });
   }
-  function inc(e, btn) { e.preventDefault(); e.stopPropagation(); var key = btn.closest('.rc-qty').dataset.key, l = Cart.line(key); if (l) { Cart.setQty(key, l.qty + 1); refresh(l.id); } }
+  function inc(e, btn) {
+    e.preventDefault(); e.stopPropagation();
+    var key = btn.closest('.rc-qty').dataset.key, l = Cart.line(key);
+    if (!l) return;
+    /* one shared ceiling: never take more units than are actually available */
+    if (window.RAFRules) {
+      var c = RAFRules.clampQty(l.id, l.qty + 1);
+      if (c.capped) {
+        if (window.RAFShop && RAFShop.toast) RAFShop.toast(c.reason, { icon: 'ti-alert-circle' });
+        if (c.qty !== l.qty) { Cart.setQty(key, c.qty); refresh(l.id); }
+        return;
+      }
+    }
+    Cart.setQty(key, l.qty + 1); refresh(l.id);
+  }
   function dec(e, btn) { e.preventDefault(); e.stopPropagation(); var key = btn.closest('.rc-qty').dataset.key, l = Cart.line(key); if (l) { var id = l.id; Cart.setQty(key, l.qty - 1); refresh(id); } }
 
   /* ---------- variant selector ---------- */

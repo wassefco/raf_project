@@ -237,6 +237,16 @@
   window.chQty = function(key,d){
     var l = RAFShop.Cart.line(key); if(!l) return;
     if(l.qty+d<=0){ removeLine(key); return; }
+    /* shared ceiling — the cart can never exceed available stock */
+    if(window.RAFRules){
+      var c = RAFRules.clampQty(l.id, l.qty+d);
+      if(c.capped && d>0){
+        RAFShop.toast(c.reason, { icon:'ti-alert-circle' });
+        if(c.qty!==l.qty){ RAFShop.Cart.setQty(key, c.qty); render(); }
+        return;
+      }
+      RAFShop.Cart.setQty(key, Math.max(1,c.qty)); render(); return;
+    }
     RAFShop.Cart.setQty(key, l.qty+d); render();
   };
   window.removeLine = function(key){

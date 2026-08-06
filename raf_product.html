@@ -875,16 +875,26 @@ function renderStock(){
   else { el.className = 'stock-l ok'; el.innerHTML = '<i class="ti ti-circle-check"></i> ' + T('متوفر — ' + s + ' قطعة','In stock — ' + s + ' available'); }
   syncQtyBtns();
 }
+/* the ceiling comes from the shared rule, never from a local stock copy */
+function qtyMax(){
+  if (window.RAFRules) return RAFRules.maxQty(PID);
+  return (P.stock == null || P.stock === 0) ? 0 : P.stock;
+}
 function changeQty(d){
-  var max = (P.stock == null || P.stock === 0) ? 1 : P.stock;
-  var q = Math.max(1, Math.min(max, qtyVal() + d));
-  document.getElementById('qty').textContent = q;
+  var want = qtyVal() + d;
+  if (window.RAFRules){
+    var c = RAFRules.clampQty(PID, want);
+    if (c.capped && d > 0 && window.RAFShop && RAFShop.toast) RAFShop.toast(c.reason, { icon:'ti-alert-circle' });
+    document.getElementById('qty').textContent = Math.max(1, c.qty || 1);
+  } else {
+    document.getElementById('qty').textContent = Math.max(1, Math.min(qtyMax() || 1, want));
+  }
   syncQtyBtns(); updateTotal();
 }
 function syncQtyBtns(){
-  var q = qtyVal(), max = (P.stock == null || P.stock === 0) ? 1 : P.stock;
+  var q = qtyVal(), max = qtyMax();
   document.getElementById('qtyMinus').disabled = q <= 1 || isOOS();
-  document.getElementById('qtyPlus').disabled = q >= max || isOOS();
+  document.getElementById('qtyPlus').disabled = isOOS() || max <= 0 || q >= max;
 }
 function updateTotal(){
   document.getElementById('sbTotal').textContent = money(parseFloat(P.price) * qtyVal());

@@ -204,6 +204,7 @@
     backEl.addEventListener('click',onClick);
     document.addEventListener('keydown',onKey);
     var x=backEl.querySelector('.rq-x'); if(x) x.focus();
+    syncQtyBtns();                                   /* apply the stock ceiling on open */
   }
   function onKey(e){ if(e.key==='Escape') finish(); }
   function onClick(e){
@@ -223,10 +224,27 @@
     hint('');
   }
   function chQty(d){
-    var max=P.stock||99;
-    qty=Math.max(1,Math.min(max,qty+d));
+    /* shared ceiling — identical to the product page and the cart */
+    if(window.RAFRules){
+      var c=RAFRules.clampQty(P.id, qty+d);
+      qty=Math.max(1,c.qty||1);
+      /* tell the customer why they cannot go higher, both when they hit the
+         ceiling and when they try to pass it */
+      if(d>0 && (c.capped||c.atMax)) hint(T('الحد الأقصى المتاح '+c.max,'Only '+c.max+' available'));
+      else if(d<0) hint('');
+    } else {
+      qty=Math.max(1,Math.min(P.stock||99,qty+d));
+    }
     backEl.querySelector('#rqNum').textContent=qty;
     backEl.querySelector('#rqTot').textContent=money(parseFloat(P.price)*qty);
+    syncQtyBtns();
+  }
+  function syncQtyBtns(){
+    if(!backEl) return;
+    var max=window.RAFRules?RAFRules.maxQty(P.id):(P.stock||99);
+    var minus=backEl.querySelector('[data-q="-1"]'), plus=backEl.querySelector('[data-q="1"]');
+    if(minus) minus.disabled=isOOS(P)||qty<=1;
+    if(plus)  plus.disabled=isOOS(P)||max<=0||qty>=max;
   }
   function hint(msg){
     var h=backEl&&backEl.querySelector('#rqHint'); if(!h) return;

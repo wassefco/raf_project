@@ -203,6 +203,34 @@
   };
 
   /* ══════════════════════════════════════════════════════════════
+     QUANTITY CEILING — the single rule every selector must obey.
+     maxQty() is the one place that decides how many units a shopper may
+     take: current stock, minus whatever other checkout sessions hold.
+     Every quantity control in the product (details page, cards, quick
+     order, cart) calls clampQty() so the ceiling behaves identically.
+     ══════════════════════════════════════════════════════════════ */
+  function maxQty(productId){
+    if (!S()) return 0;
+    var p = S().product(productId);
+    if (!p) return 0;
+    if (p.status !== 'active' || !StorePolicy.isListable(p.store)) return 0;
+    if (p.stock == null) return 0;
+    return Math.max(0, Reserve.availableFor(productId));
+  }
+  /* Clamp a desired quantity to the ceiling.
+     → { qty, max, capped, atMax, reason } */
+  function clampQty(productId, want){
+    var max = maxQty(productId);
+    var n = parseInt(want, 10);
+    if (!n || n < 1) n = 1;
+    if (max <= 0) return { qty:0, max:0, capped:true, atMax:true,
+                           reason:T('نفدت كمية هذا المنتج','This product is sold out') };
+    if (n > max) return { qty:max, max:max, capped:true, atMax:true,
+                          reason:T('الحد الأقصى المتاح ' + max, 'Only ' + max + ' available') };
+    return { qty:n, max:max, capped:false, atMax:n === max, reason:'' };
+  }
+
+  /* ══════════════════════════════════════════════════════════════
      3 · CART SYNCHRONIZATION
      Re-reads price, name, store, stock and availability from the source
      for every cart line. Returns the changes so the UI can tell the shopper
@@ -324,6 +352,7 @@
   global.RAFRules = {
     StorePolicy: StorePolicy,
     REASONS: REASONS, validate: validate,
+    maxQty: maxQty, clampQty: clampQty,
     syncCart: syncCart, resetCartState: resetCartState,
     finalValidate: finalValidate, placeOrder: placeOrder,
     Reserve: Reserve,

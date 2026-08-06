@@ -116,15 +116,26 @@ html[dir="ltr"] .adc-slide .ov{background:linear-gradient(90deg,rgba(10,10,10,.8
 .adc-brand{position:absolute;bottom:26px;left:28px;z-index:3;display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:8px 15px 8px 9px;border-radius:30px;}
 .adc-brand .bl{width:34px;height:34px;border-radius:50%;background:var(--gold);color:var(--black);display:flex;align-items:center;justify-content:center;font-size:18px;}
 .adc-brand b{font-size:13px;font-weight:700;}
-.adc-arrow{position:absolute;top:50%;transform:translateY(-50%);width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.92);border:none;color:var(--ink);font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;transition:all .2s;box-shadow:var(--sh-sm);}
-.adc-arrow:hover{background:var(--gold);color:var(--black);}
+/* Arrows stay out of the way: hidden until the banner is hovered, then fade
+   in semi-transparent so the advertisement reads through them. */
+.adc-arrow{position:absolute;top:50%;transform:translateY(-50%);width:42px;height:42px;border-radius:50%;
+  background:rgba(255,255,255,.34);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,.4);color:#fff;font-size:21px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:5;box-shadow:0 4px 14px rgba(20,16,8,.18);
+  /* opacity + pointer-events (not visibility) so the arrows stay reachable by
+     keyboard while staying invisible until the banner is hovered */
+  opacity:0;pointer-events:none;transition:opacity .28s ease,background .2s ease,color .2s ease;}
+.adc:hover .adc-arrow,.adc:focus-within .adc-arrow{opacity:1;pointer-events:auto;}
+.adc-arrow:hover{background:rgba(255,255,255,.72);color:var(--ink);}
+.adc-arrow:focus-visible{opacity:1;pointer-events:auto;}
 .adc-arrow.prev{right:16px;} .adc-arrow.next{left:16px;}
 /* fixed-height strip pinned to the banner floor — same position on every
    viewport, and it never grows to collide with content */
 .adc-dots{position:absolute;bottom:0;left:0;right:0;height:44px;display:flex;align-items:center;justify-content:center;gap:7px;z-index:6;pointer-events:none;}
 .adc-dots > *{pointer-events:auto;}
-.adc-dot{width:9px;height:9px;min-height:0;flex-shrink:0;border-radius:20px;background:rgba(255,255,255,.5);border:none;cursor:pointer;transition:all .3s;padding:0;}
-.adc-dot.on{width:26px;background:var(--gold);}
+/* small, low-weight indicators with a clear active state */
+.adc-dot{width:6px;height:6px;min-height:0;flex-shrink:0;border-radius:20px;background:rgba(255,255,255,.45);border:none;cursor:pointer;transition:all .3s;padding:0;}
+.adc-dot.on{width:16px;background:var(--gold);}
 
 /* ============ CAROUSEL (content rows) ============ */
 .car{position:relative;}
@@ -283,6 +294,8 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   /* clears the 44px pagination strip pinned to the banner floor */
   .adc-brand{bottom:54px;left:20px;}
   .car-arrow{display:none!important;}
+  /* touch devices navigate by swipe, auto-rotation and the dots */
+  .adc-arrow{display:none!important;}
 }
 @media(max-width:680px){
   .wrap{padding:0 16px;}
