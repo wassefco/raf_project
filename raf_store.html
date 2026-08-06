@@ -75,6 +75,11 @@
 
   /* ══════════ STORE HERO — premium branded storefront ══════════ */
   .shero { position: relative; background: var(--ink); overflow: hidden; }
+  /* cover photo sits under the existing mesh + glow so the hero keeps its look */
+  .shero.has-cover{background-size:cover;background-position:center;}
+  .shero.has-cover .shero-mesh{background-color:rgba(21,19,15,.78);}
+  .crest.has-logo{background-size:cover;background-position:center;}
+  .crest.has-logo i{display:none;}
   .shero-mesh {
     position: absolute; inset: 0;
     background-image:
@@ -755,6 +760,18 @@ function renderStore(){
 
   var bc = document.querySelector('.bc-cur'); if (bc) bc.textContent = s.name;
   var ci = document.getElementById('crestIcon'); if (ci) ci.className = 'ti ' + s.icon;
+  /* real store branding: logo in the crest, cover photo behind the hero */
+  var src = (window.RAFSource && RAFSource.store(SLUG)) || null;
+  var crest = document.querySelector('.crest');
+  if (crest && src && src.logo){
+    crest.style.backgroundImage = 'url("' + src.logo + '")';
+    crest.classList.add('has-logo');
+  }
+  var heroEl = document.querySelector('.shero');
+  if (heroEl && src && src.cover){
+    heroEl.style.backgroundImage = 'url("' + src.cover + '")';
+    heroEl.classList.add('has-cover');
+  }
 
   /* keep the store name node intact — other components read it */
   var nameEl = document.querySelector('.shero-name');
@@ -952,6 +969,10 @@ function render(){
          and keep the store line hidden (single-store context) */
       var prod = Object.assign({}, p, { store: { ar: STORE.name, en: STORE.name } });
       prod.variants = variantsFor(p);   /* required options are still enforced before adding */
+      /* product photography comes from the central source, by id */
+      if (!prod.img && window.RAFCatalog && RAFCatalog.get){
+        var c = RAFCatalog.get(p.id); if (c && c.img) prod.img = c.img;
+      }
       return RAFCard.product(prod, {
         store: false,
         hrefFor: function(x){ return 'raf_product.html?id=' + encodeURIComponent(x.id); }

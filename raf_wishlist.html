@@ -477,7 +477,7 @@ function applyLang(){
     /* prefer the richer shared catalog, skip anything already saved, and
        resolve live availability like every other listing */
     var picks = (RAFShop.catalog || [])
-      .map(function(p){ return { id:p.id||p.sku, ar:p.ar, en:p.en, price:p.price, ic:p.ic, store:p.store }; })
+      .map(function(p){ return { id:p.id||p.sku, ar:p.ar, en:p.en, price:p.price, ic:p.ic, img:p.img||'', store:p.store }; })
       .filter(function(p){ return p.id && !saved[p.id]; })
       .map(function(p){ return RAFShop.Stock ? RAFShop.Stock.sync(p) : p; })
       .slice(0,4);

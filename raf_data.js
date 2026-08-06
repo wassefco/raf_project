@@ -70,7 +70,7 @@
       if (Stock.isOOS(p)) return null;
       var a = Cart.read(), key = keyOf(p.id, variant), ex = a.find(function (l) { return l.key === key; });
       if (ex) ex.qty++;
-      else a.push({ key: key, id: p.id, name: { ar: p.ar, en: p.en }, price: p.price, qty: 1, variant: variant || {}, ic: p.ic || 'ti-box', store: p.store ? { ar: pick(p.store, 'ar'), en: pick(p.store, 'en') } : null });
+      else a.push({ key: key, id: p.id, name: { ar: p.ar, en: p.en }, price: p.price, qty: 1, variant: variant || {}, ic: p.ic || 'ti-box', img: p.img || '', store: p.store ? { ar: pick(p.store, 'ar'), en: pick(p.store, 'en') } : null });
       Cart.write(a); return key;
     },
 
@@ -153,7 +153,7 @@
     toggle: function (p) {
       var a = Wish.read(), i = a.findIndex(function (w) { return w.id === p.id; });
       if (i > -1) { a.splice(i, 1); Wish.write(a); return false; }
-      a.push({ id: p.id, ar: p.ar, en: p.en, price: p.price, old: p.old || '', disc: p.disc || 0, store: p.store || null, ic: p.ic || 'ti-box', rate: p.rate || '', rev: p.rev || '', variants: p.variants || null, stock: (p.stock === undefined ? null : p.stock), available: (p.available === undefined ? true : p.available) });
+      a.push({ id: p.id, ar: p.ar, en: p.en, price: p.price, old: p.old || '', disc: p.disc || 0, store: p.store || null, ic: p.ic || 'ti-box', img: p.img || '', rate: p.rate || '', rev: p.rev || '', variants: p.variants || null, stock: (p.stock === undefined ? null : p.stock), available: (p.available === undefined ? true : p.available) });
       Wish.write(a); return true;
     },
     remove: function (id) { Wish.write(Wish.read().filter(function (w) { return w.id !== id; })); },
@@ -292,7 +292,7 @@
         sku: p.id, id: p.id, ar: p.name.ar, en: p.name.en,
         store: s ? { ar: s.name.ar, en: s.name.en } : null,
         slug: p.store, price: p.price, old: p.old || '', disc: p.disc || 0,
-        ic: p.ic || 'ti-box', rate: p.rate || '', rev: p.rev || '',
+        ic: p.ic || 'ti-box', img: p.img || '', rate: p.rate || '', rev: p.rev || '',
         stock: p.stock, cat: p.cat, sponsored: !!p.sponsored
       };
     });
@@ -301,6 +301,7 @@
     if (!window.RAFSource) return [];
     return RAFSource.stores({}).map(function (s) {
       return { slug: s.slug, ar: s.name.ar, en: s.name.en, cat: s.cat, ic: s.ic,
+               logo: s.logo || '', cover: s.cover || '',
                rate: s.rating, prod: s.productCount, sponsored: !!s.sponsored };
     });
   }

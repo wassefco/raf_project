@@ -290,7 +290,8 @@ function toggleLang() {
       : '<span class="store-status-closed"><i class="ti ti-circle-filled" style="font-size:8px;"></i> '+T('مغلق','Closed')+'</span>';
     return '<div class="store-card" onclick="window.location=\'raf_store.html?store='+encodeURIComponent(s.slug)+'\'">'
       + '<span class="store-num">'+(s.num||'')+'</span>'
-      + '<div class="store-img"><i class="ti '+(s.ic||'ti-building-store')+'"></i>'+badge
+      + '<div class="store-img"'+(s.cover?' style="background-image:url(\''+s.cover+'\');background-size:cover;background-position:center;"':'')+'>'
+      + (s.cover?'':'<i class="ti '+(s.ic||'ti-building-store')+'"></i>')+badge
       + '<div class="verified-ico"><i class="ti ti-check"></i></div></div>'
       + '<div class="store-body">'
         + '<div class="store-name">'+(en()?s.name.en:s.name.ar)+'</div>'

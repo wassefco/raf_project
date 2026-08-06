@@ -233,10 +233,17 @@
   ];
 
   /* ---------- flatten ---------- */
+  /* Local demo imagery. Every product and store has its own file, named by id
+     so the mapping needs no per-record wiring. The icon stays as the fallback
+     if an image is ever missing. */
+  var IMG_BASE = 'assets/products/', STORE_IMG = 'assets/stores/';
+
   var STORES = [], PRODUCTS = [], BY_ID = {}, BY_SLUG = {};
   RAW.forEach(function (s) {
     var store = {
-      slug:s.slug, name:s.name, num:s.num, ic:s.ic, cover:s.cover, cat:s.cat,
+      slug:s.slug, name:s.name, num:s.num, ic:s.ic,
+      logo:STORE_IMG + s.slug + '-logo.jpg',
+      cover:s.cover || (STORE_IMG + s.slug + '-cover.jpg'), cat:s.cat,
       rating:s.rating, orders:s.orders, followers:s.followers, productCount:s.productCount,
       satisfaction:s.satisfaction, reviewCount:s.reviewCount, reviewScore:s.reviewScore,
       status:s.status, sponsored:!!s.sponsored, hours:s.hours, desc:s.desc, cats:s.cats || []
@@ -244,6 +251,8 @@
     STORES.push(store); BY_SLUG[s.slug] = store;
     (s.items || []).forEach(function (p) {
       p.store = s.slug;
+      p.img = p.img || (IMG_BASE + p.id + '.jpg');
+      p.images = p.images && p.images.length ? p.images : [p.img];
       PRODUCTS.push(p); BY_ID[p.id] = p;
     });
   });

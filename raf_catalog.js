@@ -25,6 +25,7 @@
       ar: p.name.ar, en: p.name.en,
       price: p.price, old: p.old || '', disc: p.disc || 0,
       rate: p.rate || '', rev: p.rev || '', ic: p.ic || 'ti-box',
+      img: p.img || '', images: p.images || [],
       stock: (p.stock == null ? 10 : p.stock),
       desc: p.desc || null,
       store: s ? { ar: s.name.ar, en: s.name.en } : null,

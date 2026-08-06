@@ -76,6 +76,10 @@
     font-size:12px;font-weight:700;padding:6px 13px;border-radius:30px;display:none;align-items:center;gap:6px;}
   .gal-oos.show{display:inline-flex;}
   .gal-stage.is-oos .gal-icon{filter:grayscale(1);opacity:.5;}
+  .gal-stage.has-photo{background-size:cover;background-position:center;}
+  .gal-stage.has-photo::after{background:linear-gradient(180deg,rgba(255,255,255,.10),transparent 45%);}
+  .gal-stage.is-oos.has-photo{filter:grayscale(1);opacity:.62;}
+  .gthumb{background-size:cover;background-position:center;}
   .gal-float{position:absolute;bottom:18px;inset-inline-end:18px;z-index:2;display:flex;gap:9px;}
   .gal-fbtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,.92);
     backdrop-filter:blur(6px);color:var(--text2);font-size:19px;cursor:pointer;display:flex;align-items:center;justify-content:center;
@@ -684,6 +688,7 @@ function compose(id){
     store: L(c.store), storeSlug: c.slug, storeIcon: s ? s.ic : "ti-building-store",
     cat: catRec ? { ar:catRec.ar, en:catRec.en } : { ar:"منتجات", en:"Products" },
     icon: c.ic || "ti-box",
+    img: c.img || "",                       /* product photography (central) */
     price: c.price, oldPrice: c.old || null, discount: c.disc ? "-" + c.disc + "%" : null,
     stock: c.stock, status: c.status, sponsored: !!c.sponsored,
     variants: c.variants || null,
@@ -766,12 +771,23 @@ function render(){
   bs.textContent = P.store; bs.href = 'raf_store.html?store=' + encodeURIComponent(P.storeSlug);
   document.getElementById('bcProduct').textContent = L(P.name);
 
-  /* gallery */
-  var gal = P.gallery && P.gallery.length ? P.gallery : [P.icon];
-  document.getElementById('galIcon').className = 'ti ' + gal[0] + ' gal-icon';
-  document.getElementById('galThumbs').innerHTML = gal.map(function(ic, i){
-    return '<button class="gthumb' + (i === 0 ? ' on' : '') + '" onclick="pickThumb(' + i + ',\'' + ic + '\')" aria-label="view ' + (i+1) + '"><i class="ti ' + ic + '"></i></button>';
-  }).join('');
+  /* gallery — real photography when the product has it, icons as the fallback */
+  var stage = document.getElementById('galStage');
+  var icon = document.getElementById('galIcon');
+  if (P.img){
+    stage.style.backgroundImage = 'url("' + P.img + '")';
+    stage.classList.add('has-photo');
+    icon.style.display = 'none';
+    document.getElementById('galThumbs').innerHTML =
+      '<button class="gthumb on" style="background-image:url(\'' + P.img + '\')" aria-label="view 1"></button>';
+  } else {
+    var gal = P.gallery && P.gallery.length ? P.gallery : [P.icon];
+    stage.style.backgroundImage = ''; stage.classList.remove('has-photo');
+    icon.style.display = ''; icon.className = 'ti ' + gal[0] + ' gal-icon';
+    document.getElementById('galThumbs').innerHTML = gal.map(function(ic, i){
+      return '<button class="gthumb' + (i === 0 ? ' on' : '') + '" onclick="pickThumb(' + i + ',\'' + ic + '\')" aria-label="view ' + (i+1) + '"><i class="ti ' + ic + '"></i></button>';
+    }).join('');
+  }
   var tag = document.getElementById('galTag');
   if (P.discount && !isOOS()){ tag.textContent = P.discount; tag.style.display = ''; } else tag.style.display = 'none';
   document.getElementById('galOOS').classList.toggle('show', isOOS());
@@ -999,7 +1015,7 @@ function cartProduct(){
      label — otherwise the one-store-per-order check would treat the same
      store as two different ones after a language switch */
   return { id:PID, ar:P.name.ar, en:P.name.en, price:P.price, old:P.oldPrice || '',
-           ic:P.icon || 'ti-box', rate:String(P.rating), rev:String(P.reviews), stock:P.stock,
+           ic:P.icon || 'ti-box', img:P.img || '', rate:String(P.rating), rev:String(P.reviews), stock:P.stock,
            store:{ ar:P.storeName.ar, en:P.storeName.en } };
 }
 

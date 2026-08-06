@@ -180,7 +180,8 @@
     var out = RAFCO.isOOS(l);
     var vars = Object.keys(l.variant||{});
     return '<div class="ci" data-key="'+l.key+'">'
-      + '<div class="ci-img"><i class="ti '+(l.ic||'ti-box')+'"></i></div>'
+      + '<div class="ci-img"'+(l.img?' style="background-image:url(\''+l.img+'\');background-size:cover;background-position:center;"':'')+'>'
+        + (l.img?'':'<i class="ti '+(l.ic||'ti-box')+'"></i>')+'</div>'
       + '<div class="ci-main">'
         + '<div class="ci-name">'+L(l.name)+'</div>'
         + (out ? '<div class="ci-oos"><i class="ti ti-ban"></i> '+T('غير متوفر حالياً','Currently unavailable')+'</div>' : '')
