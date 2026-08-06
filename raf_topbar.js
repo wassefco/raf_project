@@ -23,14 +23,15 @@
     /* colour set explicitly so the header never inherits host-page link styling */
     '.rtb-logo{flex-shrink:0;display:inline-flex;align-items:center;color:#15130F;text-decoration:none;}.rtb-logo img{height:56px;width:auto;display:block;}'+
     '.rtb-search{flex:1;max-width:1000px;position:relative;}'+
-    '.rtb-search input{width:100%;height:52px;border:1.5px solid #D8D3C8;background:#fff;border-radius:14px;padding:0 102px 0 18px;font-family:"Tajawal",sans-serif;font-size:15px;color:#0A0A0A;outline:none;transition:border-color .2s,box-shadow .2s;box-shadow:0 4px 16px rgba(20,16,8,.06);}'+
-    '[dir="ltr"] .rtb-search input{padding:0 18px 0 102px;}'+
+    /* logical padding: the text reserve is always on the same side as the
+       buttons, in both RTL and LTR */
+    '.rtb-search input{width:100%;height:52px;border:1.5px solid #D8D3C8;background:#fff;border-radius:14px;padding:0;padding-inline-start:18px;padding-inline-end:102px;font-family:"Tajawal",sans-serif;font-size:15px;color:#0A0A0A;outline:none;transition:border-color .2s,box-shadow .2s;box-shadow:0 4px 16px rgba(20,16,8,.06);}'+
     '.rtb-search input::placeholder{color:#8A857C;}'+
     '.rtb-search input:focus{border-color:#C9A84C;box-shadow:0 0 0 4px rgba(201,168,76,.12);}'+
-    '.rtb-search>button{position:absolute;top:6px;inset-inline-end:6px;width:40px;height:40px;border:none;border-radius:11px;background:#C9A84C;color:#0A0A0A;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:background .2s;}'+
+    /* both in-field buttons share one size and one vertical centre */
+    '.rtb-search>button{position:absolute;top:50%;transform:translateY(-50%);inset-inline-end:6px;width:40px;height:40px;flex-shrink:0;border:none;border-radius:11px;background:#C9A84C;color:#0A0A0A;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;transition:background .2s;}'+
     '.rtb-search>button:hover{background:#A07828;}'+
-    /* filter entry point — same control on every page */
-    '.rtb-search>button.rtb-filter{inset-inline-end:52px;background:transparent;color:#5A5650;border:1.5px solid #D8D3C8;width:42px;}'+
+    '.rtb-search>button.rtb-filter{inset-inline-end:52px;background:transparent;color:#5A5650;border:1.5px solid #D8D3C8;width:40px;}'+
     '.rtb-search>button.rtb-filter:hover{border-color:#C9A84C;color:#A07828;background:rgba(201,168,76,.1);}'+
     '.rtb-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}'+
     '.rtb-ico{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#15130F;cursor:pointer;background:transparent;position:relative;font-size:20px;transition:all .2s;text-decoration:none;}'+
@@ -49,13 +50,14 @@
     /* tablet-portrait + phones (≤860): app chrome (no inline search/subnav) + visible mobile search bar */
     '@media(max-width:860px){'+
       'nav:not(.app-bnav):not(.top){padding:0 14px!important;}.rtb-inner{gap:12px;}.rtb-search{display:none;}.rtb-subnav{display:none;}.rtb-account-l{display:none;}.rtb-account{padding:0 14px;}.rtb-logo img{height:42px;}'+
-      '.rtb-msearch{display:block;background:rgba(245,242,236,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #E2DBCC;padding:10px 14px;}'+
+      /* gutter matches the page content width so the field lines up with the
+         sections below it */
+      '.rtb-msearch{display:block;background:rgba(245,242,236,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid #E2DBCC;padding:10px 16px;}'+
       '.rtb-msearch form{position:relative;max-width:680px;margin:0 auto;}'+
-      '.rtb-msearch input{width:100%;height:46px;border:1.5px solid #D8D3C8;background:#fff;border-radius:13px;padding:0 92px 0 16px;font-family:"Tajawal",sans-serif;font-size:14.5px;color:#0A0A0A;outline:none;box-shadow:0 2px 10px rgba(20,16,8,.05);}'+
-      '[dir="ltr"] .rtb-msearch input{padding:0 16px 0 92px;}'+
+      '.rtb-msearch input{width:100%;height:46px;border:1.5px solid #D8D3C8;background:#fff;border-radius:13px;padding:0;padding-inline-start:16px;padding-inline-end:92px;font-family:"Tajawal",sans-serif;font-size:14.5px;color:#0A0A0A;outline:none;box-shadow:0 2px 10px rgba(20,16,8,.05);}'+
       '.rtb-msearch input:focus{border-color:#C9A84C;box-shadow:0 0 0 3px rgba(201,168,76,.12);}'+
-      '.rtb-msearch button{position:absolute;top:5px;inset-inline-end:5px;width:36px;height:36px;border:none;border-radius:10px;background:#C9A84C;color:#0A0A0A;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;}'+
-      '.rtb-msearch button.rtb-mfilter{inset-inline-end:47px;background:transparent;color:#5A5650;border:1.5px solid #D8D3C8;width:38px;}'+
+      '.rtb-msearch button{position:absolute;top:50%;transform:translateY(-50%);inset-inline-end:5px;width:36px;height:36px;flex-shrink:0;border:none;border-radius:10px;background:#C9A84C;color:#0A0A0A;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;}'+
+      '.rtb-msearch button.rtb-mfilter{inset-inline-end:47px;background:transparent;color:#5A5650;border:1.5px solid #D8D3C8;width:36px;}'+
       '.rtb-msearch button.rtb-mfilter:hover{border-color:#C9A84C;color:#A07828;}'+
     '}'+
     /* tablet + mobile (≤1024): language lives in the hamburger; cart/wishlist/account live in the bottom nav → remove from header */

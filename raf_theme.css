@@ -74,13 +74,27 @@ html:not([data-ui="admin"]) [role="button"]{ min-height:40px; }
   html:not([data-ui="admin"]) .btn,
   html:not([data-ui="admin"]) [role="button"]{ min-height:44px; }
 }
-/* icon-only controls stay square rather than being stretched by the rule above */
+/* Icon-only controls and in-field affordances keep their designed size — the
+   rule above would otherwise stretch them out of their container (search
+   buttons overflowing the input, 9px carousel dots becoming a 40px band). */
 html:not([data-ui="admin"]) .nav-ico,
 html:not([data-ui="admin"]) .rtb-ico,
 html:not([data-ui="admin"]) .rn-bell,
 html:not([data-ui="admin"]) .qty button,
 html:not([data-ui="admin"]) .qb,
-html:not([data-ui="admin"]) .rcv-x{ min-height:0; }
+html:not([data-ui="admin"]) .rcv-x,
+html:not([data-ui="admin"]) .rtb-search > button,
+html:not([data-ui="admin"]) .rtb-msearch button,
+/* card action: the button and the qty stepper must match exactly (38px), or
+   the two card states sit at different heights in the same grid */
+html:not([data-ui="admin"]) .rc-cart,
+html:not([data-ui="admin"]) .adc-dot,
+html:not([data-ui="admin"]) .adc-arrow,
+html:not([data-ui="admin"]) .car-arrow,
+html:not([data-ui="admin"]) .fstore-x,
+html:not([data-ui="admin"]) .gal-fbtn,
+html:not([data-ui="admin"]) .rq-x,
+html:not([data-ui="admin"]) .fsheet-x{ min-height:0; }
 
 html:not([data-ui="admin"]) ::selection{ background:var(--gold-soft); color:var(--ink); }
 
