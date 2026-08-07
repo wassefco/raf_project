@@ -166,11 +166,17 @@
   /* -------------------------------------------------------------------------
    * 3) USERS  (18 seeded — reflects the RAF org structure)
    * ---------------------------------------------------------------------- */
-  function u(id, name, email, phone, accountType, roleId, status, regDate, overrides) {
+  /* `storeSlug` is the canonical merchant ↔ store relationship. A merchant or
+     merchant employee belongs to exactly one store and never picks it by hand;
+     every merchant-side surface scopes its data through this field. It is the
+     ONLY accepted way to resolve a store — never by display name, email or
+     username. Null for every non-merchant account. */
+  function u(id, name, email, phone, accountType, roleId, status, regDate, overrides, storeSlug) {
     return {
       id: id, name: name, email: email, phone: phone,
       accountType: accountType, roleId: roleId, status: status,
-      regDate: regDate, overrides: overrides || {}
+      regDate: regDate, overrides: overrides || {},
+      storeSlug: storeSlug || null
     };
   }
   var USERS = [
@@ -192,11 +198,17 @@
     u('usr-009', 'فيصل المطيري', 'f.mutairi@raf.kw', '+965 9000 1009', 'staff', 'marketing', 'active', '2023-09-27'),
     /* 2 Merchants */
     u('usr-010', 'متجر كازا مود', 'casa.mode@raf.kw', '+965 9000 1010', 'merchant', 'merchant', 'active', '2023-10-11',
-      { 'auctions.edit': 'grant' }),
-    u('usr-011', 'متجر لمسة ذهب', 'lamset.gold@raf.kw', '+965 9000 1011', 'merchant', 'merchant', 'active', '2023-11-30'),
-    /* 2 Merchant Employees */
-    u('usr-012', 'ريم الدوسري', 'reem.d@casa.kw', '+965 9000 1012', 'merchant', 'merchant_employee', 'active', '2024-01-08'),
-    u('usr-013', 'طلال الشمري', 'talal.s@lamset.kw', '+965 9000 1013', 'merchant', 'merchant_employee', 'active', '2024-02-19'),
+      { 'auctions.edit': 'grant' }, 'casa-mode'),
+    /* UNASSIGNED — «لمسة ذهب» matches no store in RAFSource. Deliberately left
+       null: an account is never pointed at a different store to fill the gap. */
+    u('usr-011', 'متجر لمسة ذهب', 'lamset.gold@raf.kw', '+965 9000 1011', 'merchant', 'merchant', 'active', '2023-11-30',
+      null, null),
+    /* 2 Merchant Employees — UNASSIGNED. Nothing in the data states which store
+       either works for; an email domain is not a store reference. */
+    u('usr-012', 'ريم الدوسري', 'reem.d@casa.kw', '+965 9000 1012', 'merchant', 'merchant_employee', 'active', '2024-01-08',
+      null, null),
+    u('usr-013', 'طلال الشمري', 'talal.s@lamset.kw', '+965 9000 1013', 'merchant', 'merchant_employee', 'active', '2024-02-19',
+      null, null),
     /* 2 Drivers */
     u('usr-014', 'ماجد العنزي', 'majed.driver@raf.kw', '+965 9000 1014', 'driver', 'driver', 'active', '2024-03-14'),
     u('usr-015', 'حمد القحطاني', 'hamad.driver@raf.kw', '+965 9000 1015', 'driver', 'driver', 'suspended', '2024-04-02'),
@@ -270,6 +282,26 @@
     if (force || !localStorage.getItem(LS.users))     write(LS.users, USERS);
     if (force || !localStorage.getItem(LS.templates)) write(LS.templates, TEMPLATES);
     if (force || !localStorage.getItem(LS.session))   write(LS.session, 'usr-001');
+    backfillStoreSlugs();
+  }
+
+  /* Accounts stored before the merchant ↔ store link existed have no
+     storeSlug. Backfill them from the seed by id, without disturbing any
+     other edit an admin may have made to those records. */
+  function backfillStoreSlugs() {
+    try {
+      var stored = read(LS.users, null);
+      if (!Array.isArray(stored)) return;
+      var seedBySlug = {};
+      USERS.forEach(function (su) { if (su.storeSlug) seedBySlug[su.id] = su.storeSlug; });
+      var changed = false;
+      stored.forEach(function (su) {
+        /* only fill in the field where it never existed. An explicit null means
+           "no store assigned" and is left exactly as it is — never re-guessed. */
+        if (su.storeSlug === undefined) { su.storeSlug = seedBySlug[su.id] || null; changed = true; }
+      });
+      if (changed) write(LS.users, stored);
+    } catch (e) {}
   }
 
   /* -------------------------------------------------------------------------
@@ -369,6 +401,39 @@
    *      <section data-perm="reports.view"> ... </section>
    *      <body data-perm-guard="permissions.view" data-perm-redirect="raf_management.html">
    * ---------------------------------------------------------------------- */
+  /* ---- merchant ↔ store resolution ----
+     The single accepted way for a merchant surface to learn which store it is
+     looking at. Resolution is by stored id only; display name, email and
+     username are never consulted. */
+  function isMerchant(userOrId) {
+    var user = resolveUser(userOrId || read(LS.session, 'usr-001'));
+    return !!(user && (user.roleId === 'merchant' || user.roleId === 'merchant_employee'));
+  }
+  function storeSlugOf(userOrId) {
+    var user = resolveUser(userOrId || read(LS.session, 'usr-001'));
+    return (user && user.storeSlug) || null;
+  }
+  /* The store record itself, straight from the central authority.
+     Never falls back: an account with no link, or a link pointing at a store
+     that does not exist, resolves to null. It is never silently pointed at
+     some other store. */
+  function storeOf(userOrId) {
+    var slug = storeSlugOf(userOrId);
+    if (!slug || !global.RAFSource) return null;
+    return global.RAFSource.store(slug) || null;
+  }
+  /* Explicit link state, so a surface can tell "no store assigned" apart from
+     "assigned to a store that is missing" and report it as the data problem it
+     is instead of guessing. reason: null | 'unassigned' | 'store_not_found'. */
+  function storeLinkOf(userOrId) {
+    var user = resolveUser(userOrId || read(LS.session, 'usr-001'));
+    var slug = (user && user.storeSlug) || null;
+    if (!slug) return { slug:null, store:null, ok:false, reason:'unassigned' };
+    var store = global.RAFSource ? global.RAFSource.store(slug) : null;
+    if (!store) return { slug:slug, store:null, ok:false, reason:'store_not_found' };
+    return { slug:slug, store:store, ok:true, reason:null };
+  }
+
   function enforce(userOrId) {
     var user = resolveUser(userOrId || read(LS.session, 'usr-001'));
     /* page-level guard */
@@ -417,6 +482,10 @@
     can: can,
     originOf: originOf,
     effectivePermissions: effectivePermissions,
+    storeSlugOf: storeSlugOf,
+    storeOf: storeOf,
+    storeLinkOf: storeLinkOf,
+    isMerchant: isMerchant,
     /* enforcement */
     enforce: enforce
   };

@@ -3,901 +3,1328 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>رف — لوحة التاجر</title>
+<title>رف — الطلبات</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<style>
-*{box-sizing:border-box;margin:0;padding:0;}
-:root{
-  --bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;
-  --sb:#0A0A0A;--sb2:#1A1A1A;--sb3:#888;
-  --gold:#C9A84C;--gold2:#A07828;
-  --text:#0A0A0A;--text2:#555;--text3:#888;
-  --border:#D8D3C8;
-  --green:#2E7D32;--green-bg:#E8F5E9;
-  --red:#C62828;--red-bg:#FFEBEE;
-  --blue:#1565C0;--blue-bg:#E3F2FD;
-  --amber:#E65100;--amber-bg:#FFF3E0;
-  --r:8px;--rl:12px;
-  --font:'Tajawal',sans-serif;
-  --fen:'DM Sans',sans-serif;
-}
-html,body{height:100%;overflow:hidden;}
-body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex;}
-
-/* SIDEBAR */
-.sb{width:220px;min-width:220px;background:var(--sb);border-left:1px solid var(--sb2);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
-.sb::-webkit-scrollbar{width:3px;}
-.sb::-webkit-scrollbar-thumb{background:#222;}
-.sb-logo{padding:20px 16px;border-bottom:1px solid var(--sb2);display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.sb-mark{width:34px;height:34px;background:var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:17px;font-weight:900;color:#000;flex-shrink:0;}
-.sb-title{font-size:14px;font-weight:700;color:#F5F2EC;}
-.sb-sub{font-size:9px;color:#444;font-family:var(--fen);letter-spacing:2px;}
-.sb-store{padding:14px 16px;border-bottom:1px solid var(--sb2);display:flex;align-items:center;gap:10px;}
-.sb-store-ico{width:36px;height:36px;border-radius:var(--r);background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--gold);flex-shrink:0;}
-.sb-store-name{font-size:13px;font-weight:700;color:#DDD;}
-.sb-store-pkg{font-size:10px;color:var(--gold);background:rgba(201,168,76,.1);padding:2px 7px;border-radius:10px;display:inline-block;margin-top:2px;}
-.sb-sec{padding:14px 14px 4px;font-size:9px;color:#2A2A2A;letter-spacing:2px;text-transform:uppercase;font-family:var(--fen);}
-.sb-item{display:flex;align-items:center;gap:9px;padding:9px 14px;margin:1px 8px;border-radius:var(--r);color:var(--sb3);cursor:pointer;font-size:13px;transition:all .15s;text-decoration:none;}
-.sb-item:hover{background:#111;color:#CCC;}
-.sb-item.on{background:rgba(201,168,76,.1);color:var(--gold);border:0.5px solid rgba(201,168,76,.2);}
-.sb-item i{font-size:17px;flex-shrink:0;}
-.sb-n{margin-right:auto;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700;}
-.sb-n.r{background:var(--red-bg);color:var(--red);}
-.sb-n.g{background:rgba(201,168,76,.15);color:var(--gold2);}
-.sb-foot{margin-top:auto;padding:14px 12px;border-top:1px solid var(--sb2);flex-shrink:0;}
-.sb-user{display:flex;align-items:center;gap:9px;padding:10px 12px;background:#111;border-radius:var(--r);}
-.sb-av{width:32px;height:32px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000;flex-shrink:0;}
-.sb-un{font-size:12px;font-weight:500;color:#DDD;}
-.sb-ur{font-size:10px;color:#444;}
-
-/* MAIN */
-.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;}
-
-/* TOPBAR */
-.top{height:58px;flex-shrink:0;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;}
-.top-t{font-size:16px;font-weight:700;}
-.top-b{font-size:12px;color:var(--text3);margin-right:6px;}
-.top-act{margin-right:auto;display:flex;gap:8px;align-items:center;}
-.btn{display:flex;align-items:center;gap:5px;padding:7px 14px;border-radius:var(--r);font-family:var(--font);font-size:12px;cursor:pointer;border:none;transition:all .15s;}
-.btn-p{background:var(--gold);color:#000;font-weight:700;}
-.btn-p:hover{background:var(--gold2);}
-.btn-g{background:transparent;border:1px solid var(--border);color:var(--text2);}
-.btn-g:hover{border-color:var(--gold);color:var(--gold);}
-.lang-btn{padding:6px 12px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--fen);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.5px;}
-.lang-btn:hover{border-color:var(--gold);color:var(--gold);}
-.ico{width:34px;height:34px;border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;background:transparent;font-size:16px;position:relative;transition:all .2s;}
-.ico:hover{border-color:var(--gold);color:var(--gold);}
-.dot{position:absolute;top:-3px;right:-3px;width:7px;height:7px;background:var(--red);border-radius:50%;border:1.5px solid var(--card);}
-
-/* CONTENT */
-.cnt{flex:1;overflow-y:auto;padding:24px;}
-.cnt::-webkit-scrollbar{width:5px;}
-.cnt::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
-
-/* SECTION PANELS */
-.sec-panel{display:none;}
-.sec-panel.on{display:block;}
-
-/* STATS */
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
-.s-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:18px;}
-.s-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.s-ico{width:38px;height:38px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:19px;}
-.s-chg{font-size:11px;font-weight:500;display:flex;align-items:center;gap:2px;padding:3px 7px;border-radius:20px;}
-.up{color:var(--green);background:var(--green-bg);}
-.dn{color:var(--red);background:var(--red-bg);}
-.s-num{font-size:26px;font-weight:700;font-family:var(--fen);}
-.s-lbl{font-size:12px;color:var(--text3);margin-top:3px;}
-
-/* CARD */
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px;}
-.c-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
-.c-title{font-size:13px;font-weight:700;}
-.c-act{font-size:12px;color:var(--gold);cursor:pointer;text-decoration:none;}
-
-/* TABLE */
-table{width:100%;border-collapse:collapse;}
-thead th{padding:10px 14px;text-align:right;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;background:var(--bg2);border-bottom:1px solid var(--border);}
-tbody tr{border-bottom:1px solid var(--border);transition:background .12s;}
-tbody tr:last-child{border-bottom:none;}
-tbody tr:hover{background:var(--bg);}
-tbody td{padding:12px 14px;font-size:13px;color:var(--text);vertical-align:middle;}
-
-/* BADGE */
-.badge{display:inline-flex;align-items:center;gap:3px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;}
-.b-g{background:var(--green-bg);color:var(--green);}
-.b-r{background:var(--red-bg);color:var(--red);}
-.b-a{background:var(--amber-bg);color:var(--amber);}
-.b-b{background:var(--blue-bg);color:var(--blue);}
-.b-gold{background:rgba(201,168,76,.12);color:var(--gold2);}
-
-/* PRODUCT ROW */
-.p-row{display:flex;align-items:center;gap:10px;}
-.p-img{width:36px;height:36px;border-radius:var(--r);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text3);flex-shrink:0;}
-.p-name{font-size:13px;font-weight:500;}
-.p-cat{font-size:11px;color:var(--text3);}
-
-/* STOCK BAR */
-.stock-bar{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;width:80px;}
-.stock-fill{height:100%;border-radius:3px;}
-
-/* FORM */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:20px;}
-.form-grid.full{grid-template-columns:1fr;}
-.field-lbl{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;display:block;}
-.field-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .2s;}
-.field-input:focus{border-color:var(--gold);}
-.field-input::placeholder{color:var(--text3);}
-.field-select{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;outline:none;cursor:pointer;}
-.upload-box{border:1.5px dashed var(--border);border-radius:var(--r);padding:28px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);}
-.upload-box:hover{border-color:var(--gold);}
-.upload-box i{font-size:28px;color:var(--text3);display:block;margin-bottom:8px;}
-.upload-box span{font-size:13px;color:var(--text3);}
-.upload-note{font-size:11px;color:var(--text3);margin-top:4px;}
-.form-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-start;}
-
-/* TOGGLE */
-.toggle{width:44px;height:24px;background:var(--border);border-radius:12px;cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0;}
-.toggle.on{background:var(--gold);}
-.toggle::after{content:'';position:absolute;top:3px;right:3px;width:18px;height:18px;background:white;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
-.toggle.on::after{transform:translateX(-20px);}
-
-/* SETTINGS ROWS */
-.set-row{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);}
-.set-row:last-child{border-bottom:none;}
-.set-ico{width:36px;height:36px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;margin-left:12px;}
-.set-lbl{font-size:13px;font-weight:500;}
-.set-sub{font-size:11px;color:var(--text3);margin-top:2px;}
-.set-act{margin-right:auto;}
-
-/* WORKING HOURS (settings card) */
-.wh-card-grid{display:flex;flex-direction:column;gap:6px;padding:16px 18px;}
-.wh-card-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);transition:background .2s;}
-.wh-card-row.closed{opacity:.45;}
-.wh-card-toggle{position:relative;width:36px;height:20px;flex-shrink:0;}
-.wh-card-toggle input{opacity:0;width:0;height:0;position:absolute;}
-.wh-card-slider{position:absolute;inset:0;background:var(--border);border-radius:10px;cursor:pointer;transition:.2s;}
-.wh-card-slider::before{content:'';position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;bottom:3px;right:3px;transition:.2s;}
-.wh-card-toggle input:checked+.wh-card-slider{background:var(--gold);}
-.wh-card-toggle input:checked+.wh-card-slider::before{transform:translateX(-16px);}
-.wh-card-day{width:68px;font-size:13px;font-weight:600;color:var(--text);flex-shrink:0;}
-.wh-card-times{display:flex;align-items:center;gap:8px;flex:1;font-size:12px;color:var(--text2);}
-.wh-card-times select{padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-family:var(--font);font-size:12px;outline:none;cursor:pointer;}
-.wh-card-times select:focus{border-color:var(--gold);}
-.wh-closed-badge{font-size:11px;color:var(--text3);font-style:italic;}
-
-/* PAGINATION */
-.t-foot{padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text3);}
-.pgs{display:flex;gap:3px;}
-.pg{width:26px;height:26px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.pg.on,.pg:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08);}
-
-/* TABS */
-.tabs{display:flex;border-bottom:1px solid var(--border);padding:0 18px;}
-.tab{padding:10px 14px;font-size:12px;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;}
-.tab.on{color:var(--text);border-bottom-color:var(--gold);font-weight:700;}
-
-/* COUPON CARD */
-.coup-item{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border);}
-.coup-item:last-child{border-bottom:none;}
-.coup-code{font-size:14px;font-weight:700;font-family:var(--fen);color:var(--gold);letter-spacing:1px;}
-.coup-meta{font-size:12px;color:var(--text3);margin-top:3px;}
-
-/* PROGRESS */
-.prog-row{padding:10px 18px;border-bottom:1px solid var(--border);}
-.prog-row:last-child{border-bottom:none;}
-.prog-h{display:flex;justify-content:space-between;margin-bottom:6px;font-size:12px;}
-.prog-t{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;}
-.prog-f{height:100%;background:var(--gold);border-radius:3px;}
-
-/* TWO COL */
-.two-col{display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-bottom:16px;}
-
-/* COUPON TYPE BUTTONS */
-.coup-type-btn{padding:7px 14px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text3);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px;}
-.coup-type-btn:hover{border-color:var(--gold);color:var(--gold);}
-.coup-type-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08);font-weight:700;}
-
-/* ===== RESPONSIVE ===== */
-.mob-menu-btn{display:none;width:34px;height:34px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0;}
-.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:998;cursor:pointer;}
-@media(max-width:768px){
-  html,body{overflow:auto;height:auto;}
-  body{flex-direction:column;}
-  .sb{position:fixed;top:0;right:0;bottom:0;z-index:999;width:220px;transform:translateX(100%);transition:transform .25s;display:flex;}
-  .sb.open{transform:translateX(0);}
-  .sb-overlay.open{display:block;}
-  .mob-menu-btn{display:flex;}
-  .main{min-height:100vh;overflow:auto;}
-  .cnt{padding:14px;overflow:visible;}
-  .top{padding:0 14px;gap:8px;}
-  .two-col{grid-template-columns:1fr;}
-  .table-wrap{overflow-x:auto;}
-  table{min-width:600px;}
-}
-@media(max-width:480px){
-  .metrics-grid,.mini-metrics,.stats-grid{grid-template-columns:1fr 1fr!important;}
-  .top-act{flex-wrap:wrap;gap:5px;}
-  .cnt{padding:10px;}
-  .wh-card-row{flex-wrap:wrap;gap:6px;}
-  .wh-card-day{width:auto;}
-  .wh-card-times{flex-wrap:wrap;}
-  .form-grid{grid-template-columns:1fr!important;}
-}
-</style>
-<link rel="stylesheet" href="raf_header.css">
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <script src="raf_features.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   MERCHANT WORKSPACE — ORDERS  (Phase 1, interface only)
+   Built on the RAF design tokens from raf_theme.css. Nothing here
+   redefines the design language; it only lays out the workspace.
+   ══════════════════════════════════════════════════════════════ */
+*{box-sizing:border-box;}
+body{background:var(--bg2);margin:0;}
+
+/* ---------- shell ---------- */
+.mw{display:flex;min-height:100vh;}
+.mw-rail{width:74px;flex:0 0 74px;background:var(--ink);display:flex;flex-direction:column;align-items:center;
+  gap:6px;padding:14px 0;position:sticky;top:0;height:100vh;z-index:40;}
+.mw-rail-logo{width:42px;height:42px;border-radius:13px;background:var(--gold);color:#1C1606;display:flex;
+  align-items:center;justify-content:center;font-family:var(--font-display);font-size:19px;font-weight:900;
+  margin-bottom:10px;text-decoration:none;}
+.mw-rail-b{width:50px;min-height:50px;border-radius:14px;border:0;background:transparent;color:#8E877A;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;
+  font-family:inherit;font-size:9.5px;font-weight:700;transition:background .18s,color .18s;}
+.mw-rail-b i{font-size:21px;}
+.mw-rail-b:hover:not(:disabled){background:rgba(255,255,255,.07);color:#EDE8DC;}
+.mw-rail-b.on{background:var(--gold-soft);color:var(--gold);}
+.mw-rail-b:disabled{opacity:.34;cursor:not-allowed;}
+.mw-rail-sp{flex:1;}
+.mw-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+/* ---------- header ---------- */
+.mw-head{position:sticky;top:0;z-index:35;background:var(--card);border-bottom:1px solid var(--border);
+  padding:12px clamp(14px,2.2vw,24px);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.mw-store{display:flex;align-items:center;gap:11px;min-width:0;}
+.mw-store-logo{width:44px;height:44px;flex:0 0 auto;border-radius:13px;background:var(--bg3) center/cover no-repeat;
+  display:flex;align-items:center;justify-content:center;color:var(--gold2);font-size:21px;}
+.mw-store-t{min-width:0;}
+.mw-store-t b{display:block;font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mw-store-t span{font-size:11.5px;color:var(--text3);}
+.mw-head-sp{flex:1;min-width:8px;}
+.mw-hbtn{width:44px;height:44px;border-radius:13px;border:1px solid var(--border);background:var(--card);
+  color:var(--text2);font-size:20px;cursor:pointer;position:relative;display:flex;align-items:center;justify-content:center;
+  transition:border-color .18s,color .18s;}
+.mw-hbtn:hover{border-color:var(--gold);color:var(--gold2);}
+.mw-hbtn .dot{position:absolute;top:8px;inset-inline-end:8px;width:8px;height:8px;border-radius:50%;
+  background:var(--red);border:2px solid var(--card);}
+.mw-prof{display:flex;align-items:center;gap:9px;height:44px;padding:0 12px;border-radius:13px;
+  border:1px solid var(--border);background:var(--card);cursor:pointer;font-family:inherit;transition:border-color .18s;}
+.mw-prof:hover{border-color:var(--gold);}
+.mw-prof-av{width:28px;height:28px;border-radius:50%;background:var(--gold-soft);color:var(--gold2);
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;}
+.mw-prof-n{font-size:12.5px;font-weight:700;color:var(--ink);max-width:120px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;}
+
+/* ---------- operational banner ---------- */
+.mw-ops{display:flex;align-items:center;gap:12px;padding:9px 14px;border-radius:14px;border:1px solid var(--border2);
+  background:var(--bg);min-width:0;}
+.mw-ops-dot{width:11px;height:11px;flex:0 0 auto;border-radius:50%;background:var(--green);
+  box-shadow:0 0 0 4px rgba(46,158,91,.16);}
+.mw-ops[data-load="moderate"] .mw-ops-dot{background:#E0A32E;box-shadow:0 0 0 4px rgba(224,163,46,.18);}
+.mw-ops[data-load="heavy"] .mw-ops-dot{background:var(--red);box-shadow:0 0 0 4px rgba(217,83,79,.18);}
+.mw-ops-t{min-width:0;line-height:1.35;}
+.mw-ops-t b{display:block;font-size:12.5px;font-weight:800;color:var(--ink);white-space:nowrap;}
+.mw-ops-t span{font-size:11.5px;color:var(--text2);white-space:nowrap;}
+.mw-ops-t span em{font-style:normal;font-family:var(--font-en);font-weight:700;color:var(--gold2);}
+.mw-ops-edit{margin-inline-start:4px;height:34px;padding:0 13px;border-radius:30px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;transition:border-color .18s,color .18s,background .18s;}
+.mw-ops-edit:hover{border-color:var(--gold);background:var(--gold-soft);color:var(--gold2);}
+
+/* ---------- split workspace ---------- */
+.mw-split{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,420px);gap:0;align-items:start;}
+.mw-list{min-width:0;padding:16px clamp(14px,2.2vw,24px) 40px;}
+.mw-side{position:sticky;top:69px;height:calc(100vh - 69px);border-inline-start:1px solid var(--border);
+  background:var(--card);overflow:auto;}
+
+/* ---------- search + chips ---------- */
+.mw-search{position:relative;margin-bottom:12px;}
+.mw-search input{width:100%;height:48px;border-radius:14px;border:1px solid var(--border2);background:var(--card);
+  font-family:inherit;font-size:14px;color:var(--ink);padding-inline-start:46px;padding-inline-end:14px;}
+.mw-search input:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+.mw-search > i{position:absolute;top:50%;transform:translateY(-50%);inset-inline-start:15px;font-size:19px;color:var(--text3);
+  pointer-events:none;}
+.mw-search-hint{font-size:11px;color:var(--text3);margin:6px 2px 0;}
+.mw-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:14px;scrollbar-width:none;}
+.mw-chips::-webkit-scrollbar{display:none;}
+.mw-chip{flex:0 0 auto;height:36px;padding:0 14px;border-radius:30px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;transition:all .18s;}
+.mw-chip:hover{border-color:var(--gold);color:var(--gold2);}
+.mw-chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#F5F0E4;}
+.mw-chip i{font-size:15px;}
+
+/* ---------- queue groups ---------- */
+.mw-grp{margin-bottom:22px;}
+.mw-grp-h{display:flex;align-items:center;gap:9px;margin-bottom:11px;}
+.mw-grp-h b{font-size:13.5px;font-weight:800;color:var(--ink);}
+.mw-grp-n{font-family:var(--font-en);font-size:11.5px;font-weight:800;color:var(--text2);background:var(--bg3);
+  border-radius:20px;padding:2px 9px;min-width:24px;text-align:center;}
+.mw-grp-line{flex:1;height:1px;background:var(--border);}
+.mw-grp-h .pip{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
+.pip-pending{background:var(--gold);} .pip-preparing{background:#E0A32E;} .pip-ready{background:var(--green);}
+.pip-driver{background:#3E7BB6;} .pip-scheduled{background:#8A857C;} .pip-done{background:#5A9E76;}
+.pip-cancelled{background:var(--red);}
+.mw-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:11px;}
+.mw-empty{border:1px dashed var(--border2);border-radius:14px;padding:16px;text-align:center;font-size:12.5px;
+  color:var(--text3);background:var(--card);}
+
+/* ---------- order card ---------- */
+.mw-card{text-align:start;width:100%;background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:13px 14px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:9px;
+  transition:border-color .18s,box-shadow .18s,transform .18s;}
+.mw-card:hover{border-color:var(--gold);box-shadow:0 12px 26px -20px rgba(20,16,8,.5);}
+.mw-card:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.mw-card.on{border-color:var(--gold);background:var(--gold-soft);}
+.mw-c-top{display:flex;align-items:center;gap:9px;}
+.mw-c-no{font-family:var(--font-en);font-size:13.5px;font-weight:800;color:var(--ink);}
+.mw-c-time{font-size:11.5px;color:var(--text3);margin-inline-start:auto;white-space:nowrap;}
+.mw-c-cust{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--text2);min-width:0;}
+.mw-c-cust i{font-size:15px;color:var(--text3);flex:0 0 auto;}
+.mw-c-cust span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mw-c-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.mw-tag{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border-radius:20px;
+  background:var(--bg2);color:var(--text2);font-size:11.5px;font-weight:700;}
+.mw-tag i{font-size:14px;}
+.mw-tag.total{background:var(--gold-soft);color:var(--gold2);font-family:var(--font-en);font-weight:800;}
+.mw-c-bot{display:flex;align-items:center;gap:9px;}
+.mw-thumbs{display:flex;align-items:center;}
+.mw-thumb{width:36px;height:36px;border-radius:10px;border:2px solid var(--card);background:var(--bg3) center/cover no-repeat;
+  display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:16px;margin-inline-start:-8px;}
+.mw-thumb:first-child{margin-inline-start:0;}
+.mw-thumb.more{background:var(--ink);color:#F5F0E4;font-family:var(--font-en);font-size:11px;font-weight:800;}
+.mw-c-status{margin-inline-start:auto;display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;
+  border-radius:20px;font-size:11.5px;font-weight:800;}
+.st-pending{background:var(--gold-soft);color:var(--gold2);}
+.st-preparing{background:rgba(224,163,46,.14);color:#8A6410;}
+.st-ready{background:rgba(46,158,91,.13);color:#1F7A45;}
+.st-driver{background:rgba(62,123,182,.13);color:#2C5C8C;}
+.st-scheduled{background:var(--bg3);color:var(--text2);}
+.st-done{background:rgba(46,158,91,.10);color:#2E7D32;}
+.st-cancelled{background:rgba(217,83,79,.12);color:#A63A36;}
+/* countdown placeholder — no timing logic in Phase 1 */
+.mw-cd{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 9px;border-radius:20px;
+  background:rgba(217,83,79,.09);color:#A63A36;font-family:var(--font-en);font-size:11.5px;font-weight:800;}
+.mw-cd i{font-size:14px;}
+
+/* ---------- drawer ---------- */
+.mw-dr-h{position:sticky;top:0;z-index:2;background:var(--card);border-bottom:1px solid var(--border);
+  padding:14px 16px;display:flex;align-items:center;gap:10px;}
+.mw-dr-h b{font-family:var(--font-en);font-size:15px;font-weight:800;color:var(--ink);}
+.mw-dr-x{width:38px;height:38px;border-radius:11px;border:1px solid var(--border);background:var(--card);
+  color:var(--text2);font-size:18px;cursor:pointer;margin-inline-start:auto;display:none;align-items:center;justify-content:center;}
+.mw-dr-b{padding:14px 16px 40px;}
+.mw-sec{margin-bottom:18px;}
+.mw-sec-h{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:var(--text3);
+  letter-spacing:.4px;margin-bottom:9px;text-transform:uppercase;}
+.mw-sec-h i{font-size:15px;color:var(--gold2);}
+.mw-kv{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.mw-kv:last-child{border-bottom:none;}
+.mw-kv dt{color:var(--text3);flex:0 0 42%;font-size:12.5px;}
+.mw-kv dd{margin:0;color:var(--ink);font-weight:700;flex:1;min-width:0;word-break:break-word;}
+.mw-kv dd.num{font-family:var(--font-en);}
+.mw-none{color:var(--text3);font-weight:500;font-style:italic;font-size:12.5px;}
+.mw-note{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:11px 13px;
+  font-size:12.5px;line-height:1.8;color:var(--text2);}
+
+/* product cards inside the drawer + focus mode */
+.mw-p{display:flex;gap:11px;padding:11px;border:1px solid var(--border);border-radius:14px;background:var(--card);
+  margin-bottom:9px;}
+.mw-p-img{width:58px;height:58px;flex:0 0 auto;border-radius:12px;background:var(--bg3) center/cover no-repeat;
+  border:0;padding:0;cursor:zoom-in;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:23px;}
+.mw-p-img:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.mw-p-b{flex:1;min-width:0;}
+.mw-p-n{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.45;}
+.mw-p-opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;}
+.mw-opt{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 8px;border-radius:8px;
+  background:var(--bg2);font-size:11.5px;font-weight:700;color:var(--text2);}
+.mw-opt b{color:var(--ink);}
+.mw-opt .sw{width:11px;height:11px;border-radius:50%;border:1px solid var(--border2);}
+.mw-qty{background:var(--ink);color:#F5F0E4;font-family:var(--font-en);}
+.mw-mod{background:rgba(224,163,46,.16);color:#8A6410;}
+.mw-p-note{margin-top:8px;font-size:12px;color:var(--text2);background:var(--bg);border-radius:9px;padding:7px 9px;
+  line-height:1.7;}
+
+/* timeline */
+.mw-tl{position:relative;padding-inline-start:20px;}
+.mw-tl::before{content:"";position:absolute;inset-inline-start:5px;top:6px;bottom:6px;width:2px;background:var(--border);}
+.mw-tl-i{position:relative;padding:7px 0;font-size:12.5px;}
+.mw-tl-i::before{content:"";position:absolute;inset-inline-start:-19px;top:12px;width:12px;height:12px;border-radius:50%;
+  background:var(--card);border:2px solid var(--border2);}
+.mw-tl-i.done::before{background:var(--green);border-color:var(--green);}
+.mw-tl-i.active::before{background:var(--gold);border-color:var(--gold);}
+.mw-tl-i.cancel::before{background:var(--red);border-color:var(--red);}
+.mw-tl-i b{display:block;font-weight:700;color:var(--ink);}
+.mw-tl-i span{font-size:11.5px;color:var(--text3);}
+
+/* invoice */
+.mw-inv{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:12px 14px;}
+.mw-inv-r{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:12.5px;color:var(--text2);}
+.mw-inv-r span:last-child{font-family:var(--font-en);font-weight:700;color:var(--ink);}
+.mw-inv-r.tot{border-top:1px solid var(--border2);margin-top:6px;padding-top:10px;font-size:14px;font-weight:800;color:var(--ink);}
+.mw-inv-r.tot span:last-child{font-size:16px;font-weight:800;color:var(--gold2);}
+.mw-inv-r.disc span:last-child{color:var(--green);}
+
+/* drawer empty state */
+.mw-dr-empty{padding:60px 26px;text-align:center;color:var(--text3);}
+.mw-dr-empty i{font-size:42px;color:var(--border2);display:block;margin-bottom:12px;}
+.mw-dr-empty b{display:block;font-size:14px;color:var(--text2);margin-bottom:5px;}
+.mw-dr-empty span{font-size:12.5px;line-height:1.7;}
+
+/* ---------- focus mode ---------- */
+.mw-focus{position:fixed;inset:0;z-index:80;background:var(--bg);display:none;flex-direction:column;}
+.mw-focus.show{display:flex;}
+body.mw-focused{overflow:hidden;}
+.mw-f-head{background:var(--card);border-bottom:1px solid var(--border);padding:12px clamp(14px,3vw,26px);
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.mw-f-head b{font-family:var(--font-en);font-size:17px;font-weight:800;color:var(--ink);}
+.mw-f-x{margin-inline-start:auto;height:44px;padding:0 16px;border-radius:30px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;}
+.mw-f-x:hover{border-color:var(--gold);color:var(--gold2);}
+.mw-f-body{flex:1;overflow:auto;padding:18px clamp(14px,3vw,26px) 40px;}
+.mw-f-grid{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:18px;align-items:start;}
+.mw-panel{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;}
+.mw-panel + .mw-panel{margin-top:14px;}
+/* checklist placeholder — no logic in Phase 1 */
+.mw-check{display:flex;align-items:center;gap:11px;padding:11px;border:1px solid var(--border);border-radius:12px;
+  margin-bottom:8px;background:var(--bg);}
+.mw-check .box{width:22px;height:22px;flex:0 0 auto;border-radius:7px;border:2px solid var(--border2);background:var(--card);}
+.mw-check span{font-size:13px;color:var(--text2);}
+
+/* ---------- overlays: panels, menus, dialogs, zoom ---------- */
+.mw-pop{position:fixed;inset:0;z-index:90;display:none;}
+.mw-pop.show{display:block;}
+.mw-pop-back{position:absolute;inset:0;background:rgba(20,16,8,.4);}
+.mw-pop-card{position:absolute;top:66px;inset-inline-end:clamp(14px,2.2vw,24px);width:min(360px,calc(100vw - 28px));
+  max-height:min(70vh,520px);overflow:auto;background:var(--card);border:1px solid var(--border);border-radius:18px;
+  box-shadow:0 28px 60px -28px rgba(20,16,8,.55);}
+.mw-pop-h{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--border);padding:13px 15px;
+  display:flex;align-items:center;gap:9px;font-size:14px;font-weight:800;color:var(--ink);}
+.mw-pop-h i{color:var(--gold2);font-size:18px;}
+.mw-n{display:flex;gap:11px;padding:12px 15px;border-bottom:1px solid var(--border);}
+.mw-n:last-child{border-bottom:none;}
+.mw-n-ic{width:36px;height:36px;flex:0 0 auto;border-radius:11px;background:var(--gold-soft);color:var(--gold2);
+  display:flex;align-items:center;justify-content:center;font-size:17px;}
+.mw-n-b{min-width:0;font-size:12.5px;line-height:1.6;color:var(--text2);}
+.mw-n-b b{display:block;color:var(--ink);font-size:13px;}
+.mw-n-b span{font-size:11px;color:var(--text3);}
+.mw-menu-i{display:flex;align-items:center;gap:11px;width:100%;padding:12px 15px;border:0;background:transparent;
+  font-family:inherit;font-size:13.5px;color:var(--text2);cursor:pointer;text-align:start;text-decoration:none;
+  border-bottom:1px solid var(--border);}
+.mw-menu-i:last-child{border-bottom:none;}
+.mw-menu-i:hover{background:var(--bg);color:var(--ink);}
+.mw-menu-i i{font-size:19px;color:var(--text3);}
+.mw-menu-i.danger{color:var(--red);} .mw-menu-i.danger i{color:var(--red);}
+
+.mw-dlg{position:fixed;inset:0;z-index:95;display:none;align-items:center;justify-content:center;padding:18px;
+  background:rgba(20,16,8,.5);}
+.mw-dlg.show{display:flex;}
+.mw-dlg-c{width:100%;max-width:420px;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:22px;}
+.mw-dlg-c h3{font-family:var(--font-display);font-size:19px;font-weight:800;color:var(--ink);margin-bottom:6px;}
+.mw-dlg-c p{font-size:13px;line-height:1.75;color:var(--text2);margin-bottom:16px;}
+.mw-eta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.mw-eta-b{flex:1 1 96px;min-height:48px;border-radius:13px;border:1.5px solid var(--border2);background:var(--card);
+  font-family:var(--font-en);font-size:13.5px;font-weight:800;color:var(--text2);cursor:pointer;transition:all .18s;}
+.mw-eta-b:hover{border-color:var(--gold);color:var(--gold2);}
+.mw-eta-b.on{background:var(--ink);border-color:var(--ink);color:#F5F0E4;}
+.mw-dlg-f{display:flex;gap:9px;}
+.mw-dlg-f button{flex:1;min-height:46px;border-radius:30px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;
+  border:1px solid transparent;}
+.mw-btn-ghost{background:var(--card);color:var(--text2);border-color:var(--border2);}
+.mw-btn-gold{background:var(--gold);color:#1C1606;border-color:var(--gold2);}
+
+.mw-zoom{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:24px;
+  background:rgba(10,8,4,.86);}
+.mw-zoom.show{display:flex;}
+.mw-zoom img{max-width:min(620px,92vw);max-height:82vh;border-radius:18px;background:var(--card);}
+.mw-zoom-x{position:absolute;top:18px;inset-inline-end:18px;width:46px;height:46px;border-radius:50%;border:0;
+  background:rgba(255,255,255,.14);color:#fff;font-size:22px;cursor:pointer;}
+.mw-zoom-cap{position:absolute;bottom:24px;inset-inline:24px;text-align:center;color:#EDE8DC;font-size:13px;}
+
+/* ---------- PHASE 2.1 · processing ---------- */
+/* merchant action bar */
+.mw-acts{display:flex;gap:9px;margin-top:6px;}
+.mw-act{flex:1;min-height:52px;border-radius:14px;border:1px solid transparent;font-family:inherit;font-size:14.5px;
+  font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .18s;}
+.mw-act i{font-size:19px;}
+.mw-act-accept{background:var(--ink);color:#F5F0E4;border-color:var(--ink);}
+.mw-act-accept:hover:not(:disabled){background:#241F17;}
+.mw-act-reject{background:var(--card);color:var(--red);border-color:var(--border2);flex:0 0 auto;padding:0 18px;}
+.mw-act-reject:hover:not(:disabled){border-color:var(--red);background:rgba(217,83,79,.07);}
+.mw-act-ready{background:var(--green);color:#fff;border-color:#25834A;}
+.mw-act-ready:hover:not(:disabled){background:#25834A;}
+.mw-act:disabled{opacity:.45;cursor:not-allowed;}
+.mw-act:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+/* undo bar — replaces confirmation dialogs */
+.mw-undo{display:flex;align-items:center;gap:11px;margin-top:10px;padding:11px 13px;border-radius:14px;
+  background:var(--ink);color:#F5F0E4;}
+.mw-undo-ring{position:relative;width:30px;height:30px;flex:0 0 auto;}
+.mw-undo-ring svg{transform:rotate(-90deg);}
+.mw-undo-ring .trk{stroke:rgba(255,255,255,.18);}
+.mw-undo-ring .bar{stroke:var(--gold);stroke-linecap:round;}
+.mw-undo-ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-en);font-size:11px;font-weight:800;}
+.mw-undo-t{flex:1;min-width:0;font-size:12.5px;line-height:1.5;}
+.mw-undo-t b{display:block;font-size:13px;}
+.mw-undo-b{min-height:40px;padding:0 15px;border-radius:30px;border:1px solid rgba(255,255,255,.3);
+  background:transparent;color:#F5F0E4;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;}
+.mw-undo-b:hover{background:rgba(255,255,255,.12);}
+
+/* lock banner */
+.mw-lock{display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:13px;margin-bottom:12px;
+  background:rgba(224,163,46,.12);border:1px solid rgba(224,163,46,.4);font-size:12.5px;color:#7A5A10;line-height:1.6;}
+.mw-lock i{font-size:19px;flex:0 0 auto;}
+.mw-lock b{font-weight:800;}
+.mw-lock-btn{margin-inline-start:auto;min-height:38px;padding:0 13px;border-radius:30px;border:1px solid rgba(224,163,46,.6);
+  background:var(--card);color:#7A5A10;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;}
+.mw-lock-btn:hover{background:rgba(224,163,46,.16);}
+.mw-card.locked{border-inline-start:3px solid #E0A32E;}
+
+/* pending timeout warning */
+.mw-card.warn{border-color:var(--red);box-shadow:0 0 0 3px rgba(217,83,79,.12);}
+.mw-cd.warn{background:var(--red);color:#fff;animation:mw-pulse 1.4s ease-in-out infinite;}
+@keyframes mw-pulse{0%,100%{opacity:1}50%{opacity:.55}}
+@media(prefers-reduced-motion:reduce){.mw-cd.warn{animation:none;}}
+
+/* checklist (active) */
+.mw-check{cursor:pointer;transition:border-color .16s,background .16s;}
+.mw-check:hover{border-color:var(--gold);}
+.mw-check.on{background:rgba(46,158,91,.08);border-color:rgba(46,158,91,.42);}
+.mw-check.on .box{background:var(--green);border-color:var(--green);color:#fff;display:flex;align-items:center;
+  justify-content:center;font-size:14px;}
+.mw-check.on span{color:var(--text3);text-decoration:line-through;}
+.mw-check[aria-disabled="true"]{opacity:.55;cursor:not-allowed;}
+
+/* notification centre */
+.mw-n{cursor:pointer;text-align:start;width:100%;border:0;border-bottom:1px solid var(--border);background:transparent;
+  font-family:inherit;}
+.mw-n:hover{background:var(--bg);}
+.mw-n.unread{background:rgba(201,168,76,.06);}
+.mw-n.unread .mw-n-b b::after{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;
+  background:var(--gold);margin-inline-start:7px;vertical-align:middle;}
+.mw-n-ic.warn{background:rgba(217,83,79,.12);color:var(--red);}
+.mw-pop-h .mw-n-clear{margin-inline-start:auto;border:0;background:transparent;color:var(--gold2);font-family:inherit;
+  font-size:12px;font-weight:700;cursor:pointer;}
+.mw-hbtn .dot{display:none;}
+.mw-hbtn .dot.show{display:block;}
+.mw-hbtn .count{position:absolute;top:4px;inset-inline-end:4px;min-width:18px;height:18px;padding:0 4px;border-radius:20px;
+  background:var(--red);color:#fff;font-family:var(--font-en);font-size:10.5px;font-weight:800;display:none;
+  align-items:center;justify-content:center;border:2px solid var(--card);}
+.mw-hbtn .count.show{display:flex;}
+
+/* read-only state for non-holders */
+.mw-readonly{font-size:12px;color:var(--text3);text-align:center;padding:10px;}
+
+/* The merchant's actions are the point of the screen, so they stay in reach
+   instead of sitting below seven sections of detail. */
+.mw-actbar{position:sticky;bottom:0;z-index:3;background:var(--card);margin:14px -16px -40px;
+  padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border);}
+.mw-panel .mw-actbar{position:static;margin:0;padding:0;border-top:0;background:transparent;}
+
+/* ---------- missing-data notice (explicit, never inferred) ---------- */
+.mw-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;}
+.mw-gate-c{max-width:480px;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:22px;padding:36px 30px;}
+.mw-gate-c i{font-size:40px;color:var(--gold2);}
+.mw-gate-c h1{font-family:var(--font-display);font-size:21px;font-weight:800;color:var(--ink);margin:14px 0 10px;}
+.mw-gate-c p{font-size:13.5px;line-height:1.85;color:var(--text2);}
+
+/* ---------- responsive ---------- */
+@media(max-width:1080px){
+  .mw-split{grid-template-columns:minmax(0,1fr) minmax(320px,360px);}
+  .mw-cards{grid-template-columns:1fr;}
+}
+@media(max-width:880px){
+  .mw-split{grid-template-columns:1fr;}
+  /* drawer becomes a bottom sheet */
+  .mw-side{position:fixed;inset:auto 0 0 0;top:auto;height:min(88vh,760px);width:100%;z-index:70;
+    border:1px solid var(--border);border-radius:22px 22px 0 0;transform:translateY(100%);
+    transition:transform .28s cubic-bezier(.22,.61,.36,1);box-shadow:0 -20px 50px -26px rgba(20,16,8,.5);}
+  .mw-side.open{transform:none;}
+  .mw-dr-x{display:flex;}
+  .mw-sheet-back{position:fixed;inset:0;z-index:69;background:rgba(20,16,8,.4);display:none;}
+  .mw-sheet-back.show{display:block;}
+  .mw-f-grid{grid-template-columns:1fr;}
+  .mw-head{gap:10px;}
+  .mw-ops{width:100%;order:5;}
+  .mw-prof-n{display:none;}
+  .mw-prof{padding:0 10px;}
+}
+@media(max-width:600px){
+  .mw-rail{position:fixed;inset:auto 0 0 0;top:auto;width:100%;height:64px;flex-direction:row;justify-content:space-around;
+    padding:0 6px;padding-bottom:env(safe-area-inset-bottom,0px);height:calc(64px + env(safe-area-inset-bottom,0px));}
+  .mw-rail-logo,.mw-rail-sp{display:none;}
+  .mw{flex-direction:column;}
+  .mw-main{padding-bottom:74px;}
+  .mw-list{padding:14px 14px 30px;}
+  .mw-store-logo{width:38px;height:38px;font-size:18px;}
+  .mw-store-t b{font-size:15px;}
+  .mw-pop-card{top:auto;bottom:0;inset-inline:0;width:100%;max-height:78vh;border-radius:22px 22px 0 0;}
+}
+@media(prefers-reduced-motion:reduce){
+  .mw-side{transition:none;}
+  .mw-card{transition:none;}
+}
+</style>
 </head>
 <body>
 
-<!-- SIDEBAR OVERLAY (mobile) -->
-<div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar(false)"></div>
-
-<!-- SIDEBAR -->
-<aside class="sb" id="mobileSidebar">
-  <div class="sb-logo">
-    <img src="raf_appicon.png" alt="RAF" class="sb-mark-img">
-    <div><div class="sb-title">Ruph</div><div class="sb-sub">MERCHANT</div></div>
-  </div>
-  <div class="sb-store">
-    <div class="sb-store-ico"><i class="ti ti-hanger"></i></div>
-    <div>
-      <div class="sb-store-name">Casa Mode</div>
-      <span class="sb-store-pkg">باقة بريميوم</span>
-    </div>
-  </div>
-
-  <div class="sb-sec" data-ar="الرئيسية" data-en="MAIN">الرئيسية</div>
-  <a class="sb-item on" onclick="switchSec('dashboard',this)"><i class="ti ti-layout-dashboard"></i> <span data-ar="لوحة التحكم" data-en="Dashboard">لوحة التحكم</span></a>
-  <a class="sb-item" onclick="switchSec('orders',this)"><i class="ti ti-shopping-cart"></i> <span data-ar="الطلبات" data-en="Orders">الطلبات</span> <span class="sb-n r">5</span></a>
-
-  <div class="sb-sec" data-ar="المتجر" data-en="STORE">المتجر</div>
-  <a class="sb-item" onclick="switchSec('products',this)"><i class="ti ti-tag"></i> <span data-ar="المنتجات" data-en="Products">المنتجات</span></a>
-  <a class="sb-item" onclick="switchSec('inventory',this)"><i class="ti ti-box"></i> <span data-ar="المخزون" data-en="Inventory">المخزون</span> <span class="sb-n r">3</span></a>
-  <a class="sb-item" onclick="switchSec('coupons',this)"><i class="ti ti-discount"></i> <span data-ar="الكوبونات" data-en="Coupons">الكوبونات</span></a>
-
-  <div class="sb-sec" data-ar="التحليلات" data-en="ANALYTICS">التحليلات</div>
-  <a class="sb-item" onclick="switchSec('reports',this)"><i class="ti ti-chart-bar"></i> <span data-ar="التقارير" data-en="Reports">التقارير</span></a>
-
-  <div class="sb-sec" data-ar="الإعدادات" data-en="SETTINGS">الإعدادات</div>
-  <a class="sb-item" onclick="switchSec('settings',this)"><i class="ti ti-settings"></i> <span data-ar="إعدادات المتجر" data-en="Store Settings">إعدادات المتجر</span></a>
-
-  <div class="sb-foot">
-    <div class="sb-user">
-      <div class="sb-av">ع</div>
-      <div><div class="sb-un">علي التاجر</div><div class="sb-ur">مالك المتجر</div></div>
-      <i class="ti ti-logout" style="margin-right:auto;color:#333;font-size:16px;cursor:pointer;" onclick="window.location='raf_login.html'"></i>
-    </div>
-  </div>
-</aside>
-
-<!-- MAIN -->
-<div class="main">
-
-  <!-- TOPBAR -->
-  <header class="top">
-    <button class="mob-menu-btn" onclick="toggleSidebar(true)"><i class="ti ti-menu-2"></i></button>
-    <div>
-      <div class="top-t" id="top-title">لوحة التحكم</div>
-      <div class="top-b">Casa Mode</div>
-    </div>
-    <div class="top-act">
-      <button class="lang-btn" onclick="toggleLang()" data-ar="EN" data-en="ع">EN</button>
-      <button class="btn btn-g"><i class="ti ti-download"></i> <span data-ar="تصدير" data-en="Export">تصدير</span></button>
-      <button class="btn btn-p" onclick="switchSec('products',document.querySelector('.sb-item:nth-child(7)'))"><i class="ti ti-plus"></i> <span data-ar="منتج جديد" data-en="New Product">منتج جديد</span></button>
-      <button class="ico" style="margin-right:6px;"><i class="ti ti-bell"></i><span class="dot"></span></button>
-    </div>
-  </header>
-
-  <div class="cnt">
-
-    <!-- DASHBOARD -->
-    <div class="sec-panel on" id="sec-dashboard">
-
-      <div class="stats">
-        <div class="s-card">
-          <div class="s-head">
-            <div class="s-ico" style="background:var(--blue-bg);color:var(--blue);"><i class="ti ti-shopping-cart"></i></div>
-            <div class="s-chg up"><i class="ti ti-arrow-up"></i>18%</div>
-          </div>
-          <div class="s-num">284</div>
-          <div class="s-lbl">طلب هذا الشهر</div>
-        </div>
-        <div class="s-card">
-          <div class="s-head">
-            <div class="s-ico" style="background:rgba(201,168,76,.12);color:var(--gold2);"><i class="ti ti-cash"></i></div>
-            <div class="s-chg up"><i class="ti ti-arrow-up"></i>12%</div>
-          </div>
-          <div class="s-num">3,420</div>
-          <div class="s-lbl">المبيعات (د.ك)</div>
-        </div>
-        <div class="s-card">
-          <div class="s-head">
-            <div class="s-ico" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-tag"></i></div>
-            <div class="s-chg up"><i class="ti ti-arrow-up"></i>8</div>
-          </div>
-          <div class="s-num">142</div>
-          <div class="s-lbl">منتج نشط</div>
-        </div>
-        <div class="s-card">
-          <div class="s-head">
-            <div class="s-ico" style="background:var(--amber-bg);color:var(--amber);"><i class="ti ti-star"></i></div>
-            <div class="s-chg up"><i class="ti ti-arrow-up"></i>0.2</div>
-          </div>
-          <div class="s-num">4.9</div>
-          <div class="s-lbl">متوسط التقييم</div>
-        </div>
-      </div>
-
-      <div class="two-col">
-        <div class="card">
-          <div class="c-head"><div class="c-title">أفضل المنتجات</div></div>
-          <div class="prog-row"><div class="prog-h"><span>قميص أوفرسايز</span><span style="color:var(--gold);font-weight:700;">84</span></div><div class="prog-t"><div class="prog-f" style="width:90%;"></div></div></div>
-          <div class="prog-row"><div class="prog-h"><span>بنطلون كاجوال</span><span style="color:var(--gold);font-weight:700;">62</span></div><div class="prog-t"><div class="prog-f" style="width:68%;"></div></div></div>
-          <div class="prog-row"><div class="prog-h"><span>هودي أوفرسايز</span><span style="color:var(--gold);font-weight:700;">48</span></div><div class="prog-t"><div class="prog-f" style="width:52%;"></div></div></div>
-        </div>
-
-        <div class="card">
-          <div class="c-head"><div class="c-title">حالة المتجر</div></div>
-          <div style="padding:16px 18px;display:flex;align-items:center;justify-content:space-between;">
-            <div><div style="font-size:13px;font-weight:500;">مفتوح الآن</div><div style="font-size:11px;color:var(--text3);margin-top:2px;">يغلق الساعة 11م</div></div>
-            <button class="toggle on" onclick="this.classList.toggle('on')"></button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="c-head"><div class="c-title">آخر الطلبات</div><a class="c-act" onclick="switchSec('orders',null)">عرض الكل</a></div>
-        <table>
-          <colgroup><col style="width:30%;"><col style="width:22%;"><col style="width:16%;"><col style="width:18%;"><col style="width:7%;"></colgroup>
-          <thead><tr><th>الطلب</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th><th></th></tr></thead>
-          <tbody>
-            <tr>
-              <td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">#1284</div><div class="p-cat">محمد العنزي</div></div></div></td>
-              <td style="font-weight:700;color:var(--gold);font-family:var(--fen);">24.500</td>
-              <td><span class="badge b-b"><i class="ti ti-truck"></i> توصيل</span></td>
-              <td style="font-size:11px;color:var(--text3);">اليوم</td>
-              <td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td>
-            </tr>
-            <tr>
-              <td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">#1283</div><div class="p-cat">نورة الرشيدي</div></div></div></td>
-              <td style="font-weight:700;color:var(--gold);font-family:var(--fen);">18.000</td>
-              <td><span class="badge b-g"><i class="ti ti-check"></i> مكتمل</span></td>
-              <td style="font-size:11px;color:var(--text3);">أمس</td>
-              <td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td>
-            </tr>
-            <tr>
-              <td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">#1282</div><div class="p-cat">فهد المطيري</div></div></div></td>
-              <td style="font-weight:700;color:var(--gold);font-family:var(--fen);">35.000</td>
-              <td><span class="badge b-a"><i class="ti ti-clock"></i> تجهيز</span></td>
-              <td style="font-size:11px;color:var(--text3);">أمس</td>
-              <td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ORDERS -->
-    <div class="sec-panel" id="sec-orders">
-      <div class="card">
-        <div class="c-head"><div class="c-title">الطلبات</div><span style="font-size:12px;color:var(--text3);">284 طلب هذا الشهر</span></div>
-        <div class="tabs">
-          <div class="tab on">الكل</div>
-          <div class="tab">جديد <span style="background:var(--red-bg);color:var(--red);padding:1px 6px;border-radius:10px;font-size:10px;margin-right:4px;">5</span></div>
-          <div class="tab">قيد التوصيل</div>
-          <div class="tab">مكتمل</div>
-          <div class="tab">ملغي</div>
-        </div>
-        <table>
-          <colgroup><col style="width:28%;"><col style="width:20%;"><col style="width:16%;"><col style="width:16%;"><col style="width:13%;"><col style="width:7%;"></colgroup>
-          <thead><tr><th>الطلب</th><th>المنتجات</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th><th></th></tr></thead>
-          <tbody>
-            <tr><td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">#ORD-1284</div><div class="p-cat">محمد العنزي</div></div></div></td><td style="color:var(--text2);">قميص أوفرسايز × 1</td><td style="font-weight:700;color:var(--gold);font-family:var(--fen);">12.000</td><td><span class="badge b-b"><i class="ti ti-truck"></i> توصيل</span></td><td style="font-size:11px;color:var(--text3);">اليوم 2:30م</td><td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td></tr>
-            <tr><td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">#ORD-1283</div><div class="p-cat">نورة الرشيدي</div></div></div></td><td style="color:var(--text2);">قميص لينن × 1</td><td style="font-weight:700;color:var(--gold);font-family:var(--fen);">18.000</td><td><span class="badge b-g"><i class="ti ti-check"></i> مكتمل</span></td><td style="font-size:11px;color:var(--text3);">أمس 1:10م</td><td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td></tr>
-            <tr><td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">#ORD-1282</div><div class="p-cat">فهد المطيري</div></div></div></td><td style="color:var(--text2);">بنطلون × 1</td><td style="font-weight:700;color:var(--gold);font-family:var(--fen);">22.000</td><td><span class="badge b-a"><i class="ti ti-clock"></i> تجهيز</span></td><td style="font-size:11px;color:var(--text3);">أمس 11:45ص</td><td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td></tr>
-            <tr><td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">#ORD-1281</div><div class="p-cat">سارة العتيبي</div></div></div></td><td style="color:var(--text2);">هودي × 2</td><td style="font-weight:700;color:var(--gold);font-family:var(--fen);">50.000</td><td><span class="badge b-r"><i class="ti ti-x"></i> ملغي</span></td><td style="font-size:11px;color:var(--text3);">3 أيام</td><td><button class="ico" style="width:26px;height:26px;"><i class="ti ti-dots-vertical" style="font-size:13px;"></i></button></td></tr>
-          </tbody>
-        </table>
-        <div class="t-foot"><span>عرض 4 من 284 طلب</span><div class="pgs"><button class="pg"><i class="ti ti-chevron-right" style="font-size:11px;"></i></button><button class="pg on">1</button><button class="pg">2</button><button class="pg">3</button><button class="pg"><i class="ti ti-chevron-left" style="font-size:11px;"></i></button></div></div>
-      </div>
-    </div>
-
-    <!-- PRODUCTS -->
-    <div class="sec-panel" id="sec-products">
-      <div class="card" style="margin-bottom:16px;">
-        <div class="c-head"><div class="c-title">إضافة منتج جديد</div><span class="badge b-gold">142 / 200 منتج</span></div>
-        <div class="form-grid">
-          <div><label class="field-lbl">اسم المنتج</label><input type="text" class="field-input" placeholder="مثال: قميص أوفرسايز كلاسيك"></div>
-          <div><label class="field-lbl">الفئة</label><select class="field-select"><option>قمصان</option><option>بناطيل</option><option>فساتين</option><option>هودي</option></select></div>
-          <div><label class="field-lbl">السعر (د.ك)</label><input type="number" class="field-input" placeholder="0.000"></div>
-          <div><label class="field-lbl">سعر قبل الخصم (اختياري)</label><input type="number" class="field-input" placeholder="0.000"></div>
-          <div><label class="field-lbl">المقاسات المتاحة</label><input type="text" class="field-input" placeholder="XS, S, M, L, XL"></div>
-          <div><label class="field-lbl">الألوان المتاحة</label><input type="text" class="field-input" placeholder="أسود، أبيض، بيج"></div>
-        </div>
-        <div style="padding:0 20px 20px;">
-          <label class="field-lbl">الوصف</label>
-          <textarea class="field-input" rows="3" placeholder="وصف المنتج..." style="resize:none;"></textarea>
-        </div>
-        <div style="padding:0 20px 20px;">
-          <label class="field-lbl">الصور والفيديو</label>
-          <div class="upload-box">
-            <i class="ti ti-cloud-upload"></i>
-            <span>اسحب الصور هنا أو اضغط للرفع</span>
-            <div class="upload-note">تنتظر موافقة الإدارة قبل النشر · PNG, JPG, MP4 · حد أقصى 10MB</div>
-          </div>
-        </div>
-        <div class="form-footer">
-          <button class="btn btn-p"><i class="ti ti-send"></i> إرسال للمراجعة</button>
-          <button class="btn btn-g">حفظ مسودة</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- INVENTORY -->
-    <div class="sec-panel" id="sec-inventory">
-      <div class="card">
-        <div class="c-head">
-          <div class="c-title">إدارة المخزون</div>
-          <span class="badge b-r">3 منتجات تحتاج تحديث</span>
-        </div>
-        <table>
-          <colgroup><col style="width:35%;"><col style="width:15%;"><col style="width:20%;"><col style="width:15%;"><col style="width:15%;"></colgroup>
-          <thead><tr><th>المنتج</th><th>الكمية</th><th>المخزون</th><th>الحالة</th><th>إجراء</th></tr></thead>
-          <tbody>
-            <tr>
-              <td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">قميص أوفرسايز كلاسيك</div><div class="p-cat">S, M, L</div></div></div></td>
-              <td style="font-weight:700;font-family:var(--fen);">24</td>
-              <td><div class="stock-bar"><div class="stock-fill" style="width:80%;background:var(--green);"></div></div></td>
-              <td><span class="badge b-g">متوفر</span></td>
-              <td><button class="btn btn-g" style="font-size:11px;padding:5px 10px;"><i class="ti ti-edit" style="font-size:12px;"></i> تحديث</button></td>
-            </tr>
-            <tr>
-              <td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">بنطلون كاجوال واسع</div><div class="p-cat">M, L, XL</div></div></div></td>
-              <td style="font-weight:700;font-family:var(--fen);color:var(--amber);">4</td>
-              <td><div class="stock-bar"><div class="stock-fill" style="width:15%;background:var(--amber);"></div></div></td>
-              <td><span class="badge b-a">منخفض</span></td>
-              <td><button class="btn btn-p" style="font-size:11px;padding:5px 10px;"><i class="ti ti-edit" style="font-size:12px;"></i> تحديث</button></td>
-            </tr>
-            <tr>
-              <td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">هودي أوفرسايز</div><div class="p-cat">S, M</div></div></div></td>
-              <td style="font-weight:700;font-family:var(--fen);color:var(--red);">0</td>
-              <td><div class="stock-bar"><div class="stock-fill" style="width:0%;background:var(--red);"></div></div></td>
-              <td><span class="badge b-r">نفد</span></td>
-              <td><button class="btn btn-p" style="font-size:11px;padding:5px 10px;"><i class="ti ti-edit" style="font-size:12px;"></i> تحديث</button></td>
-            </tr>
-            <tr>
-              <td><div class="p-row"><div class="p-img"><i class="ti ti-shirt"></i></div><div><div class="p-name">قميص لينن بريميوم</div><div class="p-cat">S, M, L, XL</div></div></div></td>
-              <td style="font-weight:700;font-family:var(--fen);">18</td>
-              <td><div class="stock-bar"><div class="stock-fill" style="width:60%;background:var(--green);"></div></div></td>
-              <td><span class="badge b-g">متوفر</span></td>
-              <td><button class="btn btn-g" style="font-size:11px;padding:5px 10px;"><i class="ti ti-edit" style="font-size:12px;"></i> تحديث</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- COUPONS -->
-    <div class="sec-panel" id="sec-coupons">
-
-      <!-- Welcome Coupon Block -->
-      <div class="card" style="margin-bottom:16px;border-right:3px solid var(--gold);">
-        <div class="c-head" style="background:rgba(201,168,76,0.06);">
-          <div class="c-title" style="display:flex;align-items:center;gap:8px;">
-            <i class="ti ti-gift" style="color:var(--gold);font-size:16px;"></i>
-            كوبون الترحيب (للمشتركين الجدد)
-          </div>
-          <span class="badge b-gold">مرة واحدة لكل مستخدم</span>
-        </div>
-        <div style="padding:14px 18px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text3);line-height:1.7;">
-          يُرسل هذا الكوبون تلقائياً لكل عميل جديد يسجّل في منصة رف. يمكن للتاجر تخصيص الكود والنسبة وحد الخصم الأقصى.
-        </div>
-        <div class="form-grid" style="padding:16px 18px;">
-          <div>
-            <label class="field-lbl">رمز الكوبون</label>
-            <input type="text" class="field-input" value="WELCOME20" placeholder="مثال: WELCOME20">
-          </div>
-          <div>
-            <label class="field-lbl">نسبة الخصم %</label>
-            <input type="number" class="field-input" value="20" min="1" max="100">
-          </div>
-          <div>
-            <label class="field-lbl">أقصى خصم (د.ك)</label>
-            <input type="number" class="field-input" value="5.000" placeholder="0.000" step="0.001">
-          </div>
-          <div>
-            <label class="field-lbl">ينطبق على</label>
-            <select class="field-select">
-              <option selected>جميع المنتجات</option>
-              <option>منتجات مختارة</option>
-              <option>فئة معينة</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-footer" style="justify-content:space-between;align-items:center;">
-          <button class="btn btn-p"><i class="ti ti-device-floppy"></i> حفظ الإعدادات</button>
-          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text2);">
-            تفعيل الكوبون
-            <button class="toggle on" id="welcomeToggle" onclick="this.classList.toggle('on')"></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Limited-Count Coupon Form -->
-      <div class="card" style="margin-bottom:16px;">
-        <div class="c-head">
-          <div class="c-title" style="display:flex;align-items:center;gap:8px;">
-            <i class="ti ti-discount" style="color:var(--gold);font-size:16px;"></i>
-            إنشاء كوبون جديد
-          </div>
-          <a class="c-act" onclick="toggleCouponForm()" id="couponFormToggle"><i class="ti ti-plus" style="font-size:12px;"></i> إضافة</a>
-        </div>
-
-        <!-- Coupon Type Selector -->
-        <div id="couponFormBox" style="display:none;border-top:1px solid var(--border);">
-          <div style="padding:14px 18px 10px;">
-            <div style="font-size:11px;color:var(--text3);margin-bottom:10px;letter-spacing:.5px;text-transform:uppercase;">نوع الكوبون</div>
-            <div style="display:flex;gap:8px;margin-bottom:4px;">
-              <button class="coup-type-btn on" id="ctype-limited" onclick="selCType('limited')">
-                <i class="ti ti-users"></i> محدود العدد
-              </button>
-              <button class="coup-type-btn" id="ctype-timed" onclick="selCType('timed')">
-                <i class="ti ti-clock"></i> محدود الوقت
-              </button>
-              <button class="coup-type-btn" id="ctype-fixed" onclick="selCType('fixed')">
-                <i class="ti ti-tag"></i> مبلغ ثابت
-              </button>
-            </div>
-          </div>
-
-          <div class="form-grid" style="padding:0 18px 14px;">
-            <div><label class="field-lbl">رمز الكوبون</label><input type="text" class="field-input" placeholder="مثال: FLASH10"></div>
-            <div id="cfield-pct">
-              <label class="field-lbl">نسبة الخصم %</label>
-              <input type="number" class="field-input" placeholder="10" min="1" max="100">
-            </div>
-            <div id="cfield-amount" style="display:none;">
-              <label class="field-lbl">قيمة الخصم (د.ك)</label>
-              <input type="number" class="field-input" placeholder="0.000" step="0.001">
-            </div>
-            <div id="cfield-max-uses">
-              <label class="field-lbl">أقصى عدد استخدامات</label>
-              <input type="number" class="field-input" placeholder="50" min="1">
-            </div>
-            <div id="cfield-end-date">
-              <label class="field-lbl">تاريخ الانتهاء</label>
-              <input type="date" class="field-input">
-            </div>
-            <div><label class="field-lbl">أقصى خصم (د.ك)</label><input type="number" class="field-input" placeholder="10.000" step="0.001"></div>
-            <div>
-              <label class="field-lbl">ينطبق على</label>
-              <select class="field-select">
-                <option>جميع المنتجات</option>
-                <option>فئة معينة</option>
-                <option>منتجات مختارة</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-footer">
-            <button class="btn btn-p" onclick="saveCoupon()"><i class="ti ti-plus"></i> إنشاء الكوبون</button>
-            <button class="btn btn-g" onclick="toggleCouponForm()">إلغاء</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Existing Coupons -->
-      <div class="card">
-        <div class="c-head"><div class="c-title">الكوبونات الحالية</div><span style="font-size:11px;color:var(--text3);">4 كوبونات</span></div>
-
-        <!-- Limited count coupon with progress -->
-        <div class="coup-item">
-          <div class="coup-code-ico" style="width:40px;height:40px;border-radius:8px;background:rgba(201,168,76,.12);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--gold);flex-shrink:0;">
-            <i class="ti ti-users"></i>
-          </div>
-          <div style="flex:1;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-              <div class="coup-code">FLASH10</div>
-              <span class="badge b-b" style="font-size:9px;">محدود العدد</span>
-            </div>
-            <div class="coup-meta">خصم 10% · أقصى 10 د.ك · 38 من أصل 50 استخداماً متبقّياً</div>
-            <div style="height:4px;background:var(--bg2);border-radius:3px;overflow:hidden;width:160px;margin-top:6px;">
-              <div style="height:100%;width:76%;background:var(--gold);border-radius:3px;"></div>
-            </div>
-          </div>
-          <span class="badge b-g">نشط</span>
-          <button class="toggle on" onclick="this.classList.toggle('on')" style="margin-right:10px;"></button>
-        </div>
-
-        <!-- Welcome coupon (read-only ref) -->
-        <div class="coup-item">
-          <div class="coup-code-ico" style="width:40px;height:40px;border-radius:8px;background:rgba(201,168,76,.12);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--gold);flex-shrink:0;">
-            <i class="ti ti-gift"></i>
-          </div>
-          <div style="flex:1;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-              <div class="coup-code">WELCOME20</div>
-              <span class="badge b-gold" style="font-size:9px;">مرة واحدة / مشترك جديد</span>
-            </div>
-            <div class="coup-meta">خصم 20% · أقصى 5 د.ك · يُرسل تلقائياً عند التسجيل</div>
-          </div>
-          <span class="badge b-g">نشط</span>
-          <button class="toggle on" id="welcomeRef" onclick="this.classList.toggle('on');document.getElementById('welcomeToggle').classList.toggle('on')" style="margin-right:10px;"></button>
-        </div>
-
-        <!-- Regular coupon -->
-        <div class="coup-item">
-          <div class="coup-code-ico" style="width:40px;height:40px;border-radius:8px;background:rgba(201,168,76,.12);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--gold);flex-shrink:0;">
-            <i class="ti ti-clock"></i>
-          </div>
-          <div style="flex:1;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-              <div class="coup-code">CASA20</div>
-              <span class="badge b-b" style="font-size:9px;">محدود الوقت</span>
-            </div>
-            <div class="coup-meta">خصم 20% · ينتهي 31 مايو 2026 · استُخدم 14 مرة</div>
-          </div>
-          <span class="badge b-g">نشط</span>
-          <button class="toggle on" onclick="this.classList.toggle('on')" style="margin-right:10px;"></button>
-        </div>
-
-        <!-- Expired coupon -->
-        <div class="coup-item" style="opacity:.65;">
-          <div class="coup-code-ico" style="width:40px;height:40px;border-radius:8px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text3);flex-shrink:0;">
-            <i class="ti ti-discount"></i>
-          </div>
-          <div style="flex:1;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-              <div class="coup-code" style="color:var(--text3);">EID50</div>
-              <span class="badge b-r" style="font-size:9px;">منتهي</span>
-            </div>
-            <div class="coup-meta">خصم 50% · انتهى · استُخدم 88 مرة (100 كحد أقصى)</div>
-          </div>
-          <span class="badge b-r">منتهي</span>
-          <button class="toggle" style="margin-right:10px;cursor:not-allowed;opacity:.4;"></button>
-        </div>
-      </div>
-    </div>
-
-    <!-- REPORTS -->
-    <div class="sec-panel" id="sec-reports">
-      <div class="stats">
-        <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--blue-bg);color:var(--blue);"><i class="ti ti-shopping-cart"></i></div><div class="s-chg up"><i class="ti ti-arrow-up"></i>18%</div></div><div class="s-num">284</div><div class="s-lbl">الطلبات الشهر</div></div>
-        <div class="s-card"><div class="s-head"><div class="s-ico" style="background:rgba(201,168,76,.12);color:var(--gold2);"><i class="ti ti-cash"></i></div><div class="s-chg up"><i class="ti ti-arrow-up"></i>12%</div></div><div class="s-num">3,420</div><div class="s-lbl">المبيعات (د.ك)</div></div>
-        <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--red-bg);color:var(--red);"><i class="ti ti-percentage"></i></div><div class="s-chg dn"><i class="ti ti-arrow-down"></i>2%</div></div><div class="s-num">342</div><div class="s-lbl">العمولة (د.ك)</div></div>
-        <div class="s-card"><div class="s-head"><div class="s-ico" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-eye"></i></div><div class="s-chg up"><i class="ti ti-arrow-up"></i>34%</div></div><div class="s-num">8,240</div><div class="s-lbl">مشاهدات الصفحة</div></div>
-      </div>
-      <div class="card">
-        <div class="c-head"><div class="c-title">أداء الكوبونات</div></div>
-        <div class="prog-row"><div class="prog-h"><span>CASA20</span><span style="color:var(--gold);font-weight:700;">14 استخدام</span></div><div class="prog-t"><div class="prog-f" style="width:25%;"></div></div></div>
-        <div class="prog-row"><div class="prog-h"><span>WELCOME10</span><span style="color:var(--gold);font-weight:700;">32 استخدام</span></div><div class="prog-t"><div class="prog-f" style="width:58%;"></div></div></div>
-        <div class="prog-row"><div class="prog-h"><span>EID50</span><span style="color:var(--gold);font-weight:700;">88 استخدام</span></div><div class="prog-t"><div class="prog-f" style="width:100%;"></div></div></div>
-      </div>
-    </div>
-
-    <!-- SETTINGS -->
-    <div class="sec-panel" id="sec-settings">
-      <div class="card" style="margin-bottom:16px;">
-        <div class="c-head"><div class="c-title">معلومات المتجر</div></div>
-        <div class="form-grid">
-          <div><label class="field-lbl">اسم المتجر</label><input type="text" class="field-input" value="Casa Mode"></div>
-          <div><label class="field-lbl">رقم التواصل</label><input type="text" class="field-input" value="+965 9XXX XXXX" style="direction:ltr;text-align:right;"></div>
-        </div>
-        <div style="padding:0 20px 20px;"><label class="field-lbl">وصف المتجر</label><textarea class="field-input" rows="3" style="resize:none;">متجر Casa Mode للملابس والأزياء العصرية...</textarea></div>
-        <div style="padding:0 20px 20px;">
-          <label class="field-lbl">روابط السوشيال ميديا</label>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <input type="text" class="field-input" placeholder="Instagram @username">
-            <input type="text" class="field-input" placeholder="TikTok @username">
-          </div>
-        </div>
-        <div class="form-footer"><button class="btn btn-p"><i class="ti ti-device-floppy"></i> حفظ التغييرات</button></div>
-      </div>
-
-      <div class="card">
-        <div class="c-head"><div class="c-title">إعدادات التشغيل</div></div>
-        <div class="set-row">
-          <div class="set-ico" style="background:var(--green-bg);color:var(--green);"><i class="ti ti-door-enter"></i></div>
-          <div><div class="set-lbl">حالة المتجر</div><div class="set-sub">مفتوح — يغلق 11م</div></div>
-          <button class="toggle on set-act" onclick="this.classList.toggle('on')"></button>
-        </div>
-        <div class="set-row">
-          <div class="set-ico" style="background:var(--amber-bg);color:var(--amber);"><i class="ti ti-bell"></i></div>
-          <div><div class="set-lbl">إشعارات الطلبات الجديدة</div><div class="set-sub">إشعار فوري عند كل طلب</div></div>
-          <button class="toggle on set-act" onclick="this.classList.toggle('on')"></button>
-        </div>
-        <div class="set-row">
-          <div class="set-ico" style="background:var(--blue-bg);color:var(--blue);"><i class="ti ti-box"></i></div>
-          <div><div class="set-lbl">تنبيه انخفاض المخزون</div><div class="set-sub">عند وصول الكمية لـ 5 قطع</div></div>
-          <button class="toggle on set-act" onclick="this.classList.toggle('on')"></button>
-        </div>
-      </div>
-
-      <!-- WORKING HOURS CARD -->
-      <div class="card" style="margin-top:16px;">
-        <div class="c-head" style="display:flex;align-items:center;justify-content:space-between;">
-          <div class="c-title"><i class="ti ti-clock" style="font-size:16px;color:var(--gold);margin-left:8px;"></i>ساعات العمل</div>
-          <span style="font-size:11px;color:var(--text3);">السبت — الخميس: 10ص–10م</span>
-        </div>
-        <div class="wh-card-grid" id="merchantWhGrid">
-
-          <div class="wh-card-row" id="mwh-sat">
-            <label class="wh-card-toggle"><input type="checkbox" checked onchange="toggleMWh('sat',this)"><span class="wh-card-slider"></span></label>
-            <span class="wh-card-day">السبت</span>
-            <div class="wh-card-times">
-              من <select><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
-              <span>—</span>
-              حتى <select><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
-            </div>
-          </div>
-
-          <div class="wh-card-row" id="mwh-sun">
-            <label class="wh-card-toggle"><input type="checkbox" checked onchange="toggleMWh('sun',this)"><span class="wh-card-slider"></span></label>
-            <span class="wh-card-day">الأحد</span>
-            <div class="wh-card-times">
-              من <select><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
-              <span>—</span>
-              حتى <select><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
-            </div>
-          </div>
-
-          <div class="wh-card-row" id="mwh-mon">
-            <label class="wh-card-toggle"><input type="checkbox" checked onchange="toggleMWh('mon',this)"><span class="wh-card-slider"></span></label>
-            <span class="wh-card-day">الاثنين</span>
-            <div class="wh-card-times">
-              من <select><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
-              <span>—</span>
-              حتى <select><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
-            </div>
-          </div>
-
-          <div class="wh-card-row" id="mwh-tue">
-            <label class="wh-card-toggle"><input type="checkbox" checked onchange="toggleMWh('tue',this)"><span class="wh-card-slider"></span></label>
-            <span class="wh-card-day">الثلاثاء</span>
-            <div class="wh-card-times">
-              من <select><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
-              <span>—</span>
-              حتى <select><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
-            </div>
-          </div>
-
-          <div class="wh-card-row" id="mwh-wed">
-            <label class="wh-card-toggle"><input type="checkbox" checked onchange="toggleMWh('wed',this)"><span class="wh-card-slider"></span></label>
-            <span class="wh-card-day">الأربعاء</span>
-            <div class="wh-card-times">
-              من <select><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
-              <span>—</span>
-              حتى <select><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
-            </div>
-          </div>
-
-          <div class="wh-card-row" id="mwh-thu">
-            <label class="wh-card-toggle"><input type="checkbox" checked onchange="toggleMWh('thu',this)"><span class="wh-card-slider"></span></label>
-            <span class="wh-card-day">الخميس</span>
-            <div class="wh-card-times">
-              من <select><option>8 ص</option><option>9 ص</option><option selected>10 ص</option><option>11 ص</option><option>12 م</option></select>
-              <span>—</span>
-              حتى <select><option>8 م</option><option selected>10 م</option><option>11 م</option><option>12 م</option></select>
-            </div>
-          </div>
-
-          <div class="wh-card-row closed" id="mwh-fri">
-            <label class="wh-card-toggle"><input type="checkbox" onchange="toggleMWh('fri',this)"><span class="wh-card-slider"></span></label>
-            <span class="wh-card-day">الجمعة</span>
-            <div class="wh-card-times" style="opacity:.4;pointer-events:none;">
-              <span class="wh-closed-badge">مغلق</span>
-            </div>
-          </div>
-
-        </div>
-        <div class="form-footer"><button class="btn btn-p" onclick="saveMWh(this)"><i class="ti ti-device-floppy"></i> حفظ ساعات العمل</button></div>
-      </div>
-
-    </div>
-
+<!-- Missing-data gate: shown when the signed-in account has no store link.
+     Never guesses a store — see RAFPerm.storeLinkOf(). -->
+<div class="mw-gate" id="gate" style="display:none;">
+  <div class="mw-gate-c">
+    <i class="ti ti-building-store"></i>
+    <h1 id="gateT"></h1>
+    <p id="gateP"></p>
   </div>
 </div>
 
+<div class="mw" id="shell" style="display:none;">
+
+  <!-- TEMPORARY NAVIGATION PLACEHOLDER.
+       Not a designed navigation. It holds the Orders slot only so Focus Mode
+       has a sidebar to hide. The real Merchant Workspace navigation is to be
+       designed later — do not expand this. -->
+  <aside class="mw-rail" id="rail">
+    <a class="mw-rail-logo" href="raf_homepage.html" aria-label="RAF">رف</a>
+    <button class="mw-rail-b on" aria-current="page"><i class="ti ti-clipboard-list"></i><span data-ar="الطلبات" data-en="Orders">الطلبات</span></button>
+    <div class="mw-rail-sp"></div>
+  </aside>
+
+  <div class="mw-main">
+
+    <!-- HEADER — store, operational banner, notifications, profile. No stats. -->
+    <header class="mw-head">
+      <div class="mw-store">
+        <div class="mw-store-logo" id="stLogo"><i class="ti ti-building-store"></i></div>
+        <div class="mw-store-t">
+          <b id="stName">—</b>
+          <span id="stSub" data-ar="مساحة عمل الطلبات" data-en="Orders workspace">مساحة عمل الطلبات</span>
+        </div>
+      </div>
+
+      <!-- OPERATIONAL BANNER — one action only: edit expected preparation time -->
+      <div class="mw-ops" id="ops" data-load="normal">
+        <span class="mw-ops-dot"></span>
+        <div class="mw-ops-t">
+          <b id="opsLabel">—</b>
+          <span data-ar="وقت التجهيز المتوقع:" data-en="Expected preparation time:">وقت التجهيز المتوقع:</span>
+          <span><em id="opsEta">—</em></span>
+        </div>
+        <button class="mw-ops-edit" onclick="openEta()">
+          <i class="ti ti-pencil"></i> <span data-ar="تعديل" data-en="Edit">تعديل</span>
+        </button>
+      </div>
+
+      <div class="mw-head-sp"></div>
+
+      <button class="mw-hbtn" onclick="openPop('notifPop')" aria-label="Notifications" id="notifBtn">
+        <i class="ti ti-bell"></i><span class="count" id="notifCount"></span>
+      </button>
+      <button class="mw-prof" onclick="openPop('profPop')" aria-haspopup="menu">
+        <span class="mw-prof-av" id="profAv">—</span>
+        <span class="mw-prof-n" id="profName">—</span>
+        <i class="ti ti-chevron-down" style="font-size:15px;color:var(--text3);"></i>
+      </button>
+    </header>
+
+    <!-- SPLIT WORKSPACE -->
+    <div class="mw-split">
+
+      <!-- ORDERS LIST -->
+      <section class="mw-list">
+        <div class="mw-search">
+          <i class="ti ti-search"></i>
+          <input id="q" type="search" autocomplete="off"
+                 data-ar-ph="ابحث في الطلبات…" data-en-ph="Search orders…" placeholder="ابحث في الطلبات…">
+        </div>
+        <div class="mw-search-hint"
+             data-ar="رقم الطلب · اسم العميل · رقم الهاتف · اسم المنتج · SKU · الباركود"
+             data-en="Order number · customer name · phone · product name · SKU · barcode">رقم الطلب · اسم العميل · رقم الهاتف · اسم المنتج · SKU · الباركود</div>
+
+        <div class="mw-chips" id="chips" role="group"></div>
+        <div id="queue"></div>
+      </section>
+
+      <!-- ORDER DETAILS DRAWER — never navigates away -->
+      <aside class="mw-side" id="drawer" aria-label="Order details">
+        <div class="mw-dr-h">
+          <b id="drNo" data-ar="تفاصيل الطلب" data-en="Order details">تفاصيل الطلب</b>
+          <button class="mw-dr-x" onclick="closeDrawer()" aria-label="close"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="mw-dr-b" id="drBody"></div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<div class="mw-sheet-back" id="sheetBack" onclick="closeDrawer()"></div>
+
+<!-- FOCUS MODE — hides rail, list and header chrome -->
+<div class="mw-focus" id="focus" role="dialog" aria-modal="true">
+  <div class="mw-f-head">
+    <i class="ti ti-focus-2" style="font-size:22px;color:var(--gold2);"></i>
+    <b id="fcNo">—</b>
+    <span style="font-size:12.5px;color:var(--text3);" data-ar="وضع التركيز" data-en="Focus mode">وضع التركيز</span>
+    <button class="mw-f-x" onclick="closeFocus()">
+      <i class="ti ti-x"></i> <span data-ar="إنهاء التركيز" data-en="Exit focus">إنهاء التركيز</span>
+    </button>
+  </div>
+  <div class="mw-f-body"><div class="mw-f-grid" id="fcBody"></div></div>
+</div>
+
+<!-- NOTIFICATIONS PANEL (UI only) -->
+<div class="mw-pop" id="notifPop">
+  <div class="mw-pop-back" onclick="closePop()"></div>
+  <div class="mw-pop-card" role="dialog" aria-label="Notifications">
+    <div class="mw-pop-h"><i class="ti ti-bell"></i> <span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span>
+      <button class="mw-n-clear" onclick="markAllRead()" data-ar="تعليم الكل كمقروء" data-en="Mark all read">تعليم الكل كمقروء</button>
+    </div>
+    <div id="notifList"></div>
+  </div>
+</div>
+
+<!-- MERCHANT PROFILE MENU -->
+<div class="mw-pop" id="profPop">
+  <div class="mw-pop-back" onclick="closePop()"></div>
+  <div class="mw-pop-card" role="menu" aria-label="Merchant menu">
+    <div class="mw-pop-h"><i class="ti ti-user-circle"></i> <span id="profFull">—</span></div>
+    <button class="mw-menu-i" onclick="toggleLang()"><i class="ti ti-language"></i>
+      <span data-ar="English" data-en="العربية">English</span></button>
+    <a class="mw-menu-i" href="raf_homepage.html"><i class="ti ti-external-link"></i>
+      <span data-ar="عرض المتجر كعميل" data-en="View store as customer">عرض المتجر كعميل</span></a>
+    <a class="mw-menu-i danger" href="raf_login.html"><i class="ti ti-logout"></i>
+      <span data-ar="تسجيل الخروج" data-en="Sign out">تسجيل الخروج</span></a>
+  </div>
+</div>
+
+<!-- EXPECTED PREPARATION TIME (UI only — business logic comes later) -->
+<div class="mw-dlg" id="etaDlg">
+  <div class="mw-dlg-c" role="dialog" aria-modal="true">
+    <h3 data-ar="وقت التجهيز المتوقع" data-en="Expected preparation time">وقت التجهيز المتوقع</h3>
+    <p data-ar="هذا الوقت يظهر للعملاء عند الطلبات الجديدة فقط."
+       data-en="This is shown to customers on new incoming orders only.">هذا الوقت يظهر للعملاء عند الطلبات الجديدة فقط.</p>
+    <div class="mw-eta" id="etaRow"></div>
+    <div class="mw-dlg-f">
+      <button class="mw-btn-ghost" onclick="closeEta()" data-ar="إلغاء" data-en="Cancel">إلغاء</button>
+      <button class="mw-btn-gold" onclick="saveEta()" data-ar="حفظ" data-en="Save">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMAGE ZOOM — no navigation -->
+<div class="mw-zoom" id="zoom" onclick="if(event.target===this)closeZoom()">
+  <button class="mw-zoom-x" onclick="closeZoom()" aria-label="close"><i class="ti ti-x"></i></button>
+  <img id="zoomImg" alt="">
+  <div class="mw-zoom-cap" id="zoomCap"></div>
+</div>
+
+<script src="raf_source.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_rules.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_permissions.js"></script>
 <script>
-  const titles = {dashboard:'لوحة التحكم',orders:'الطلبات',products:'إضافة منتج',inventory:'المخزون',coupons:'الكوبونات',reports:'التقارير',settings:'إعدادات المتجر'};
+/* ══════════════════════════════════════════════════════════════
+   MERCHANT WORKSPACE — ORDERS  ·  PHASE 1: INTERFACE ONLY
+   ------------------------------------------------------------
+   Reads from the existing systems and renders. It deliberately
+   implements NO workflow: no accept/reject/ready, no locking,
+   no undo, no countdown timing, no checklist behaviour, no
+   workload rules, no scheduling, no validation.
 
-  function switchSec(id, item) {
-    document.querySelectorAll('.sec-panel').forEach(p => p.classList.remove('on'));
-    document.getElementById('sec-' + id).classList.add('on');
-    if (item) { document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('on')); item.classList.add('on'); }
-    document.getElementById('top-title').textContent = titles[id] || '';
+   Data sources (read-only here):
+     RAFPerm        — signed-in merchant and the canonical store link
+     RAFShop.Orders — the orders themselves
+     RAFCatalog     — product imagery and option data for order lines
+     RAFOrderEngine — whether an order is still awaiting a decision
+   ══════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function L(o){ return (o && typeof o === 'object') ? (isEn() ? (o.en||o.ar) : (o.ar||o.en)) : (o||''); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  /* a field the data does not carry yet is shown as missing, never invented */
+  function none(){ return '<span class="mw-none">'+T('غير مسجَّل','Not recorded')+'</span>'; }
+
+  var STORE = null, STORE_SLUG = null, ORDERS = [], selected = null;
+  var E = window.RAFOrderEngine, ME = null;
+
+  /* ---------- session recovery ----------
+     The workspace remembers exactly where the merchant was, so a refresh,
+     an emergency update or a crash never costs them their place. */
+  var SKEY = 'raf_merchant_session';
+  var SESSION = { selected:null, drawerOpen:false, focus:false, scrollY:0, q:'', chips:[] };
+  function loadSession(){
+    try { var s = JSON.parse(localStorage.getItem(SKEY)); if (s && typeof s === 'object') SESSION = Object.assign(SESSION, s); }
+    catch(e){}
+  }
+  function saveSession(){
+    SESSION.selected   = selected;
+    SESSION.drawerOpen = document.getElementById('drawer').classList.contains('open');
+    SESSION.focus      = document.getElementById('focus').classList.contains('show');
+    SESSION.scrollY    = window.scrollY || 0;
+    SESSION.q          = (document.getElementById('q')||{}).value || '';
+    SESSION.chips      = [].slice.call(document.querySelectorAll('.mw-chip'))
+                           .map(function(c,i){ return c.getAttribute('aria-pressed')==='true' ? i : -1; })
+                           .filter(function(i){ return i > -1; });
+    try { localStorage.setItem(SKEY, JSON.stringify(SESSION)); } catch(e){}
   }
 
-  document.querySelectorAll('.tab').forEach(t => {
-    t.addEventListener('click', function() {
-      const p = this.closest('.tabs');
-      p.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
-      this.classList.add('on');
+  /* ---------- merchant notifications ----------
+     Workspace-only. No push notifications. */
+  var NKEY = 'raf_merchant_notifs', SEENKEY = 'raf_merchant_seen', WARNKEY = 'raf_merchant_warned';
+  function notifs(){ try { var a = JSON.parse(localStorage.getItem(NKEY)); return Array.isArray(a)?a:[]; } catch(e){ return []; } }
+  function writeNotifs(a){ try { localStorage.setItem(NKEY, JSON.stringify(a.slice(0,60))); } catch(e){} }
+  function pushNotif(type, orderId){
+    var a = notifs();
+    if (a.some(function(n){ return n.type===type && n.orderId===orderId; })) return false;
+    a.unshift({ id:type+'-'+orderId+'-'+Date.now(), type:type, orderId:orderId, ts:Date.now(), read:false });
+    writeNotifs(a); return true;
+  }
+  function unreadCount(){ return notifs().filter(function(n){ return !n.read; }).length; }
+  function readSet(key){ try { var a=JSON.parse(localStorage.getItem(key)); return Array.isArray(a)?a:[]; } catch(e){ return []; } }
+  function writeSet(key,a){ try { localStorage.setItem(key, JSON.stringify(a.slice(-200))); } catch(e){} }
+
+  /* ---------- notification sounds ----------
+     Asset-based. The files under assets/sounds/ are placeholders and are
+     meant to be swapped for the real recordings without touching this code.
+     Playback failures are silent: a blocked or missing sound must never
+     interrupt the merchant's work. */
+  var SOUNDS = { new:'assets/sounds/new_order.wav', warn:'assets/sounds/warning.wav' };
+  var audio = {};
+  function primeSounds(){
+    Object.keys(SOUNDS).forEach(function(k){
+      if (audio[k]) return;
+      try { var a = new Audio(SOUNDS[k]); a.preload = 'auto'; a.load(); audio[k] = a; } catch(e){}
     });
-  });
-
-  /* Coupon form toggle */
-  function toggleCouponForm() {
-    const box = document.getElementById('couponFormBox');
-    const btn = document.getElementById('couponFormToggle');
-    const open = box.style.display === 'none' || box.style.display === '';
-    box.style.display = open ? 'block' : 'none';
-    btn.innerHTML = open
-      ? '<i class="ti ti-x" style="font-size:12px;"></i> إغلاق'
-      : '<i class="ti ti-plus" style="font-size:12px;"></i> إضافة';
+  }
+  function beep(kind){
+    var key = kind === 'warn' ? 'warn' : 'new';
+    try {
+      primeSounds();
+      var a = audio[key];
+      if (!a) return;
+      a.currentTime = 0;
+      var p = a.play();
+      if (p && p.catch) p.catch(function(){});   /* autoplay policy — stay silent */
+    } catch(e){}
   }
 
-  /* Coupon type selector */
-  function selCType(type) {
-    ['limited','timed','fixed'].forEach(t => {
-      document.getElementById('ctype-' + t).classList.toggle('on', t === type);
-    });
-    // Show/hide fields based on type
-    document.getElementById('cfield-max-uses').style.display = type === 'limited' ? 'block' : 'none';
-    document.getElementById('cfield-end-date').style.display = type === 'timed' ? 'block' : 'none';
-    document.getElementById('cfield-pct').style.display     = type !== 'fixed'   ? 'block' : 'none';
-    document.getElementById('cfield-amount').style.display  = type === 'fixed'   ? 'block' : 'none';
+  /* ---------- queue order: fixed, presentational only ---------- */
+  var QUEUE = [
+    { k:'pending',   pip:'pip-pending',   st:'st-pending',   ar:'بانتظار القبول', en:'Pending acceptance' },
+    { k:'preparing', pip:'pip-preparing', st:'st-preparing', ar:'قيد التجهيز',    en:'Preparing' },
+    { k:'ready',     pip:'pip-ready',     st:'st-ready',     ar:'جاهز',           en:'Ready' },
+    { k:'driver',    pip:'pip-driver',    st:'st-driver',    ar:'بانتظار السائق', en:'Waiting driver' },
+    { k:'scheduled', pip:'pip-scheduled', st:'st-scheduled', ar:'مجدول',          en:'Scheduled' },
+    { k:'done',      pip:'pip-done',      st:'st-done',      ar:'مكتمل',          en:'Completed' },
+    { k:'cancelled', pip:'pip-cancelled', st:'st-cancelled', ar:'ملغي',           en:'Cancelled' }
+  ];
+  /* Queue placement now follows the merchant processing state held by the
+     shared engine, falling back to the customer-facing order status. */
+  function bucketOf(o){
+    var m = E.mstate(o.id);
+    if (m === E.MSTATE.WAITING_DRIVER) return 'driver';
+    if (m === E.MSTATE.READY)          return 'ready';
+    if (m === E.MSTATE.PREPARING || m === E.MSTATE.ACCEPTED) return 'preparing';
+    if (m === 'rejected')              return 'cancelled';
+    if (m === E.MSTATE.PENDING)        return 'pending';
+    if (o.status === 'cancelled') return 'cancelled';
+    if (o.status === 'delivered') return 'done';
+    return 'preparing';
   }
+  /* under a minute left on the acceptance window */
+  function isWarning(o){
+    var left = E.msLeft(o.id);
+    return bucketOf(o) === 'pending' && left > 0 && left <= 60000;
+  }
+  function qdef(k){ return QUEUE.filter(function(g){ return g.k===k; })[0] || QUEUE[1]; }
 
-  /* Save coupon (prototype: just close form + flash success) */
-  function saveCoupon() {
-    toggleCouponForm();
-    const btn = document.querySelector('#sec-coupons .btn-p');
-    const orig = btn ? btn.innerHTML : '';
-    if (btn) { btn.innerHTML = '<i class="ti ti-check"></i> تم الحفظ'; btn.style.background='var(--green)'; }
-    setTimeout(() => { if (btn) { btn.innerHTML = orig; btn.style.background=''; } }, 2000);
-  }
-  function toggleSidebar(open) {
-    const sb = document.getElementById('mobileSidebar');
-    const ov = document.getElementById('sbOverlay');
-    if (sb) sb.classList.toggle('open', open);
-    if (ov) ov.classList.toggle('open', open);
-  }
+  /* ---------- quick filter chips (UI only, no filtering logic) ---------- */
+  var CHIPS = [
+    { ic:'ti-calendar',       ar:'اليوم',            en:'Today' },
+    { ic:'ti-clock-hour-4',   ar:'مجدولة',           en:'Scheduled' },
+    { ic:'ti-truck-delivery', ar:'توصيل',            en:'Delivery' },
+    { ic:'ti-building-store', ar:'استلام',           en:'Pickup' },
+    { ic:'ti-cash',           ar:'نقداً',            en:'Cash' },
+    { ic:'ti-credit-card',    ar:'كي نت',            en:'KNET' },
+    { ic:'ti-pencil',         ar:'طلبات معدّلة',      en:'Modified orders' },
+    { ic:'ti-note',           ar:'طلبات بها ملاحظات', en:'Orders with notes' }
+  ];
 
-  /* Working Hours */
-  function toggleMWh(day, chk) {
-    const row = document.getElementById('mwh-' + day);
-    const times = row.querySelector('.wh-card-times');
-    if (chk.checked) {
-      row.classList.remove('closed');
-      times.style.opacity = '';
-      times.style.pointerEvents = '';
-      times.querySelectorAll('select').forEach(s => s.disabled = false);
-    } else {
-      row.classList.add('closed');
-      times.style.opacity = '.4';
-      times.style.pointerEvents = 'none';
-      times.querySelectorAll('select').forEach(s => s.disabled = true);
+  /* ---------- expected preparation time (display state only) ---------- */
+  var ETA = [
+    { k:'5-10',  load:'normal',   ar:'5–10 دقائق',  en:'5–10 minutes' },
+    { k:'15-20', load:'moderate', ar:'15–20 دقيقة', en:'15–20 minutes' },
+    { k:'20-30', load:'heavy',    ar:'20–30 دقيقة', en:'20–30 minutes' }
+  ];
+  var LOADS = {
+    normal:   { ar:'المتجر يعمل بشكل طبيعي', en:'Store operating normally' },
+    moderate: { ar:'ضغط متوسط',              en:'Moderate workload' },
+    heavy:    { ar:'ضغط مرتفع',              en:'Heavy workload' }
+  };
+  var etaKey = '5-10', etaDraft = '5-10';
+  function etaDef(k){ return ETA.filter(function(e){ return e.k===k; })[0] || ETA[0]; }
+
+  /* ---------- store + identity ---------- */
+  function resolveStore(){
+    if (!window.RAFPerm) return { ok:false, reason:'unassigned' };
+    return RAFPerm.storeLinkOf();
+  }
+  /* The store an order belongs to, resolved canonically: each order line
+     carries its product id, and the product record in RAFSource carries the
+     store slug. Display names are never consulted — an order whose lines
+     cannot be resolved is not guessed at, it is simply unscopeable.
+     (Phase 2 extends the order snapshot to carry storeSlug directly, which
+     removes this join entirely.) */
+  function slugOfOrder(o){
+    var lines = o.items || [];
+    for (var i = 0; i < lines.length; i++){
+      if (!lines[i].id || !window.RAFSource) continue;
+      var p = RAFSource.product(lines[i].id);
+      if (p && p.store) return p.store;
     }
+    return null;
   }
-  function saveMWh(btn) {
-    const orig = btn.innerHTML;
-    btn.innerHTML = '<i class="ti ti-check"></i> تم الحفظ';
-    btn.style.background = 'var(--green)';
-    setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; }, 2000);
+  function ordersForStore(slug){
+    if (!window.RAFShop || !slug) return [];
+    return RAFShop.Orders.all().filter(function(o){ return slugOfOrder(o) === slug; });
   }
-  /* LANG */
-  function toggleLang(){
-    const r=document.getElementById('htmlRoot');
-    const isAr=r.lang==='ar';
-    r.lang=isAr?'en':'ar';r.dir=isAr?'ltr':'rtl';
-    localStorage.setItem('raf_lang',isAr?'en':'ar');
-    applyLang();
+
+  /* ---------- order card ---------- */
+  function thumbsHTML(o){
+    var items = o.items || [], shown = items.slice(0,3), extra = items.length - shown.length;
+    var h = shown.map(function(it){
+      var p = window.RAFCatalog ? RAFCatalog.get(it.id) : null;
+      var img = p && p.img;
+      return img
+        ? '<span class="mw-thumb" style="background-image:url(\''+esc(img)+'\')"></span>'
+        : '<span class="mw-thumb"><i class="ti '+esc(it.ic||'ti-box')+'"></i></span>';
+    }).join('');
+    if (extra > 0) h += '<span class="mw-thumb more">+'+extra+'</span>';
+    return h;
   }
+  function unitCount(o){
+    return (o.items||[]).reduce(function(n,it){ return n + (it.qty||1); }, 0);
+  }
+  function cardHTML(o){
+    var bucket = bucketOf(o), b = qdef(bucket);
+    var isPending = bucket === 'pending', warn = isWarning(o);
+    var lock = E.lockedByOther(o.id, ME);
+    return '<button class="mw-card'+(selected===o.id?' on':'')+(warn?' warn':'')+(lock?' locked':'')
+      + '" data-id="'+esc(o.id)+'" onclick="pick(\''+esc(o.id)+'\')">'
+      + '<div class="mw-c-top">'
+        + '<span class="mw-c-no">'+esc(o.id)+'</span>'
+        + (isPending ? '<span class="mw-cd'+(warn?' warn':'')+'"><i class="ti ti-clock"></i> '+E.clock(o.id)+'</span>' : '')
+        + '<span class="mw-c-time">'+esc(L(o.date))+'</span>'
+      + '</div>'
+      + '<div class="mw-c-cust"><i class="ti ti-user"></i><span>'+none()+'</span></div>'
+      + '<div class="mw-c-meta">'
+        + '<span class="mw-tag"><i class="ti ti-truck-delivery"></i>'+T('نوع الطلب','Type')+': '+T('غير مسجَّل','Not recorded')+'</span>'
+        + '<span class="mw-tag"><i class="ti ti-wallet"></i>'+esc(L(o.pay))+'</span>'
+        + '<span class="mw-tag total">'+esc(o.total)+' '+T('د.ك','KWD')+'</span>'
+      + '</div>'
+      + '<div class="mw-c-bot">'
+        + '<span class="mw-thumbs">'+thumbsHTML(o)+'</span>'
+        + '<span class="mw-tag"><i class="ti ti-box"></i>'+unitCount(o)+'</span>'
+        + '<span class="mw-c-status '+b.st+'">'+T(b.ar,b.en)+'</span>'
+      + '</div>'
+      + '</button>';
+  }
+
+  /* ---------- queue render ---------- */
+  function renderQueue(){
+    var by = {}; QUEUE.forEach(function(g){ by[g.k] = []; });
+    ORDERS.forEach(function(o){ (by[bucketOf(o)] || by.preparing).push(o); });
+    document.getElementById('queue').innerHTML = QUEUE.map(function(g){
+      var list = by[g.k];
+      return '<section class="mw-grp">'
+        + '<div class="mw-grp-h"><span class="pip '+g.pip+'"></span><b>'+T(g.ar,g.en)+'</b>'
+          + '<span class="mw-grp-n">'+list.length+'</span><span class="mw-grp-line"></span></div>'
+        + (list.length
+            ? '<div class="mw-cards">'+list.map(cardHTML).join('')+'</div>'
+            : '<div class="mw-empty">'+T('لا توجد طلبات هنا','No orders here')+'</div>')
+        + '</section>';
+    }).join('');
+  }
+
+  /* ---------- product card (drawer + focus mode) ---------- */
+  function productHTML(it){
+    var p = window.RAFCatalog ? RAFCatalog.get(it.id) : null;
+    var img = p && p.img;
+    var v = it.variant || {};
+    var opts = Object.keys(v).map(function(k){
+      return '<span class="mw-opt">'+esc(k)+': <b>'+esc(v[k])+'</b></span>';
+    }).join('');
+    return '<div class="mw-p">'
+      + (img
+          ? '<button class="mw-p-img" style="background-image:url(\''+esc(img)+'\')" aria-label="'+T('تكبير الصورة','Zoom image')+'"'
+            + ' onclick="zoomImg(\''+esc(img)+'\',\''+esc(L(it.name))+'\')"></button>'
+          : '<button class="mw-p-img" aria-label="'+T('تكبير الصورة','Zoom image')+'" disabled><i class="ti '+esc(it.ic||'ti-box')+'"></i></button>')
+      + '<div class="mw-p-b">'
+        + '<div class="mw-p-n">'+esc(L(it.name))+'</div>'
+        + '<div class="mw-p-opts">'
+          + '<span class="mw-opt mw-qty">'+T('الكمية','Qty')+' '+(it.qty||1)+'</span>'
+          + opts
+        + '</div>'
+        /* product notes have no source on the order record yet */
+        + '<div class="mw-p-note">'+T('ملاحظات المنتج','Product notes')+': '+T('غير مسجَّلة','Not recorded')+'</div>'
+      + '</div></div>';
+  }
+
+  /* ---------- timeline ---------- */
+  function timelineHTML(o){
+    var tl = o.tl || [];
+    if (!tl.length) return '<div class="mw-empty">'+T('لا يوجد سجل','No timeline')+'</div>';
+    return '<div class="mw-tl">'+tl.map(function(t){
+      return '<div class="mw-tl-i '+esc(t.s||'')+'"><b>'+esc(L(t.t))+'</b><span>'+esc(L(t.time))+'</span></div>';
+    }).join('')+'</div>';
+  }
+
+  /* ---------- invoice ---------- */
+  function invoiceHTML(o){
+    function row(lbl,val,cls){ return '<div class="mw-inv-r '+(cls||'')+'"><span>'+lbl+'</span><span>'+val+'</span></div>'; }
+    var k = T('د.ك','KWD'), h = '';
+    if (o.subtotal != null) h += row(T('المجموع الفرعي','Subtotal'), esc(o.subtotal)+' '+k);
+    if (o.discount && parseFloat(o.discount) > 0) h += row(T('الخصم','Discount'), '− '+esc(o.discount)+' '+k, 'disc');
+    if (o.ship != null) h += row(T('التوصيل','Delivery'), esc(o.ship)+' '+k);
+    if (o.tip && parseFloat(o.tip) > 0) h += row(T('إكرامية السائق','Driver tip'), esc(o.tip)+' '+k);
+    if (o.tax && parseFloat(o.tax) > 0) h += row(T('الضريبة','Tax'), esc(o.tax)+' '+k);
+    h += row(T('الإجمالي','Total'), esc(o.total)+' '+k, 'tot');
+    return '<div class="mw-inv">'+h+'</div>';
+  }
+
+  function kv(label, value){
+    return '<div class="mw-kv"><dt>'+label+'</dt><dd>'+value+'</dd></div>';
+  }
+
+  /* ---------- drawer ---------- */
+  function renderDrawer(){
+    var body = document.getElementById('drBody'), head = document.getElementById('drNo');
+    var o = selected && ORDERS.filter(function(x){ return x.id===selected; })[0];
+    if (!o){
+      head.textContent = T('تفاصيل الطلب','Order details');
+      body.innerHTML = '<div class="mw-dr-empty"><i class="ti ti-click"></i>'
+        + '<b>'+T('اختر طلباً','Select an order')+'</b>'
+        + '<span>'+T('اختر بطاقة طلب لعرض تفاصيلها هنا دون مغادرة الصفحة.',
+                     'Pick an order card to see its details here without leaving the page.')+'</span></div>';
+      return;
+    }
+    head.textContent = o.id;
+    var b = qdef(bucketOf(o));
+    body.innerHTML =
+      /* who is processing this order, stated before anything else */
+      lockBannerHTML(o)
+      /* 1 — order information */
+      + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-receipt"></i> '+T('معلومات الطلب','Order information')+'</div>'
+        + '<dl style="margin:0">'
+        + kv(T('رقم الطلب','Order number'), '<span class="num">'+esc(o.id)+'</span>')
+        + kv(T('الحالة','Status'), '<span class="mw-c-status '+b.st+'">'+T(b.ar,b.en)+'</span>')
+        + kv(T('وقت الطلب','Order time'), esc(L(o.date)))
+        + kv(T('نوع الطلب','Order type'), none())
+        + kv(T('طريقة الدفع','Payment method'), esc(L(o.pay)))
+        + kv(T('عدد القطع','Item count'), '<span class="num">'+unitCount(o)+'</span>')
+        + '</dl></section>'
+
+      /* 2 — customer information */
+      + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-user"></i> '+T('معلومات العميل','Customer information')+'</div>'
+        + '<dl style="margin:0">'
+        + kv(T('الاسم','Name'), none())
+        + kv(T('رقم الهاتف','Phone'), none())
+        + kv(T('العنوان','Address'), o.addr ? esc(L(o.addr)) : none())
+        + '</dl></section>'
+
+      /* 3 — products */
+      + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-package"></i> '+T('المنتجات','Products')+'</div>'
+        + (o.items||[]).map(productHTML).join('')
+        + '</section>'
+
+      /* 4 — merchant notes */
+      + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-notes"></i> '+T('ملاحظات التاجر','Merchant notes')+'</div>'
+        + '<div class="mw-note">'+none()+'</div></section>'
+
+      /* 5 — preparation notes */
+      + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-tools-kitchen-2"></i> '+T('ملاحظات التجهيز','Preparation notes')+'</div>'
+        + '<div class="mw-note">'+none()+'</div></section>'
+
+      /* 6 — timeline */
+      + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-timeline-event"></i> '+T('المسار الزمني','Timeline')+'</div>'
+        + timelineHTML(o)+'</section>'
+
+      /* 7 — invoice summary */
+      + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-file-invoice"></i> '+T('ملخص الفاتورة','Invoice summary')+'</div>'
+        + invoiceHTML(o)+'</section>'
+
+      /* merchant processing */
+      + actionsHTML(o)
+
+      + '<button class="mw-f-x" style="width:100%;justify-content:center;margin-top:10px;" onclick="openFocus()">'
+        + '<i class="ti ti-focus-2"></i> '+T('وضع التركيز','Focus mode')+'</button>';
+  }
+
+  /* ---------- merchant actions · lock · undo ---------- */
+  function lockBannerHTML(o){
+    var lock = E.lockedByOther(o.id, ME);
+    if (!lock) return '';
+    var canOverride = window.RAFPerm && RAFPerm.currentUser() &&
+                      RAFPerm.currentUser().roleId !== 'merchant_employee';
+    return '<div class="mw-lock"><i class="ti ti-lock"></i><div>'
+      + T('هذا الطلب قيد المعالجة حالياً بواسطة ','This order is currently being processed by ')
+      + '<b>'+esc(lock.name)+'</b></div>'
+      + (canOverride
+          ? '<button class="mw-lock-btn" onclick="overrideLock(\''+esc(o.id)+'\')">'+T('تولّي المعالجة','Take over')+'</button>'
+          : '')
+      + '</div>';
+  }
+  function undoHTML(o){
+    var u = E.undoOf(o.id);
+    if (!u) return '';
+    var left = E.undoMsLeft(o.id), secs = Math.ceil(left/1000);
+    var frac = left / E.UNDO_MS, C = 75.4;
+    var label = u.action === E.ACTION.ACCEPT ? T('تم قبول الطلب','Order accepted')
+              : u.action === E.ACTION.REJECT ? T('تم رفض الطلب','Order rejected')
+              : T('تم تعليم الطلب جاهزاً','Order marked ready');
+    return '<div class="mw-undo">'
+      + '<div class="mw-undo-ring"><svg width="30" height="30" viewBox="0 0 30 30">'
+        + '<circle class="trk" cx="15" cy="15" r="12" fill="none" stroke-width="3"></circle>'
+        + '<circle class="bar" cx="15" cy="15" r="12" fill="none" stroke-width="3" '
+        + 'stroke-dasharray="'+C+'" stroke-dashoffset="'+(C*(1-frac))+'"></circle></svg><b>'+secs+'</b></div>'
+      + '<div class="mw-undo-t"><b>'+label+'</b>'
+        + T('يمكنك التراجع خلال المهلة.','You can undo within the countdown.')+'</div>'
+      + '<button class="mw-undo-b" onclick="undoAction(\''+esc(o.id)+'\')">'
+        + '<i class="ti ti-arrow-back-up"></i> '+T('تراجع','Undo')+'</button></div>';
+  }
+  function actionsHTML(o){
+    return '<div class="mw-actbar">' + actionsInner(o) + '</div>';
+  }
+  function actionsInner(o){
+    var html = undoHTML(o);
+    if (E.undoOf(o.id)) return html;                 /* the undo bar is the state */
+
+    var m = E.mstate(o.id);
+    var mayProcess = E.canProcess(o.id, ME);
+
+    if (E.merchantDone(o.id)){
+      var doneLbl = m === 'rejected' ? T('تم رفض هذا الطلب','This order was rejected')
+                  : T('انتهت مسؤولية المتجر — الطلب بانتظار السائق',
+                      'Merchant work is complete — the order is waiting for a driver');
+      return html + '<div class="mw-readonly">'+doneLbl+'</div>';
+    }
+    if (!mayProcess) return html + '<div class="mw-readonly">'+T('للقراءة فقط','Read only')+'</div>';
+
+    if (m === E.MSTATE.PENDING){
+      return html + '<div class="mw-acts">'
+        + '<button class="mw-act mw-act-accept" onclick="doAccept(\''+esc(o.id)+'\')">'
+          + '<i class="ti ti-check"></i> '+T('قبول','Accept')+'</button>'
+        + '<button class="mw-act mw-act-reject" onclick="doReject(\''+esc(o.id)+'\')">'
+          + '<i class="ti ti-x"></i> '+T('رفض','Reject')+'</button></div>';
+    }
+    if (m === E.MSTATE.PREPARING || m === E.MSTATE.ACCEPTED){
+      return html + '<div class="mw-acts">'
+        + '<button class="mw-act mw-act-ready" onclick="doReady(\''+esc(o.id)+'\')">'
+          + '<i class="ti ti-package-export"></i> '+T('جاهز','Ready')+'</button></div>';
+    }
+    return html;
+  }
+
+  /* ---------- focus mode ---------- */
+  function renderFocus(){
+    var o = selected && ORDERS.filter(function(x){ return x.id===selected; })[0];
+    if (!o) return;
+    document.getElementById('fcNo').textContent = o.id;
+    document.getElementById('fcBody').innerHTML =
+      '<div>'
+        + '<div class="mw-panel"><div class="mw-sec-h"><i class="ti ti-package"></i> '+T('المنتجات','Products')+'</div>'
+          + (o.items||[]).map(productHTML).join('') + '</div>'
+        + '<div class="mw-panel"><div class="mw-sec-h"><i class="ti ti-list-check"></i> '+T('قائمة التحقق','Checklist')+'</div>'
+          + checklistHTML(o) + '</div>'
+      + '</div>'
+      + '<div>'
+        + '<div class="mw-panel"><div class="mw-sec-h"><i class="ti ti-user"></i> '+T('معلومات العميل','Customer information')+'</div>'
+          + '<dl style="margin:0">'
+          + kv(T('الاسم','Name'), none())
+          + kv(T('رقم الهاتف','Phone'), none())
+          + kv(T('العنوان','Address'), o.addr ? esc(L(o.addr)) : none())
+          + '</dl></div>'
+        + '<div class="mw-panel"><div class="mw-sec-h"><i class="ti ti-tools-kitchen-2"></i> '+T('ملاحظات التجهيز','Preparation notes')+'</div>'
+          + '<div class="mw-note">'+none()+'</div></div>'
+        + '<div class="mw-panel"><div class="mw-sec-h"><i class="ti ti-notes"></i> '+T('ملاحظات التاجر','Merchant notes')+'</div>'
+          + '<div class="mw-note">'+none()+'</div></div>'
+        + '<div class="mw-panel"><div class="mw-sec-h"><i class="ti ti-timeline-event"></i> '+T('المسار الزمني','Timeline')+'</div>'
+          + timelineHTML(o)+'</div>'
+        + '<div class="mw-panel"><div class="mw-sec-h"><i class="ti ti-check"></i> '+T('الإجراءات','Actions')+'</div>'
+          + actionsHTML(o)+'</div>'
+      + '</div>';
+  }
+
+  /* ---------- checklist ---------- */
+  var CKEY = 'raf_merchant_checklist';
+  function checklist(orderId){
+    try { var a = JSON.parse(localStorage.getItem(CKEY)); return (a && a[orderId]) || {}; } catch(e){ return {}; }
+  }
+  function setChecklist(orderId, map){
+    var a = {}; try { a = JSON.parse(localStorage.getItem(CKEY)) || {}; } catch(e){}
+    a[orderId] = map;
+    try { localStorage.setItem(CKEY, JSON.stringify(a)); } catch(e){}
+  }
+  function checklistHTML(o){
+    var c = checklist(o.id), may = E.canProcess(o.id, ME) && !E.merchantDone(o.id);
+    return (o.items||[]).map(function(it,i){
+      var key = 'i'+i, on = !!c[key];
+      return '<div class="mw-check'+(on?' on':'')+'"'+(may?'':' aria-disabled="true"')+' role="checkbox" tabindex="0"'
+        + ' aria-checked="'+(on?'true':'false')+'"'
+        + (may?' onclick="toggleCheck(\''+esc(o.id)+'\',\''+key+'\')"':'')+'>'
+        + '<span class="box">'+(on?'<i class="ti ti-check"></i>':'')+'</span>'
+        + '<span>'+esc(L(it.name))+' <b style="font-family:var(--font-en)">×'+(it.qty||1)+'</b></span></div>';
+    }).join('') || '<div class="mw-empty">'+T('لا توجد منتجات','No products')+'</div>';
+  }
+
+  /* ---------- notification centre ---------- */
+  function relTime(ts){
+    var d = Math.floor((Date.now()-ts)/1000);
+    if (d < 60)   return T('الآن','just now');
+    if (d < 3600) return T('قبل '+Math.floor(d/60)+' د', Math.floor(d/60)+'m ago');
+    if (d < 86400)return T('قبل '+Math.floor(d/3600)+' س', Math.floor(d/3600)+'h ago');
+    return T('قبل '+Math.floor(d/86400)+' ي', Math.floor(d/86400)+'d ago');
+  }
+  function renderNotifs(){
+    var list = notifs().filter(function(n){
+      return ORDERS.some(function(o){ return o.id === n.orderId; });   /* store-scoped */
+    });
+    var box = document.getElementById('notifList');
+    box.innerHTML = list.length ? list.map(function(n){
+      var isWarn = n.type === 'timeout';
+      return '<button class="mw-n'+(n.read?'':' unread')+'" onclick="openNotif(\''+esc(n.id)+'\',\''+esc(n.orderId)+'\')">'
+        + '<div class="mw-n-ic'+(isWarn?' warn':'')+'"><i class="ti '+(isWarn?'ti-alert-triangle':'ti-shopping-bag-plus')+'"></i></div>'
+        + '<div class="mw-n-b"><b>'+(isWarn?T('تحذير: قارب وقت القبول على الانتهاء','Acceptance window almost over')
+                                           :T('طلب جديد','New order'))+'</b>'
+        + esc(n.orderId)+'<br><span>'+relTime(n.ts)+'</span></div></button>';
+    }).join('')
+    : '<div class="mw-n"><div class="mw-n-ic"><i class="ti ti-bell"></i></div>'
+      + '<div class="mw-n-b"><b>'+T('لا توجد إشعارات','No notifications')+'</b></div></div>';
+    var n = list.filter(function(x){ return !x.read; }).length;
+    var badge = document.getElementById('notifCount');
+    badge.textContent = n > 9 ? '9+' : n;
+    badge.classList.toggle('show', n > 0);
+  }
+
+  /* new orders and timeout warnings — sound, badge, centre, queue position */
+  function scanNotifications(){
+    var seen = readSet(SEENKEY), warned = readSet(WARNKEY);
+    var newOnes = 0, warnings = 0;
+    ORDERS.forEach(function(o){
+      if (seen.indexOf(o.id) < 0){
+        seen.push(o.id);
+        /* only announce orders that actually need a decision */
+        if (bucketOf(o) === 'pending' && pushNotif('new', o.id)) newOnes++;
+      }
+      if (isWarning(o) && warned.indexOf(o.id) < 0){
+        warned.push(o.id);
+        if (pushNotif('timeout', o.id)) warnings++;
+      }
+    });
+    writeSet(SEENKEY, seen); writeSet(WARNKEY, warned);
+    if (warnings) beep('warn');
+    else if (newOnes) beep('new');
+    return newOnes + warnings;
+  }
+
+  /* ---------- chips + eta ---------- */
+  function renderChips(){
+    document.getElementById('chips').innerHTML = CHIPS.map(function(c,i){
+      return '<button class="mw-chip" aria-pressed="false" onclick="toggleChip(this)" data-i="'+i+'">'
+        + '<i class="ti '+c.ic+'"></i>'+T(c.ar,c.en)+'</button>';
+    }).join('');
+  }
+  function renderOps(){
+    var e = etaDef(etaKey);
+    document.getElementById('ops').setAttribute('data-load', e.load);
+    document.getElementById('opsLabel').textContent = T(LOADS[e.load].ar, LOADS[e.load].en);
+    document.getElementById('opsEta').textContent = T(e.ar, e.en);
+  }
+  function renderEtaRow(){
+    document.getElementById('etaRow').innerHTML = ETA.map(function(e){
+      return '<button class="mw-eta-b'+(etaDraft===e.k?' on':'')+'" onclick="pickEta(\''+e.k+'\')">'+T(e.ar,e.en)+'</button>';
+    }).join('');
+  }
+
+  /* ---------- window-level handlers ---------- */
+  window.pick = function(id){
+    selected = id;
+    /* opening an order claims it, if nobody else is already processing it */
+    E.acquireLock(id, ME);
+    renderQueue(); renderDrawer();
+    if (window.matchMedia('(max-width:880px)').matches){
+      document.getElementById('drawer').classList.add('open');
+      document.getElementById('sheetBack').classList.add('show');
+    }
+    saveSession();
+  };
+
+  /* ---------- merchant actions ---------- */
+  function afterAction(res){
+    if (!res.ok) return;
+    renderQueue(); renderDrawer();
+    if (document.getElementById('focus').classList.contains('show')) renderFocus();
+    saveSession();
+  }
+  window.doAccept = function(id){ afterAction(E.merchantAccept(id, ME)); };
+  window.doReject = function(id){ afterAction(E.merchantReject(id, ME)); };
+  window.doReady  = function(id){ afterAction(E.merchantReady(id, ME)); };
+  window.undoAction = function(id){ E.undo(id); afterAction({ ok:true }); };
+  window.overrideLock = function(id){
+    /* managers and admins only; employees never see this control */
+    if (!window.RAFPerm) return;
+    var u = RAFPerm.currentUser();
+    if (!u || u.roleId === 'merchant_employee') return;
+    E.overrideLock(id, ME);
+    renderQueue(); renderDrawer();
+  };
+  window.toggleCheck = function(orderId, key){
+    var c = checklist(orderId);
+    c[key] = !c[key];
+    setChecklist(orderId, c);
+    renderDrawer();
+    if (document.getElementById('focus').classList.contains('show')) renderFocus();
+  };
+  window.openNotif = function(nid, orderId){
+    var a = notifs();
+    a.forEach(function(n){ if (n.id === nid) n.read = true; });
+    writeNotifs(a);
+    closePop();
+    pick(orderId);                       /* deep-link into the order */
+    renderNotifs();
+  };
+  window.markAllRead = function(){
+    var a = notifs(); a.forEach(function(n){ n.read = true; }); writeNotifs(a); renderNotifs();
+  };
+  window.closeDrawer = function(){
+    document.getElementById('drawer').classList.remove('open');
+    document.getElementById('sheetBack').classList.remove('show');
+  };
+  window.openFocus = function(){
+    if (!selected) return;
+    renderFocus();
+    document.getElementById('focus').classList.add('show');
+    document.body.classList.add('mw-focused');
+    closeDrawer();
+    saveSession();
+  };
+  window.closeFocus = function(){
+    document.getElementById('focus').classList.remove('show');
+    document.body.classList.remove('mw-focused');
+    /* orders that arrived during focus are shown normally now */
+    refreshOrders();
+    renderQueue(); renderDrawer();
+    saveSession();
+  };
+  window.openPop  = function(id){ closePop(); document.getElementById(id).classList.add('show'); };
+  window.closePop = function(){ ['notifPop','profPop'].forEach(function(i){ document.getElementById(i).classList.remove('show'); }); };
+  window.openEta  = function(){ etaDraft = etaKey; renderEtaRow(); document.getElementById('etaDlg').classList.add('show'); };
+  window.closeEta = function(){ document.getElementById('etaDlg').classList.remove('show'); };
+  window.pickEta  = function(k){ etaDraft = k; renderEtaRow(); };
+  window.saveEta  = function(){ etaKey = etaDraft; renderOps(); closeEta(); };  /* display only */
+  window.toggleChip = function(btn){
+    btn.setAttribute('aria-pressed', btn.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+    saveSession();
+  };
+  window.zoomImg = function(src, cap){
+    document.getElementById('zoomImg').src = src;
+    document.getElementById('zoomCap').textContent = cap || '';
+    document.getElementById('zoom').classList.add('show');
+  };
+  window.closeZoom = function(){ document.getElementById('zoom').classList.remove('show'); };
+
+  window.toggleLang = function(){
+    var r = root(), en = r.lang === 'en';
+    r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+    try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+    applyLang(); paintAll();
+  };
   function applyLang(){
-    const en=document.getElementById('htmlRoot').lang==='en';
-    document.querySelectorAll('[data-ar]').forEach(el=>{el.textContent=en?el.dataset.en:el.dataset.ar;});
+    var en = isEn();
+    document.querySelectorAll('[data-ar][data-en]').forEach(function(el){
+      var t = el.getAttribute('data-'+(en?'en':'ar')); if (t!==null) el.textContent = t;
+    });
+    document.querySelectorAll('[data-ar-ph][data-en-ph]').forEach(function(el){
+      el.placeholder = el.getAttribute('data-'+(en?'en':'ar')+'-ph');
+    });
+    document.title = en ? 'RAF — Orders' : 'رف — الطلبات';
   }
-  (function(){const l=localStorage.getItem('raf_lang');if(l){const r=document.getElementById('htmlRoot');r.lang=l;r.dir=l==='en'?'ltr':'rtl';}applyLang();})();
+
+  function refreshOrders(){ ORDERS = ordersForStore(STORE_SLUG); }
+
+  function paintAll(){
+    renderChips(); renderOps(); renderQueue(); renderDrawer(); renderNotifs();
+    if (document.getElementById('focus').classList.contains('show')) renderFocus();
+  }
+
+  /* ---------- the workspace tick ----------
+     Drives countdowns, the undo window, lock heartbeats, new-order detection
+     and the timeout warning. In Focus Mode nothing behind the overlay is
+     repainted — a new order only plays its sound. */
+  function tick(){
+    var focused = document.getElementById('focus').classList.contains('show');
+    refreshOrders();
+    E.sweepLocks();
+    E.sweepUndo();
+    scanNotifications();
+    if (focused){ renderFocus(); return; }   /* no banners, no dialogs, no interruption */
+    renderQueue(); renderDrawer(); renderNotifs();
+  }
+
+  /* ---------- boot ---------- */
+  function boot(){
+    var l = null; try { l = localStorage.getItem('raf_lang'); } catch(e){}
+    if (l === 'en'){ root().lang = 'en'; root().dir = 'ltr'; }
+    applyLang();
+
+    var link = resolveStore();
+    if (!link.ok){
+      /* missing data is reported, never papered over with another store */
+      document.getElementById('gate').style.display = '';
+      document.getElementById('gateT').textContent = link.reason === 'store_not_found'
+        ? T('المتجر المرتبط غير موجود','Linked store not found')
+        : T('لا يوجد متجر مرتبط بالحساب','No store linked to this account');
+      document.getElementById('gateP').textContent = link.reason === 'store_not_found'
+        ? T('هذا الحساب مرتبط بمتجر غير موجود في النظام. يرجى تصحيح الربط.',
+            'This account points at a store that does not exist. The link needs correcting.')
+        : T('لم يتم ربط هذا الحساب بمتجر بعد. يتم الربط يدوياً ولا يُخمَّن تلقائياً.',
+            'This account has not been linked to a store yet. Links are set explicitly and never inferred.');
+      return;
+    }
+
+    STORE = link.store;
+    STORE_SLUG = link.slug;          /* the canonical scope key for every read */
+    document.getElementById('shell').style.display = '';
+
+    /* header identity */
+    document.getElementById('stName').textContent = L(STORE.name);
+    if (STORE.logo){
+      var lg = document.getElementById('stLogo');
+      lg.style.backgroundImage = "url('"+STORE.logo+"')"; lg.innerHTML = '';
+    }
+    var me = RAFPerm.currentUser();
+    if (me){
+      document.getElementById('profName').textContent = me.name;
+      document.getElementById('profFull').textContent = me.name;
+      document.getElementById('profAv').textContent = (me.name||'?').trim().charAt(0);
+    }
+
+    ME = me ? { id:me.id, name:me.name, roleId:me.roleId } : null;
+
+    ORDERS = ordersForStore(STORE_SLUG);
+    /* first pass seeds the seen-set without announcing history */
+    if (!localStorage.getItem(SEENKEY)) writeSet(SEENKEY, ORDERS.map(function(o){ return o.id; }));
+    scanNotifications();
+    paintAll();
+
+    /* ---- session recovery: put the merchant back exactly where they were ---- */
+    loadSession();
+    if (SESSION.q && document.getElementById('q')) document.getElementById('q').value = SESSION.q;
+    (SESSION.chips||[]).forEach(function(i){
+      var c = document.querySelectorAll('.mw-chip')[i];
+      if (c) c.setAttribute('aria-pressed','true');
+    });
+    if (SESSION.selected && ORDERS.some(function(o){ return o.id === SESSION.selected; })){
+      selected = SESSION.selected;
+      E.acquireLock(selected, ME);        /* reclaim my own lock after a refresh */
+      renderQueue(); renderDrawer();
+      if (SESSION.drawerOpen && window.matchMedia('(max-width:880px)').matches){
+        document.getElementById('drawer').classList.add('open');
+        document.getElementById('sheetBack').classList.add('show');
+      }
+      if (SESSION.focus){
+        renderFocus();
+        document.getElementById('focus').classList.add('show');
+        document.body.classList.add('mw-focused');
+      }
+    }
+    if (SESSION.scrollY) setTimeout(function(){ window.scrollTo(0, SESSION.scrollY); }, 30);
+
+    /* ---- heartbeat: keeps my lock alive; silence for 60s releases it ---- */
+    setInterval(function(){ if (selected) E.heartbeat(selected, ME); }, E.LOCK_HEARTBEAT_MS);
+    setInterval(tick, 1000);
+    E.watch(function(){ if (!document.getElementById('focus').classList.contains('show')) { renderQueue(); renderDrawer(); } });
+    window.addEventListener('scroll', function(){ SESSION.scrollY = window.scrollY; }, { passive:true });
+    window.addEventListener('beforeunload', saveSession);
+    var qEl = document.getElementById('q'); if (qEl) qEl.addEventListener('input', saveSession);
+
+    /* browsers only allow playback after a gesture — prime on the first one */
+    ['pointerdown','keydown'].forEach(function(ev){
+      document.addEventListener(ev, primeSounds, { once:true });
+    });
+
+    /* existing permission layer, unchanged */
+    try { RAFPerm.enforce(); } catch(e){}
+
+    document.addEventListener('keydown', function(e){
+      if (e.key !== 'Escape') return;
+      if (document.getElementById('zoom').classList.contains('show')) return closeZoom();
+      if (document.getElementById('etaDlg').classList.contains('show')) return closeEta();
+      if (document.getElementById('focus').classList.contains('show')) return closeFocus();
+      closePop(); closeDrawer();
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
 </script>
-<!-- FLOATING BACK BUTTON -->
-<button id="floatBack" onclick="history.back()" title="رجوع" style="position:fixed;bottom:24px;left:24px;z-index:9999;width:46px;height:46px;border-radius:50%;background:#1a1a1a;border:1px solid #333;color:#C9A84C;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.5);transition:all .2s;"><i class="ti ti-arrow-right"></i></button>
-<style>#floatBack:hover{background:#C9A84C!important;color:#0A0A0A!important;border-color:#C9A84C!important;}</style>
 </body>
 </html>

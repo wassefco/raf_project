@@ -122,18 +122,20 @@
 <script src="raf_data.js"></script>
 <script src="raf_catalog.js"></script>
 <script src="raf_rules.js"></script>
+<script src="raf_order_engine.js"></script>
 <script src="raf_checkout.js"></script>
 <script>
 /* ============================================================
-   ORDER PENDING — the store has 5 minutes to accept.
-   Accepted  → normal order flow continues (tracking).
-   Timed out → order cancelled, customer refunded and notified.
-   The countdown is anchored to a stored deadline, so closing the
-   tab or reloading cannot extend or restart the window.
+   ORDER PENDING — customer view.
+
+   All of the acceptance workflow (window, countdown, accept,
+   reject, timeout, refund, stock restoration, notifications,
+   timeline, order status) now lives in RAFOrderEngine and is
+   shared with the merchant and admin surfaces. This file only
+   renders that state and reflects the outcome.
    ============================================================ */
 (function(){
-  var WINDOW_MS = 5 * 60 * 1000;
-  var LS = 'raf_pending';
+  var E = window.RAFOrderEngine;
   var CIRC = 326.7;
 
   function root(){ return document.getElementById('htmlRoot') || document.documentElement; }
@@ -150,15 +152,10 @@
     var r=root(), en=r.lang==='en';
     r.lang=en?'ar':'en'; r.dir=en?'rtl':'ltr';
     try{ localStorage.setItem('raf_lang', r.lang); }catch(e){}
-    applyLang();
+    applyLang(); paint();
   };
 
   var ORDER_ID = new URLSearchParams(location.search).get('id') || '';
-  function state(){
-    try{ var s=JSON.parse(localStorage.getItem(LS)||'{}'); return (s && s.id===ORDER_ID) ? s : null; }catch(e){ return null; }
-  }
-  function save(s){ try{ localStorage.setItem(LS, JSON.stringify(s)); }catch(e){} }
-  function clear(){ try{ localStorage.removeItem(LS); }catch(e){} }
 
   function setOrderNo(){
     document.getElementById('ordNo').textContent = ORDER_ID || '—';
@@ -171,84 +168,41 @@
       document.getElementById(k).classList.toggle('show', k===id);
     });
   }
-
-  /* ---- outcomes ---- */
-  function accept(){
-    var s=state(); if(!s || s.done) return;
-    s.done='accepted'; save(s);
-    setOrderStatus('progress');
-    show('stOk');
-    notify(T('قبل المتجر طلبك '+ORDER_ID,'Store accepted order '+ORDER_ID), 'raf_tracking.html?id='+encodeURIComponent(ORDER_ID));
-  }
-  function timeout(){
-    var s=state(); if(!s || s.done) return;
-    s.done='timeout'; save(s);
-    cancelAndRefund('timeout');
-    show('stFail');
-  }
+  /* the customer cancelling their own order — the engine owns the effects */
   window.cancelOrder=function(){
-    var s=state(); if(!s || s.done) return;
-    s.done='cancelled'; save(s);
-    cancelAndRefund('customer');
-    document.querySelector('#stFail h1').textContent=T('تم إلغاء الطلب','Order cancelled');
-    document.querySelector('#stFail p').textContent=T('تم إلغاء طلبك بناءً على طلبك.','Your order was cancelled at your request.');
+    if(!E.cancel(ORDER_ID)) return;
+    failCopy(T('تم إلغاء الطلب','Order cancelled'),
+             T('تم إلغاء طلبك بناءً على طلبك.','Your order was cancelled at your request.'));
     show('stFail');
   };
-
-  /* mark the order cancelled, restore its stock and record the refund */
-  function cancelAndRefund(why){
-    setOrderStatus('cancelled');
-    restoreStock();
-    if(window.RAFRules) RAFRules.Reserve.release();
-    notify(why==='timeout'
-      ? T('تم إلغاء الطلب '+ORDER_ID+' تلقائياً وإعادة المبلغ','Order '+ORDER_ID+' was auto-cancelled and refunded')
-      : T('تم إلغاء الطلب '+ORDER_ID+' وإعادة المبلغ','Order '+ORDER_ID+' was cancelled and refunded'),
-      'raf_order_details.html?id='+encodeURIComponent(ORDER_ID));
-  }
-  function setOrderStatus(st){
-    if(!window.RAFShop) return;
-    try{
-      var all=RAFShop.Orders.all();
-      var i=all.findIndex(function(o){ return o.id===ORDER_ID; });
-      if(i<0) return;
-      all[i].status=st;
-      if(st==='cancelled'){
-        all[i].refunded=true;
-        all[i].tl=[{k:'placed',t:{ar:'تم استلام الطلب',en:'Order placed'},time:all[i].date,s:'done'},
-                   {k:'cancel',t:{ar:'أُلغي الطلب وأُعيد المبلغ',en:'Cancelled and refunded'},time:RAFShop.nowStr(),s:'cancel'}];
-      }
-      localStorage.setItem('raf_orders', JSON.stringify(all));
-    }catch(e){}
-  }
-  /* a cancelled order returns its units to the shelf */
-  function restoreStock(){
-    if(!window.RAFSource || !window.RAFShop) return;
-    var s=state(); if(!s || !s.items) return;
-    Object.keys(s.items).forEach(function(pid){
-      var p=RAFSource.product(pid);
-      if(p && p.stock!=null) RAFSource.updateProduct(pid,{ stock:p.stock + s.items[pid] });
-    });
-  }
-  /* surface the outcome in the notification centre */
-  function notify(text, href){
-    try{
-      var a=JSON.parse(localStorage.getItem('raf_notif_extra')||'[]');
-      a.unshift({ id:'ord-'+ORDER_ID+'-'+Date.now(), t:{ar:text,en:text}, href:href, ts:Date.now() });
-      localStorage.setItem('raf_notif_extra', JSON.stringify(a.slice(0,20)));
-    }catch(e){}
+  function failCopy(title, body){
+    document.querySelector('#stFail h1').textContent = title;
+    document.querySelector('#stFail p').textContent  = body;
   }
 
-  /* ---- countdown anchored to a stored deadline ---- */
-  var timer=null;
-  function tick(){
-    var s=state(); if(!s) return;
-    var left=Math.max(0, s.deadline - Date.now());
-    var m=Math.floor(left/60000), sec=Math.floor((left%60000)/1000);
+  /* ---- render whatever the engine currently says ---- */
+  function paint(){
+    var s = E.get(ORDER_ID);
+    if(!s) return;
+    if(s.done === E.DECISION.ACCEPTED){ show('stOk'); return; }
+    if(s.done === E.DECISION.REJECTED){
+      failCopy(T('اعتذر المتجر عن الطلب','The store could not accept your order'),
+               T('لم يتمكن المتجر من قبول طلبك، وتم إعادة المبلغ كاملاً.',
+                 'The store was unable to accept your order, and you have been refunded in full.'));
+      show('stFail'); return;
+    }
+    if(s.done === E.DECISION.CANCELLED){
+      failCopy(T('تم إلغاء الطلب','Order cancelled'),
+               T('تم إلغاء طلبك بناءً على طلبك.','Your order was cancelled at your request.'));
+      show('stFail'); return;
+    }
+    if(s.done){ show('stFail'); return; }              /* timeout keeps its page copy */
+
+    show('stWait');
     var c=document.getElementById('clock');
-    if(c) c.textContent = m+':'+(sec<10?'0':'')+sec;
+    if(c) c.textContent = E.clock(ORDER_ID);
     var ring=document.getElementById('ring');
-    if(ring) ring.style.strokeDashoffset = String(CIRC * (1 - left/WINDOW_MS));
-    if(left<=0){ clearInterval(timer); timeout(); }
+    if(ring) ring.style.strokeDashoffset = String(CIRC * E.progress(ORDER_ID));
   }
 
   function boot(){
@@ -258,28 +212,9 @@
 
     if(!ORDER_ID){ location.replace('raf_orders.html'); return; }
 
-    var s=state();
-    if(!s){
-      /* first arrival: snapshot what was ordered so a cancellation can
-         put the stock back, then start the acceptance window */
-      var items={};
-      try{
-        var o=RAFShop.Orders.get(ORDER_ID);
-        (o&&o.items||[]).forEach(function(it){ if(it.id) items[it.id]=(items[it.id]||0)+(it.qty||1); });
-      }catch(e){}
-      s={ id:ORDER_ID, deadline:Date.now()+WINDOW_MS, items:items, done:null };
-      save(s);
-    }
-    if(s.done==='accepted'){ show('stOk'); return; }
-    if(s.done){ show('stFail'); return; }
-
-    show('stWait'); tick(); timer=setInterval(tick,1000);
-
-    /* the merchant app accepts through this hook (or another tab does) */
-    window.__acceptOrder = accept;
-    window.addEventListener('storage', function(e){
-      if(e.key==='raf_order_accept' && e.newValue===ORDER_ID) accept();
-    });
+    E.start(ORDER_ID);        /* idempotent: an open window is never restarted */
+    paint();
+    E.watch(paint);           /* countdown, expiry and merchant decisions all land here */
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

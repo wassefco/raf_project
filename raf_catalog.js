@@ -36,20 +36,22 @@
     };
   }
 
-  /* store display name (either language) → slug */
+  /* Store display name (either language) → slug.
+     Exact matches only. This used to fall back to 'casa-mode' for an empty
+     name and to a slugified guess for an unknown one, which could route a
+     customer into the wrong store. An unresolved name now returns '' so the
+     caller can decline to navigate rather than land somewhere arbitrary. */
   function slugFor(name) {
-    if (!name) return 'casa-mode';
+    if (!name) return '';
     var S = src();
-    if (S) {
-      var needle = String(name).trim().toLowerCase();
-      var hit = S.allStores().find(function (s) {
-        return s.name.ar.trim().toLowerCase() === needle ||
-               s.name.en.trim().toLowerCase() === needle ||
-               s.slug === needle;
-      });
-      if (hit) return hit.slug;
-    }
-    return String(name).trim().toLowerCase().replace(/&/g, '').replace(/\s+/g, '-').replace(/-+/g, '-');
+    if (!S) return '';
+    var needle = String(name).trim().toLowerCase();
+    var hit = S.allStores().find(function (s) {
+      return s.name.ar.trim().toLowerCase() === needle ||
+             s.name.en.trim().toLowerCase() === needle ||
+             s.slug === needle;
+    });
+    return hit ? hit.slug : '';
   }
 
   window.RAFCatalog = {
