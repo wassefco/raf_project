@@ -84,7 +84,9 @@ html[dir="ltr"] .sec-link i{transform:scaleX(-1);}
 /* ============ HERO ============ */
 /* mobile search band — collapses completely on desktop so it adds no whitespace */
 /* hero banner (ad carousel) now sits directly under Categories */
-.hero-banner .wrap{padding-top:0;padding-bottom:34px;}
+.hero-banner .wrap{padding-top:0;padding-bottom:30px;}
+/* headingless category rail — tight above the hero, no wasted band */
+#categories{padding:16px 0 4px;}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:50px;padding:0 24px;border-radius:30px;font-family:var(--font-ar);font-size:14.5px;font-weight:700;cursor:pointer;border:none;transition:all .22s;white-space:nowrap;}
 .btn-gold{background:var(--gold);color:var(--black);box-shadow:var(--sh-gold);}
 .btn-gold:hover{background:var(--gold2);transform:translateY(-2px);}
@@ -95,7 +97,7 @@ html[dir="ltr"] .sec-link i{transform:scaleX(-1);}
 .adc{position:relative;border-radius:var(--rxl);overflow:hidden;box-shadow:var(--sh);}
 .adc-viewport{overflow:hidden;border-radius:var(--rxl);}
 .adc-track{display:flex;transition:transform .55s cubic-bezier(.4,0,.2,1);}
-.adc-slide{flex:0 0 100%;min-width:100%;height:420px;position:relative;display:flex;align-items:stretch;color:#fff;cursor:pointer;overflow:hidden;}
+.adc-slide{flex:0 0 100%;min-width:100%;height:360px;position:relative;display:flex;align-items:stretch;color:#fff;cursor:pointer;overflow:hidden;}
 .adc-slide .glow{position:absolute;inset:0;z-index:0;}
 .adc-slide .ov{position:absolute;inset:0;z-index:1;background:linear-gradient(270deg,rgba(10,10,10,.86) 0%,rgba(10,10,10,.45) 48%,rgba(10,10,10,.06) 100%);}
 html[dir="ltr"] .adc-slide .ov{background:linear-gradient(90deg,rgba(10,10,10,.86) 0%,rgba(10,10,10,.45) 48%,rgba(10,10,10,.06) 100%);}
@@ -240,14 +242,6 @@ html[dir="ltr"] .adc-slide .ov{background:linear-gradient(90deg,rgba(10,10,10,.8
 .tab.on{background:var(--gold);color:var(--black);}
 .tab-pane{display:none;} .tab-pane.on{display:block;}
 
-/* trust */
-.trust{background:var(--card);border-bottom:1px solid var(--border);}
-.trust-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;padding:24px 0;}
-.trust-item{display:flex;align-items:center;gap:13px;}
-.trust-ico{width:48px;height:48px;border-radius:14px;background:var(--gold-soft);display:flex;align-items:center;justify-content:center;font-size:23px;color:var(--gold2);flex-shrink:0;}
-.trust-item b{font-size:14.5px;font-weight:700;color:var(--ink);display:block;}
-.trust-item span{font-size:12px;color:var(--text3);}
-
 /* cta strip */
 .cta-strip{background:var(--gold);}
 .cta-strip .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:30px 24px;flex-wrap:wrap;}
@@ -274,7 +268,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 
 /* ============ RESPONSIVE ============ */
 @media(max-width:1024px){
-  .adc-slide{height:380px;}
+  .adc-slide{height:330px;}
   .adc-content{max-width:62%;padding:36px 40px 54px;}
   .adc-product{width:188px;height:188px;font-size:90px;}
 }
@@ -286,7 +280,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   .subnav{display:none;}
   .hero .wrap{padding-top:18px;padding-bottom:30px;}
   .btn-account span{display:none;}.btn-account{padding:0 14px;}
-  .adc-slide{height:330px;}
+  .adc-slide{height:290px;}
   .adc-content{max-width:100%;padding:28px 28px 52px;}
   .adc-visual{display:none;}
   .adc-slide .ov,html[dir="ltr"] .adc-slide .ov{background:linear-gradient(0deg,rgba(10,10,10,.8) 0%,rgba(10,10,10,.34) 100%);}
@@ -301,9 +295,8 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   .wrap{padding:0 16px;}
   .sec{padding:34px 0;}
   .sec-title{font-size:23px;}
-  .trust-grid{grid-template-columns:repeat(2,1fr);gap:18px 14px;padding:20px 0;}
   .foot-grid{grid-template-columns:1fr 1fr;gap:26px;}
-  .adc-slide{height:300px;}
+  .adc-slide{height:262px;}
   .adc-content{padding:22px 22px 50px;}
   .adc-title{font-size:21px;}
   .adc-sub{font-size:13.5px;margin-bottom:14px;}
@@ -369,10 +362,10 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 <nav></nav>
 
 <!-- ============ CATEGORIES ============ -->
+<!-- No heading: the icons speak for themselves. One horizontal scroller that
+     takes any number of categories (swipe on touch, drag or arrows on mouse). -->
 <section class="sec" id="categories"><div class="wrap">
-  <div class="sec-head"><div><div class="sec-kicker">CATEGORIES</div><h2 class="sec-title" data-ar="تسوّق حسب الفئة" data-en="Shop by Category">تسوّق حسب الفئة</h2></div>
-    <a class="sec-link" href="raf_storespage.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
-  <div class="car"><div class="car-track" id="catTrack"></div>
+  <div class="car"><div class="car-track" id="catTrack" data-hscroll></div>
     <button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button>
     <button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button>
   </div>
@@ -438,14 +431,6 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   </div>
 </div></section>
 
-<!-- ============ TRUST ============ -->
-<section class="trust"><div class="wrap"><div class="trust-grid">
-  <div class="trust-item"><div class="trust-ico"><i class="ti ti-truck-delivery"></i></div><div><b data-ar="توصيل سريع" data-en="Fast Delivery">توصيل سريع</b><span data-ar="خلال 24-48 ساعة" data-en="Within 24-48h">خلال 24-48 ساعة</span></div></div>
-  <div class="trust-item"><div class="trust-ico"><i class="ti ti-rosette-discount-check"></i></div><div><b data-ar="منتجات أصلية" data-en="Authentic Products">منتجات أصلية</b><span data-ar="مضمونة 100%" data-en="100% guaranteed">مضمونة 100%</span></div></div>
-  <div class="trust-item"><div class="trust-ico"><i class="ti ti-shield-lock"></i></div><div><b data-ar="دفع آمن" data-en="Secure Payments">دفع آمن</b><span data-ar="حماية كاملة" data-en="Fully protected">حماية كاملة</span></div></div>
-  <div class="trust-item"><div class="trust-ico"><i class="ti ti-headset"></i></div><div><b data-ar="دعم 24/7" data-en="24/7 Support">دعم 24/7</b><span data-ar="فريق متواجد دائماً" data-en="Always available">فريق متواجد دائماً</span></div></div>
-</div></div></section>
-
 <!-- ============ CTA ============ -->
 <section class="cta-strip"><div class="wrap">
   <div><h3 data-ar="هل لديك متجر؟ انضم إلى رف" data-en="Own a store? Join RAF">هل لديك متجر؟ انضم إلى رف</h3><p data-ar="ابدأ البيع لآلاف العملاء اليوم — تسجيل مجاني." data-en="Start selling to thousands today — free signup.">ابدأ البيع لآلاف العملاء اليوم — تسجيل مجاني.</p></div>
@@ -476,7 +461,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 <!-- ============ BOTTOM NAV ============ -->
 <nav class="app-bnav">
   <a href="raf_homepage.html" class="bnav-tab on"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
-  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفّح" data-en="Browse">تصفّح</span></a>
+  <a href="raf_notifications.html" class="bnav-tab"><i class="ti ti-bell"></i><span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span></a>
   <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
   <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
@@ -555,6 +540,7 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 <script src="raf_catalog.js"></script>
 <script src="raf_rules.js"></script>
 <script src="raf_card.js"></script>
+<script src="raf_hscroll.js"></script>
 <script src="raf_quick.js"></script>
 <script>
 /* ===== ADMIN-READY DATA (replace with API later) ===== */

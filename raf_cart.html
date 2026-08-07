@@ -13,6 +13,45 @@
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <script src="raf_features.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
+<style>
+/* MULTIPLE CARTS — store switcher (cart page only) */
+.carts-bar{max-width:1180px;margin:0 auto 16px;padding:0 clamp(14px,3vw,28px);}
+.carts-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;}
+.carts-h{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:12px;}
+.carts-h i{color:var(--gold2);}
+.carts-n{margin-inline-start:auto;font-size:12px;font-weight:700;color:var(--gold2);background:var(--gold-soft);border-radius:20px;padding:3px 10px;}
+.carts-track{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;}
+.cart-chip{flex:0 0 auto;min-width:210px;max-width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border2);border-radius:14px;background:var(--bg);cursor:pointer;transition:border-color .2s,background .2s;}
+.cart-chip:hover{border-color:var(--gold);}
+.cart-chip.on{border-color:var(--gold);background:var(--gold-soft);cursor:default;}
+.cc-ic{width:34px;height:34px;flex:0 0 auto;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--gold2);font-size:17px;}
+.cc-main{min-width:0;display:flex;flex-direction:column;gap:2px;text-align:start;}
+.cc-main b{font-size:13.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cc-main span{font-size:11.5px;color:var(--text2);white-space:nowrap;}
+.cc-on{margin-inline-start:auto;font-size:11px;font-weight:700;color:var(--gold2);white-space:nowrap;}
+.cc-x{margin-inline-start:auto;width:28px;height:28px;flex:0 0 auto;border:0;background:transparent;border-radius:8px;color:var(--text3);cursor:pointer;font-size:15px;}
+.cc-x:hover{background:rgba(217,83,79,.1);color:var(--red);}
+.carts-note{display:flex;gap:9px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;line-height:1.7;color:var(--text2);}
+.carts-note i{color:var(--gold2);font-size:16px;flex:0 0 auto;margin-top:1px;}
+.carts-note b{display:block;color:var(--ink);font-size:12.5px;margin-bottom:2px;}
+
+/* OUT OF STOCK — products pulled out of the cart, with replacements */
+.oos-wrap{max-width:1180px;margin:0 auto;padding:0 clamp(14px,3vw,28px);}
+.oos-panel .panel-h i{color:var(--red);}
+.oos-group{padding:14px 0;border-bottom:1px solid var(--border);}
+.oos-group:last-child{border-bottom:none;padding-bottom:4px;}
+.oos-head{display:flex;align-items:center;gap:12px;}
+.oos-thumb{width:56px;height:56px;flex:0 0 auto;border-radius:12px;background:var(--bg2);background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--text3);filter:grayscale(1);opacity:.7;}
+.oos-info{flex:1;min-width:0;}
+.oos-name{font-size:14px;font-weight:700;color:var(--text2);line-height:1.45;}
+.oos-meta{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:12px;color:var(--red);}
+.oos-store{font-size:11.5px;color:var(--text3);margin-top:2px;}
+.oos-x{width:30px;height:30px;flex:0 0 auto;border:0;background:transparent;border-radius:8px;color:var(--text3);cursor:pointer;font-size:16px;}
+.oos-x:hover{background:rgba(217,83,79,.1);color:var(--red);}
+.oos-alt-l{display:flex;align-items:center;gap:6px;margin:12px 0 8px;font-size:12.5px;font-weight:700;color:var(--ink);}
+.oos-alt-l i{color:var(--gold2);font-size:15px;}
+.oos-alt-empty{font-size:12px;color:var(--text3);margin-top:10px;}
+</style>
 </head>
 <body>
 
@@ -34,6 +73,25 @@
 </div>
 
 <main class="co-wrap">
+  <!-- MULTIPLE CARTS — one cart per store, checkout runs on one cart at a time -->
+  <div class="carts-bar" id="cartsBar" style="display:none;">
+    <div class="carts-box">
+      <div class="carts-h">
+        <i class="ti ti-shopping-cart"></i>
+        <span data-ar="سلاتك" data-en="Your carts">سلاتك</span>
+        <span class="carts-n" id="cartsCount"></span>
+      </div>
+      <div class="carts-track" id="cartsTrack"></div>
+      <div class="carts-note">
+        <i class="ti ti-info-circle"></i>
+        <div>
+          <b data-ar="كل متجر يُنشئ طلباً منفصلاً" data-en="Every store creates a separate order">كل متجر يُنشئ طلباً منفصلاً</b>
+          <span data-ar="يتم الدفع من سلة واحدة في كل مرة. تُحتسب رسوم التوصيل لكل متجر على حدة، وتُطبَّق سياسات المتجر وشروط التوصيل بشكل مستقل على كل طلب." data-en="Checkout is completed from one cart at a time. Delivery fees are calculated independently for each store, and store policies and delivery conditions apply individually to each order.">يتم الدفع من سلة واحدة في كل مرة. تُحتسب رسوم التوصيل لكل متجر على حدة، وتُطبَّق سياسات المتجر وشروط التوصيل بشكل مستقل على كل طلب.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- EMPTY STATE -->
   <div class="empty" id="cartEmpty" style="display:none;">
     <div class="empty-ic"><i class="ti ti-shopping-cart-off"></i></div>
@@ -56,7 +114,7 @@
       <!-- CROSS-SELL (same stores) -->
       <div class="panel" id="xsPanel" style="display:none;">
         <div class="panel-h"><i class="ti ti-sparkles"></i> <span data-ar="أضف من نفس المتجر" data-en="Add from the same store">أضف من نفس المتجر</span></div>
-        <div class="panel-b"><div class="xs-track" id="xsTrack"></div></div>
+        <div class="panel-b"><div class="xs-track" id="xsTrack" data-hscroll></div></div>
       </div>
 
       <!-- COUPON -->
@@ -89,12 +147,19 @@
           <button class="btn btn-gold btn-block" id="checkoutBtn" onclick="goCheckout()">
             <i class="ti ti-lock"></i> <span data-ar="متابعة للدفع" data-en="Proceed to checkout">متابعة للدفع</span>
           </button>
-          <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:12px;font-size:12px;color:var(--text3);">
-            <i class="ti ti-shield-check" style="color:var(--green);"></i>
-            <span data-ar="دفع آمن ومحمي بالكامل" data-en="Secure, fully protected payment">دفع آمن ومحمي بالكامل</span>
-          </div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- OUT OF STOCK — products removed from the cart automatically, kept
+       visible below it together with in-stock alternatives from other stores.
+       Lives outside the cart grid so it still shows when the cart empties. -->
+  <div class="oos-wrap" id="oosWrap" style="display:none;">
+    <div class="panel oos-panel">
+      <div class="panel-h"><i class="ti ti-package-off"></i> <span data-ar="نفدت الكمية" data-en="Out of Stock">نفدت الكمية</span>
+        <span class="side" id="oosSide"></span></div>
+      <div class="panel-b" id="oosBody"></div>
     </div>
   </div>
 </main>
@@ -122,7 +187,7 @@
 
 <nav class="app-bnav">
   <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
-  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفّح" data-en="Browse">تصفّح</span></a>
+  <a href="raf_notifications.html" class="bnav-tab"><i class="ti ti-bell"></i><span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span></a>
   <a href="raf_cart.html" class="bnav-cart on"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
   <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
@@ -133,6 +198,7 @@
 <script src="raf_catalog.js"></script>
 <script src="raf_rules.js"></script>
 <script src="raf_card.js"></script>
+<script src="raf_hscroll.js"></script>
 <script src="raf_checkout.js"></script>
 <script>
 /* ============================================================
@@ -145,9 +211,159 @@
   /* Arabic count agreement: 1 منتج · 2 منتجان · 3–10 منتجات · 11+ منتجاً */
   function plural(n){ return n===1?'منتج':(n===2?'منتجان':(n<=10?'منتجات':'منتجاً')); }
 
+  /* ---------- OUT OF STOCK ----------
+     syncCart() already pulls unavailable lines out of the basket (so every
+     total stays correct). We keep a record of what it removed so the customer
+     can still see it below the cart, with in-stock alternatives from other
+     stores. Persisted, because the line is gone from the cart after the first
+     sync and would otherwise vanish on the next visit. */
+  var OOS_KEY = 'raf_oos_removed';
+  function oosRead(){ try{ var a=JSON.parse(localStorage.getItem(OOS_KEY)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function oosWrite(a){ try{ localStorage.setItem(OOS_KEY, JSON.stringify(a.slice(0,12))); }catch(e){} }
+  function oosRecord(removed){
+    if(!removed || !removed.length) return;
+    var a = oosRead();
+    removed.forEach(function(r){
+      var l = r.line || {};
+      if(a.some(function(x){ return x.id===r.id; })) return;
+      a.unshift({ id:r.id, name:l.name || {ar:r.name,en:r.name}, price:l.price||'', ic:l.ic||'ti-box',
+                  img:l.img||'', store:l.store||null, reason:r.code||'OUT_OF_STOCK' });
+    });
+    oosWrite(a);
+  }
+  /* dropped once the product is buyable again, or when the customer dismisses it */
+  function oosPrune(){
+    var a = oosRead(), keep = a.filter(function(x){
+      if(!window.RAFRules) return true;
+      return RAFRules.maxQty(x.id) <= 0;                 /* still unavailable */
+    });
+    if(keep.length !== a.length) oosWrite(keep);
+    return keep;
+  }
+  window.oosDismiss = function(id){
+    oosWrite(oosRead().filter(function(x){ return x.id!==id; }));
+    renderOOS();
+  };
+  /* in-stock products from a different store: the same category first, then
+     the nearest neighbouring categories when that store is the only one
+     carrying the category */
+  var NEAR = {
+    fashion:['shoes','bags','accessories'], shoes:['fashion','bags','accessories'],
+    bags:['accessories','fashion','shoes'], accessories:['jewelry','bags','watches'],
+    jewelry:['accessories','watches'],      watches:['jewelry','accessories'],
+    electronics:['watches','accessories'],  perfume:['accessories','jewelry']
+  };
+  function alternatives(id, storeKey){
+    if(!window.RAFCatalog) return [];
+    var p = RAFCatalog.get(id);
+    var mine = (p && p.slug) || '';
+    function pick(cat){
+      return RAFCatalog.list({ cat:cat, inStock:true }).filter(function(x){
+        if(x.id === id) return false;
+        if(mine && x.slug === mine) return false;         /* other stores only */
+        if(!mine && storeKey && L(x.store) === storeKey) return false;
+        return true;
+      });
+    }
+    var out = pick(p && p.cat);
+    if(!out.length){
+      (NEAR[(p && p.cat) || ''] || []).forEach(function(c){
+        if(out.length < 8) out = out.concat(pick(c));
+      });
+    }
+    return out.slice(0,8);
+  }
+  function renderOOS(){
+    var list = oosPrune(), wrap = document.getElementById('oosWrap');
+    if(!list.length){ wrap.style.display='none'; return; }
+    wrap.style.display='';
+    document.getElementById('oosSide').textContent =
+      T(list.length+' '+plural(list.length), list.length+' item'+(list.length===1?'':'s'));
+    document.getElementById('oosBody').innerHTML = list.map(function(x){
+      var alts = alternatives(x.id, x.store ? L(x.store) : '');
+      return '<div class="oos-group">'
+        + '<div class="oos-head">'
+          + '<div class="oos-thumb"'+(x.img?' style="background-image:url(\''+x.img+'\')"':'')+'>'
+            + (x.img?'':'<i class="ti '+(x.ic||'ti-box')+'"></i>')+'</div>'
+          + '<div class="oos-info"><div class="oos-name">'+L(x.name)+'</div>'
+            + (x.store?'<div class="oos-store"><i class="ti ti-building-store"></i> '+L(x.store)+'</div>':'')
+            + '<div class="oos-meta"><i class="ti ti-ban"></i> '
+              + T('نفدت الكمية — أُزيل من سلتك','Sold out — removed from your cart')+'</div></div>'
+          + '<button class="oos-x" onclick="oosDismiss(\''+x.id+'\')" aria-label="'+T('إخفاء','Dismiss')+'"><i class="ti ti-x"></i></button>'
+        + '</div>'
+        + (alts.length && window.RAFCard
+            ? '<div class="oos-alt-l"><i class="ti ti-arrows-shuffle"></i> '
+              + T('منتجات مشابهة من محلات أخرى','Similar products from other stores')+'</div>'
+              + '<div class="xs-track" data-hscroll>'
+              + alts.map(function(p){ return '<div class="xs">'+RAFCard.product(p,{rating:false})+'</div>'; }).join('')
+              + '</div>'
+            : '<div class="oos-alt-empty">'+T('لا توجد بدائل متاحة حالياً','No alternatives available right now')+'</div>')
+        + '</div>';
+    }).join('');
+  }
+
+  /* ---------- multiple carts (one per store) ----------
+     Every cart keeps its own items, coupon, tip and notes. Only the active
+     cart is checked out, so each store is always placed as its own order. */
+  var CARTS = [];
+  function renderCarts(){
+    CARTS = (window.RAFShop && RAFShop.Carts) ? RAFShop.Carts.list() : [];
+    var bar = document.getElementById('cartsBar');
+    /* shown whenever another store's cart exists — including when the active
+       cart is empty, so a parked cart is never stranded out of reach */
+    var show = CARTS.length > 1 || (CARTS.length === 1 && !CARTS[0].active);
+    if(!show){ bar.style.display='none'; return; }
+    bar.style.display='';
+    document.querySelector('.carts-note').style.display = CARTS.length > 1 ? '' : 'none';
+    document.getElementById('cartsCount').textContent = CARTS.length;
+    document.getElementById('cartsTrack').innerHTML = CARTS.map(function(c,i){
+      return '<div class="cart-chip'+(c.active?' on':'')+'"'
+        + (c.active?'':' onclick="switchCart('+i+')" role="button" tabindex="0"')+'>'
+        + '<div class="cc-ic"><i class="ti ti-building-store"></i></div>'
+        + '<div class="cc-main"><b>'+c.label+'</b><span>'
+          + T(c.count+' '+plural(c.count), c.count+' item'+(c.count===1?'':'s'))
+          + ' · '+money(c.subtotal)+' '+T('د.ك','KWD')+'</span></div>'
+        + (c.active
+            ? '<span class="cc-on">'+T('الحالية','Active')+'</span>'
+            : '<button class="cc-x" onclick="dropCart(event,'+i+')" aria-label="'+T('حذف السلة','Delete cart')+'"><i class="ti ti-trash"></i></button>')
+        + '</div>';
+    }).join('');
+  }
+  /* the cart-scoped fields travel with the cart, so they are repainted on switch */
+  function restoreCartState(){
+    var c = RAFCO.getCoupon(), m = document.getElementById('couponMsg'), ci = document.getElementById('couponInput');
+    if(c){ ci.value=c.code; m.className='msg ok show'; m.innerHTML='<i class="ti ti-circle-check"></i> '+T('تم تطبيق الكوبون — خصم '+c.pct+'%','Coupon applied — '+c.pct+'% off'); }
+    else { ci.value=''; m.className='msg'; m.innerHTML=''; }
+    document.getElementById('orderNotes').value = RAFCO.get('raf_order_notes','');
+  }
+  window.switchCart = function(i){
+    var c = CARTS[i]; if(!c || c.active) return;
+    if(!RAFShop.Carts.switchTo(c.store)) return;
+    restoreCartState();
+    render();
+    RAFShop.toast(T('تم التبديل إلى سلة '+c.label,'Switched to the '+c.label+' cart'), {icon:'ti-arrows-exchange'});
+  };
+  window.dropCart = function(e,i){
+    e.preventDefault(); e.stopPropagation();
+    var c = CARTS[i]; if(!c) return;
+    RAFShop.confirm({
+      icon:'ti-trash', danger:true,
+      title:T('حذف سلة '+c.label+'؟','Delete the '+c.label+' cart?'),
+      msg:T('سيتم حذف جميع منتجات هذه السلة نهائياً.','All products in this cart will be permanently removed.'),
+      confirmText:T('حذف السلة','Delete cart'), cancelText:T('إلغاء','Cancel')
+    }).then(function(ok){
+      if(!ok) return;
+      RAFShop.Carts.drop(c.store);
+      render();
+      RAFShop.toast(T('تم حذف السلة','Cart deleted'), {icon:'ti-trash'});
+    });
+  };
+
   /* ---------- render ---------- */
   function render(){
     var items = RAFShop.Cart.items();
+    renderCarts();
+    renderOOS();
     document.getElementById('cartEmpty').style.display = items.length ? 'none' : '';
     document.getElementById('cartGrid').style.display  = items.length ? '' : 'none';
     document.getElementById('stepBar').style.display   = items.length ? '' : 'none';
@@ -341,7 +557,39 @@
     if(items.some(RAFCO.isOOS)){ RAFShop.toast(T('احذف المنتجات غير المتوفرة أولاً','Remove unavailable items first'), {icon:'ti-alert-triangle'}); return; }
     window.location='raf_checkout.html';
   };
-  window.goBack = function(){ if(history.length>1) history.back(); else window.location='raf_homepage.html'; };
+  /* ---------- back navigation ----------
+     history.back() alone is wrong here: the cart is reachable from Checkout
+     (where "back" would jump forward again), from a Buy Now redirect, and from
+     a fresh tab where there is no history at all. Resolve the real previous
+     location instead, and only use history.back() when that location is the
+     entry actually sitting behind us. */
+  var FUNNEL = /^raf_(cart|checkout|pending|tracking)\.html$/i;
+  function referrerTarget(){
+    if(!document.referrer) return '';
+    try{
+      var u = new URL(document.referrer, location.href);
+      if(u.origin !== location.origin) return '';
+      var file = (u.pathname.split('/').pop()||'').toLowerCase();
+      if(!file || FUNNEL.test(file)) return '';          /* never bounce inside the funnel */
+      return u.pathname + u.search + u.hash;
+    }catch(e){ return ''; }
+  }
+  function shoppingTarget(){
+    /* no usable referrer → continue shopping where this cart belongs */
+    var items = RAFShop.Cart.items();
+    if(items.length && window.RAFCatalog){
+      var p = RAFCatalog.get(items[0].id);
+      var slug = (p && p.slug) || RAFCatalog.slugFor(RAFShop.Cart.storeOf(items[0]));
+      if(slug) return 'raf_store.html?store='+encodeURIComponent(slug);
+    }
+    return 'raf_homepage.html';
+  }
+  window.goBack = function(){
+    var ref = referrerTarget();
+    /* the referrer is the entry behind us → a real back step keeps history clean */
+    if(ref && history.length>1){ history.back(); return; }
+    window.location = ref || shoppingTarget();
+  };
 
   /* ---------- re-sync against the central source whenever the cart opens ----------
      Prices, names, stock and store status are re-read; anything that moved is
@@ -349,6 +597,8 @@
   function syncOnOpen(){
     if (!window.RAFRules) return;
     var res = RAFRules.syncCart();
+    /* anything the sync pulled out is kept for the Out of Stock section */
+    oosRecord((res.removed || []).filter(function(r){ return r.code === 'OUT_OF_STOCK'; }));
     var box = document.getElementById('syncNotice');
     if (!box) return;
     if (!res.changed){ box.innerHTML = ''; box.style.display = 'none'; return; }
@@ -366,13 +616,13 @@
 
   /* ---------- boot ---------- */
   function boot(){
-    var c = RAFCO.getCoupon();
-    if(c){ var m=document.getElementById('couponMsg'); document.getElementById('couponInput').value=c.code;
-      m.className='msg ok show'; m.innerHTML='<i class="ti ti-circle-check"></i> '+T('تم تطبيق الكوبون — خصم '+c.pct+'%','Coupon applied — '+c.pct+'% off'); }
-    document.getElementById('orderNotes').value = RAFCO.get('raf_order_notes','');
+    restoreCartState();
     syncOnOpen();
     render();
-    document.addEventListener('raf:cart', function(){ RAFShop.Cart.badge(); });
+    /* live cart — adding from the cross-sell rail (or any other surface on this
+       page) updates items, quantities and totals immediately, no refresh */
+    document.addEventListener('raf:cart', function(){ render(); });
+    document.addEventListener('raf:carts', renderCarts);
     var root=document.getElementById('htmlRoot');
     if(root) new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
     document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeVE(); });

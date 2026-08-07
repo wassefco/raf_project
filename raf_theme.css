@@ -94,6 +94,9 @@ html:not([data-ui="admin"]) .car-arrow,
 html:not([data-ui="admin"]) .fstore-x,
 html:not([data-ui="admin"]) .gal-fbtn,
 html:not([data-ui="admin"]) .rq-x,
+/* the size-guide pill inside the Quick Order option header is a compact
+   inline control on a dense label row — the product page keeps the full 40px */
+html:not([data-ui="admin"]) .rq-l .sg-link,
 html:not([data-ui="admin"]) .fsheet-x{ min-height:0; }
 
 html:not([data-ui="admin"]) ::selection{ background:var(--gold-soft); color:var(--ink); }
@@ -281,3 +284,36 @@ html:not([data-ui="admin"]) footer[data-raf-footer] a:hover{ color:var(--gold); 
 
 /* directional icon helper — flips arrows for LTR without extra markup */
 [dir="ltr"] .rafx-flip{transform:scaleX(-1);}
+
+/* ══════════════ 9 · PAGE TRANSITIONS ══════════════
+   One shared entrance for every screen: a short fade with a small rise,
+   so navigating through RAF feels continuous instead of snapping. It is
+   pure CSS on a single element — no scripts, no layout work, nothing to
+   run on scroll — and it is skipped entirely when the visitor asks for
+   reduced motion. Admin surfaces opt out with <html data-ui="admin">. */
+/* Movement only — deliberately no opacity. An entrance that fades from 0
+   hides the whole page for as long as its animation is stalled (a tab that
+   never painted, a stopped animation clock, a engine that skips it). A rise
+   degrades to nothing worse than content resting a few pixels lower, so the
+   page can never be left invisible. It is also transform-only on the page's
+   own content, never on <body>: a transform there would become the containing
+   block for every position:fixed header, bottom nav and modal while it ran. */
+@keyframes rafx-page-in{
+  from{ transform:translate3d(0,9px,0); }
+  to  { transform:none; }
+}
+html:not([data-ui="admin"]) body > main,
+html:not([data-ui="admin"]) body > .co-wrap,
+html:not([data-ui="admin"]) body > section{
+  animation:rafx-page-in .36s cubic-bezier(.22,.61,.36,1);
+}
+/* content that arrives after load (panels, sheets, injected sections)
+   can borrow the same entrance without redefining it */
+.rafx-in{ animation:rafx-page-in .28s cubic-bezier(.22,.61,.36,1); }
+
+@media(prefers-reduced-motion:reduce){
+  html:not([data-ui="admin"]) body > main,
+  html:not([data-ui="admin"]) body > .co-wrap,
+  html:not([data-ui="admin"]) body > section,
+  .rafx-in{ animation:none!important; }
+}

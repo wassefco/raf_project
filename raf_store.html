@@ -172,7 +172,7 @@
   }
   .trust-card {
     background: var(--card); border: 1px solid var(--border); border-radius: var(--rxl);
-    box-shadow: var(--sh); display: grid; grid-template-columns: repeat(4, 1fr); overflow: hidden;
+    box-shadow: var(--sh); display: grid; grid-template-columns: repeat(2, 1fr); overflow: hidden;
   }
   .trust-item { padding: 18px 20px; display: flex; align-items: center; gap: 12px; border-inline-end: 1px solid var(--border); }
   .trust-item:last-child { border-inline-end: none; }
@@ -500,14 +500,6 @@
       <div class="trust-ico"><i class="ti ti-mood-happy"></i></div>
       <div><div class="trust-v" id="trSat">98%</div><div class="trust-l" data-ar="رضا العملاء" data-en="Satisfaction">رضا العملاء</div></div>
     </div>
-    <div class="trust-item">
-      <div class="trust-ico"><i class="ti ti-truck-delivery"></i></div>
-      <div><div class="trust-v" data-ar="24 ساعة" data-en="24 hours">24 ساعة</div><div class="trust-l" data-ar="توصيل داخل الكويت" data-en="Delivery in Kuwait">توصيل داخل الكويت</div></div>
-    </div>
-    <div class="trust-item">
-      <div class="trust-ico"><i class="ti ti-refresh"></i></div>
-      <div><div class="trust-v" data-ar="7 أيام" data-en="7 days">7 أيام</div><div class="trust-l" data-ar="إرجاع مجاني" data-en="Free returns">إرجاع مجاني</div></div>
-    </div>
   </div>
 </section>
 
@@ -609,7 +601,7 @@
 <!-- MOBILE APP BOTTOM NAV -->
 <nav class="app-bnav">
   <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
-  <a href="raf_storespage.html" class="bnav-tab on"><i class="ti ti-compass"></i><span data-ar="تصفح" data-en="Browse">تصفح</span></a>
+  <a href="raf_notifications.html" class="bnav-tab"><i class="ti ti-bell"></i><span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span></a>
   <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
   <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
@@ -623,6 +615,7 @@
 <script src="raf_data.js"></script>
 <script src="raf_catalog.js"></script>
 <script src="raf_rules.js"></script>
+<script src="raf_sizeguide.js"></script>
 <script src="raf_card.js"></script>
 <!-- Quick Order sheet opens on top of this page when arriving with ?quick=<id> -->
 <script src="raf_quick.js"></script>

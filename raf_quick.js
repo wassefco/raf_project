@@ -108,7 +108,14 @@
 '.rq-add:hover:not(:disabled){background:var(--gold2,#A07828);color:#fff;}',
 '.rq-add:disabled{background:var(--bg3,#E7E1D4);color:var(--text3,#8A857C);border-color:var(--border,#E2DBCC);box-shadow:none;cursor:not-allowed;}',
 '.rq-add i{font-size:19px;}',
-'body.rq-lock{overflow:hidden;}'
+'body.rq-lock{overflow:hidden;}',
+/* returning from the sheet: point out the card that was open */
+'@keyframes rq-spot{0%{box-shadow:0 0 0 0 rgba(201,168,76,.55);}',
+'  35%{box-shadow:0 0 0 6px rgba(201,168,76,.28);}',
+'  100%{box-shadow:0 0 0 0 rgba(201,168,76,0);}}',
+'.rc-card.rq-spot{border-color:var(--gold,#C9A84C);animation:rq-spot 1.6s ease-out 1;scroll-margin-block:96px;}',
+'@media(prefers-reduced-motion:reduce){',
+'  .rc-card.rq-spot{animation:none;box-shadow:0 0 0 3px rgba(201,168,76,.4);}}'
     ].join('');
     document.head.appendChild(s);
   }
@@ -168,6 +175,10 @@
     if(P.stock<=5)  return '<div class="rq-stock low"><i class="ti ti-flame"></i> '+T('بقي '+P.stock+' قطع فقط','Only '+P.stock+' left')+'</div>';
     return '<div class="rq-stock ok"><i class="ti ti-circle-check"></i> '+T('متوفر','In stock')+'</div>';
   }
+  function isSizeLabel(label){
+    var t = ((label && label.ar) || '') + ' ' + ((label && label.en) || label || '');
+    return /(مقاس|size)/i.test(t) && !/(حجم|سعة|volume|capacity|ml|gb)/i.test(t);
+  }
   function optionsHTML(){
     if(!P.variants||!P.variants.length) return '';
     return P.variants.map(function(g,gi){
@@ -178,8 +189,14 @@
         if(isColor&&o.hex) return '<button class="rq-sw'+(on?' on':'')+'" data-g="'+gi+'" data-v="'+v+'"><i class="dot" style="background:'+o.hex+'"></i>'+lbl+'</button>';
         return '<button class="rq-o'+(on?' on':'')+'" data-g="'+gi+'" data-v="'+v+'">'+lbl+'</button>';
       }).join('');
+      /* size guide, only on the group that actually sells by size */
+      var sg = '';
+      if (window.RAFSizeGuide && isSizeLabel(g.label)) {
+        var k = RAFSizeGuide.forProduct({ variants:P.variants, cat:P.cat });
+        if (k) sg = RAFSizeGuide.linkHTML(k);
+      }
       return '<div class="rq-sec" data-grp="'+gi+'"><div class="rq-l">'+L(g.label)+' <span class="req">*</span>'
-        + '<span class="pick">'+T('مطلوب','Required')+'</span></div><div class="rq-opts">'+opts+'</div></div>';
+        + sg + '<span class="pick">'+T('مطلوب','Required')+'</span></div><div class="rq-opts">'+opts+'</div></div>';
     }).join('');
   }
 
@@ -285,15 +302,82 @@
   function onStorePage(){ return /raf_store\.html$/i.test(location.pathname); }
   function finish(added){
     if(!backEl) return;
-    var url=storeUrl();
+    var pid = P && P.id;
+    /* landing back on the store page, the card that was opened is pointed out */
+    var url = storeUrl() + (pid ? '&focus=' + encodeURIComponent(pid) : '');
     backEl.classList.remove('show');
     document.removeEventListener('keydown',onKey);
     document.body.classList.remove('rq-lock');
     var el=backEl; backEl=null;
     setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); },300);
     if(lastFocus&&lastFocus.focus) try{ lastFocus.focus(); }catch(e){}
-    /* only navigate when the sheet was opened somewhere other than the store */
-    if(!onStorePage()) setTimeout(function(){ location.href=url; }, added?600:180);
+    if(onStorePage()){
+      /* already on the store page — just return to the card that was open */
+      setTimeout(function(){ spotlight(pid); }, added?420:160);
+      return;
+    }
+    setTimeout(function(){ location.href=url; }, added?600:180);
+  }
+
+  /* ---------- return to the card that was opened ----------
+     Scrolls the product card back into view and flags it briefly, so the
+     customer never loses their place in a long store listing. */
+  function spotlight(id){
+    if(!id) return;
+    css();                                   /* the sheet may never have opened here */
+    var card = document.querySelector('.rc-card[data-id="'+CSS_esc(id)+'"]');
+    if(!card) return;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    try{ card.scrollIntoView({ behavior: reduce?'auto':'smooth', block:'center', inline:'nearest' }); }
+    catch(e){ card.scrollIntoView(); }
+    /* smooth scrolling never advances in a tab that isn't painting — make sure
+       the card ends up on screen either way */
+    setTimeout(function(){
+      var r = card.getBoundingClientRect();
+      if(r.bottom <= 0 || r.top >= (window.innerHeight || 0)){
+        try{ card.scrollIntoView({ behavior:'auto', block:'center' }); }catch(e){ card.scrollIntoView(); }
+      }
+    }, 600);
+    card.classList.remove('rq-spot');
+    /* restart the animation even if the same card is flagged twice in a row */
+    void card.offsetWidth;
+    card.classList.add('rq-spot');
+    /* listings re-render (language flip, cart events) and would drop the flag
+       with the old node — re-assert it for the life of the highlight */
+    var until = Date.now() + 1900;
+    var keep = setInterval(function(){
+      if(Date.now() > until) return stop();
+      var now = document.querySelector('.rc-card[data-id="'+CSS_esc(id)+'"]');
+      if(now && !now.classList.contains('rq-spot')) now.classList.add('rq-spot');
+    }, 200);
+    function stop(){
+      clearInterval(keep);
+      var now = document.querySelector('.rc-card[data-id="'+CSS_esc(id)+'"]');
+      if(now) now.classList.remove('rq-spot');
+      card.classList.remove('rq-spot');
+    }
+  }
+  function CSS_esc(v){
+    if(window.CSS && CSS.escape) return CSS.escape(v);
+    return String(v).replace(/["\\]/g,'\\$&');
+  }
+  /* store page: honour ?focus=<id> after arriving back from the sheet */
+  function autoFocus(){
+    var params = new URLSearchParams(location.search);
+    var id = params.get('focus');
+    if(!id) return;
+    try{
+      var u = new URL(location.href); u.searchParams.delete('focus');
+      history.replaceState({},'',u.pathname+(u.search||'')+u.hash);
+    }catch(e){}
+    /* the listing may still be rendering — look a few times before giving up */
+    var tries = 0;
+    var go = function(){
+      if(document.querySelector('.rc-card[data-id="'+CSS_esc(id)+'"]')) return spotlight(id);
+      if(++tries < 12) setTimeout(go, 120);
+    };
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ setTimeout(go,120); });
+    else setTimeout(go,120);
   }
 
   /* URL a multi-store product card navigates to: the Store page, with the
@@ -320,6 +404,7 @@
   }
 
   window.RAFQuick={ open:open, close:function(){ finish(false); }, isOpen:function(){ return !!backEl; },
-                    urlFor:urlFor, autoOpen:autoOpen };
+                    urlFor:urlFor, autoOpen:autoOpen, spotlight:spotlight };
   autoOpen();
+  autoFocus();
 })();

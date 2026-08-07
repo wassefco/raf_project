@@ -218,8 +218,9 @@
     if (/raf_store\.html$/i.test(location.pathname)) { RAFQuick.open(p.id); return; }
     window.location = RAFQuick.urlFor(p);
   }
-  /* ONE STORE PER ORDER — when the cart belongs to another store the customer
-     is asked BEFORE anything opens or navigates. Cancelling leaves them exactly
+  /* ONE CART PER STORE — when the cart belongs to another store the customer
+     is asked BEFORE anything opens or navigates: empty the current cart, cancel,
+     or keep both by starting a separate cart. Cancelling leaves them exactly
      where they are: no Quick Order sheet, no store change, cart untouched. */
   function quickFlow(p) {
     if (!window.RAFQuick || !p) return false;
@@ -229,9 +230,11 @@
        cart — browsing it is still allowed */
     if (Sh && Sh.Cart.conflicts && !isOOS(p) && Sh.Cart.conflicts(p)) {
       var cur = Sh.Cart.storeLabelForKey(Sh.Cart.currentStore()), next = Sh.Cart.storeLabel(p);
-      Sh.Cart.confirmSwitch(cur, next).then(function (ok) {
-        if (!ok) return;                       /* cancelled → stay put, nothing opens */
-        Sh.Cart.clear();                       /* confirmed → start the new store's cart */
+      Sh.Cart.confirmSwitch(cur, next).then(function (choice) {
+        if (!choice) return;                   /* cancelled → stay put, nothing opens */
+        /* separate → keep the old cart aside; empty → discard it */
+        if (choice === 'separate') Sh.Carts.park();
+        else Sh.Cart.clear();
         refreshAll();
         openQuick(p);
       });
@@ -283,7 +286,10 @@
     }
     if (Cart.tryAdd) {
       return Cart.tryAdd(p, variant).then(function (r) {
-        if (r.cleared) refreshAll(); else refresh(p.id);
+        if (r.cleared || r.separate) refreshAll(); else refresh(p.id);
+        if (r.separate && window.RAFShop && RAFShop.toast) {
+          RAFShop.toast(T('تم إنشاء سلة منفصلة لهذا المتجر', 'A separate cart was created for this store'), { icon: 'ti-shopping-cart-plus' });
+        }
         return r;
       });
     }

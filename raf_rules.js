@@ -246,11 +246,11 @@
       var name = l.name ? L(l.name) : l.id;
 
       if (!p || p.status === 'deleted') {
-        removed.push({ id:l.id, name:name, code:'NOT_FOUND', message:T('لم يعد متاحاً','No longer available') });
+        removed.push({ id:l.id, name:name, line:l, code:'NOT_FOUND', message:T('لم يعد متاحاً','No longer available') });
         return;
       }
       if (p.status !== 'active' || !StorePolicy.isListable(p.store)) {
-        removed.push({ id:l.id, name:name,
+        removed.push({ id:l.id, name:name, line:l,
           code: p.status !== 'active' ? 'PRODUCT_HIDDEN' : 'STORE_CLOSED',
           message: p.status !== 'active' ? T('لم يعد معروضاً','No longer listed') : T('متجره مغلق','Its store is closed') });
         return;
@@ -271,7 +271,7 @@
 
       /* stock shrank below what's in the basket */
       if (p.stock === 0) {
-        removed.push({ id:l.id, name:name, code:'OUT_OF_STOCK', message:T('نفدت الكمية','Sold out') });
+        removed.push({ id:l.id, name:name, line:l, code:'OUT_OF_STOCK', message:T('نفدت الكمية','Sold out') });
         return;
       }
       var free = Reserve.availableFor(l.id);

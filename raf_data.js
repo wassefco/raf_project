@@ -6,7 +6,7 @@
    ============================================================ */
 (function () {
   if (window.RAFShop) return;
-  var LS = { cart: 'raf_cart', wish: 'raf_wish', orders: 'raf_orders', follow: 'raf_follow' };
+  var LS = { cart: 'raf_cart', carts: 'raf_carts', wish: 'raf_wish', orders: 'raf_orders', follow: 'raf_follow' };
 
   function read(k, def) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? def : v; } catch (e) { return def; } }
   function write(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
@@ -111,25 +111,32 @@
       if (Stock.isOOS(p)) return Promise.resolve({ added: false, cleared: false, cancelled: false, oos: true });
       if (!Cart.conflicts(p)) { Cart.add(p, variant); return Promise.resolve({ added: true, cleared: false, cancelled: false }); }
       var cur = Cart.storeLabelForKey(Cart.currentStore()), next = Cart.storeLabel(p);
-      return Cart.confirmSwitch(cur, next).then(function (ok) {
-        if (!ok) return { added: false, cleared: false, cancelled: true };
+      return Cart.confirmSwitch(cur, next).then(function (choice) {
+        /* 'separate' → park the current cart and open a fresh one for this store */
+        if (choice === 'separate') {
+          Carts.startSeparate(p, variant);
+          return { added: true, cleared: false, cancelled: false, separate: true };
+        }
+        if (!choice) return { added: false, cleared: false, cancelled: true };
         Cart.clear(); Cart.add(p, variant);
         return { added: true, cleared: true, cancelled: false };
       });
     },
-    /* shared "different store" confirmation */
+    /* shared "different store" choice — empty the current cart, cancel, or keep
+       both by starting a separate cart for the new store */
     confirmSwitch: function (cur, next) {
       var e = isEn();
       return confirmDialog({
         icon: 'ti-building-store',
-        title: e ? 'Start a new cart?' : 'بدء سلة جديدة؟',
+        title: e ? 'Products from another store' : 'منتجات من متجر آخر',
         msg: e
-          ? 'Your cart contains products from “' + cur + '”. RAF supports one store per order, so adding from “' + next + '” will clear your current cart.'
-          : 'سلتك تحتوي على منتجات من «' + cur + '». يدعم رف متجراً واحداً لكل طلب، لذا ستُفرَغ سلتك الحالية عند الإضافة من «' + next + '».',
-        confirmText: e ? 'Clear cart & continue' : 'إفراغ السلة والمتابعة',
+          ? 'Your current cart belongs to “' + cur + '”. You can empty it and continue with “' + next + '”, or keep both by starting a separate cart. Every store is checked out as its own order, with its own delivery fee and store policies.'
+          : 'سلتك الحالية تخص «' + cur + '». يمكنك إفراغها والمتابعة مع «' + next + '»، أو الاحتفاظ بالسلتين عبر إنشاء سلة منفصلة. كل متجر يُطلب بشكل منفصل، برسوم توصيل وسياسات خاصة به.',
+        confirmText: e ? 'Empty current cart' : 'إفراغ السلة الحالية',
         cancelText: e ? 'Cancel' : 'إلغاء',
+        altText: e ? 'Create a separate cart' : 'إنشاء سلة منفصلة',
         danger: true
-      });
+      }).then(function (v) { return v === 'alt' ? 'separate' : v; });
     },
     setQty: function (key, q) { var a = Cart.read(), i = a.findIndex(function (l) { return l.key === key; }); if (i < 0) return; if (q <= 0) a.splice(i, 1); else a[i].qty = q; Cart.write(a); },
     remove: function (key) { Cart.setQty(key, 0); },
@@ -138,11 +145,103 @@
     count: function () { return Cart.read().reduce(function (s, l) { return s + (l.qty || 0); }, 0); },
     subtotal: function () { return Cart.read().reduce(function (s, l) { return s + (parseFloat(l.price) || 0) * (l.qty || 0); }, 0); },
     badge: function () {
-      var n = Cart.count();
+      /* the badge counts every cart the customer has, not just the active one,
+         so a parked store cart never looks like it disappeared */
+      var n = Carts.totalCount();
       document.querySelectorAll('#cartBadge,.cart-badge,#rtbCartBadge,.rtb-badge').forEach(function (b) {
         if (n > 0) { b.textContent = n > 99 ? '99+' : n; b.style.display = 'flex'; } else { b.textContent = ''; b.style.display = 'none'; }
       });
     }
+  };
+
+  /* ─────────── MULTIPLE CARTS (one cart per store) ───────────
+     `raf_cart` stays the ACTIVE cart, so every existing consumer (checkout,
+     badge, rules, cart page) keeps reading exactly what it read before.
+     The other carts are parked in `raf_carts` as { store, items, state } and
+     are swapped in when the customer switches. Each cart keeps its own coupon,
+     tip and notes, so all cart rules apply to it independently. Checkout always
+     runs on the active cart alone — one store, one order. */
+  var CART_STATE = ['raf_coupon', 'raf_tip', 'raf_order_notes'];
+  var Carts = {
+    read: function () { var a = read(LS.carts, []); return Array.isArray(a) ? a : []; },
+    write: function (a) {
+      write(LS.carts, a.filter(function (c) { return c && c.items && c.items.length; }));
+      Cart.badge();
+      document.dispatchEvent(new CustomEvent('raf:carts'));
+    },
+    /* cart-scoped checkout state travels with the cart it belongs to */
+    grabState: function () {
+      var s = {};
+      CART_STATE.forEach(function (k) { try { var v = localStorage.getItem(k); if (v != null) s[k] = v; } catch (e) {} });
+      return s;
+    },
+    putState: function (s) {
+      CART_STATE.forEach(function (k) {
+        try { if (s && s[k] != null) localStorage.setItem(k, s[k]); else localStorage.removeItem(k); } catch (e) {}
+      });
+    },
+    /* every cart the customer currently has — the active one first */
+    list: function () {
+      var out = [], act = Cart.read();
+      if (act.length) out.push({ store: Cart.currentStore(), items: act, active: true });
+      Carts.read().forEach(function (c) { out.push({ store: c.store, items: c.items, active: false }); });
+      return out.map(function (c) {
+        return {
+          store: c.store,
+          label: Cart.storeLabel(c.items[0]) || c.store,
+          items: c.items,
+          active: c.active,
+          count: c.items.reduce(function (s, l) { return s + (l.qty || 0); }, 0),
+          subtotal: c.items.reduce(function (s, l) { return s + (parseFloat(l.price) || 0) * (l.qty || 0); }, 0)
+        };
+      });
+    },
+    count: function () { return Carts.list().length; },
+    /* total units across every cart — used by the header badge */
+    totalCount: function () { return Carts.list().reduce(function (s, c) { return s + c.count; }, 0); },
+    has: function (storeKey) { return Carts.list().some(function (c) { return c.store === storeKey; }); },
+    /* move the active cart aside without losing it */
+    park: function () {
+      var act = Cart.read();
+      if (!act.length) return false;
+      var key = Cart.currentStore(), parked = Carts.read().filter(function (c) { return c.store !== key; });
+      parked.push({ store: key, items: act, state: Carts.grabState() });
+      Carts.write(parked);
+      Carts.putState(null);
+      Cart.write([]);
+      return true;
+    },
+    /* make another store's cart the active one; the current cart is parked */
+    switchTo: function (storeKey) {
+      if (!storeKey || Cart.currentStore() === storeKey) return false;
+      var parked = Carts.read(), i = -1;
+      for (var n = 0; n < parked.length; n++) { if (parked[n].store === storeKey) { i = n; break; } }
+      if (i < 0) return false;
+      var target = parked.splice(i, 1)[0];
+      var act = Cart.read();
+      if (act.length) parked.push({ store: Cart.currentStore(), items: act, state: Carts.grabState() });
+      Carts.write(parked);
+      Carts.putState(target.state);
+      Cart.write(target.items);
+      return true;
+    },
+    /* park the current cart and start a fresh one for this product's store */
+    startSeparate: function (p, variant) {
+      Carts.park();
+      Cart.add(p, variant);
+      return true;
+    },
+    /* discard one cart entirely — active or parked */
+    drop: function (storeKey) {
+      if (Cart.currentStore() === storeKey) {
+        Carts.putState(null);
+        Cart.clear();
+        return true;
+      }
+      Carts.write(Carts.read().filter(function (c) { return c.store !== storeKey; }));
+      return true;
+    },
+    clear: function () { Carts.write([]); }
   };
 
   /* ─────────── WISHLIST ─────────── */
@@ -363,6 +462,9 @@
         '.raf-dlg h3{font-family:"Playfair Display",serif;font-size:21px;font-weight:800;color:#15130F;margin-bottom:10px;}' +
         '.raf-dlg p{font-size:14px;line-height:1.75;color:#5A5650;margin-bottom:22px;}' +
         '.raf-dlg-row{display:flex;gap:10px;}' +
+        '.raf-dlg-row.stack{flex-direction:column;}' +
+        '.raf-dlg-alt{background:rgba(201,168,76,.12);color:#7A5C1B;border-color:#D8CBA4;}' +
+        '.raf-dlg-alt:hover{background:rgba(201,168,76,.22);}' +
         '.raf-dlg-row button{flex:1;height:48px;border-radius:30px;font-family:"Tajawal",sans-serif;font-size:14.5px;font-weight:700;cursor:pointer;border:1px solid transparent;transition:all .2s;}' +
         '.raf-dlg-no{background:#fff;color:#5A5650;border-color:#D8D0BE;}' +
         '.raf-dlg-no:hover{border-color:#8A857C;}' +
@@ -378,15 +480,22 @@
         '<div class="raf-dlg" role="dialog" aria-modal="true">' +
           '<div class="raf-dlg-ic' + (o.danger ? ' danger' : '') + '"><i class="ti ' + (o.icon || 'ti-alert-circle') + '"></i></div>' +
           '<h3></h3><p></p>' +
-          '<div class="raf-dlg-row">' +
-            '<button class="raf-dlg-no"></button>' +
-            '<button class="raf-dlg-yes' + (o.danger ? ' danger' : '') + '"></button>' +
+          /* a third action stacks the buttons so all three stay readable */
+          '<div class="raf-dlg-row' + (o.altText ? ' stack' : '') + '">' +
+            (o.altText
+              ? '<button class="raf-dlg-yes' + (o.danger ? ' danger' : '') + '"></button>' +
+                '<button class="raf-dlg-no"></button>' +
+                '<button class="raf-dlg-alt"></button>'
+              : '<button class="raf-dlg-no"></button>' +
+                '<button class="raf-dlg-yes' + (o.danger ? ' danger' : '') + '"></button>') +
           '</div></div>';
       back.querySelector('h3').textContent = o.title || '';
       back.querySelector('p').textContent = o.msg || '';
       var no = back.querySelector('.raf-dlg-no'), yes = back.querySelector('.raf-dlg-yes');
+      var alt = back.querySelector('.raf-dlg-alt');
       no.textContent = o.cancelText || (isEn() ? 'Cancel' : 'إلغاء');
       yes.textContent = o.confirmText || (isEn() ? 'Confirm' : 'تأكيد');
+      if (alt) { alt.textContent = o.altText; alt.onclick = function () { close('alt'); }; }
       function close(v) {
         back.classList.remove('show');
         document.removeEventListener('keydown', onKey);
@@ -403,7 +512,7 @@
     });
   }
 
-  window.RAFShop = { Cart: Cart, Wish: Wish, Follow: Follow, Stock: Stock, Orders: Orders, search: search, L: L, nowStr: nowStr, toast: toast, isEn: isEn, confirm: confirmDialog };
+  window.RAFShop = { Cart: Cart, Carts: Carts, Wish: Wish, Follow: Follow, Stock: Stock, Orders: Orders, search: search, L: L, nowStr: nowStr, toast: toast, isEn: isEn, confirm: confirmDialog };
   /* `catalog` and `stores` stay readable as arrays for existing callers, but are
      now live views over the central authority rather than stored copies */
   Object.defineProperty(window.RAFShop, 'catalog', { get: catalogList, enumerable: true });

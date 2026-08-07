@@ -125,6 +125,9 @@
 
   .opt{margin-top:26px;}
   .opt-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+  /* size guide sits under the size row, start-aligned — beside the options
+     without crowding the label/selection header */
+  .opt-guide{margin-top:12px;}
   .opt-t{font-size:13.5px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:6px;}
   .opt-t .req{color:var(--red);}
   .opt-sel{font-size:12.5px;color:var(--text3);font-weight:600;}
@@ -167,10 +170,6 @@
   .btn-buy:disabled{background:var(--bg3);border-color:var(--border);color:var(--text3);box-shadow:none;cursor:not-allowed;}
   .opt-hint{font-size:12.5px;color:var(--red);margin-top:10px;min-height:17px;display:flex;align-items:center;gap:6px;}
 
-  .pills{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:24px;}
-  .pill{display:flex;align-items:center;gap:10px;padding:13px 15px;border:1px solid var(--border);border-radius:var(--rl);
-    background:var(--card);font-size:12.5px;font-weight:600;color:var(--text2);}
-  .pill i{font-size:19px;color:var(--gold2);flex-shrink:0;}
 
   /* ── TABS ── */
   .tabs{max-width:var(--wrap);margin:0 auto 56px;padding:0 var(--pad);}
@@ -256,7 +255,7 @@
   @media(max-width:900px){.nav-center{display:none;}}
   @media(max-width:768px){:root{--pad:16px;}
     .ptitle{font-size:25px;} .pprice-n{font-size:29px;} .gal-icon{font-size:110px;}
-    .pills{grid-template-columns:1fr;} .rsum{padding:20px;gap:20px;} .rbig-n{font-size:42px;}
+    .rsum{padding:20px;gap:20px;} .rbig-n{font-size:42px;}
     .rel-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
     .spec-k{flex:0 0 45%;padding:13px 14px;} .spec-v{padding:13px 14px;}
     /* primary actions move to a persistent bar */
@@ -405,13 +404,6 @@
     </div>
     <button class="btn-buy" id="btnBuy" onclick="buyNow()"><i class="ti ti-bolt"></i> <span data-ar="اشترِ الآن" data-en="Buy Now">اشترِ الآن</span></button>
     <div class="opt-hint" id="optHint"></div>
-
-    <div class="pills">
-      <div class="pill"><i class="ti ti-truck-delivery"></i> <span data-ar="توصيل سريع خلال 24 ساعة" data-en="Fast delivery within 24 hours">توصيل سريع خلال 24 ساعة</span></div>
-      <div class="pill"><i class="ti ti-refresh"></i> <span data-ar="إرجاع مجاني خلال 7 أيام" data-en="Free returns within 7 days">إرجاع مجاني خلال 7 أيام</span></div>
-      <div class="pill"><i class="ti ti-shield-check"></i> <span data-ar="منتج أصلي مضمون" data-en="Guaranteed authentic">منتج أصلي مضمون</span></div>
-      <div class="pill"><i class="ti ti-cash"></i> <span data-ar="الدفع عند الاستلام" data-en="Cash on delivery">الدفع عند الاستلام</span></div>
-    </div>
   </div>
 </div>
 
@@ -486,7 +478,7 @@
 <!-- MOBILE APP BOTTOM NAV -->
 <nav class="app-bnav">
   <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
-  <a href="raf_storespage.html" class="bnav-tab on"><i class="ti ti-compass"></i><span data-ar="تصفح" data-en="Browse">تصفح</span></a>
+  <a href="raf_notifications.html" class="bnav-tab"><i class="ti ti-bell"></i><span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span></a>
   <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
   <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
@@ -500,6 +492,7 @@
 <script src="raf_data.js"></script>
 <script src="raf_catalog.js"></script>
 <script src="raf_rules.js"></script>
+<script src="raf_sizeguide.js"></script>
 <script src="raf_card.js"></script>
 <script>
 /* ============================================================
@@ -687,6 +680,7 @@ function compose(id){
     storeName: c.store || { ar:"RAF", en:"RAF" },
     store: L(c.store), storeSlug: c.slug, storeIcon: s ? s.ic : "ti-building-store",
     cat: catRec ? { ar:catRec.ar, en:catRec.en } : { ar:"منتجات", en:"Products" },
+    catKey: c.cat || "",                    /* category key — drives the size guide */
     icon: c.ic || "ti-box",
     img: c.img || "",                       /* product photography (central) */
     price: c.price, oldPrice: c.old || null, discount: c.disc ? "-" + c.disc + "%" : null,
@@ -831,6 +825,26 @@ function render(){
 }
 
 /* options */
+/* Size Guide — only for products that genuinely sell by size. The key also
+   decides which table opens (clothing / trousers / shoes / rings). */
+function sizeGuideKey(){
+  if (!window.RAFSizeGuide) return '';
+  var groups = (P.variants || []).slice();
+  /* page-local editorial sizes are treated the same as a catalog size group */
+  if (P.sizes && P.sizes.length){
+    groups.push({ label:{ar:'المقاس',en:'Size'}, options:P.sizes.map(function(s){ return { v:s, label:{ar:s,en:s} }; }) });
+  }
+  return RAFSizeGuide.forProduct({ variants:groups, cat:P.catKey });
+}
+function sizeGuideLink(){
+  var k = sizeGuideKey();
+  return k ? ' ' + RAFSizeGuide.linkHTML(k) : '';
+}
+function isSizeLabel(label){
+  var t = (L(label) || '') + ' ' + ((label && label.en) || '');
+  return /(مقاس|size)/i.test(t) && !/(حجم|سعة|volume|capacity|ml|gb)/i.test(t);
+}
+
 function renderOptions(){
   var sizeBox = document.getElementById('optSize'), colorBox = document.getElementById('optColor');
   sizeBox.style.display = 'none'; colorBox.style.display = 'none';
@@ -846,12 +860,20 @@ function renderOptions(){
       box.style.display = '';
       box.querySelector('.opt-sel').textContent = v ? L(v) : T('اختر', 'Choose');
       box.querySelector('.opt-row').innerHTML = optionButtons(o);
+      if (o.key === 'size'){
+        var oldG = box.querySelector('.opt-guide');
+        if (oldG) oldG.remove();
+        var lnk = sizeGuideLink();
+        if (lnk) box.insertAdjacentHTML('beforeend', '<div class="opt-guide">' + lnk + '</div>');
+      }
     } else {
       var wrap = document.createElement('div');
       wrap.className = 'opt opt-dyn';
+      var dynGuide = isSizeLabel(o.label) ? sizeGuideLink() : '';
       wrap.innerHTML = '<div class="opt-h"><span class="opt-t">' + L(o.label) + ' <span class="req">*</span></span>' +
         '<span class="opt-sel">' + (v ? L(v) : '') + '</span></div>' +
-        '<div class="opt-row">' + optionButtons(o) + '</div>';
+        '<div class="opt-row">' + optionButtons(o) + '</div>' +
+        (dynGuide ? '<div class="opt-guide">' + dynGuide + '</div>' : '');
       anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
       anchor = wrap;
     }

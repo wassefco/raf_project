@@ -79,6 +79,14 @@
         <div class="panel-h"><i class="ti ti-coin"></i> <span data-ar="إكرامية السائق" data-en="Driver tip">إكرامية السائق</span><span class="side" data-ar="اختياري" data-en="Optional">اختياري</span></div>
         <div class="panel-b">
           <div class="tips" id="tipRow"></div>
+          <!-- custom tip — shown only while "Other" is selected -->
+          <div id="tipOther" style="display:none;margin-top:10px;">
+            <div class="coupon">
+              <input id="tipCustom" type="text" inputmode="decimal" oninput="tipCustomInput()" data-ar-ph="أدخل المبلغ (د.ك)" data-en-ph="Enter amount (KWD)" placeholder="أدخل المبلغ (د.ك)">
+              <button onclick="applyCustomTip()" data-ar="تطبيق" data-en="Apply">تطبيق</button>
+            </div>
+            <div class="msg" id="tipMsg"></div>
+          </div>
           <label style="display:flex;align-items:center;gap:9px;margin-top:14px;font-size:13px;color:var(--text2);cursor:pointer;">
             <input type="checkbox" id="tipInvoice" onchange="saveTipInvoice()" style="width:17px;height:17px;accent-color:var(--gold);">
             <span data-ar="إظهار الإكرامية في الفاتورة" data-en="Show tip on the invoice">إظهار الإكرامية في الفاتورة</span>
@@ -136,7 +144,7 @@
 
 <nav class="app-bnav">
   <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
-  <a href="raf_storespage.html" class="bnav-tab"><i class="ti ti-compass"></i><span data-ar="تصفّح" data-en="Browse">تصفّح</span></a>
+  <a href="raf_notifications.html" class="bnav-tab"><i class="ti ti-bell"></i><span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span></a>
   <a href="raf_cart.html" class="bnav-cart on"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
   <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
   <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
@@ -153,7 +161,7 @@
    ============================================================ */
 (function(){
   var T=RAFCO.T, L=RAFCO.L, money=RAFCO.money;
-  var TIPS=[0,0.500,1.000,2.000];
+  var TIPS=[0.500,1.000,2.000];
   var PAYMENTS=[
     {id:'cod',  ic:'ti-cash',         ar:'الدفع عند الاستلام', en:'Cash on delivery', sAr:'نقداً عند وصول الطلب',  sEn:'Pay in cash on arrival'},
     {id:'knet', ic:'ti-credit-card',  ar:'كي-نت',              en:'K-Net',            sAr:'بطاقة الدفع الكويتية',  sEn:'Kuwaiti debit card'},
@@ -233,14 +241,51 @@
     return false;
   };
 
+  /* "Other" stays selected while the customer types their own amount */
+  var tipOther=false;
   function renderTips(){
     var cur=RAFCO.getTip();
+    var preset=TIPS.some(function(v){ return Math.abs(cur-v)<0.0001; });
+    var otherOn = tipOther || (cur>0 && !preset);
     document.getElementById('tipRow').innerHTML = TIPS.map(function(v){
-      return '<button class="tip'+(Math.abs(cur-v)<0.0001?' on':'')+'" onclick="pickTip('+v+')">'+(v===0?T('بدون','None'):money(v))+'</button>';
-    }).join('');
+      return '<button class="tip'+(!otherOn&&Math.abs(cur-v)<0.0001?' on':'')+'" onclick="pickTip('+v+')">'+money(v)+'</button>';
+    }).join('') + '<button class="tip'+(otherOn?' on':'')+'" onclick="pickOtherTip()" data-ar="أخرى" data-en="Other">'+T('أخرى','Other')+'</button>';
+    document.getElementById('tipOther').style.display = otherOn ? '' : 'none';
+    if(otherOn){
+      var inp=document.getElementById('tipCustom');
+      if(document.activeElement!==inp) inp.value = cur>0 && !preset ? money(cur) : '';
+    }
     document.getElementById('tipInvoice').checked = RAFCO.get('raf_tip_invoice','1')==='1';
   }
-  window.pickTip=function(v){ RAFCO.setTip(v); renderTips(); renderSummary(); };
+  window.pickTip=function(v){ tipOther=false; RAFCO.setTip(v); clearTipMsg(); renderTips(); renderSummary(); };
+  window.pickOtherTip=function(){
+    tipOther=true; RAFCO.setTip(0); clearTipMsg(); renderTips(); renderSummary();
+    var inp=document.getElementById('tipCustom'); if(inp) inp.focus();
+  };
+  function clearTipMsg(){ var m=document.getElementById('tipMsg'); if(m){ m.className='msg'; m.innerHTML=''; } }
+  /* a custom tip must be a positive monetary amount */
+  function parseTip(raw){
+    var s=String(raw||'').trim().replace(/[٫،]/g,'.').replace(/[٠-٩]/g,function(d){ return String.fromCharCode(d.charCodeAt(0)-0x0660+48); });
+    if(!/^\d+(\.\d{1,3})?$/.test(s)) return null;
+    var n=parseFloat(s);
+    if(!isFinite(n) || n<=0 || n>MAX_TIP) return null;
+    return n;
+  }
+  var MAX_TIP=99;
+  window.tipCustomInput=function(){ clearTipMsg(); };
+  window.applyCustomTip=function(){
+    var raw=document.getElementById('tipCustom').value, m=document.getElementById('tipMsg');
+    var n=parseTip(raw);
+    if(n===null){
+      m.className='msg err show';
+      m.innerHTML='<i class="ti ti-alert-circle"></i> '+T('أدخل مبلغاً صحيحاً أكبر من صفر (بحد أقصى '+MAX_TIP+' د.ك)','Enter a valid amount greater than zero (max '+MAX_TIP+' KWD)');
+      return;
+    }
+    RAFCO.setTip(n);
+    m.className='msg ok show';
+    m.innerHTML='<i class="ti ti-circle-check"></i> '+T('تمت إضافة إكرامية '+money(n)+' د.ك','A '+money(n)+' KWD tip was added');
+    renderSummary();
+  };
   window.saveTipInvoice=function(){ RAFCO.set('raf_tip_invoice', document.getElementById('tipInvoice').checked?'1':'0'); renderSummary(); };
   window.saveDriverNotes=function(){ RAFCO.set('raf_driver_notes', document.getElementById('driverNotes').value); };
 
@@ -275,7 +320,26 @@
      Shown before payment (or before placing a cash order). Resolves true to
      continue, false to go back and edit the cart. If the customer does
      nothing for 5 seconds it continues on its own. */
-  var QC_SECONDS = 5;
+  var QC_SECONDS = 10;
+  /* one line of the order preview: image, name, chosen options, quantity */
+  function qcItemHTML(l){
+    var vars = Object.keys(l.variant||{});
+    return '<div class="qc-item">'
+      + '<div class="qc-thumb"'+(l.img?' style="background-image:url(\''+l.img+'\')"':'')+'>'
+        + (l.img?'':'<i class="ti '+(l.ic||'ti-box')+'"></i>')+'</div>'
+      + '<div class="qc-idet">'
+        + '<div class="qc-iname">'+L(l.name)+'</div>'
+        + (vars.length
+            ? '<div class="qc-ivars">'+vars.map(function(k){
+                return '<span class="qc-ivar">'+k+': <b>'+l.variant[k]+'</b></span>';
+              }).join('')+'</div>'
+            : '')
+        + '<div class="qc-iqty">'+T('الكمية','Qty')+': '+(l.qty||1)+'</div>'
+      + '</div>'
+      + '<div class="qc-iprice">'+money(RAFCO.price(l)*(l.qty||1))+' '+T('د.ك','KWD')+'</div>'
+      + '</div>';
+  }
+
   function quickConfirm(pay){
     return new Promise(function(resolve){
       if(document.getElementById('qcBack')) return resolve(true);
@@ -295,6 +359,8 @@
                           :T('سيتم تحويلك لإتمام الدفع.','You will continue to payment.'))+'</p></div></div>'
           + '<div class="qc-b">'
             + '<div class="qc-row"><span>'+T('المتجر','Store')+'</span><b>'+storeName+'</b></div>'
+            /* every product in the order — photo, name, options and quantity */
+            + '<div class="qc-items">'+items.map(qcItemHTML).join('')+'</div>'
             + '<div class="qc-row"><span>'+T('المنتجات','Items')+'</span><b>'+count+'</b></div>'
             + '<div class="qc-row"><span>'+T('طريقة الدفع','Payment')+'</span><b>'+(pay?L(pay):'')+'</b></div>'
             + '<div class="qc-row total"><span>'+T('الإجمالي','Total')+'</span><b>'+money(totals.total)+' '+T('د.ك','KWD')+'</b></div>'
@@ -314,7 +380,7 @@
         left--;
         var el=document.getElementById('qcCount');
         if(el) el.textContent=left;
-        if(left<=0) finish(true);           /* no action for 5s → continue */
+        if(left<=0) finish(true);           /* no action for 10s → continue */
       }
       function finish(go){
         if(done) return; done=true;
