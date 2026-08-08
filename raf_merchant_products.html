@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — المنتجات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   MERCHANT WORKSPACE — PRODUCTS  (Phase 3.1)
+   Same shell, tokens and interaction model as the approved Orders
+   Workspace. Nothing here redefines the design language.
+   ══════════════════════════════════════════════════════════════ */
+*{box-sizing:border-box;}
+body{background:var(--bg2);margin:0;}
+.mw{display:flex;min-height:100vh;}
+.mw-rail{width:74px;flex:0 0 74px;background:var(--ink);display:flex;flex-direction:column;align-items:center;
+  gap:6px;padding:14px 0;position:sticky;top:0;height:100vh;z-index:40;}
+.mw-rail-logo{width:42px;height:42px;border-radius:13px;background:var(--gold);color:#1C1606;display:flex;
+  align-items:center;justify-content:center;font-family:var(--font-display);font-size:19px;font-weight:900;
+  margin-bottom:10px;text-decoration:none;}
+.mw-rail-b{width:50px;min-height:50px;border-radius:14px;border:0;background:transparent;color:#8E877A;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;
+  font-family:inherit;font-size:9.5px;font-weight:700;text-decoration:none;transition:background .18s,color .18s;}
+.mw-rail-b i{font-size:21px;}
+.mw-rail-b:hover{background:rgba(255,255,255,.07);color:#EDE8DC;}
+.mw-rail-b.on{background:var(--gold-soft);color:var(--gold);}
+.mw-rail-sp{flex:1;}
+.mw-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+.mw-head{position:sticky;top:0;z-index:35;background:var(--card);border-bottom:1px solid var(--border);
+  padding:12px clamp(14px,2.2vw,24px);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.mw-store{display:flex;align-items:center;gap:11px;min-width:0;}
+.mw-store-logo{width:44px;height:44px;flex:0 0 auto;border-radius:13px;background:var(--bg3) center/cover no-repeat;
+  display:flex;align-items:center;justify-content:center;color:var(--gold2);font-size:21px;}
+.mw-store-t b{display:block;font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--ink);}
+.mw-store-t span{font-size:11.5px;color:var(--text3);}
+.mw-head-sp{flex:1;min-width:8px;}
+.mw-count{font-size:12.5px;font-weight:700;color:var(--text2);background:var(--bg2);border-radius:20px;padding:6px 13px;}
+
+.mw-body{padding:16px clamp(14px,2.2vw,24px) 60px;}
+.mw-search{position:relative;margin-bottom:12px;max-width:560px;}
+.mw-search input{width:100%;height:48px;border-radius:14px;border:1px solid var(--border2);background:var(--card);
+  font-family:inherit;font-size:14px;color:var(--ink);padding-inline-start:46px;padding-inline-end:14px;}
+.mw-search input:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+.mw-search > i{position:absolute;top:50%;transform:translateY(-50%);inset-inline-start:15px;font-size:19px;
+  color:var(--text3);pointer-events:none;}
+.mw-hint{font-size:11px;color:var(--text3);margin:0 2px 12px;}
+.mw-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px;scrollbar-width:none;}
+.mw-chips::-webkit-scrollbar{display:none;}
+.mw-chip{flex:0 0 auto;min-height:44px;padding:0 14px;border-radius:30px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;transition:all .18s;}
+.mw-chip:hover{border-color:var(--gold);color:var(--gold2);}
+.mw-chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#F5F0E4;}
+
+.mw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;}
+.mw-p{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;display:flex;gap:12px;
+  transition:border-color .18s,box-shadow .18s;}
+.mw-p:hover{border-color:var(--gold);box-shadow:0 12px 26px -20px rgba(20,16,8,.5);}
+.mw-p-img{width:76px;height:76px;flex:0 0 auto;border-radius:12px;background:var(--bg3) center/cover no-repeat;
+  display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:26px;}
+.mw-p-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
+.mw-p-n{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.45;}
+.mw-p-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+.mw-tag{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:20px;
+  background:var(--bg2);color:var(--text2);font-size:11.5px;font-weight:700;}
+.mw-tag.price{background:var(--gold-soft);color:var(--gold2);font-family:var(--font-en);font-weight:800;}
+.mw-tag.old{text-decoration:line-through;color:var(--text3);font-family:var(--font-en);}
+.mw-tag.disc{background:rgba(217,83,79,.12);color:#A63A36;font-family:var(--font-en);}
+.mw-tag.sku{font-family:var(--font-en);}
+.mw-st{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:20px;
+  font-size:11.5px;font-weight:800;}
+.st-available{background:rgba(46,158,91,.13);color:#1F7A45;}
+.st-out{background:rgba(217,83,79,.12);color:#A63A36;}
+.st-hidden{background:var(--bg3);color:var(--text2);}
+.mw-p-f{display:flex;align-items:center;gap:8px;margin-top:2px;}
+.mw-edit{min-height:44px;padding:0 15px;border-radius:30px;border:1px solid var(--border2);background:var(--card);
+  color:var(--text2);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;transition:all .18s;margin-inline-start:auto;}
+.mw-edit:hover:not(:disabled){border-color:var(--gold);background:var(--gold-soft);color:var(--gold2);}
+.mw-edit:disabled{opacity:.45;cursor:not-allowed;}
+.mw-empty{border:1px dashed var(--border2);border-radius:14px;padding:26px;text-align:center;font-size:13px;
+  color:var(--text3);background:var(--card);grid-column:1/-1;}
+
+/* ---------- editor ---------- */
+.mw-ed{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:20px;
+  background:rgba(20,16,8,.5);}
+.mw-ed.show{display:flex;}
+.mw-ed-c{width:100%;max-width:640px;max-height:92vh;display:flex;flex-direction:column;background:var(--card);
+  border:1px solid var(--border);border-radius:20px;overflow:hidden;}
+.mw-ed-h{display:flex;align-items:center;gap:11px;padding:16px 20px;border-bottom:1px solid var(--border);}
+.mw-ed-h h3{flex:1;font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--ink);min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mw-ed-x{width:40px;height:40px;flex:0 0 auto;border-radius:12px;border:1px solid var(--border);background:var(--card);
+  color:var(--text2);font-size:18px;cursor:pointer;}
+.mw-ed-b{flex:1;overflow:auto;padding:18px 20px;}
+.mw-ed-f{display:flex;gap:10px;padding:14px 20px calc(14px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid var(--border);background:var(--card);}
+.mw-ed-f button{flex:1;min-height:50px;border-radius:30px;font-family:inherit;font-size:14.5px;font-weight:800;
+  cursor:pointer;border:1px solid transparent;}
+.mw-btn-ghost{background:var(--card);color:var(--text2);border-color:var(--border2);}
+.mw-btn-gold{background:var(--gold);color:#1C1606;border-color:var(--gold2);}
+.mw-btn-gold:disabled{opacity:.5;cursor:not-allowed;}
+
+.mw-sec{margin-bottom:22px;}
+.mw-sec-h{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;color:var(--text3);
+  letter-spacing:.4px;text-transform:uppercase;margin-bottom:11px;}
+.mw-sec-h i{color:var(--gold2);font-size:15px;}
+.mw-f{margin-bottom:13px;}
+.mw-f label{display:block;font-size:12.5px;font-weight:700;color:var(--text2);margin-bottom:6px;}
+.mw-f input,.mw-f textarea,.mw-f select{width:100%;min-height:48px;border-radius:12px;border:1px solid var(--border2);
+  background:var(--card);font-family:inherit;font-size:14px;color:var(--ink);padding:12px 14px;}
+.mw-f textarea{min-height:88px;resize:vertical;line-height:1.7;}
+.mw-f input:focus,.mw-f textarea:focus,.mw-f select:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+.mw-f input[readonly]{background:var(--bg2);color:var(--text3);cursor:not-allowed;}
+.mw-f .note{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.6;}
+.mw-f.err input,.mw-f.err textarea,.mw-f.err select{border-color:var(--red);}
+.mw-f .msg{font-size:11.5px;color:var(--red);margin-top:5px;display:none;}
+.mw-f.err .msg{display:block;}
+.mw-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.mw-num{font-family:var(--font-en);}
+.mw-ed-err{background:rgba(217,83,79,.1);border:1px solid rgba(217,83,79,.34);border-radius:12px;
+  padding:11px 13px;margin-bottom:16px;font-size:12.5px;color:#A63A36;line-height:1.7;display:none;}
+.mw-ed-err.show{display:block;}
+.mw-ed-err ul{margin:6px 0 0;padding-inline-start:18px;}
+.mw-ro{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:11px 13px;
+  font-size:12px;color:var(--text2);line-height:1.7;}
+.mw-ro b{color:var(--ink);font-family:var(--font-en);}
+
+.mw-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;}
+.mw-gate-c{max-width:480px;text-align:center;background:var(--card);border:1px solid var(--border);
+  border-radius:22px;padding:36px 30px;}
+.mw-gate-c i{font-size:40px;color:var(--gold2);}
+.mw-gate-c h1{font-family:var(--font-display);font-size:21px;font-weight:800;color:var(--ink);margin:14px 0 10px;}
+.mw-gate-c p{font-size:13.5px;line-height:1.85;color:var(--text2);}
+
+.mw-toast{position:fixed;inset-inline:0;bottom:24px;z-index:120;display:flex;justify-content:center;
+  pointer-events:none;opacity:0;transition:opacity .2s;}
+.mw-toast.show{opacity:1;}
+.mw-toast div{background:var(--ink);color:#F5F0E4;border-radius:30px;padding:12px 20px;font-size:13.5px;
+  font-weight:700;box-shadow:0 18px 40px -20px rgba(20,16,8,.7);}
+
+@media(max-width:880px){ .mw-row{grid-template-columns:1fr;} }
+@media(max-width:600px){
+  .mw-rail{position:fixed;inset:auto 0 0 0;top:auto;width:100%;flex-direction:row;justify-content:space-around;
+    padding:0 6px;padding-bottom:env(safe-area-inset-bottom,0px);height:calc(64px + env(safe-area-inset-bottom,0px));}
+  .mw-rail-logo,.mw-rail-sp{display:none;}
+  .mw{flex-direction:column;}
+  .mw-main{padding-bottom:74px;}
+  .mw-grid{grid-template-columns:1fr;}
+  /* full-screen editor with the save actions always in reach */
+  .mw-ed{padding:0;align-items:stretch;}
+  .mw-ed-c{max-width:100%;max-height:100%;height:100%;border-radius:0;border:0;}
+}
+@media(prefers-reduced-motion:reduce){ .mw-p,.mw-toast{transition:none;} }
+</style>
+</head>
+<body>
+
+<div class="mw-gate" id="gate" style="display:none;">
+  <div class="mw-gate-c"><i class="ti ti-building-store"></i>
+    <h1 id="gateT"></h1><p id="gateP"></p></div>
+</div>
+
+<div class="mw" id="shell" style="display:none;">
+  <!-- TEMPORARY NAVIGATION PLACEHOLDER — not a designed navigation. -->
+  <aside class="mw-rail">
+    <a class="mw-rail-logo" href="raf_homepage.html" aria-label="RAF">رف</a>
+    <a class="mw-rail-b" href="raf_merchant.html"><i class="ti ti-clipboard-list"></i><span data-ar="الطلبات" data-en="Orders">الطلبات</span></a>
+    <a class="mw-rail-b on" href="raf_merchant_products.html" aria-current="page"><i class="ti ti-package"></i><span data-ar="المنتجات" data-en="Products">المنتجات</span></a>
+    <div class="mw-rail-sp"></div>
+  </aside>
+
+  <div class="mw-main">
+    <header class="mw-head">
+      <div class="mw-store">
+        <div class="mw-store-logo" id="stLogo"><i class="ti ti-building-store"></i></div>
+        <div class="mw-store-t"><b id="stName">—</b>
+          <span data-ar="مساحة عمل المنتجات" data-en="Products workspace">مساحة عمل المنتجات</span></div>
+      </div>
+      <div class="mw-head-sp"></div>
+      <span class="mw-count" id="pCount"></span>
+    </header>
+
+    <div class="mw-body">
+      <div class="mw-search">
+        <i class="ti ti-search"></i>
+        <input id="q" type="search" autocomplete="off" oninput="render()"
+               data-ar-ph="ابحث في منتجاتك…" data-en-ph="Search your products…" placeholder="ابحث في منتجاتك…">
+      </div>
+      <div class="mw-hint" id="searchHint"></div>
+      <div class="mw-chips" id="chips" role="group"></div>
+      <div class="mw-grid" id="grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCT EDITOR — opens in place, never navigates away -->
+<div class="mw-ed" id="editor" role="dialog" aria-modal="true">
+  <div class="mw-ed-c">
+    <div class="mw-ed-h">
+      <h3 id="edTitle">—</h3>
+      <button class="mw-ed-x" onclick="tryClose()" aria-label="close"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="mw-ed-b" id="edBody"></div>
+    <div class="mw-ed-f">
+      <button class="mw-btn-ghost" onclick="tryClose()" data-ar="إلغاء" data-en="Cancel">إلغاء</button>
+      <button class="mw-btn-gold" id="saveBtn" onclick="save()" data-ar="حفظ التغييرات" data-en="Save changes">حفظ التغييرات</button>
+    </div>
+  </div>
+</div>
+
+<div class="mw-toast" id="toast"><div id="toastMsg"></div></div>
+
+<script src="raf_features.js"></script>
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_merchant_products.js"></script>
+<script>
+/* ============================================================
+   MERCHANT PRODUCTS — PHASE 3.1
+   The page renders and collects input. Every write goes through
+   RAFMerchantProducts, which owns ownership, permission,
+   validation, staleness and audit. This file never touches
+   RAFSource directly.
+   ============================================================ */
+(function(){
+  'use strict';
+  var MP = window.RAFMerchantProducts;
+  var STORE = null, SLUG = null, ME = null;
+  var editing = null, baseVersion = null, original = null, dirty = false;
+
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function L(o){ return (o && typeof o==='object') ? (isEn()?(o.en||o.ar):(o.ar||o.en)) : (o||''); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function el(id){ return document.getElementById(id); }
+
+  /* ---------- filters, built only from data that exists ---------- */
+  var FILTERS = [
+    { k:'all',       ar:'الكل',        en:'All' },
+    { k:'available', ar:'متوفر',       en:'Available' },
+    { k:'out',       ar:'غير متوفر',   en:'Unavailable' },
+    { k:'hidden',    ar:'مخفي',        en:'Hidden' }
+  ];
+  var filter = 'all';
+
+  function statusOf(p){
+    if (p.status === 'hidden') return 'hidden';
+    if (p.stock === 0) return 'out';
+    return 'available';
+  }
+  function statusLabel(k){
+    return k==='hidden' ? T('مخفي','Hidden')
+         : k==='out'    ? T('غير متوفر','Unavailable')
+         : T('متوفر','Available');
+  }
+
+  function renderChips(){
+    var cats = MP.categories();
+    var rows = FILTERS.slice();
+    /* category filters appear only for categories this store actually uses */
+    var used = {};
+    MP.list({ storeSlug:SLUG }).forEach(function(p){ if (p.cat) used[p.cat] = 1; });
+    cats.filter(function(c){ return used[c.k]; }).forEach(function(c){
+      rows.push({ k:'cat:'+c.k, ar:c.ar, en:c.en });
+    });
+    el('chips').innerHTML = rows.map(function(r){
+      return '<button class="mw-chip" aria-pressed="'+(filter===r.k)+'" onclick="setFilter(\''+r.k+'\')">'
+        + T(r.ar,r.en)+'</button>';
+    }).join('');
+  }
+  window.setFilter = function(k){ filter = k; renderChips(); render(); };
+
+  /* ---------- list ---------- */
+  function matches(p, q){
+    if (!q) return true;
+    q = q.trim().toLowerCase();
+    /* authoritative fields only: name, and the product id which is the SKU */
+    var hay = [p.name.ar, p.name.en, p.id, p.barcode || ''].join(' ').toLowerCase();
+    return hay.indexOf(q) > -1;
+  }
+  window.render = function(){
+    var q = (el('q')||{}).value || '';
+    var all = MP.list({ storeSlug:SLUG });
+    var list = all.filter(function(p){
+      if (!matches(p,q)) return false;
+      if (filter === 'all') return true;
+      if (filter.indexOf('cat:') === 0) return p.cat === filter.slice(4);
+      return statusOf(p) === filter;
+    });
+    el('pCount').textContent = T(all.length+' منتج', all.length+' products');
+    el('grid').innerHTML = list.length ? list.map(cardHTML).join('')
+      : '<div class="mw-empty">'+T('لا توجد منتجات مطابقة','No matching products')+'</div>';
+  };
+  function cardHTML(p){
+    var st = statusOf(p);
+    var canEdit = MP.canEdit();
+    return '<article class="mw-p">'
+      + '<div class="mw-p-img"'+(p.img?' style="background-image:url(\''+esc(p.img)+'\')"':'')+'>'
+        + (p.img?'':'<i class="ti '+esc(p.ic||'ti-box')+'"></i>')+'</div>'
+      + '<div class="mw-p-b">'
+        + '<div class="mw-p-n">'+esc(L(p.name))+'</div>'
+        + '<div class="mw-p-meta">'
+          + '<span class="mw-tag price">'+esc(p.price)+' '+MP.currency()+'</span>'
+          + (p.old ? '<span class="mw-tag old">'+esc(p.old)+'</span>' : '')
+          + (p.disc ? '<span class="mw-tag disc">-'+esc(p.disc)+'%</span>' : '')
+        + '</div>'
+        + '<div class="mw-p-meta">'
+          + '<span class="mw-st st-'+st+'">'+statusLabel(st)+'</span>'
+          + '<span class="mw-tag"><i class="ti ti-box"></i>'+(p.stock==null?'—':p.stock)+'</span>'
+          + (p.cat ? '<span class="mw-tag">'+esc(catName(p.cat))+'</span>' : '')
+          + '<span class="mw-tag sku">SKU '+esc(p.id)+'</span>'
+        + '</div>'
+        + '<div class="mw-p-f"><button class="mw-edit" onclick="openEditor(\''+esc(p.id)+'\')"'
+          + (canEdit?'':' disabled title="'+T('لا تملك صلاحية التعديل','No edit permission')+'"')+'>'
+          + '<i class="ti ti-pencil"></i> '+T('تعديل','Edit')+'</button></div>'
+      + '</div></article>';
+  }
+  function catName(key){
+    var c = MP.categories().filter(function(x){ return x.k===key; })[0];
+    return c ? T(c.ar,c.en) : key;
+  }
+
+  /* ---------- editor ---------- */
+  window.openEditor = function(id){
+    var p = MP.get(id);
+    if (!p){ toast(T('لا يمكن فتح هذا المنتج','This product cannot be opened')); return; }
+    editing = id;
+    baseVersion = MP.versionOf(id);
+    original = JSON.parse(JSON.stringify({ name:p.name, desc:p.desc||{ar:'',en:''},
+      price:p.price, old:p.old||'', disc:p.disc||0, cat:p.cat||'', stock:p.stock, status:p.status }));
+    dirty = false;
+    el('edTitle').textContent = L(p.name);
+    el('edBody').innerHTML = editorHTML(p);
+    el('editor').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    el('edBody').addEventListener('input', markDirty);
+    el('edBody').addEventListener('change', markDirty);
+  };
+  function markDirty(){ dirty = true; }
+
+  function field(id, labelAr, labelEn, control, note){
+    return '<div class="mw-f" id="f-'+id+'"><label for="'+id+'">'+T(labelAr,labelEn)+'</label>'
+      + control + (note?'<div class="note">'+note+'</div>':'') + '<div class="msg" id="m-'+id+'"></div></div>';
+  }
+  function editorHTML(p){
+    var cats = MP.categories();
+    return '<div class="mw-ed-err" id="edErr"></div>'
+
+      /* BASIC INFORMATION — each language edited on its own, never overwritten */
+      + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-abc"></i> '+T('المعلومات الأساسية','Basic information')+'</div>'
+        + field('nameAr','اسم المنتج (عربي)','Product name (Arabic)',
+            '<input id="nameAr" dir="rtl" value="'+esc(p.name.ar)+'">')
+        + field('nameEn','اسم المنتج (إنجليزي)','Product name (English)',
+            '<input id="nameEn" dir="ltr" value="'+esc(p.name.en)+'">')
+        + field('descAr','الوصف (عربي)','Description (Arabic)',
+            '<textarea id="descAr" dir="rtl">'+esc((p.desc&&p.desc.ar)||'')+'</textarea>')
+        + field('descEn','الوصف (إنجليزي)','Description (English)',
+            '<textarea id="descEn" dir="ltr">'+esc((p.desc&&p.desc.en)||'')+'</textarea>')
+      + '</section>'
+
+      /* PRICING */
+      + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-tag"></i> '+T('التسعير','Pricing')+'</div>'
+        + '<div class="mw-row">'
+          + field('price','السعر الحالي','Current price',
+              '<input id="price" class="mw-num" inputmode="decimal" dir="ltr" value="'+esc(p.price)+'">',
+              MP.currency())
+          + field('old','السعر الأصلي','Original price',
+              '<input id="old" class="mw-num" inputmode="decimal" dir="ltr" value="'+esc(p.old||'')+'">',
+              T('اتركه فارغاً إن لم يوجد خصم','Leave empty when there is no discount'))
+        + '</div>'
+        + field('disc','نسبة الخصم %','Discount %',
+            '<input id="disc" class="mw-num" inputmode="numeric" dir="ltr" value="'+esc(p.disc||0)+'">',
+            T('يتطلب سعراً أصلياً أعلى من السعر الحالي','Requires an original price higher than the current price'))
+      + '</section>'
+
+      /* AVAILABILITY — the customer-facing state only. Numeric inventory is
+         shown for reference and cannot be edited in this phase. */
+      + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-package"></i> '+T('التوفر','Availability')+'</div>'
+        + field('status','حالة العرض للعملاء','Customer-facing state',
+            '<select id="status">'
+            + '<option value="active"'+(p.status==='active'?' selected':'')+'>'+T('معروض للعملاء','Available to customers')+'</option>'
+            + '<option value="hidden"'+(p.status==='hidden'?' selected':'')+'>'+T('مخفي','Hidden')+'</option>'
+            + '</select>')
+        + '<div class="mw-ro">'
+          + '<div>'+T('الكمية الحالية','Current stock')+': <b>'+(p.stock==null?'—':p.stock)+'</b>'
+            + ' <span style="color:var(--text3)">('+T('للعرض فقط','read-only')+')</span></div>'
+          + (p.stock === 0
+              ? '<div style="margin-top:6px;color:#A63A36;">'
+                + T('يظهر هذا المنتج للعملاء كغير متوفر لأن الكمية صفر.',
+                    'This product shows to customers as Unavailable because its stock is zero.')
+                + '</div>'
+              : '')
+          + '<div style="margin-top:7px;color:var(--text3);font-size:11.5px;">'
+            + T('تُدار الكميات والمخزون في مرحلة المخزون المخصصة.',
+                'Stock quantities and inventory are managed in the dedicated Inventory phase.')
+          + '</div>'
+        + '</div>'
+      + '</section>'
+
+      /* CATEGORY — existing categories only */
+      + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-category"></i> '+T('الفئة','Category')+'</div>'
+        + field('cat','الفئة','Category',
+            '<select id="cat">' + cats.map(function(c){
+                return '<option value="'+esc(c.k)+'"'+(p.cat===c.k?' selected':'')+'>'+esc(T(c.ar,c.en))+'</option>';
+              }).join('') + '</select>')
+      + '</section>'
+
+      /* OPTIONS (Phase 3.2) — the size / colour groups customers select from */
+      + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-versions"></i> '+T('الخيارات','Options')+'</div>'
+        + '<div id="vGroups"></div>'
+        + '<button class="mw-add" onclick="addGroup()"><i class="ti ti-plus"></i> '
+          + T('إضافة مجموعة خيارات','Add option group')+'</button>'
+      + '</section>'
+
+      /* SIZE GUIDE (Phase 3.2) — product-specific, shown only when configured */
+      + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-ruler-measure"></i> '+T('دليل المقاسات','Size guide')+'</div>'
+        + '<div id="sgBox"></div>'
+      + '</section>'
+
+      /* ADVANCED — read-only in this phase */
+      + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-adjustments"></i> '+T('معلومات متقدمة','Advanced information')+'</div>'
+        + '<div class="mw-ro">'
+          + '<div>SKU: <b>'+esc(p.id)+'</b></div>'
+          + '<div>'+T('الباركود','Barcode')+': <b>'+T('غير مسجَّل','Not recorded')+'</b></div>'
+          + '<div>'+T('الخيارات','Options')+': <b>'+(p.variants?p.variants.length:0)+'</b></div>'
+          + '<div style="margin-top:7px;color:var(--text3);font-size:11.5px;">'
+            + T('الصور والخيارات ودليل المقاسات والباركود تُدار في مراحل لاحقة.',
+                'Images, options, size guide and barcode are managed in later phases.')
+          + '</div>'
+        + '</div>'
+      + '</section>';
+  }
+
+  /* ══════════ PHASE 3.2 · OPTIONS + SIZE GUIDE ══════════
+     The page holds a working copy; every write goes through
+     RAFMerchantVariants, which owns identity, validation and atomicity. */
+  var MV = window.RAFMerchantVariants;
+  var vGroups = [], vGuide = null;
+
+  function renderGroups(){
+    var box = el('vGroups'); if (!box) return;
+    box.innerHTML = vGroups.length ? vGroups.map(function(g, gi){
+      var kind = MV.isColorGroup(g) ? 'color' : (MV.isSizeGroup(g) ? 'size' : 'other');
+      return '<div class="mw-vg">'
+        + '<div class="mw-vg-h">'
+          + '<input class="mw-vg-l" value="'+esc(g.label.ar)+'" dir="rtl" placeholder="'+T('اسم المجموعة (عربي)','Group (AR)')+'"'
+            + ' oninput="setGroupLabel('+gi+',\'ar\',this.value)">'
+          + '<input class="mw-vg-l" value="'+esc(g.label.en)+'" dir="ltr" placeholder="'+T('اسم المجموعة (إنجليزي)','Group (EN)')+'"'
+            + ' oninput="setGroupLabel('+gi+',\'en\',this.value)">'
+          + '<button class="mw-ico danger" onclick="removeGroup('+gi+')" aria-label="'+T('حذف المجموعة','Remove group')+'"><i class="ti ti-trash"></i></button>'
+        + '</div>'
+        + '<div class="mw-vo-list">' + g.options.map(function(o, oi){
+            return '<div class="mw-vo">'
+              + (kind==='color'
+                  ? '<input class="mw-sw" type="color" value="'+esc(HEX.test(o.hex||'')?o.hex:'#cccccc')+'"'
+                    + ' oninput="setOpt('+gi+','+oi+',\'hex\',this.value)" aria-label="'+T('اللون','Colour')+'">'
+                  : '<span class="mw-vo-i">'+(oi+1)+'</span>')
+              + '<input value="'+esc(o.label.ar)+'" dir="rtl" placeholder="'+T('القيمة (عربي)','Value (AR)')+'"'
+                + ' oninput="setOpt('+gi+','+oi+',\'ar\',this.value)">'
+              + '<input value="'+esc(o.label.en)+'" dir="ltr" placeholder="'+T('القيمة (إنجليزي)','Value (EN)')+'"'
+                + ' oninput="setOpt('+gi+','+oi+',\'en\',this.value)">'
+              + '<button class="mw-ico" onclick="moveOpt('+gi+','+oi+',-1)" '+(oi===0?'disabled':'')+' aria-label="'+T('لأعلى','Up')+'"><i class="ti ti-chevron-up"></i></button>'
+              + '<button class="mw-ico" onclick="moveOpt('+gi+','+oi+',1)" '+(oi===g.options.length-1?'disabled':'')+' aria-label="'+T('لأسفل','Down')+'"><i class="ti ti-chevron-down"></i></button>'
+              + '<button class="mw-ico danger" onclick="removeOpt('+gi+','+oi+')" aria-label="'+T('حذف','Remove')+'"><i class="ti ti-x"></i></button>'
+              + '<span class="mw-vid" title="'+T('المعرّف الثابت','Stable identifier')+'">'+esc(o.v)+'</span>'
+            + '</div>';
+          }).join('') + '</div>'
+        + '<button class="mw-add sm" onclick="addOpt('+gi+')"><i class="ti ti-plus"></i> '+T('إضافة قيمة','Add value')+'</button>'
+      + '</div>';
+    }).join('') : '<div class="mw-ro">'+T('لا توجد خيارات لهذا المنتج.','This product has no options.')+'</div>';
+  }
+  var HEX = /^#[0-9a-fA-F]{6}$/;
+
+  window.setGroupLabel = function(gi, lang, v){ vGroups[gi].label[lang] = v; markDirty(); };
+  window.setOpt = function(gi, oi, k, v){
+    if (k === 'hex') vGroups[gi].options[oi].hex = v;
+    else vGroups[gi].options[oi].label[k] = v;
+    markDirty();
+  };
+  window.addOpt = function(gi){
+    var g = vGroups[gi];
+    /* the stable id is generated once, from the label, and never regenerated */
+    g.options.push({ v: MV.newOptionId(g, 'option-' + (g.options.length + 1)),
+                     label:{ ar:'', en:'' } });
+    markDirty(); renderGroups();
+  };
+  window.removeOpt = function(gi, oi){ vGroups[gi].options.splice(oi,1); markDirty(); renderGroups(); };
+  /* explicit ordering — sizes are never sorted alphabetically */
+  window.moveOpt = function(gi, oi, dir){
+    var a = vGroups[gi].options, j = oi + dir;
+    if (j < 0 || j >= a.length) return;
+    var t = a[oi]; a[oi] = a[j]; a[j] = t;
+    markDirty(); renderGroups();
+  };
+  window.addGroup = function(){
+    vGroups.push({ label:{ar:'',en:''}, options:[{ v:'option-1', label:{ar:'',en:''} }] });
+    markDirty(); renderGroups();
+  };
+  window.removeGroup = function(gi){ vGroups.splice(gi,1); markDirty(); renderGroups(); };
+
+  /* ---------- size guide ---------- */
+  function renderGuide(){
+    var box = el('sgBox'); if (!box) return;
+    if (!vGuide){
+      box.innerHTML = '<div class="mw-ro"><b>'+T('لا يوجد دليل مقاسات','No size guide')+'</b>'
+        + '<div style="margin-top:5px;color:var(--text3);font-size:11.5px;">'
+        + T('لن يظهر زر دليل المقاسات للعملاء ما لم تُضِف دليلاً.',
+            'Customers will not see a size guide button unless you add one.')+'</div></div>'
+        + '<button class="mw-add" onclick="addGuide()"><i class="ti ti-plus"></i> '
+        + T('إضافة دليل مقاسات','Add a size guide')+'</button>';
+      return;
+    }
+    box.innerHTML = '<div class="mw-sg-badge"><i class="ti ti-circle-check"></i> '+T('الدليل مُعدّ','Size guide configured')+'</div>'
+      + '<div class="mw-row">'
+        + '<div class="mw-f"><label>'+T('العنوان (عربي)','Title (AR)')+'</label>'
+          + '<input dir="rtl" value="'+esc(vGuide.title.ar)+'" oninput="setGuide(\'title\',\'ar\',this.value)"></div>'
+        + '<div class="mw-f"><label>'+T('العنوان (إنجليزي)','Title (EN)')+'</label>'
+          + '<input dir="ltr" value="'+esc(vGuide.title.en)+'" oninput="setGuide(\'title\',\'en\',this.value)"></div>'
+      + '</div>'
+      + '<div class="mw-f"><label>'+T('ملاحظة (عربي)','Note (AR)')+'</label>'
+        + '<textarea dir="rtl" oninput="setGuide(\'note\',\'ar\',this.value)">'+esc((vGuide.note&&vGuide.note.ar)||'')+'</textarea></div>'
+      + '<div class="mw-f"><label>'+T('ملاحظة (إنجليزي)','Note (EN)')+'</label>'
+        + '<textarea dir="ltr" oninput="setGuide(\'note\',\'en\',this.value)">'+esc((vGuide.note&&vGuide.note.en)||'')+'</textarea></div>'
+      + '<div class="mw-sg-note">'+T('الوحدات تُكتب داخل أسماء الأعمدة كما هي — لا يوجد تحويل تلقائي.',
+                                     'Units live in the column names exactly as written — nothing is converted automatically.')+'</div>'
+      + '<div class="mw-sg-scroll"><table class="mw-sg-t"><thead><tr>'
+        + vGuide.cols.map(function(c,ci){
+            return '<th><input value="'+esc(c.ar)+'" dir="rtl" oninput="setCol('+ci+',\'ar\',this.value)" placeholder="AR">'
+              + '<input value="'+esc(c.en)+'" dir="ltr" oninput="setCol('+ci+',\'en\',this.value)" placeholder="EN">'
+              + (vGuide.cols.length>2?'<button class="mw-ico danger" onclick="removeCol('+ci+')"><i class="ti ti-x"></i></button>':'')
+              + '</th>';
+          }).join('')
+        + '<th class="mw-sg-add"><button class="mw-ico" onclick="addCol()" aria-label="'+T('إضافة عمود','Add column')+'"><i class="ti ti-plus"></i></button></th>'
+        + '</tr></thead><tbody>'
+        + vGuide.rows.map(function(r,ri){
+            return '<tr>' + r.map(function(cell,ci){
+                return '<td><input value="'+esc(cell)+'" oninput="setCell('+ri+','+ci+',this.value)"></td>';
+              }).join('')
+              + '<td><button class="mw-ico danger" onclick="removeRow('+ri+')" aria-label="'+T('حذف الصف','Remove row')+'"><i class="ti ti-trash"></i></button></td></tr>';
+          }).join('')
+        + '</tbody></table></div>'
+      + '<div class="mw-sg-f">'
+        + '<button class="mw-add sm" onclick="addRow()"><i class="ti ti-plus"></i> '+T('إضافة صف','Add row')+'</button>'
+        + '<button class="mw-add sm danger" onclick="clearGuide()"><i class="ti ti-trash"></i> '+T('إزالة الدليل','Remove guide')+'</button>'
+      + '</div>';
+  }
+  window.setGuide = function(sec, lang, v){
+    if (!vGuide[sec]) vGuide[sec] = { ar:'', en:'' };
+    vGuide[sec][lang] = v; markDirty();
+  };
+  window.setCol  = function(ci, lang, v){ vGuide.cols[ci][lang] = v; markDirty(); };
+  window.setCell = function(ri, ci, v){ vGuide.rows[ri][ci] = v; markDirty(); };
+  window.addCol  = function(){
+    vGuide.cols.push({ ar:'', en:'' });
+    vGuide.rows.forEach(function(r){ r.push(''); });
+    markDirty(); renderGuide();
+  };
+  window.removeCol = function(ci){
+    if (vGuide.cols.length <= 2) return;
+    vGuide.cols.splice(ci,1);
+    vGuide.rows.forEach(function(r){ r.splice(ci,1); });
+    markDirty(); renderGuide();
+  };
+  window.addRow    = function(){ vGuide.rows.push(vGuide.cols.map(function(){ return ''; })); markDirty(); renderGuide(); };
+  window.removeRow = function(ri){ vGuide.rows.splice(ri,1); markDirty(); renderGuide(); };
+  window.clearGuide= function(){ vGuide = null; markDirty(); renderGuide(); };
+  window.addGuide  = function(){
+    vGuide = { title:{ar:'',en:''}, note:{ar:'',en:''},
+               cols:[{ar:'المقاس',en:'Size'},{ar:'',en:''}],
+               rows:[['','']] };
+    markDirty(); renderGuide();
+  };
+
+  /* ---------- save / cancel ---------- */
+  function readForm(){
+    return {
+      name: { ar:el('nameAr').value.trim(), en:el('nameEn').value.trim() },
+      desc: { ar:el('descAr').value.trim(), en:el('descEn').value.trim() },
+      price: el('price').value.trim(),
+      old:   el('old').value.trim(),
+      disc:  el('disc').value.trim() === '' ? 0 : Number(el('disc').value.trim()),
+      /* stock is intentionally not collected — it is read-only in this phase */
+      status: el('status').value,
+      cat:   el('cat').value
+    };
+  }
+  function clearErrors(){
+    document.querySelectorAll('.mw-f.err').forEach(function(f){ f.classList.remove('err'); });
+    var b = el('edErr'); b.classList.remove('show'); b.innerHTML = '';
+  }
+  var FIELD_MAP = { 'name.ar':'nameAr','name.en':'nameEn', price:'price', old:'old',
+                    disc:'disc', status:'status', cat:'cat' };
+  function showErrors(errors){
+    var b = el('edErr');
+    b.innerHTML = '<b>'+T('تعذّر الحفظ','Could not save')+'</b><ul>'
+      + errors.map(function(e){ return '<li>'+esc(e.message)+'</li>'; }).join('') + '</ul>';
+    b.classList.add('show');
+    errors.forEach(function(e){
+      var id = FIELD_MAP[e.field];
+      var f = id && el('f-'+id);
+      if (f) f.classList.add('err');
+    });
+    el('edBody').scrollTop = 0;
+  }
+  window.save = function(){
+    if (!editing) return;
+    clearErrors();
+    var res = MP.update(editing, readForm(), { actor:ME, baseVersion:baseVersion });
+    if (!res.ok){
+      showErrors(res.errors || [{ message:T('تعذّر الحفظ','Could not save') }]);
+      /* a stale save must not be silently retried over newer data */
+      if (res.code === 'STALE') el('saveBtn').disabled = true;
+      return;
+    }
+    dirty = false;
+    closeEditor();
+    render(); renderChips();
+    toast(T('تم حفظ التغييرات','Changes saved'));
+  };
+  window.tryClose = function(){
+    if (!dirty) return closeEditor();
+    var keep = window.confirm(
+      T('لديك تغييرات غير محفوظة.\n\nموافق = تجاهل التغييرات\nإلغاء = متابعة التعديل',
+        'You have unsaved changes.\n\nOK = discard changes\nCancel = continue editing'));
+    if (keep) closeEditor();
+  };
+  function closeEditor(){
+    el('editor').classList.remove('show');
+    document.body.style.overflow = '';
+    el('saveBtn').disabled = false;
+    editing = null; baseVersion = null; original = null; dirty = false;
+  }
+
+  var toastTimer = null;
+  function toast(msg){
+    el('toastMsg').textContent = msg;
+    el('toast').classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el('toast').classList.remove('show'); }, 2600);
+  }
+
+  /* ---------- language ---------- */
+  window.toggleLang = function(){
+    var r = root(), en = r.lang === 'en';
+    r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+    try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+    applyLang(); renderChips(); render();
+    if (editing){ var p = MP.get(editing); if (p) el('edBody').innerHTML = editorHTML(p); }
+  };
+  function applyLang(){
+    var en = isEn();
+    document.querySelectorAll('[data-ar][data-en]').forEach(function(e){
+      var t = e.getAttribute('data-'+(en?'en':'ar')); if (t!==null) e.textContent = t;
+    });
+    document.querySelectorAll('[data-ar-ph][data-en-ph]').forEach(function(e){
+      e.placeholder = e.getAttribute('data-'+(en?'en':'ar')+'-ph');
+    });
+    el('searchHint').textContent = T('اسم المنتج · SKU · الباركود','Product name · SKU · barcode');
+    document.title = en ? 'RAF — Products' : 'رف — المنتجات';
+  }
+
+  /* ---------- boot ---------- */
+  function boot(){
+    var l=null; try{ l=localStorage.getItem('raf_lang'); }catch(e){}
+    if (l==='en'){ root().lang='en'; root().dir='ltr'; }
+    applyLang();
+
+    var link = window.RAFPerm ? RAFPerm.storeLinkOf() : { ok:false, reason:'unassigned' };
+    if (!link.ok || !MP.canView()){
+      el('gate').style.display = '';
+      el('gateT').textContent = !link.ok
+        ? (link.reason==='store_not_found' ? T('المتجر المرتبط غير موجود','Linked store not found')
+                                           : T('لا يوجد متجر مرتبط بالحساب','No store linked to this account'))
+        : T('لا تملك صلاحية عرض المنتجات','You do not have permission to view products');
+      el('gateP').textContent = !link.ok
+        ? T('لم يتم ربط هذا الحساب بمتجر. يتم الربط يدوياً ولا يُخمَّن تلقائياً.',
+            'This account is not linked to a store. Links are set explicitly and never inferred.')
+        : T('يتم التحكم بالصلاحيات من نظام صلاحيات رف.','Access is controlled by the RAF permission system.');
+      return;
+    }
+    STORE = link.store; SLUG = link.slug;
+    var me = RAFPerm.currentUser();
+    ME = me ? { id:me.id, name:me.name, roleId:me.roleId } : null;
+
+    el('shell').style.display = '';
+    el('stName').textContent = L(STORE.name);
+    if (STORE.logo){ var lg = el('stLogo'); lg.style.backgroundImage = "url('"+STORE.logo+"')"; lg.innerHTML=''; }
+
+    renderChips(); render();
+    try { RAFPerm.enforce(); } catch(e){}
+
+    /* another session changed a product — reflect it without losing the editor */
+    document.addEventListener('raf:source', function(){ render(); });
+    document.addEventListener('keydown', function(e){ if (e.key==='Escape' && editing) tryClose(); });
+    window.addEventListener('beforeunload', function(e){
+      if (dirty){ e.preventDefault(); e.returnValue = ''; }
+    });
+  }
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+</body>
+</html>

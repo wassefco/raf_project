@@ -82,34 +82,93 @@
     'ops.busy_off':         { tl:false, ar:'إلغاء الإيقاف المؤقت',        en:'Busy Mode disabled' },
     'ops.busy_expired':     { tl:false, ar:'انتهى الإيقاف المؤقت تلقائيًا', en:'Temporary closure expired' },
     'snapshot.updated':     { tl:false, ar:'تم تعديل سجل الطلب',          en:'Order record updated' },
+    /* product management — recorded against the store, not an order */
+    'product.updated':      { tl:false, ar:'تم تعديل منتج',               en:'Product updated' },
+    'variant.created':      { tl:false, ar:'تمت إضافة خيار للمنتج',       en:'Product option added' },
+    'variant.updated':      { tl:false, ar:'تم تعديل خيارات المنتج',      en:'Product options updated' },
+    'variant.removed':      { tl:false, ar:'تم حذف خيار من المنتج',       en:'Product option removed' },
+    'size_guide.updated':   { tl:false, ar:'تم تعديل دليل المقاسات',      en:'Size guide updated' },
     'order.migrated':       { tl:false, ar:'تمت ترقية سجل الطلب',         en:'Order record migrated' }
   };
 
   function isEn(){ var r = document.getElementById('htmlRoot') || document.documentElement; return r.lang === 'en'; }
   function T(ar,en){ return isEn() ? en : ar; }
 
-  /* ---------- storage (append-only) ---------- */
+  /* ══════════════ STORAGE LAYER ══════════════
+     Deliberately behind an interface. Capacity is a technical limitation of
+     whatever store is plugged in — never a business rule. The engine never
+     deletes, trims or overwrites an event to make room: if the store cannot
+     accept an event, that is reported as a persistence failure.
+
+     A storage adapter implements:
+       name      — identifier for diagnostics
+       durable   — true only for a store with unbounded, permanent retention
+       read()    — returns the full event array
+       append(e) — appends one event; THROWS if it cannot persist
+
+     Swap in a server-backed store with RAFAudit.setStore(adapter). Nothing
+     else changes: not the engine, the schema, the Timeline or the Audit Log. */
+  var localStore = {
+    name: 'localStorage',
+    durable: false,                 /* bounded by the browser quota */
+    read: function () {
+      try { var a = JSON.parse(localStorage.getItem(LS)); return Array.isArray(a) ? a : []; }
+      catch (e) { return []; }
+    },
+    append: function (ev) {
+      /* re-read immediately before appending so a concurrent tab is not lost */
+      var all = this.read();
+      all.push(ev);
+      try { localStorage.setItem(LS, JSON.stringify(all)); }
+      catch (e) {
+        /* quota exhausted, or storage unavailable. Existing history is left
+           exactly as it is — nothing is discarded to make space. */
+        var err = new Error('persist_failed:' + ((e && e.name) || 'unknown'));
+        err.cause = e;
+        throw err;
+      }
+      return ev;
+    }
+  };
+  var store = localStore;
+  function setStore(adapter){
+    if (!adapter || typeof adapter.read !== 'function' || typeof adapter.append !== 'function') {
+      return { ok:false, reason:'invalid_adapter' };
+    }
+    store = adapter;
+    return { ok:true, name:adapter.name || 'custom', durable:!!adapter.durable };
+  }
+  function storeInfo(){
+    return { name:store.name || 'custom', durable:!!store.durable,
+             unboundedRetention:!!store.durable };
+  }
   function readAll(){
-    try { var a = JSON.parse(localStorage.getItem(LS)); return Array.isArray(a) ? a : []; }
-    catch (e) { return []; }
+    try { return store.read() || []; } catch (e) { return []; }
   }
-  function writeAll(list){
-    try { localStorage.setItem(LS, JSON.stringify(list)); return true; }
-    catch (e) { return false; }
-  }
-  /* an audit failure is recorded for diagnostics — never silently swallowed,
-     and never allowed to alter the business result that already happened */
+  /* An audit failure is recorded for diagnostics — never silently swallowed,
+     and never allowed to alter the business result that already happened.
+     Mirrored in memory so a diagnostic survives even when the store itself is
+     the thing that is full. */
+  var failureLog = [];
   function recordFailure(ev, err){
+    var entry = { at:Date.now(), eventId:ev && ev.eventId, action:ev && ev.action,
+                  orderId:ev && ev.orderId, store:store.name || 'custom',
+                  error:String((err && err.message) || err || 'persist_failed') };
+    failureLog.unshift(entry);
+    if (failureLog.length > 100) failureLog.length = 100;   /* diagnostics only, not audit data */
     try {
       var f = JSON.parse(localStorage.getItem(LS_FAIL) || '[]');
-      f.unshift({ at:Date.now(), eventId:ev && ev.eventId, action:ev && ev.action,
-                  error:String((err && err.message) || err || 'persist_failed') });
+      f.unshift(entry);
       localStorage.setItem(LS_FAIL, JSON.stringify(f.slice(0, 50)));
-    } catch (e) {}
+    } catch (e) { /* storage full — the in-memory mirror still holds it */ }
+    return entry;
   }
   function failures(){
-    try { var f = JSON.parse(localStorage.getItem(LS_FAIL)); return Array.isArray(f) ? f : []; }
-    catch (e) { return []; }
+    var stored = [];
+    try { var f = JSON.parse(localStorage.getItem(LS_FAIL)); if (Array.isArray(f)) stored = f; }
+    catch (e) {}
+    /* whichever record is richer this session */
+    return failureLog.length >= stored.length ? failureLog.slice() : stored;
   }
 
   /* ---------- actor resolution ----------
@@ -213,50 +272,58 @@
     var check = validate(ev);
     if (!check.ok) { recordFailure(ev, 'invalid:' + check.missing.join(',')); return { ok:false, reason:'invalid', missing:check.missing }; }
 
-    /* re-read immediately before appending so a concurrent tab is not lost */
     var all = readAll();
     for (var i = all.length - 1; i >= 0; i--) {
       if (all[i].eventId === ev.eventId) return { ok:true, duplicate:true, event:all[i] };
     }
     ev.seq = (all.length ? (all[all.length - 1].seq || 0) : 0) + 1;
 
-    /* an undo marks its original, without removing it */
-    if (ev.undoOf) {
-      for (var j = all.length - 1; j >= 0; j--) {
-        if (all[j].eventId === ev.undoOf) { all[j].undone = true; break; }
-      }
+    /* Append only. An undo never touches the event it reverses — it carries
+       `undoOf`, and `undone` is derived when the log is read. Nothing already
+       written is ever mutated, trimmed or discarded. */
+    try {
+      store.append(ev);
+    } catch (e) {
+      var diag = recordFailure(ev, e);
+      return { ok:false, reason:'persist_failed', persisted:false, event:ev, diagnostic:diag,
+               store:store.name || 'custom' };
     }
-    all.push(ev);
-    if (all.length > MAX) {
-      var dropped = all.length - MAX;
-      all = all.slice(dropped);
-      recordFailure(ev, 'trimmed:' + dropped + ' oldest events exceeded storage ceiling');
-    }
-    if (!writeAll(all)) { recordFailure(ev, 'persist_failed'); return { ok:false, reason:'persist_failed', event:ev }; }
     emit(ev);
-    return { ok:true, event:ev };
+    return { ok:true, persisted:true, event:ev };
   }
 
   /* ---------- reading ----------
      Deterministic order: timestamp, then sequence — never insertion order alone. */
-  function sorted(list){
-    return list.slice().sort(function (a, b) {
+  /* `undone` is derived, never stored back onto the original event: an event
+     is undone when some later event points at it with undoOf. */
+  function withUndone(list, universe){
+    var reversed = {};
+    (universe || list).forEach(function (e) { if (e.undoOf) reversed[e.undoOf] = true; });
+    return list.map(function (e) {
+      return reversed[e.eventId] ? Object.assign({}, e, { undone:true }) : e;
+    });
+  }
+  function sorted(list, universe){
+    return withUndone(list, universe).sort(function (a, b) {
       if (a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
       if ((a.seq || 0) !== (b.seq || 0))  return (a.seq || 0) - (b.seq || 0);
       return String(a.eventId).localeCompare(String(b.eventId));
     });
   }
   function forOrder(orderId){
-    return sorted(readAll().filter(function (e) { return e.orderId === orderId; }));
+    var all = readAll();
+    return sorted(all.filter(function (e) { return e.orderId === orderId; }), all);
   }
   /* store isolation is enforced here, by slug only */
   function forStore(slug){
     if (!slug) return [];
-    return sorted(readAll().filter(function (e) { return e.storeSlug === slug; }));
+    var all = readAll();
+    return sorted(all.filter(function (e) { return e.storeSlug === slug; }), all);
   }
   function query(opts){
     opts = opts || {};
-    var list = readAll().filter(function (e) {
+    var all = readAll();
+    var list = all.filter(function (e) {
       if (opts.storeSlug && e.storeSlug !== opts.storeSlug) return false;
       if (opts.orderId  && e.orderId  !== opts.orderId)  return false;
       if (opts.action   && e.action   !== opts.action)   return false;
@@ -266,7 +333,7 @@
       if (opts.since    && e.timestamp < opts.since)     return false;
       return true;
     });
-    return sorted(list);
+    return sorted(list, all);
   }
 
   /* ---------- timeline projection ----------
@@ -342,10 +409,13 @@
   global.addEventListener('storage', function (e) { if (e.key === LS) emit(null); });
 
   global.RAFAudit = {
-    ACTOR: ACTOR, SOURCE: SOURCE, ACTIONS: A, MAX: MAX,
+    ACTOR: ACTOR, SOURCE: SOURCE, ACTIONS: A,
     record: record, validate: validate, makeId: makeId, exists: exists,
-    forOrder: forOrder, forStore: forStore, query: query, all: function(){ return sorted(readAll()); },
+    forOrder: forOrder, forStore: forStore, query: query,
+    all: function(){ var a = readAll(); return sorted(a, a); },
     timeline: timeline, auditLog: auditLog, canViewAudit: canViewAudit, label: label,
-    failures: failures, watch: watch
+    failures: failures, watch: watch,
+    /* storage layer — swap in a durable store without touching anything else */
+    setStore: setStore, storeInfo: storeInfo
   };
 })(window);

@@ -87,9 +87,28 @@
     return '';
   }
 
+  /* ---------- product-level guide ----------
+     A merchant-configured guide on the product record always wins. Products
+     without one keep the category-derived tables above. Registered under a
+     per-product key so the existing open(key) contract is unchanged. */
+  function productGuideOf(product){
+    var g = product && product.sizeGuide;
+    if (!g || !g.title || !(g.cols || []).length || !(g.rows || []).length) return null;
+    return g;
+  }
+  function registerProductGuide(product){
+    var g = productGuideOf(product);
+    if (!g) return '';
+    var key = 'product:' + (product.id || '');
+    GUIDES[key] = g;
+    return key;
+  }
+
   /* the public test: returns a guide key, or '' when there is nothing to show */
-  function forProduct(product){ return keyFor(product); }
-  function hasSizes(product){ return !!keyFor(product); }
+  function forProduct(product){
+    return registerProductGuide(product) || keyFor(product);
+  }
+  function hasSizes(product){ return !!forProduct(product); }
 
   /* ---------- panel ---------- */
   function css(){
@@ -162,7 +181,8 @@
   }
 
   function open(key){
-    key = GUIDES[key] ? key : 'clothing';
+    /* an unknown key must not silently show another product's table */
+    if (!GUIDES[key]) return;
     css();
     close();
     backEl = document.createElement('div');
