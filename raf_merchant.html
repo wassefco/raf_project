@@ -363,6 +363,62 @@ body.mw-focused{overflow:hidden;}
   align-items:center;justify-content:center;border:2px solid var(--card);}
 .mw-hbtn .count.show{display:flex;}
 
+/* ---------- PHASE 2.3 · operating condition ---------- */
+.mw-ops.is-busy{border-color:rgba(217,83,79,.5);background:rgba(217,83,79,.07);}
+.mw-ops-mode{flex:0 0 auto;font-size:10.5px;font-weight:800;color:var(--text2);background:var(--bg3);
+  border-radius:20px;padding:3px 9px;white-space:nowrap;}
+.mw-ops-mode.manual{background:var(--gold-soft);color:var(--gold2);}
+.mw-ops-off{color:var(--red);font-size:17px;display:flex;align-items:center;}
+.mw-ops-info{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2);background:var(--bg);
+  border:1px solid var(--border);border-radius:11px;padding:9px 11px;margin-bottom:12px;line-height:1.6;}
+.mw-ops-info i{color:var(--gold2);font-size:15px;flex:0 0 auto;}
+.mw-eta-b small{display:block;font-family:var(--font-ar);font-size:10.5px;font-weight:600;opacity:.75;margin-top:3px;}
+.mw-busy-h{font-size:12px;font-weight:800;color:var(--text3);letter-spacing:.4px;text-transform:uppercase;
+  margin:16px 0 9px;}
+.mw-busy-row{display:flex;gap:8px;}
+.mw-busy-row .mw-eta-b{flex:1;}
+.mw-busy-note{font-size:11.5px;color:var(--text3);line-height:1.7;margin-top:9px;}
+.mw-busy-on{display:flex;align-items:center;gap:11px;padding:12px;border-radius:13px;
+  background:rgba(217,83,79,.09);border:1px solid rgba(217,83,79,.3);font-size:12.5px;color:#A63A36;line-height:1.6;}
+.mw-busy-on i{font-size:20px;flex:0 0 auto;}
+.mw-busy-on b{display:block;font-size:13px;}
+.mw-busy-on > div{flex:1;min-width:0;}
+.mw-ops-err{margin-top:12px;padding:10px 12px;border-radius:11px;background:rgba(217,83,79,.1);
+  border:1px solid rgba(217,83,79,.34);color:#A63A36;font-size:12.5px;line-height:1.6;}
+/* offline banner */
+.mw-off{display:none;align-items:center;gap:9px;padding:10px clamp(14px,2.2vw,24px);
+  background:rgba(217,83,79,.1);border-bottom:1px solid rgba(217,83,79,.3);color:#A63A36;font-size:12.5px;font-weight:700;}
+body.is-offline .mw-off{display:flex;}
+@media(max-width:600px){ .mw-busy-row{flex-wrap:wrap;} .mw-busy-row .mw-eta-b{flex:1 1 44%;} }
+
+/* ---------- PHASE 2.4 · audit & timeline ---------- */
+.mw-tl-undone{font-weight:600;color:var(--red);font-size:11.5px;}
+.mw-audit-btn{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 13px;margin-top:12px;
+  border:1px solid var(--border2);border-radius:30px;background:var(--card);color:var(--text2);
+  font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .18s;}
+.mw-audit-btn:hover{border-color:var(--gold);background:var(--gold-soft);color:var(--gold2);}
+.mw-audit-btn i{font-size:16px;}
+.mw-audit-n{font-family:var(--font-en);font-size:11px;font-weight:800;background:var(--bg3);
+  border-radius:20px;padding:2px 7px;}
+.mw-audit-c{max-width:560px;}
+.mw-audit-c h3{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.mw-audit-c h3 i{color:var(--gold2);font-size:20px;}
+.mw-audit-id{font-family:var(--font-en);font-size:12.5px;font-weight:700;color:var(--text3);
+  background:var(--bg2);border-radius:20px;padding:3px 10px;}
+.mw-audit-b{max-height:min(56vh,460px);overflow:auto;margin:14px 0;}
+.mw-au{border:1px solid var(--border);border-radius:13px;padding:11px 13px;margin-bottom:9px;background:var(--bg);}
+.mw-au-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--ink);}
+.mw-au-h b{font-weight:800;}
+.mw-au-t{margin-inline-start:auto;font-family:var(--font-en);font-size:11.5px;color:var(--text3);}
+.mw-au-tag{font-size:10.5px;font-weight:800;border-radius:20px;padding:2px 8px;}
+.mw-au-tag.auto{background:var(--gold-soft);color:var(--gold2);}
+.mw-au-tag.undone{background:rgba(217,83,79,.12);color:#A63A36;}
+.mw-au-d{margin:9px 0 0;display:grid;gap:4px;}
+.mw-au-d > div{display:flex;gap:8px;font-size:11.5px;line-height:1.6;}
+.mw-au-d dt{flex:0 0 34%;color:var(--text3);}
+.mw-au-d dd{margin:0;flex:1;min-width:0;color:var(--text2);word-break:break-word;font-family:var(--font-en);}
+@media(max-width:560px){ .mw-audit-b{max-height:52vh;} .mw-au-d dt{flex:0 0 40%;} }
+
 /* read-only state for non-holders */
 .mw-readonly{font-size:12px;color:var(--text3);text-align:center;padding:10px;}
 
@@ -461,6 +517,8 @@ body.mw-focused{overflow:hidden;}
           <span data-ar="وقت التجهيز المتوقع:" data-en="Expected preparation time:">وقت التجهيز المتوقع:</span>
           <span><em id="opsEta">—</em></span>
         </div>
+        <span class="mw-ops-mode" id="opsMode"></span>
+        <span class="mw-ops-off" id="opsOffline" style="display:none;"><i class="ti ti-wifi-off"></i></span>
         <button class="mw-ops-edit" onclick="openEta()">
           <i class="ti ti-pencil"></i> <span data-ar="تعديل" data-en="Edit">تعديل</span>
         </button>
@@ -477,6 +535,10 @@ body.mw-focused{overflow:hidden;}
         <i class="ti ti-chevron-down" style="font-size:15px;color:var(--text3);"></i>
       </button>
     </header>
+
+    <div class="mw-off"><i class="ti ti-wifi-off"></i>
+      <span data-ar="لا يوجد اتصال — التغييرات التشغيلية معطّلة مؤقتاً"
+            data-en="No connection — operational changes are temporarily disabled">لا يوجد اتصال — التغييرات التشغيلية معطّلة مؤقتاً</span></div>
 
     <!-- SPLIT WORKSPACE -->
     <div class="mw-split">
@@ -551,13 +613,29 @@ body.mw-focused{overflow:hidden;}
 <!-- EXPECTED PREPARATION TIME (UI only — business logic comes later) -->
 <div class="mw-dlg" id="etaDlg">
   <div class="mw-dlg-c" role="dialog" aria-modal="true">
-    <h3 data-ar="وقت التجهيز المتوقع" data-en="Expected preparation time">وقت التجهيز المتوقع</h3>
-    <p data-ar="هذا الوقت يظهر للعملاء عند الطلبات الجديدة فقط."
-       data-en="This is shown to customers on new incoming orders only.">هذا الوقت يظهر للعملاء عند الطلبات الجديدة فقط.</p>
+    <h3 data-ar="حالة تشغيل المتجر" data-en="Store operating state">حالة تشغيل المتجر</h3>
+    <p data-ar="تحدد وقت التجهيز المتوقع للطلبات الجديدة فقط. الطلبات المقبولة لا تتغير."
+       data-en="Sets the expected preparation time for new orders only. Accepted orders never change.">تحدد وقت التجهيز المتوقع للطلبات الجديدة فقط. الطلبات المقبولة لا تتغير.</p>
+    <div class="mw-ops-info" id="opsInfo"></div>
     <div class="mw-eta" id="etaRow"></div>
+    <div class="mw-busy-h" data-ar="إيقاف مؤقت" data-en="Temporary closure">إيقاف مؤقت</div>
+    <div id="busyBox"></div>
+    <div class="mw-ops-err" id="opsErr" style="display:none;"></div>
     <div class="mw-dlg-f">
-      <button class="mw-btn-ghost" onclick="closeEta()" data-ar="إلغاء" data-en="Cancel">إلغاء</button>
-      <button class="mw-btn-gold" onclick="saveEta()" data-ar="حفظ" data-en="Save">حفظ</button>
+      <button class="mw-btn-ghost" onclick="closeEta()" data-ar="إغلاق" data-en="Close">إغلاق</button>
+      <button class="mw-btn-gold" onclick="saveEta()" data-ar="حفظ الحالة" data-en="Save state">حفظ الحالة</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUDIT LOG — detailed accountability record, permission-gated -->
+<div class="mw-dlg" id="auditDlg">
+  <div class="mw-dlg-c mw-audit-c" role="dialog" aria-modal="true">
+    <h3><i class="ti ti-list-search"></i> <span data-ar="سجل التدقيق" data-en="Audit log">سجل التدقيق</span>
+      <span class="mw-audit-id" id="auditTitle"></span></h3>
+    <div class="mw-audit-b" id="auditBody"></div>
+    <div class="mw-dlg-f">
+      <button class="mw-btn-ghost" onclick="closeAudit()" data-ar="إغلاق" data-en="Close">إغلاق</button>
     </div>
   </div>
 </div>
@@ -570,7 +648,10 @@ body.mw-focused{overflow:hidden;}
 </div>
 
 <script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
 <script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_store_ops.js"></script>
 <script src="raf_catalog.js"></script>
 <script src="raf_rules.js"></script>
 <script src="raf_order_engine.js"></script>
@@ -623,6 +704,7 @@ body.mw-focused{overflow:hidden;}
     SESSION.chips      = [].slice.call(document.querySelectorAll('.mw-chip'))
                            .map(function(c,i){ return c.getAttribute('aria-pressed')==='true' ? i : -1; })
                            .filter(function(i){ return i > -1; });
+    SESSION.savedAt    = Date.now();
     try { localStorage.setItem(SKEY, JSON.stringify(SESSION)); } catch(e){}
   }
 
@@ -676,9 +758,10 @@ body.mw-focused{overflow:hidden;}
     { k:'done',      pip:'pip-done',      st:'st-done',      ar:'مكتمل',          en:'Completed' },
     { k:'cancelled', pip:'pip-cancelled', st:'st-cancelled', ar:'ملغي',           en:'Cancelled' }
   ];
-  /* Queue placement now follows the merchant processing state held by the
-     shared engine, falling back to the customer-facing order status. */
+  /* Real state-driven placement. Every order lands in exactly one group:
+     the first match wins and there is no fall-through duplication. */
   function bucketOf(o){
+    if (window.RAFStoreOps && RAFStoreOps.isScheduled(o)) return 'scheduled';
     var m = E.mstate(o.id);
     if (m === E.MSTATE.WAITING_DRIVER) return 'driver';
     if (m === E.MSTATE.READY)          return 'ready';
@@ -688,6 +771,26 @@ body.mw-focused{overflow:hidden;}
     if (o.status === 'cancelled') return 'cancelled';
     if (o.status === 'delivered') return 'done';
     return 'preparing';
+  }
+  /* Operational urgency within a group — never arbitrary order.
+     pending: closest to its acceptance deadline first
+     preparing: accepted longest ago first (closest to expected completion)
+     ready / driver: waiting longest first
+     scheduled: chronological
+     done / cancelled: most recent first, they are history */
+  function sortBucket(key, list){
+    function decidedAt(o){ var r = E.mrecord(o.id); return (r && r.at) || 0; }
+    var by = {
+      pending:   function(a,b){ return E.msLeft(a.id) - E.msLeft(b.id); },
+      preparing: function(a,b){ return decidedAt(a) - decidedAt(b); },
+      ready:     function(a,b){ return decidedAt(a) - decidedAt(b); },
+      driver:    function(a,b){ return decidedAt(a) - decidedAt(b); },
+      scheduled: function(a,b){
+        var A = RAFStoreOps.scheduledAt(a) || 0, B = RAFStoreOps.scheduledAt(b) || 0; return A - B; },
+      done:      function(a,b){ return decidedAt(b) - decidedAt(a); },
+      cancelled: function(a,b){ return decidedAt(b) - decidedAt(a); }
+    };
+    return list.slice().sort(by[key] || function(){ return 0; });
   }
   /* under a minute left on the acceptance window */
   function isWarning(o){
@@ -708,44 +811,32 @@ body.mw-focused{overflow:hidden;}
     { ic:'ti-note',           ar:'طلبات بها ملاحظات', en:'Orders with notes' }
   ];
 
-  /* ---------- expected preparation time (display state only) ---------- */
-  var ETA = [
-    { k:'5-10',  load:'normal',   ar:'5–10 دقائق',  en:'5–10 minutes' },
-    { k:'15-20', load:'moderate', ar:'15–20 دقيقة', en:'15–20 minutes' },
-    { k:'20-30', load:'heavy',    ar:'20–30 دقيقة', en:'20–30 minutes' }
-  ];
+  /* ---------- operating condition ----------
+     All of it comes from RAFStoreOps; this page holds no workload rules. */
+  var OPS = window.RAFStoreOps;
   var LOADS = {
     normal:   { ar:'المتجر يعمل بشكل طبيعي', en:'Store operating normally' },
     moderate: { ar:'ضغط متوسط',              en:'Moderate workload' },
-    heavy:    { ar:'ضغط مرتفع',              en:'Heavy workload' }
+    high:     { ar:'ضغط مرتفع',              en:'Heavy workload' }
   };
-  var etaKey = '5-10', etaDraft = '5-10';
-  function etaDef(k){ return ETA.filter(function(e){ return e.k===k; })[0] || ETA[0]; }
+  var opsDraft = null;   /* pending selection inside the control sheet */
+  var wasOffline = false;
 
   /* ---------- store + identity ---------- */
   function resolveStore(){
     if (!window.RAFPerm) return { ok:false, reason:'unassigned' };
     return RAFPerm.storeLinkOf();
   }
-  /* The store an order belongs to, resolved canonically: each order line
-     carries its product id, and the product record in RAFSource carries the
-     store slug. Display names are never consulted — an order whose lines
-     cannot be resolved is not guessed at, it is simply unscopeable.
-     (Phase 2 extends the order snapshot to carry storeSlug directly, which
-     removes this join entirely.) */
-  function slugOfOrder(o){
-    var lines = o.items || [];
-    for (var i = 0; i < lines.length; i++){
-      if (!lines[i].id || !window.RAFSource) continue;
-      var p = RAFSource.product(lines[i].id);
-      if (p && p.store) return p.store;
-    }
-    return null;
-  }
+  /* Store ownership comes from the order snapshot and nowhere else. The
+     snapshot carries storeSlug and storeId directly, so no product join and
+     no display-name matching is involved. Orders without a snapshot are
+     Legacy Unresolved and are not scoped to any store. */
   function ordersForStore(slug){
-    if (!window.RAFShop || !slug) return [];
-    return RAFShop.Orders.all().filter(function(o){ return slugOfOrder(o) === slug; });
+    if (!window.RAFOrderSnapshot || !slug) return [];
+    return RAFOrderSnapshot.forStore(slug);
   }
+  /* the frozen record for an order — the source for everything rendered below */
+  function snapOf(id){ return window.RAFOrderSnapshot ? RAFOrderSnapshot.of(id) : null; }
 
   /* ---------- order card ---------- */
   function thumbsHTML(o){
@@ -763,7 +854,15 @@ body.mw-focused{overflow:hidden;}
   function unitCount(o){
     return (o.items||[]).reduce(function(n,it){ return n + (it.qty||1); }, 0);
   }
+  /* a captured value, or an explicit "not recorded" — never a guess */
+  function val(v){ return (v == null || v === '') ? none() : esc(v); }
+  function deliveryLabel(s){
+    var t = s && s.delivery && s.delivery.type;
+    if (!t) return T('نوع الطلب','Type')+': '+T('غير مسجَّل','Not recorded');
+    return t === 'pickup' ? T('استلام من المتجر','Pickup') : T('توصيل','Delivery');
+  }
   function cardHTML(o){
+    var s = snapOf(o.id);
     var bucket = bucketOf(o), b = qdef(bucket);
     var isPending = bucket === 'pending', warn = isWarning(o);
     var lock = E.lockedByOther(o.id, ME);
@@ -774,9 +873,9 @@ body.mw-focused{overflow:hidden;}
         + (isPending ? '<span class="mw-cd'+(warn?' warn':'')+'"><i class="ti ti-clock"></i> '+E.clock(o.id)+'</span>' : '')
         + '<span class="mw-c-time">'+esc(L(o.date))+'</span>'
       + '</div>'
-      + '<div class="mw-c-cust"><i class="ti ti-user"></i><span>'+none()+'</span></div>'
+      + '<div class="mw-c-cust"><i class="ti ti-user"></i><span>'+val(s && s.customer && s.customer.name)+'</span></div>'
       + '<div class="mw-c-meta">'
-        + '<span class="mw-tag"><i class="ti ti-truck-delivery"></i>'+T('نوع الطلب','Type')+': '+T('غير مسجَّل','Not recorded')+'</span>'
+        + '<span class="mw-tag"><i class="ti ti-truck-delivery"></i>'+deliveryLabel(s)+'</span>'
         + '<span class="mw-tag"><i class="ti ti-wallet"></i>'+esc(L(o.pay))+'</span>'
         + '<span class="mw-tag total">'+esc(o.total)+' '+T('د.ك','KWD')+'</span>'
       + '</div>'
@@ -793,7 +892,7 @@ body.mw-focused{overflow:hidden;}
     var by = {}; QUEUE.forEach(function(g){ by[g.k] = []; });
     ORDERS.forEach(function(o){ (by[bucketOf(o)] || by.preparing).push(o); });
     document.getElementById('queue').innerHTML = QUEUE.map(function(g){
-      var list = by[g.k];
+      var list = sortBucket(g.k, by[g.k]);
       return '<section class="mw-grp">'
         + '<div class="mw-grp-h"><span class="pip '+g.pip+'"></span><b>'+T(g.ar,g.en)+'</b>'
           + '<span class="mw-grp-n">'+list.length+'</span><span class="mw-grp-line"></span></div>'
@@ -805,37 +904,100 @@ body.mw-focused{overflow:hidden;}
   }
 
   /* ---------- product card (drawer + focus mode) ---------- */
-  function productHTML(it){
-    var p = window.RAFCatalog ? RAFCatalog.get(it.id) : null;
-    var img = p && p.img;
-    var v = it.variant || {};
+  /* Products render from the order's frozen item snapshot — never from live
+     catalogue data. A later price change, rename or deleted image can no
+     longer alter what this order shows. */
+  function productHTML(it, snapItem){
+    var si = snapItem || null;
+    var img = si ? si.image : ((window.RAFCatalog && RAFCatalog.get(it.id)) || {}).img;
+    var v = (si && si.variant) || it.variant || {};
     var opts = Object.keys(v).map(function(k){
       return '<span class="mw-opt">'+esc(k)+': <b>'+esc(v[k])+'</b></span>';
     }).join('');
+    if (si && si.sku)     opts += '<span class="mw-opt">SKU: <b>'+esc(si.sku)+'</b></span>';
+    if (si && si.barcode) opts += '<span class="mw-opt">'+T('باركود','Barcode')+': <b>'+esc(si.barcode)+'</b></span>';
+    if (si && si.modified) opts += '<span class="mw-opt mw-mod"><i class="ti ti-pencil"></i> '+T('معدّل','Modified')+'</span>';
     return '<div class="mw-p">'
       + (img
           ? '<button class="mw-p-img" style="background-image:url(\''+esc(img)+'\')" aria-label="'+T('تكبير الصورة','Zoom image')+'"'
             + ' onclick="zoomImg(\''+esc(img)+'\',\''+esc(L(it.name))+'\')"></button>'
           : '<button class="mw-p-img" aria-label="'+T('تكبير الصورة','Zoom image')+'" disabled><i class="ti '+esc(it.ic||'ti-box')+'"></i></button>')
       + '<div class="mw-p-b">'
-        + '<div class="mw-p-n">'+esc(L(it.name))+'</div>'
+        + '<div class="mw-p-n">'+esc(si ? (isEn() ? (si.nameEn||si.nameAr) : (si.nameAr||si.nameEn)) : L(it.name))+'</div>'
         + '<div class="mw-p-opts">'
-          + '<span class="mw-opt mw-qty">'+T('الكمية','Qty')+' '+(it.qty||1)+'</span>'
+          + '<span class="mw-opt mw-qty">'+T('الكمية','Qty')+' '+((si && si.qty) || it.qty || 1)+'</span>'
           + opts
         + '</div>'
-        /* product notes have no source on the order record yet */
-        + '<div class="mw-p-note">'+T('ملاحظات المنتج','Product notes')+': '+T('غير مسجَّلة','Not recorded')+'</div>'
+        + '<div class="mw-p-note">'+T('ملاحظات المنتج','Product notes')+': '
+          + ((si && si.customerNotes) ? esc(si.customerNotes) : T('غير مسجَّلة','Not recorded'))+'</div>'
       + '</div></div>';
   }
+  /* pair each order line with its frozen snapshot item */
+  function productsHTML(o){
+    var S = snapOf(o.id), items = (o.items || []);
+    return items.map(function(it, i){
+      var si = S && S.items ? (S.items.filter(function(x){ return x.productId === it.id; })[0] || S.items[i]) : null;
+      return productHTML(it, si);
+    }).join('');
+  }
+  function oosLabel(S){
+    var p = S && S.preference && S.preference.outOfStock;
+    if (!p) return none();
+    return p === 'cancel' ? T('إلغاء الطلب بالكامل','Cancel the entire order')
+                          : T('المتابعة بدون المنتج','Continue without the item');
+  }
 
-  /* ---------- timeline ---------- */
+  /* ---------- timeline ----------
+     Rendered from the shared audit event log. No technical metadata is shown,
+     and an automatic event never reads as though a person performed it. */
   function timelineHTML(o){
-    var tl = o.tl || [];
-    if (!tl.length) return '<div class="mw-empty">'+T('لا يوجد سجل','No timeline')+'</div>';
-    return '<div class="mw-tl">'+tl.map(function(t){
-      return '<div class="mw-tl-i '+esc(t.s||'')+'"><b>'+esc(L(t.t))+'</b><span>'+esc(L(t.time))+'</span></div>';
+    if (!window.RAFAudit) return '<div class="mw-empty">'+T('لا يوجد سجل','No timeline')+'</div>';
+    var ev = RAFAudit.timeline(o.id);
+    if (!ev.length) return '<div class="mw-empty">'+T('لا يوجد سجل','No timeline')+'</div>';
+    return '<div class="mw-tl">'+ev.map(function(e){
+      var cls = e.undone ? 'cancel' : (e.automatic ? 'active' : 'done');
+      return '<div class="mw-tl-i '+cls+'">'
+        + '<b>'+esc(e.text)+(e.undone?' <span class="mw-tl-undone">'+T('(تم التراجع)','(undone)')+'</span>':'')+'</b>'
+        + '<span>'+esc(e.time)
+          + (e.automatic ? ' · '+T('تلقائي','automatic') : (e.actor ? ' · '+esc(e.actor) : ''))
+        + '</span></div>';
     }).join('')+'</div>';
   }
+  /* ---------- audit log (detailed) ----------
+     Gated on the existing reports.view permission — merchants have it,
+     merchant employees do not. */
+  function canAudit(){ return !!(window.RAFAudit && RAFAudit.canViewAudit()); }
+  function auditEntryHTML(o){
+    if (!canAudit()) return '';
+    var n = RAFAudit.forOrder(o.id).length;
+    return '<button class="mw-audit-btn" onclick="openAudit(\''+esc(o.id)+'\')">'
+      + '<i class="ti ti-list-search"></i> '+T('سجل التدقيق','Audit log')
+      + '<span class="mw-audit-n">'+n+'</span></button>';
+  }
+  window.openAudit = function(id){
+    if (!canAudit()) return;
+    var rows = RAFAudit.auditLog({ orderId:id, storeSlug:STORE_SLUG });
+    document.getElementById('auditTitle').textContent = id;
+    document.getElementById('auditBody').innerHTML = rows.length ? rows.map(function(r){
+      return '<div class="mw-au">'
+        + '<div class="mw-au-h"><b>'+esc(r.label)+'</b>'
+          + (r.automatic?'<span class="mw-au-tag auto">'+T('تلقائي','Automatic')+'</span>':'')
+          + (r.undone?'<span class="mw-au-tag undone">'+T('تم التراجع','Undone')+'</span>':'')
+          + '<span class="mw-au-t">'+esc(r.time)+'</span></div>'
+        + '<dl class="mw-au-d">'
+          + auRow(T('المنفّذ','Actor'), (r.actorName || T('غير معروف','Unknown')) + ' · ' + r.actorType)
+          + auRow(T('المصدر','Source'), r.source)
+          + (r.previousState||r.newState ? auRow(T('التحول','Transition'),
+              (r.previousState||'—')+' → '+(r.newState||'—')) : '')
+          + (r.reason ? auRow(T('السبب','Reason'), r.reason) : '')
+          + auRow(T('معرّف الحدث','Event ID'), r.eventId)
+          + (r.snapshotVersion ? auRow(T('إصدار السجل','Snapshot'), r.snapshotVersion) : '')
+        + '</dl></div>';
+    }).join('') : '<div class="mw-empty">'+T('لا توجد أحداث','No events')+'</div>';
+    document.getElementById('auditDlg').classList.add('show');
+  };
+  function auRow(k,v){ return '<div><dt>'+esc(k)+'</dt><dd>'+esc(v)+'</dd></div>'; }
+  window.closeAudit = function(){ document.getElementById('auditDlg').classList.remove('show'); };
 
   /* ---------- invoice ---------- */
   function invoiceHTML(o){
@@ -867,6 +1029,7 @@ body.mw-focused{overflow:hidden;}
       return;
     }
     head.textContent = o.id;
+    var S = snapOf(o.id);
     var b = qdef(bucketOf(o));
     body.innerHTML =
       /* who is processing this order, stated before anything else */
@@ -877,35 +1040,36 @@ body.mw-focused{overflow:hidden;}
         + kv(T('رقم الطلب','Order number'), '<span class="num">'+esc(o.id)+'</span>')
         + kv(T('الحالة','Status'), '<span class="mw-c-status '+b.st+'">'+T(b.ar,b.en)+'</span>')
         + kv(T('وقت الطلب','Order time'), esc(L(o.date)))
-        + kv(T('نوع الطلب','Order type'), none())
+        + kv(T('نوع الطلب','Order type'), deliveryLabel(S))
         + kv(T('طريقة الدفع','Payment method'), esc(L(o.pay)))
+        + kv(T('إذا نفد منتج','If an item is unavailable'), oosLabel(S))
         + kv(T('عدد القطع','Item count'), '<span class="num">'+unitCount(o)+'</span>')
         + '</dl></section>'
 
       /* 2 — customer information */
       + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-user"></i> '+T('معلومات العميل','Customer information')+'</div>'
         + '<dl style="margin:0">'
-        + kv(T('الاسم','Name'), none())
-        + kv(T('رقم الهاتف','Phone'), none())
-        + kv(T('العنوان','Address'), o.addr ? esc(L(o.addr)) : none())
+        + kv(T('الاسم','Name'), val(S && S.customer && S.customer.name))
+        + kv(T('رقم الهاتف','Phone'), val(S && S.customer && S.customer.phone))
+        + kv(T('العنوان','Address'), val((S && S.delivery && S.delivery.address) || (o.addr ? L(o.addr) : null)))
         + '</dl></section>'
 
       /* 3 — products */
       + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-package"></i> '+T('المنتجات','Products')+'</div>'
-        + (o.items||[]).map(productHTML).join('')
+        + productsHTML(o)
         + '</section>'
 
       /* 4 — merchant notes */
       + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-notes"></i> '+T('ملاحظات التاجر','Merchant notes')+'</div>'
-        + '<div class="mw-note">'+none()+'</div></section>'
+        + '<div class="mw-note">'+val(S && S.merchant && S.merchant.notes)+'</div></section>'
 
       /* 5 — preparation notes */
       + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-tools-kitchen-2"></i> '+T('ملاحظات التجهيز','Preparation notes')+'</div>'
-        + '<div class="mw-note">'+none()+'</div></section>'
+        + '<div class="mw-note">'+val(S && S.preparation && S.preparation.notes)+'</div></section>'
 
       /* 6 — timeline */
       + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-timeline-event"></i> '+T('المسار الزمني','Timeline')+'</div>'
-        + timelineHTML(o)+'</section>'
+        + timelineHTML(o) + auditEntryHTML(o) + '</section>'
 
       /* 7 — invoice summary */
       + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-file-invoice"></i> '+T('ملخص الفاتورة','Invoice summary')+'</div>'
@@ -987,11 +1151,12 @@ body.mw-focused{overflow:hidden;}
   function renderFocus(){
     var o = selected && ORDERS.filter(function(x){ return x.id===selected; })[0];
     if (!o) return;
+    var S = snapOf(o.id);
     document.getElementById('fcNo').textContent = o.id;
     document.getElementById('fcBody').innerHTML =
       '<div>'
         + '<div class="mw-panel"><div class="mw-sec-h"><i class="ti ti-package"></i> '+T('المنتجات','Products')+'</div>'
-          + (o.items||[]).map(productHTML).join('') + '</div>'
+          + productsHTML(o) + '</div>'
         + '<div class="mw-panel"><div class="mw-sec-h"><i class="ti ti-list-check"></i> '+T('قائمة التحقق','Checklist')+'</div>'
           + checklistHTML(o) + '</div>'
       + '</div>'
@@ -1003,9 +1168,9 @@ body.mw-focused{overflow:hidden;}
           + kv(T('العنوان','Address'), o.addr ? esc(L(o.addr)) : none())
           + '</dl></div>'
         + '<div class="mw-panel"><div class="mw-sec-h"><i class="ti ti-tools-kitchen-2"></i> '+T('ملاحظات التجهيز','Preparation notes')+'</div>'
-          + '<div class="mw-note">'+none()+'</div></div>'
+          + '<div class="mw-note">'+val(S && S.preparation && S.preparation.notes)+'</div></div>'
         + '<div class="mw-panel"><div class="mw-sec-h"><i class="ti ti-notes"></i> '+T('ملاحظات التاجر','Merchant notes')+'</div>'
-          + '<div class="mw-note">'+none()+'</div></div>'
+          + '<div class="mw-note">'+val(S && S.merchant && S.merchant.notes)+'</div></div>'
         + '<div class="mw-panel"><div class="mw-sec-h"><i class="ti ti-timeline-event"></i> '+T('المسار الزمني','Timeline')+'</div>'
           + timelineHTML(o)+'</div>'
         + '<div class="mw-panel"><div class="mw-sec-h"><i class="ti ti-check"></i> '+T('الإجراءات','Actions')+'</div>'
@@ -1093,20 +1258,85 @@ body.mw-focused{overflow:hidden;}
     }).join('');
   }
   function renderOps(){
-    var e = etaDef(etaKey);
-    document.getElementById('ops').setAttribute('data-load', e.load);
-    document.getElementById('opsLabel').textContent = T(LOADS[e.load].ar, LOADS[e.load].en);
-    document.getElementById('opsEta').textContent = T(e.ar, e.en);
+    if (!OPS || !STORE_SLUG) return;
+    var s = OPS.snapshot(STORE_SLUG);
+    var el = document.getElementById('ops');
+    el.setAttribute('data-load', s.busy ? 'heavy' : s.state);
+    el.classList.toggle('is-busy', s.busy);
+
+    var label = s.busy
+      ? T('المتجر مشغول — لا يستقبل طلبات جديدة','Busy — not accepting new orders')
+      : T(LOADS[s.state].ar, LOADS[s.state].en);
+    document.getElementById('opsLabel').textContent = label;
+    document.getElementById('opsEta').textContent = T(s.range.ar, s.range.en);
+
+    /* manual control is stated plainly, and only to the merchant */
+    var badge = document.getElementById('opsMode');
+    if (badge){
+      badge.textContent = s.manual ? T('يدوي','Manual') : T('تلقائي','Automatic');
+      badge.className = 'mw-ops-mode' + (s.manual ? ' manual' : '');
+    }
+    var off = document.getElementById('opsOffline');
+    if (off) off.style.display = OPS.offline() ? '' : 'none';
   }
-  function renderEtaRow(){
-    document.getElementById('etaRow').innerHTML = ETA.map(function(e){
-      return '<button class="mw-eta-b'+(etaDraft===e.k?' on':'')+'" onclick="pickEta(\''+e.k+'\')">'+T(e.ar,e.en)+'</button>';
+  /* the control sheet: workload, automatic mode, and temporary closure */
+  function renderOpsSheet(){
+    if (!OPS || !STORE_SLUG) return;
+    var s = OPS.snapshot(STORE_SLUG);
+    if (opsDraft === null) opsDraft = s.manual ? s.state : 'auto';
+
+    var rows = [{ k:'auto', ar:'تلقائي', en:'Automatic',
+                  sub:T('يحسب النظام الحالة من الطلبات النشطة','Calculated from active orders') }];
+    ['normal','moderate','high'].forEach(function(k){
+      rows.push({ k:k, ar:LOADS[k].ar, en:LOADS[k].en, sub:T(OPS.RANGES[k].ar, OPS.RANGES[k].en) });
+    });
+    document.getElementById('etaRow').innerHTML = rows.map(function(r){
+      return '<button class="mw-eta-b'+(opsDraft===r.k?' on':'')+'" onclick="pickOpsState(\''+r.k+'\')">'
+        + T(r.ar,r.en) + '<small>' + r.sub + '</small></button>';
     }).join('');
+
+    /* the merchant's own view of what the system currently calculates */
+    var info = document.getElementById('opsInfo');
+    if (info){
+      info.innerHTML = '<i class="ti ti-info-circle"></i> '
+        + T('الطلبات النشطة الآن: ','Active orders right now: ') + '<b>' + s.activeCount + '</b> — '
+        + T('الحساب التلقائي: ','automatic would be: ') + T(LOADS[s.autoState].ar, LOADS[s.autoState].en);
+    }
+
+    /* busy mode */
+    var busyBox = document.getElementById('busyBox');
+    if (busyBox){
+      busyBox.innerHTML = s.busy
+        ? '<div class="mw-busy-on"><i class="ti ti-player-pause"></i><div>'
+            + '<b>' + T('المتجر مشغول','Store is busy') + '</b>'
+            + T('يستأنف الاستقبال خلال ','Resumes accepting in ') + busyLeftLabel(s) + '</div>'
+            + '<button class="mw-eta-b" style="flex:0 0 auto;min-height:44px;" onclick="reopenNow()">'
+            + T('إعادة الفتح الآن','Reopen now') + '</button></div>'
+        : '<div class="mw-busy-row">' + OPS.BUSY_DURATIONS.map(function(h){
+              return '<button class="mw-eta-b" onclick="startBusy('+h+')">'+h+T(' س',' h')+'</button>'; }).join('')
+          + '</div><div class="mw-busy-note">'
+          + T('إيقاف مؤقت لاستقبال الطلبات الجديدة. الطلبات الحالية تستمر كالمعتاد. الحد الأقصى 8 ساعات.',
+              'Temporarily stops new orders. Existing orders continue as normal. Maximum 8 hours.')
+          + '</div>';
+    }
+  }
+  function busyLeftLabel(s){
+    var ms = OPS.busyMsLeft(STORE_SLUG), m = Math.ceil(ms/60000);
+    if (m >= 60) return Math.floor(m/60) + T(' س ','h ') + (m%60) + T(' د','m');
+    return m + T(' دقيقة',' min');
   }
 
   /* ---------- window-level handlers ---------- */
+  /* a genuine merchant action, keyed so a refresh never re-logs it */
+  function logOpen(id){
+    if (!window.RAFAudit) return;
+    RAFAudit.record({ action:'order.opened', orderId:id, actor:ME, source:'merchant',
+      key:(ME && ME.id) + ':' + Math.floor(Date.now() / 60000) });
+  }
   window.pick = function(id){
+    var reopened = selected !== id;
     selected = id;
+    if (reopened) logOpen(id);
     /* opening an order claims it, if nobody else is already processing it */
     E.acquireLock(id, ME);
     renderQueue(); renderDrawer();
@@ -1164,11 +1394,16 @@ body.mw-focused{overflow:hidden;}
     document.getElementById('focus').classList.add('show');
     document.body.classList.add('mw-focused');
     closeDrawer();
+    if (window.RAFAudit) RAFAudit.record({ action:'focus.entered', orderId:selected,
+      actor:ME, source:'merchant', key:Date.now() });
     saveSession();
   };
   window.closeFocus = function(){
+    var wasOpen = document.getElementById('focus').classList.contains('show');
     document.getElementById('focus').classList.remove('show');
     document.body.classList.remove('mw-focused');
+    if (wasOpen && window.RAFAudit) RAFAudit.record({ action:'focus.exited', orderId:selected,
+      actor:ME, source:'merchant', key:Date.now() });
     /* orders that arrived during focus are shown normally now */
     refreshOrders();
     renderQueue(); renderDrawer();
@@ -1176,10 +1411,36 @@ body.mw-focused{overflow:hidden;}
   };
   window.openPop  = function(id){ closePop(); document.getElementById(id).classList.add('show'); };
   window.closePop = function(){ ['notifPop','profPop'].forEach(function(i){ document.getElementById(i).classList.remove('show'); }); };
-  window.openEta  = function(){ etaDraft = etaKey; renderEtaRow(); document.getElementById('etaDlg').classList.add('show'); };
-  window.closeEta = function(){ document.getElementById('etaDlg').classList.remove('show'); };
-  window.pickEta  = function(k){ etaDraft = k; renderEtaRow(); };
-  window.saveEta  = function(){ etaKey = etaDraft; renderOps(); closeEta(); };  /* display only */
+  window.openEta  = function(){ opsDraft = null; renderOpsSheet(); document.getElementById('etaDlg').classList.add('show'); };
+  window.closeEta = function(){ document.getElementById('etaDlg').classList.remove('show'); opsDraft = null; };
+  window.pickOpsState = function(k){ opsDraft = k; renderOpsSheet(); };
+  /* an operational change must never be reported as done while offline */
+  function opsGuard(res){
+    var m = document.getElementById('opsErr');
+    if (res && res.ok){ if (m){ m.style.display='none'; m.textContent=''; } return true; }
+    if (m){
+      m.style.display = '';
+      m.textContent = (res && res.reason === 'offline')
+        ? T('لا يوجد اتصال — لم يتم حفظ التغيير.','No connection — the change was not saved.')
+        : T('تعذّر تنفيذ التغيير.','The change could not be applied.');
+    }
+    return false;
+  }
+  window.saveEta = function(){
+    var res = (opsDraft === 'auto' || opsDraft === null)
+      ? OPS.setAutomatic(STORE_SLUG, ME)
+      : OPS.setManual(STORE_SLUG, opsDraft, ME);
+    if (!opsGuard(res)) return;
+    renderOps(); renderOpsSheet(); closeEta();
+  };
+  window.startBusy = function(hours){
+    if (!opsGuard(OPS.setBusy(STORE_SLUG, hours, ME))) return;
+    renderOps(); renderOpsSheet();
+  };
+  window.reopenNow = function(){
+    if (!opsGuard(OPS.reopen(STORE_SLUG, ME))) return;
+    renderOps(); renderOpsSheet();
+  };
   window.toggleChip = function(btn){
     btn.setAttribute('aria-pressed', btn.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
     saveSession();
@@ -1224,7 +1485,17 @@ body.mw-focused{overflow:hidden;}
     refreshOrders();
     E.sweepLocks();
     E.sweepUndo();
+    if (OPS) OPS.sweep();                    /* expired temporary closures reopen */
+    var off = !!(OPS && OPS.offline());
+    if (off !== wasOffline){
+      wasOffline = off;
+      if (window.RAFAudit) RAFAudit.record({ action: off ? 'net.offline' : 'net.online',
+        storeSlug:STORE_SLUG, actor:ME, source:'merchant', key:Date.now() });
+    }
+    document.body.classList.toggle('is-offline', off);
     scanNotifications();
+    /* operating condition updates silently, even inside Focus Mode */
+    renderOps();
     if (focused){ renderFocus(); return; }   /* no banners, no dialogs, no interruption */
     renderQueue(); renderDrawer(); renderNotifs();
   }
@@ -1284,6 +1555,10 @@ body.mw-focused{overflow:hidden;}
     });
     if (SESSION.selected && ORDERS.some(function(o){ return o.id === SESSION.selected; })){
       selected = SESSION.selected;
+      /* a restored session is logged as a recovery — never as the merchant
+         opening the order again */
+      if (window.RAFAudit) RAFAudit.record({ action:'session.recovered', orderId:selected,
+        actor:ME, source:'merchant', key:(ME && ME.id) + ':' + (SESSION.savedAt || 0) });
       E.acquireLock(selected, ME);        /* reclaim my own lock after a refresh */
       renderQueue(); renderDrawer();
       if (SESSION.drawerOpen && window.matchMedia('(max-width:880px)').matches){
@@ -1302,6 +1577,12 @@ body.mw-focused{overflow:hidden;}
     setInterval(function(){ if (selected) E.heartbeat(selected, ME); }, E.LOCK_HEARTBEAT_MS);
     setInterval(tick, 1000);
     E.watch(function(){ if (!document.getElementById('focus').classList.contains('show')) { renderQueue(); renderDrawer(); } });
+    /* another employee's operational change lands here — silently, never
+       interrupting Focus Mode */
+    if (OPS) OPS.watch(function(){
+      renderOps();
+      if (document.getElementById('etaDlg').classList.contains('show')) renderOpsSheet();
+    });
     window.addEventListener('scroll', function(){ SESSION.scrollY = window.scrollY; }, { passive:true });
     window.addEventListener('beforeunload', saveSession);
     var qEl = document.getElementById('q'); if (qEl) qEl.addEventListener('input', saveSession);

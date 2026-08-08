@@ -135,6 +135,16 @@
         T('قبل المتجر طلبك ' + orderId, 'Store accepted order ' + orderId),
         'raf_tracking.html?id=' + encodeURIComponent(orderId));
     } else {
+      /* the acceptance window closing on its own is a system event, never a
+         merchant one */
+      if (decision === DECISION.TIMEOUT) {
+        audit('system.timeout', orderId, { automatic:true, systemGenerated:true,
+          source:'automation', key:s.decidedAt, reason:'acceptance_window_elapsed' });
+      }
+      if (decision === DECISION.CANCELLED) {
+        audit('order.cancelled', orderId, { source:'customer', key:s.decidedAt,
+          actor:{ type:'customer' }, reason:'customer_cancelled' });
+      }
       cancelAndRefund(orderId, why || decision);
     }
     emit(orderId, decision);
@@ -149,8 +159,16 @@
 
   /* mark the order cancelled, restore its stock and record the refund */
   function cancelAndRefund(orderId, why){
+    var st = get(orderId);
+    var k = (st && st.decidedAt) || Date.now();
     setOrderStatus(orderId, STATUS.CANCELLED);
+    audit('system.cancelled', orderId, { automatic:true, systemGenerated:true, source:'automation',
+      key:k, reason:why, previousState:null, newState:STATUS.CANCELLED });
     restoreStock(orderId);
+    audit('system.stock_restored', orderId, { automatic:true, systemGenerated:true, source:'automation',
+      key:k, metadata:{ items:(st && st.items) || null } });
+    audit('system.refunded', orderId, { automatic:true, systemGenerated:true, source:'automation',
+      key:k, reason:why });
     if (global.RAFRules) { try { RAFRules.Reserve.release(); } catch (e) {} }
     notify(orderId,
       why === 'timeout'
@@ -221,6 +239,20 @@
   var LS_UNDO   = 'raf_order_undo';
   var LS_PICKUP = 'raf_driver_pickup';
 
+  /* ---------- audit bridge ----------
+     The engine performs the action; RAFAudit records it. Audit is never
+     allowed to change or roll back a business result that already happened,
+     so every call is fire-and-forget and failures are swallowed here (the
+     audit engine records them for diagnostics itself). */
+  function audit(action, orderId, opts){
+    if (!global.RAFAudit) return null;
+    try {
+      var o = opts || {};
+      o.action = action; o.orderId = orderId;
+      return RAFAudit.record(o);
+    } catch (e) { return null; }
+  }
+
   function readJSON(k, dflt){
     try { var v = JSON.parse(localStorage.getItem(k)); return v && typeof v === 'object' ? v : dflt; }
     catch (e) { return dflt; }
@@ -283,7 +315,11 @@
   }
   function openUndo(orderId, action, prevState, actor){
     var all = undoAll();
+    var cur = mstateAll()[orderId];
     all[orderId] = { action:action, prev:prevState || null, at:Date.now(),
+                     /* the state timestamp the action's audit event was keyed on,
+                        so an undo can point back at exactly that event */
+                     actionAt: cur ? cur.at : null,
                      by:(actor && actor.id) || null, byName:(actor && actor.name) || null };
     writeJSON(LS_UNDO, all);
   }
@@ -312,6 +348,19 @@
     if (u.action === ACTION.ACCEPT){ dropTimeline(orderId, 'm-accept'); }
     if (u.action === ACTION.REJECT){ dropTimeline(orderId, 'm-reject'); }
     if (u.action === ACTION.READY) { dropTimeline(orderId, 'm-ready'); dropTimeline(orderId, 'm-waiting-driver'); }
+    /* the undo is appended as its own event and points back at the original;
+       neither is ever removed from the audit log */
+    if (global.RAFAudit){
+      var origAction = u.action === ACTION.ACCEPT ? 'order.accept'
+                     : u.action === ACTION.REJECT ? 'order.reject' : 'order.ready';
+      var origId = RAFAudit.makeId(origAction, orderId, u.actionAt);
+      audit('order.undo', orderId, { actor:{ id:u.by, name:u.byName }, source:'merchant',
+        key:u.at, undoOf:origId, reason:'merchant_undo',
+        previousState: u.action === ACTION.ACCEPT ? MSTATE.PREPARING
+                     : u.action === ACTION.REJECT ? 'rejected' : MSTATE.READY,
+        newState: (u.prev && u.prev.state) || MSTATE.PENDING,
+        metadata:{ of:origAction } });
+    }
     emit(orderId, 'undo');
     return true;
   }
@@ -338,6 +387,8 @@
     setMState(orderId, MSTATE.PREPARING, actor);
     appendTimeline(orderId, 'm-accept', 'قبل المتجر الطلب', 'Store accepted the order');
     openUndo(orderId, ACTION.ACCEPT, prev, actor);
+    audit('order.accept', orderId, { actor:actor, source:'merchant', reversible:true,
+      key:(mrecord(orderId) || {}).at, previousState:MSTATE.PENDING, newState:MSTATE.PREPARING });
     return { ok:true, undoMs:UNDO_MS };
   }
   function merchantReject(orderId, actor){
@@ -347,6 +398,8 @@
     setMState(orderId, 'rejected', actor);
     appendTimeline(orderId, 'm-reject', 'اعتذر المتجر عن الطلب', 'Store declined the order', 'cancel');
     openUndo(orderId, ACTION.REJECT, prev, actor);
+    audit('order.reject', orderId, { actor:actor, source:'merchant', reversible:true,
+      key:(mrecord(orderId) || {}).at, previousState:MSTATE.PENDING, newState:'rejected' });
     return { ok:true, undoMs:UNDO_MS };
   }
   function merchantReady(orderId, actor){
@@ -354,13 +407,26 @@
     var cur = mstate(orderId);
     if (cur !== MSTATE.PREPARING && cur !== MSTATE.ACCEPTED) return { ok:false, reason:'not_preparing' };
     var prev = mrecord(orderId);
-    /* pressing Ready ends merchant responsibility: the order goes straight on
-       to waiting for a driver, exactly as the approved flow states */
-    setMState(orderId, MSTATE.WAITING_DRIVER, actor);
+    /* READY is a real, persistent state. The merchant's work ends here; the
+       driver workflow owns everything after it (Ready → Waiting Driver →
+       pickup). Nothing advances the order on the merchant's behalf. */
+    setMState(orderId, MSTATE.READY, actor);
     appendTimeline(orderId, 'm-ready', 'الطلب جاهز', 'Order ready');
-    appendTimeline(orderId, 'm-waiting-driver', 'بانتظار السائق', 'Waiting for driver', 'active');
     openUndo(orderId, ACTION.READY, prev, actor);
+    audit('order.ready', orderId, { actor:actor, source:'merchant', reversible:true,
+      key:(mrecord(orderId) || {}).at, previousState:cur, newState:MSTATE.READY });
     return { ok:true, undoMs:UNDO_MS };
+  }
+  /* Driver workflow hook: the order has a driver on the way. Out of scope for
+     the merchant phases, exposed so the driver module never has to reach into
+     merchant state itself. */
+  function driverAssigned(orderId, actor){
+    if (mstate(orderId) !== MSTATE.READY) return { ok:false, reason:'not_ready' };
+    setMState(orderId, MSTATE.WAITING_DRIVER, actor);
+    appendTimeline(orderId, 'm-waiting-driver', 'بانتظار السائق', 'Waiting for driver', 'active');
+    audit('driver.assigned', orderId, { actor:actor, source:'driver',
+      key:(mrecord(orderId) || {}).at, previousState:MSTATE.READY, newState:MSTATE.WAITING_DRIVER });
+    return { ok:true };
   }
   /* after Ready the merchant has no further processing actions */
   function merchantDone(orderId){
@@ -374,14 +440,24 @@
      is written into the timeline. */
   function driverPickedUp(orderId, actor){
     var cur = mstate(orderId);
-    if (cur !== MSTATE.READY && cur !== MSTATE.WAITING_DRIVER){
+    /* Ready was never recorded — a crash, a lost connection, a refresh.
+       Complete it automatically and say so in the timeline. */
+    var recovered = (cur !== MSTATE.READY && cur !== MSTATE.WAITING_DRIVER);
+    if (recovered){
       clearUndo(orderId);
-      setMState(orderId, MSTATE.WAITING_DRIVER, actor);
       appendTimeline(orderId, 'm-ready', 'الطلب جاهز', 'Order ready');
       appendTimeline(orderId, 'm-auto-recovery',
         'اكتمل "جاهز" تلقائياً بعد استلام السائق', 'Ready auto-completed after driver pickup');
     }
+    setMState(orderId, MSTATE.WAITING_DRIVER, actor);
     appendTimeline(orderId, 'm-picked-up', 'استلم السائق الطلب', 'Driver picked up the order');
+    var k = (mrecord(orderId) || {}).at;
+    /* the recovery is recorded as automatic, never as a merchant action */
+    if (recovered) audit('driver.pickup_recovery', orderId, { automatic:true, systemGenerated:true,
+      source:'automation', key:k, previousState:cur, newState:MSTATE.READY,
+      reason:'ready_not_recorded_before_pickup' });
+    audit('driver.pickup', orderId, { actor:actor, source:'driver', key:k,
+      previousState:recovered ? MSTATE.READY : cur, newState:MSTATE.WAITING_DRIVER });
     emit(orderId, 'pickup');
     return true;
   }
@@ -402,9 +478,13 @@
     if (!orderId || !actor) return false;
     var l = lockOf(orderId);
     if (l && l.userId !== actor.id) return false;         /* someone else holds it */
+    var fresh = !l;                                       /* a genuine new claim */
     var all = locksAll();
-    all[orderId] = { userId:actor.id, name:actor.name || actor.id, ts:Date.now() };
+    var since = (all[orderId] && all[orderId].userId === actor.id && all[orderId].since) || Date.now();
+    all[orderId] = { userId:actor.id, name:actor.name || actor.id, ts:Date.now(), since:since };
     writeJSON(LS_LOCKS, all);
+    /* keyed on the claim, so refreshing or reclaiming does not log again */
+    if (fresh) audit('lock.acquired', orderId, { actor:actor, source:'merchant', key:actor.id + ':' + since });
     emit(orderId, 'lock');
     return true;
   }
@@ -419,6 +499,7 @@
     if (!l) return false;
     if (actor && l.userId !== actor.id) return false;
     delete all[orderId]; writeJSON(LS_LOCKS, all);
+    audit('lock.released', orderId, { actor:actor, source:'merchant', key:l.since || l.ts });
     emit(orderId, 'lock');
     return true;
   }
@@ -426,8 +507,15 @@
      admins only; the caller decides that with canOverrideLock() */
   function overrideLock(orderId, actor){
     var all = locksAll();
+    var prior = all[orderId] || null;
     delete all[orderId]; writeJSON(LS_LOCKS, all);
-    return acquireLock(orderId, actor);
+    var got = acquireLock(orderId, actor);
+    if (got && prior && actor && prior.userId !== actor.id){
+      audit('lock.overridden', orderId, { actor:actor, source:'merchant',
+        key:prior.userId + ':' + (prior.since || prior.ts),
+        reason:'manager_override', metadata:{ previousHolderId:prior.userId } });
+    }
+    return got;
   }
   function lockedByOther(orderId, actor){
     var l = lockOf(orderId);
@@ -443,7 +531,12 @@
   function sweepLocks(){
     var all = locksAll(), now = Date.now(), changed = false;
     Object.keys(all).forEach(function (k) {
-      if (now - all[k].ts > LOCK_STALE_MS) { delete all[k]; changed = true; }
+      if (now - all[k].ts > LOCK_STALE_MS) {
+        audit('lock.expired', k, { automatic:true, systemGenerated:true, source:'automation',
+          key:all[k].userId + ':' + (all[k].since || all[k].ts),
+          reason:'heartbeat_lost', metadata:{ heldBy:all[k].userId } });
+        delete all[k]; changed = true;
+      }
     });
     if (changed) writeJSON(LS_LOCKS, all);
     return changed;
@@ -548,7 +641,7 @@
     mstate: mstate, mrecord: mrecord, merchantDone: merchantDone,
     merchantAccept: merchantAccept, merchantReject: merchantReject, merchantReady: merchantReady,
     undo: undo, undoOf: undoOf, undoMsLeft: undoMsLeft, commitUndo: commitUndo, sweepUndo: sweepUndo,
-    driverPickedUp: driverPickedUp,
+    driverPickedUp: driverPickedUp, driverAssigned: driverAssigned,
     /* locking */
     lockOf: lockOf, acquireLock: acquireLock, heartbeat: heartbeat, releaseLock: releaseLock,
     overrideLock: overrideLock, lockedByOther: lockedByOther, canProcess: canProcess, sweepLocks: sweepLocks,

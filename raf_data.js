@@ -374,6 +374,36 @@
              { k: 'ship', t: { ar: 'مع مندوب التوصيل', en: 'Out for delivery' }, time: { ar: '—', en: '—' }, s: '' },
              { k: 'done', t: { ar: 'تم التسليم', en: 'Delivered' }, time: { ar: '—', en: '—' }, s: '' }]
       };
+
+      /* ---- ORDER SNAPSHOT ----
+         The immutable commercial record is built and validated by its own
+         engine; this module never assembles snapshot data itself. A snapshot
+         that is not complete blocks the order rather than committing a
+         partially captured commercial record. */
+      if (window.RAFOrderSnapshot) {
+        var store = (window.RAFSource && opts.storeSlug) ? RAFSource.store(opts.storeSlug) : null;
+        var snap = RAFOrderSnapshot.build({
+          orderId: order.id,
+          store: store,
+          checkoutAt: Date.now(),
+          customerId: opts.customerId || null,
+          customerNotes: opts.customerNotes || null,
+          address: opts.address || null,
+          addressText: opts.addr ? (opts.addr.ar || opts.addr.en) : null,
+          deliveryType: opts.deliveryType || null,
+          deliveryInstructions: opts.deliveryInstructions || null,
+          oosPreference: opts.oosPreference || null,
+          prepTimeShown: opts.prepTimeShown || null,
+          totals: opts.totals || {},
+          lines: lines,
+          payment: opts.payment || null,
+          paymentStatus: opts.paymentStatus || null
+        });
+        var check = RAFOrderSnapshot.validate(snap);
+        if (!check.ok) return { error: 'INCOMPLETE_SNAPSHOT', missing: check.missing };
+        RAFOrderSnapshot.attach(order, snap);
+      }
+
       var all = Orders.all(); all.unshift(order); write(LS.orders, all);
       return order;
     }

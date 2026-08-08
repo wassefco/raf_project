@@ -241,6 +241,21 @@
   var STORES = [], PRODUCTS = [], BY_ID = {}, BY_SLUG = {};
   RAW.forEach(function (s) {
     var store = {
+      /* STRUCTURED OPENING HOURS — the authoritative source for the closing
+         time and the 30-minute last-order rule.
+
+           schedule: {
+             saturday:  { open:'10:00', close:'23:00' },
+             sunday:    { open:'10:00', close:'23:00' },
+             …
+             friday:    { closed:true }
+           }
+
+         Times are 24-hour 'HH:MM'. A day may instead carry { closed:true }.
+         The free-text `hours` field below is DISPLAY COPY ONLY and is never
+         parsed. No store is seeded with a schedule: an absent one reports a
+         genuine "closing time unavailable" state rather than a guessed time. */
+      schedule: s.schedule || null,
       slug:s.slug, name:s.name, num:s.num, ic:s.ic,
       logo:STORE_IMG + s.slug + '-logo.jpg',
       cover:s.cover || (STORE_IMG + s.slug + '-cover.jpg'), cat:s.cat,

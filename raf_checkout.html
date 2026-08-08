@@ -94,6 +94,23 @@
         </div>
       </div>
 
+      <!-- STORE OPERATING NOTICE — expected preparation time, busy state and
+           the next-business-day message. Customers see the useful outcome only:
+           no workload wording, no counts, no internal operational detail. -->
+      <div class="panel" id="opsPanel" style="display:none;">
+        <div class="panel-b" id="opsNotice"></div>
+      </div>
+
+      <!-- OUT-OF-STOCK PREFERENCE — captured here so the order snapshot records
+           exactly what the customer chose; it is never defaulted or guessed. -->
+      <div class="panel">
+        <div class="panel-h"><i class="ti ti-package-off"></i> <span data-ar="إذا نفد أحد المنتجات" data-en="If an item is unavailable">إذا نفد أحد المنتجات</span><span class="side" data-ar="مطلوب" data-en="Required">مطلوب</span></div>
+        <div class="panel-b">
+          <div class="tips" id="oosRow"></div>
+          <div class="msg" id="oosMsg"></div>
+        </div>
+      </div>
+
       <!-- DRIVER INSTRUCTIONS -->
       <div class="panel">
         <div class="panel-h"><i class="ti ti-message-2"></i> <span data-ar="تعليمات للسائق" data-en="Driver instructions">تعليمات للسائق</span><span class="side" data-ar="اختياري" data-en="Optional">اختياري</span></div>
@@ -151,7 +168,10 @@
 </nav>
 
 <script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
 <script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_store_ops.js"></script>
 <script src="raf_catalog.js"></script>
 <script src="raf_rules.js"></script>
 <script src="raf_checkout.js"></script>
@@ -289,6 +309,61 @@
   window.saveTipInvoice=function(){ RAFCO.set('raf_tip_invoice', document.getElementById('tipInvoice').checked?'1':'0'); renderSummary(); };
   window.saveDriverNotes=function(){ RAFCO.set('raf_driver_notes', document.getElementById('driverNotes').value); };
 
+  /* ---- out-of-stock preference ----
+     Stored exactly as chosen. There is no default: the customer must pick,
+     and the snapshot records their choice verbatim. */
+  var OOS=[
+    { k:'continue', ic:'ti-player-track-next', ar:'تابع بدون المنتج غير المتوفر', en:'Continue without the unavailable item' },
+    { k:'cancel',   ic:'ti-x',                 ar:'ألغِ الطلب بالكامل',           en:'Cancel the entire order' }
+  ];
+  /* ---- store operating notice (customer-facing) ----
+     Reads the shared operations engine so the customer and the merchant can
+     never see different preparation times. */
+  function storeSlugForCart(){
+    var l = RAFShop.Cart.items()[0];
+    var c = (l && window.RAFCatalog) ? RAFCatalog.get(l.id) : null;
+    return c ? c.slug : null;
+  }
+  function renderOpsNotice(){
+    var panel = document.getElementById('opsPanel'), box = document.getElementById('opsNotice');
+    if (!panel || !window.RAFStoreOps) return;
+    var slug = storeSlugForCart();
+    if (!slug){ panel.style.display='none'; return; }
+    var rows = [];
+    var accept = RAFStoreOps.acceptsNewOrders(slug);
+    if (!accept.ok && accept.reason === 'busy'){
+      rows.push('<div class="alert warn"><i class="ti ti-player-pause"></i><div>'+accept.message+'</div></div>');
+    } else {
+      var r = RAFStoreOps.prepRange(slug);
+      rows.push('<div class="sum-row"><span>'+T('وقت التجهيز المتوقع','Expected preparation time')+'</span>'
+        + '<span>'+T(r.ar, r.en)+'</span></div>');
+    }
+    /* past the cutoff → say so plainly instead of implying same-day delivery */
+    var cut = RAFStoreOps.cutoff(slug);
+    if (cut.known && !cut.sameDay){
+      rows.push('<div class="alert warn" style="margin-top:10px;"><i class="ti ti-calendar-clock"></i><div>'+cut.message+'</div></div>');
+    }
+    box.innerHTML = rows.join('');
+    panel.style.display = '';
+    /* a busy store cannot be checked out */
+    var btn = document.getElementById('payBtn');
+    if (btn && !btn.dataset.busy) btn.disabled = !accept.ok;
+  }
+
+  function oosSel(){ return RAFCO.get('raf_oos_pref',''); }
+  function renderOos(){
+    var cur=oosSel();
+    document.getElementById('oosRow').innerHTML = OOS.map(function(o){
+      return '<button class="tip'+(cur===o.k?' on':'')+'" style="flex:1 1 180px;height:auto;padding:12px 14px;text-align:start;"'
+        + ' onclick="pickOos(\''+o.k+'\')"><i class="ti '+o.ic+'" style="margin-inline-end:6px"></i>'+T(o.ar,o.en)+'</button>';
+    }).join('');
+  }
+  window.pickOos=function(k){
+    RAFCO.set('raf_oos_pref',k);
+    var m=document.getElementById('oosMsg'); m.className='msg'; m.innerHTML='';
+    renderOos();
+  };
+
   function renderPayments(){
     var sel=RAFCO.get('raf_pay_sel','cod');
     document.getElementById('payList').innerHTML = PAYMENTS.map(function(p){
@@ -422,6 +497,15 @@
       err.innerHTML='<div class="alert warn"><i class="ti ti-alert-triangle"></i><div>'+T('اختر عنوان التوصيل أولاً','Select a delivery address first')+'</div></div>';
       return;
     }
+    /* the out-of-stock choice is recorded verbatim in the snapshot, so it
+       must actually be chosen — it is never defaulted on the customer's behalf */
+    if(!oosSel()){
+      var om=document.getElementById('oosMsg');
+      om.className='msg err show';
+      om.innerHTML='<i class="ti ti-alert-circle"></i> '+T('اختر ما تريد أن يحدث إذا نفد أحد المنتجات','Choose what should happen if an item is unavailable');
+      document.getElementById('oosRow').scrollIntoView({block:'center',behavior:'smooth'});
+      return;
+    }
     var payId=RAFCO.get('raf_pay_sel','cod');
     var pay=PAYMENTS.find(function(p){return p.id===payId;})||PAYMENTS[0];
 
@@ -434,10 +518,26 @@
       if(btn){ btn.disabled=true; btn.dataset.busy='1'; }
 
       var totals=RAFCO.totals(RAFShop.Cart.items(),{withTip:true});
+      /* the store this order belongs to, by slug — never by display name */
+      var firstLine=RAFShop.Cart.items()[0];
+      var cat=(firstLine && window.RAFCatalog) ? RAFCatalog.get(firstLine.id) : null;
       RAFRules.placeOrder({
         pay:{ar:pay.ar,en:pay.en},
         addr:{ar:addrText(addr,'ar'),en:addrText(addr,'en')},
-        totals:totals
+        totals:totals,
+        /* ---- snapshot context (consumed by RAFOrderSnapshot) ---- */
+        storeSlug: cat ? cat.slug : null,
+        address: addr,
+        deliveryType: 'delivery',
+        deliveryInstructions: RAFCO.get('raf_driver_notes','') || null,
+        customerNotes: RAFCO.get('raf_order_notes','') || null,
+        customerId: (window.RAFPerm && RAFPerm.currentUser()) ? RAFPerm.currentUser().id : null,
+        oosPreference: oosSel(),
+        /* the preparation-time range the store was showing at this moment;
+           frozen into the snapshot and never recalculated later */
+        prepTimeShown: (window.RAFStoreOps && cat) ? RAFStoreOps.prepKey(cat.slug) : null,
+        payment: { ar:pay.ar, en:pay.en, id:pay.id },
+        paymentStatus: pay.id==='cod' ? 'cod' : 'paid'
       }).then(function(res){
         if(!res.ok){
           if(btn){ btn.disabled=false; delete btn.dataset.busy; }
@@ -473,10 +573,10 @@
     if(!has){ RAFShop.Cart.badge(); return; }
     if(window.RAFRules) RAFRules.Reserve.hold(items);
     document.getElementById('driverNotes').value=RAFCO.get('raf_driver_notes','');
-    renderAddresses(); renderTips(); renderPayments(); renderSummary();
+    renderAddresses(); renderTips(); renderOos(); renderOpsNotice(); renderPayments(); renderSummary();
     RAFCO.applyLang(); RAFShop.Cart.badge();
     var root=document.getElementById('htmlRoot');
-    if(root) new MutationObserver(function(){ renderAddresses(); renderTips(); renderPayments(); renderSummary(); })
+    if(root) new MutationObserver(function(){ renderAddresses(); renderTips(); renderOos(); renderOpsNotice(); renderPayments(); renderSummary(); })
       .observe(root,{attributes:true,attributeFilter:['lang']});
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();

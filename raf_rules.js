@@ -320,6 +320,19 @@
       var v = validate(l.id, l.variant, l.qty);
       if (!v.ok) errors.push({ id:l.id, name:l.name ? L(l.name) : l.id, code:v.code, message:v.message });
     });
+    /* Busy Mode: a store that has temporarily stopped taking NEW orders is
+       refused here. Orders already placed are untouched by this gate.
+       The operational rule itself lives in RAFStoreOps, not here. */
+    if (global.RAFStoreOps && global.RAFCatalog && lines.length) {
+      var c0 = RAFCatalog.get(lines[0].id);
+      if (c0 && c0.slug) {
+        var accept = RAFStoreOps.acceptsNewOrders(c0.slug);
+        if (!accept.ok && accept.reason === 'busy') {
+          errors.push({ code:'STORE_BUSY', message:accept.message });
+        }
+      }
+    }
+
     /* single store per order stays enforced at the final gate too */
     var stores = {};
     lines.forEach(function (l) { var k = RAFShop.Cart.storeOf(l); if (k) stores[k] = 1; });
@@ -339,7 +352,12 @@
       var check = finalValidate();
       if (!check.ok) { placing = false; return resolve({ ok:false, errors:check.errors, sync:check.sync }); }
       var order = RAFShop.Orders.create(opts || {});
-      if (!order) { placing = false; return resolve({ ok:false,
+      /* an incomplete commercial snapshot must never commit */
+      if (order && order.error === 'INCOMPLETE_SNAPSHOT') { placing = false; return resolve({ ok:false,
+        errors:[{ code:'INCOMPLETE_SNAPSHOT', fields:order.missing,
+                  message:T('تعذّر إتمام الطلب: بيانات الطلب غير مكتملة',
+                            'Could not complete the order: the order record is incomplete') }] }); }
+      if (!order || !order.id) { placing = false; return resolve({ ok:false,
         errors:[{ code:'CREATE_FAILED', message:T('تعذّر إنشاء الطلب','Could not create the order') }] }); }
       Reserve.commit();                       /* inventory committed on success */
       RAFShop.Cart.clear();
