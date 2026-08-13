@@ -205,7 +205,9 @@
       var act = Cart.read();
       if (!act.length) return false;
       var key = Cart.currentStore(), parked = Carts.read().filter(function (c) { return c.store !== key; });
-      parked.push({ store: key, items: act, state: Carts.grabState() });
+      /* `at` records when this cart was last active, so the cart page can
+         deterministically reopen the most recently used one */
+      parked.push({ store: key, items: act, state: Carts.grabState(), at: Date.now() });
       Carts.write(parked);
       Carts.putState(null);
       Cart.write([]);
@@ -219,7 +221,7 @@
       if (i < 0) return false;
       var target = parked.splice(i, 1)[0];
       var act = Cart.read();
-      if (act.length) parked.push({ store: Cart.currentStore(), items: act, state: Carts.grabState() });
+      if (act.length) parked.push({ store: Cart.currentStore(), items: act, state: Carts.grabState(), at: Date.now() });
       Carts.write(parked);
       Carts.putState(target.state);
       Cart.write(target.items);
@@ -241,7 +243,17 @@
       Carts.write(Carts.read().filter(function (c) { return c.store !== storeKey; }));
       return true;
     },
-    clear: function () { Carts.write([]); }
+    clear: function () { Carts.write([]); },
+    /* A8 — the parked cart to reopen when the active one is empty: the most
+       recently active, falling back to the first available. Deterministic,
+       never random, and it neither merges nor deletes anything. */
+    nextActive: function () {
+      var parked = Carts.read().filter(function (c) { return c.items && c.items.length; });
+      if (!parked.length) return null;
+      var best = parked[0];
+      parked.forEach(function (c) { if ((c.at || 0) > (best.at || 0)) best = c; });
+      return best.store;
+    }
   };
 
   /* ─────────── WISHLIST ─────────── */

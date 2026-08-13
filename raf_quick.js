@@ -220,8 +220,75 @@
 
     backEl.addEventListener('click',onClick);
     document.addEventListener('keydown',onKey);
+    attachSwipe();                                   /* A5 — swipe down to close */
     var x=backEl.querySelector('.rq-x'); if(x) x.focus();
     syncQtyBtns();                                   /* apply the stock ceiling on open */
+  }
+
+  /* ---------- A5: swipe down to close ----------
+     An addition to the close button, never a replacement: the button, Escape
+     and the backdrop all still work. The gesture only starts on the grab
+     handle or when the sheet is already scrolled to the top, so it can never
+     steal an internal scroll, a variant tap, a quantity press or a button. */
+  var swipe = null;
+  var SWIPE_CLOSE_PX = 90;         /* far enough that a small nudge never closes */
+  var SWIPE_START_SLOP = 6;
+  function sheetEl(){ return backEl && backEl.querySelector('.rq'); }
+  function attachSwipe(){
+    var sheet = sheetEl(); if (!sheet) return;
+    swipe = { sheet:sheet, startY:0, dy:0, active:false, tracking:false };
+
+    swipe.onStart = function(e){
+      if (e.touches && e.touches.length !== 1) return;
+      var t = (e.touches ? e.touches[0] : e);
+      /* a control or a scrolled body keeps its own behaviour */
+      if (e.target.closest('button,a,input,textarea,select')) return;
+      var onGrab = !!e.target.closest('.rq-grab');
+      if (!onGrab && sheet.scrollTop > 0) return;
+      swipe.startY = t.clientY; swipe.dy = 0;
+      swipe.tracking = true; swipe.active = false;
+      swipe.fromGrab = onGrab;
+    };
+    swipe.onMove = function(e){
+      if (!swipe.tracking) return;
+      var t = (e.touches ? e.touches[0] : e);
+      var dy = t.clientY - swipe.startY;
+      if (!swipe.active){
+        if (dy < SWIPE_START_SLOP) {
+          /* an upward or sideways move is a scroll, not a dismissal */
+          if (dy < -SWIPE_START_SLOP) swipe.tracking = false;
+          return;
+        }
+        swipe.active = true;
+        sheet.style.transition = 'none';
+      }
+      if (dy < 0) dy = 0;
+      swipe.dy = dy;
+      sheet.style.transform = 'translateY(' + dy + 'px)';
+      if (e.cancelable) e.preventDefault();          /* we own the gesture now */
+    };
+    swipe.onEnd = function(){
+      if (!swipe.tracking) return;
+      var dy = swipe.dy;
+      swipe.tracking = false; swipe.active = false;
+      sheet.style.transition = '';
+      if (dy >= SWIPE_CLOSE_PX) { sheet.style.transform = ''; finish(false); return; }
+      sheet.style.transform = '';                    /* springs back */
+    };
+    sheet.addEventListener('touchstart', swipe.onStart, { passive:true });
+    sheet.addEventListener('touchmove',  swipe.onMove,  { passive:false });
+    sheet.addEventListener('touchend',   swipe.onEnd);
+    sheet.addEventListener('touchcancel',swipe.onEnd);
+  }
+  function detachSwipe(){
+    if (!swipe || !swipe.sheet) { swipe = null; return; }
+    var s = swipe.sheet;
+    s.removeEventListener('touchstart', swipe.onStart);
+    s.removeEventListener('touchmove',  swipe.onMove);
+    s.removeEventListener('touchend',   swipe.onEnd);
+    s.removeEventListener('touchcancel',swipe.onEnd);
+    s.style.transform = ''; s.style.transition = '';
+    swipe = null;                                    /* no listener ever outlives its sheet */
   }
   function onKey(e){ if(e.key==='Escape') finish(); }
   function onClick(e){
@@ -305,6 +372,7 @@
     var pid = P && P.id;
     /* landing back on the store page, the card that was opened is pointed out */
     var url = storeUrl() + (pid ? '&focus=' + encodeURIComponent(pid) : '');
+    detachSwipe();                                  /* A5 — listeners never leak */
     backEl.classList.remove('show');
     document.removeEventListener('keydown',onKey);
     document.body.classList.remove('rq-lock');

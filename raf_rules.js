@@ -177,23 +177,28 @@
       writeRes(all);
       return { id:id, expires:all[id].expires };
     },
-    /* release on payment failure, cancellation or abandonment */
+    /* release this session's checkout hold on payment failure or abandonment.
+       Idempotent: a second call reports that nothing was left to release. */
     release: function () {
       var all = readRes(), id = sessionId();
       if (all[id]) { delete all[id]; writeRes(all); return true; }
-      return false;
+      return false;                               /* already released — no-op */
     },
-    /* commit: stock is decremented centrally and the hold is dropped */
+    /* PHASE 3.4 — inventory is now owned by RAFInventory.
+       This only drops the session's checkout hold; it no longer touches
+       stock, and it never clamps. The decrement happens once, in
+       RAFInventory.reserveForOrder(), keyed to the order id. */
     commit: function () {
-      var all = readRes(), id = sessionId(), r = all[id];
-      if (!r) return false;
-      Object.keys(r.items).forEach(function (pid) {
-        var p = S() && S().product(pid);
-        if (!p || p.stock == null) return;
-        S().updateProduct(pid, { stock: Math.max(0, p.stock - r.items[pid]) });
-      });
+      var all = readRes(), id = sessionId();
+      if (!all[id]) return false;                 /* idempotent: already dropped */
       delete all[id]; writeRes(all);
       return true;
+    },
+    /* release a specific order's inventory from ANY session — a merchant can
+       release a hold created in a customer's tab. Idempotent. */
+    releaseOrder: function (orderId, reason, actor) {
+      if (global.RAFInventory) return RAFInventory.releaseForOrder(orderId, reason, actor);
+      return { ok:false, code:'NO_INVENTORY' };
     },
     msLeft: function () {
       var r = readRes()[sessionId()];
@@ -359,7 +364,26 @@
                             'Could not complete the order: the order record is incomplete') }] }); }
       if (!order || !order.id) { placing = false; return resolve({ ok:false,
         errors:[{ code:'CREATE_FAILED', message:T('تعذّر إنشاء الطلب','Could not create the order') }] }); }
-      Reserve.commit();                       /* inventory committed on success */
+      /* PHASE 3.4 — the order now exists and has passed placement validation.
+         This is the earliest authoritative point at which inventory can be
+         tied to an order, so the reservation is created here, keyed to
+         order.id. It is atomic across every line and never clamps. */
+      if (global.RAFInventory) {
+        var inv = RAFInventory.reserveForOrder(order.id, order.items || [], opts && opts.actor);
+        if (!inv.ok) {
+          /* no stock, no order: undo the order we just created rather than
+             leave one that inventory cannot back */
+          try {
+            var all = RAFShop.Orders.all().filter(function (o) { return o.id !== order.id; });
+            localStorage.setItem('raf_orders', JSON.stringify(all));
+          } catch (e) {}
+          placing = false;
+          return resolve({ ok:false, code:inv.code, shortages:inv.shortages || [],
+                           errors:inv.errors || [{ code:'INSUFFICIENT_STOCK',
+                             message:T('الكمية المطلوبة غير متوفرة','The requested quantity is not available') }] });
+        }
+      }
+      Reserve.commit();                       /* drops this session's checkout hold */
       RAFShop.Cart.clear();
       resetCartState();
       placing = false;

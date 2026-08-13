@@ -33,7 +33,8 @@
       "Bash(grep -rohE 'class=\"btn[a-z-]*\"' __TRACKED_VAR__.html)",
       "Bash(awk '/<\\\\/style>/{f=1} f' raf_homepage.html)",
       "Bash(python -)",
-      "Bash(rm -f raf_merchant.html)"
+      "Bash(rm -f raf_merchant.html)",
+      "Bash(perl -i -pe ' *)"
     ]
   }
 }

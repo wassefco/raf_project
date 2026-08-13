@@ -14,6 +14,13 @@
 <script src="raf_features.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
 <style>
+/* A1 — live cart item count, prominent on phones */
+.co-count{display:inline-flex;align-items:center;gap:5px;margin-inline-start:9px;padding:4px 11px;
+  border-radius:20px;background:var(--gold-soft);color:var(--gold2);font-family:var(--font-en);
+  font-size:12.5px;font-weight:800;white-space:nowrap;vertical-align:middle;}
+.co-count[hidden]{display:none;}
+@media(max-width:600px){ .co-count{font-size:12px;padding:3px 9px;margin-inline-start:7px;} }
+
 /* MULTIPLE CARTS — store switcher (cart page only) */
 .carts-bar{max-width:1180px;margin:0 auto 16px;padding:0 clamp(14px,3vw,28px);}
 .carts-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;}
@@ -58,6 +65,9 @@
 <header class="co-head">
   <button type="button" class="co-back" onclick="goBack()"><i class="ti ti-arrow-right"></i> <span data-ar="متابعة التسوق" data-en="Continue shopping">متابعة التسوق</span></button>
   <div class="co-title" data-ar="سلة التسوق" data-en="Shopping Cart">سلة التسوق</div>
+  <!-- live item count — RAF counts total units, the same definition the header
+       badge uses. Rendered from the cart itself, never a static number. -->
+  <span class="co-count" id="cartCount" hidden></span>
   <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
 </header>
 
@@ -197,6 +207,7 @@
 <script src="raf_audit.js"></script>
 <script src="raf_data.js"></script>
 <script src="raf_catalog.js"></script>
+<script src="raf_inventory.js"></script>
 <script src="raf_rules.js"></script>
 <script src="raf_order_snapshot.js"></script>
 <script src="raf_store_ops.js"></script>
@@ -363,8 +374,17 @@
   };
 
   /* ---------- render ---------- */
+  /* A1 — total units in the active cart, RAF's existing count definition */
+  function renderCount(){
+    var el = document.getElementById('cartCount');
+    if (!el) return;
+    var n = RAFShop.Cart.count();
+    el.hidden = n === 0;
+    el.textContent = T(n + ' ' + plural(n), n + ' item' + (n === 1 ? '' : 's'));
+  }
   function render(){
     var items = RAFShop.Cart.items();
+    renderCount();
     renderCarts();
     renderOOS();
     document.getElementById('cartEmpty').style.display = items.length ? 'none' : '';
@@ -618,8 +638,20 @@
   }
 
   /* ---------- boot ---------- */
+  /* A8 — arriving at an empty active cart while another store's cart still has
+     products opens that cart instead of showing the empty state. Nothing is
+     merged, deleted, re-priced or re-quantified. */
+  function openNextActiveCart(){
+    if (!RAFShop.Carts || RAFShop.Cart.items().length) return false;
+    var next = RAFShop.Carts.nextActive();
+    if (!next) return false;
+    if (!RAFShop.Carts.switchTo(next)) return false;
+    restoreCartState();
+    return true;
+  }
   function boot(){
     restoreCartState();
+    openNextActiveCart();
     syncOnOpen();
     render();
     /* live cart — adding from the cross-sell rail (or any other surface on this

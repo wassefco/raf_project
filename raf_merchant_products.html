@@ -135,6 +135,114 @@ body{background:var(--bg2);margin:0;}
   font-size:12px;color:var(--text2);line-height:1.7;}
 .mw-ro b{color:var(--ink);font-family:var(--font-en);}
 
+/* ---------- PHASE 3.2 · options + size guide ---------- */
+.mw-vg{border:1px solid var(--border);border-radius:14px;padding:12px;margin-bottom:11px;background:var(--bg);}
+.mw-vg-h{display:flex;gap:8px;align-items:center;margin-bottom:10px;}
+.mw-vg-l{flex:1;min-width:0;min-height:44px;border-radius:10px;border:1px solid var(--border2);
+  background:var(--card);font-family:inherit;font-size:13px;color:var(--ink);padding:0 11px;}
+.mw-vo-list{display:flex;flex-direction:column;gap:7px;}
+.mw-vo{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.mw-vo input{flex:1 1 110px;min-width:0;min-height:44px;border-radius:10px;border:1px solid var(--border2);
+  background:var(--card);font-family:inherit;font-size:13px;color:var(--ink);padding:0 11px;}
+.mw-vo-i{width:26px;height:26px;flex:0 0 auto;border-radius:8px;background:var(--bg3);color:var(--text2);
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-en);font-size:11.5px;font-weight:800;}
+.mw-sw{width:44px;min-width:44px;height:44px;flex:0 0 auto;padding:2px;border-radius:10px;
+  border:1px solid var(--border2);background:var(--card);cursor:pointer;}
+.mw-vid{flex:0 0 auto;font-family:var(--font-en);font-size:10.5px;color:var(--text3);background:var(--bg2);
+  border-radius:20px;padding:3px 8px;}
+.mw-ico{width:44px;height:44px;flex:0 0 auto;border-radius:10px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.mw-ico:hover:not(:disabled){border-color:var(--gold);color:var(--gold2);}
+.mw-ico:disabled{opacity:.35;cursor:not-allowed;}
+.mw-ico.danger:hover{border-color:var(--red);color:var(--red);background:rgba(217,83,79,.07);}
+.mw-add{min-height:44px;padding:0 15px;border-radius:30px;border:1px dashed var(--border2);background:var(--card);
+  color:var(--text2);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;gap:6px;}
+.mw-add:hover{border-color:var(--gold);color:var(--gold2);}
+.mw-add.sm{font-size:12px;padding:0 13px;}
+.mw-add.danger{color:var(--red);border-color:rgba(217,83,79,.4);}
+.mw-sg-badge{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:800;color:#1F7A45;
+  background:rgba(46,158,91,.13);border-radius:20px;padding:5px 12px;margin-bottom:12px;}
+.mw-sg-note{font-size:11.5px;color:var(--text3);line-height:1.7;margin:4px 0 12px;}
+.mw-sg-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:12px;}
+.mw-sg-t{border-collapse:collapse;width:100%;min-width:420px;}
+.mw-sg-t th,.mw-sg-t td{border-bottom:1px solid var(--border);border-inline-end:1px solid var(--border);padding:6px;vertical-align:top;}
+.mw-sg-t th{background:var(--bg2);}
+.mw-sg-t th input,.mw-sg-t td input{width:100%;min-width:76px;min-height:40px;border-radius:8px;
+  border:1px solid var(--border2);background:var(--card);font-family:inherit;font-size:12.5px;color:var(--ink);padding:0 8px;}
+.mw-sg-t th input+input{margin-top:4px;}
+.mw-sg-t th.mw-sg-add{width:52px;}
+.mw-sg-f{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px;}
+/* ---------- PHASE 3.4 · inventory ---------- */
+.mw-tag.res{background:rgba(224,163,46,.16);color:#8A6410;}
+.mw-tag.avail{background:rgba(46,158,91,.13);color:#1F7A45;}
+.mw-tag.warn{background:rgba(217,83,79,.12);color:#A63A36;}
+.mw-inv-g{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:11px;}
+.mw-inv-c{border:1px solid var(--border);border-radius:13px;padding:11px;background:var(--bg);text-align:center;}
+.mw-inv-c span{display:block;font-size:11.5px;color:var(--text3);margin-bottom:4px;}
+.mw-inv-c b{font-family:var(--font-en);font-size:21px;font-weight:800;color:var(--ink);}
+.mw-inv-c.hi{border-color:var(--gold);background:var(--gold-soft);}
+.mw-inv-c.hi b{color:var(--gold2);}
+.mw-inv-state{display:inline-flex;align-items:center;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:800;}
+.mw-inv-state.st-available{background:rgba(46,158,91,.13);color:#1F7A45;}
+.mw-inv-state.st-out{background:rgba(217,83,79,.12);color:#A63A36;}
+.mw-inv-note{display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:10px 12px;border-radius:11px;
+  background:var(--bg2);border:1px solid var(--border);font-size:11.5px;line-height:1.7;color:var(--text2);}
+.mw-inv-note i{color:var(--text3);font-size:15px;flex:0 0 auto;margin-top:1px;}
+.mw-inv-none{display:flex;gap:9px;align-items:flex-start;padding:12px;border-radius:13px;
+  background:rgba(217,83,79,.09);border:1px solid rgba(217,83,79,.3);font-size:12.5px;line-height:1.7;color:#A63A36;}
+.mw-inv-none i{font-size:19px;flex:0 0 auto;}
+.mw-inv-none b{display:block;}
+.mw-adj{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.mw-adj-h{font-size:12px;font-weight:800;color:var(--text3);letter-spacing:.4px;text-transform:uppercase;margin-bottom:10px;}
+.mw-adj-row{display:flex;gap:8px;margin-bottom:9px;flex-wrap:wrap;}
+.mw-adj-dir{display:flex;gap:6px;flex:1 1 200px;}
+.mw-adj-b{flex:1;min-height:48px;border-radius:12px;border:1px solid var(--border2);background:var(--card);
+  color:var(--text2);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.mw-adj-b.on{background:var(--ink);border-color:var(--ink);color:#F5F0E4;}
+.mw-adj-row #adjQty{flex:0 1 130px;min-height:48px;border-radius:12px;border:1px solid var(--border2);
+  background:var(--card);font-size:14px;color:var(--ink);padding:0 13px;}
+#adjReason{width:100%;min-height:48px;border-radius:12px;border:1px solid var(--border2);background:var(--card);
+  font-family:inherit;font-size:14px;color:var(--ink);padding:0 13px;margin-bottom:9px;}
+.mw-adj-res{font-size:13px;color:var(--text2);min-height:20px;}
+.mw-adj-res b{font-family:var(--font-en);color:var(--ink);}
+.mw-adj-res .bad{color:var(--red);font-weight:700;}
+.mw-adj-err{display:none;margin-top:8px;padding:10px 12px;border-radius:11px;background:rgba(217,83,79,.1);
+  border:1px solid rgba(217,83,79,.34);color:#A63A36;font-size:12.5px;line-height:1.6;}
+.mw-adj-err.show{display:block;}
+/* id-scoped so the shared touch-target floor cannot pull these below 44px */
+#invBox .mw-adj-apply{width:100%;min-height:48px;border-radius:30px;font-family:inherit;font-size:14px;
+  font-weight:800;cursor:pointer;border:1px solid var(--gold2);margin-top:10px;}
+#invBox .mw-adj-b{min-height:48px;}
+#invBox #adjQty,#invBox #adjReason{min-height:48px;}
+@media(max-width:600px){
+  .mw-inv-g{grid-template-columns:1fr;}
+  .mw-inv-c{display:flex;align-items:center;justify-content:space-between;text-align:start;}
+  .mw-inv-c span{margin-bottom:0;}
+  .mw-adj-row #adjQty{flex:1 1 100%;}
+}
+
+/* ---------- PHASE 3.3 · images ---------- */
+.mw-mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:12px;}
+.mw-mi{position:relative;border:1px solid var(--border);border-radius:14px;padding:8px;background:var(--bg);}
+.mw-mi.main{border-color:var(--gold);background:var(--gold-soft);}
+.mw-mi-t{aspect-ratio:1/1;border-radius:10px;background:var(--bg3) center/cover no-repeat;margin-bottom:8px;}
+.mw-mi-badge{position:absolute;top:12px;inset-inline-start:12px;background:var(--gold);color:#1C1606;
+  font-size:10.5px;font-weight:800;border-radius:20px;padding:3px 9px;}
+.mw-mi-a{display:flex;gap:5px;flex-wrap:wrap;}
+.mw-mi-a .mw-ico{width:40px;height:40px;font-size:15px;}
+.mw-mi-k{display:block;margin-top:6px;font-family:var(--font-en);font-size:10px;color:var(--text3);text-transform:uppercase;}
+.mw-mg-add{display:flex;gap:8px;flex-wrap:wrap;}
+.mw-mnote{display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:10px 12px;border-radius:11px;
+  background:var(--bg2);border:1px solid var(--border);font-size:11.5px;line-height:1.7;color:var(--text2);}
+.mw-mnote i{color:var(--text3);font-size:15px;flex:0 0 auto;margin-top:1px;}
+@media(max-width:600px){ .mw-mg{grid-template-columns:1fr 1fr;} }
+
+.mw-vnote{display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:10px 12px;border-radius:11px;
+  background:var(--bg2);border:1px solid var(--border);font-size:11.5px;line-height:1.7;color:var(--text2);}
+.mw-vnote i{color:var(--text3);font-size:15px;flex:0 0 auto;margin-top:1px;}
+
 .mw-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;}
 .mw-gate-c{max-width:480px;text-align:center;background:var(--card);border:1px solid var(--border);
   border-radius:22px;padding:36px 30px;}
@@ -226,8 +334,11 @@ body{background:var(--bg2);margin:0;}
 <script src="raf_data.js"></script>
 <script src="raf_order_snapshot.js"></script>
 <script src="raf_catalog.js"></script>
+<script src="raf_inventory.js"></script>
 <script src="raf_permissions.js"></script>
 <script src="raf_merchant_products.js"></script>
+<script src="raf_merchant_variants.js"></script>
+<script src="raf_merchant_media.js"></script>
 <script>
 /* ============================================================
    MERCHANT PRODUCTS — PHASE 3.1
@@ -259,15 +370,39 @@ body{background:var(--bg2);margin:0;}
   ];
   var filter = 'all';
 
+  /* Availability comes from the inventory authority; the page never computes
+     it. Product lifecycle (hidden) stays separate from stock. */
+  var INV = window.RAFInventory;
   function statusOf(p){
     if (p.status === 'hidden') return 'hidden';
-    if (p.stock === 0) return 'out';
-    return 'available';
+    if (!INV) return 'unknown';
+    return INV.stateOf(p.id) === 'out_of_stock' ? 'out' : 'available';
+  }
+  /* a product with no readable inventory record is reported, never guessed */
+  function invOf(id){
+    if (!INV) return null;
+    var s = RAFSource.product(id);
+    if (!s || s.stock == null) return null;
+    return { onHand:INV.onHand(id), reserved:INV.reserved(id), available:INV.available(id) };
   }
   function statusLabel(k){
-    return k==='hidden' ? T('مخفي','Hidden')
-         : k==='out'    ? T('غير متوفر','Unavailable')
+    return k==='hidden'  ? T('مخفي','Hidden')
+         : k==='out'     ? T('غير متوفر','Out of stock')
+         : k==='unknown' ? T('بيانات المخزون غير متاحة','Inventory data unavailable')
          : T('متوفر','Available');
+  }
+  /* compact inventory line for a product card */
+  function invTagsHTML(id){
+    var v = invOf(id);
+    if (!v) return '<span class="mw-tag warn"><i class="ti ti-alert-triangle"></i>'
+      + T('لا يوجد سجل مخزون','No inventory record')+'</span>';
+    return '<span class="mw-tag" title="'+T('المخزون','On hand')+'"><i class="ti ti-box"></i>'
+        + T('المخزون','On hand')+' '+v.onHand+'</span>'
+      + (v.reserved > 0
+          ? '<span class="mw-tag res" title="'+T('محجوز','Reserved')+'"><i class="ti ti-lock"></i>'
+            + T('محجوز','Reserved')+' '+v.reserved+'</span>' : '')
+      + '<span class="mw-tag avail" title="'+T('المتاح','Available')+'"><i class="ti ti-circle-check"></i>'
+        + T('المتاح','Available')+' '+v.available+'</span>';
   }
 
   function renderChips(){
@@ -322,7 +457,7 @@ body{background:var(--bg2);margin:0;}
         + '</div>'
         + '<div class="mw-p-meta">'
           + '<span class="mw-st st-'+st+'">'+statusLabel(st)+'</span>'
-          + '<span class="mw-tag"><i class="ti ti-box"></i>'+(p.stock==null?'—':p.stock)+'</span>'
+          + invTagsHTML(p.id)
           + (p.cat ? '<span class="mw-tag">'+esc(catName(p.cat))+'</span>' : '')
           + '<span class="mw-tag sku">SKU '+esc(p.id)+'</span>'
         + '</div>'
@@ -345,8 +480,14 @@ body{background:var(--bg2);margin:0;}
     original = JSON.parse(JSON.stringify({ name:p.name, desc:p.desc||{ar:'',en:''},
       price:p.price, old:p.old||'', disc:p.disc||0, cat:p.cat||'', stock:p.stock, status:p.status }));
     dirty = false;
+    /* working copies — RAFSource is not touched until Save succeeds */
+    vGroups = MV.groups(id);
+    vGuide  = MV.guideOf(id) ? JSON.parse(JSON.stringify(MV.guideOf(id))) : null;
+    vImages = MM.list(id);
     el('edTitle').textContent = L(p.name);
     el('edBody').innerHTML = editorHTML(p);
+    adjDir = 1;
+    renderInventory(); renderMedia(); renderGroups(); renderGuide();
     el('editor').classList.add('show');
     document.body.style.overflow = 'hidden';
     el('edBody').addEventListener('input', markDirty);
@@ -397,20 +538,7 @@ body{background:var(--bg2);margin:0;}
             + '<option value="active"'+(p.status==='active'?' selected':'')+'>'+T('معروض للعملاء','Available to customers')+'</option>'
             + '<option value="hidden"'+(p.status==='hidden'?' selected':'')+'>'+T('مخفي','Hidden')+'</option>'
             + '</select>')
-        + '<div class="mw-ro">'
-          + '<div>'+T('الكمية الحالية','Current stock')+': <b>'+(p.stock==null?'—':p.stock)+'</b>'
-            + ' <span style="color:var(--text3)">('+T('للعرض فقط','read-only')+')</span></div>'
-          + (p.stock === 0
-              ? '<div style="margin-top:6px;color:#A63A36;">'
-                + T('يظهر هذا المنتج للعملاء كغير متوفر لأن الكمية صفر.',
-                    'This product shows to customers as Unavailable because its stock is zero.')
-                + '</div>'
-              : '')
-          + '<div style="margin-top:7px;color:var(--text3);font-size:11.5px;">'
-            + T('تُدار الكميات والمخزون في مرحلة المخزون المخصصة.',
-                'Stock quantities and inventory are managed in the dedicated Inventory phase.')
-          + '</div>'
-        + '</div>'
+        + '<div id="invBox"></div>'
       + '</section>'
 
       /* CATEGORY — existing categories only */
@@ -419,6 +547,11 @@ body{background:var(--bg2);margin:0;}
             '<select id="cat">' + cats.map(function(c){
                 return '<option value="'+esc(c.k)+'"'+(p.cat===c.k?' selected':'')+'>'+esc(T(c.ar,c.en))+'</option>';
               }).join('') + '</select>')
+      + '</section>'
+
+      /* IMAGES (Phase 3.3) — ordered gallery; the first image is the main one */
+      + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-photo"></i> '+T('الصور','Images')+'</div>'
+        + '<div id="mediaBox"></div>'
       + '</section>'
 
       /* OPTIONS (Phase 3.2) — the size / colour groups customers select from */
@@ -447,6 +580,199 @@ body{background:var(--bg2);margin:0;}
       + '</section>';
   }
 
+  /* ══════════ PHASE 3.4 · INVENTORY ══════════
+     Every number comes from RAFInventory. The page keeps no inventory state
+     of its own — each render resolves from the authority. */
+  var adjDir = 1;
+
+  function renderInventory(){
+    var box = el('invBox'); if (!box || !editing) return;
+    var v = invOf(editing);
+    if (!v){
+      box.innerHTML = '<div class="mw-inv-none"><i class="ti ti-alert-triangle"></i><div>'
+        + '<b>'+T('لا يوجد سجل مخزون لهذا المنتج','No inventory record for this product')+'</b>'
+        + T('لا يمكن عرض أو تعديل المخزون.','Inventory cannot be shown or adjusted.')
+        + '</div></div>';
+      return;
+    }
+    var st = INV.stateOf(editing);
+    box.innerHTML =
+      '<div class="mw-inv-g">'
+        + '<div class="mw-inv-c"><span>'+T('المخزون','On hand')+'</span><b>'+v.onHand+'</b></div>'
+        + '<div class="mw-inv-c"><span>'+T('محجوز','Reserved')+'</span><b>'+v.reserved+'</b></div>'
+        + '<div class="mw-inv-c hi"><span>'+T('المتاح','Available')+'</span><b>'+v.available+'</b></div>'
+      + '</div>'
+      + '<div class="mw-inv-state st-'+(st==='out_of_stock'?'out':'available')+'">'
+        + (st==='out_of_stock' ? T('غير متوفر للعملاء','Out of stock for customers')
+                               : T('متوفر للعملاء','Available to customers'))
+      + '</div>'
+      + (v.reserved > 0
+          ? '<div class="mw-inv-note"><i class="ti ti-info-circle"></i><span>'
+            + T('الكمية المحجوزة مرتبطة بطلبات جارية وتعود تلقائياً إذا أُلغيت.',
+                'Reserved units belong to orders in progress and return automatically if those orders are cancelled.')
+            + '</span></div>' : '')
+      /* manual adjustment — an explicit action, validated by the authority */
+      + '<div class="mw-adj">'
+        + '<div class="mw-adj-h">'+T('تعديل المخزون','Adjust stock')+'</div>'
+        + '<div class="mw-adj-row">'
+          + '<div class="mw-adj-dir">'
+            + '<button type="button" class="mw-adj-b'+(adjDir===1?' on':'')+'" onclick="setAdjDir(1)">'
+              + '<i class="ti ti-plus"></i> '+T('زيادة','Increase')+'</button>'
+            + '<button type="button" class="mw-adj-b'+(adjDir===-1?' on':'')+'" onclick="setAdjDir(-1)">'
+              + '<i class="ti ti-minus"></i> '+T('إنقاص','Decrease')+'</button>'
+          + '</div>'
+          + '<input id="adjQty" class="mw-num" inputmode="numeric" dir="ltr" value=""'
+            + ' placeholder="'+T('الكمية','Quantity')+'" oninput="previewAdj()">'
+        + '</div>'
+        + '<input id="adjReason" placeholder="'+T('سبب التعديل (مطلوب)','Reason (required)')+'" oninput="clearAdjMsg()">'
+        + '<div class="mw-adj-res" id="adjPreview"></div>'
+        + '<div class="mw-adj-err" id="adjErr"></div>'
+        + '<button type="button" class="mw-btn-gold mw-adj-apply" onclick="applyAdj()">'
+          + T('تطبيق التعديل','Apply adjustment')+'</button>'
+      + '</div>';
+    previewAdj();
+  }
+  window.setAdjDir = function(d){ adjDir = d; renderInventory(); };
+  window.clearAdjMsg = function(){ var e=el('adjErr'); if(e){ e.textContent=''; e.classList.remove('show'); } };
+  window.previewAdj = function(){
+    var box = el('adjPreview'); if (!box || !editing) return;
+    var v = invOf(editing); if (!v) return;
+    var raw = (el('adjQty')||{}).value || '';
+    var n = Number(String(raw).trim());
+    if (!raw || !isFinite(n) || n <= 0 || n % 1 !== 0){ box.textContent = ''; return; }
+    var next = v.onHand + (adjDir * n);
+    box.innerHTML = T('النتيجة','Result') + ': <b>' + v.onHand + ' → ' + next + '</b>'
+      + (next < 0 ? ' <span class="bad">'+T('غير مسموح','not allowed')+'</span>' : '');
+  };
+  window.applyAdj = function(){
+    if (!editing) return;
+    clearAdjMsg();
+    var qty = Number(String((el('adjQty')||{}).value || '').trim());
+    var reason = String((el('adjReason')||{}).value || '').trim();
+    /* the authority validates; the page only passes the merchant's input */
+    var res = INV.adjust(editing, adjDir * qty, reason, { actor:ME, baseVersion:baseVersion });
+    if (!res.ok){
+      var e = el('adjErr');
+      e.textContent = (res.errors && res.errors[0] && res.errors[0].message) || adjErrorText(res.code);
+      e.classList.add('show');
+      /* a stale reading must be reloaded, not retried over newer data */
+      if (res.code === 'STALE'){ baseVersion = MP.versionOf(editing); renderInventory(); }
+      return;
+    }
+    /* our own write moved the product's version — keep the editor in step */
+    baseVersion = MP.versionOf(editing);
+    el('adjQty').value = ''; el('adjReason').value = '';
+    renderInventory(); render();
+    toast(T('تم تعديل المخزون','Stock adjusted'));
+  };
+  function adjErrorText(code){
+    return code === 'FORBIDDEN'    ? T('لا تملك صلاحية تعديل المخزون','You do not have permission to change inventory')
+         : code === 'CROSS_STORE'  ? T('هذا المنتج لا يخص متجرك','This product does not belong to your store')
+         : code === 'PERSIST_FAILED' ? T('تعذّر حفظ المخزون','Inventory could not be saved')
+         : T('تعذّر تنفيذ التعديل','The adjustment could not be applied');
+  }
+
+  /* ══════════ PHASE 3.3 · IMAGES ══════════
+     A working copy of the ordered image list. Nothing reaches RAFSource
+     until Save, and every write goes through RAFMerchantMedia. */
+  var MM = window.RAFMerchantMedia;
+  var vImages = [];
+
+  function renderMedia(){
+    var box = el('mediaBox'); if (!box) return;
+    box.innerHTML =
+      (vImages.length
+        ? '<div class="mw-mg">' + vImages.map(function(refUrl, i){
+            var kind = MM.kindOf(refUrl);
+            return '<div class="mw-mi'+(i===0?' main':'')+'">'
+              + '<div class="mw-mi-t" style="background-image:url(\''+esc(refUrl)+'\')"></div>'
+              + (i===0?'<span class="mw-mi-badge">'+T('الرئيسية','Main')+'</span>':'')
+              + '<div class="mw-mi-a">'
+                + '<button class="mw-ico" onclick="moveImg('+i+',-1)" '+(i===0?'disabled':'')+' aria-label="'+T('لليسار','Move back')+'"><i class="ti ti-chevron-up"></i></button>'
+                + '<button class="mw-ico" onclick="moveImg('+i+',1)" '+(i===vImages.length-1?'disabled':'')+' aria-label="'+T('لليمين','Move forward')+'"><i class="ti ti-chevron-down"></i></button>'
+                + (i!==0?'<button class="mw-ico" onclick="makeMain('+i+')" aria-label="'+T('اجعلها الرئيسية','Make main')+'"><i class="ti ti-star"></i></button>':'')
+                + '<button class="mw-ico" onclick="replaceImg('+i+')" aria-label="'+T('استبدال','Replace')+'"><i class="ti ti-refresh"></i></button>'
+                + '<button class="mw-ico danger" onclick="removeImg('+i+')" '+(vImages.length<=1?'disabled title="'+T('يجب إبقاء صورة واحدة','At least one image is required')+'"':'')+' aria-label="'+T('حذف','Remove')+'"><i class="ti ti-trash"></i></button>'
+              + '</div>'
+              + '<span class="mw-mi-k">'+kind+'</span>'
+            + '</div>';
+          }).join('') + '</div>'
+        : '<div class="mw-ro">'+T('لا توجد صور لهذا المنتج.','This product has no images.')+'</div>')
+      + '<div class="mw-mg-add">'
+        + '<button class="mw-add" onclick="pickFile(-1)"><i class="ti ti-upload"></i> '+T('إضافة من جهازك','Add from your device')+'</button>'
+        + '<button class="mw-add" onclick="addByUrl()"><i class="ti ti-link"></i> '+T('إضافة برابط','Add by link')+'</button>'
+      + '</div>'
+      + '<div class="mw-mnote"><i class="ti ti-info-circle"></i><span>'
+        + T('الصورة الأولى هي الصورة الرئيسية التي تظهر في البطاقات ونتائج البحث. الحد الأقصى '
+            + MM.MAX_IMAGES + ' صور، وحجم الملف حتى ' + Math.round(MM.MAX_DATA_URL_BYTES/1024) + ' كيلوبايت.',
+            'The first image is the main image shown on cards and in search results. Up to '
+            + MM.MAX_IMAGES + ' images, each file up to ' + Math.round(MM.MAX_DATA_URL_BYTES/1024) + ' KB.')
+      + '</span></div>'
+      + '<input type="file" id="mediaFile" accept="image/*" style="display:none" onchange="onFile(event)">';
+  }
+
+  var replaceAt = -1;
+  window.moveImg = function(i, dir){
+    var j = i + dir; if (j < 0 || j >= vImages.length) return;
+    var t = vImages[i]; vImages[i] = vImages[j]; vImages[j] = t;
+    markDirty(); renderMedia();
+  };
+  window.makeMain = function(i){
+    var pick = vImages.splice(i,1)[0];
+    vImages.unshift(pick);
+    markDirty(); renderMedia();
+  };
+  window.removeImg = function(i){
+    if (vImages.length <= 1) return;         /* a product must keep one image */
+    vImages.splice(i,1); markDirty(); renderMedia();
+  };
+  window.replaceImg = function(i){ pickFile(i); };
+  window.pickFile = function(i){ replaceAt = i; el('mediaFile').value = ''; el('mediaFile').click(); };
+  window.onFile = function(e){
+    var f = e.target.files && e.target.files[0]; if (!f) return;
+    MM.fileToDataUrl(f).then(function(dataUrl){
+      if (MM.byteLength(dataUrl) > MM.MAX_DATA_URL_BYTES){
+        showErrors([{ message:T('حجم الصورة يتجاوز '+Math.round(MM.MAX_DATA_URL_BYTES/1024)+' كيلوبايت',
+                                'Image exceeds '+Math.round(MM.MAX_DATA_URL_BYTES/1024)+' KB') }]);
+        return;
+      }
+      applyNewRef(dataUrl);
+    }).catch(function(){
+      showErrors([{ message:T('تعذّرت قراءة الملف','The file could not be read') }]);
+    });
+  };
+  window.addByUrl = function(){
+    var url = window.prompt(T('أدخل رابط الصورة','Enter the image URL'), '');
+    if (!url) return;
+    url = url.trim();
+    if (MM.kindOf(url) === 'ephemeral'){
+      showErrors([{ message:T('هذا الرابط مؤقت ولن يبقى بعد التحديث.','This link is temporary and would not survive a refresh.') }]);
+      return;
+    }
+    /* never save a reference that does not resolve */
+    MM.probe(url).then(function(ok){
+      if (!ok){ showErrors([{ message:T('تعذّر تحميل هذه الصورة. تحقق من الرابط.','This image could not be loaded. Check the link.') }]); return; }
+      applyNewRef(url);
+    });
+  };
+  function applyNewRef(ref){
+    clearErrors();
+    if (vImages.indexOf(ref) > -1){
+      showErrors([{ message:T('هذه الصورة مضافة بالفعل','This image has already been added') }]);
+      return;
+    }
+    if (replaceAt >= 0){ vImages[replaceAt] = ref; }        /* position preserved */
+    else {
+      if (vImages.length >= MM.MAX_IMAGES){
+        showErrors([{ message:T('الحد الأقصى '+MM.MAX_IMAGES+' صور','A maximum of '+MM.MAX_IMAGES+' images is allowed') }]);
+        return;
+      }
+      vImages.push(ref);
+    }
+    replaceAt = -1;
+    markDirty(); renderMedia();
+  }
+
   /* ══════════ PHASE 3.2 · OPTIONS + SIZE GUIDE ══════════
      The page holds a working copy; every write goes through
      RAFMerchantVariants, which owns identity, validation and atomicity. */
@@ -463,7 +789,6 @@ body{background:var(--bg2);margin:0;}
             + ' oninput="setGroupLabel('+gi+',\'ar\',this.value)">'
           + '<input class="mw-vg-l" value="'+esc(g.label.en)+'" dir="ltr" placeholder="'+T('اسم المجموعة (إنجليزي)','Group (EN)')+'"'
             + ' oninput="setGroupLabel('+gi+',\'en\',this.value)">'
-          + '<button class="mw-ico danger" onclick="removeGroup('+gi+')" aria-label="'+T('حذف المجموعة','Remove group')+'"><i class="ti ti-trash"></i></button>'
         + '</div>'
         + '<div class="mw-vo-list">' + g.options.map(function(o, oi){
             return '<div class="mw-vo">'
@@ -477,13 +802,17 @@ body{background:var(--bg2);margin:0;}
                 + ' oninput="setOpt('+gi+','+oi+',\'en\',this.value)">'
               + '<button class="mw-ico" onclick="moveOpt('+gi+','+oi+',-1)" '+(oi===0?'disabled':'')+' aria-label="'+T('لأعلى','Up')+'"><i class="ti ti-chevron-up"></i></button>'
               + '<button class="mw-ico" onclick="moveOpt('+gi+','+oi+',1)" '+(oi===g.options.length-1?'disabled':'')+' aria-label="'+T('لأسفل','Down')+'"><i class="ti ti-chevron-down"></i></button>'
-              + '<button class="mw-ico danger" onclick="removeOpt('+gi+','+oi+')" aria-label="'+T('حذف','Remove')+'"><i class="ti ti-x"></i></button>'
               + '<span class="mw-vid" title="'+T('المعرّف الثابت','Stable identifier')+'">'+esc(o.v)+'</span>'
             + '</div>';
           }).join('') + '</div>'
         + '<button class="mw-add sm" onclick="addOpt('+gi+')"><i class="ti ti-plus"></i> '+T('إضافة قيمة','Add value')+'</button>'
       + '</div>';
     }).join('') : '<div class="mw-ro">'+T('لا توجد خيارات لهذا المنتج.','This product has no options.')+'</div>';
+    /* removal is deliberately unavailable — stated plainly rather than hidden */
+    box.innerHTML += '<div class="mw-vnote"><i class="ti ti-lock"></i><span>'
+      + T('حذف الخيارات غير متاح حاليًا لحماية الخيارات المرتبطة بالطلبات السابقة. يمكنك إعادة التسمية والترتيب والإضافة.',
+          'Option removal is temporarily unavailable to protect options referenced by historical orders. You can rename, reorder and add.')
+      + '</span></div>';
   }
   var HEX = /^#[0-9a-fA-F]{6}$/;
 
@@ -500,7 +829,8 @@ body{background:var(--bg2);margin:0;}
                      label:{ ar:'', en:'' } });
     markDirty(); renderGroups();
   };
-  window.removeOpt = function(gi, oi){ vGroups[gi].options.splice(oi,1); markDirty(); renderGroups(); };
+  /* removal is unavailable in this phase — no UI control, and the engine
+     refuses it as well (OPTION_REMOVAL_DEFERRED) */
   /* explicit ordering — sizes are never sorted alphabetically */
   window.moveOpt = function(gi, oi, dir){
     var a = vGroups[gi].options, j = oi + dir;
@@ -512,7 +842,6 @@ body{background:var(--bg2);margin:0;}
     vGroups.push({ label:{ar:'',en:''}, options:[{ v:'option-1', label:{ar:'',en:''} }] });
     markDirty(); renderGroups();
   };
-  window.removeGroup = function(gi){ vGroups.splice(gi,1); markDirty(); renderGroups(); };
 
   /* ---------- size guide ---------- */
   function renderGuide(){
@@ -621,13 +950,64 @@ body{background:var(--bg2);margin:0;}
   window.save = function(){
     if (!editing) return;
     clearErrors();
+
+    /* Options and the size guide are validated BEFORE anything is written, so
+       an invalid option can never leave a half-saved product behind. */
+    var vPayload = {};
+    if (JSON.stringify(vGroups) !== JSON.stringify(MV.groups(editing))) vPayload.variants = vGroups;
+    var storedGuide = MV.guideOf(editing);
+    if (JSON.stringify(vGuide) !== JSON.stringify(storedGuide || null)) vPayload.sizeGuide = vGuide;
+    var hasVariantWork = Object.keys(vPayload).length > 0;
+
+    var mediaChanged = JSON.stringify(vImages) !== JSON.stringify(MM.list(editing));
+
+    /* everything is validated up front, so a rejected member cannot leave a
+       partially saved product behind */
+    var pre = [];
+    if (hasVariantWork){
+      if (vPayload.variants  !== undefined) pre = pre.concat(MV.validateGroups(vPayload.variants).errors);
+      if (vPayload.sizeGuide !== undefined) pre = pre.concat(MV.validateGuide(vPayload.sizeGuide).errors);
+    }
+    if (mediaChanged) pre = pre.concat(MM.validate(vImages).errors);
+    if (pre.length){ showErrors(pre); return; }
+
+    /* 1 — the Phase 3.1 fields */
     var res = MP.update(editing, readForm(), { actor:ME, baseVersion:baseVersion });
-    if (!res.ok){
+    if (!res.ok && res.code !== 'NO_CHANGES'){
       showErrors(res.errors || [{ message:T('تعذّر الحفظ','Could not save') }]);
       /* a stale save must not be silently retried over newer data */
       if (res.code === 'STALE') el('saveBtn').disabled = true;
       return;
     }
+    if (res.ok) baseVersion = res.version;      /* our own write is not a conflict */
+
+    /* 2 — options + size guide, atomically */
+    if (hasVariantWork){
+      var vres = MV.save(editing, vPayload, { actor:ME, baseVersion:baseVersion });
+      if (!vres.ok && vres.code !== 'NO_CHANGES'){
+        showErrors(vres.errors || [{ message:T('تعذّر حفظ الخيارات','Could not save the options') }]);
+        if (vres.code === 'STALE') el('saveBtn').disabled = true;
+        return;
+      }
+      if (vres.ok) baseVersion = vres.version;
+    }
+
+    /* 3 — images */
+    if (mediaChanged){
+      var mres = MM.save(editing, vImages, { actor:ME, baseVersion:baseVersion });
+      if (!mres.ok && mres.code !== 'NO_CHANGES'){
+        showErrors(mres.errors || [{ message:T('تعذّر حفظ الصور','Could not save the images') }]);
+        if (mres.code === 'STALE') el('saveBtn').disabled = true;
+        return;
+      }
+      if (mres.ok) baseVersion = mres.version;
+    }
+
+    if (!res.ok && !hasVariantWork && !mediaChanged){
+      showErrors(res.errors || [{ message:T('لا توجد تغييرات','No changes to save') }]);
+      return;
+    }
+
     dirty = false;
     closeEditor();
     render(); renderChips();
@@ -705,8 +1085,10 @@ body{background:var(--bg2);margin:0;}
     renderChips(); render();
     try { RAFPerm.enforce(); } catch(e){}
 
-    /* another session changed a product — reflect it without losing the editor */
-    document.addEventListener('raf:source', function(){ render(); });
+    /* another session changed a product — reflect it without losing the editor.
+       Inventory uses the same propagation; no polling, no second state. */
+    document.addEventListener('raf:source', function(){ render(); if (editing) renderInventory(); });
+    document.addEventListener('raf:inventory', function(){ render(); if (editing) renderInventory(); });
     document.addEventListener('keydown', function(e){ if (e.key==='Escape' && editing) tryClose(); });
     window.addEventListener('beforeunload', function(e){
       if (dirty){ e.preventDefault(); e.returnValue = ''; }

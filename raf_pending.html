@@ -11,7 +11,37 @@
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <style>
-  .pend{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg,#F5F2EC);}
+  /* A2 — a RAF shopping-bag motif, drawn with the existing design tokens.
+     No external assets, no restaurant/food imagery. Direction-agnostic, so it
+     reads identically in RTL and LTR. */
+  .pend{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+    background:var(--bg,#F5F2EC);position:relative;overflow:hidden;}
+  .pend::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.5;
+    background-image:
+      radial-gradient(circle at 50% 50%, rgba(201,168,76,.10) 0 2px, transparent 2px),
+      url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='150' height='150' viewBox='0 0 150 150'>\
+<g fill='none' stroke='%23C9A84C' stroke-opacity='.20' stroke-width='2.2'>\
+<path d='M34 58h38v42a6 6 0 0 1-6 6H40a6 6 0 0 1-6-6z'/>\
+<path d='M45 58v-8a8 8 0 0 1 16 0v8'/>\
+<path d='M86 92h30v34a5 5 0 0 1-5 5H91a5 5 0 0 1-5-5z'/>\
+<path d='M95 92v-6a6 6 0 0 1 12 0v6'/>\
+<path d='M96 14h26v30a4 4 0 0 1-4 4h-18a4 4 0 0 1-4-4z'/>\
+<path d='M104 14v-5a5 5 0 0 1 10 0v5'/>\
+</g></svg>");
+    background-size:26px 26px, 150px 150px;}
+  .pend-card{position:relative;z-index:1;}
+  /* A7 — the committed decision, announced before navigating */
+  .a7-bar{position:fixed;inset-inline:0;top:0;z-index:60;display:none;align-items:center;gap:10px;
+    padding:14px 18px;font-family:var(--font,'Tajawal',sans-serif);font-size:14px;font-weight:700;
+    line-height:1.6;color:#fff;box-shadow:0 10px 30px -18px rgba(20,16,8,.7);}
+  .a7-bar.show{display:flex;}
+  .a7-bar.ok{background:var(--green,#2E9E5B);}
+  .a7-bar.bad{background:var(--red,#D9534F);}
+  .a7-bar i{font-size:20px;flex:0 0 auto;}
+  @media(max-width:600px){ .a7-bar{font-size:13px;padding:12px 14px;} }
+  @media(max-width:600px){ .pend::before{background-size:22px 22px, 118px 118px;} }
+  @media(prefers-reduced-motion:reduce){ .pend::before{opacity:.35;} }
   .pend-card{width:100%;max-width:520px;background:var(--card,#fff);border:1px solid var(--border,#E2DBCC);
     border-radius:26px;padding:34px 30px;text-align:center;box-shadow:0 26px 60px -30px rgba(20,16,8,.5);}
   .pend-ring{position:relative;width:118px;height:118px;margin:0 auto 22px;}
@@ -57,6 +87,8 @@
 </head>
 <body>
 
+<div class="a7-bar" id="a7Bar" aria-live="polite"></div>
+
 <div class="pend">
   <div class="pend-card">
 
@@ -77,12 +109,18 @@
       <div class="pend-steps">
         <div class="pend-step done"><i class="ti ti-circle-check"></i> <span data-ar="تم الدفع بنجاح" data-en="Payment received">تم الدفع بنجاح</span></div>
         <div class="pend-step on"><i class="ti ti-clock-hour-4"></i> <span data-ar="بانتظار قبول المتجر" data-en="Awaiting store acceptance">بانتظار قبول المتجر</span></div>
-        <div class="pend-step"><i class="ti ti-tools-kitchen-2"></i> <span data-ar="تجهيز الطلب" data-en="Order preparation">تجهيز الطلب</span></div>
+        <div class="pend-step"><i class="ti ti-package"></i> <span data-ar="تجهيز الطلب" data-en="Order preparation">تجهيز الطلب</span></div>
         <div class="pend-step"><i class="ti ti-truck-delivery"></i> <span data-ar="التوصيل إليك" data-en="Delivery to you">التوصيل إليك</span></div>
       </div>
       <div class="pend-acts">
+        <!-- A3 — leaves the waiting screen only. The order, its timer, its
+             inventory reservation and merchant processing all continue. -->
+        <a class="pend-primary" href="raf_homepage.html"><i class="ti ti-shopping-bag"></i>
+          <span data-ar="متابعة التسوق" data-en="Continue Shopping">متابعة التسوق</span></a>
         <button class="pend-ghost" onclick="cancelOrder()"><i class="ti ti-x"></i> <span data-ar="إلغاء الطلب" data-en="Cancel order">إلغاء الطلب</span></button>
       </div>
+      <div class="pend-note" data-ar="يمكنك متابعة التسوق — سيستمر طلبك وسنبلغك فور رد المتجر."
+           data-en="You can keep shopping — your order continues and we will tell you as soon as the store responds.">يمكنك متابعة التسوق — سيستمر طلبك وسنبلغك فور رد المتجر.</div>
       <div class="pend-note" data-ar="إذا لم يقبل المتجر خلال 5 دقائق، سيُلغى الطلب تلقائياً ويُعاد المبلغ كاملاً."
            data-en="If the store does not accept within 5 minutes, the order is cancelled automatically and refunded in full.">إذا لم يقبل المتجر خلال 5 دقائق، سيُلغى الطلب تلقائياً ويُعاد المبلغ كاملاً.</div>
     </div>
@@ -124,6 +162,7 @@
 <script src="raf_order_snapshot.js"></script>
 <script src="raf_store_ops.js"></script>
 <script src="raf_catalog.js"></script>
+<script src="raf_inventory.js"></script>
 <script src="raf_rules.js"></script>
 <script src="raf_order_engine.js"></script>
 <script src="raf_checkout.js"></script>
@@ -183,16 +222,39 @@
     document.querySelector('#stFail p').textContent  = body;
   }
 
+  /* ---- A7: the committed decision, and only the committed decision ----
+     The engine sets `done` when a merchant action commits — never while it is
+     still inside the 10-second undo window — so reading it here cannot show a
+     result the merchant may still take back. Navigation happens once. */
+  var announced = false;
+  function announce(kind){
+    if (announced) return;
+    announced = true;
+    var msg = kind === 'accepted'
+      ? T('تم قبول طلبك من المتجر.', 'Your order has been accepted by the store.')
+      : T('تم رفض طلبك من المتجر.', 'Your order has been rejected by the store.');
+    var to = kind === 'accepted'
+      ? 'raf_tracking.html?id=' + encodeURIComponent(ORDER_ID) + '&new=1'
+      : 'raf_homepage.html';
+    var bar = document.getElementById('a7Bar');
+    bar.className = 'a7-bar show ' + (kind === 'accepted' ? 'ok' : 'bad');
+    bar.innerHTML = '<i class="ti ' + (kind === 'accepted' ? 'ti-circle-check' : 'ti-circle-x') + '"></i>'
+      + '<span>' + msg + '</span>';
+    bar.setAttribute('role', 'status');
+    /* a short beat so the customer reads the result before the page changes */
+    setTimeout(function(){ window.location = to; }, 2200);
+  }
+
   /* ---- render whatever the engine currently says ---- */
   function paint(){
     var s = E.get(ORDER_ID);
     if(!s) return;
-    if(s.done === E.DECISION.ACCEPTED){ show('stOk'); return; }
+    if(s.done === E.DECISION.ACCEPTED){ show('stOk'); announce('accepted'); return; }
     if(s.done === E.DECISION.REJECTED){
       failCopy(T('اعتذر المتجر عن الطلب','The store could not accept your order'),
                T('لم يتمكن المتجر من قبول طلبك، وتم إعادة المبلغ كاملاً.',
                  'The store was unable to accept your order, and you have been refunded in full.'));
-      show('stFail'); return;
+      show('stFail'); announce('rejected'); return;
     }
     if(s.done === E.DECISION.CANCELLED){
       failCopy(T('تم إلغاء الطلب','Order cancelled'),

@@ -32,7 +32,9 @@
       slug: p.store || '',
       variants: p.variants || null,
       /* additive fields — safe for old callers, useful for new ones */
-      cat: p.cat || '', status: p.status, sponsored: !!p.sponsored
+      cat: p.cat || '', status: p.status, sponsored: !!p.sponsored,
+      /* a merchant-configured, product-specific size guide (null when none) */
+      sizeGuide: p.sizeGuide || null
     };
   }
 

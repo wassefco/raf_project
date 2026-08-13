@@ -491,6 +491,7 @@
 <script src="raf_source.js"></script>
 <script src="raf_data.js"></script>
 <script src="raf_catalog.js"></script>
+<script src="raf_inventory.js"></script>
 <script src="raf_rules.js"></script>
 <script src="raf_sizeguide.js"></script>
 <script src="raf_card.js"></script>
@@ -682,10 +683,12 @@ function compose(id){
     cat: catRec ? { ar:catRec.ar, en:catRec.en } : { ar:"منتجات", en:"Products" },
     catKey: c.cat || "",                    /* category key — drives the size guide */
     icon: c.ic || "ti-box",
-    img: c.img || "",                       /* product photography (central) */
+    img: c.img || "",                       /* main image (central) */
+    images: (c.images && c.images.length) ? c.images : (c.img ? [c.img] : []),
     price: c.price, oldPrice: c.old || null, discount: c.disc ? "-" + c.disc + "%" : null,
     stock: c.stock, status: c.status, sponsored: !!c.sponsored,
     variants: c.variants || null,
+    sizeGuide: c.sizeGuide || null,         /* merchant-configured, product-specific */
     rating: parseFloat(c.rate) || 4.6, reviews: parseInt(c.rev) || 0,
     /* ---- page-local (editorial) ---- */
     sales: e.sales || (parseInt(c.rev) || 0) * 2,
@@ -768,12 +771,17 @@ function render(){
   /* gallery — real photography when the product has it, icons as the fallback */
   var stage = document.getElementById('galStage');
   var icon = document.getElementById('galIcon');
-  if (P.img){
-    stage.style.backgroundImage = 'url("' + P.img + '")';
+  /* the product's ordered image list; images[0] is the main image */
+  var photos = (P.images && P.images.length) ? P.images : (P.img ? [P.img] : []);
+  if (photos.length){
+    stage.style.backgroundImage = 'url("' + photos[0] + '")';
     stage.classList.add('has-photo');
     icon.style.display = 'none';
-    document.getElementById('galThumbs').innerHTML =
-      '<button class="gthumb on" style="background-image:url(\'' + P.img + '\')" aria-label="view 1"></button>';
+    document.getElementById('galThumbs').innerHTML = photos.map(function(srcUrl, i){
+      return '<button class="gthumb' + (i === 0 ? ' on' : '') + '" style="background-image:url(\'' + srcUrl + '\')"'
+        + ' onclick="pickPhoto(' + i + ')" aria-label="view ' + (i+1) + '"></button>';
+    }).join('');
+    window.__photos = photos;
   } else {
     var gal = P.gallery && P.gallery.length ? P.gallery : [P.icon];
     stage.style.backgroundImage = ''; stage.classList.remove('has-photo');
@@ -834,7 +842,9 @@ function sizeGuideKey(){
   if (P.sizes && P.sizes.length){
     groups.push({ label:{ar:'المقاس',en:'Size'}, options:P.sizes.map(function(s){ return { v:s, label:{ar:s,en:s} }; }) });
   }
-  return RAFSizeGuide.forProduct({ variants:groups, cat:P.catKey });
+  /* a merchant-configured, product-specific guide wins over the category one */
+  return RAFSizeGuide.forProduct({ id:P.id, sizeGuide:P.sizeGuide || null,
+                                   variants:groups, cat:P.catKey });
 }
 function sizeGuideLink(){
   var k = sizeGuideKey();
@@ -897,6 +907,18 @@ function pickOpt(key, i){
   SEL[key] = i;
   renderOptions();
   hint('');
+}
+/* photo gallery — swap the stage to the chosen image */
+function pickPhoto(i){
+  var photos = window.__photos || [];
+  if (!photos[i]) return;
+  var stage = document.getElementById('galStage');
+  document.querySelectorAll('.gthumb').forEach(function(t, k){ t.classList.toggle('on', k === i); });
+  stage.classList.add('swap');
+  setTimeout(function(){
+    stage.style.backgroundImage = 'url("' + photos[i] + '")';
+    stage.classList.remove('swap');
+  }, 160);
 }
 function pickThumb(i, ic){
   var stage = document.getElementById('galStage'), icon = document.getElementById('galIcon');

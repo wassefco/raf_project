@@ -164,9 +164,12 @@
     setOrderStatus(orderId, STATUS.CANCELLED);
     audit('system.cancelled', orderId, { automatic:true, systemGenerated:true, source:'automation',
       key:k, reason:why, previousState:null, newState:STATUS.CANCELLED });
-    restoreStock(orderId);
-    audit('system.stock_restored', orderId, { automatic:true, systemGenerated:true, source:'automation',
-      key:k, metadata:{ items:(st && st.items) || null } });
+    var rel = restoreStock(orderId, why);
+    /* only report a restoration that actually happened */
+    if (rel && rel.ok && !rel.alreadyApplied) {
+      audit('system.stock_restored', orderId, { automatic:true, systemGenerated:true, source:'automation',
+        key:k, metadata:{ items:rel.released || null } });
+    }
     audit('system.refunded', orderId, { automatic:true, systemGenerated:true, source:'automation',
       key:k, reason:why });
     if (global.RAFRules) { try { RAFRules.Reserve.release(); } catch (e) {} }
@@ -195,14 +198,13 @@
   }
 
   /* a cancelled order returns its units to the shelf */
-  function restoreStock(orderId){
-    if (!global.RAFSource || !global.RAFShop) return;
-    var s = get(orderId);
-    if (!s || !s.items) return;
-    Object.keys(s.items).forEach(function (pid) {
-      var p = RAFSource.product(pid);
-      if (p && p.stock != null) RAFSource.updateProduct(pid, { stock: p.stock + s.items[pid] });
-    });
+  /* PHASE 3.4 — inventory is owned by RAFInventory. Restoration is now keyed
+     to the order, which makes it idempotent (a second call is a no-op) and
+     releasable from any session, including a merchant's. The old per-session,
+     non-idempotent path is gone. */
+  function restoreStock(orderId, reason, actor){
+    if (global.RAFInventory) return RAFInventory.releaseForOrder(orderId, reason || 'order_cancelled', actor);
+    return { ok:false, code:'NO_INVENTORY' };
   }
 
   /* surface the outcome in the notification centre */

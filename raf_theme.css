@@ -317,3 +317,34 @@ html:not([data-ui="admin"]) body > section{
   html:not([data-ui="admin"]) body > section,
   .rafx-in{ animation:none!important; }
 }
+
+/* ══════════════ 10 · A4 · PAGE ZOOM BEHAVIOUR ══════════════
+   The page should not zoom by accident on a phone or tablet, but the
+   customer must still be able to zoom deliberately — so user scaling is
+   NOT disabled and no maximum-scale is imposed. Two real causes are
+   addressed instead:
+
+     1. iOS zooms the whole page when a field smaller than 16px takes
+        focus. Fields are lifted to 16px on touch pointers only, so the
+        desktop type scale is untouched.
+     2. Double-tap on a control zooms the page. `touch-action:manipulation`
+        removes the double-tap delay and its zoom on controls only.
+
+   Image viewers are deliberately excluded: pinch-zoom inside them keeps
+   working. Nothing here changes layout width, so no horizontal overflow
+   is introduced. */
+@media (pointer: coarse) {
+  html:not([data-ui="admin"]) input:not([type="checkbox"]):not([type="radio"]):not([type="color"]),
+  html:not([data-ui="admin"]) select,
+  html:not([data-ui="admin"]) textarea { font-size: 16px; }
+}
+html:not([data-ui="admin"]) button,
+html:not([data-ui="admin"]) a,
+html:not([data-ui="admin"]) [role="button"],
+html:not([data-ui="admin"]) label,
+html:not([data-ui="admin"]) summary { touch-action: manipulation; }
+/* image zoom surfaces keep full pinch/zoom */
+html:not([data-ui="admin"]) .mw-zoom,
+html:not([data-ui="admin"]) .mw-zoom img,
+html:not([data-ui="admin"]) .gal-stage,
+html:not([data-ui="admin"]) .sg-back { touch-action: auto; }

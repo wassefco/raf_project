@@ -90,26 +90,13 @@
   }
 
   /* ---------- historical references ----------
-     An option value that a real order already recorded may not be removed:
-     the snapshot is the commercial record and must stay readable. */
-  function referencedInOrders(productId, optionLabelText){
-    if (!global.RAFShop) return [];
-    var hits = [];
-    try {
-      RAFShop.Orders.all().forEach(function (o) {
-        var snap = o.snapshot;
-        if (!snap || !snap.items) return;
-        snap.items.forEach(function (it) {
-          if (it.productId !== productId) return;
-          var v = it.variant || {};
-          Object.keys(v).forEach(function (k) {
-            if (String(v[k]) === String(optionLabelText)) hits.push(o.id);
-          });
-        });
-      });
-    } catch (e) {}
-    return hits.filter(function (v, i, a) { return a.indexOf(v) === i; });
-  }
+     There is deliberately no reference lookup here. The order snapshot stores
+     option LABELS, not stable option ids, so any check would have to match on
+     display strings — which are not authoritative and break the moment an
+     option is renamed. Rather than rely on that, option removal is refused
+     outright (see OPTION_REMOVAL_DEFERRED in save). A future, explicitly
+     approved schema phase will add option ids to the snapshot, at which point
+     a real reference check becomes possible. */
 
   /* ---------- validation: option groups ---------- */
   function validateGroups(list){
@@ -221,30 +208,34 @@
     if (nextGroups !== undefined) {
       var gv = validateGroups(nextGroups);
       if (!gv.ok) errors = errors.concat(gv.errors);
-      /* removing a value a real order recorded would break history */
+      /* OPTION REMOVAL IS DEFERRED.
+         The order snapshot records option LABELS, not stable option ids, so
+         once an option is renamed there is no authoritative way to tell
+         whether history still references it. Matching on labels or any other
+         display string would not be authoritative, so removal is refused
+         outright until the snapshot captures option ids.
+
+         Identity is the option's `v`. Renaming, reordering, recolouring and
+         adding all keep every existing `v` present, so they pass freely; only
+         a `v` that disappears is a removal — including one that disappears
+         because its whole group was dropped. */
       if (gv.ok) {
-        var beforeVals = [];
+        var survivingIds = {};
+        nextGroups.forEach(function (g) {
+          (g.options || []).forEach(function (o) { survivingIds[o.v] = 1; });
+        });
+        var removed = [];
         (before.variants || []).forEach(function (g) {
           (g.options || []).forEach(function (o) {
-            beforeVals.push({ ar:(o.label && o.label.ar) || '', en:(o.label && o.label.en) || '' });
+            if (!survivingIds[o.v]) removed.push(o.v);
           });
         });
-        var afterVals = {};
-        nextGroups.forEach(function (g) {
-          (g.options || []).forEach(function (o) {
-            afterVals[((o.label && o.label.ar) || '')] = 1;
-            afterVals[((o.label && o.label.en) || '')] = 1;
-          });
-        });
-        beforeVals.forEach(function (v) {
-          if (afterVals[v.ar] || afterVals[v.en]) return;
-          var refs = referencedInOrders(productId, v.ar).concat(referencedInOrders(productId, v.en));
-          if (refs.length) {
-            errors.push({ field:'variants',
-              message:T('لا يمكن حذف الخيار «' + (v.ar || v.en) + '» لأنه مستخدم في طلبات سابقة (' + refs.length + ').',
-                        'The option “' + (v.en || v.ar) + '” cannot be removed: it is used by ' + refs.length + ' existing order(s).') });
-          }
-        });
+        if (removed.length) {
+          return { ok:false, code:'OPTION_REMOVAL_DEFERRED', removed:removed,
+                   errors:[{ field:'variants',
+                     message:T('حذف الخيارات غير متاح حاليًا لحماية الخيارات المرتبطة بالطلبات السابقة.',
+                               'Option removal is temporarily unavailable to protect options referenced by historical orders.') }] };
+        }
       }
       patch.variants = nextGroups.length ? nextGroups : null;
     }
@@ -325,7 +316,6 @@
     groups: groups, sizeGroupOf: sizeGroupOf, colorGroupOf: colorGroupOf,
     isSizeGroup: isSizeGroup, isColorGroup: isColorGroup,
     guideOf: guideOf, hasGuide: hasGuide,
-    referencedInOrders: referencedInOrders,
     /* identity */
     newOptionId: newOptionId, slugify: slugify,
     /* validation */

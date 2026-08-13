@@ -88,6 +88,16 @@
     'variant.updated':      { tl:false, ar:'تم تعديل خيارات المنتج',      en:'Product options updated' },
     'variant.removed':      { tl:false, ar:'تم حذف خيار من المنتج',       en:'Product option removed' },
     'size_guide.updated':   { tl:false, ar:'تم تعديل دليل المقاسات',      en:'Size guide updated' },
+    'image.added':          { tl:false, ar:'تمت إضافة صورة للمنتج',       en:'Product image added' },
+    'image.updated':        { tl:false, ar:'تم استبدال صورة المنتج',      en:'Product image replaced' },
+    'image.reordered':      { tl:false, ar:'تم إعادة ترتيب صور المنتج',   en:'Product images reordered' },
+    'image.removed':        { tl:false, ar:'تم حذف صورة من المنتج',       en:'Product image removed' },
+    'main_image.changed':   { tl:false, ar:'تم تغيير الصورة الرئيسية',    en:'Main product image changed' },
+    /* inventory */
+    'inventory.reserved':      { tl:false, ar:'تم حجز المخزون',            en:'Inventory reserved' },
+    'inventory.released':      { tl:false, ar:'تم تحرير المخزون',          en:'Inventory released' },
+    'inventory.sale_committed':{ tl:false, ar:'تم اعتماد بيع المخزون',     en:'Inventory sale committed' },
+    'inventory.adjusted':      { tl:false, ar:'تم تعديل المخزون يدويًا',   en:'Inventory adjusted' },
     'order.migrated':       { tl:false, ar:'تمت ترقية سجل الطلب',         en:'Order record migrated' }
   };
 
