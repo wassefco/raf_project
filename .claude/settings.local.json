@@ -34,7 +34,9 @@
       "Bash(awk '/<\\\\/style>/{f=1} f' raf_homepage.html)",
       "Bash(python -)",
       "Bash(rm -f raf_merchant.html)",
-      "Bash(perl -i -pe ' *)"
+      "Bash(perl -i -pe ' *)",
+      "Bash(sed -n '/function ordersForStore/,/^  }/p' raf_merchant.html)",
+      "Bash(sed -n '/function afterAction/,/^  }/p' raf_merchant.html)"
     ]
   }
 }

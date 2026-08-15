@@ -111,6 +111,69 @@
 .od-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
 .od-actions .btn{flex:1;min-width:190px;}
 @media(max-width:560px){.od-actions .btn{min-width:100%;}.cf{padding:18px;}.cf-t{font-size:18px;}}
+/* ---------- GROUP C · customer approved change ---------- */
+.cc-card{background:var(--card);border:1.5px solid var(--gold);border-radius:18px;padding:18px;margin-bottom:16px;
+  box-shadow:0 6px 24px rgba(201,168,76,.14);}
+.cc-h{display:flex;gap:11px;align-items:flex-start;margin-bottom:14px;}
+.cc-h i{font-size:24px;color:var(--gold2);flex:0 0 auto;}
+.cc-h b{display:block;font-size:15px;font-weight:800;color:var(--ink);line-height:1.45;}
+.cc-h span{font-size:12.5px;color:var(--text2);}
+.cc-prod{display:flex;align-items:center;gap:11px;padding:10px;border-radius:12px;background:var(--bg);margin-bottom:12px;}
+.cc-th{width:46px;height:46px;border-radius:10px;background:var(--bg2) center/cover no-repeat;
+  border:1px solid var(--border);flex:0 0 auto;}
+.cc-prod b{display:block;font-size:13.5px;font-weight:800;color:var(--ink);overflow-wrap:anywhere;}
+.cc-prod span{font-size:12px;color:var(--text2);font-family:var(--font-en);}
+.cc-diff{display:flex;align-items:stretch;gap:10px;margin-bottom:12px;}
+.cc-side{flex:1 1 0;min-width:0;padding:11px 13px;border-radius:12px;border:1px solid var(--border2);background:var(--bg);}
+.cc-side span{display:block;font-size:11px;font-weight:800;color:var(--text3);margin-bottom:3px;}
+.cc-side b{font-size:13.5px;font-weight:800;color:var(--text2);overflow-wrap:anywhere;}
+.cc-side.new{border-color:var(--gold);background:var(--gold-soft);}
+.cc-side.new b{color:var(--gold2);}
+.cc-arrow{align-self:center;font-size:20px;color:var(--gold2);flex:0 0 auto;}
+html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
+.cc-reason,.cc-price{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2);margin-bottom:8px;}
+.cc-reason i,.cc-price i{color:var(--gold2);font-size:16px;flex:0 0 auto;}
+.cc-outcome{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin:12px 0 14px;}
+.cc-outcome div{display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.65;color:var(--text2);}
+.cc-outcome div+div{margin-top:7px;}
+.cc-outcome i{flex:0 0 auto;font-size:15px;margin-top:1px;}
+.cc-outcome div:first-child i{color:var(--green);}
+.cc-outcome div:last-child i{color:var(--red);}
+.cc-amt{flex:0 0 auto;font-family:var(--font-en);font-size:14px;font-weight:800;color:var(--ink);white-space:nowrap;}
+.cc-prod.new{border:1px solid var(--gold);background:var(--gold-soft);}
+.cc-swap{text-align:center;color:var(--gold2);font-size:19px;margin:-4px 0 8px;}
+.cc-refund{display:flex;gap:9px;align-items:flex-start;background:rgba(46,158,91,.09);
+  border:1px solid rgba(46,158,91,.3);border-radius:12px;padding:11px 13px;margin-bottom:10px;}
+.cc-refund i{color:var(--green);font-size:19px;flex:0 0 auto;margin-top:1px;}
+.cc-refund b{display:block;font-size:14px;font-weight:800;color:var(--ink);font-family:var(--font-en);}
+.cc-refund em{font-style:normal;display:block;font-size:11.5px;color:var(--text2);line-height:1.6;margin-top:3px;
+  font-family:var(--font-ar);}
+.cc-dest{margin-bottom:12px;}
+.cc-dest-h{font-size:12.5px;font-weight:800;color:var(--ink);margin-bottom:8px;}
+#ccCard .cc-dest-o{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:11px 13px;
+  margin-bottom:8px;border-radius:12px;border:1.5px solid var(--border2);background:var(--card);
+  cursor:pointer;font-family:inherit;text-align:start;transition:all .16s;}
+#ccCard .cc-dest-o:hover{border-color:var(--gold);}
+#ccCard .cc-dest-o[aria-pressed="true"]{border-color:var(--ink);background:var(--bg);}
+.cc-dest-tick{flex:0 0 auto;width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--card);}
+#ccCard .cc-dest-o[aria-pressed="true"] .cc-dest-tick{border-color:var(--ink);background:var(--ink);color:#F5F0E4;}
+.cc-dest-o > i{font-size:21px;color:var(--gold2);flex:0 0 auto;}
+.cc-dest-b{min-width:0;flex:1;}
+.cc-dest-b b{display:block;font-size:13px;font-weight:800;color:var(--ink);line-height:1.4;}
+.cc-dest-b em{font-style:normal;display:block;font-size:11.5px;color:var(--text2);line-height:1.55;}
+.cc-acts{display:flex;flex-direction:column;gap:9px;}
+/* the theme stylesheet loads after this block and sets a 40px floor on every
+   button, so these decisions are id-scoped to outrank it */
+#ccCard .cc-acts button{min-height:52px;border-radius:14px;font-family:inherit;font-size:15px;font-weight:800;
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid transparent;}
+#ccCard .cc-ok{background:var(--ink);color:#F5F0E4;border-color:var(--ink);}
+#ccCard .cc-no{background:var(--card);color:var(--text2);border-color:var(--border2);}
+#ccCard .cc-no:hover{border-color:var(--red);color:var(--red);}
+.cc-err{display:none;margin-top:11px;padding:10px 12px;border-radius:11px;background:rgba(217,83,79,.1);
+  border:1px solid rgba(217,83,79,.32);color:var(--red);font-size:12.5px;font-weight:700;line-height:1.6;}
+.cc-err.show{display:block;}
+@media (min-width:560px){ .cc-acts{flex-direction:row;} .cc-acts button{flex:1;} }
 </style>
 <script src="raf_features.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
@@ -151,6 +214,11 @@
 <script src="raf_order_snapshot.js"></script>
 <script src="raf_catalog.js"></script>
 <script src="raf_rules.js"></script>
+<script src="raf_inventory.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_wallet.js"></script>
+<script src="raf_order_changes.js"></script>
 <script src="raf_checkout.js"></script>
 <script>
 /* ============================================================
@@ -327,6 +395,184 @@
       + '</div>';
   }
 
+  /* ---------- customer approved change ----------
+     The store has asked for something. Nothing has moved yet, and nothing
+     will until one of these two buttons is pressed. */
+  /* the customer's refund choice, held only until they decide. It starts
+     unset and this file never assigns it a default. */
+  var CCDEST = null;
+  window.pickRefundDest = function(d){ CCDEST = d; render(); };
+
+  function destHTML(c){
+    if (!c.needsDestination) return '';
+    /* a resumed approval keeps the choice the customer already made */
+    if (c.resuming && c.chosenDestination) {
+      CCDEST = CCDEST || c.chosenDestination;
+      return '<div class="cc-refund"><i class="ti ti-refresh"></i><div><b>'
+        + T('لم تكتمل العملية السابقة','Your previous approval did not finish')
+        + '</b><em>'+T('اضغط «الموافقة» لإكمالها. لن يتم خصم أو إرجاع أي مبلغ مرتين.',
+                       'Press Approve to finish it. Nothing will be refunded twice.')+'</em></div></div>';
+    }
+    var D = RAFOrderChanges.REFUND_DESTINATION;
+    var opts = [
+      [D.ORIGINAL_PAYMENT, 'ti-credit-card', T('إعادة المبلغ إلى وسيلة الدفع الأصلية','Refund to original payment method'),
+       T('قد يستغرق استرداد المبلغ حتى 7 أيام عمل.','Refunds may take up to 7 business days.')],
+      [D.WALLET, 'ti-wallet', T('إضافته إلى محفظة رف','Add to RAF Wallet'),
+       T('يتوفر في محفظتك فوراً بعد الموافقة.','Available in your wallet immediately after you approve.')]
+    ];
+    return '<div class="cc-dest"><div class="cc-dest-h">'
+      + T('أين تريد استرداد المبلغ؟','Where should the refund go?')+'</div>'
+      + opts.map(function(x){
+          var on = CCDEST === x[0];
+          return '<button class="cc-dest-o" aria-pressed="'+(on?'true':'false')+'" onclick="pickRefundDest(\''+x[0]+'\')">'
+            + '<span class="cc-dest-tick">'+(on?'<i class="ti ti-check"></i>':'')+'</span>'
+            + '<i class="ti '+x[1]+'"></i>'
+            + '<span class="cc-dest-b"><b>'+x[2]+'</b><em>'+x[3]+'</em></span></button>';
+        }).join('') + '</div>';
+  }
+
+  /* removal / replacement — the two changes that can move money */
+  function lineChangeHTML(o, c){
+    var name = T(c.productNameAr || c.productNameEn, c.productNameEn || c.productNameAr);
+    var sub = [];
+    if (c.size)  sub.push(T('المقاس','Size')+': '+c.size);
+    if (c.color) sub.push(T('اللون','Colour')+': '+c.color);
+    sub.push(T('الكمية','Qty')+': '+(c.qty||1));
+    var isRemoval = c.kind === 'removal';
+    var refund = parseFloat(c.refundAmount) || 0;
+
+    var h = '<section class="cc-card" id="ccCard">'
+      + '<div class="cc-h"><i class="ti '+(isRemoval?'ti-package-off':'ti-repeat')+'"></i><div>'
+        + '<b>'+(isRemoval
+            ? T('المتجر يطلب إزالة منتج غير متوفر','The store has asked to remove an unavailable product')
+            : T('المتجر يطلب استبدال أحد المنتجات','The store has asked to replace a product'))+'</b>'
+        + '<span>'+T('لن يتم تنفيذ أي تغيير إلا بعد موافقتك.','Nothing changes unless you approve it.')+'</span>'
+      + '</div></div>'
+      + '<div class="cc-prod">'
+        + (c.image?'<span class="cc-th" style="background-image:url(\''+c.image+'\')"></span>':'')
+        + '<div><b>'+name+'</b><span>'+sub.join(' · ')+'</span></div>'
+        + '<span class="cc-amt">'+c.paidAmount+' '+T('د.ك','KWD')+'</span></div>';
+
+    if (!isRemoval){
+      var rname = T(c.replacementNameAr || c.replacementNameEn, c.replacementNameEn || c.replacementNameAr);
+      h += '<div class="cc-swap"><i class="ti ti-arrow-down"></i></div>'
+        + '<div class="cc-prod new">'
+        + (c.replacementImage?'<span class="cc-th" style="background-image:url(\''+c.replacementImage+'\')"></span>':'')
+        + '<div><b>'+rname+'</b><span>'+T('المنتج البديل','Replacement product')+'</span></div>'
+        + '<span class="cc-amt">'+c.replacementPayable+' '+T('د.ك','KWD')+'</span></div>';
+    }
+
+    h += '<div class="cc-reason"><i class="ti ti-info-circle"></i><span>'
+      + T('السبب','Reason')+': '+T(c.reasonAr, c.reasonEn)+'</span></div>';
+
+    h += refund > 0
+      ? '<div class="cc-refund"><i class="ti ti-cash"></i><div><b>'
+        + (isRemoval ? T('سيتم إرجاع المبلغ','You will be refunded')
+                     : T('سيتم إرجاع الفرق','You will be refunded the difference'))
+        + ': '+c.refundAmount+' '+T('د.ك','KWD')+'</b>'
+        + '<em>'+T('لا تتغيّر رسوم التوصيل ولا الكوبون ولا بقية المنتجات.',
+                   'Delivery fee, coupon and your other products do not change.')+'</em></div></div>'
+      : '<div class="cc-price"><i class="ti ti-tag"></i><span>'+T('لا يوجد تغيير في السعر','No change in price')+'</span></div>';
+
+    h += destHTML(c);
+
+    h += '<div class="cc-outcome">'
+      + '<div><i class="ti ti-check"></i>'+(isRemoval
+          ? T('عند الموافقة: يُزال هذا المنتج فقط ويُعاد مبلغه، ويكمل المتجر تجهيز بقية طلبك.',
+              'If you approve: only this product is removed and refunded; the store continues with the rest of your order.')
+          : T('عند الموافقة: يُستبدل هذا المنتج فقط، ويُعاد الفرق إن وجد.',
+              'If you approve: only this product is replaced, and any difference is refunded.'))+'</div>'
+      + '<div><i class="ti ti-x"></i>'+T('عند الرفض: يبقى طلبك كما هو دون أي تغيير، ويُبلَّغ المتجر بقرارك.',
+            'If you decline: your order stays exactly as it is and the store is told.')+'</div>'
+      + '</div>'
+      + '<div class="cc-acts">'
+        + '<button class="cc-ok" onclick="approveChange(\''+c.id+'\')">'
+          + '<i class="ti ti-check"></i> '+T('الموافقة','Approve')+'</button>'
+        + '<button class="cc-no" onclick="declineChange(\''+c.id+'\')">'
+          + '<i class="ti ti-x"></i> '+T('رفض','Decline')+'</button>'
+      + '</div>'
+      + '<div class="cc-err" id="ccErr" role="alert"></div>'
+      + '</section>';
+    return h;
+  }
+
+  function changeHTML(o){
+    var C = window.RAFOrderChanges;
+    if (!C) return '';
+    var c = C.describe(o.id);
+    if (!c) return '';
+    if (c.kind === 'removal' || c.kind === 'replacement') return lineChangeHTML(o, c);
+    var group = T(c.groupAr || c.groupEn, c.groupEn || c.groupAr);
+    var to    = T(c.toLabelAr || c.toLabelEn, c.toLabelEn || c.toLabelAr);
+    var name  = T(c.productNameAr || c.productNameEn, c.productNameEn || c.productNameAr);
+    return '<section class="cc-card" id="ccCard">'
+      + '<div class="cc-h"><i class="ti ti-message-question"></i><div>'
+        + '<b>'+T('المتجر يطلب تعديلاً على طلبك','The store has requested a change to your order')+'</b>'
+        + '<span>'+T('لن يتم تنفيذ أي تغيير إلا بعد موافقتك.','Nothing changes unless you approve it.')+'</span>'
+      + '</div></div>'
+      + '<div class="cc-prod">'
+        + (c.image?'<span class="cc-th" style="background-image:url(\''+c.image+'\')"></span>':'')
+        + '<div><b>'+name+'</b><span>'+T('الكمية','Qty')+': '+(c.qty||1)+'</span></div></div>'
+      + '<div class="cc-diff">'
+        + '<div class="cc-side"><span>'+T('الحالي','Current')+'</span><b>'+group+': '+c.fromLabel+'</b></div>'
+        + '<i class="ti ti-arrow-left cc-arrow"></i>'
+        + '<div class="cc-side new"><span>'+T('المقترح','Proposed')+'</span><b>'+group+': '+to+'</b></div>'
+      + '</div>'
+      + '<div class="cc-reason"><i class="ti ti-info-circle"></i><span>'
+        + T('السبب','Reason')+': '+T(c.reasonAr, c.reasonEn)+'</span></div>'
+      + '<div class="cc-price"><i class="ti ti-tag"></i><span>'
+        + T('لا يوجد تغيير في السعر','No change in price')+'</span></div>'
+      + '<div class="cc-outcome">'
+        + '<div><i class="ti ti-check"></i>'+T('عند الموافقة: يتم تعديل هذا المنتج فقط ويكمل المتجر تجهيز طلبك.',
+              'If you approve: only this item changes and the store continues preparing your order.')+'</div>'
+        + '<div><i class="ti ti-x"></i>'+T('عند الرفض: يبقى طلبك كما هو دون أي تغيير، ويُبلَّغ المتجر بقرارك.',
+              'If you decline: your order stays exactly as it is and the store is told.')+'</div>'
+      + '</div>'
+      + '<div class="cc-acts">'
+        + '<button class="cc-ok" onclick="approveChange(\''+c.id+'\')">'
+          + '<i class="ti ti-check"></i> '+T('الموافقة على التعديل','Approve the change')+'</button>'
+        + '<button class="cc-no" onclick="declineChange(\''+c.id+'\')">'
+          + '<i class="ti ti-x"></i> '+T('رفض التعديل','Decline the change')+'</button>'
+      + '</div>'
+      + '<div class="cc-err" id="ccErr" role="alert"></div>'
+      + '</section>';
+  }
+  function ccActor(){
+    var u = (window.RAFPerm && RAFPerm.currentUser()) ? RAFPerm.currentUser() : null;
+    return u ? { id:u.id, name:u.name } : null;
+  }
+  function ccFail(res){
+    var box = document.getElementById('ccErr');
+    if (!box) return;
+    box.textContent = res.message || T('تعذّر تنفيذ العملية.','The action could not be completed.');
+    box.classList.add('show');
+  }
+  window.approveChange = function(id){
+    var o = getOrder(); if (!o) return;
+    var res = RAFOrderChanges.approve(o.id, id, ccActor(), { refundDestination: CCDEST });
+    if (!res.ok) {
+      /* re-render first so the card survives, then show why */
+      render(); ccFail(res); return;
+    }
+    var msg = res.refund
+      ? (res.refund.destination === 'wallet'
+          ? T('تمت الموافقة. أُضيف ' + res.refund.amount + ' د.ك إلى محفظتك.',
+              'Approved. ' + res.refund.amount + ' KWD was added to your wallet.')
+          : T('تمت الموافقة. سيُعاد ' + res.refund.amount + ' د.ك إلى وسيلة الدفع الأصلية خلال 7 أيام عمل كحد أقصى.',
+              'Approved. ' + res.refund.amount + ' KWD will be returned to your original payment method within 7 business days.'))
+      : T('تم تطبيق التعديل على طلبك.','The change has been applied to your order.');
+    CCDEST = null;
+    RAFShop.toast(msg, { icon:'ti-check' });
+    render();
+  };
+  window.declineChange = function(id){
+    var o = getOrder(); if (!o) return;
+    var res = RAFOrderChanges.reject(o.id, id, ccActor());
+    if (!res.ok) { ccFail(res); render(); return; }
+    RAFShop.toast(T('تم رفض التعديل. طلبك كما هو.','Change declined. Your order is unchanged.'), { icon:'ti-x' });
+    render();
+  };
+
   /* ---------- render ---------- */
   function render(){
     var root=document.getElementById('odRoot');
@@ -338,7 +584,7 @@
         + '<div class="empty-actions"><a href="raf_orders.html" class="btn btn-gold"><i class="ti ti-receipt"></i> '+T('طلباتي','My Orders')+'</a></div></div>';
       return;
     }
-    root.innerHTML = confirmationHTML(o) + timelineHTML(o) + driverHTML(o) + mapHTML(o)
+    root.innerHTML = confirmationHTML(o) + changeHTML(o) + timelineHTML(o) + driverHTML(o) + mapHTML(o)
                    + detailsHTML(o) + invoiceHTML(o) + actionsHTML();
     RAFShop.Cart.badge();
   }

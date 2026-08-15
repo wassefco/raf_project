@@ -144,8 +144,9 @@
       <p data-ar="لم يقبل المتجر طلبك خلال 5 دقائق، لذلك تم إلغاؤه تلقائياً."
          data-en="The store did not accept your order within 5 minutes, so it was cancelled automatically.">لم يقبل المتجر طلبك خلال 5 دقائق، لذلك تم إلغاؤه تلقائياً.</p>
       <div class="refund"><i class="ti ti-cash-banknote"></i>
-        <span data-ar="تمت إعادة المبلغ بالكامل إلى طريقة الدفع الأصلية. قد يستغرق ظهوره حتى 3 أيام عمل."
-              data-en="You have been refunded in full to your original payment method. It may take up to 3 business days to appear.">تمت إعادة المبلغ بالكامل إلى طريقة الدفع الأصلية. قد يستغرق ظهوره حتى 3 أيام عمل.</span></div>
+        <!-- the refund period is stated once, by the engine, in the copy above -->
+        <span data-ar="يُعاد المبلغ إلى طريقة الدفع الأصلية."
+              data-en="The refund is returned to your original payment method.">يُعاد المبلغ إلى طريقة الدفع الأصلية.</span></div>
       <div class="pend-order"><i class="ti ti-receipt"></i> <span class="ordNo">—</span></div>
       <div class="pend-acts">
         <a class="pend-primary" href="raf_homepage.html"><i class="ti ti-shopping-bag"></i> <span data-ar="تسوّق مجدداً" data-en="Shop again">تسوّق مجدداً</span></a>
@@ -230,9 +231,14 @@
   function announce(kind){
     if (announced) return;
     announced = true;
-    var msg = kind === 'accepted'
-      ? T('تم قبول طلبك من المتجر.', 'Your order has been accepted by the store.')
-      : T('تم رفض طلبك من المتجر.', 'Your order has been rejected by the store.');
+    var msg;
+    if (kind === 'accepted') {
+      msg = T('تم قبول طلبك من المتجر.', 'Your order has been accepted by the store.');
+    } else {
+      /* the store's own reason, in customer wording, from the engine */
+      var ct = E.customerRejectionText(E.rejectionOf(ORDER_ID));
+      msg = T(ct.ar, ct.en);
+    }
     var to = kind === 'accepted'
       ? 'raf_tracking.html?id=' + encodeURIComponent(ORDER_ID) + '&new=1'
       : 'raf_homepage.html';
@@ -251,9 +257,10 @@
     if(!s) return;
     if(s.done === E.DECISION.ACCEPTED){ show('stOk'); announce('accepted'); return; }
     if(s.done === E.DECISION.REJECTED){
+      var rj = E.customerRejectionText(E.rejectionOf(ORDER_ID));
       failCopy(T('اعتذر المتجر عن الطلب','The store could not accept your order'),
-               T('لم يتمكن المتجر من قبول طلبك، وتم إعادة المبلغ كاملاً.',
-                 'The store was unable to accept your order, and you have been refunded in full.'));
+               T(rj.ar + ' تم بدء استرداد المبلغ كاملاً. ' + E.REFUND_DAYS_TEXT.ar,
+                 rj.en + ' A full refund has been initiated. ' + E.REFUND_DAYS_TEXT.en));
       show('stFail'); announce('rejected'); return;
     }
     if(s.done === E.DECISION.CANCELLED){

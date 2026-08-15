@@ -341,8 +341,143 @@
     if (e.key === LS_RES || e.key === LS_MOVE) emit();
   });
 
+  /* ══════════════ GROUP C · LINE-LEVEL RESERVATION OPERATIONS ══════════════
+     Authorised narrow addition. Everything above stays as it was: an order
+     reserves as a whole, releases as a whole and commits as a whole.
+
+     A customer-approved change touches ONE line of a live order, so these two
+     operations move a single line's quantity while the rest of the
+     reservation stays ACTIVE. They are the only way to do that — no caller
+     may reach into a reservation itself.
+
+     Idempotency is by operation key, recorded on the reservation. Replaying
+     an approval therefore cannot move stock twice. */
+
+  function lineOps(res){ return res.lineOps || (res.lineOps = {}); }
+
+  /* qty must be a whole, positive, in-range number — never clamped */
+  function lineQtyOk(res, productId, qty){
+    if (!validQty(qty)) return false;
+    var held = (res.items || {})[productId];
+    return typeof held === 'number' && held >= qty;
+  }
+
+  /* release exactly `qty` of one product from a live reservation */
+  function releaseLine(orderId, productId, qty, opts){
+    opts = opts || {};
+    var opKey = opts.opKey;
+    if (!orderId || !productId) return { ok:false, code:'INVALID_LINE' };
+    if (!opKey) return { ok:false, code:'OP_KEY_REQUIRED' };
+
+    var all = allReservations(), res = all[orderId];
+    if (!res) return { ok:false, code:'NO_RESERVATION' };
+    if (lineOps(res)[opKey]) return { ok:true, alreadyApplied:true, result:res.lineOps[opKey] };
+    if (res.status !== STATUS.ACTIVE) return { ok:false, code:'RESERVATION_NOT_ACTIVE', status:res.status };
+    if (!lineQtyOk(res, productId, qty))
+      return { ok:false, code:'INVALID_LINE', held:(res.items || {})[productId] || 0, requested:qty };
+
+    /* 1 — return the units to stock */
+    var before = onHand(productId);
+    if (!S().updateProduct(productId, { stock: before + qty }))
+      return { ok:false, code:'PERSIST_FAILED' };
+
+    /* 2 — shrink the reservation line; an emptied reservation is released */
+    var next = {};
+    for (var k in res.items) if (res.items.hasOwnProperty(k)) next[k] = res.items[k];
+    next[productId] -= qty;
+    if (next[productId] === 0) delete next[productId];
+
+    var snapshotItems = res.items, snapshotStatus = res.status;
+    res.items = next;
+    if (!Object.keys(next).length) { res.status = STATUS.RELEASED; res.releasedAt = Date.now(); }
+    lineOps(res)[opKey] = { type:'release', productId:productId, qty:qty, at:Date.now() };
+    all[orderId] = res;
+
+    if (!writeJSON(LS_RES, all)) {
+      /* nothing partial survives: put the stock back exactly as it was */
+      S().updateProduct(productId, { stock: before });
+      res.items = snapshotItems; res.status = snapshotStatus;
+      return { ok:false, code:'PERSIST_FAILED', rolledBack:true };
+    }
+
+    addMovements([movement(productId, qty, DIRECTION.RELEASE,
+                           opts.reason || 'order_line_removed', orderId, opts.actor)]);
+    audit('inventory.line_released', { orderId:orderId, storeSlug:slugOf(productId),
+      actor:opts.actor, source:'system', systemGenerated:!opts.actor, key:'relline:' + opKey,
+      metadata:{ reservationId:res.reservationId, productId:productId, quantity:qty,
+                 reason:opts.reason || 'order_line_removed', remaining:res.items } });
+    emit();
+    return { ok:true, released:qty, productId:productId, remaining:res.items, status:res.status };
+  }
+
+  /* swap one product for another inside a live reservation, all-or-nothing */
+  function replaceLine(orderId, fromProductId, toProductId, qty, opts){
+    opts = opts || {};
+    var opKey = opts.opKey;
+    if (!orderId || !fromProductId || !toProductId) return { ok:false, code:'INVALID_LINE' };
+    if (fromProductId === toProductId) return { ok:false, code:'INVALID_LINE', reason:'same_product' };
+    if (!opKey) return { ok:false, code:'OP_KEY_REQUIRED' };
+
+    var all = allReservations(), res = all[orderId];
+    if (!res) return { ok:false, code:'NO_RESERVATION' };
+    if (lineOps(res)[opKey]) return { ok:true, alreadyApplied:true, result:res.lineOps[opKey] };
+    if (res.status !== STATUS.ACTIVE) return { ok:false, code:'RESERVATION_NOT_ACTIVE', status:res.status };
+    if (!lineQtyOk(res, fromProductId, qty))
+      return { ok:false, code:'INVALID_LINE', held:(res.items || {})[fromProductId] || 0, requested:qty };
+
+    /* 1 — the replacement must be genuinely available BEFORE anything moves */
+    var free = onHand(toProductId) - reserved(toProductId);
+    if (qty > free)
+      return { ok:false, code:'INSUFFICIENT_STOCK',
+               shortages:[{ productId:toProductId, requested:qty, available:Math.max(0, free) }],
+               errors:[{ field:toProductId,
+                         message:T('الكمية المطلوبة غير متوفرة','The requested quantity is not available') }] };
+
+    /* 2 — apply both halves, undoing the first if the second cannot land */
+    var fromBefore = onHand(fromProductId);
+    if (!S().updateProduct(fromProductId, { stock: fromBefore + qty }))
+      return { ok:false, code:'PERSIST_FAILED' };
+
+    var toBefore = onHand(toProductId), toNext = toBefore - qty;
+    if (toNext < 0 || !S().updateProduct(toProductId, { stock: toNext })) {
+      S().updateProduct(fromProductId, { stock: fromBefore });      /* undo half one */
+      return { ok:false, code:toNext < 0 ? 'INSUFFICIENT_STOCK' : 'PERSIST_FAILED', rolledBack:true };
+    }
+
+    var snapshotItems = res.items;
+    var next = {};
+    for (var k in res.items) if (res.items.hasOwnProperty(k)) next[k] = res.items[k];
+    next[fromProductId] -= qty;
+    if (next[fromProductId] === 0) delete next[fromProductId];
+    next[toProductId] = (next[toProductId] || 0) + qty;
+
+    res.items = next;
+    lineOps(res)[opKey] = { type:'replace', from:fromProductId, to:toProductId, qty:qty, at:Date.now() };
+    all[orderId] = res;
+
+    if (!writeJSON(LS_RES, all)) {
+      S().updateProduct(fromProductId, { stock: fromBefore });
+      S().updateProduct(toProductId,   { stock: toBefore });
+      res.items = snapshotItems;
+      return { ok:false, code:'PERSIST_FAILED', rolledBack:true };
+    }
+
+    addMovements([
+      movement(fromProductId, qty, DIRECTION.RELEASE, opts.reason || 'order_line_replaced', orderId, opts.actor),
+      movement(toProductId,   qty, DIRECTION.RESERVE, opts.reason || 'order_line_replaced', orderId, opts.actor)
+    ]);
+    audit('inventory.line_replaced', { orderId:orderId, storeSlug:slugOf(toProductId),
+      actor:opts.actor, source:'system', systemGenerated:!opts.actor, key:'repline:' + opKey,
+      metadata:{ reservationId:res.reservationId, from:fromProductId, to:toProductId,
+                 quantity:qty, reason:opts.reason || 'order_line_replaced', items:res.items } });
+    emit();
+    return { ok:true, from:fromProductId, to:toProductId, qty:qty, items:res.items };
+  }
+
   global.RAFInventory = {
     STATUS: STATUS, DIRECTION: DIRECTION,
+    /* Group C · line-level reservation operations */
+    releaseLine: releaseLine, replaceLine: replaceLine,
     /* read */
     onHand: onHand, reserved: reserved, available: available, stateOf: stateOf,
     reservationFor: reservationFor, allReservations: allReservations, movements: movements,

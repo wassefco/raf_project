@@ -282,6 +282,88 @@ body.mw-focused{overflow:hidden;}
 .mw-btn-ghost{background:var(--card);color:var(--text2);border-color:var(--border2);}
 .mw-btn-gold{background:var(--gold);color:#1C1606;border-color:var(--gold2);}
 
+/* ---------- GROUP C · customer approved changes ---------- */
+.mw-act-change{background:var(--card);color:var(--gold2);border-color:var(--gold);}
+.mw-act-change:hover:not(:disabled){background:var(--gold-soft);}
+.mw-await{display:flex;align-items:center;gap:11px;margin-top:6px;padding:12px 14px;border-radius:13px;
+  border:1px solid var(--gold);background:var(--gold-soft);}
+.mw-await i{font-size:21px;color:var(--gold2);flex:0 0 auto;}
+.mw-await b{display:block;font-size:13.5px;font-weight:800;color:var(--ink);}
+.mw-await span{font-size:12px;color:var(--text2);overflow-wrap:anywhere;}
+.mw-chg-badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;
+  color:var(--gold2);background:var(--gold-soft);border:1px solid var(--gold);border-radius:20px;padding:2px 8px;}
+#chgDlg .mw-rj-r{min-height:46px;}
+#chgDlg .mw-dlg-f button{min-height:46px;}
+#chgDlg .mw-rj-i{min-height:56px;}
+.mw-opt-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px;}
+#chgDlg .mw-opt{min-height:44px;padding:0 14px;border-radius:11px;border:1.5px solid var(--border2);
+  background:var(--card);font-family:inherit;font-size:13px;font-weight:700;color:var(--text2);cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;transition:all .16s;}
+#chgDlg .mw-opt:hover{border-color:var(--gold);color:var(--gold2);}
+#chgDlg .mw-opt[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#F5F0E4;}
+#chgDlg .mw-opt[disabled]{opacity:.45;cursor:not-allowed;}
+.mw-opt-dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.18);flex:0 0 auto;}
+.mw-opt-cur{font-size:11.5px;color:var(--text3);margin:2px 0 7px;}
+.mw-opt-cur b{color:var(--ink);font-weight:800;}
+.mw-fin{border:1px solid var(--border2);border-radius:13px;overflow:hidden;background:var(--bg);}
+.mw-fin-r{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;
+  border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text2);}
+.mw-fin-r:last-child{border-bottom:none;}
+.mw-fin-r b{font-family:var(--font-en);font-size:14px;font-weight:800;color:var(--ink);white-space:nowrap;}
+.mw-fin-r.hi{background:var(--gold-soft);} .mw-fin-r.hi b{color:var(--gold2);}
+.mw-fin-n{padding:10px 13px;font-size:11.5px;color:var(--text3);line-height:1.6;}
+
+/* ---------- GROUP B · rejection sheet ----------
+   The theme sets a 40px floor on every button with a two-element selector,
+   which outranks a bare class, so these rules are scoped by the dialog id. */
+#rjDlg .mw-rj-r{min-height:46px;}
+#rjDlg .mw-rj-i{min-height:56px;}
+#rjDlg .mw-dlg-f button{min-height:46px;}
+.mw-rj-c{max-width:520px;max-height:88vh;display:flex;flex-direction:column;padding:20px;}
+.mw-rj-b{overflow-y:auto;margin:0 -4px 14px;padding:0 4px;-webkit-overflow-scrolling:touch;}
+.mw-rj-h{font-size:12px;font-weight:800;color:var(--text3);letter-spacing:.02em;margin:14px 0 8px;}
+.mw-rj-h:first-child{margin-top:0;}
+.mw-rj-r{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;padding:9px 13px;margin-bottom:7px;
+  border-radius:12px;border:1.5px solid var(--border2);background:var(--card);cursor:pointer;
+  font-family:inherit;font-size:13.5px;font-weight:700;color:var(--text2);text-align:start;transition:all .16s;}
+.mw-rj-r:hover{border-color:var(--gold);color:var(--gold2);}
+.mw-rj-r[aria-checked="true"]{border-color:var(--ink);background:var(--ink);color:#F5F0E4;}
+.mw-rj-r .tick{flex:0 0 auto;width:19px;height:19px;border-radius:50%;border:2px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;font-size:12px;}
+.mw-rj-r[aria-checked="true"] .tick{border-color:#F5F0E4;background:#F5F0E4;color:var(--ink);}
+.mw-rj-r span{min-width:0;overflow-wrap:anywhere;}
+
+.mw-rj-i{display:flex;align-items:center;gap:11px;width:100%;min-height:56px;padding:8px 12px;margin-bottom:7px;
+  border-radius:12px;border:1.5px solid var(--border2);background:var(--card);cursor:pointer;
+  font-family:inherit;text-align:start;transition:all .16s;}
+.mw-rj-i:hover{border-color:var(--gold);}
+.mw-rj-i[aria-checked="true"]{border-color:var(--red);background:rgba(217,83,79,.07);}
+.mw-rj-i .tick{flex:0 0 auto;width:20px;height:20px;border-radius:6px;border:2px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;font-size:13px;color:transparent;}
+.mw-rj-i[aria-checked="true"] .tick{border-color:var(--red);background:var(--red);color:#fff;}
+.mw-rj-th{flex:0 0 auto;width:42px;height:42px;border-radius:9px;background:var(--bg2) center/cover no-repeat;
+  border:1px solid var(--border);}
+.mw-rj-t{min-width:0;flex:1;line-height:1.45;}
+.mw-rj-t b{display:block;font-size:13px;font-weight:800;color:var(--ink);overflow-wrap:anywhere;}
+.mw-rj-t em{font-style:normal;display:block;font-size:11.5px;color:var(--text2);overflow-wrap:anywhere;}
+.mw-rj-q{flex:0 0 auto;font-family:var(--font-en);font-size:12px;font-weight:800;color:var(--gold2);
+  background:var(--gold-soft);border-radius:20px;padding:3px 9px;}
+
+.mw-rj-x{width:100%;min-height:76px;padding:11px 13px;border-radius:12px;border:1.5px solid var(--border2);
+  background:var(--card);font-family:inherit;font-size:13.5px;color:var(--ink);resize:vertical;line-height:1.6;}
+.mw-rj-x:focus{outline:none;border-color:var(--gold);}
+.mw-rj-n{font-size:11.5px;color:var(--text3);margin-top:5px;text-align:end;font-family:var(--font-en);}
+.mw-rj-note{display:flex;gap:8px;align-items:flex-start;font-size:12px;line-height:1.65;color:var(--text2);
+  background:var(--bg);border:1px solid var(--border);border-radius:11px;padding:10px 12px;margin-top:12px;}
+.mw-rj-note i{color:var(--gold2);font-size:15px;flex:0 0 auto;margin-top:1px;}
+.mw-rj-err{display:none;margin-top:12px;padding:10px 12px;border-radius:11px;background:rgba(217,83,79,.1);
+  border:1px solid rgba(217,83,79,.32);color:var(--red);font-size:12.5px;font-weight:700;line-height:1.6;}
+.mw-rj-err.show{display:block;}
+.mw-btn-red{background:var(--red);color:#fff;border-color:#B8433F;}
+.mw-btn-red:disabled{opacity:.5;cursor:not-allowed;}
+@media (max-width:560px){ .mw-rj-c{max-height:92vh;padding:16px;} }
+@media (max-height:520px){ .mw-rj-c{max-height:96vh;padding:14px;} .mw-rj-b{max-height:46vh;} }
+
 .mw-zoom{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:24px;
   background:rgba(10,8,4,.86);}
 .mw-zoom.show{display:flex;}
@@ -641,6 +723,40 @@ body.is-offline .mw-off{display:flex;}
   </div>
 </div>
 
+<!-- CUSTOMER APPROVED CHANGE — the merchant proposes, the customer decides -->
+<div class="mw-dlg" id="chgDlg">
+  <div class="mw-dlg-c mw-rj-c" role="dialog" aria-modal="true" aria-labelledby="chgTitle">
+    <h3 id="chgTitle"><span data-ar="طلب تعديل من العميل" data-en="Request a customer change">طلب تعديل من العميل</span>
+      <span class="mw-audit-id" id="chgOrd"></span></h3>
+    <p data-ar="لا يتم تغيير أي شيء الآن. يُرسل الاقتراح إلى العميل، ولا يُطبَّق إلا بعد موافقته."
+       data-en="Nothing changes now. The proposal is sent to the customer and is applied only after they approve.">لا يتم تغيير أي شيء الآن. يُرسل الاقتراح إلى العميل، ولا يُطبَّق إلا بعد موافقته.</p>
+    <div class="mw-rj-b" id="chgBody"></div>
+    <div class="mw-rj-err" id="chgErr" role="alert"></div>
+    <div class="mw-dlg-f">
+      <button class="mw-btn-ghost" onclick="closeChange()" data-ar="إلغاء" data-en="Cancel">إلغاء</button>
+      <button class="mw-btn-gold" id="chgGo" onclick="submitChange()"
+        data-ar="إرسال للعميل" data-en="Send to customer">إرسال للعميل</button>
+    </div>
+  </div>
+</div>
+
+<!-- ORDER REJECTION — reason is required before the decision is recorded -->
+<div class="mw-dlg" id="rjDlg">
+  <div class="mw-dlg-c mw-rj-c" role="dialog" aria-modal="true" aria-labelledby="rjTitle">
+    <h3 id="rjTitle"><span data-ar="رفض الطلب" data-en="Reject order">رفض الطلب</span>
+      <span class="mw-audit-id" id="rjOrd"></span></h3>
+    <p data-ar="اختر سبب الرفض. سيتم إبلاغ العميل وإعادة المبلغ بعد انتهاء مهلة التراجع."
+       data-en="Choose a rejection reason. The customer is informed and refunded once the undo window ends.">اختر سبب الرفض. سيتم إبلاغ العميل وإعادة المبلغ بعد انتهاء مهلة التراجع.</p>
+    <div class="mw-rj-b" id="rjBody"></div>
+    <div class="mw-rj-err" id="rjErr" role="alert"></div>
+    <div class="mw-dlg-f">
+      <button class="mw-btn-ghost" onclick="closeReject()" data-ar="إلغاء" data-en="Cancel">إلغاء</button>
+      <button class="mw-btn-red" id="rjGo" onclick="confirmReject()"
+        data-ar="تأكيد الرفض" data-en="Confirm rejection">تأكيد الرفض</button>
+    </div>
+  </div>
+</div>
+
 <!-- IMAGE ZOOM — no navigation -->
 <div class="mw-zoom" id="zoom" onclick="if(event.target===this)closeZoom()">
   <button class="mw-zoom-x" onclick="closeZoom()" aria-label="close"><i class="ti ti-x"></i></button>
@@ -657,6 +773,7 @@ body.is-offline .mw-off{display:flex;}
 <script src="raf_inventory.js"></script>
 <script src="raf_rules.js"></script>
 <script src="raf_order_engine.js"></script>
+<script src="raf_order_changes.js"></script>
 <script src="raf_permissions.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════════════
@@ -884,6 +1001,10 @@ body.is-offline .mw-off{display:flex;}
       + '<div class="mw-c-bot">'
         + '<span class="mw-thumbs">'+thumbsHTML(o)+'</span>'
         + '<span class="mw-tag"><i class="ti ti-box"></i>'+unitCount(o)+'</span>'
+        /* not a new order status — a view derived from the active proposal */
+        + (window.RAFOrderChanges && RAFOrderChanges.hasPending(o.id)
+            ? '<span class="mw-chg-badge"><i class="ti ti-clock-hour-4"></i>'
+              + T('بانتظار موافقة العميل','Waiting for customer') + '</span>' : '')
         + '<span class="mw-c-status '+b.st+'">'+T(b.ar,b.en)+'</span>'
       + '</div>'
       + '</button>';
@@ -1142,9 +1263,20 @@ body.is-offline .mw-off{display:flex;}
           + '<i class="ti ti-x"></i> '+T('رفض','Reject')+'</button></div>';
     }
     if (m === E.MSTATE.PREPARING || m === E.MSTATE.ACCEPTED){
+      var pend = window.RAFOrderChanges && RAFOrderChanges.activeOf(o.id);
+      if (pend){
+        /* Ready is not offered while the customer still owes an answer —
+           the engine refuses it too, this only stops the pointless click */
+        return html + '<div class="mw-await"><i class="ti ti-clock-hour-4"></i><div>'
+          + '<b>'+T('بانتظار موافقة العميل','Waiting for customer approval')+'</b>'
+          + '<span>'+T(pend.groupLabelAr,pend.groupLabelEn)+': '
+          + esc(pend.fromLabel)+' → '+esc(T(pend.toLabelAr,pend.toLabelEn))+'</span></div></div>';
+      }
       return html + '<div class="mw-acts">'
         + '<button class="mw-act mw-act-ready" onclick="doReady(\''+esc(o.id)+'\')">'
-          + '<i class="ti ti-package-export"></i> '+T('جاهز','Ready')+'</button></div>';
+          + '<i class="ti ti-package-export"></i> '+T('جاهز','Ready')+'</button>'
+        + '<button class="mw-act mw-act-change" onclick="doChange(\''+esc(o.id)+'\')">'
+          + '<i class="ti ti-edit"></i> '+T('طلب تعديل','Request change')+'</button></div>';
     }
     return html;
   }
@@ -1216,11 +1348,19 @@ body.is-offline .mw-off{display:flex;}
     });
     var box = document.getElementById('notifList');
     box.innerHTML = list.length ? list.map(function(n){
-      var isWarn = n.type === 'timeout';
+      var isWarn = n.type === 'timeout' || n.type === 'change_failed';
+      var COPY = {
+        'new':             T('طلب جديد','New order'),
+        'timeout':         T('تحذير: قارب وقت القبول على الانتهاء','Acceptance window almost over'),
+        'change_approved': T('وافق العميل على التعديل','Customer approved the change'),
+        'change_rejected': T('رفض العميل التعديل','Customer declined the change'),
+        'change_failed':   T('تعذّر تطبيق التعديل','The change could not be applied')
+      };
+      var ICON = { 'change_approved':'ti-user-check', 'change_rejected':'ti-user-x',
+                   'change_failed':'ti-alert-triangle', 'timeout':'ti-alert-triangle' };
       return '<button class="mw-n'+(n.read?'':' unread')+'" onclick="openNotif(\''+esc(n.id)+'\',\''+esc(n.orderId)+'\')">'
-        + '<div class="mw-n-ic'+(isWarn?' warn':'')+'"><i class="ti '+(isWarn?'ti-alert-triangle':'ti-shopping-bag-plus')+'"></i></div>'
-        + '<div class="mw-n-b"><b>'+(isWarn?T('تحذير: قارب وقت القبول على الانتهاء','Acceptance window almost over')
-                                           :T('طلب جديد','New order'))+'</b>'
+        + '<div class="mw-n-ic'+(isWarn?' warn':'')+'"><i class="ti '+(ICON[n.type]||'ti-shopping-bag-plus')+'"></i></div>'
+        + '<div class="mw-n-b"><b>'+(COPY[n.type] || T('تحديث على الطلب','Order update'))+'</b>'
         + esc(n.orderId)+'<br><span>'+relTime(n.ts)+'</span></div></button>';
     }).join('')
     : '<div class="mw-n"><div class="mw-n-ic"><i class="ti ti-bell"></i></div>'
@@ -1357,8 +1497,314 @@ body.is-offline .mw-off{display:flex;}
     saveSession();
   }
   window.doAccept = function(id){ afterAction(E.merchantAccept(id, ME)); };
-  window.doReject = function(id){ afterAction(E.merchantReject(id, ME)); };
-  window.doReady  = function(id){ afterAction(E.merchantReady(id, ME)); };
+  /* ---------- GROUP C · customer approved changes ----------
+     The page gathers a proposal and shows it back. Every rule about whether
+     the proposal is legitimate belongs to RAFOrderChanges, which is asked
+     again on submit. */
+  var CH = { id:null, line:null, group:null, v:null, reason:null, mode:null, repl:null };
+
+  window.doChange = function(id){
+    CH = { id:id, line:null, group:null, v:null, reason:null, mode:null, repl:null };
+    document.getElementById('chgOrd').textContent = id;
+    document.getElementById('chgErr').classList.remove('show');
+    renderChange();
+    document.getElementById('chgDlg').classList.add('show');
+  };
+  window.closeChange = function(){
+    document.getElementById('chgDlg').classList.remove('show');
+    CH = { id:null, line:null, group:null, v:null, reason:null, mode:null, repl:null };
+  };
+  function chgItems(){ var S = CH.id ? snapOf(CH.id) : null; return (S && S.items) || []; }
+
+  function renderChange(){
+    var C = window.RAFOrderChanges;
+    var lines = chgItems();
+    var html = '<div class="mw-rj-h">'+T('المنتج المراد تعديله','Product to change')+'</div>';
+    lines.forEach(function(it,i){
+      var on = CH.line === i;
+      var sub = [];
+      if (it.size)  sub.push(T('المقاس','Size')+': '+it.size);
+      if (it.color) sub.push(T('اللون','Colour')+': '+it.color);
+      html += '<button class="mw-rj-i" role="radio" aria-checked="'+(on?'true':'false')+'" onclick="pickChgLine('+i+')">'
+        + '<span class="tick"><i class="ti ti-check"></i></span>'
+        + '<span class="mw-rj-th"'+(it.image?' style="background-image:url(\''+esc(it.image)+'\')"':'')+'></span>'
+        + '<span class="mw-rj-t"><b>'+esc(T(it.nameAr||it.nameEn, it.nameEn||it.nameAr))+'</b>'
+        + (sub.length?'<em>'+esc(sub.join(' · '))+'</em>':'')+'</span>'
+        + '<span class="mw-rj-q">×'+esc(String(it.qty||1))+'</span></button>';
+    });
+
+    if (CH.line != null){
+      /* what kind of change: options, remove the line, or swap it out */
+      html += '<div class="mw-rj-h">'+T('نوع التعديل','Type of change')+'</div>';
+      [['option', 'ti-adjustments', T('تغيير الخيارات','Change the options')],
+       ['removal','ti-trash',       T('إزالة المنتج (غير متوفر)','Remove the product (unavailable)')],
+       ['replacement','ti-repeat',  T('استبدال المنتج','Replace the product')]].forEach(function(m){
+        var on = CH.mode === m[0];
+        html += '<button class="mw-rj-r" role="radio" aria-checked="'+(on?'true':'false')+'" '
+          + 'onclick="pickChgMode(\''+m[0]+'\')"><span class="tick">'+(on?'<i class="ti ti-check"></i>':'')+'</span>'
+          + '<span><i class="ti '+m[1]+'" style="margin-inline-end:6px"></i>'+esc(m[2])+'</span></button>';
+      });
+    }
+
+    if (CH.line != null && (CH.mode === 'removal' || CH.mode === 'replacement')){
+      var pay = C.paidAmountOf(CH.id, CH.line);
+      if (!pay.ok){
+        html += '<div class="mw-rj-note"><i class="ti ti-alert-triangle"></i><span>'+esc(pay.message)+'</span></div>';
+      } else {
+        var it = chgItems()[CH.line];
+        html += '<div class="mw-rj-h">'+T('الأثر المالي','Financial effect')+'</div>'
+          + '<div class="mw-fin"><div class="mw-fin-r"><span>'+T('المبلغ المدفوع لهذا المنتج','Amount paid for this product')
+          + '</span><b>'+esc(money3(pay.paid))+' '+T('د.ك','KWD')+'</b></div>';
+
+        if (CH.mode === 'removal'){
+          html += '<div class="mw-fin-r hi"><span>'+T('المبلغ المسترد للعميل','Amount refunded to the customer')
+            + '</span><b>'+esc(money3(pay.paid))+' '+T('د.ك','KWD')+'</b></div>'
+            + '<div class="mw-fin-n">'+T('لا تتغيّر رسوم التوصيل ولا الكوبون.','Delivery fee and coupon do not change.')+'</div>';
+        } else {
+          var cand = C.replacementCandidates(CH.id, CH.line);
+          var chosen = CH.repl ? (cand.candidates||[]).filter(function(x){ return x.id===CH.repl; })[0] : null;
+          html += chosen
+            ? '<div class="mw-fin-r"><span>'+T('قيمة المنتج البديل','Replacement value')+'</span><b>'
+              + esc(chosen.payable)+' '+T('د.ك','KWD')+'</b></div>'
+              + '<div class="mw-fin-r hi"><span>'+T('الفرق المسترد للعميل','Difference refunded')+'</span><b>'
+              + esc(chosen.refund)+' '+T('د.ك','KWD')+'</b></div>'
+            : '<div class="mw-fin-n">'+T('اختر المنتج البديل لعرض الفرق.','Choose a replacement to see the difference.')+'</div>';
+          html += '</div>';
+
+          html += '<div class="mw-rj-h">'+T('المنتج البديل','Replacement product')+'</div>';
+          if (!cand.ok){
+            html += '<div class="mw-rj-note"><i class="ti ti-alert-triangle"></i><span>'+esc(cand.message)+'</span></div>';
+          } else if (!cand.candidates.length){
+            html += '<div class="mw-rj-note"><i class="ti ti-alert-triangle"></i><span>'
+              + T('لا يوجد منتج بديل متاح في متجرك بقيمة مساوية أو أقل.',
+                  'Your store has no available product at or below this value.')+'</span></div>';
+          } else {
+            cand.candidates.forEach(function(x){
+              var on = CH.repl === x.id;
+              html += '<button class="mw-rj-i" role="radio" aria-checked="'+(on?'true':'false')+'" '
+                + 'onclick="pickChgRepl(\''+esc(x.id)+'\')">'
+                + '<span class="tick"><i class="ti ti-check"></i></span>'
+                + '<span class="mw-rj-th"'+(x.img?' style="background-image:url(\''+esc(x.img)+'\')"':'')+'></span>'
+                + '<span class="mw-rj-t"><b>'+esc(T(x.ar,x.en))+'</b>'
+                + '<em>'+esc(x.payable)+' '+T('د.ك','KWD')+' · '+T('يُسترد','refund')+' '+esc(x.refund)+'</em></span></button>';
+            });
+          }
+        }
+        if (CH.mode === 'removal') html += '</div>';
+        html += '<div class="mw-rj-note"><i class="ti ti-user-check"></i><span>'
+          + T('يختار العميل وحده وجهة الاسترداد (الدفع الأصلي أو المحفظة).',
+              'Only the customer chooses where the refund goes (original payment or wallet).')+'</span></div>';
+      }
+      document.getElementById('chgBody').innerHTML = html;
+      return;
+    }
+
+    if (CH.line != null && CH.mode === 'option'){
+      var groups = C.optionsFor(CH.id, CH.line);
+      if (!groups || !groups.length){
+        html += '<div class="mw-rj-note"><i class="ti ti-alert-triangle"></i><span>'
+          + T('لا توجد خيارات قابلة للتعديل على هذا المنتج.','This product has no changeable options.')+'</span></div>';
+      } else {
+        groups.forEach(function(g){
+          if (!g.onOrder) return;               /* a group the order never used */
+          html += '<div class="mw-rj-h">'+esc(T(g.labelAr,g.labelEn))+'</div>'
+            + '<div class="mw-opt-cur">'+T('اختيار العميل الحالي','Customer’s current choice')
+            + ': <b>'+esc(g.current)+'</b></div><div class="mw-opt-row">';
+          g.options.forEach(function(o){
+            var same = (o.ar === g.current || o.en === g.current);
+            var on = CH.group === g.groupIndex && CH.v === o.v;
+            html += '<button class="mw-opt" aria-pressed="'+(on?'true':'false')+'"'
+              + (same||!o.priceNeutral?' disabled':'')
+              + ' onclick="pickChgOpt('+g.groupIndex+',\''+esc(o.v)+'\')">'
+              + (o.hex?'<span class="mw-opt-dot" style="background:'+esc(o.hex)+'"></span>':'')
+              + esc(T(o.ar,o.en))+(same?' · '+T('الحالي','current'):'')+'</button>';
+          });
+          html += '</div>';
+        });
+        html += '<div class="mw-rj-h">'+T('سبب التعديل','Reason for the change')+'</div>';
+        C.REASONS.forEach(function(r){
+          var on = CH.reason === r.id;
+          html += '<button class="mw-rj-r" role="radio" aria-checked="'+(on?'true':'false')+'" '
+            + 'onclick="pickChgReason(\''+esc(r.id)+'\')">'
+            + '<span class="tick">'+(on?'<i class="ti ti-check"></i>':'')+'</span>'
+            + '<span>'+esc(T(r.ar,r.en))+'</span></button>';
+        });
+      }
+    }
+
+    html += '<div class="mw-rj-note"><i class="ti ti-user-check"></i><span>'
+      + T('لن يتغيّر الطلب ولا قيمته قبل موافقة العميل. لا يمكن تعليم الطلب جاهزاً أثناء انتظار الرد.',
+          'Neither the order nor its value changes before the customer approves. The order cannot be marked ready while the reply is outstanding.')
+      + '</span></div>';
+    document.getElementById('chgBody').innerHTML = html;
+  }
+  function money3(n){ return (Math.round(n*1000)/1000).toFixed(3); }
+  window.pickChgLine = function(i){
+    CH.line = i; CH.group = null; CH.v = null; CH.mode = null; CH.repl = null;
+    document.getElementById('chgErr').classList.remove('show'); renderChange();
+  };
+  window.pickChgMode = function(m){
+    CH.mode = m; CH.group = null; CH.v = null; CH.repl = null;
+    document.getElementById('chgErr').classList.remove('show'); renderChange();
+  };
+  window.pickChgRepl = function(pid){
+    CH.repl = pid;
+    document.getElementById('chgErr').classList.remove('show'); renderChange();
+  };
+  window.pickChgOpt = function(g,v){
+    CH.group = g; CH.v = v;
+    document.getElementById('chgErr').classList.remove('show'); renderChange();
+  };
+  window.pickChgReason = function(id){
+    CH.reason = id;
+    document.getElementById('chgErr').classList.remove('show'); renderChange();
+  };
+  function chgFail(res){
+    var box = document.getElementById('chgErr');
+    box.textContent = res.message || T('تعذّر إرسال طلب التعديل.','The change request could not be sent.');
+    box.classList.add('show');
+  }
+  function chgDraft(){
+    if (CH.mode === 'removal')
+      return { kind:'removal', lineIndex:CH.line, reasonId:'product_unavailable' };
+    if (CH.mode === 'replacement')
+      return { kind:'replacement', lineIndex:CH.line,
+               replacementProductId:CH.repl, reasonId:'product_unavailable' };
+    return { lineIndex:CH.line, groupIndex:CH.group, optionV:CH.v, reasonId:CH.reason };
+  }
+  window.submitChange = function(){
+    if (!CH.id) return;
+    var C = window.RAFOrderChanges;
+    var draft = chgDraft();
+    var line = draft.kind === 'removal' || draft.kind === 'replacement';
+    var pre = line ? C.validateLineChange(CH.id, draft, ME) : C.validateProposal(CH.id, draft, ME);
+    if (!pre.ok) return chgFail(pre);
+    var res = C.propose(CH.id, chgDraft(), ME);
+    if (!res.ok) return chgFail(res);
+    closeChange();
+    renderQueue(); renderDrawer(); saveSession();
+  };
+
+  /* ---------- GROUP B · rejection ----------
+     The page collects and shows the decision. Every rule that decides whether
+     the decision is valid lives in the engine, which is asked again on commit. */
+  var RJ = { id:null, reason:null, items:{}, text:'' };
+
+  window.doReject = function(id){
+    RJ = { id:id, reason:null, items:{}, text:'' };
+    document.getElementById('rjOrd').textContent = id;
+    document.getElementById('rjErr').classList.remove('show');
+    renderReject();
+    document.getElementById('rjDlg').classList.add('show');
+  };
+  window.closeReject = function(){
+    document.getElementById('rjDlg').classList.remove('show');
+    RJ = { id:null, reason:null, items:{}, text:'' };
+  };
+  function rjItems(){
+    var S = RJ.id ? snapOf(RJ.id) : null;
+    return (S && S.items) ? S.items : [];
+  }
+  function renderReject(){
+    var reasons = E.REJECT_REASONS, r = E.reasonById(RJ.reason);
+    var html = '<div class="mw-rj-h">'+T('سبب الرفض','Rejection reason')+'</div>';
+    reasons.forEach(function(x){
+      var on = RJ.reason === x.id;
+      html += '<button class="mw-rj-r" role="radio" aria-checked="'+(on?'true':'false')+'" '
+        + 'onclick="pickReason(\''+esc(x.id)+'\')">'
+        + '<span class="tick">'+(on?'<i class="ti ti-check"></i>':'')+'</span>'
+        + '<span>'+esc(T(x.ar, x.en))+'</span></button>';
+    });
+
+    if (r && r.needsItems){
+      var lines = rjItems();
+      html += '<div class="mw-rj-h">'+T('المنتجات غير المتوفرة','Unavailable products')+'</div>';
+      if (!lines.length){
+        html += '<div class="mw-rj-note"><i class="ti ti-alert-triangle"></i><span>'
+          + T('لا يمكن قراءة منتجات هذا الطلب، ولذلك لا يمكن تحديد المنتج غير المتوفر.',
+              'This order’s products cannot be read, so an unavailable product cannot be identified.')
+          + '</span></div>';
+      }
+      lines.forEach(function(it, i){
+        var on = !!RJ.items[i];
+        var sub = [];
+        if (it.size)  sub.push(T('المقاس','Size')+': '+it.size);
+        if (it.color) sub.push(T('اللون','Colour')+': '+it.color);
+        html += '<button class="mw-rj-i" role="checkbox" aria-checked="'+(on?'true':'false')+'" '
+          + 'onclick="pickItem('+i+')">'
+          + '<span class="tick"><i class="ti ti-check"></i></span>'
+          + '<span class="mw-rj-th"'+(it.image?' style="background-image:url(\''+esc(it.image)+'\')"':'')+'></span>'
+          + '<span class="mw-rj-t"><b>'+esc(T(it.nameAr||it.nameEn, it.nameEn||it.nameAr))+'</b>'
+          + (sub.length?'<em>'+esc(sub.join(' · '))+'</em>':'')+'</span>'
+          + '<span class="mw-rj-q">×'+esc(String(it.qty||1))+'</span></button>';
+      });
+    }
+
+    if (r && r.needsExplanation){
+      html += '<div class="mw-rj-h">'+T('التوضيح (مطلوب)','Explanation (required)')+'</div>'
+        + '<textarea class="mw-rj-x" id="rjText" maxlength="'+E.EXPLANATION_MAX+'" oninput="typeReason(this)" '
+        + 'placeholder="'+T('اكتب سبب الرفض باختصار','Briefly state the rejection reason')+'">'+esc(RJ.text)+'</textarea>'
+        + '<div class="mw-rj-n"><span id="rjN">'+RJ.text.length+'</span>/'+E.EXPLANATION_MAX+'</div>'
+        + '<div class="mw-rj-note"><i class="ti ti-eye-off"></i><span>'
+        + T('هذا التوضيح داخلي ولا يظهر للعميل.','This explanation is internal and is not shown to the customer.')
+        + '</span></div>';
+    }
+
+    html += '<div class="mw-rj-note"><i class="ti ti-clock"></i><span>'
+      + T('لديك '+(E.UNDO_MS/1000)+' ثوانٍ للتراجع قبل إبلاغ العميل وإعادة المبلغ. '+E.REFUND_DAYS_TEXT.ar,
+          'You have '+(E.UNDO_MS/1000)+' seconds to undo before the customer is informed and refunded. '+E.REFUND_DAYS_TEXT.en)
+      + '</span></div>';
+
+    document.getElementById('rjBody').innerHTML = html;
+    var t = document.getElementById('rjText');
+    if (t && RJ.focusText){ RJ.focusText = false; t.focus(); }
+  }
+  window.pickReason = function(id){
+    RJ.reason = id; RJ.items = {}; RJ.focusText = (id === 'other');
+    document.getElementById('rjErr').classList.remove('show');
+    renderReject();
+  };
+  window.pickItem = function(i){
+    if (RJ.items[i]) delete RJ.items[i]; else RJ.items[i] = true;
+    document.getElementById('rjErr').classList.remove('show');
+    renderReject();
+  };
+  window.typeReason = function(el){
+    RJ.text = el.value;
+    var n = document.getElementById('rjN'); if (n) n.textContent = String(RJ.text.length);
+    document.getElementById('rjErr').classList.remove('show');
+  };
+  function rjContext(){
+    return { reasonId:RJ.reason, explanation:RJ.text,
+             items:Object.keys(RJ.items).map(Number).sort(function(a,b){ return a-b; }) };
+  }
+  function rjFail(res){
+    var box = document.getElementById('rjErr');
+    box.textContent = res.message
+      || (res.reason === 'locked'         ? T('موظف آخر يعالج هذا الطلب حالياً.','Another employee is processing this order.')
+       :  res.reason === 'not_pending'    ? T('لم يعد هذا الطلب في انتظار القرار.','This order is no longer awaiting a decision.')
+       :  res.reason === 'in_undo_window' ? T('هناك إجراء قيد التراجع على هذا الطلب.','An action on this order is still within its undo window.')
+       :  T('تعذر تسجيل الرفض.','The rejection could not be recorded.'));
+    box.classList.add('show');
+  }
+  window.confirmReject = function(){
+    if (!RJ.id) return;
+    /* asked once for the message, then again by the engine on commit —
+       the engine's answer is the one that decides */
+    var pre = E.validateRejection(RJ.id, rjContext(), ME);
+    if (!pre.ok) return rjFail(pre);
+    var res = E.merchantReject(RJ.id, ME, rjContext());
+    if (!res.ok) return rjFail(res);
+    closeReject();
+    afterAction(res);
+  };
+  window.doReady  = function(id){
+    var res = E.merchantReady(id, ME);
+    /* the engine is the authority; if it refuses, say why rather than
+       leaving a dead button */
+    if (!res.ok && res.message) RAFShop.toast(res.message, { icon:'ti-clock-hour-4' });
+    afterAction(res);
+  };
   window.undoAction = function(id){ E.undo(id); afterAction({ ok:true }); };
   window.overrideLock = function(id){
     /* managers and admins only; employees never see this control */
@@ -1540,7 +1986,9 @@ body.is-offline .mw-off{display:flex;}
       document.getElementById('profAv').textContent = (me.name||'?').trim().charAt(0);
     }
 
-    ME = me ? { id:me.id, name:me.name, roleId:me.roleId } : null;
+    /* the canonical store scope travels with the actor so the engine can
+       prove ownership itself instead of trusting the page's own filtering */
+    ME = me ? { id:me.id, name:me.name, roleId:me.roleId, storeSlug:STORE_SLUG } : null;
 
     ORDERS = ordersForStore(STORE_SLUG);
     /* first pass seeds the seen-set without announcing history */

@@ -124,10 +124,14 @@
      One guard, one decision: whoever gets there first wins, exactly as
      before. Accept keeps the order moving; reject / cancel / timeout all
      run the identical cancel-and-refund chain. */
-  function decide(orderId, decision, why){
+  function decide(orderId, decision, why, context){
     var s = get(orderId);
     if (!s || s.done) return false;
-    s.done = decision; s.decidedAt = Date.now(); save(s);
+    s.done = decision; s.decidedAt = Date.now();
+    /* the rejection context becomes part of the committed record here, once,
+       guarded by the same `s.done` gate that makes the decision idempotent */
+    if (decision === DECISION.REJECTED && context) s.rejection = context;
+    save(s);
 
     if (decision === DECISION.ACCEPTED) {
       setOrderStatus(orderId, STATUS.PROGRESS);
@@ -145,7 +149,7 @@
         audit('order.cancelled', orderId, { source:'customer', key:s.decidedAt,
           actor:{ type:'customer' }, reason:'customer_cancelled' });
       }
-      cancelAndRefund(orderId, why || decision);
+      cancelAndRefund(orderId, why || decision, decision === DECISION.REJECTED ? (context || null) : null);
     }
     emit(orderId, decision);
     return true;
@@ -153,17 +157,18 @@
   function accept(orderId){ return decide(orderId, DECISION.ACCEPTED); }
   /* the merchant declining is the existing cancellation path with its own
      trigger — same status, same refund, same stock restoration */
-  function reject(orderId){ return decide(orderId, DECISION.REJECTED, 'rejected'); }
+  function reject(orderId, context){ return decide(orderId, DECISION.REJECTED, 'rejected', context); }
   function cancel(orderId){ return decide(orderId, DECISION.CANCELLED, 'customer'); }
   function timeout(orderId){ return decide(orderId, DECISION.TIMEOUT, 'timeout'); }
 
   /* mark the order cancelled, restore its stock and record the refund */
-  function cancelAndRefund(orderId, why){
+  function cancelAndRefund(orderId, why, rejection){
     var st = get(orderId);
     var k = (st && st.decidedAt) || Date.now();
     setOrderStatus(orderId, STATUS.CANCELLED);
     audit('system.cancelled', orderId, { automatic:true, systemGenerated:true, source:'automation',
-      key:k, reason:why, previousState:null, newState:STATUS.CANCELLED });
+      key:k, reason:why, previousState:null, newState:STATUS.CANCELLED,
+      metadata: rejection ? { rejection:rejection } : null });
     var rel = restoreStock(orderId, why);
     /* only report a restoration that actually happened */
     if (rel && rel.ok && !rel.alreadyApplied) {
@@ -173,11 +178,20 @@
     audit('system.refunded', orderId, { automatic:true, systemGenerated:true, source:'automation',
       key:k, reason:why });
     if (global.RAFRules) { try { RAFRules.Reserve.release(); } catch (e) {} }
-    notify(orderId,
-      why === 'timeout'
-        ? T('تم إلغاء الطلب ' + orderId + ' تلقائياً وإعادة المبلغ', 'Order ' + orderId + ' was auto-cancelled and refunded')
-        : T('تم إلغاء الطلب ' + orderId + ' وإعادة المبلغ', 'Order ' + orderId + ' was cancelled and refunded'),
-      'raf_order_details.html?id=' + encodeURIComponent(orderId));
+    /* the refund wording states the expected processing period, never a
+       guaranteed settlement date from the card provider */
+    var msg;
+    if (rejection) {
+      var ct = customerRejectionText(rejection);
+      msg = T(ct.ar + ' ' + REFUND_DAYS_TEXT.ar, ct.en + ' ' + REFUND_DAYS_TEXT.en);
+    } else if (why === 'timeout') {
+      msg = T('تم إلغاء الطلب ' + orderId + ' تلقائياً وإعادة المبلغ. ' + REFUND_DAYS_TEXT.ar,
+              'Order ' + orderId + ' was auto-cancelled and refunded. ' + REFUND_DAYS_TEXT.en);
+    } else {
+      msg = T('تم إلغاء الطلب ' + orderId + ' وإعادة المبلغ. ' + REFUND_DAYS_TEXT.ar,
+              'Order ' + orderId + ' was cancelled and refunded. ' + REFUND_DAYS_TEXT.en);
+    }
+    notify(orderId, msg, 'raf_order_details.html?id=' + encodeURIComponent(orderId));
   }
 
   /* ---------- order status + timeline ---------- */
@@ -315,10 +329,13 @@
     var u = undoOf(orderId);
     return u ? Math.max(0, UNDO_MS - (Date.now() - u.at)) : 0;
   }
-  function openUndo(orderId, action, prevState, actor){
+  function openUndo(orderId, action, prevState, actor, context){
     var all = undoAll();
     var cur = mstateAll()[orderId];
     all[orderId] = { action:action, prev:prevState || null, at:Date.now(),
+                     /* the validated rejection decision rides along with the
+                        pending action and only becomes real at commit */
+                     rejection: context || null,
                      /* the state timestamp the action's audit event was keyed on,
                         so an undo can point back at exactly that event */
                      actionAt: cur ? cur.at : null,
@@ -333,8 +350,8 @@
     var all = undoAll(), u = all[orderId];
     if (!u) return false;
     delete all[orderId]; writeJSON(LS_UNDO, all);
-    if (u.action === ACTION.ACCEPT)      accept(orderId);   /* existing chain */
-    else if (u.action === ACTION.REJECT) reject(orderId);   /* existing chain */
+    if (u.action === ACTION.ACCEPT)      accept(orderId);              /* existing chain */
+    else if (u.action === ACTION.REJECT) reject(orderId, u.rejection); /* existing chain */
     /* READY has no engine-level consequence beyond the state already applied */
     emit(orderId, 'commit');
     return true;
@@ -393,21 +410,171 @@
       key:(mrecord(orderId) || {}).at, previousState:MSTATE.PENDING, newState:MSTATE.PREPARING });
     return { ok:true, undoMs:UNDO_MS };
   }
-  function merchantReject(orderId, actor){
-    var g = actionable(orderId, actor); if (!g.ok) return g;
+  /* ---------- GROUP B · rejection reasons ----------
+     A rejection is never a bare state change: the merchant states why, and
+     that statement travels with the decision through the existing chain.
+     The reasons are a closed list — the merchant picks one, never writes one,
+     except for the explicit "other" case which demands an explanation. */
+  var REJECT_REASONS = [
+    { id:'product_unavailable',  ar:'المنتج غير متوفر',                 en:'Product unavailable',              needsItems:true },
+    { id:'quantity_unavailable', ar:'الكمية المطلوبة غير متوفرة',       en:'Requested quantity unavailable' },
+    { id:'cannot_prepare',       ar:'المتجر غير قادر على تجهيز الطلب',  en:'Store unable to prepare the order' },
+    { id:'product_issue',        ar:'مشكلة في المنتج',                  en:'Product issue' },
+    { id:'order_issue',          ar:'مشكلة في الطلب',                   en:'Order issue' },
+    { id:'store_operational',    ar:'مشكلة تشغيلية في المتجر',          en:'Store operational issue' },
+    { id:'other',                ar:'سبب آخر',                          en:'Other', needsExplanation:true }
+  ];
+  var EXPLANATION_MAX = 280;
+  var REFUND_DAYS_TEXT = { ar:'قد يستغرق استرداد المبلغ حتى 7 أيام عمل.',
+                           en:'Refunds may take up to 7 business days.' };
+
+  function reasonById(id){
+    for (var i = 0; i < REJECT_REASONS.length; i++) if (REJECT_REASONS[i].id === id) return REJECT_REASONS[i];
+    return null;
+  }
+  /* typed validation failures, each with the wording the merchant sees */
+  var REJECT_ERRORS = {
+    INVALID_REJECTION_REASON:      { ar:'يرجى اختيار سبب الرفض.',              en:'Please select a rejection reason.' },
+    UNAVAILABLE_PRODUCT_REQUIRED:  { ar:'يرجى تحديد المنتج غير المتوفر.',      en:'Please select the unavailable product.' },
+    REJECTION_EXPLANATION_REQUIRED:{ ar:'يرجى كتابة سبب الرفض.',              en:'Please write the rejection reason.' },
+    INVALID_REJECTION_ITEM:        { ar:'المنتج المحدد ليس ضمن هذا الطلب.',    en:'The selected product is not part of this order.' },
+    CROSS_STORE:                   { ar:'هذا الطلب لا يخص متجرك.',            en:'This order does not belong to your store.' },
+    FORBIDDEN:                     { ar:'ليس لديك صلاحية معالجة الطلبات.',     en:'You do not have permission to process orders.' },
+    LOCKED:                        { ar:'موظف آخر يعالج هذا الطلب حالياً.',    en:'Another employee is processing this order.' }
+  };
+  function rejectError(code, extra){
+    var m = REJECT_ERRORS[code] || { ar:'', en:'' };
+    var r = { ok:false, code:code, reason:code, ar:m.ar, en:m.en, message:T(m.ar, m.en) };
+    if (extra) for (var k in extra) if (extra.hasOwnProperty(k)) r[k] = extra[k];
+    return r;
+  }
+
+  /* the order's authoritative item list — the snapshot, never the catalogue */
+  function snapItems(orderId){
+    if (!global.RAFOrderSnapshot) return null;
+    var s = null; try { s = RAFOrderSnapshot.of(orderId); } catch (e) { return null; }
+    return (s && s.items) ? s.items : null;
+  }
+  function snapSlug(orderId){
+    if (!global.RAFOrderSnapshot) return null;
+    try { return RAFOrderSnapshot.storeSlugOf(orderId) || null; } catch (e) { return null; }
+  }
+
+  /* Validate a rejection before anything at all is written. Order of checks
+     matters: authorisation and ownership first, then business validation, so
+     a validation failure is never reported as a permission failure. */
+  function validateRejection(orderId, context, actor){
+    if (!actor || !actor.id) return rejectError('FORBIDDEN');
+    /* fails closed: without the permission authority present there is nothing
+       to authorise against, and an unauthorised rejection is the worse error */
+    var allowed = false;
+    try { allowed = !!(global.RAFPerm && RAFPerm.can(actor.id, 'orders.manage')); } catch (e) { allowed = false; }
+    if (!allowed) return rejectError('FORBIDDEN');
+
+    /* ownership is proven from the canonical storeSlug on both sides, or the
+       action is refused — an unprovable link is never treated as a match */
+    var mine = actor.storeSlug || null, theirs = snapSlug(orderId);
+    if (!mine || !theirs || mine !== theirs) return rejectError('CROSS_STORE', { actorStore:mine, orderStore:theirs });
+
+    var l = lockOf(orderId);
+    if (l && l.userId !== actor.id) return rejectError('LOCKED', { lockedBy:l.name || l.userId });
+
+    var ctx = context || {};
+    var r = reasonById(ctx.reasonId);
+    if (!r) return rejectError('INVALID_REJECTION_REASON');
+
+    var explanation = null;
+    if (r.needsExplanation) {
+      explanation = String(ctx.explanation == null ? '' : ctx.explanation).trim();
+      if (!explanation) return rejectError('REJECTION_EXPLANATION_REQUIRED');
+      explanation = explanation.slice(0, EXPLANATION_MAX);
+    }
+
+    var items = [];
+    if (r.needsItems) {
+      var lines = snapItems(orderId);
+      if (!lines || !lines.length) return rejectError('INVALID_REJECTION_ITEM', { reason:'order_items_unavailable' });
+      var picked = ctx.items || [];
+      if (!picked.length) return rejectError('UNAVAILABLE_PRODUCT_REQUIRED');
+      var seen = {};
+      for (var i = 0; i < picked.length; i++) {
+        var ix = picked[i];
+        /* the line index in the order's own snapshot is the item identity —
+           no name matching, no catalogue lookup */
+        if (typeof ix !== 'number' || ix !== Math.floor(ix) || ix < 0 || ix >= lines.length)
+          return rejectError('INVALID_REJECTION_ITEM', { index:ix });
+        if (seen[ix]) continue;
+        seen[ix] = 1;
+        var it = lines[ix];
+        items.push({ lineIndex:ix, productId:it.productId || null, variantId:it.variantId || null,
+                     nameAr:it.nameAr || '', nameEn:it.nameEn || '', qty:it.qty || null,
+                     size:it.size || null, color:it.color || null });
+      }
+      if (!items.length) return rejectError('UNAVAILABLE_PRODUCT_REQUIRED');
+    }
+
+    return { ok:true, context:{
+      reasonId:r.id, reasonAr:r.ar, reasonEn:r.en,
+      explanation:explanation, items:items,
+      by:actor.id, byName:actor.name || actor.id, at:Date.now()
+    } };
+  }
+
+  /* what the customer is told — reason in plain language, never internals */
+  function customerRejectionText(ctx){
+    if (!ctx || !ctx.reasonId) return { ar:'تم رفض طلبك من المتجر.', en:'Your order has been rejected by the store.' };
+    if (ctx.reasonId === 'product_unavailable') {
+      var names = (ctx.items || []);
+      if (names.length) {
+        return { ar:'تم رفض طلبك لأن بعض المنتجات غير متوفرة: ' + names.map(function(i){ return i.nameAr || i.nameEn; }).join('، ') + '.',
+                 en:'Your order was rejected because some products are unavailable: ' + names.map(function(i){ return i.nameEn || i.nameAr; }).join(', ') + '.' };
+      }
+      return { ar:'تم رفض طلبك لأن بعض المنتجات غير متوفرة.', en:'Your order was rejected because some products are unavailable.' };
+    }
+    /* a free-text merchant explanation is internal — the customer gets the
+       generic wording rather than text that was never written for them */
+    if (ctx.reasonId === 'other') return { ar:'تم رفض طلبك من المتجر.', en:'Your order has been rejected by the store.' };
+    return { ar:'تم رفض طلبك من المتجر: ' + ctx.reasonAr + '.',
+             en:'Your order has been rejected by the store: ' + ctx.reasonEn + '.' };
+  }
+  /* the rejection context of a committed decision, or null */
+  function rejectionOf(orderId){
+    var s = get(orderId);
+    return (s && s.done === DECISION.REJECTED && s.rejection) ? s.rejection : null;
+  }
+
+  function merchantReject(orderId, actor, context){
+    var g = actionable(orderId, actor);
+    /* the shared guard reports a lock in the engine's older shape; a rejection
+       reports it as a typed error so every caller gets one vocabulary */
+    if (!g.ok && g.reason === 'locked') {
+      var l = lockOf(orderId);
+      return rejectError('LOCKED', { lockedBy:(l && (l.name || l.userId)) || null });
+    }
+    if (!g.ok) return g;
     if (mstate(orderId) !== MSTATE.PENDING) return { ok:false, reason:'not_pending' };
+    var v = validateRejection(orderId, context, actor); if (!v.ok) return v;
+    var ctx = v.context;
     var prev = mrecord(orderId);
     setMState(orderId, 'rejected', actor);
     appendTimeline(orderId, 'm-reject', 'اعتذر المتجر عن الطلب', 'Store declined the order', 'cancel');
-    openUndo(orderId, ACTION.REJECT, prev, actor);
+    openUndo(orderId, ACTION.REJECT, prev, actor, ctx);
     audit('order.reject', orderId, { actor:actor, source:'merchant', reversible:true,
-      key:(mrecord(orderId) || {}).at, previousState:MSTATE.PENDING, newState:'rejected' });
-    return { ok:true, undoMs:UNDO_MS };
+      key:(mrecord(orderId) || {}).at, previousState:MSTATE.PENDING, newState:'rejected',
+      reason:ctx.reasonId, metadata:{ rejection:ctx } });
+    return { ok:true, undoMs:UNDO_MS, rejection:ctx };
   }
   function merchantReady(orderId, actor){
     var g = actionable(orderId, actor); if (!g.ok) return g;
     var cur = mstate(orderId);
     if (cur !== MSTATE.PREPARING && cur !== MSTATE.ACCEPTED) return { ok:false, reason:'not_preparing' };
+    /* the store's work cannot be declared finished while the customer still
+       owes an answer on a change to that very order */
+    if (global.RAFOrderChanges && RAFOrderChanges.hasPending(orderId)) {
+      return { ok:false, reason:'awaiting_customer_approval',
+               message:T('بانتظار موافقة العميل على التعديل المقترح',
+                         'Waiting for the customer to approve the proposed change') };
+    }
     var prev = mrecord(orderId);
     /* READY is a real, persistent state. The merchant's work ends here; the
        driver workflow owns everything after it (Ready → Waiting Driver →
@@ -647,6 +814,11 @@
     /* locking */
     lockOf: lockOf, acquireLock: acquireLock, heartbeat: heartbeat, releaseLock: releaseLock,
     overrideLock: overrideLock, lockedByOther: lockedByOther, canProcess: canProcess, sweepLocks: sweepLocks,
+    /* rejection (Group B) */
+    REJECT_REASONS: REJECT_REASONS, REJECT_ERRORS: REJECT_ERRORS, EXPLANATION_MAX: EXPLANATION_MAX,
+    REFUND_DAYS_TEXT: REFUND_DAYS_TEXT, reasonById: reasonById,
+    validateRejection: validateRejection, rejectionOf: rejectionOf,
+    customerRejectionText: customerRejectionText,
     /* policy */
     canModify: canModify, modifyPolicy: modifyPolicy, oosPreferenceOf: oosPreferenceOf,
     appendTimeline: appendTimeline,

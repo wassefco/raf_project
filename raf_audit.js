@@ -50,8 +50,28 @@
     'order.reject':         { tl:true,  ar:'اعتذر المتجر عن الطلب',       en:'Store declined the order' },
     'order.ready':          { tl:true,  ar:'تم تجهيز الطلب',              en:'Order ready' },
     'order.undo':           { tl:true,  ar:'تم التراجع عن الإجراء',       en:'Action undone' },
-    'modify.requested':     { tl:false, ar:'طلب تعديل الخيارات',          en:'Variant modification requested' },
+    'modify.requested':     { tl:true,  ar:'تم طلب تعديل — بانتظار موافقة العميل',
+                                        en:'Change requested — waiting for customer approval' },
+    'modify.approved':      { tl:true,  ar:'وافق العميل على التعديل',     en:'Customer approved the change' },
+    'modify.rejected':      { tl:true,  ar:'رفض العميل التعديل',          en:'Customer declined the change' },
+    'modify.failed':        { tl:true,  ar:'تعذّر تطبيق التعديل',         en:'The change could not be applied' },
     'modify.applied':       { tl:true,  ar:'تم تطبيق تعديل معتمد',        en:'Approved modification applied' },
+    'product_removal.requested':     { tl:true,  ar:'طلب المتجر إزالة منتج غير متوفر — بانتظار موافقة العميل',
+                                                 en:'Store requested removal of an unavailable product — awaiting customer approval' },
+    'product_removal.approved':      { tl:true,  ar:'وافق العميل على إزالة المنتج',   en:'Customer approved the removal' },
+    'product_removal.rejected':      { tl:true,  ar:'رفض العميل إزالة المنتج',        en:'Customer declined the removal' },
+    'product_removal.applied':       { tl:true,  ar:'تمت إزالة المنتج من الطلب',      en:'Product removed from the order' },
+    'product_replacement.requested': { tl:true,  ar:'طلب المتجر استبدال منتج — بانتظار موافقة العميل',
+                                                 en:'Store requested a product replacement — awaiting customer approval' },
+    'product_replacement.approved':  { tl:true,  ar:'وافق العميل على الاستبدال',      en:'Customer approved the replacement' },
+    'product_replacement.rejected':  { tl:true,  ar:'رفض العميل الاستبدال',           en:'Customer declined the replacement' },
+    'product_replacement.applied':   { tl:true,  ar:'تم استبدال المنتج في الطلب',     en:'Product replaced in the order' },
+    'inventory.line_released': { tl:false, ar:'تم تحرير كمية منتج من الحجز',  en:'Line quantity released from the reservation' },
+    'inventory.line_replaced': { tl:false, ar:'تم استبدال منتج داخل الحجز',   en:'Line replaced inside the reservation' },
+    'refund.created':       { tl:true,  ar:'تم إنشاء استرداد',              en:'Refund created' },
+    'wallet.credited':      { tl:true,  ar:'تمت إضافة المبلغ إلى محفظة العميل',
+                                        en:'Amount added to the customer’s wallet' },
+    'wallet.debited':       { tl:false, ar:'تم خصم مبلغ من محفظة العميل',  en:'Amount debited from the customer’s wallet' },
     'product.removed':      { tl:true,  ar:'تم حذف منتج من الطلب',        en:'Product removed from the order' },
     'note.order':           { tl:false, ar:'أُضيفت ملاحظة على الطلب',     en:'Order note added' },
     'note.preparation':     { tl:false, ar:'أُضيفت ملاحظة تجهيز',         en:'Preparation note added' },
@@ -364,6 +384,25 @@
       var text = label(e.action);
       /* an automatic event must never read as if a person did it */
       if (e.action === 'order.undo' && e.metadata && e.metadata.of) text = T('تم التراجع عن: ','Undone: ') + label(e.metadata.of);
+      /* an approved-change event reads as the option that moved, in plain
+         wording — the technical metadata stays in the audit log */
+      if (e.action.indexOf('modify.') === 0 && e.metadata) {
+        var md = e.metadata, ch = md.change || md;
+        var grp = T(ch.groupAr || ch.groupEn, ch.groupEn || ch.groupAr);
+        var to  = T(ch.toLabelAr || ch.toLabelEn, ch.toLabelEn || ch.toLabelAr) || md.appliedLabel;
+        if (grp && ch.fromLabel && to) text += ' — ' + grp + ': ' + ch.fromLabel + ' → ' + to;
+      }
+      /* a rejection reads with its reason, and with the products it names —
+         plain wording only, never the technical metadata behind it */
+      if (e.action === 'order.reject' && e.metadata && e.metadata.rejection) {
+        var rj = e.metadata.rejection;
+        text = T('تم رفض الطلب — ', 'Order rejected — ') + T(rj.reasonAr, rj.reasonEn);
+        if (rj.items && rj.items.length) {
+          text += T(': ', ': ') + rj.items.map(function (i) {
+            return T(i.nameAr || i.nameEn, i.nameEn || i.nameAr);
+          }).join(T('، ', ', '));
+        }
+      }
       return {
         eventId: e.eventId,
         time: timeOf(e.timestamp),

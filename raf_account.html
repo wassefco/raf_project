@@ -244,6 +244,12 @@ html[dir="ltr"] .sh .line{background:linear-gradient(270deg,var(--border),transp
           <div class="tile-s" id="rewardsSub"></div></div>
         <i class="ti ti-chevron-left tile-go"></i>
       </a>
+      <a class="tile" href="raf_wallet.html">
+        <div class="tile-ic"><i class="ti ti-wallet"></i></div>
+        <div class="tile-b"><div class="tile-t" data-ar="محفظتي" data-en="My Wallet">محفظتي</div>
+          <div class="tile-s" id="walletSub" data-ar="رصيدك في رف" data-en="Your RAF balance">رصيدك في رف</div></div>
+        <i class="ti ti-chevron-left tile-go"></i>
+      </a>
       <a class="tile" href="raf_coupons.html">
         <div class="tile-ic"><i class="ti ti-ticket"></i></div>
         <div class="tile-b"><div class="tile-t" data-ar="العروض والكوبونات" data-en="Offers & Coupons">العروض والكوبونات</div>
@@ -321,7 +327,27 @@ html[dir="ltr"] .sh .line{background:linear-gradient(270deg,var(--border),transp
 <script src="raf_audit.js"></script>
 <script src="raf_data.js"></script>
 <script src="raf_order_snapshot.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_wallet.js"></script>
 <script src="raf_account.js"></script>
+<script>
+/* the wallet tile shows the authority's balance — never its own number */
+(function(){
+  function paint(){
+    var el = document.getElementById('walletSub');
+    if (!el || !window.RAFWallet || !window.RAFPerm) return;
+    var u = RAFPerm.currentUser(); if (!u) return;
+    var b = RAFWallet.balance(u.id, { id:u.id, name:u.name, type:'customer' });
+    if (!b.ok) return;
+    var en = (document.getElementById('htmlRoot')||document.documentElement).lang === 'en';
+    el.removeAttribute('data-ar'); el.removeAttribute('data-en');
+    el.textContent = b.balance + (en ? ' KWD' : ' د.ك');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',paint); else paint();
+  var r=document.getElementById('htmlRoot');
+  if(r) new MutationObserver(paint).observe(r,{attributes:true,attributeFilter:['lang']});
+})();
+</script>
 <script>
 /* ============================================================
    Personal Hub — live data from the shared RAF layer.

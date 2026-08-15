@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رف — محفظتي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" rel="stylesheet">
+<link rel="stylesheet" href="raf_account.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<style>
+/* the balance card and ledger rows; everything else reuses the account shell */
+#wBal{background:linear-gradient(135deg,var(--ink),#2A241A);border-radius:20px;padding:22px;margin-bottom:18px;
+  color:#F5F0E4;position:relative;overflow:hidden;}
+#wBal::after{content:"";position:absolute;inset-inline-end:-30px;top:-30px;width:140px;height:140px;
+  border-radius:50%;background:rgba(201,168,76,.16);}
+#wBal .wb-l{font-size:12.5px;font-weight:700;color:rgba(245,240,228,.72);margin-bottom:7px;position:relative;}
+#wBal .wb-v{font-family:var(--font-en);font-size:34px;font-weight:800;line-height:1.1;position:relative;}
+#wBal .wb-c{font-size:15px;font-weight:700;color:var(--gold);margin-inline-start:7px;}
+#wBal .wb-n{margin-top:12px;font-size:11.5px;color:rgba(245,240,228,.6);position:relative;line-height:1.6;}
+.wtx{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--border);}
+.wtx:last-child{border-bottom:none;}
+.wtx-ic{width:40px;height:40px;flex:0 0 auto;border-radius:11px;display:flex;align-items:center;
+  justify-content:center;font-size:19px;}
+.wtx-ic.cr{background:rgba(46,158,91,.12);color:var(--green);}
+.wtx-ic.db{background:rgba(217,83,79,.1);color:var(--red);}
+.wtx-b{flex:1;min-width:0;}
+.wtx-t{font-size:13.5px;font-weight:700;color:var(--ink);overflow-wrap:anywhere;line-height:1.45;}
+.wtx-s{font-size:11.5px;color:var(--text3);font-family:var(--font-en);}
+.wtx-a{flex:0 0 auto;font-family:var(--font-en);font-size:14px;font-weight:800;white-space:nowrap;}
+.wtx-a.cr{color:var(--green);} .wtx-a.db{color:var(--red);}
+.wempty{text-align:center;padding:38px 20px;color:var(--text3);}
+.wempty i{font-size:44px;color:var(--border2);display:block;margin-bottom:12px;}
+.wempty b{display:block;font-size:15px;font-weight:800;color:var(--text2);margin-bottom:5px;}
+.wempty span{font-size:12.5px;line-height:1.7;}
+.wgate{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px 20px;text-align:center;}
+.wgate i{font-size:40px;color:var(--gold2);display:block;margin-bottom:12px;}
+.wgate b{display:block;font-size:16px;font-weight:800;color:var(--ink);margin-bottom:6px;}
+.wgate p{font-size:13px;color:var(--text2);line-height:1.75;}
+</style>
+</head>
+<body>
+<header class="ahead">
+  <button type="button" class="ahead-back" data-fallback="raf_account.html"><i class="ti ti-arrow-right"></i> <span data-ar="العودة" data-en="Back">العودة</span></button>
+  <div class="ahead-title" data-ar="محفظتي" data-en="My Wallet">محفظتي</div>
+  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
+</header>
+
+<div class="wrap" id="wRoot"></div>
+
+<nav class="app-bnav">
+  <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
+  <a href="raf_notifications.html" class="bnav-tab"><i class="ti ti-bell"></i><span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span></a>
+  <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
+  <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
+  <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
+</nav>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_wallet.js"></script>
+<script src="raf_account.js"></script>
+<script>
+/* ============================================================
+   MY WALLET — a view over RAFWallet. It reads the authority and
+   renders it. It holds no balance of its own and performs no
+   arithmetic on money.
+   ============================================================ */
+(function(){
+  function en(){ return (document.getElementById('htmlRoot')||document.documentElement).lang === 'en'; }
+  function T(ar,e){ return en() ? e : ar; }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  function me(){
+    var u = (window.RAFPerm && RAFPerm.currentUser()) ? RAFPerm.currentUser() : null;
+    return u ? { id:u.id, name:u.name, type:'customer' } : null;
+  }
+  function dateOf(ts){
+    try {
+      return new Date(ts).toLocaleDateString(en()?'en-GB':'ar-KW',
+        { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+    } catch(e){ return ''; }
+  }
+
+  function render(){
+    var root = document.getElementById('wRoot');
+    var u = me();
+    if (!u){
+      /* no signed-in customer means no wallet to show — and never someone else's */
+      root.innerHTML = '<div class="wgate"><i class="ti ti-user-question"></i>'
+        + '<b>'+T('سجّل الدخول لعرض محفظتك','Sign in to see your wallet')+'</b>'
+        + '<p>'+T('محفظتك مرتبطة بحسابك، ولا يمكن عرضها دون تسجيل الدخول.',
+                 'Your wallet belongs to your account and cannot be shown without signing in.')+'</p></div>';
+      return;
+    }
+
+    var bal = RAFWallet.balance(u.id, u);
+    var hist = RAFWallet.history(u.id, u);
+    if (!bal.ok || !hist.ok){
+      root.innerHTML = '<div class="wgate"><i class="ti ti-lock"></i>'
+        + '<b>'+T('لا يمكن عرض هذه المحفظة','This wallet cannot be shown')+'</b>'
+        + '<p>'+esc((bal.message || hist.message) || '')+'</p></div>';
+      return;
+    }
+
+    var txs = hist.transactions;
+    var html = '<div id="wBal">'
+      + '<div class="wb-l">'+T('الرصيد المتاح','Available balance')+'</div>'
+      + '<div class="wb-v">'+esc(bal.balance)+'<span class="wb-c">'+T('د.ك','KWD')+'</span></div>'
+      + '<div class="wb-n">'+T('يُستخدم رصيد المحفظة في عمليات الاسترداد المعتمدة من الطلبات.',
+                               'Your wallet balance comes from approved refunds on your orders.')+'</div>'
+      + '</div>';
+
+    html += '<div class="section-h">'+T('آخر العمليات','Recent transactions')+'</div>';
+    if (!txs.length){
+      html += '<div class="panel"><div class="wempty"><i class="ti ti-receipt-off"></i>'
+        + '<b>'+T('لا توجد عمليات بعد','No transactions yet')+'</b>'
+        + '<span>'+T('ستظهر هنا أي مبالغ تُضاف إلى محفظتك.',
+                     'Any amount added to your wallet will appear here.')+'</span></div></div>';
+    } else {
+      html += '<div class="panel">' + txs.map(function(t){
+        var cr = t.type === 'credit';
+        return '<div class="wtx">'
+          + '<div class="wtx-ic '+(cr?'cr':'db')+'"><i class="ti '+(cr?'ti-arrow-down-left':'ti-arrow-up-right')+'"></i></div>'
+          + '<div class="wtx-b"><div class="wtx-t">'+esc(T(t.descriptionAr,t.descriptionEn))+'</div>'
+          + '<div class="wtx-s">'+esc(dateOf(t.timestamp))+(t.orderId?' · '+esc(t.orderId):'')+'</div></div>'
+          + '<div class="wtx-a '+(cr?'cr':'db')+'">'+(cr?'+':'−')+esc(t.amount)+' '+T('د.ك','KWD')+'</div>'
+          + '</div>';
+      }).join('') + '</div>';
+    }
+    root.innerHTML = html;
+  }
+
+  function boot(){
+    var l=null; try{ l=localStorage.getItem('raf_lang'); }catch(e){}
+    if(l==='en'){ var r=document.getElementById('htmlRoot'); r.lang='en'; r.dir='ltr'; }
+    if (window.applyLang) applyLang();
+    render();
+    var root=document.getElementById('htmlRoot');
+    if(root) new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
+</body>
+</html>

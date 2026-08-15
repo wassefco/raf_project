@@ -50,7 +50,8 @@
   <div class="section-h" data-ar="خيارات أخرى" data-en="Other options">خيارات أخرى</div>
   <div class="panel">
     <div class="row"><div class="row-ic"><i class="ti ti-cash"></i></div><div class="row-body"><div class="row-lbl" data-ar="الدفع عند الاستلام" data-en="Cash on delivery">الدفع عند الاستلام</div><div class="row-sub" data-ar="متاح لمعظم الطلبات" data-en="Available for most orders">متاح لمعظم الطلبات</div></div><span class="badge b-delivered" data-ar="مُفعّل" data-en="Enabled">مُفعّل</span></div>
-    <div class="row"><div class="row-ic" style="background:var(--gold-soft);color:var(--gold2)"><i class="ti ti-wallet"></i></div><div class="row-body"><div class="row-lbl" data-ar="محفظة رف" data-en="RAF Wallet">محفظة رف</div><div class="row-sub">12.500 <span data-ar="د.ك" data-en="KWD">د.ك</span></div></div><button class="btn btn-ghost btn-sm" data-ar="شحن" data-en="Top up">شحن</button></div>
+    <!-- the balance is read from RAFWallet; this row never holds its own number -->
+    <a class="row" href="raf_wallet.html" style="text-decoration:none;color:inherit;"><div class="row-ic" style="background:var(--gold-soft);color:var(--gold2)"><i class="ti ti-wallet"></i></div><div class="row-body"><div class="row-lbl" data-ar="محفظة رف" data-en="RAF Wallet">محفظة رف</div><div class="row-sub" id="walletRowBal">—</div></div><span class="btn btn-ghost btn-sm" data-ar="عرض" data-en="View">عرض</span></a>
   </div>
 </div>
 
@@ -62,6 +63,26 @@
   <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
 
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_wallet.js"></script>
 <script src="raf_account.js"></script>
+<script>
+(function(){
+  function paint(){
+    var el = document.getElementById('walletRowBal');
+    if (!el || !window.RAFWallet || !window.RAFPerm) return;
+    var u = RAFPerm.currentUser();
+    var en = (document.getElementById('htmlRoot')||document.documentElement).lang === 'en';
+    if (!u){ el.textContent = en ? 'Sign in to view' : 'سجّل الدخول للعرض'; return; }
+    var b = RAFWallet.balance(u.id, { id:u.id, name:u.name, type:'customer' });
+    el.textContent = (b.ok ? b.balance : '—') + (en ? ' KWD' : ' د.ك');
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',paint); else paint();
+  var r=document.getElementById('htmlRoot');
+  if(r) new MutationObserver(paint).observe(r,{attributes:true,attributeFilter:['lang']});
+})();
+</script>
 </body>
 </html>
