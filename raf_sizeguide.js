@@ -198,6 +198,12 @@
     });
     document.addEventListener('keydown', onKey);
     document.body.appendChild(backEl);
+    /* A5 — the same swipe-to-close every RAF sheet uses; the button, the
+       backdrop and Escape all keep working exactly as before */
+    if (window.RAFSwipe) {
+      var sheet = backEl.querySelector('.sg');
+      if (sheet) RAFSwipe.attach(sheet, close);
+    }
     requestAnimationFrame(function () { if (backEl) backEl.classList.add('show'); });
     setTimeout(function () { if (backEl) backEl.classList.add('show'); }, 30);   /* hidden-tab safe */
   }
@@ -205,6 +211,10 @@
   function close(){
     if (!backEl) return;
     var el = backEl; backEl = null;
+    if (window.RAFSwipe) {
+      var sheet = el.querySelector('.sg');
+      if (sheet) RAFSwipe.detach(sheet);            /* listeners never outlive the sheet */
+    }
     el.classList.remove('show');
     document.removeEventListener('keydown', onKey);
     setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 240);

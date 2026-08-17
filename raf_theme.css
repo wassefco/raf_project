@@ -343,8 +343,27 @@ html:not([data-ui="admin"]) a,
 html:not([data-ui="admin"]) [role="button"],
 html:not([data-ui="admin"]) label,
 html:not([data-ui="admin"]) summary { touch-action: manipulation; }
-/* image zoom surfaces keep full pinch/zoom */
-html:not([data-ui="admin"]) .mw-zoom,
-html:not([data-ui="admin"]) .mw-zoom img,
-html:not([data-ui="admin"]) .gal-stage,
-html:not([data-ui="admin"]) .sg-back { touch-action: auto; }
+
+/* ---- page-level zoom is suppressed on touch devices ----
+   `pan-x pan-y` lets the page scroll in both directions but withholds the
+   pinch and double-tap zoom gestures from the page itself. This is done
+   with touch-action rather than `user-scalable=no` / `maximum-scale=1`
+   deliberately: the viewport meta is left alone, so browser and assistive
+   -technology zoom still work and no accessibility path is removed.
+   Nothing here affects layout width, and it applies to touch only, so the
+   desktop is untouched. */
+@media (pointer: coarse) {
+  html:not([data-ui="admin"]),
+  html:not([data-ui="admin"]) body { touch-action: pan-x pan-y; }
+
+  /* …except on surfaces where zooming the image IS the feature. These opt
+     back into the full gesture set so pinch and pan keep working there. */
+  html:not([data-ui="admin"]) .mw-zoom,
+  html:not([data-ui="admin"]) .mw-zoom img,
+  html:not([data-ui="admin"]) .gal-stage,
+  html:not([data-ui="admin"]) .gal-stage *,
+  html:not([data-ui="admin"]) .sg-back,
+  html:not([data-ui="admin"]) .sg-back img,
+  html:not([data-ui="admin"]) [data-zoomable],
+  html:not([data-ui="admin"]) [data-zoomable] * { touch-action: auto; }
+}

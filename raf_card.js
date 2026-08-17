@@ -340,6 +340,12 @@
     var wrap = document.createElement('div'); wrap.innerHTML = html; document.body.appendChild(wrap.firstChild);
     requestAnimationFrame(function () { document.getElementById('rcvBack').classList.add('show'); });
     document.documentElement.style.overflow = 'hidden';
+    /* A5 — this variant picker is part of the Quick Add flow, so it closes
+       with the same downward swipe as every other RAF sheet */
+    if (window.RAFSwipe) {
+      var sheet = document.querySelector('#rcvBack .rcv');
+      if (sheet) RAFSwipe.attach(sheet, closeV);
+    }
   }
   function _pick(btn) {
     var g = btn.dataset.g;
@@ -365,6 +371,10 @@
   }
   function closeV() {
     var b = document.getElementById('rcvBack'); if (!b) return;
+    if (window.RAFSwipe) {
+      var sheet = b.querySelector('.rcv');
+      if (sheet) RAFSwipe.detach(sheet);            /* listeners never outlive the sheet */
+    }
     b.classList.remove('show');
     document.documentElement.style.overflow = '';
     setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 220);

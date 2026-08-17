@@ -19,7 +19,16 @@
   border-radius:20px;background:var(--gold-soft);color:var(--gold2);font-family:var(--font-en);
   font-size:12.5px;font-weight:800;white-space:nowrap;vertical-align:middle;}
 .co-count[hidden]{display:none;}
-@media(max-width:600px){ .co-count{font-size:12px;padding:3px 9px;margin-inline-start:7px;} }
+/* On phones the header ran out of room: the back label ate ~140px and
+   squeezed the title to two cramped lines, which buried the count. The
+   label collapses to its icon below 600px so the title and the count
+   both read properly. */
+@media(max-width:600px){
+  .co-count{font-size:12.5px;padding:4px 10px;margin-inline-start:8px;}
+  .co-head .co-back span{display:none;}
+  .co-head .co-back{min-width:44px;justify-content:center;}
+  .co-title{white-space:nowrap;}
+}
 
 /* MULTIPLE CARTS — store switcher (cart page only) */
 .carts-bar{max-width:1180px;margin:0 auto 16px;padding:0 clamp(14px,3vw,28px);}
@@ -211,6 +220,7 @@
 <script src="raf_rules.js"></script>
 <script src="raf_order_snapshot.js"></script>
 <script src="raf_store_ops.js"></script>
+<script src="raf_swipe.js"></script>
 <script src="raf_card.js"></script>
 <script src="raf_hscroll.js"></script>
 <script src="raf_checkout.js"></script>
@@ -380,7 +390,7 @@
     if (!el) return;
     var n = RAFShop.Cart.count();
     el.hidden = n === 0;
-    el.textContent = T(n + ' ' + plural(n), n + ' item' + (n === 1 ? '' : 's'));
+    el.textContent = T(n + ' ' + plural(n), n + ' product' + (n === 1 ? '' : 's'));
   }
   function render(){
     var items = RAFShop.Cart.items();

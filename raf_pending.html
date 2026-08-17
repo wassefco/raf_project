@@ -73,6 +73,15 @@
   .pend-note{font-size:12px;color:var(--text3,#8A857C);margin-top:16px;line-height:1.7;}
   .pend-state{display:none;}
   .pend-state.show{display:block;}
+  /* A7 — unavailable products, listed by name only */
+  .rj-items{margin:16px auto 0;max-width:420px;text-align:start;background:var(--bg,#F5F2EC);
+    border:1px solid var(--border,#E2DBCC);border-radius:14px;padding:13px 15px;}
+  .rj-items[hidden]{display:none;}
+  .rj-items b{display:block;font-size:12.5px;font-weight:800;color:var(--ink,#15130F);margin-bottom:8px;}
+  .rj-items ul{list-style:none;margin:0;padding:0;}
+  .rj-items li{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text2,#5A5650);
+    line-height:1.65;padding:3px 0;overflow-wrap:anywhere;}
+  .rj-items li i{color:var(--red,#D9534F);font-size:15px;flex:0 0 auto;margin-top:2px;}
   .st-ic{width:76px;height:76px;margin:0 auto 18px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:36px;}
   .st-ic.ok{background:rgba(46,158,91,.12);color:var(--green,#2E9E5B);}
   .st-ic.bad{background:rgba(217,83,79,.12);color:var(--red,#D9534F);}
@@ -138,6 +147,25 @@
     </div>
 
     <!-- TIMED OUT -->
+    <!-- A7 — the merchant's FINAL rejection, presented as a real result.
+         Built from the same cards/buttons/tokens the rest of RAF uses. It is
+         filled in by renderReject() and never auto-navigates: the customer
+         reads it and chooses when to leave. -->
+    <div class="pend-state" id="stReject">
+      <div class="st-ic bad"><i class="ti ti-circle-x"></i></div>
+      <h1 data-ar="تم رفض طلبك" data-en="Your order was rejected">تم رفض طلبك</h1>
+      <p id="rjReason"></p>
+      <div class="rj-items" id="rjItems"></div>
+      <div class="refund"><i class="ti ti-cash-banknote"></i><span id="rjRefund"></span></div>
+      <div class="pend-order"><i class="ti ti-receipt"></i> <span class="ordNo">—</span></div>
+      <div class="pend-acts">
+        <a class="pend-primary" href="raf_homepage.html"><i class="ti ti-shopping-bag"></i>
+          <span data-ar="متابعة التسوق" data-en="Continue Shopping">متابعة التسوق</span></a>
+        <a class="pend-ghost" href="raf_orders.html"><i class="ti ti-receipt"></i>
+          <span data-ar="طلباتي" data-en="My orders">طلباتي</span></a>
+      </div>
+    </div>
+
     <div class="pend-state" id="stFail">
       <div class="st-ic bad"><i class="ti ti-clock-off"></i></div>
       <h1 data-ar="تم إلغاء الطلب" data-en="Order cancelled">تم إلغاء الطلب</h1>
@@ -207,7 +235,7 @@
     if(t) t.href='raf_tracking.html?id='+encodeURIComponent(ORDER_ID)+'&new=1';
   }
   function show(id){
-    ['stWait','stOk','stFail'].forEach(function(k){
+    ['stWait','stOk','stFail','stReject'].forEach(function(k){
       document.getElementById(k).classList.toggle('show', k===id);
     });
   }
@@ -218,6 +246,54 @@
              T('تم إلغاء طلبك بناءً على طلبك.','Your order was cancelled at your request.'));
     show('stFail');
   };
+  /* ---- A7 · the rejection result ----
+     Reads the committed decision from the order engine and presents it in
+     customer language. Product NAMES only — never ids, line indexes,
+     variant ids or any other internal field. */
+  function renderReject(){
+    var rj = E.rejectionOf(ORDER_ID);
+    var reasonEl = document.getElementById('rjReason');
+    var box = document.getElementById('rjItems');
+    var refundEl = document.getElementById('rjRefund');
+
+    /* why, in a sentence the customer can act on */
+    var why;
+    if (!rj) {
+      why = T('تعذر على المتجر إتمام طلبك.', 'The store could not complete your order.');
+    } else if (rj.reasonId === 'product_unavailable') {
+      why = T('تعذر على المتجر تجهيز طلبك بسبب عدم توفر بعض المنتجات.',
+              'The store could not complete your order because some products are unavailable.');
+    } else if (rj.reasonId === 'other') {
+      /* the merchant's own words are internal by design; the customer gets a
+         professional generic sentence instead of warehouse notes */
+      why = T('تعذر على المتجر إتمام طلبك في الوقت الحالي.',
+              'The store was unable to complete your order at this time.');
+    } else {
+      why = T('تعذر على المتجر إتمام طلبك: ' + rj.reasonAr + '.',
+              'The store could not complete your order: ' + rj.reasonEn + '.');
+    }
+    reasonEl.textContent = why;
+
+    /* the affected products, by name */
+    var items = (rj && rj.items) || [];
+    if (items.length){
+      box.hidden = false;
+      box.innerHTML = '<b>' + T('المنتجات غير المتوفرة:','Unavailable products:') + '</b><ul>'
+        + items.map(function(i){
+            var n = T(i.nameAr || i.nameEn, i.nameEn || i.nameAr) || '';
+            return '<li><i class="ti ti-circle-x"></i><span></span></li>'.replace('<span></span>',
+                   '<span>' + n.replace(/[&<>"]/g, function(c){
+                     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }) + '</span>');
+          }).join('') + '</ul>';
+    } else {
+      box.hidden = true; box.innerHTML = '';
+    }
+
+    refundEl.textContent = T(
+      'سيتم إرجاع المبلغ وفقًا لطريقة الاسترداد المختارة، وقد يستغرق وصول المبلغ حتى 7 أيام عمل.',
+      'The amount will be refunded according to the selected refund method and may take up to 7 business days.');
+  }
+
   function failCopy(title, body){
     document.querySelector('#stFail h1').textContent = title;
     document.querySelector('#stFail p').textContent  = body;
@@ -239,16 +315,20 @@
       var ct = E.customerRejectionText(E.rejectionOf(ORDER_ID));
       msg = T(ct.ar, ct.en);
     }
-    var to = kind === 'accepted'
-      ? 'raf_tracking.html?id=' + encodeURIComponent(ORDER_ID) + '&new=1'
-      : 'raf_homepage.html';
     var bar = document.getElementById('a7Bar');
     bar.className = 'a7-bar show ' + (kind === 'accepted' ? 'ok' : 'bad');
     bar.innerHTML = '<i class="ti ' + (kind === 'accepted' ? 'ti-circle-check' : 'ti-circle-x') + '"></i>'
       + '<span>' + msg + '</span>';
     bar.setAttribute('role', 'status');
-    /* a short beat so the customer reads the result before the page changes */
-    setTimeout(function(){ window.location = to; }, 2200);
+    /* An ACCEPTED order has somewhere useful to go, so it routes itself to
+       tracking after a short beat. A REJECTED order does not: the customer
+       needs to read the reason, see which products were unavailable and
+       understand the refund. It stays put and offers Continue Shopping. */
+    if (kind === 'accepted') {
+      setTimeout(function(){
+        window.location = 'raf_tracking.html?id=' + encodeURIComponent(ORDER_ID) + '&new=1';
+      }, 2200);
+    }
   }
 
   /* ---- render whatever the engine currently says ---- */
@@ -257,11 +337,8 @@
     if(!s) return;
     if(s.done === E.DECISION.ACCEPTED){ show('stOk'); announce('accepted'); return; }
     if(s.done === E.DECISION.REJECTED){
-      var rj = E.customerRejectionText(E.rejectionOf(ORDER_ID));
-      failCopy(T('اعتذر المتجر عن الطلب','The store could not accept your order'),
-               T(rj.ar + ' تم بدء استرداد المبلغ كاملاً. ' + E.REFUND_DAYS_TEXT.ar,
-                 rj.en + ' A full refund has been initiated. ' + E.REFUND_DAYS_TEXT.en));
-      show('stFail'); announce('rejected'); return;
+      renderReject();
+      show('stReject'); announce('rejected'); return;
     }
     if(s.done === E.DECISION.CANCELLED){
       failCopy(T('تم إلغاء الطلب','Order cancelled'),

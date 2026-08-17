@@ -773,7 +773,13 @@
     /* the destination is the customer's, is required when money moves, and
        has no default anywhere in this file */
     if (num(c.refundAmount) > 0) {
-      var dest = c.refundDestination || opts.refundDestination;
+      /* An explicit choice always wins while the money has not moved: if a
+         first attempt failed (wallet unavailable, say) the customer must be
+         able to pick the other destination. Once the refund IS done the
+         stored destination is final and cannot be switched. */
+      var dest = c.refundDone
+        ? c.refundDestination
+        : (isRefundDestination(opts.refundDestination) ? opts.refundDestination : c.refundDestination);
       if (!isRefundDestination(dest)) return fail('REFUND_DESTINATION_REQUIRED');
       c.refundDestination = dest;
     }
