@@ -400,6 +400,7 @@
     return { ok:true };
   }
   function merchantAccept(orderId, actor){
+    var auth = processGuard(orderId, actor); if (!auth.ok) return auth;
     var g = actionable(orderId, actor); if (!g.ok) return g;
     if (mstate(orderId) !== MSTATE.PENDING) return { ok:false, reason:'not_pending' };
     var prev = mrecord(orderId);
@@ -543,6 +544,25 @@
     return (s && s.done === DECISION.REJECTED && s.rejection) ? s.rejection : null;
   }
 
+  /* M-03 — Accept and Ready are authoritative operations, so the engine
+     proves the actor may perform them. It previously trusted the merchant
+     page, which meant a direct API call bypassed every check. Reject already
+     did this (Group B); this is the same gate, reused, not a second one. */
+  function processGuard(orderId, actor){
+    if (!actor || !actor.id) return rejectError('FORBIDDEN');
+    var allowed = false;
+    try { allowed = !!(global.RAFPerm && RAFPerm.can(actor.id, 'orders.manage')); } catch (e) { allowed = false; }
+    if (!allowed) return rejectError('FORBIDDEN');
+
+    /* ownership is proven from the canonical storeSlug on both sides */
+    var mine = actor.storeSlug || null, theirs = snapSlug(orderId);
+    if (!mine || !theirs || mine !== theirs) return rejectError('CROSS_STORE', { actorStore:mine, orderStore:theirs });
+
+    var l = lockOf(orderId);
+    if (l && l.userId !== actor.id) return rejectError('LOCKED', { lockedBy:l.name || l.userId });
+    return { ok:true };
+  }
+
   function merchantReject(orderId, actor, context){
     var g = actionable(orderId, actor);
     /* the shared guard reports a lock in the engine's older shape; a rejection
@@ -565,6 +585,7 @@
     return { ok:true, undoMs:UNDO_MS, rejection:ctx };
   }
   function merchantReady(orderId, actor){
+    var auth = processGuard(orderId, actor); if (!auth.ok) return auth;
     var g = actionable(orderId, actor); if (!g.ok) return g;
     var cur = mstate(orderId);
     if (cur !== MSTATE.PREPARING && cur !== MSTATE.ACCEPTED) return { ok:false, reason:'not_preparing' };

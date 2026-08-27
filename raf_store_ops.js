@@ -139,7 +139,29 @@
       RAFAudit.record(o);
     } catch (e) {}
   }
+  /* M-04 — every mutation below used to trust whatever slug it was handed,
+     so a direct call could change another store's operating state. The slug
+     is now proven against the caller: the actor must exist, must hold the
+     existing orders.manage permission, and must belong to that store. This
+     reuses RAFPerm and the existing merchant↔store link; it is not a second
+     permission system, and read paths are deliberately untouched. */
+  function opsGuard(slug, actor){
+    if (!slug) return { ok:false, reason:'CROSS_STORE', code:'CROSS_STORE',
+                        message:T('هذا المتجر لا يخصك.','This store does not belong to you.') };
+    if (!actor || !actor.id) return { ok:false, reason:'FORBIDDEN', code:'FORBIDDEN',
+                        message:T('ليس لديك صلاحية لهذا الإجراء.','You do not have permission for this action.') };
+    var allowed = false;
+    try { allowed = !!(global.RAFPerm && RAFPerm.can(actor.id, 'orders.manage')); } catch (e) { allowed = false; }
+    if (!allowed) return { ok:false, reason:'FORBIDDEN', code:'FORBIDDEN',
+                        message:T('ليس لديك صلاحية لهذا الإجراء.','You do not have permission for this action.') };
+    if (!actor.storeSlug || actor.storeSlug !== slug)
+      return { ok:false, reason:'CROSS_STORE', code:'CROSS_STORE', actorStore:actor.storeSlug || null,
+               targetStore:slug, message:T('هذا المتجر لا يخصك.','This store does not belong to you.') };
+    return { ok:true };
+  }
+
   function setManual(slug, state, actor){
+    var auth = opsGuard(slug, actor); if (!auth.ok) return auth;
     if (!RANGES[state]) return { ok:false, reason:'unknown_state' };
     if (offline()) return { ok:false, reason:'offline' };
     var before = currentState(slug);
@@ -151,6 +173,7 @@
   }
   /* back to automatic: the current active count decides, never a cached value */
   function setAutomatic(slug, actor){
+    var auth = opsGuard(slug, actor); if (!auth.ok) return auth;
     if (offline()) return { ok:false, reason:'offline' };
     var before = currentState(slug);
     save(slug, { mode:MODE.AUTO, manualState:null }, actor);
@@ -172,6 +195,7 @@
     return u ? Math.max(0, u - Date.now()) : 0;
   }
   function setBusy(slug, hours, actor){
+    var auth = opsGuard(slug, actor); if (!auth.ok) return auth;
     if (offline()) return { ok:false, reason:'offline' };
     var h = parseFloat(hours);
     if (!isFinite(h) || h <= 0) return { ok:false, reason:'bad_duration' };
@@ -184,6 +208,7 @@
     return { ok:true, until:until, cappedTo8h: h * 3600000 > MAX_BUSY_MS };
   }
   function reopen(slug, actor){
+    var auth = opsGuard(slug, actor); if (!auth.ok) return auth;
     if (offline()) return { ok:false, reason:'offline' };
     var was = recordOf(slug).busyUntil;
     save(slug, { busyUntil:null }, actor);

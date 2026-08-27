@@ -212,6 +212,46 @@ body{background:var(--bg2);margin:0;}
   border:1px solid rgba(217,83,79,.34);color:#A63A36;font-size:12.5px;line-height:1.6;}
 .mw-adj-err.show{display:block;}
 /* id-scoped so the shared touch-target floor cannot pull these below 44px */
+/* ---- combination inventory (grouped vertical cards: mobile-first) ---- */
+.cmb-h{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
+.cmb-h b{display:block;font-size:14px;font-weight:800;color:var(--ink);}
+.cmb-h span{font-size:12px;color:var(--text2);line-height:1.6;}
+.cmb-mode{margin-inline-start:auto;flex:0 0 auto;font-size:11px;font-weight:800;border-radius:20px;
+  padding:4px 10px;background:var(--bg3);color:var(--text2);white-space:nowrap;}
+.cmb-mode.on{background:var(--gold-soft);color:var(--gold2);}
+.cmb-sec{border:1px solid var(--border2);border-radius:14px;margin-bottom:10px;overflow:hidden;}
+#invBox .cmb-sec-h{display:flex;align-items:center;gap:9px;width:100%;min-height:48px;padding:0 14px;
+  border:0;background:var(--bg);font-family:inherit;font-size:13.5px;font-weight:800;color:var(--ink);
+  cursor:pointer;text-align:start;}
+#invBox .cmb-sec-h b{flex:1;min-width:0;overflow-wrap:anywhere;}
+#invBox .cmb-sec-h i{color:var(--text3);font-size:17px;}
+.cmb-dot{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,.18);flex:0 0 auto;}
+.cmb-rows{padding:4px 0;}
+.cmb-row{padding:12px 14px;border-top:1px solid var(--border);}
+.cmb-row:first-child{border-top:none;}
+.cmb-n{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.cmb-n b{font-size:13.5px;font-weight:800;color:var(--ink);overflow-wrap:anywhere;}
+.cmb-st{font-size:10.5px;font-weight:800;border-radius:20px;padding:2px 8px;}
+.cmb-st.ok{background:rgba(46,158,91,.12);color:var(--green);}
+.cmb-st.out{background:rgba(217,83,79,.12);color:var(--red);}
+.cmb-st.un{background:var(--bg3);color:var(--text3);}
+.cmb-nums{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.cmb-nums span{flex:1 1 74px;background:var(--bg);border:1px solid var(--border);border-radius:10px;
+  padding:7px 9px;font-family:var(--font-en);font-size:15px;font-weight:800;color:var(--ink);}
+.cmb-nums span.hi{background:var(--gold-soft);border-color:var(--gold);color:var(--gold2);}
+.cmb-nums em{display:block;font-style:normal;font-family:var(--font-ar);font-size:10.5px;
+  font-weight:700;color:var(--text3);margin-bottom:2px;}
+.cmb-adj{display:flex;align-items:center;gap:7px;}
+#invBox .cmb-b{width:44px;min-height:44px;flex:0 0 auto;border-radius:11px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);cursor:pointer;font-size:17px;}
+#invBox .cmb-b:hover{border-color:var(--gold);color:var(--gold2);}
+.cmb-in{flex:1;min-width:0;min-height:44px;border-radius:11px;border:1px solid var(--border2);
+  background:var(--card);text-align:center;font-family:var(--font-en);font-size:16px;font-weight:800;color:var(--ink);}
+#invBox .cmb-save{flex:0 0 auto;min-height:44px;padding:0 15px;border-radius:11px;border:1px solid var(--gold2);
+  background:var(--gold);color:#1C1606;font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;}
+.cmb-err{display:none;margin-top:10px;padding:10px 12px;border-radius:11px;background:rgba(217,83,79,.1);
+  border:1px solid rgba(217,83,79,.32);color:var(--red);font-size:12.5px;font-weight:700;line-height:1.6;}
+.cmb-err.show{display:block;}
 #invBox .mw-adj-apply{width:100%;min-height:48px;border-radius:30px;font-family:inherit;font-size:14px;
   font-weight:800;cursor:pointer;border:1px solid var(--gold2);margin-top:10px;}
 #invBox .mw-adj-b{min-height:48px;}
@@ -585,8 +625,125 @@ body{background:var(--bg2);margin:0;}
      of its own — each render resolves from the authority. */
   var adjDir = 1;
 
+  /* ══════════ VARIANT COMBINATION INVENTORY ══════════
+     Shown only for a product whose options can actually express more than
+     one purchasable combination. A product with no options, or a single
+     option group, keeps the simple product-level panel it always had. */
+  var comboOpen = {};                       /* which colour/dimension groups are expanded */
+  function comboGroupsFor(pid){
+    var p = RAFCatalog.get(pid);
+    return (p && p.variants) || [];
+  }
+  function comboCapable(pid){ return comboGroupsFor(pid).length >= 2; }
+
+  /* group the flat combination list by its FIRST dimension, so a phone shows
+     "Black → S / M / L" as vertical cards rather than a wide matrix */
+  function comboSections(pid){
+    var gs = comboGroupsFor(pid);
+    if (!gs.length) return [];
+    var lead = gs[0], rest = gs.slice(1);
+    var rows = INV.combinationsOf(pid);
+    return (lead.options || []).map(function(lo){
+      var mine = rows.filter(function(r){ return r.vs.indexOf(String(lo.v)) > -1; });
+      return { v:String(lo.v), label:lo.label || lo, hex:lo.hex || null,
+               rows:mine.map(function(r){
+                 /* label this row by the remaining dimensions only */
+                 var tail = r.options.filter(function(o){ return String(o.v) !== String(lo.v); });
+                 return { id:r.id, label:tail.map(function(o){ return L(o.label||o); }).join(' · ') || L(lo.label||lo),
+                          onHand:r.onHand, reserved:r.reserved, available:r.available,
+                          configured:r.configured };
+               }) };
+    });
+  }
+  function comboInventoryHTML(pid){
+    var secs = comboSections(pid);
+    var mode = INV.modeOf(pid);
+    var unconfigured = INV.combinationsOf(pid).filter(function(r){ return !r.configured; }).length;
+    var h = '<div class="cmb-h"><div><b>'+T('مخزون الخيارات','Combination stock')+'</b>'
+      + '<span>'+T('لكل تركيبة قابلة للشراء مخزون خاص بها.',
+                   'Every purchasable combination carries its own stock.')+'</span></div>'
+      + '<span class="cmb-mode '+(mode==='combination'?'on':'')+'">'
+      + (mode==='combination' ? T('مُفعّل','Active') : T('غير مُفعّل','Not set up'))+'</span></div>';
+
+    if (mode === 'product'){
+      h += '<div class="mw-inv-note"><i class="ti ti-info-circle"></i><span>'
+        + T('هذا المنتج يستخدم مخزوناً على مستوى المنتج. حدّد كميات التركيبات أدناه لتفعيل مخزون الخيارات — لا يتم توزيع الكمية الحالية تلقائياً.',
+            'This product uses product-level stock. Set quantities below to switch it to combination stock — the current quantity is never split automatically.')
+        + '</span></div>';
+    } else if (unconfigured){
+      h += '<div class="mw-inv-note"><i class="ti ti-alert-triangle"></i><span>'
+        + T(unconfigured+' تركيبة بدون مخزون محدد — لن تكون متاحة للعملاء حتى تُحدَّد.',
+            unconfigured+' combination(s) have no stock configured — customers cannot buy them until you set one.')
+        + '</span></div>';
+    }
+
+    secs.forEach(function(s){
+      var open = comboOpen[s.v] !== false;
+      h += '<section class="cmb-sec">'
+        + '<button type="button" class="cmb-sec-h" onclick="toggleCombo(\''+esc(s.v)+'\')" aria-expanded="'+open+'">'
+          + (s.hex ? '<span class="cmb-dot" style="background:'+esc(s.hex)+'"></span>' : '')
+          + '<b>'+esc(L(s.label))+'</b>'
+          + '<i class="ti ti-chevron-'+(open?'up':'down')+'"></i></button>';
+      if (open){
+        h += '<div class="cmb-rows">' + s.rows.map(function(r){
+          var state = !r.configured ? T('غير محدد','Not configured')
+                    : r.available > 0 ? T('متوفر','Available') : T('غير متوفر','Out of stock');
+          var cls = !r.configured ? 'un' : (r.available > 0 ? 'ok' : 'out');
+          return '<div class="cmb-row">'
+            + '<div class="cmb-n"><b>'+esc(r.label)+'</b><span class="cmb-st '+cls+'">'+state+'</span></div>'
+            + '<div class="cmb-nums">'
+              + '<span><em>'+T('المخزون','On hand')+'</em>'+r.onHand+'</span>'
+              + '<span><em>'+T('محجوز','Reserved')+'</em>'+r.reserved+'</span>'
+              + '<span class="hi"><em>'+T('المتاح','Available')+'</em>'+r.available+'</span>'
+            + '</div>'
+            + '<div class="cmb-adj">'
+              + '<button type="button" class="cmb-b" onclick="cmbStep(\''+esc(r.id)+'\',-1)" aria-label="'+T('إنقاص','Decrease')+'"><i class="ti ti-minus"></i></button>'
+              + '<input class="cmb-in" id="cmb_'+esc(r.id)+'" inputmode="numeric" dir="ltr" value="'+r.onHand+'">'
+              + '<button type="button" class="cmb-b" onclick="cmbStep(\''+esc(r.id)+'\',1)" aria-label="'+T('زيادة','Increase')+'"><i class="ti ti-plus"></i></button>'
+              + '<button type="button" class="cmb-save" onclick="cmbApply(\''+esc(r.id)+'\')">'+T('حفظ','Save')+'</button>'
+            + '</div>'
+          + '</div>';
+        }).join('') + '</div>';
+      }
+      h += '</section>';
+    });
+    h += '<div class="cmb-err" id="cmbErr"></div>';
+    return '<div class="cmb">'+h+'</div>';
+  }
+  window.toggleCombo = function(v){ comboOpen[v] = comboOpen[v] === false; renderInventory(); };
+  window.cmbStep = function(id, d){
+    var i = el('cmb_'+id); if (!i) return;
+    var n = parseInt(i.value, 10); if (!isFinite(n)) n = 0;
+    i.value = Math.max(0, n + d);
+  };
+  function cmbErr(msg){ var e = el('cmbErr'); if (e){ e.textContent = msg; e.classList.add('show'); } }
+  window.cmbApply = function(id){
+    var i = el('cmb_'+id); if (!i || !editing) return;
+    var raw = String(i.value).trim();
+    if (!/^\d+$/.test(raw)) return cmbErr(T('أدخل كمية صحيحة.','Enter a whole quantity.'));
+    var e = {}; e[id] = parseInt(raw, 10);
+    var rows = INV.combinationsOf(editing).filter(function(r){ return r.configured; });
+    var base = rows.reduce(function(m, r){ return Math.max(m, r.updatedAt || 0); }, 0);
+    var res = INV.setCombinations(editing, e, { actor:ME, baseVersion:base || undefined });
+    if (!res.ok){
+      var m = res.code === 'BELOW_RESERVED'
+        ? T('لا يمكن أن يقل المخزون عن الكمية المحجوزة ('+res.reserved+').',
+            'Stock cannot go below the reserved quantity ('+res.reserved+').')
+        : res.code === 'STALE' ? T('تم تحديث المخزون من جلسة أخرى. أعد المحاولة.',
+                                   'Stock was updated in another session. Try again.')
+        : res.code === 'CROSS_STORE' ? T('هذا المنتج لا يخص متجرك.','This product does not belong to your store.')
+        : res.code === 'FORBIDDEN' ? T('ليس لديك صلاحية.','You do not have permission.')
+        : T('تعذّر حفظ المخزون.','Stock could not be saved.');
+      return cmbErr(m);
+    }
+    renderInventory();
+    if (window.RAFShop) RAFShop.toast(T('تم حفظ المخزون','Stock saved'), { icon:'ti-circle-check' });
+  };
+
   function renderInventory(){
     var box = el('invBox'); if (!box || !editing) return;
+    /* a multi-dimension product is governed by its combinations */
+    if (comboCapable(editing)){ box.innerHTML = comboInventoryHTML(editing); return; }
     var v = invOf(editing);
     if (!v){
       box.innerHTML = '<div class="mw-inv-none"><i class="ti ti-alert-triangle"></i><div>'
@@ -1076,7 +1233,9 @@ body{background:var(--bg2);margin:0;}
     }
     STORE = link.store; SLUG = link.slug;
     var me = RAFPerm.currentUser();
-    ME = me ? { id:me.id, name:me.name, roleId:me.roleId } : null;
+    /* the canonical store scope travels with the actor so an authority can
+       prove ownership itself instead of trusting the page */
+    ME = me ? { id:me.id, name:me.name, roleId:me.roleId, storeSlug:SLUG } : null;
 
     el('shell').style.display = '';
     el('stName').textContent = L(STORE.name);

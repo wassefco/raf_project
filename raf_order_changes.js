@@ -380,6 +380,12 @@
     var reason = reasonById(d.reasonId);
     if (!reason) return fail('CHANGE_REQUIRED', { reason:'reason_required' });
 
+    /* §30 — refuse at proposal time too, so the merchant is told straight
+       away rather than after the customer has agreed to something the store
+       cannot actually deliver */
+    var move0 = combinationMove(orderId, item.productId, group, option, item.qty || 1, ix);
+    if (move0 && !move0.ok) return move0;
+
     return { ok:true, resolved:{
       item:item, lineIndex:ix, product:product, group:group, option:option,
       variantKey:key, currentLabel:current, reason:reason, kind:kindOfGroup(group)
@@ -659,7 +665,51 @@
     var key = variantKeyFor(item, group);
     if (!key) return fail('STALE_CHANGE', { reason:'group_not_on_order_item' });
 
+    /* §30 — on a combination-stocked product the option the customer is
+       being moved TO must actually be buyable. The combination is only
+       reserved when the change commits, never while it is a proposal. */
+    var move = combinationMove(c.orderId, c.productId, group, option, c.qty || 1, c.lineIndex);
+    if (move && !move.ok) return move;
+    if (move) return { ok:true, item:item, items:items, group:group, option:option, variantKey:key,
+                       fromCombinationId:move.from, toCombinationId:move.to };
+
     return { ok:true, item:item, items:items, group:group, option:option, variantKey:key };
+  }
+
+  /* Work out which combination an approved option change would move the
+     order's held units to, and whether that combination can be bought.
+     Returns null for a product that is not on combination stock. */
+  function combinationMove(orderId, productId, group, option, qty, lineIndex){
+    if (!global.RAFInventory || !RAFInventory.isCombinationMode(productId)) return null;
+    /* The line records the exact combination it bought, so an order holding
+       two lines of the same product in different colours stays unambiguous.
+       Falling back to scanning the reservation would guess between them. */
+    var ord = orderRecord(orderId);
+    var line = (ord && ord.items && lineIndex != null) ? ord.items[lineIndex] : null;
+    var held = (line && line.id === productId) ? (line.combinationId || null) : null;
+    if (!held) {
+      var res = RAFInventory.reservationFor(orderId);
+      if (res && res.combos) {
+        var owned = Object.keys(res.combos).filter(function (x) {
+          var pp = RAFInventory.partsOf(x); return pp && pp.productId === productId; });
+        if (owned.length === 1) held = owned[0];   /* only when it cannot be ambiguous */
+      }
+    }
+    if (!held) return fail('STALE_CHANGE', { reason:'combination_not_identifiable' });
+
+    var cur = RAFInventory.partsOf(held).vs.slice(), oldV = null;
+    (group.options || []).forEach(function (o) {
+      if (cur.indexOf(String(o.v)) > -1) oldV = String(o.v);
+    });
+    if (!oldV) return fail('STALE_CHANGE', { reason:'combination_dimension_missing' });
+
+    var nextVs = cur.map(function (x) { return x === oldV ? String(option.v) : x; });
+    var targetId = RAFInventory.combinationIdFor(productId, nextVs);
+    if (!targetId) return fail('OPTION_NOT_AVAILABLE', { optionV:option.v });
+    if (RAFInventory.comboAvailable(targetId) < (qty || 1))
+      return fail('OPTION_NOT_AVAILABLE', { reason:'insufficient_stock', combinationId:targetId,
+                  available:RAFInventory.comboAvailable(targetId) });
+    return { ok:true, from:held, to:targetId };
   }
 
   /* ══════════════ REMOVAL / REPLACEMENT · approval ══════════════
@@ -901,6 +951,27 @@
     c.decidedBy = { id:actor.id, name:actor.name || actor.id };
     c.appliedLabel = label;
     put(orderId, c);
+
+    /* §30 — the held combination moves with the approved option, so the
+       store now holds Black/L instead of Black/M. Keyed by the change id,
+       so replaying an approval cannot move stock twice. */
+    if (v.fromCombinationId && v.toCombinationId && global.RAFInventory) {
+      var mv = RAFInventory.replaceLine(orderId, c.productId, c.productId, c.qty || 1,
+        { opKey:'chgv-' + c.id, reason:'customer_approved_variant_change',
+          fromCombinationId:v.fromCombinationId, toCombinationId:v.toCombinationId,
+          actor:{ id:actor.id, name:actor.name, type:'customer' } });
+      if (!mv.ok && !mv.alreadyApplied) {
+        /* the option is no longer buyable: close the change as failed rather
+           than leave the order saying one thing and inventory another */
+        c.state = STATE.FAILED; c.decidedAt = Date.now();
+        c.decidedBy = { id:actor.id, name:actor.name || actor.id };
+        c.failure = mv.code || 'inventory_failed'; put(orderId, c);
+        audit('modify.failed', orderId, { automatic:true, systemGenerated:true, source:'automation',
+          key:c.decidedAt, reason:c.failure, metadata:{ changeId:c.id } });
+        notifyMerchant('change_failed', orderId);
+        return fail('OPTION_NOT_AVAILABLE', { reason:mv.code });
+      }
+    }
 
     /* the snapshot's own update already emitted modify.applied */
     audit('modify.approved', orderId, {

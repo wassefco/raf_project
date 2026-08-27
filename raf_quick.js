@@ -292,13 +292,14 @@
 
   function addAndGo(){
     if(busy||!P||isOOS(P)) return;
-    var variant={};
+    var variant={}, vs=[];
     if(P.variants){
       for(var gi=0;gi<P.variants.length;gi++){
         var g=P.variants[gi], v=sel['g'+gi];
         if(v==null){ hint(T('اختر '+L(g.label)+' أولاً','Please select '+L(g.label)+' first')); return; }
         var opt=g.options.find(function(o){ return String(o.v)===String(v); });
         variant[L(g.label)]=L(opt.label||opt);
+        vs.push(String(opt.v));           /* the stable id, kept for inventory */
       }
     }
     var notes=(backEl.querySelector('#rqNotes')||{}).value||'';
@@ -307,9 +308,9 @@
     busy=true;
     var btn=backEl.querySelector('#rqAdd'); if(btn) btn.disabled=true;
     /* Single Store Shopping is enforced centrally */
-    RAFShop.Cart.tryAdd(P,variant).then(function(r){
+    RAFShop.Cart.tryAdd(P,variant,vs).then(function(r){
       if(!r.added){ busy=false; if(btn) btn.disabled=false; return; }
-      for(var i=1;i<qty;i++) RAFShop.Cart.add(P,variant);
+      for(var i=1;i<qty;i++) RAFShop.Cart.add(P,variant,vs);
       RAFShop.Cart.badge();
       RAFShop.toast(T('تمت الإضافة إلى السلة','Added to your cart'),{icon:'ti-circle-check'});
       finish(true);

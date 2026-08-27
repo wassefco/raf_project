@@ -729,7 +729,9 @@ function buildOpts(){
       OPTS.push({ key:'v' + gi, label:g.label, type:isColor ? 'color' : 'chip',
         values:g.options.map(function(o){
           var lb = o.label || o;
-          return { ar:(lb.ar || lb), en:(lb.en || lb.ar || lb), hex:o.hex, out:false };
+          /* the stable option id travels with the choice: inventory needs it
+             to name the exact combination, and it must never be a label */
+          return { v:o.v, ar:(lb.ar || lb), en:(lb.en || lb.ar || lb), hex:o.hex, out:false };
         }), def:0 });
     });
   }
@@ -738,6 +740,10 @@ function buildOpts(){
 
 /* ---------- availability (shared rule) ---------- */
 function isOOS(){
+  /* on combination stock the selected combination decides, not the product
+     total — "20 in stock" must not offer a sold-out Black / M */
+  var a = (typeof selectedAvailable === 'function') ? selectedAvailable() : null;
+  if (a !== null) return a <= 0;
   if (window.RAFShop && RAFShop.Stock) return RAFShop.Stock.isOOS({ id:PID, stock:P.stock });
   return P.stock === 0;
 }
@@ -857,6 +863,7 @@ function isSizeLabel(label){
 }
 
 function renderOptions(){
+  refreshAvailability();          /* availability is recomputed before painting */
   var sizeBox = document.getElementById('optSize'), colorBox = document.getElementById('optColor');
   sizeBox.style.display = 'none'; colorBox.style.display = 'none';
   /* remove any dynamic groups from a previous render */
@@ -902,10 +909,44 @@ function optionButtons(o){
            ' onclick="pickOpt(\'' + o.key + '\',' + i + ')">' + L(v) + '</button>';
   }).join('');
 }
+/* ---------- combination availability ----------
+   For each option, ask the inventory authority whether THAT option combined
+   with what is currently chosen in the other dimensions can actually be
+   bought. So "Black / M sold out" greys out M while Black is selected, and
+   Black itself stays selectable because Black / L is still available.
+   Products not on combination stock are left exactly as they were. */
+function refreshAvailability(){
+  if (!window.RAFInventory || !RAFInventory.isCombinationMode(PID)) return;
+  var vOpts = OPTS.filter(function(o){ return o.values.some(function(x){ return x.v != null; }); });
+  if (vOpts.length < 2) return;
+  /* An option is greyed out only when NOTHING containing it can be bought —
+     a genuinely sold-out colour or size. Greying it out because the other
+     dimension happens to be sold out would disable Black merely because
+     Black / M ran out, and would strand the customer with no selectable
+     option at all. Whether the CURRENT pairing is buyable is answered
+     separately, by the sold-out badge and the disabled Add button. */
+  var live = RAFInventory.combinationsOf(PID).filter(function(c){ return c.available > 0; });
+  vOpts.forEach(function(o){
+    o.values.forEach(function(val){
+      if (val.v == null) return;
+      var v = String(val.v);
+      val.out = !live.some(function(c){ return c.vs.indexOf(v) > -1; });
+    });
+  });
+}
+/* the exact combination the customer is looking at right now */
+function selectedAvailable(){
+  if (!window.RAFInventory || !RAFInventory.isCombinationMode(PID)) return null;
+  var vs = buildVs();
+  if (!vs.length) return null;
+  var st = RAFInventory.combinationState(PID, vs);
+  return (st.ok && st.mode === 'combination') ? st.available : null;
+}
 function pickOpt(key, i){
   var o = OPTS.find(function(x){ return x.key === key; });
   if (!o || o.values[i].out) return;
   SEL[key] = i;
+  refreshAvailability();
   renderOptions();
   hint('');
 }
@@ -1055,6 +1096,15 @@ function buildVariant(){
   hint('');
   return variant;
 }
+/* the stable option ids behind the current selection, in group order */
+function buildVs(){
+  var vs = [];
+  for (var i = 0; i < OPTS.length; i++){
+    var o = OPTS[i], sel = SEL[o.key], val = o.values[sel];
+    if (val && val.v != null) vs.push(String(val.v));
+  }
+  return vs;
+}
 function cartProduct(){
   /* the store key must be the canonical bilingual pair, not the localized
      label — otherwise the one-store-per-order check would treat the same
@@ -1071,9 +1121,10 @@ function addToCart(then){
   if (!variant) return;
   var q = qtyVal();
   var prod = cartProduct();
-  RAFShop.Cart.tryAdd(prod, variant).then(function(r){
+  var vs = buildVs();
+  RAFShop.Cart.tryAdd(prod, variant, vs).then(function(r){
     if (!r.added) return;
-    for (var i = 1; i < q; i++) RAFShop.Cart.add(prod, variant);
+    for (var i = 1; i < q; i++) RAFShop.Cart.add(prod, variant, vs);
     RAFShop.Cart.badge();
     if (typeof then === 'function') { then(); return; }
     RAFShop.toast(T('تمت الإضافة إلى السلة','Added to your cart'), { icon:'ti-circle-check' });

@@ -64,13 +64,22 @@
     write: function (a) { write(LS.cart, a); Cart.badge(); document.dispatchEvent(new CustomEvent('raf:cart')); },
     line: function (key) { return Cart.read().find(function (l) { return l.key === key; }); },
     firstForProduct: function (id) { return Cart.read().find(function (l) { return l.id === id; }); },
-    add: function (p, variant) {
+    /* `vs` — the stable option ids (Phase 3.2 `v`) behind this selection.
+       The selectors already know them; they used to be dropped in favour of
+       translated labels. Carrying them lets inventory identify the exact
+       purchasable combination without ever reading a label. The cart KEY is
+       deliberately unchanged, so existing lines, the multi-cart store and
+       every Group A/C behaviour keep working byte-for-byte. */
+    add: function (p, variant, vs) {
       /* safety net: a sold-out product can never enter the cart, whichever
          path calls this (listing, Quick Order, Favorites, Add All) */
       if (Stock.isOOS(p)) return null;
       var a = Cart.read(), key = keyOf(p.id, variant), ex = a.find(function (l) { return l.key === key; });
-      if (ex) ex.qty++;
-      else a.push({ key: key, id: p.id, name: { ar: p.ar, en: p.en }, price: p.price, qty: 1, variant: variant || {}, ic: p.ic || 'ti-box', img: p.img || '', store: p.store ? { ar: pick(p.store, 'ar'), en: pick(p.store, 'en') } : null });
+      var combo = (vs && vs.length && window.RAFInventory)
+        ? RAFInventory.combinationIdFor(p.id, vs) : null;
+      if (ex) { ex.qty++; if (combo && !ex.combinationId) { ex.combinationId = combo; ex.vs = vs.slice(); } }
+      else a.push({ key: key, id: p.id, name: { ar: p.ar, en: p.en }, price: p.price, qty: 1, variant: variant || {}, ic: p.ic || 'ti-box', img: p.img || '', store: p.store ? { ar: pick(p.store, 'ar'), en: pick(p.store, 'en') } : null,
+                    combinationId: combo, vs: (vs && vs.length) ? vs.slice() : null });
       Cart.write(a); return key;
     },
 
@@ -105,20 +114,20 @@
     },
     /* Guarded add. Never clears the cart silently — asks first.
        Resolves { added, cleared, cancelled }. Use this everywhere instead of add(). */
-    tryAdd: function (p, variant) {
+    tryAdd: function (p, variant, vs) {
       /* availability is checked before the store rule — a sold-out product must
          never trigger a "clear your cart" prompt */
       if (Stock.isOOS(p)) return Promise.resolve({ added: false, cleared: false, cancelled: false, oos: true });
-      if (!Cart.conflicts(p)) { Cart.add(p, variant); return Promise.resolve({ added: true, cleared: false, cancelled: false }); }
+      if (!Cart.conflicts(p)) { Cart.add(p, variant, vs); return Promise.resolve({ added: true, cleared: false, cancelled: false }); }
       var cur = Cart.storeLabelForKey(Cart.currentStore()), next = Cart.storeLabel(p);
       return Cart.confirmSwitch(cur, next).then(function (choice) {
         /* 'separate' → park the current cart and open a fresh one for this store */
         if (choice === 'separate') {
-          Carts.startSeparate(p, variant);
+          Carts.startSeparate(p, variant, vs);
           return { added: true, cleared: false, cancelled: false, separate: true };
         }
         if (!choice) return { added: false, cleared: false, cancelled: true };
-        Cart.clear(); Cart.add(p, variant);
+        Cart.clear(); Cart.add(p, variant, vs);
         return { added: true, cleared: true, cancelled: false };
       });
     },
@@ -228,9 +237,9 @@
       return true;
     },
     /* park the current cart and start a fresh one for this product's store */
-    startSeparate: function (p, variant) {
+    startSeparate: function (p, variant, vs) {
       Carts.park();
-      Cart.add(p, variant);
+      Cart.add(p, variant, vs);
       return true;
     },
     /* discard one cart entirely — active or parked */
@@ -361,7 +370,10 @@
           id: l.id,
           name: l.name, meta: { ar: pre + 'الكمية ' + l.qty, en: pre + 'Qty ' + l.qty },
           price: l.price, ic: l.ic || 'ti-box',
-          store: l.store || null, variant: l.variant || {}, qty: l.qty || 1
+          store: l.store || null, variant: l.variant || {}, qty: l.qty || 1,
+          /* the exact purchasable combination this line bought, by stable
+             option ids — what inventory reserves, releases and sells */
+          combinationId: l.combinationId || null, vs: l.vs || null
         };
       });
       var subtotal = Cart.subtotal();

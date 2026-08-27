@@ -101,6 +101,25 @@ body{background:var(--bg2);margin:0;}
 .mw-chip:hover{border-color:var(--gold);color:var(--gold2);}
 .mw-chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#F5F0E4;}
 .mw-chip i{font-size:15px;}
+/* the theme's global button floor lands these at 40px; filters are primary
+   touch controls, so they are lifted to the 44px minimum (id-scoped to
+   outrank that rule) */
+#chips .mw-chip{min-height:44px;}
+/* same cause for the accept / reject / ready / change buttons */
+.mw-acts .mw-act{min-height:52px;}
+/* M-02 — the empty result of a narrowed queue */
+.mw-inv-r.orig span{color:var(--text3);}
+.mw-inv-n{display:flex;gap:7px;align-items:flex-start;font-size:11.5px;line-height:1.6;color:var(--text3);
+  padding:9px 2px 0;}
+.mw-inv-n i{color:var(--gold2);font-size:14px;flex:0 0 auto;margin-top:1px;}
+.mw-nores{text-align:center;padding:46px 20px;color:var(--text2);}
+.mw-nores i{font-size:44px;color:var(--border2);display:block;margin-bottom:12px;}
+.mw-nores b{display:block;font-size:16px;font-weight:800;color:var(--ink);margin-bottom:6px;}
+.mw-nores span{display:block;font-size:13px;line-height:1.7;margin-bottom:16px;}
+#queue .mw-clear{min-height:44px;padding:0 18px;border-radius:30px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-family:inherit;font-size:13.5px;font-weight:700;
+  cursor:pointer;display:inline-flex;align-items:center;gap:7px;}
+#queue .mw-clear:hover{border-color:var(--gold);color:var(--gold2);}
 
 /* ---------- queue groups ---------- */
 .mw-grp{margin-bottom:22px;}
@@ -630,12 +649,16 @@ body.is-offline .mw-off{display:flex;}
       <section class="mw-list">
         <div class="mw-search">
           <i class="ti ti-search"></i>
-          <input id="q" type="search" autocomplete="off"
+          <input id="q" type="search" autocomplete="off" oninput="onSearchInput()"
+                 data-ar-label="ابحث في الطلبات" data-en-label="Search orders"
+                 aria-label="ابحث في الطلبات"
                  data-ar-ph="ابحث في الطلبات…" data-en-ph="Search orders…" placeholder="ابحث في الطلبات…">
         </div>
+        <!-- barcode is not captured by this catalogue, so it is not offered
+             as something the merchant can search by -->
         <div class="mw-search-hint"
-             data-ar="رقم الطلب · اسم العميل · رقم الهاتف · اسم المنتج · SKU · الباركود"
-             data-en="Order number · customer name · phone · product name · SKU · barcode">رقم الطلب · اسم العميل · رقم الهاتف · اسم المنتج · SKU · الباركود</div>
+             data-ar="رقم الطلب · اسم العميل · رقم الهاتف · اسم المنتج · SKU"
+             data-en="Order number · customer name · phone · product name · SKU">رقم الطلب · اسم العميل · رقم الهاتف · اسم المنتج · SKU</div>
 
         <div class="mw-chips" id="chips" role="group"></div>
         <div id="queue"></div>
@@ -777,14 +800,22 @@ body.is-offline .mw-off{display:flex;}
 <script src="raf_permissions.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════════════
-   MERCHANT WORKSPACE — ORDERS  ·  PHASE 1: INTERFACE ONLY
+   MERCHANT WORKSPACE — ORDERS
    ------------------------------------------------------------
-   Reads from the existing systems and renders. It deliberately
-   implements NO workflow: no accept/reject/ready, no locking,
-   no undo, no countdown timing, no checklist behaviour, no
-   workload rules, no scheduling, no validation.
+   The merchant's daily workspace. It renders the queue and the
+   order drawer, and it drives the approved workflows: accept /
+   reject / ready with the undo window, the smart order lock,
+   Focus Mode, store operating state, customer-approved changes
+   and the store's inventory view.
 
-   Data sources (read-only here):
+   Every rule lives in an authority, never in this page: the
+   order engine owns state, locks and the undo window; RAFPerm
+   owns permissions; RAFAudit owns events; RAFInventory owns
+   stock; RAFStoreOps owns the operating state. This file
+   gathers input, calls those authorities and renders what they
+   return — and asks them again before committing anything.
+
+   Data sources:
      RAFPerm        — signed-in merchant and the canonical store link
      RAFShop.Orders — the orders themselves
      RAFCatalog     — product imagery and option data for order lines
@@ -959,10 +990,14 @@ body.is-offline .mw-off{display:flex;}
 
   /* ---------- order card ---------- */
   function thumbsHTML(o){
+    /* M-05 — the card's thumbnails are order history too, so they come from
+       the captured snapshot line and fall back to the catalogue only when the
+       order has no snapshot line at that position. */
+    var S = snapOf(o.id);
     var items = o.items || [], shown = items.slice(0,3), extra = items.length - shown.length;
-    var h = shown.map(function(it){
-      var p = window.RAFCatalog ? RAFCatalog.get(it.id) : null;
-      var img = p && p.img;
+    var h = shown.map(function(it, i){
+      var si = snapLineFor(S, it, i);
+      var img = si ? si.image : ((window.RAFCatalog && RAFCatalog.get(it.id)) || {}).img;
       return img
         ? '<span class="mw-thumb" style="background-image:url(\''+esc(img)+'\')"></span>'
         : '<span class="mw-thumb"><i class="ti '+esc(it.ic||'ti-box')+'"></i></span>';
@@ -975,6 +1010,23 @@ body.is-offline .mw-off{display:flex;}
   }
   /* a captured value, or an explicit "not recorded" — never a guess */
   function val(v){ return (v == null || v === '') ? none() : esc(v); }
+
+  /* M-07 — the payment method the customer actually used is frozen on the
+     snapshot. `order.pay` is a live field and is only consulted for an order
+     that has no snapshot at all. */
+  function payLabel(S, o){
+    var pm = S && S.commercial && S.commercial.paymentMethod;
+    if (pm && (pm.ar || pm.en)) return esc(L(pm));
+    if (!S) return o && o.pay ? esc(L(o.pay)) : none();   /* legacy, no snapshot */
+    return none();
+  }
+  /* M-08 — the delivery address is history. If the snapshot did not record
+     one, that fact is stated; the mutable live address is never substituted,
+     because it can be edited after the order was placed. */
+  function addrLabel(S){
+    var a = S && S.delivery && S.delivery.address;
+    return (a == null || a === '') ? none() : esc(a);
+  }
   function deliveryLabel(s){
     var t = s && s.delivery && s.delivery.type;
     if (!t) return T('نوع الطلب','Type')+': '+T('غير مسجَّل','Not recorded');
@@ -1011,9 +1063,106 @@ body.is-offline .mw-off{display:flex;}
   }
 
   /* ---------- queue render ---------- */
+  /* ════════ M-01 / M-02 · search + filters ════════
+     Both narrow the merchant's OWN queue — ORDERS is already scoped by
+     storeSlug, and nothing here re-derives ownership. Matching is
+     deterministic substring matching on data that genuinely exists; no
+     fuzzy matching, no scoring, no catalogue guesses. Nothing is mutated. */
+  function searchText(){
+    var el = document.getElementById('q');
+    return el ? el.value.trim().toLowerCase() : '';
+  }
+  /* every string this order can legitimately be found by */
+  function haystack(o){
+    var S = snapOf(o.id), parts = [o.id];
+    if (S) {
+      if (S.customer) { parts.push(S.customer.name); parts.push(S.customer.phone); }
+      (S.items || []).forEach(function(i){
+        parts.push(i.nameAr); parts.push(i.nameEn); parts.push(i.sku);
+      });
+    }
+    (o.items || []).forEach(function(i){
+      if (i.name) { parts.push(i.name.ar); parts.push(i.name.en); }
+    });
+    return parts.filter(Boolean).join('   ').toLowerCase();
+  }
+  /* digits typed with spaces or dashes still match a stored phone number */
+  function digits(s){ return String(s || '').replace(/[^0-9]/g, ''); }
+
+  function matchesSearch(o, q){
+    if (!q) return true;
+    if (haystack(o).indexOf(q) > -1) return true;
+    var qd = digits(q);
+    if (qd.length >= 3) {
+      var S = snapOf(o.id);
+      var phone = digits(S && S.customer && S.customer.phone);
+      if (phone && phone.indexOf(qd) > -1) return true;
+      if (digits(o.id).indexOf(qd) > -1) return true;
+    }
+    return false;
+  }
+
+  function activeChips(){
+    return [].slice.call(document.querySelectorAll('.mw-chip'))
+             .filter(function(c){ return c.getAttribute('aria-pressed') === 'true'; })
+             .map(function(c){ return parseInt(c.getAttribute('data-i'), 10); });
+  }
+  function sameDay(ts){
+    if (!ts) return false;
+    var a = new Date(ts), b = new Date();
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+  /* one predicate per chip, in the order CHIPS declares them */
+  var CHIP_TEST = [
+    function(o, S){ return sameDay(S && S.checkoutAt); },                                   /* Today */
+    function(o, S){ return !!(S && S.scheduled); },                                          /* Scheduled */
+    function(o, S){ return !!(S && S.delivery && S.delivery.type === 'delivery'); },         /* Delivery */
+    function(o, S){ return !!(S && S.delivery && S.delivery.type === 'pickup'); },           /* Pickup */
+    function(o, S){ var p = S && S.commercial && S.commercial.paymentMethod;
+                    return !!(p && p.id === 'cod'); },                                       /* Cash */
+    function(o, S){ var p = S && S.commercial && S.commercial.paymentMethod;
+                    return !!(p && p.id === 'knet'); },                                      /* KNET */
+    function(o, S){ /* a customer-approved change touched this order */
+                    var snapMod = !!(S && (S.items || []).some(function(i){ return i.modified; }));
+                    var liveMod = (o.items || []).some(function(i){ return i.removed || i.replacedFrom; });
+                    return snapMod || liveMod; },                                            /* Modified */
+    function(o, S){ return !!(S && ((S.customer && S.customer.notes)
+                                 || (S.preparation && S.preparation.notes)
+                                 || (S.merchant && S.merchant.notes))); }                    /* Notes */
+  ];
+  function matchesChips(o, idx){
+    if (!idx.length) return true;
+    var S = snapOf(o.id);
+    /* every active chip must hold — chips narrow, they do not widen */
+    for (var i = 0; i < idx.length; i++) {
+      var t = CHIP_TEST[idx[i]];
+      if (t && !t(o, S)) return false;
+    }
+    return true;
+  }
+  function visibleOrders(){
+    var q = searchText(), idx = activeChips();
+    if (!q && !idx.length) return ORDERS;
+    return ORDERS.filter(function(o){ return matchesSearch(o, q) && matchesChips(o, idx); });
+  }
+  function filtersActive(){ return !!searchText() || activeChips().length > 0; }
+
   function renderQueue(){
+    var list0 = visibleOrders();
     var by = {}; QUEUE.forEach(function(g){ by[g.k] = []; });
-    ORDERS.forEach(function(o){ (by[bucketOf(o)] || by.preparing).push(o); });
+    list0.forEach(function(o){ (by[bucketOf(o)] || by.preparing).push(o); });
+    /* a narrowed queue that matched nothing says so, once, instead of showing
+       an empty bucket under every heading */
+    if (!list0.length && filtersActive()) {
+      document.getElementById('queue').innerHTML =
+        '<div class="mw-nores"><i class="ti ti-search-off"></i>'
+        + '<b>'+T('لا توجد طلبات مطابقة','No matching orders')+'</b>'
+        + '<span>'+T('جرّب تعديل البحث أو إزالة بعض عوامل التصفية.',
+                     'Try changing the search or removing some filters.')+'</span>'
+        + '<button class="mw-clear" onclick="clearFilters()">'
+        + '<i class="ti ti-x"></i> '+T('مسح البحث والتصفية','Clear search and filters')+'</button></div>';
+      return;
+    }
     document.getElementById('queue').innerHTML = QUEUE.map(function(g){
       var list = sortBucket(g.k, by[g.k]);
       return '<section class="mw-grp">'
@@ -1032,6 +1181,10 @@ body.is-offline .mw-off{display:flex;}
      longer alter what this order shows. */
   function productHTML(it, snapItem){
     var si = snapItem || null;
+    /* M-05 — when the order captured an image, that image IS the order's
+       image. The live catalogue is consulted only for a line that has no
+       snapshot at all (a legacy unresolved order), never to "improve" a
+       captured one. */
     var img = si ? si.image : ((window.RAFCatalog && RAFCatalog.get(it.id)) || {}).img;
     var v = (si && si.variant) || it.variant || {};
     var opts = Object.keys(v).map(function(k){
@@ -1056,11 +1209,23 @@ body.is-offline .mw-off{display:flex;}
       + '</div></div>';
   }
   /* pair each order line with its frozen snapshot item */
+  /* M-06 — a line's identity is its POSITION. The live order and the snapshot
+     are both built from the same cart lines in the same order, so line i on
+     one side is line i on the other. Matching by productId picked the first
+     P-001 for every P-001 line, so two colours of the same shirt showed
+     identical variants. The position is checked against the product id: if
+     they disagree the line is shown without snapshot data rather than with
+     another line's. */
+  function snapLineFor(S, it, i){
+    if (!S || !S.items) return null;
+    var si = S.items[i];
+    if (!si) return null;
+    return si.productId === it.id ? si : null;
+  }
   function productsHTML(o){
     var S = snapOf(o.id), items = (o.items || []);
     return items.map(function(it, i){
-      var si = S && S.items ? (S.items.filter(function(x){ return x.productId === it.id; })[0] || S.items[i]) : null;
-      return productHTML(it, si);
+      return productHTML(it, snapLineFor(S, it, i));
     }).join('');
   }
   function oosLabel(S){
@@ -1122,7 +1287,14 @@ body.is-offline .mw-off{display:flex;}
   function auRow(k,v){ return '<div><dt>'+esc(k)+'</dt><dd>'+esc(v)+'</dd></div>'; }
   window.closeAudit = function(){ document.getElementById('auditDlg').classList.remove('show'); };
 
-  /* ---------- invoice ---------- */
+  /* ---------- invoice ----------
+     M-09 / M-10 — two different things, never merged:
+       · the ACTIVE invoice (the live order) is what the customer owes now
+       · the snapshot's commercial block is what they owed at placement
+     The rows below are the active invoice and are labelled as the CURRENT
+     total. When an approved change has moved the total, the original is
+     shown beside it as a historical line so nobody can read the frozen
+     snapshot as having been recalculated. */
   function invoiceHTML(o){
     function row(lbl,val,cls){ return '<div class="mw-inv-r '+(cls||'')+'"><span>'+lbl+'</span><span>'+val+'</span></div>'; }
     var k = T('د.ك','KWD'), h = '';
@@ -1131,7 +1303,18 @@ body.is-offline .mw-off{display:flex;}
     if (o.ship != null) h += row(T('التوصيل','Delivery'), esc(o.ship)+' '+k);
     if (o.tip && parseFloat(o.tip) > 0) h += row(T('إكرامية السائق','Driver tip'), esc(o.tip)+' '+k);
     if (o.tax && parseFloat(o.tax) > 0) h += row(T('الضريبة','Tax'), esc(o.tax)+' '+k);
-    h += row(T('الإجمالي','Total'), esc(o.total)+' '+k, 'tot');
+    h += row(T('الإجمالي الحالي','Current total'), esc(o.total)+' '+k, 'tot');
+
+    var S = snapOf(o.id);
+    var orig = S && S.commercial && S.commercial.grandTotal;
+    if (orig != null && String(orig) !== String(o.total)) {
+      h += row(T('الإجمالي عند الطلب (سجل ثابت)','Total at placement (historical record)'),
+               esc(orig)+' '+k, 'orig');
+      h += '<div class="mw-inv-n"><i class="ti ti-history"></i>'
+         + T('تغيّر إجمالي الطلب بعد تعديل وافق عليه العميل. السجل الأصلي لم يتغيّر.',
+             'The order total changed after a customer-approved modification. The original record is unchanged.')
+         + '</div>';
+    }
     return '<div class="mw-inv">'+h+'</div>';
   }
 
@@ -1164,7 +1347,7 @@ body.is-offline .mw-off{display:flex;}
         + kv(T('الحالة','Status'), '<span class="mw-c-status '+b.st+'">'+T(b.ar,b.en)+'</span>')
         + kv(T('وقت الطلب','Order time'), esc(L(o.date)))
         + kv(T('نوع الطلب','Order type'), deliveryLabel(S))
-        + kv(T('طريقة الدفع','Payment method'), esc(L(o.pay)))
+        + kv(T('طريقة الدفع','Payment method'), payLabel(S, o))
         + kv(T('إذا نفد منتج','If an item is unavailable'), oosLabel(S))
         + kv(T('عدد القطع','Item count'), '<span class="num">'+unitCount(o)+'</span>')
         + '</dl></section>'
@@ -1174,7 +1357,7 @@ body.is-offline .mw-off{display:flex;}
         + '<dl style="margin:0">'
         + kv(T('الاسم','Name'), val(S && S.customer && S.customer.name))
         + kv(T('رقم الهاتف','Phone'), val(S && S.customer && S.customer.phone))
-        + kv(T('العنوان','Address'), val((S && S.delivery && S.delivery.address) || (o.addr ? L(o.addr) : null)))
+        + kv(T('العنوان','Address'), addrLabel(S))
         + '</dl></section>'
 
       /* 3 — products */
@@ -1299,7 +1482,7 @@ body.is-offline .mw-off{display:flex;}
           + '<dl style="margin:0">'
           + kv(T('الاسم','Name'), none())
           + kv(T('رقم الهاتف','Phone'), none())
-          + kv(T('العنوان','Address'), o.addr ? esc(L(o.addr)) : none())
+          + kv(T('العنوان','Address'), addrLabel(S))
           + '</dl></div>'
         + '<div class="mw-panel"><div class="mw-sec-h"><i class="ti ti-tools-kitchen-2"></i> '+T('ملاحظات التجهيز','Preparation notes')+'</div>'
           + '<div class="mw-note">'+val(S && S.preparation && S.preparation.notes)+'</div></div>'
@@ -1889,9 +2072,20 @@ body.is-offline .mw-off{display:flex;}
     if (!opsGuard(OPS.reopen(STORE_SLUG, ME))) return;
     renderOps(); renderOpsSheet();
   };
+  /* M-02 / M-12 — a chip that looks active IS active: every toggle re-renders
+     the queue, so the pressed state and the visible orders can never disagree */
   window.toggleChip = function(btn){
     btn.setAttribute('aria-pressed', btn.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
-    saveSession();
+    renderQueue(); saveSession();
+  };
+  /* M-01 — typing filters as you type */
+  window.onSearchInput = function(){ renderQueue(); saveSession(); };
+  window.clearFilters = function(){
+    var el = document.getElementById('q'); if (el) el.value = '';
+    [].forEach.call(document.querySelectorAll('.mw-chip'), function(c){
+      c.setAttribute('aria-pressed','false');
+    });
+    renderQueue(); saveSession();
   };
   window.zoomImg = function(src, cap){
     document.getElementById('zoomImg').src = src;
@@ -1913,6 +2107,11 @@ body.is-offline .mw-off{display:flex;}
     });
     document.querySelectorAll('[data-ar-ph][data-en-ph]').forEach(function(el){
       el.placeholder = el.getAttribute('data-'+(en?'en':'ar')+'-ph');
+    });
+    /* an accessible name has to follow the language too, otherwise a screen
+       reader announces an Arabic label over an English page */
+    document.querySelectorAll('[data-ar-label][data-en-label]').forEach(function(el){
+      el.setAttribute('aria-label', el.getAttribute('data-'+(en?'en':'ar')+'-label'));
     });
     document.title = en ? 'RAF — Orders' : 'رف — الطلبات';
   }
@@ -2003,6 +2202,11 @@ body.is-offline .mw-off{display:flex;}
       var c = document.querySelectorAll('.mw-chip')[i];
       if (c) c.setAttribute('aria-pressed','true');
     });
+    /* M-11 — restoring the CONTROLS is only half of it. The queue is rendered
+       again here so a recovered search box or pressed chip is actually
+       applied; otherwise the merchant sees "filtered" chrome over an
+       unfiltered list. */
+    renderQueue();
     if (SESSION.selected && ORDERS.some(function(o){ return o.id === SESSION.selected; })){
       selected = SESSION.selected;
       /* a restored session is logged as a recovery — never as the merchant

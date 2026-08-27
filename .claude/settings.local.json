@@ -36,7 +36,10 @@
       "Bash(rm -f raf_merchant.html)",
       "Bash(perl -i -pe ' *)",
       "Bash(sed -n '/function ordersForStore/,/^  }/p' raf_merchant.html)",
-      "Bash(sed -n '/function afterAction/,/^  }/p' raf_merchant.html)"
+      "Bash(sed -n '/function afterAction/,/^  }/p' raf_merchant.html)",
+      "Bash(grep -n \"addMovements\\(ids.map\\\\|emit\\(\\);\\\\s*$\\\\|return { ok:true, released:res.items\\\\|return { ok:true, committed:res.items\\\\|return { ok:true, reservation:res\" raf_inventory.js)",
+      "Bash(sed -i 's/var move0 = combinationMove\\(orderId, item.productId, group, option, item.qty || 1\\);/var move0 = combinationMove\\(orderId, item.productId, group, option, item.qty || 1, ix\\);/' raf_order_changes.js)",
+      "Bash(sed -i 's/var move = combinationMove\\(c.orderId, c.productId, group, option, c.qty || 1\\);/var move = combinationMove\\(c.orderId, c.productId, group, option, c.qty || 1, c.lineIndex\\);/' raf_order_changes.js)"
     ]
   }
 }

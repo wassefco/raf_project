@@ -87,8 +87,10 @@
   }
   function ok(product){ return { ok:true, product:product }; }
 
-  /* variant is the { "المقاس":"M", … } shape the cart stores */
-  function validate(id, variant, qty) {
+  /* variant is the { "المقاس":"M", … } shape the cart stores.
+     `opts` may carry { combinationId, vs } — the stable option ids behind
+     that selection — so a combination-stocked product is judged exactly. */
+  function validate(id, variant, qty, opts) {
     if (!S()) return fail(REASONS.NOT_FOUND);
     var p = S().product(id);
     if (!p) return fail(REASONS.NOT_FOUND);
@@ -113,6 +115,14 @@
         });
         if (!exists) return fail(REASONS.OPTION_INVALID, { group:label, value:picked });
       }
+    }
+
+    /* a product on combination stock is judged on the exact combination —
+       "the product has 20" must never justify selling a sold-out Black / M */
+    if (global.RAFInventory && RAFInventory.isCombinationMode(id)) {
+      var cid = (opts && opts.combinationId) || null;
+      if (!cid && opts && opts.vs) cid = RAFInventory.combinationIdFor(id, opts.vs);
+      if (cid && RAFInventory.comboAvailable(cid) < (qty || 1)) return fail(REASONS.OUT_OF_STOCK);
     }
 
     if (qty != null) {
