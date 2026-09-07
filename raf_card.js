@@ -302,7 +302,7 @@
     if (!l) return;
     /* one shared ceiling: never take more units than are actually available */
     if (window.RAFRules) {
-      var c = RAFRules.clampQty(l.id, l.qty + 1);
+      var c = RAFRules.clampQty(l.id, l.qty + 1, { combinationId:l.combinationId, vs:l.vs });
       if (c.capped) {
         if (window.RAFShop && RAFShop.toast) RAFShop.toast(c.reason, { icon: 'ti-alert-circle' });
         if (c.qty !== l.qty) { Cart.setQty(key, c.qty); refresh(l.id); }

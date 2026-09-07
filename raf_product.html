@@ -938,16 +938,33 @@ function refreshAvailability(){
 function selectedAvailable(){
   if (!window.RAFInventory || !RAFInventory.isCombinationMode(PID)) return null;
   var vs = buildVs();
-  if (!vs.length) return null;
+  /* on combination stock an unresolvable selection is not "fall back to the
+     product total" — it is nothing this customer may buy */
+  if (!vs.length) return 0;
   var st = RAFInventory.combinationState(PID, vs);
-  return (st.ok && st.mode === 'combination') ? st.available : null;
+  if (!st.ok) return 0;
+  return st.mode === 'combination' ? st.available : null;
 }
+/* the id of the exact combination on screen, for the shared quantity rule */
+function selectedCombination(){
+  if (!window.RAFInventory || !RAFInventory.isCombinationMode(PID)) return null;
+  var vs = buildVs();
+  return vs.length ? RAFInventory.combinationIdFor(PID, vs) : null;
+}
+/* §9 — changing a colour or a size changes the product the customer is
+   actually buying, so everything that describes it is repainted at once:
+   availability, the sold-out badge, the quantity ceiling and both buttons. */
 function pickOpt(key, i){
   var o = OPTS.find(function(x){ return x.key === key; });
   if (!o || o.values[i].out) return;
   SEL[key] = i;
   refreshAvailability();
   renderOptions();
+  var max = qtyMax();
+  if (max > 0 && qtyVal() > max) document.getElementById('qty').textContent = max;
+  renderStock();
+  applyAvailability();
+  updateTotal();
   hint('');
 }
 /* photo gallery — swap the stage to the chosen image */
@@ -971,7 +988,11 @@ function pickThumb(i, ic){
 
 /* stock + quantity */
 function renderStock(){
-  var el = document.getElementById('stockLabel'), s = P.stock;
+  var el = document.getElementById('stockLabel');
+  /* §7 — what is shown belongs to the EXACT selected combination. A product
+     total is never presented as if it were this colour-and-size's stock. */
+  var a = selectedAvailable();
+  var s = (a === null) ? P.stock : a;
   if (isOOS()){ el.className = 'stock-l out'; el.innerHTML = '<i class="ti ti-ban"></i> ' + T('نفدت الكمية','Sold out'); }
   else if (s != null && s <= 5){ el.className = 'stock-l low'; el.innerHTML = '<i class="ti ti-flame"></i> ' + T('بقي ' + s + ' قطع فقط','Only ' + s + ' left'); }
   else { el.className = 'stock-l ok'; el.innerHTML = '<i class="ti ti-circle-check"></i> ' + T('متوفر — ' + s + ' قطعة','In stock — ' + s + ' available'); }
@@ -979,13 +1000,15 @@ function renderStock(){
 }
 /* the ceiling comes from the shared rule, never from a local stock copy */
 function qtyMax(){
-  if (window.RAFRules) return RAFRules.maxQty(PID);
+  if (window.RAFRules) return RAFRules.maxQty(PID, { combinationId:selectedCombination() });
+  var a = selectedAvailable();
+  if (a !== null) return a;
   return (P.stock == null || P.stock === 0) ? 0 : P.stock;
 }
 function changeQty(d){
   var want = qtyVal() + d;
   if (window.RAFRules){
-    var c = RAFRules.clampQty(PID, want);
+    var c = RAFRules.clampQty(PID, want, { combinationId:selectedCombination() });
     if (c.capped && d > 0 && window.RAFShop && RAFShop.toast) RAFShop.toast(c.reason, { icon:'ti-alert-circle' });
     document.getElementById('qty').textContent = Math.max(1, c.qty || 1);
   } else {

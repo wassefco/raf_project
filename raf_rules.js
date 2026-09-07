@@ -120,9 +120,15 @@
     /* a product on combination stock is judged on the exact combination —
        "the product has 20" must never justify selling a sold-out Black / M */
     if (global.RAFInventory && RAFInventory.isCombinationMode(id)) {
-      var cid = (opts && opts.combinationId) || null;
-      if (!cid && opts && opts.vs) cid = RAFInventory.combinationIdFor(id, opts.vs);
-      if (cid && RAFInventory.comboAvailable(cid) < (qty || 1)) return fail(REASONS.OUT_OF_STOCK);
+      var cid = combinationOf(id, opts);
+      /* the exact combination MUST be identifiable, or the line cannot be
+         judged at all. Falling back to the product total is precisely the
+         overselling this model exists to stop. */
+      if (!cid) return fail(REASONS.OPTION_INVALID, { reason:'combination_unresolved' });
+      var cfree = RAFInventory.comboAvailable(cid);
+      if (cfree <= 0) return fail(REASONS.OUT_OF_STOCK, { combinationId:cid });
+      if (qty != null && parseInt(qty, 10) > cfree)
+        return fail(REASONS.NOT_ENOUGH, { available:cfree, requested:parseInt(qty, 10), combinationId:cid });
     }
 
     if (qty != null) {
@@ -132,6 +138,15 @@
       if (q > free) return fail(REASONS.NOT_ENOUGH, { available:free, requested:q });
     }
     return ok(p);
+  }
+
+  /* the exact combination a caller is asking about: an explicit id, or the
+     stable option ids behind the selection. Never inferred from labels. */
+  function combinationOf(id, opts){
+    if (!global.RAFInventory || !opts) return null;
+    if (opts.combinationId) return opts.combinationId;
+    if (opts.vs && opts.vs.length) return RAFInventory.combinationIdFor(id, opts.vs);
+    return null;
   }
 
   /* ══════════════════════════════════════════════════════════════
@@ -224,18 +239,28 @@
      Every quantity control in the product (details page, cards, quick
      order, cart) calls clampQty() so the ceiling behaves identically.
      ══════════════════════════════════════════════════════════════ */
-  function maxQty(productId){
+  /* `opts` may carry { combinationId, vs }. On a combination-stocked product
+     the ceiling is that ONE combination's availability — never the product
+     total, which is only the sum across every colour and size. Callers that
+     pass no combination get 0 rather than a number that would let them
+     oversell a sold-out Black / M. */
+  function maxQty(productId, opts){
     if (!S()) return 0;
     var p = S().product(productId);
     if (!p) return 0;
     if (p.status !== 'active' || !StorePolicy.isListable(p.store)) return 0;
     if (p.stock == null) return 0;
+    if (global.RAFInventory && RAFInventory.isCombinationMode(productId)) {
+      var cid = combinationOf(productId, opts);
+      if (!cid) return 0;
+      return Math.max(0, RAFInventory.comboAvailable(cid));
+    }
     return Math.max(0, Reserve.availableFor(productId));
   }
   /* Clamp a desired quantity to the ceiling.
      → { qty, max, capped, atMax, reason } */
-  function clampQty(productId, want){
-    var max = maxQty(productId);
+  function clampQty(productId, want, opts){
+    var max = maxQty(productId, opts);
     var n = parseInt(want, 10);
     if (!n || n < 1) n = 1;
     if (max <= 0) return { qty:0, max:0, capped:true, atMax:true,
@@ -289,7 +314,12 @@
         removed.push({ id:l.id, name:name, line:l, code:'OUT_OF_STOCK', message:T('نفدت الكمية','Sold out') });
         return;
       }
-      var free = Reserve.availableFor(l.id);
+      /* on combination stock the basket line is capped by its OWN combination */
+      var free = maxQty(l.id, { combinationId:l.combinationId, vs:l.vs });
+      if (free <= 0) {
+        removed.push({ id:l.id, name:name, line:l, code:'OUT_OF_STOCK', message:T('نفدت الكمية','Sold out') });
+        return;
+      }
       if ((line.qty || 1) > free) {
         changes.push({ id:l.id, name:name, field:'qty', from:line.qty, to:free,
           message:T('تم تعديل الكمية إلى '+free+' (المتوفر)', 'Quantity reduced to '+free+' (all that is left)') });
@@ -332,7 +362,9 @@
     }
     var errors = [];
     lines.forEach(function (l) {
-      var v = validate(l.id, l.variant, l.qty);
+      /* §12 — the exact combination is re-proved here, against live inventory,
+         never against the cart's own copy of what was available earlier */
+      var v = validate(l.id, l.variant, l.qty, { combinationId:l.combinationId, vs:l.vs });
       if (!v.ok) errors.push({ id:l.id, name:l.name ? L(l.name) : l.id, code:v.code, message:v.message });
     });
     /* Busy Mode: a store that has temporarily stopped taking NEW orders is

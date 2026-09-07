@@ -259,7 +259,9 @@
   function oosPrune(){
     var a = oosRead(), keep = a.filter(function(x){
       if(!window.RAFRules) return true;
-      return RAFRules.maxQty(x.id) <= 0;                 /* still unavailable */
+      /* the removed line's own combination decides whether it is buyable again */
+      return RAFRules.maxQty(x.id, { combinationId:(x.line&&x.line.combinationId)||x.combinationId||null,
+                                     vs:(x.line&&x.line.vs)||x.vs||null }) <= 0;
     });
     if(keep.length !== a.length) oosWrite(keep);
     return keep;
@@ -489,7 +491,8 @@
     if(l.qty+d<=0){ removeLine(key); return; }
     /* shared ceiling — the cart can never exceed available stock */
     if(window.RAFRules){
-      var c = RAFRules.clampQty(l.id, l.qty+d);
+      /* the ceiling belongs to this line's exact combination, not the product */
+      var c = RAFRules.clampQty(l.id, l.qty+d, { combinationId:l.combinationId, vs:l.vs });
       if(c.capped && d>0){
         RAFShop.toast(c.reason, { icon:'ti-alert-circle' });
         if(c.qty!==l.qty){ RAFShop.Cart.setQty(key, c.qty); render(); }

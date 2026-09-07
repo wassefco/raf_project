@@ -260,11 +260,43 @@
     btn.classList.add('on');
     var p=grp.querySelector('.pick'); if(p) p.textContent=btn.textContent.trim();
     hint('');
+    /* §9 — the ceiling belongs to the newly selected combination */
+    var mx = comboPending() ? 1 : (window.RAFRules ? RAFRules.maxQty(P.id, qtyOpts()) : qty);
+    if(mx > 0 && qty > mx){
+      qty = mx;
+      backEl.querySelector('#rqNum').textContent = qty;
+      backEl.querySelector('#rqTot').textContent = money(parseFloat(P.price)*qty);
+    }
+    syncQtyBtns();
+  }
+  /* the stable option ids chosen so far, and whether they name a complete
+     purchasable combination. On a combination-stocked product the ceiling
+     belongs to that exact combination, so it cannot be known until every
+     dimension has been picked. */
+  function curVs(){
+    var vs=[];
+    (P&&P.variants||[]).forEach(function(g,gi){
+      var v=sel['g'+gi];
+      if(v!=null) vs.push(String(v));
+    });
+    return vs;
+  }
+  function qtyOpts(){
+    var vs=curVs();
+    if(!P||!P.variants||vs.length!==P.variants.length) return null;
+    return { vs:vs };
+  }
+  function comboPending(){
+    return !!(window.RAFInventory && RAFInventory.isCombinationMode(P.id) && !qtyOpts());
   }
   function chQty(d){
     /* shared ceiling — identical to the product page and the cart */
+    if(comboPending()){
+      if(d>0) hint(T('اختر الخيارات أولاً','Please select the options first'));
+      return;
+    }
     if(window.RAFRules){
-      var c=RAFRules.clampQty(P.id, qty+d);
+      var c=RAFRules.clampQty(P.id, qty+d, qtyOpts());
       qty=Math.max(1,c.qty||1);
       /* tell the customer why they cannot go higher, both when they hit the
          ceiling and when they try to pass it */
@@ -279,7 +311,10 @@
   }
   function syncQtyBtns(){
     if(!backEl) return;
-    var max=window.RAFRules?RAFRules.maxQty(P.id):(P.stock||99);
+    /* before the combination is complete there is no ceiling to show, so the
+       stepper stays at one and chQty explains what is missing */
+    var pending=comboPending();
+    var max=pending?1:(window.RAFRules?RAFRules.maxQty(P.id, qtyOpts()):(P.stock||99));
     var minus=backEl.querySelector('[data-q="-1"]'), plus=backEl.querySelector('[data-q="1"]');
     if(minus) minus.disabled=isOOS(P)||qty<=1;
     if(plus)  plus.disabled=isOOS(P)||max<=0||qty>=max;
@@ -301,6 +336,12 @@
         variant[L(g.label)]=L(opt.label||opt);
         vs.push(String(opt.v));           /* the stable id, kept for inventory */
       }
+    }
+    /* §8 — the exact combination must be buyable in this quantity. The product
+       total says nothing about Black / M, so it is never consulted here. */
+    if(window.RAFRules){
+      var chk=RAFRules.validate(P.id, variant, qty, { vs:vs });
+      if(!chk.ok){ hint(chk.message); return; }
     }
     var notes=(backEl.querySelector('#rqNotes')||{}).value||'';
     if(notes.trim()) variant[T('ملاحظات','Notes')]=notes.trim();

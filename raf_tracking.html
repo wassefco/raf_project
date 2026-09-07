@@ -170,6 +170,13 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 #ccCard .cc-ok{background:var(--ink);color:#F5F0E4;border-color:var(--ink);}
 #ccCard .cc-no{background:var(--card);color:var(--text2);border-color:var(--border2);}
 #ccCard .cc-no:hover{border-color:var(--red);color:var(--red);}
+#ccCard .cc-acts button:disabled{opacity:.55;cursor:progress;}
+.cc-spin{display:inline-block;animation:ccspin .9s linear infinite;}
+@keyframes ccspin{to{transform:rotate(360deg);}}
+@media (prefers-reduced-motion:reduce){ .cc-spin{animation:none;} }
+.cc-locked{display:flex;align-items:flex-start;gap:9px;min-height:52px;padding:13px 14px;border-radius:14px;
+           background:var(--bg2);border:1px solid var(--border2);font-size:13.5px;line-height:1.65;color:var(--text2);}
+.cc-locked i{font-size:18px;color:var(--text3);flex:0 0 auto;margin-top:1px;}
 .cc-err{display:none;margin-top:11px;padding:10px 12px;border-radius:11px;background:rgba(217,83,79,.1);
   border:1px solid rgba(217,83,79,.32);color:var(--red);font-size:12.5px;font-weight:700;line-height:1.6;}
 .cc-err.show{display:block;}
@@ -485,15 +492,40 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
       + '<div><i class="ti ti-x"></i>'+T('عند الرفض: يبقى طلبك كما هو دون أي تغيير، ويُبلَّغ المتجر بقرارك.',
             'If you decline: your order stays exactly as it is and the store is told.')+'</div>'
       + '</div>'
-      + '<div class="cc-acts">'
-        + '<button class="cc-ok" onclick="approveChange(\''+c.id+'\')">'
-          + '<i class="ti ti-check"></i> '+T('الموافقة','Approve')+'</button>'
-        + '<button class="cc-no" onclick="declineChange(\''+c.id+'\')">'
-          + '<i class="ti ti-x"></i> '+T('رفض','Decline')+'</button>'
-      + '</div>'
-      + '<div class="cc-err" id="ccErr" role="alert"></div>'
+      + ccActionsHTML(c, T('الموافقة','Approve'), T('رفض','Decline'))
       + '</section>';
     return h;
+  }
+
+  /* ---------- the decision controls ----------
+     Enabled for the person who placed the order and nobody else. The gate is
+     asked of the order-changes authority, so this page never decides who a
+     customer is, and a disabled button is never the only thing stopping a
+     wrong actor — the authority refuses them too. */
+  var CCBUSY = false;
+  function ccGate(o){
+    var C = window.RAFOrderChanges;
+    if (!C || !C.canDecide) return { ok:true };
+    return C.canDecide(o.id, ccActor());
+  }
+  function ccActionsHTML(c, okLabel, noLabel){
+    var o = getOrder();
+    var gate = o ? ccGate(o) : { ok:false };
+    if (!gate.ok){
+      return '<div class="cc-locked"><i class="ti ti-lock"></i><span>'
+        + (gate.message || T('لا يمكن الرد على هذا الطلب من هذا الحساب.',
+                             'This order cannot be answered from this account.'))
+        + '</span></div>'
+        + '<div class="cc-err" id="ccErr" role="alert"></div>';
+    }
+    return '<div class="cc-acts">'
+      + '<button class="cc-ok" id="ccOk"'+(CCBUSY?' disabled':'')+' onclick="approveChange(\''+c.id+'\')">'
+        + (CCBUSY ? '<i class="ti ti-loader-2 cc-spin"></i> '+T('جارٍ التنفيذ…','Working…')
+                  : '<i class="ti ti-check"></i> '+okLabel)+'</button>'
+      + '<button class="cc-no" id="ccNo"'+(CCBUSY?' disabled':'')+' onclick="declineChange(\''+c.id+'\')">'
+        + '<i class="ti ti-x"></i> '+noLabel+'</button>'
+      + '</div>'
+      + '<div class="cc-err" id="ccErr" role="alert"></div>';
   }
 
   function changeHTML(o){
@@ -528,13 +560,8 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
         + '<div><i class="ti ti-x"></i>'+T('عند الرفض: يبقى طلبك كما هو دون أي تغيير، ويُبلَّغ المتجر بقرارك.',
               'If you decline: your order stays exactly as it is and the store is told.')+'</div>'
       + '</div>'
-      + '<div class="cc-acts">'
-        + '<button class="cc-ok" onclick="approveChange(\''+c.id+'\')">'
-          + '<i class="ti ti-check"></i> '+T('الموافقة على التعديل','Approve the change')+'</button>'
-        + '<button class="cc-no" onclick="declineChange(\''+c.id+'\')">'
-          + '<i class="ti ti-x"></i> '+T('رفض التعديل','Decline the change')+'</button>'
-      + '</div>'
-      + '<div class="cc-err" id="ccErr" role="alert"></div>'
+      + ccActionsHTML(c, T('الموافقة على التعديل','Approve the change'),
+                         T('رفض التعديل','Decline the change'))
       + '</section>';
   }
   function ccActor(){
@@ -547,9 +574,14 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     box.textContent = res.message || T('تعذّر تنفيذ العملية.','The action could not be completed.');
     box.classList.add('show');
   }
+  /* One decision per press. The flag survives the re-render, so a second click
+     (or a second tab) cannot submit the same answer twice; the authority is
+     idempotent as well, so neither can produce a duplicate effect. */
   window.approveChange = function(id){
-    var o = getOrder(); if (!o) return;
-    var res = RAFOrderChanges.approve(o.id, id, ccActor(), { refundDestination: CCDEST });
+    var o = getOrder(); if (!o || CCBUSY) return;
+    CCBUSY = true; render();
+    var res = RAFOrderChanges.customerApprove(o.id, id, ccActor(), { refundDestination: CCDEST });
+    CCBUSY = false;
     if (!res.ok) {
       /* re-render first so the card survives, then show why */
       render(); ccFail(res); return;
@@ -566,9 +598,11 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     render();
   };
   window.declineChange = function(id){
-    var o = getOrder(); if (!o) return;
-    var res = RAFOrderChanges.reject(o.id, id, ccActor());
-    if (!res.ok) { ccFail(res); render(); return; }
+    var o = getOrder(); if (!o || CCBUSY) return;
+    CCBUSY = true; render();
+    var res = RAFOrderChanges.customerReject(o.id, id, ccActor());
+    CCBUSY = false;
+    if (!res.ok) { render(); ccFail(res); return; }
     RAFShop.toast(T('تم رفض التعديل. طلبك كما هو.','Change declined. Your order is unchanged.'), { icon:'ti-x' });
     render();
   };
@@ -600,6 +634,12 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     render();
     var root=document.getElementById('htmlRoot');
     if(root) new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
+    /* §24 — a decision taken in another tab lands here as storage events.
+       Only the final state is repainted; the decision itself is never replayed,
+       so a second tab can produce no second inventory, refund or audit effect. */
+    window.addEventListener('storage', function(e){
+      if (e.key === 'raf_order_changes' || e.key === 'raf_orders') render();
+    });
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();

@@ -71,6 +71,11 @@
     REFUND_DESTINATION_REQUIRED:{ ar:'يرجى اختيار وجهة استرداد المبلغ.',         en:'Please choose where the refund should go.' },
     INVALID_CHANGE_ITEM:        { ar:'المنتج المحدد ليس ضمن هذا الطلب.',         en:'The selected product is not part of this order.' },
     INVALID_REPLACEMENT:        { ar:'المنتج البديل غير صالح.',                  en:'The replacement product is not valid.' },
+    /* a product stocked per colour-and-size cannot be offered as a replacement
+       until the merchant can say WHICH combination is being sent. There is no
+       approved way to choose one here, so it is refused rather than guessed. */
+    REPLACEMENT_COMBINATION_REQUIRED:{ ar:'لا يمكن اختيار هذا المنتج بديلاً لأنه يُباع بمقاسات أو ألوان لها مخزون منفصل.',
+                                       en:'This product cannot be offered as a replacement because it is stocked per size or colour.' },
     CROSS_STORE:                { ar:'هذا الطلب لا يخص متجرك.',                  en:'This order does not belong to your store.' },
     PRODUCT_NOT_AVAILABLE:      { ar:'المنتج لم يعد متاحًا.',                    en:'The product is no longer available.' },
     OPTION_NOT_AVAILABLE:       { ar:'الخيار المحدد لم يعد متاحًا.',             en:'The selected option is no longer available.' },
@@ -90,6 +95,12 @@
     CHANGE_NOT_ALLOWED_NOW:     { ar:'لا يمكن طلب تعديل في حالة الطلب الحالية.', en:'A modification cannot be requested in the order’s current state.' },
     PRICE_IMPACT_UNSUPPORTED:   { ar:'لا يمكن تنفيذ تعديل يغيّر قيمة الطلب.',    en:'A modification that changes the order value cannot be processed.' },
     FORBIDDEN:                  { ar:'ليس لديك صلاحية لهذا الإجراء.',            en:'You do not have permission for this action.' },
+    /* the customer-facing refusals: they describe the situation, never a role,
+       a permission key or an internal identifier */
+    NOT_ORDER_OWNER:            { ar:'هذا الطلب مسجّل باسم حساب آخر. سجّل الدخول بالحساب صاحب الطلب للرد على هذا الطلب.',
+                                  en:'This order belongs to a different account. Sign in with the account that placed it to respond.' },
+    ORDER_CUSTOMER_UNKNOWN:     { ar:'لم يُسجَّل صاحب هذا الطلب، ولا يمكن تأكيد هويتك للرد عليه. تواصل مع خدمة العملاء.',
+                                  en:'This order has no recorded account, so your identity cannot be confirmed. Please contact customer support.' },
     LOCKED:                     { ar:'موظف آخر يعالج هذا الطلب حالياً.',         en:'Another employee is processing this order.' }
   };
 
@@ -445,6 +456,11 @@
         return fail('REPLACEMENT_PRICE_EXCEEDS_ORIGINAL',
                     { original:money(pay.paid), replacement:money(repPayable) });
 
+      /* §27 — a replacement on combination stock would have to name the exact
+         combination being sent, and nothing in this flow can choose one */
+      if (global.RAFInventory && RAFInventory.isCombinationMode(rep.id))
+        return fail('REPLACEMENT_COMBINATION_REQUIRED', { productId:rep.id });
+
       /* it must also be genuinely in stock right now */
       if (global.RAFInventory && RAFInventory.available(rep.id) < pay.qty)
         return fail('PRODUCT_NOT_AVAILABLE', { reason:'insufficient_stock',
@@ -614,15 +630,46 @@
     return p;
   }
 
-  /* ══════════════ CUSTOMER · decide ══════════════ */
-  /* only the person who placed the order may answer for it; an order whose
-     customer was never recorded cannot be answered by anyone */
+  /* ══════════════ CUSTOMER · decide ══════════════
+     AUTHORIZATION MODEL (§16). Two different questions, answered separately:
+
+       merchant / employee → RAFPerm 'orders.manage' + storeSlug ownership
+       customer           → ownership of THIS order, and nothing else
+
+     A customer decision is not a permission, so RAFPerm is not consulted for
+     it and no customer permission key exists. Ownership is proved against the
+     order snapshot's recorded customer id — the same identity the checkout
+     wrote from the signed-in session — so a merchant, an employee or an admin
+     is refused here for the only reason that matters: the order is not theirs.
+
+     An order whose customer was never recorded cannot be answered by anybody.
+     That is reported as its own condition rather than dressed up as a
+     permission failure, and no owner is ever inferred to fill the gap. */
+  /* refused, in the customer's words. The code stays FORBIDDEN so callers and
+     tests see one authorization outcome; only the wording is customer-facing. */
+  function notOwner(extra){
+    var r = fail('NOT_ORDER_OWNER', extra);
+    r.code = 'FORBIDDEN'; r.reason = 'FORBIDDEN';
+    if (extra) for (var k in extra) if (extra.hasOwnProperty(k)) r[k] = extra[k];
+    return r;
+  }
   function customerGuard(orderId, actor){
-    if (!actor || !actor.id) return fail('FORBIDDEN');
+    if (!actor || !actor.id) return notOwner({ why:'no_actor' });
+    /* an actor that declares itself anything but a customer is refused
+       outright: this endpoint is not a second door into merchant authority */
+    if (actor.type && actor.type !== 'customer')
+      return notOwner({ why:'not_a_customer_actor', actorType:actor.type });
+
     var snap = snapOf(orderId);
     var owner = (snap && snap.customer && snap.customer.id) || null;
-    if (!owner || owner !== actor.id) return fail('FORBIDDEN', { orderCustomer:owner ? true : false });
+    if (!owner) return fail('ORDER_CUSTOMER_UNKNOWN', { orderId:orderId });
+    if (owner !== actor.id) return notOwner({ why:'not_order_owner' });
     return { ok:true };
+  }
+  /* the actor a customer decision is recorded as. `type` is stated, never
+     guessed, so the audit can never file a customer decision as a merchant's. */
+  function customerActor(actor){
+    return { id:actor.id, name:actor.name || actor.id, type:'customer' };
   }
   function decisionGuard(orderId, changeId, actor){
     var g = customerGuard(orderId, actor); if (!g.ok) return g;
@@ -679,6 +726,24 @@
   /* Work out which combination an approved option change would move the
      order's held units to, and whether that combination can be bought.
      Returns null for a product that is not on combination stock. */
+  /* the exact combination ONE order line is holding. Read from the live line,
+     which recorded it at checkout; the reservation is consulted only when it
+     cannot be ambiguous. Never inferred from labels, and never a guess between
+     two lines of the same product. */
+  function lineCombinationId(orderId, lineIndex, productId){
+    if (!global.RAFInventory || !RAFInventory.isCombinationMode(productId)) return null;
+    var ord = orderRecord(orderId);
+    var line = (ord && ord.items && lineIndex != null) ? ord.items[lineIndex] : null;
+    if (line && line.id === productId && line.combinationId) return line.combinationId;
+    var res = RAFInventory.reservationFor(orderId);
+    if (res && res.combos) {
+      var owned = Object.keys(res.combos).filter(function (x) {
+        var pp = RAFInventory.partsOf(x); return pp && pp.productId === productId; });
+      if (owned.length === 1) return owned[0];
+    }
+    return null;
+  }
+
   function combinationMove(orderId, productId, group, option, qty, lineIndex){
     if (!global.RAFInventory || !RAFInventory.isCombinationMode(productId)) return null;
     /* The line records the exact combination it bought, so an order holding
@@ -737,6 +802,8 @@
       if (!rep) return fail('INVALID_REPLACEMENT', { productId:c.replacementProductId });
       if (rep.status && rep.status !== 'active') return fail('PRODUCT_NOT_AVAILABLE', { status:rep.status });
       if (rep.slug !== c.storeSlug) return fail('CROSS_STORE', { productStore:rep.slug });
+      if (global.RAFInventory && !c.inventoryDone && RAFInventory.isCombinationMode(rep.id))
+        return fail('REPLACEMENT_COMBINATION_REQUIRED', { productId:rep.id });
       /* the price rule is re-checked against today's price, not the frozen one */
       var payable = num(rep.price) * c.qty;
       if (payable > pay.paid + 1e-9)
@@ -757,11 +824,19 @@
     /* ---- 1 · inventory ---- */
     if (!c.inventoryDone) {
       if (!global.RAFInventory) return fail('INVENTORY_FAILED', { reason:'inventory_unavailable' });
+      /* §26 / §28 — the EXACT combination this line holds is released, so
+         removing Black / L cannot hand back White / L. A combination-stocked
+         line whose combination cannot be named is refused, not approximated. */
+      var fromCombo = lineCombinationId(c.orderId, c.lineIndex, c.productId);
+      if (RAFInventory.isCombinationMode(c.productId) && !fromCombo)
+        return fail('STALE_CHANGE', { reason:'combination_not_identifiable' });
       var inv = c.kind === KIND.REMOVAL
         ? RAFInventory.releaseLine(c.orderId, c.productId, c.qty,
-            { opKey:opKey, reason:'order_line_removed', actor:{ id:actor.id, name:actor.name, type:'customer' } })
+            { opKey:opKey, reason:'order_line_removed', combinationId:fromCombo,
+              actor:customerActor(actor) })
         : RAFInventory.replaceLine(c.orderId, c.productId, c.replacementProductId, c.qty,
-            { opKey:opKey, reason:'order_line_replaced', actor:{ id:actor.id, name:actor.name, type:'customer' } });
+            { opKey:opKey, reason:'order_line_replaced', fromCombinationId:fromCombo,
+              actor:customerActor(actor) });
       if (!inv.ok) return fail('INVENTORY_FAILED', { reason:inv.code, shortages:inv.shortages || null });
       c.inventoryDone = true; put(c.orderId, c);
     }
@@ -853,7 +928,7 @@
     put(orderId, c);
 
     audit(c.kind === KIND.REMOVAL ? 'product_removal.approved' : 'product_replacement.approved',
-      orderId, { actor:{ id:actor.id, name:actor.name }, source:'customer', key:c.decidedAt,
+      orderId, { actor:customerActor(actor), source:'customer', key:c.decidedAt,
         metadata:{ changeId:c.id, refundAmount:c.refundAmount,
                    refundDestination:c.refundDestination || null } });
 
@@ -975,7 +1050,7 @@
 
     /* the snapshot's own update already emitted modify.applied */
     audit('modify.approved', orderId, {
-      actor:{ id:actor.id, name:actor.name || actor.id }, source:'customer',
+      actor:customerActor(actor), source:'customer',
       key:c.decidedAt, reason:c.reasonId,
       metadata:{ changeId:c.id, kind:c.kind, lineIndex:c.lineIndex, productId:c.productId,
                  groupIndex:c.groupIndex, fromLabel:c.fromLabel, toV:c.toV, appliedLabel:label,
@@ -1003,7 +1078,7 @@
                      : c.kind === KIND.REPLACEMENT  ? 'product_replacement.rejected'
                      : 'modify.rejected';
     audit(rejectAction, orderId, {
-      actor:{ id:actor.id, name:actor.name || actor.id }, source:'customer',
+      actor:customerActor(actor), source:'customer',
       key:c.decidedAt, reason:c.reasonId,
       metadata:{ changeId:c.id, kind:c.kind, lineIndex:c.lineIndex, productId:c.productId,
                  toV:c.toV || null, refundAmount:c.refundAmount || null }
@@ -1014,6 +1089,37 @@
     }
     notifyMerchant('change_rejected', orderId);
     return { ok:true, change:c };
+  }
+
+  /* ══════════════ CUSTOMER DECISION ENDPOINTS (§18) ══════════════
+     The customer's two answers have their own entry points, so no customer
+     surface ever calls a function whose contract is merchant authorization.
+     Authorization happens HERE, in the authority, not in a page: the actor is
+     stamped as a customer and `customerGuard` proves ownership of the order.
+     A UI that forgot to disable a button therefore still cannot decide. */
+  /* an actor that presents itself as anything but a customer is refused here
+     rather than re-labelled: the endpoint must never launder a merchant or
+     driver context into a customer one on its way through */
+  function asCustomer(a){
+    if (!a || !a.id) return null;
+    if (a.type && a.type !== 'customer') return null;
+    return { id:a.id, name:a.name || a.id, type:'customer' };
+  }
+  function customerApprove(orderId, changeId, actorContext, options){
+    var a = asCustomer(actorContext);
+    if (!a) return notOwner({ why: (actorContext && actorContext.id) ? 'not_a_customer_actor' : 'no_actor' });
+    return approve(orderId, changeId, a, options);
+  }
+  function customerReject(orderId, changeId, actorContext){
+    var a = asCustomer(actorContext);
+    if (!a) return notOwner({ why: (actorContext && actorContext.id) ? 'not_a_customer_actor' : 'no_actor' });
+    return reject(orderId, changeId, a);
+  }
+  /* may this actor decide on this order at all? Lets a surface render the
+     right state without duplicating the rule or reading identity itself. */
+  function canDecide(orderId, actorContext){
+    var g = customerGuard(orderId, actorContext);
+    return g.ok ? { ok:true } : { ok:false, code:g.code, message:g.message };
   }
 
   /* ---------- read helpers for the surfaces ---------- */
@@ -1058,6 +1164,8 @@
       if (!cat || cat.slug !== slug) return;
       if (cat.id === item.productId) return;
       if (cat.status && cat.status !== 'active') return;
+      /* §27 — not offerable while its stock is held per combination */
+      if (global.RAFInventory && RAFInventory.isCombinationMode(cat.id)) return;
       var payable = num(cat.price) * pay.qty;
       if (payable > pay.paid + 1e-9) return;
       if (global.RAFInventory && RAFInventory.available(cat.id) < pay.qty) return;
@@ -1079,8 +1187,12 @@
     validateProposal: validateProposal, propose: propose, optionsFor: optionsFor,
     validateLineChange: validateLineChange, paidAmountOf: paidAmountOf,
     replacementCandidates: replacementCandidates,
-    /* customer */
-    describe: describe, approve: approve, reject: reject,
+    /* customer — these are the endpoints a customer surface must use */
+    describe: describe, canDecide: canDecide,
+    customerApprove: customerApprove, customerReject: customerReject,
+    /* the shared implementation. Authorization is identical (order ownership);
+       the customer endpoints above are the supported names. */
+    approve: approve, reject: reject,
     /* read */
     activeOf: activeOf, hasPending: hasPending, historyOf: historyOf, changeById: changeById
   };

@@ -77,6 +77,15 @@
       var a = Cart.read(), key = keyOf(p.id, variant), ex = a.find(function (l) { return l.key === key; });
       var combo = (vs && vs.length && window.RAFInventory)
         ? RAFInventory.combinationIdFor(p.id, vs) : null;
+      /* §8 — on combination stock the ceiling is this combination's own
+         availability. Enforced here, not only on the button, so no add-to-cart
+         path can put more units in the basket than the store actually has. */
+      if (window.RAFInventory && RAFInventory.isCombinationMode(p.id)) {
+        if (!combo) return null;                                  /* unidentifiable */
+        var free = RAFInventory.comboAvailable(combo);
+        if (free <= 0) return null;
+        if (ex && (ex.qty || 0) >= free) return key;              /* already at the cap */
+      }
       if (ex) { ex.qty++; if (combo && !ex.combinationId) { ex.combinationId = combo; ex.vs = vs.slice(); } }
       else a.push({ key: key, id: p.id, name: { ar: p.ar, en: p.en }, price: p.price, qty: 1, variant: variant || {}, ic: p.ic || 'ti-box', img: p.img || '', store: p.store ? { ar: pick(p.store, 'ar'), en: pick(p.store, 'en') } : null,
                     combinationId: combo, vs: (vs && vs.length) ? vs.slice() : null });

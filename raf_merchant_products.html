@@ -249,6 +249,15 @@ body{background:var(--bg2);margin:0;}
   background:var(--card);text-align:center;font-family:var(--font-en);font-size:16px;font-weight:800;color:var(--ink);}
 #invBox .cmb-save{flex:0 0 auto;min-height:44px;padding:0 15px;border-radius:11px;border:1px solid var(--gold2);
   background:var(--gold);color:#1C1606;font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;}
+.cmb-in.dirty{border-color:var(--gold);background:var(--gold-soft);color:var(--gold2);font-weight:800;}
+.cmb-bar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:12px;padding:12px;
+         border:1px solid var(--border2);border-radius:14px;background:var(--bg);}
+.cmb-count{flex:1 1 120px;min-width:0;font-size:12.5px;font-weight:800;color:var(--text2);}
+#invBox .cmb-bar .cmb-reset{flex:0 0 auto;min-height:44px;padding:0 15px;border-radius:11px;
+         border:1px solid var(--border2);background:var(--card);color:var(--text2);font-weight:800;
+         font-size:13px;cursor:pointer;font-family:inherit;}
+#invBox .cmb-bar .cmb-save{display:inline-flex;align-items:center;gap:6px;}
+#invBox .cmb-bar .cmb-save:disabled,#invBox .cmb-bar .cmb-reset:disabled{opacity:.45;cursor:not-allowed;}
 .cmb-err{display:none;margin-top:10px;padding:10px 12px;border-radius:11px;background:rgba(217,83,79,.1);
   border:1px solid rgba(217,83,79,.32);color:var(--red);font-size:12.5px;font-weight:700;line-height:1.6;}
 .cmb-err.show{display:block;}
@@ -527,6 +536,8 @@ body{background:var(--bg2);margin:0;}
     el('edTitle').textContent = L(p.name);
     el('edBody').innerHTML = editorHTML(p);
     adjDir = 1;
+    /* the combination baseline is the version this merchant is now reading */
+    cmbResetDraft(id);
     renderInventory(); renderMedia(); renderGroups(); renderGuide();
     el('editor').classList.add('show');
     document.body.style.overflow = 'hidden';
@@ -689,6 +700,10 @@ body{background:var(--bg2);margin:0;}
           var state = !r.configured ? T('غير محدد','Not configured')
                     : r.available > 0 ? T('متوفر','Available') : T('غير متوفر','Out of stock');
           var cls = !r.configured ? 'un' : (r.available > 0 ? 'ok' : 'out');
+          /* an unsaved edit keeps its value across re-renders and is marked,
+             so the merchant can see exactly what one Save is about to write */
+          var shown = (cmbDraft[r.id] != null) ? cmbDraft[r.id] : r.onHand;
+          var dirty = String(shown).trim() !== String(r.onHand);
           return '<div class="cmb-row">'
             + '<div class="cmb-n"><b>'+esc(r.label)+'</b><span class="cmb-st '+cls+'">'+state+'</span></div>'
             + '<div class="cmb-nums">'
@@ -698,9 +713,9 @@ body{background:var(--bg2);margin:0;}
             + '</div>'
             + '<div class="cmb-adj">'
               + '<button type="button" class="cmb-b" onclick="cmbStep(\''+esc(r.id)+'\',-1)" aria-label="'+T('إنقاص','Decrease')+'"><i class="ti ti-minus"></i></button>'
-              + '<input class="cmb-in" id="cmb_'+esc(r.id)+'" inputmode="numeric" dir="ltr" value="'+r.onHand+'">'
+              + '<input class="cmb-in'+(dirty?' dirty':'')+'" id="cmb_'+esc(r.id)+'" inputmode="numeric" dir="ltr"'
+                + ' value="'+esc(String(shown))+'" oninput="cmbEdit(\''+esc(r.id)+'\',this.value)">'
               + '<button type="button" class="cmb-b" onclick="cmbStep(\''+esc(r.id)+'\',1)" aria-label="'+T('زيادة','Increase')+'"><i class="ti ti-plus"></i></button>'
-              + '<button type="button" class="cmb-save" onclick="cmbApply(\''+esc(r.id)+'\')">'+T('حفظ','Save')+'</button>'
             + '</div>'
           + '</div>';
         }).join('') + '</div>';
@@ -708,36 +723,116 @@ body{background:var(--bg2);margin:0;}
       h += '</section>';
     });
     h += '<div class="cmb-err" id="cmbErr"></div>';
+    /* §3 — ONE Save for the whole edited set. There is deliberately no
+       per-row Save: a set that is half-written is exactly the partial state
+       this operation must never produce. */
+    var n = cmbChangedCount();
+    h += '<div class="cmb-bar">'
+      + '<span class="cmb-count">'+(n
+          ? T(n+' تركيبة معدّلة', n+' combination'+(n===1?'':'s')+' edited')
+          : T('لا توجد تغييرات','No changes'))+'</span>'
+      + '<button type="button" class="cmb-reset" onclick="cmbDiscard()"'+(n?'':' disabled')+'>'
+        + T('تراجع','Discard')+'</button>'
+      + '<button type="button" class="cmb-save" onclick="cmbSaveAll()"'+(n?'':' disabled')+'>'
+        + '<i class="ti ti-device-floppy"></i> '+T('حفظ كل التغييرات','Save all changes')+'</button>'
+      + '</div>';
     return '<div class="cmb">'+h+'</div>';
   }
   window.toggleCombo = function(v){ comboOpen[v] = comboOpen[v] === false; renderInventory(); };
+
+  /* ---- the edited set, held until the merchant saves it as one operation ----
+     `cmbBase` is captured when the editor is opened, NOT when Save is pressed:
+     it is the version the merchant actually read, which is what makes the
+     stale-write check mean anything. */
+  var cmbDraft = {}, cmbBase = null, cmbBaseFor = null;
+  function cmbVersionOf(pid){
+    return INV.combinationsOf(pid).reduce(function(m, r){ return Math.max(m, r.updatedAt || 0); }, 0);
+  }
+  function cmbResetDraft(pid){
+    cmbDraft = {}; cmbBaseFor = pid || null;
+    cmbBase = pid ? cmbVersionOf(pid) : null;
+  }
+  function cmbCurrent(){
+    var map = {};
+    if (editing) INV.combinationsOf(editing).forEach(function(r){ map[r.id] = r; });
+    return map;
+  }
+  /* a row counts as edited only when its value actually differs from stock */
+  function cmbChangedCount(){
+    var cur = cmbCurrent(), n = 0;
+    for (var id in cmbDraft) if (cmbDraft.hasOwnProperty(id)) {
+      var r = cur[id]; if (!r) continue;
+      if (String(cmbDraft[id]).trim() !== String(r.onHand)) n++;
+    }
+    return n;
+  }
+  window.cmbEdit = function(id, val){
+    cmbDraft[id] = String(val);
+    var bar = el('invBox') && el('invBox').querySelector('.cmb-bar');
+    var n = cmbChangedCount();
+    if (bar){
+      bar.querySelector('.cmb-count').textContent = n
+        ? T(n+' تركيبة معدّلة', n+' combination'+(n===1?'':'s')+' edited')
+        : T('لا توجد تغييرات','No changes');
+      bar.querySelector('.cmb-save').disabled = !n;
+      bar.querySelector('.cmb-reset').disabled = !n;
+    }
+    var i = el('cmb_'+id);
+    if (i) i.classList.toggle('dirty', n > 0 && String(val).trim() !== String((cmbCurrent()[id]||{}).onHand));
+  };
   window.cmbStep = function(id, d){
     var i = el('cmb_'+id); if (!i) return;
     var n = parseInt(i.value, 10); if (!isFinite(n)) n = 0;
     i.value = Math.max(0, n + d);
+    cmbEdit(id, i.value);
   };
+  window.cmbDiscard = function(){ cmbResetDraft(editing); renderInventory(); };
   function cmbErr(msg){ var e = el('cmbErr'); if (e){ e.textContent = msg; e.classList.add('show'); } }
-  window.cmbApply = function(id){
-    var i = el('cmb_'+id); if (!i || !editing) return;
-    var raw = String(i.value).trim();
-    if (!/^\d+$/.test(raw)) return cmbErr(T('أدخل كمية صحيحة.','Enter a whole quantity.'));
-    var e = {}; e[id] = parseInt(raw, 10);
-    var rows = INV.combinationsOf(editing).filter(function(r){ return r.configured; });
-    var base = rows.reduce(function(m, r){ return Math.max(m, r.updatedAt || 0); }, 0);
-    var res = INV.setCombinations(editing, e, { actor:ME, baseVersion:base || undefined });
+  function cmbLabel(id){
+    var r = cmbCurrent()[id];
+    return r ? r.options.map(function(o){ return L(o.label||o); }).join(' · ') : id;
+  }
+  /* Build the entire edited set and submit it in ONE atomic operation.
+     Nothing is written unless every entry passes; a single bad row leaves the
+     whole product exactly as it was. */
+  window.cmbSaveAll = function(){
+    if (!editing) return;
+    var e = el('cmbErr'); if (e) e.classList.remove('show');
+    var cur = cmbCurrent(), entries = {}, n = 0;
+    for (var id in cmbDraft) if (cmbDraft.hasOwnProperty(id)) {
+      var row = cur[id]; if (!row) continue;
+      var raw = String(cmbDraft[id]).trim();
+      if (raw === String(row.onHand)) continue;
+      /* a value that is not a whole number is sent as-is and refused by the
+         authority, so the refusal covers the WHOLE set, not just this row */
+      entries[id] = /^\d+$/.test(raw) ? parseInt(raw, 10) : NaN;
+      n++;
+    }
+    if (!n) return cmbErr(T('لا توجد تغييرات لحفظها.','There is nothing to save.'));
+
+    var res = INV.setCombinations(editing, entries,
+      { actor:ME, baseVersion: (cmbBaseFor === editing && cmbBase != null) ? cmbBase : undefined });
     if (!res.ok){
+      var who = res.combinationId ? ' — ' + cmbLabel(res.combinationId) : '';
       var m = res.code === 'BELOW_RESERVED'
-        ? T('لا يمكن أن يقل المخزون عن الكمية المحجوزة ('+res.reserved+').',
-            'Stock cannot go below the reserved quantity ('+res.reserved+').')
-        : res.code === 'STALE' ? T('تم تحديث المخزون من جلسة أخرى. أعد المحاولة.',
-                                   'Stock was updated in another session. Try again.')
+        ? T('لا يمكن أن يقل المخزون عن الكمية المحجوزة ('+res.reserved+')'+who+'. لم يتم حفظ أي تغيير.',
+            'Stock cannot go below the reserved quantity ('+res.reserved+')'+who+'. Nothing was saved.')
+        : res.code === 'INVALID_QUANTITY'
+        ? T('أدخل كمية صحيحة'+who+'. لم يتم حفظ أي تغيير.',
+            'Enter a whole quantity'+who+'. Nothing was saved.')
+        : res.code === 'STALE' ? T('تم تحديث المخزون من جلسة أخرى. أعد تحميل المنتج ثم حاول مجدداً. لم يتم حفظ أي تغيير.',
+                                   'Stock was updated in another session. Reload the product and try again. Nothing was saved.')
+        : res.code === 'INVALID_COMBINATION' ? T('تركيبة غير صالحة'+who+'. لم يتم حفظ أي تغيير.',
+                                                 'Invalid combination'+who+'. Nothing was saved.')
         : res.code === 'CROSS_STORE' ? T('هذا المنتج لا يخص متجرك.','This product does not belong to your store.')
         : res.code === 'FORBIDDEN' ? T('ليس لديك صلاحية.','You do not have permission.')
-        : T('تعذّر حفظ المخزون.','Stock could not be saved.');
+        : T('تعذّر حفظ المخزون. لم يتم حفظ أي تغيير.','Stock could not be saved. Nothing was saved.');
       return cmbErr(m);
     }
+    cmbResetDraft(editing);
     renderInventory();
-    if (window.RAFShop) RAFShop.toast(T('تم حفظ المخزون','Stock saved'), { icon:'ti-circle-check' });
+    if (window.RAFShop) RAFShop.toast(T('تم حفظ '+n+' تركيبة','Saved '+n+' combination'+(n===1?'':'s')),
+                                      { icon:'ti-circle-check' });
   };
 
   function renderInventory(){
@@ -1198,7 +1293,16 @@ body{background:var(--bg2);margin:0;}
     r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
     try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
     applyLang(); renderChips(); render();
-    if (editing){ var p = MP.get(editing); if (p) el('edBody').innerHTML = editorHTML(p); }
+    /* rebuilding the editor body empties its panels, so they are repainted in
+       the new language. The unsaved combination draft is kept deliberately:
+       switching language must not silently discard what the merchant typed. */
+    if (editing){
+      var p = MP.get(editing);
+      if (p){
+        el('edBody').innerHTML = editorHTML(p);
+        renderInventory(); renderMedia(); renderGroups(); renderGuide();
+      }
+    }
   };
   function applyLang(){
     var en = isEn();
