@@ -272,6 +272,103 @@
     });
   });
 
+  /* ══════════════════════════════════════════════════════════════
+     MERCHANT-CREATED PRODUCTS
+     ──────────────────────────────────────────────────────────────
+     A seeded product and a merchant-created product are the same kind
+     of thing to every reader, so created products are kept as real
+     catalogue entries in their own collection and concatenated with the
+     seed array before overrides are layered on.
+
+     They are deliberately NOT stored as overrides. An override says
+     "this seeded product now reads differently"; a created product is a
+     new entity. Keeping the two apart is what makes resetOverrides()
+     unambiguous: it discards edits and leaves created products standing,
+     because throwing away a merchant's product while "resetting an edit"
+     would be data loss, not a reset.
+     ══════════════════════════════════════════════════════════════ */
+  var LS_CREATED = 'raf_created_products';
+
+  function readCreated(){
+    try { var a = JSON.parse(localStorage.getItem(LS_CREATED)); return Array.isArray(a) ? a : []; }
+    catch(e){ return []; }
+  }
+  function writeCreated(list){
+    try { localStorage.setItem(LS_CREATED, JSON.stringify(list)); } catch(e){ return false; }
+    document.dispatchEvent(new CustomEvent('raf:source'));
+    return true;
+  }
+  /* every id in play, whatever its origin — the generator must not collide
+     with a seeded id, a created id, or one another */
+  function knownIds(){
+    var seen = {};
+    for (var k in BY_ID) if (BY_ID.hasOwnProperty(k)) seen[k] = 1;
+    readCreated().forEach(function (p) { if (p && p.id) seen[p.id] = 1; });
+    return seen;
+  }
+  /* P-001, P-002, … Only ids that are exactly P-<digits> take part in the
+     sequence; P-JACKET and CM-14 are left alone rather than misread. */
+  function nextProductId(){
+    var seen = knownIds(), max = 0;
+    Object.keys(seen).forEach(function (id) {
+      var m = /^P-(\d+)$/.exec(id);
+      if (m) { var n = parseInt(m[1], 10); if (isFinite(n) && n > max) max = n; }
+    });
+    var n = max + 1, id;
+    do { id = 'P-' + String(n).padStart(3, '0'); n++; } while (seen[id]);
+    return id;
+  }
+  /* A created row carries only the images the merchant actually supplied.
+     Seeded products fall back to `assets/products/<id>.jpg` because those
+     files ship with the catalogue; a created product has no such file, so
+     inventing that path would produce a guaranteed 404. An imageless product
+     is a valid state and every surface already falls back to its icon. */
+  function normaliseCreated(p){
+    var imgs = (p.images && p.images.length) ? p.images : (p.img ? [p.img] : []);
+    p.images = imgs;
+    p.img = imgs[0] || '';
+    return p;
+  }
+
+  /* THE creation entry point. It owns identity and persistence; callers own
+     nothing. Business authorisation lives one layer up, in
+     RAFMerchantProducts.create(), which is the only supported caller. */
+  function addProduct(data){
+    if (!data || typeof data !== 'object') return { ok:false, code:'INVALID_PRODUCT' };
+    if (data.id) return { ok:false, code:'ID_NOT_ACCEPTED' };   /* never caller-supplied */
+    if (!data.store || !BY_SLUG[data.store]) return { ok:false, code:'INVALID_STORE', store:data.store || null };
+
+    var id = nextProductId();
+    var seen = knownIds();
+    if (seen[id]) return { ok:false, code:'DUPLICATE_ID', id:id };   /* belt and braces */
+
+    var row = {};
+    for (var k in data) if (data.hasOwnProperty(k)) row[k] = data[k];
+    row.id = id;
+    row.createdAt = Date.now();
+    row.origin = 'merchant';
+    normaliseCreated(row);
+
+    var list = readCreated();
+    /* re-read immediately before writing so a concurrent tab cannot be lost */
+    for (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id)
+      return { ok:false, code:'DUPLICATE_ID', id:id };
+    list.push(row);
+    if (!writeCreated(list)) return { ok:false, code:'PERSIST_FAILED' };
+
+    /* prove it reads back through the normal path before reporting success */
+    if (!product(id)) return { ok:false, code:'PERSIST_FAILED', reason:'not_readable' };
+    return { ok:true, id:id, product:product(id) };
+  }
+  function createdProducts(){ return readCreated().map(function (p) { return normaliseCreated(p); }); }
+  /* the base record for an id, wherever it came from */
+  function baseOf(id){
+    if (BY_ID[id]) return BY_ID[id];
+    var c = readCreated();
+    for (var i = 0; i < c.length; i++) if (c[i] && c[i].id === id) return normaliseCreated(c[i]);
+    return null;
+  }
+
   /* ---------- runtime overrides (what makes edits appear everywhere) ---------- */
   function readOverrides(){
     try { var o = JSON.parse(localStorage.getItem(LS_OVERRIDES)); return (o && typeof o === 'object') ? o : { products:{}, stores:{} }; }
@@ -294,7 +391,7 @@
     return merge(b, readOverrides().stores[slug]);
   }
   function product(id){
-    var b = BY_ID[id]; if (!b) return null;
+    var b = baseOf(id); if (!b) return null;      /* seeded or merchant-created */
     var p = merge(b, readOverrides().products[id]);
     p.storeRef = store(p.store);
     return p;
@@ -317,7 +414,8 @@
   function products(opts){
     opts = opts || {};
     var ov = readOverrides().products;
-    var list = PRODUCTS.map(function(p){ return merge(p, ov[p.id]); });
+    /* seeded and merchant-created entries are one catalogue to every reader */
+    var list = PRODUCTS.concat(createdProducts()).map(function(p){ return merge(p, ov[p.id]); });
     if (opts.visibleOnly !== false) list = list.filter(isVisible);
     if (opts.cat) list = list.filter(function(p){ return p.cat === opts.cat; });
     if (opts.store) list = list.filter(function(p){ return p.store === opts.store; });
@@ -337,13 +435,16 @@
 
   /* ---------- writes (admin / merchant surface, foundation for sync) ---------- */
   function updateProduct(id, patch){
-    if (!BY_ID[id]) return false;
+    if (!baseOf(id)) return false;                /* created products edit too */
     var o = readOverrides(); o.products[id] = merge(o.products[id] || {}, patch); writeOverrides(o); return true;
   }
   function updateStore(slug, patch){
     if (!BY_SLUG[slug]) return false;
     var o = readOverrides(); o.stores[slug] = merge(o.stores[slug] || {}, patch); writeOverrides(o); return true;
   }
+  /* Discards EDITS only. Merchant-created products are separate entities and
+     deliberately survive: a reset undoes changes, it does not delete stock
+     keeping units the merchant added. */
   function resetOverrides(){ try { localStorage.removeItem(LS_OVERRIDES); } catch(e){} document.dispatchEvent(new CustomEvent('raf:source')); }
 
   /* store display name in the active language — used by legacy shapes */
@@ -354,6 +455,8 @@
     product:product, products:products, store:store, stores:stores,
     categories:categories, isVisible:isVisible,
     updateProduct:updateProduct, updateStore:updateStore, resetOverrides:resetOverrides,
+    /* creation — identity and persistence are owned here, never by a page */
+    addProduct:addProduct, nextProductId:nextProductId, createdProducts:createdProducts,
     /* raw accessors for adapters/tests */
     all:function(){ return products({ visibleOnly:false }); },
     allStores:function(){ return stores({ visibleOnly:false }); },

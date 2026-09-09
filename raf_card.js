@@ -84,6 +84,8 @@
     .rc-price{font-family:var(--font-en,'DM Sans',sans-serif);font-size:18px;font-weight:700;color:var(--ink,#15130F);}
     .rc-price small{font-size:11px;font-weight:600;color:var(--text3,#8A857C);}
     .rc-old{font-family:var(--font-en,'DM Sans',sans-serif);font-size:13px;color:var(--text3,#8A857C);text-decoration:line-through;}
+    .rc-disc.rc-promo{background:var(--gold2,#A07828);}
+    .rc-price-promo{color:var(--gold2,#A07828);}
     .rc-cartwrap{margin-top:11px;}
     .rc-cart{width:100%;height:38px;border:1px solid var(--border,#E2DBCC);background:var(--bg2,#EDE8DC);color:var(--ink,#15130F);border-radius:30px;font-family:var(--font-ar,'Tajawal',sans-serif);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
     .rc-cart:hover{background:var(--gold,#C9A84C);color:#1C1606;border-color:var(--gold,#C9A84C);}
@@ -185,17 +187,26 @@
     };
     var imgStyle = p.img ? ' style="background-image:url(\'' + p.img + '\')"' : '';
     var imgInner = p.img ? '' : '<i class="ti ' + (p.ic || 'ti-box') + '"></i>';
+    /* A live promotion is shown to the shopper: struck-through price, the
+       promotional price and the percentage. The answer comes from the
+       marketing authority, so every surface that renders a card shows the
+       same thing without repeating the rule. Coupons are never shown here. */
+    var promo = (window.RAFMarketing && RAFMarketing.displayPrice) ? RAFMarketing.displayPrice(p) : null;
+    var showPromo = !!(promo && promo.promoted);
+    var priceNow = showPromo ? promo.final : p.price;
+    var priceWas = showPromo ? promo.original : p.old;
+    var badgePct = showPromo ? promo.pct : p.disc;
     return '<article class="rc-card' + (isOOS(p) ? ' is-oos' : '') + '" data-id="' + p.id + '" data-href="' + o.href + '" onclick="RAFCard.go(this)">' +
       '<div class="rc-img"' + imgStyle + '>' + imgInner +
         (isOOS(p) ? '<span class="rc-oos-tag"><i class="ti ti-ban"></i> ' + T('نفدت الكمية', 'Sold Out') + '</span>' : '') +
-        (p.disc && !isOOS(p) ? '<span class="rc-disc">-' + p.disc + '%</span>' : '') +
+        (badgePct && !isOOS(p) ? '<span class="rc-disc' + (showPromo ? ' rc-promo' : '') + '">-' + badgePct + '%</span>' : '') +
         (o.wish ? (function(){ var w = (window.RAFShop && RAFShop.Wish.has(p.id)); return '<button class="rc-wish' + (w ? ' on' : '') + '" onclick="RAFCard.wish(event,this)" aria-label="wishlist"><i class="ti ' + (w ? 'ti-heart-filled' : 'ti-heart') + '"></i></button>'; })() : '') +
       '</div>' +
       '<div class="rc-body">' +
         (o.store && p.store ? '<div class="rc-store"><i class="ti ti-building-store"></i> ' + L(p.store) + '</div>' : '') +
         '<div class="rc-name">' + L(p) + '</div>' +
         (o.rating && p.rate ? '<div class="rc-rate"><i class="ti ti-star-filled"></i> ' + p.rate + (p.rev ? ' <span>(' + p.rev + ')</span>' : '') + '</div>' : '') +
-        '<div class="rc-foot"><span class="rc-price">' + p.price + ' <small>' + kwd() + '</small></span>' + (p.old ? '<span class="rc-old">' + p.old + '</span>' : '') + '</div>' +
+        '<div class="rc-foot"><span class="rc-price' + (showPromo ? ' rc-price-promo' : '') + '">' + priceNow + ' <small>' + kwd() + '</small></span>' + (priceWas ? '<span class="rc-old">' + priceWas + '</span>' : '') + '</div>' +
         (o.cart ? '<div class="rc-cartwrap" onclick="event.stopPropagation()">' + cartCtrlHTML(p) + '</div>' : '') +
       '</div></article>';
   }

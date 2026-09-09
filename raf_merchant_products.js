@@ -63,6 +63,8 @@
   }
   function canEdit(userOrId){ return can('products.edit', userOrId); }
   function canView(userOrId){ return can('products.view', userOrId); }
+  /* creation is its own approved permission; it is never inferred from edit */
+  function canCreate(userOrId){ return can('products.create', userOrId); }
   /* products.delete is deliberately NOT surfaced by this module. Deletion,
      soft deletion and any status change to `deleted` are unavailable in this
      phase; product lifecycle will be specified separately. */
@@ -107,13 +109,42 @@
     return isFinite(n) ? n : NaN;
   }
   function validate(productId, patch, userOrId){
+    var S = src();
+    if (!S) return { ok:false, errors:[{ field:'engine', message:T('مصدر البيانات غير متاح','Data source unavailable') }] };
+    var current = S.product(productId);
+    if (!current) return { ok:false, errors:[{ field:'product', message:T('المنتج غير موجود','Product not found') }] };
+    return runRules(current, patch);
+  }
+  /* The SAME rules, applied to a product that does not exist yet. A draft is
+     judged against an empty baseline, so creation and editing can never drift
+     apart: there is one rule body and both callers run it. */
+  function validateNew(draft){
+    var baseline = { price:0, old:null, disc:0, status:STATUS.ACTIVE, cat:'' };
+    /* an empty field is "missing", not "invalid" — reporting both for the same
+       box would tell the merchant off twice for one omission */
+    var present = {};
+    Object.keys(draft).forEach(function (k) {
+      if (draft[k] !== '' && draft[k] !== undefined) present[k] = draft[k];
+    });
+    var r = runRules(baseline, present);
+    var errors = r.errors.slice();
+    function bad(field, ar, en){ errors.push({ field:field, message:T(ar, en) }); }
+    /* on creation these are required rather than optional-if-present */
+    if (!draft.name || !draft.name.ar || !String(draft.name.ar).trim())
+      bad('name.ar','اسم المنتج بالعربية مطلوب','Arabic product name is required');
+    if (!draft.name || !draft.name.en || !String(draft.name.en).trim())
+      bad('name.en','اسم المنتج بالإنجليزية مطلوب','English product name is required');
+    if (draft.price === undefined || draft.price === '')
+      bad('price','السعر مطلوب','Price is required');
+    if (!draft.cat) bad('cat','الفئة مطلوبة','Category is required');
+    /* de-duplicate: runRules may already have flagged the same field */
+    var seen = {}, out = [];
+    errors.forEach(function (e) { var k = e.field+'|'+e.message; if (!seen[k]) { seen[k]=1; out.push(e); } });
+    return { ok: out.length === 0, errors: out };
+  }
+  function runRules(current, patch){
     var errors = [];
     function bad(field, ar, en){ errors.push({ field:field, message:T(ar, en) }); }
-
-    var S = src();
-    if (!S) { bad('engine','مصدر البيانات غير متاح','Data source unavailable'); return { ok:false, errors:errors }; }
-    var current = S.product(productId);
-    if (!current) { bad('product','المنتج غير موجود','Product not found'); return { ok:false, errors:errors }; }
 
     /* name — both languages are displayed to customers, so both are required */
     if (patch.name){
@@ -262,15 +293,111 @@
     return { ok:true, productId:productId, version:stamp, changed:Object.keys(changed) };
   }
 
+  /* ══════════════ CREATE ══════════════
+     The one supported way a product comes into existence.
+
+     The store is resolved from the acting user's own record through
+     RAFPerm, never from anything the caller sends. A caller may therefore
+     ask to create a product, but never to create one somewhere else: a
+     supplied `store` or `storeSlug` is refused outright rather than
+     ignored, so nobody is misled about where their product landed. */
+  var CREATABLE = ['name','desc','price','old','disc','cat','status','sku','barcode','variants','sizeGuide','images','img','ic'];
+
+  function create(productData, opts){
+    opts = opts || {};
+    var actor = opts.actor || null;
+    var who = (actor && actor.id) || null;
+
+    /* 1 — a real, identifiable actor */
+    if (!who) {
+      return { ok:false, code:'FORBIDDEN',
+               errors:[{ field:'permission', message:T('لا تملك صلاحية إضافة منتجات','You do not have permission to add products') }] };
+    }
+    if (global.RAFPerm && !RAFPerm.getUser(who)) {
+      return { ok:false, code:'FORBIDDEN',
+               errors:[{ field:'permission', message:T('الحساب غير معروف','Unknown account') }] };
+    }
+    /* 2 — the approved creation permission, checked in the engine */
+    if (!canCreate(who)) {
+      return { ok:false, code:'FORBIDDEN',
+               errors:[{ field:'permission', message:T('لا تملك صلاحية إضافة منتجات','You do not have permission to add products') }] };
+    }
+    /* 3 — the store comes from the account, and only from the account */
+    var slug = merchantSlug(who);
+    if (!slug) {
+      return { ok:false, code:'NO_STORE',
+               errors:[{ field:'store', message:T('لا يوجد متجر مرتبط بهذا الحساب','This account is not linked to a store') }] };
+    }
+    var data = productData || {};
+    if (data.store !== undefined || data.storeSlug !== undefined || data.id !== undefined) {
+      return { ok:false, code:'FIELD_NOT_ACCEPTED', fields:['store','storeSlug','id'],
+               errors:[{ field:'store',
+                         message:T('المتجر ومعرّف المنتج يُحدَّدان تلقائياً','Store and product id are assigned automatically') }] };
+    }
+    /* 4 — only known fields ever reach the catalogue */
+    var clean = {};
+    CREATABLE.forEach(function (k) { if (data[k] !== undefined) clean[k] = data[k]; });
+    /* stock is never accepted here: inventory is its own authority and its
+       own workspace, exactly as in update() */
+    if (data.stock !== undefined) {
+      return { ok:false, code:'INVALID',
+               errors:[{ field:'stock', message:T('لا يمكن تحديد الكمية أثناء إنشاء المنتج',
+                                                  'Stock quantity is not set while creating a product') }] };
+    }
+    if (clean.status === undefined) clean.status = STATUS.ACTIVE;
+
+    /* 5 — the shared rules. `stock` is not part of the draft, and the shared
+       rules reject it, so the baseline below is applied only after validation. */
+    var v = validateNew(clean);
+    if (!v.ok) return { ok:false, code:'INVALID', errors:v.errors };
+
+    /* A new product owns no units yet. Zero is the empty baseline, not an
+       invented quantity: it keeps the product in the valid minimal state the
+       inventory authority already understands, and the merchant sets real
+       quantities afterwards in Products → Inventory. Without it the product
+       would read as "no inventory record" and be unusable on both sides. */
+    clean.stock = 0;
+
+    /* 6 — persist through the catalogue authority, which owns the identity */
+    var S = src();
+    if (!S || !S.addProduct) {
+      return { ok:false, code:'ENGINE_UNAVAILABLE',
+               errors:[{ field:'engine', message:T('تعذّر إنشاء المنتج','The product could not be created') }] };
+    }
+    clean.store = slug;
+    var stamp = Date.now();
+    clean.updatedAt = stamp;
+    var res = S.addProduct(clean);
+    if (!res.ok) {
+      return { ok:false, code:res.code || 'WRITE_FAILED',
+               errors:[{ field:'engine', message:T('تعذّر إنشاء المنتج','The product could not be created') }] };
+    }
+
+    try { document.dispatchEvent(new CustomEvent('raf:source')); } catch (e) {}
+
+    /* 7 — audit the successful creation only, after it is readable */
+    if (global.RAFAudit) {
+      try {
+        RAFAudit.record({
+          action:'product.created', storeSlug:slug,
+          actor:actor, source:'merchant', key:res.id + ':' + stamp,
+          reason:opts.reason || 'merchant_create',
+          metadata:{ productId:res.id, fields:Object.keys(clean) }
+        });
+      } catch (e) {}
+    }
+    return { ok:true, productId:res.id, version:stamp, product:res.product };
+  }
+
   global.RAFMerchantProducts = {
     STATUS: STATUS, EDITABLE: EDITABLE, READ_ONLY: READ_ONLY, currency: currency,
     /* scope */
     merchantSlug: merchantSlug, productSlug: productSlug, owns: owns,
     /* permission — no delete capability is exposed */
-    canView: canView, canEdit: canEdit,
+    canView: canView, canEdit: canEdit, canCreate: canCreate,
     /* read */
     list: list, get: get, categories: categories, versionOf: versionOf,
     /* write */
-    validate: validate, update: update
+    validate: validate, validateNew: validateNew, update: update, create: create
   };
 })(window);

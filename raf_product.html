@@ -121,6 +121,7 @@
   .pprice-n{font-family:var(--font-en);font-size:34px;font-weight:800;color:var(--ink);line-height:1;}
   .pprice-c{font-size:13px;font-weight:700;color:var(--text3);}
   .pprice-o{font-family:var(--font-en);font-size:15px;color:var(--text3);text-decoration:line-through;}
+  .pprice-n.is-promo{color:var(--gold2);}
   .pprice-save{background:var(--green-bg);color:var(--green);font-size:12.5px;font-weight:800;padding:7px 13px;border-radius:30px;}
 
   .opt{margin-top:26px;}
@@ -493,6 +494,7 @@
 <script src="raf_catalog.js"></script>
 <script src="raf_inventory.js"></script>
 <script src="raf_rules.js"></script>
+<script src="raf_marketing.js"></script>
 <script src="raf_swipe.js"></script>
 <script src="raf_sizeguide.js"></script>
 <script src="raf_card.js"></script>
@@ -818,16 +820,37 @@ function render(){
   document.getElementById('pReviews').textContent = T(P.reviews + ' تقييم', P.reviews + ' review' + (P.reviews === 1 ? '' : 's'));
   document.getElementById('pSales').textContent = T(P.sales + ' مبيعة', P.sales + ' sold');
 
-  /* price */
-  document.getElementById('pPrice').textContent = P.price;
+  /* price — a live promotion is shown to the shopper: the current price
+     struck through, the promotional price, and the offer's own name. The
+     answer comes from the marketing authority, never from a local rule. */
+  var promo = (window.RAFMarketing && RAFMarketing.displayPrice)
+    ? RAFMarketing.displayPrice({ id:PID, price:P.price, slug:P.storeSlug }) : null;
+  var showPromo = !!(promo && promo.promoted);
+
+  document.getElementById('pPrice').textContent = showPromo ? promo.final : P.price;
+  document.getElementById('pPrice').classList.toggle('is-promo', showPromo);
   var old = document.getElementById('pOld');
-  if (P.oldPrice){ old.textContent = P.oldPrice; old.style.display = ''; } else old.style.display = 'none';
+  var wasPrice = showPromo ? promo.original : P.oldPrice;
+  if (wasPrice){ old.textContent = wasPrice; old.style.display = ''; } else old.style.display = 'none';
+
   var save = document.getElementById('pSave');
-  if (P.oldPrice){
+  if (showPromo){
+    var pd = parseFloat(promo.original) - parseFloat(promo.final);
+    save.innerHTML = '<i class="ti ti-rosette-discount"></i> '
+      + T('عرض ' + promo.pct + '% — وفّرت ' + money(pd) + ' د.ك',
+          promo.pct + '% off — you save ' + money(pd) + ' KWD')
+      + (promo.name ? ' · ' + L(promo.name) : '');
+    save.style.display = '';
+  } else if (P.oldPrice && parseFloat(P.oldPrice) > parseFloat(P.price)){
+    /* only a genuine saving is announced — an old price at or below the
+       current one would otherwise read as a negative "you save" */
     var d = parseFloat(P.oldPrice) - parseFloat(P.price);
     save.textContent = T('وفّرت ' + money(d) + ' د.ك', 'You save ' + money(d) + ' KWD');
     save.style.display = '';
   } else save.style.display = 'none';
+
+  /* the total in the sticky bar follows the promotional price too */
+  window.__unitPrice = showPromo ? parseFloat(promo.final) : parseFloat(P.price);
 
   renderOptions();
   renderStock();
@@ -1022,7 +1045,8 @@ function syncQtyBtns(){
   document.getElementById('qtyPlus').disabled = isOOS() || max <= 0 || q >= max;
 }
 function updateTotal(){
-  document.getElementById('sbTotal').textContent = money(parseFloat(P.price) * qtyVal());
+  var unit = window.__unitPrice != null ? window.__unitPrice : parseFloat(P.price);
+  document.getElementById('sbTotal').textContent = money(unit * qtyVal());
 }
 
 /* tabs content */

@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — التسويق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   MARKETING CENTER — same shell, tokens and interaction model as the
+   approved Orders and Products workspaces. Nothing here redefines the
+   design language.
+   ══════════════════════════════════════════════════════════════ */
+*{box-sizing:border-box;}
+body{background:var(--bg2);margin:0;}
+.mw{display:flex;min-height:100vh;}
+.mw-rail{width:74px;flex:0 0 74px;background:var(--ink);display:flex;flex-direction:column;align-items:center;
+  gap:6px;padding:14px 0;position:sticky;top:0;height:100vh;z-index:40;}
+.mw-rail-logo{width:44px;height:44px;min-height:44px;border-radius:13px;background:var(--gold);color:#1C1606;display:flex;
+  align-items:center;justify-content:center;font-family:var(--font-display);font-size:19px;font-weight:900;
+  margin-bottom:10px;text-decoration:none;}
+.mw-rail-b{width:50px;min-height:50px;border-radius:14px;border:0;background:transparent;color:#8E877A;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;
+  font-family:inherit;font-size:9.5px;font-weight:700;text-decoration:none;transition:background .18s,color .18s;}
+.mw-rail-b i{font-size:21px;}
+.mw-rail-b:hover{background:rgba(255,255,255,.07);color:#EDE8DC;}
+.mw-rail-b.on{background:var(--gold-soft);color:var(--gold);}
+.mw-rail-sp{flex:1;}
+.mw-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+.mw-head{position:sticky;top:0;z-index:35;background:var(--card);border-bottom:1px solid var(--border);
+  padding:12px clamp(14px,2.2vw,24px);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.mw-store{display:flex;align-items:center;gap:11px;min-width:0;}
+.mw-store-logo{width:44px;height:44px;flex:0 0 auto;border-radius:13px;background:var(--bg3) center/cover no-repeat;
+  display:flex;align-items:center;justify-content:center;color:var(--gold2);font-size:21px;}
+.mw-store-t b{display:block;font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--ink);}
+.mw-store-t span{font-size:11.5px;color:var(--text3);}
+.mw-head-sp{flex:1;min-width:8px;}
+.mw-hact{display:flex;align-items:center;gap:8px;}
+.mw-ico-b{width:44px;height:44px;flex:0 0 auto;border-radius:13px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-size:18px;cursor:pointer;display:inline-flex;
+  align-items:center;justify-content:center;font-family:inherit;font-weight:800;transition:all .18s;}
+.mw-hact .mw-ico-b{min-height:44px;}
+.mw-ico-b:hover{border-color:var(--gold);color:var(--gold2);}
+.mw-ico-b.lang{width:auto;padding:0 14px;font-size:12.5px;}
+.mk-add{min-height:44px;padding:0 17px;border-radius:13px;border:1px solid var(--gold2);background:var(--gold);
+  color:#1C1606;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;display:inline-flex;
+  align-items:center;gap:7px;transition:filter .18s;}
+.mw-hact .mk-add{min-height:44px;}
+.mk-add:hover{filter:brightness(1.05);}
+
+.mw-body{padding:16px clamp(14px,2.2vw,24px) 60px;}
+
+/* ---------- summary ---------- */
+.mk-sum{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:14px;}
+.mk-sum-c{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 13px;
+  text-align:start;min-height:66px;}
+.mk-sum-n{display:block;font-family:var(--font-en);font-size:21px;font-weight:800;color:var(--ink);line-height:1.2;}
+.mk-sum-l{display:block;font-size:11.5px;font-weight:700;color:var(--text3);margin-top:2px;}
+.mk-sum-c.warn .mk-sum-n{color:#C8791E;}
+
+/* ---------- tabs ---------- */
+.mk-tabs{display:inline-flex;border:1px solid var(--border2);border-radius:14px;overflow:hidden;
+  background:var(--card);margin-bottom:14px;}
+/* the theme's `html:not([data-ui]) button` rule is (0,1,2); every touch
+   target below is scoped with two classes so 44px+ actually wins */
+.mw-body .mk-tabs button{min-height:46px;}
+.mk-card .mk-acts button{min-height:44px;}
+.mk-modal-c .mk-pick button{min-height:44px;}
+.mk-tabs button{min-height:46px;padding:0 20px;border:0;background:transparent;color:var(--text2);
+  font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;transition:all .18s;}
+.mk-tabs button[aria-selected="true"]{background:var(--ink);color:#F5F0E4;}
+
+/* ---------- toolbar ---------- */
+.mk-bar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:16px;}
+.mk-search{position:relative;flex:1 1 240px;max-width:380px;}
+.mk-search input{width:100%;min-height:44px;border-radius:13px;border:1px solid var(--border2);background:var(--card);
+  font-family:inherit;font-size:13.5px;color:var(--ink);padding-inline-start:42px;padding-inline-end:13px;}
+.mk-search input:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+.mk-search > i{position:absolute;top:50%;transform:translateY(-50%);inset-inline-start:14px;font-size:18px;
+  color:var(--text3);pointer-events:none;}
+.mk-sel{position:relative;flex:0 0 auto;}
+.mk-sel select{min-height:44px;border-radius:13px;border:1px solid var(--border2);background:var(--card);
+  font-family:inherit;font-size:12.5px;font-weight:700;color:var(--text2);padding:0 34px 0 13px;cursor:pointer;
+  appearance:none;-webkit-appearance:none;}
+html[dir="rtl"] .mk-sel select{padding:0 13px 0 34px;}
+.mk-sel select.on{border-color:var(--gold);background:var(--gold-soft);color:var(--gold2);}
+.mk-sel > i{position:absolute;top:50%;transform:translateY(-50%);inset-inline-end:12px;font-size:15px;
+  color:var(--text3);pointer-events:none;}
+
+/* ---------- sections ---------- */
+.mk-sec{margin-bottom:26px;}
+.mk-sec-h{display:flex;align-items:center;gap:9px;margin-bottom:11px;}
+.mk-sec-h i{color:var(--gold2);font-size:18px;}
+.mk-sec-h b{font-size:14.5px;font-weight:800;color:var(--ink);}
+.mk-sec-h span{font-size:12px;font-weight:700;color:var(--text3);background:var(--bg3);border-radius:20px;padding:3px 10px;}
+
+.mk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
+.mk-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;
+  display:flex;flex-direction:column;gap:10px;transition:border-color .18s;}
+.mk-card:hover{border-color:var(--gold);}
+.mk-card-h{display:flex;align-items:flex-start;gap:10px;}
+.mk-card-h .t{flex:1;min-width:0;}
+.mk-card-h b{display:block;font-size:14px;font-weight:800;color:var(--ink);line-height:1.45;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mk-card-h em{display:block;font-style:normal;font-size:11.5px;color:var(--text3);margin-top:2px;}
+.mk-code{font-family:var(--font-en);font-size:15px;font-weight:800;letter-spacing:1px;color:var(--gold2);
+  background:var(--gold-soft);border:1px dashed var(--gold);border-radius:10px;padding:7px 12px;
+  display:inline-flex;align-items:center;gap:7px;}
+.mk-state{display:inline-flex;align-items:center;gap:5px;height:25px;padding:0 10px;border-radius:20px;
+  font-size:11px;font-weight:800;flex:0 0 auto;}
+.mk-state.active   {background:rgba(46,158,91,.14);color:#1F7A45;}
+.mk-state.scheduled{background:rgba(21,19,15,.09);color:var(--text2);}
+.mk-state.expired  {background:rgba(217,83,79,.13);color:#A63A36;}
+.mk-state.disabled {background:var(--bg3);color:var(--text3);}
+.mk-state.draft    {background:var(--bg3);color:var(--text3);}
+.mk-rows{display:flex;flex-direction:column;gap:6px;}
+.mk-row{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2);}
+.mk-row i{font-size:15px;color:var(--text3);flex:0 0 auto;}
+.mk-row b{color:var(--ink);font-weight:700;}
+.mk-soon{font-size:11.5px;font-weight:800;color:#9A5B12;}
+.mk-acts{display:flex;gap:8px;margin-top:2px;}
+.mk-acts button{min-height:44px;padding:0 14px;border-radius:12px;font-family:inherit;font-size:12.5px;
+  font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  border:1px solid var(--border2);background:var(--card);color:var(--text2);transition:all .18s;}
+.mk-acts button:hover:not(:disabled){border-color:var(--gold);background:var(--gold-soft);color:var(--gold2);}
+.mk-acts button:disabled{opacity:.45;cursor:not-allowed;}
+.mk-acts .grow{flex:1;}
+.mk-adthumb{width:100%;aspect-ratio:16/7;border-radius:12px;background:var(--bg3) center/cover no-repeat;
+  display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:26px;}
+
+.mk-empty{border:1px dashed var(--border2);border-radius:16px;padding:30px 22px;text-align:center;
+  background:var(--card);grid-column:1/-1;}
+.mk-empty i{font-size:32px;color:var(--text3);display:block;margin-bottom:9px;}
+.mk-empty b{display:block;font-size:14px;font-weight:800;color:var(--ink);margin-bottom:4px;}
+.mk-empty span{display:block;font-size:12.5px;color:var(--text3);line-height:1.7;max-width:400px;margin:0 auto;}
+.mk-empty button{margin-top:12px;min-height:44px;padding:0 17px;border-radius:30px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;}
+.mk-empty button:hover{border-color:var(--gold);color:var(--gold2);}
+
+/* ---------- Add New selector ---------- */
+.mk-modal{position:fixed;inset:0;z-index:95;display:none;align-items:center;justify-content:center;
+  padding:20px;background:rgba(20,16,8,.5);}
+.mk-modal.show{display:flex;}
+.mk-modal-c{width:100%;max-width:560px;max-height:92vh;overflow:auto;background:var(--card);
+  border:1px solid var(--border);border-radius:20px;padding:22px;}
+.mk-modal-h{display:flex;align-items:flex-start;gap:11px;margin-bottom:18px;}
+.mk-modal-h .t{flex:1;min-width:0;}
+.mk-modal-h h3{font-family:var(--font-display);font-size:19px;font-weight:800;color:var(--ink);}
+.mk-modal-h p{font-size:12.5px;color:var(--text3);margin-top:3px;line-height:1.6;}
+.mk-pick{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.mk-pick button{display:flex;align-items:flex-start;gap:11px;text-align:start;padding:14px;min-height:44px;
+  border-radius:14px;border:1px solid var(--border2);background:var(--card);cursor:pointer;
+  font-family:inherit;transition:all .18s;}
+.mk-pick button:hover:not(:disabled){border-color:var(--gold);background:var(--gold-soft);}
+.mk-pick button:disabled{opacity:.6;cursor:not-allowed;background:var(--bg);}
+.mk-pick .ic{width:38px;height:38px;flex:0 0 auto;border-radius:11px;background:var(--bg3);color:var(--gold2);
+  display:inline-flex;align-items:center;justify-content:center;font-size:19px;}
+.mk-pick .tx{min-width:0;}
+.mk-pick b{display:block;font-size:13.5px;font-weight:800;color:var(--ink);}
+.mk-pick span{display:block;font-size:11.5px;color:var(--text3);line-height:1.55;margin-top:2px;}
+.mk-pick .soon{display:inline-block;margin-top:5px;font-size:10.5px;font-weight:800;color:#9A5B12;
+  background:rgba(200,121,30,.12);border-radius:20px;padding:2px 8px;}
+
+/* ---------- form drawer ---------- */
+.mk-dr{position:fixed;inset:0;z-index:96;display:none;background:rgba(20,16,8,.5);}
+.mk-dr.show{display:block;}
+.mk-dr-c{position:absolute;inset-block:0;inset-inline-end:0;width:min(560px,100%);background:var(--card);
+  display:flex;flex-direction:column;border-inline-start:1px solid var(--border);}
+.mk-dr-h{display:flex;align-items:flex-start;gap:11px;padding:16px 20px;border-bottom:1px solid var(--border);}
+.mk-dr-h .t{flex:1;min-width:0;}
+.mk-dr-h h3{font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--ink);}
+.mk-dr-h .sub{font-size:11.5px;color:var(--text3);margin-top:3px;}
+.mk-dr-x{width:44px;height:44px;min-height:44px;flex:0 0 auto;border-radius:12px;border:1px solid var(--border);
+  background:var(--card);color:var(--text2);font-size:18px;cursor:pointer;}
+.mk-dr-b{flex:1;overflow:auto;padding:18px 20px;}
+.mk-dr-f{display:flex;gap:10px;padding:12px 20px calc(12px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid var(--border);background:var(--card);}
+.mk-dr-f button{flex:1;min-height:50px;border-radius:30px;font-family:inherit;font-size:14.5px;font-weight:800;
+  cursor:pointer;border:1px solid transparent;}
+.mk-dr .mk-dr-f button{min-height:50px;}
+.mk-ghost{background:var(--card);color:var(--text2);border-color:var(--border2);}
+.mk-gold{background:var(--gold);color:#1C1606;border-color:var(--gold2);}
+.mk-gold:disabled{opacity:.55;cursor:progress;}
+
+.mk-f{margin-bottom:14px;}
+.mk-f label{display:block;font-size:12.5px;font-weight:700;color:var(--text2);margin-bottom:6px;}
+.mk-f input,.mk-f textarea,.mk-f select{width:100%;min-height:48px;border-radius:12px;border:1px solid var(--border2);
+  background:var(--card);font-family:inherit;font-size:14px;color:var(--ink);padding:12px 14px;}
+.mk-f textarea{min-height:84px;resize:vertical;line-height:1.7;}
+.mk-f input:focus,.mk-f textarea:focus,.mk-f select:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+.mk-f .note{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.6;}
+.mk-two{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.mk-en{font-family:var(--font-en);}
+.mk-err{background:rgba(217,83,79,.1);border:1px solid rgba(217,83,79,.34);border-radius:12px;
+  padding:11px 13px;margin-bottom:16px;font-size:12.5px;color:#A63A36;line-height:1.7;display:none;}
+.mk-err.show{display:block;}
+.mk-err ul{margin:6px 0 0;padding-inline-start:18px;}
+/* product selector */
+.mk-psel{border:1px solid var(--border2);border-radius:13px;overflow:hidden;background:var(--card);}
+.mk-psel-h{display:flex;align-items:center;gap:9px;padding:9px;border-bottom:1px solid var(--border);background:var(--bg);}
+.mk-psel-h input{flex:1;min-width:0;min-height:44px;border-radius:11px;border:1px solid var(--border2);
+  background:var(--card);font-family:inherit;font-size:13px;color:var(--ink);padding:0 12px;}
+.mk-psel-n{flex:0 0 auto;font-size:11.5px;font-weight:800;color:var(--gold2);background:var(--gold-soft);
+  border-radius:20px;padding:5px 10px;white-space:nowrap;}
+.mk-psel-list{max-height:290px;overflow:auto;}
+.mk-psel-none{padding:20px;text-align:center;font-size:12.5px;color:var(--text3);}
+.mk-prow{display:flex;align-items:center;gap:10px;width:100%;min-height:56px;padding:8px 11px;border:0;
+  border-bottom:1px solid var(--border);background:var(--card);cursor:pointer;font-family:inherit;text-align:start;}
+.mk-psel-list .mk-prow{min-height:56px;}
+.mk-prow:last-child{border-bottom:0;}
+.mk-prow:hover{background:var(--bg);}
+.mk-prow[aria-pressed="true"]{background:var(--gold-soft);}
+.mk-prow .tick{width:22px;height:22px;flex:0 0 auto;border-radius:7px;border:1.5px solid var(--border2);
+  display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:transparent;background:var(--card);}
+.mk-prow[aria-pressed="true"] .tick{background:var(--gold2);border-color:var(--gold2);color:#fff;}
+.mk-prow .th{width:38px;height:38px;flex:0 0 auto;border-radius:10px;background:var(--bg3) center/cover no-repeat;
+  display:inline-flex;align-items:center;justify-content:center;color:var(--text3);font-size:17px;}
+.mk-prow .nm{min-width:0;flex:1;}
+.mk-prow .nm b{display:block;font-size:13px;font-weight:700;color:var(--ink);overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;}
+.mk-prow .nm em{display:block;font-style:normal;font-size:11px;color:var(--text3);margin-top:2px;}
+.mk-prev{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:13px;margin-bottom:16px;}
+.mk-prev-h{font-size:11px;font-weight:800;color:var(--text3);letter-spacing:.4px;text-transform:uppercase;margin-bottom:9px;}
+
+.mw-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;}
+.mw-gate-c{max-width:420px;text-align:center;}
+.mw-gate-c i{font-size:40px;color:var(--text3);}
+.mw-gate-c h1{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--ink);margin:12px 0 8px;}
+.mw-gate-c p{font-size:13px;color:var(--text2);line-height:1.8;}
+
+.mw-toast{position:fixed;inset-inline:0;bottom:26px;display:flex;justify-content:center;z-index:120;
+  pointer-events:none;opacity:0;transform:translateY(10px);transition:opacity .22s,transform .22s;}
+.mw-toast.show{opacity:1;transform:none;}
+.mw-toast > div{background:var(--ink);color:#F5F0E4;border-radius:30px;padding:12px 20px;font-size:13.5px;
+  font-weight:700;box-shadow:0 14px 30px -14px rgba(20,16,8,.6);max-width:90vw;text-align:center;}
+
+@media (max-width:900px){
+  .mk-sum{grid-template-columns:repeat(4,minmax(112px,1fr));overflow-x:auto;scrollbar-width:none;padding-bottom:4px;}
+  .mk-sum::-webkit-scrollbar{display:none;}
+  .mk-sum-c{min-width:112px;}
+}
+@media (max-width:760px){
+  .mk-search{flex:1 1 100%;max-width:none;}
+  .mk-sel{flex:1 1 calc(50% - 5px);}
+  .mk-sel select{width:100%;}
+  .mk-pick{grid-template-columns:1fr;}
+  .mk-two{grid-template-columns:1fr;}
+  .mk-dr-c{width:100%;border-inline-start:0;}
+}
+@media (max-width:560px){
+  .mw-rail{position:fixed;bottom:0;top:auto;width:100%;height:auto;flex-direction:row;justify-content:space-around;
+    padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));}
+  .mw-rail-logo,.mw-rail-sp{display:none;}
+  .mw{flex-direction:column;}
+  .mw-body{padding-bottom:90px;}
+}
+</style>
+</head>
+<body>
+
+<div class="mw-gate" id="gate" style="display:none;">
+  <div class="mw-gate-c"><i class="ti ti-speakerphone"></i>
+    <h1 id="gateT"></h1><p id="gateP"></p></div>
+</div>
+
+<div class="mw" id="shell" style="display:none;">
+  <aside class="mw-rail">
+    <a class="mw-rail-logo" href="raf_homepage.html" aria-label="RAF">رف</a>
+    <a class="mw-rail-b" href="raf_merchant.html"><i class="ti ti-clipboard-list"></i><span data-ar="الطلبات" data-en="Orders">الطلبات</span></a>
+    <a class="mw-rail-b" href="raf_merchant_products.html"><i class="ti ti-package"></i><span data-ar="المنتجات" data-en="Products">المنتجات</span></a>
+    <a class="mw-rail-b on" href="raf_marketing.html" aria-current="page"><i class="ti ti-speakerphone"></i><span data-ar="التسويق" data-en="Marketing">التسويق</span></a>
+    <div class="mw-rail-sp"></div>
+  </aside>
+
+  <div class="mw-main">
+    <header class="mw-head">
+      <div class="mw-store">
+        <div class="mw-store-logo" id="stLogo"><i class="ti ti-building-store"></i></div>
+        <div class="mw-store-t"><b id="stName">—</b>
+          <span data-ar="مركز التسويق" data-en="Marketing Center">مركز التسويق</span></div>
+      </div>
+      <div class="mw-head-sp"></div>
+      <div class="mw-hact">
+        <button class="mk-add" id="addBtn" onclick="openPicker()" style="display:none">
+          <i class="ti ti-plus"></i> <span data-ar="إضافة جديد" data-en="Add New">إضافة جديد</span></button>
+        <button class="mw-ico-b" onclick="refreshAll()" aria-label="refresh"><i class="ti ti-refresh"></i></button>
+        <button class="mw-ico-b lang" onclick="toggleLang()"><span id="langLabel">EN</span></button>
+      </div>
+    </header>
+
+    <div class="mw-body">
+      <div class="mk-sum" id="summary"></div>
+
+      <div class="mk-tabs" role="tablist">
+        <button id="tabCurrent" role="tab" aria-selected="true" onclick="setTab('current')"
+                data-ar="الحالية" data-en="Current">الحالية</button>
+        <button id="tabHistory" role="tab" aria-selected="false" onclick="setTab('history')"
+                data-ar="السجل" data-en="History">السجل</button>
+      </div>
+
+      <div class="mk-bar">
+        <div class="mk-search">
+          <i class="ti ti-search"></i>
+          <input id="q" type="search" autocomplete="off" oninput="render()"
+                 data-ar-ph="ابحث بالاسم أو الرمز…" data-en-ph="Search by name or code…" placeholder="ابحث بالاسم أو الرمز…">
+        </div>
+        <div class="mk-sel"><select id="fKind" onchange="setKind(this.value)"></select><i class="ti ti-chevron-down"></i></div>
+        <div class="mk-sel" id="statusWrap"><select id="fStatus" onchange="setStatus(this.value)"></select><i class="ti ti-chevron-down"></i></div>
+      </div>
+
+      <div id="board"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD NEW — the merchant chooses what to create before any form opens -->
+<div class="mk-modal" id="picker" role="dialog" aria-modal="true" aria-labelledby="pickerT">
+  <div class="mk-modal-c">
+    <div class="mk-modal-h">
+      <div class="t">
+        <h3 id="pickerT" data-ar="ما الذي تريد إنشاءه؟" data-en="What would you like to create?">ما الذي تريد إنشاءه؟</h3>
+        <p data-ar="اختر النوع وسيفتح النموذج المناسب." data-en="Pick a type and the right form opens.">اختر النوع وسيفتح النموذج المناسب.</p>
+      </div>
+      <button class="mk-dr-x" onclick="closePicker()" aria-label="close"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="mk-pick" id="pickList"></div>
+  </div>
+</div>
+
+<!-- CREATE / EDIT — one drawer, the form inside adapts to the type -->
+<div class="mk-dr" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drTitle">
+  <div class="mk-dr-c">
+    <div class="mk-dr-h">
+      <div class="t"><h3 id="drTitle">—</h3><div class="sub" id="drSub"></div></div>
+      <button class="mk-dr-x" onclick="closeDrawer()" aria-label="close"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="mk-dr-b" id="drBody"></div>
+    <div class="mk-dr-f">
+      <button class="mk-ghost" onclick="closeDrawer()" data-ar="إلغاء" data-en="Cancel">إلغاء</button>
+      <button class="mk-gold" id="drSave" onclick="saveDrawer()" data-ar="حفظ" data-en="Save">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<div class="mw-toast" id="toast"><div id="toastMsg"></div></div>
+
+<script src="raf_features.js"></script>
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_marketing.js"></script>
+<script>
+/* ============================================================
+   MARKETING CENTER
+   The page renders and collects input. Every write goes through
+   RAFMarketing, which owns permission, ownership, validation,
+   status and audit. This file never persists anything itself.
+   ============================================================ */
+(function(){
+  'use strict';
+  var MK = window.RAFMarketing;
+  var STORE = null, SLUG = null, ME = null;
+  var tab = 'current', fKind = 'all', fStatus = 'all';
+  var draft = null, editingId = null, busy = false;
+
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function L(o){ return (o && typeof o==='object') ? (isEn()?(o.en||o.ar):(o.ar||o.en)) : (o||''); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function el(id){ return document.getElementById(id); }
+
+  var KIND_OPTS = [
+    { k:'all',       ar:'كل الأنواع', en:'All types' },
+    { k:'promotion', ar:'العروض',     en:'Promotions' },
+    { k:'coupon',    ar:'الكوبونات',  en:'Coupons' },
+    { k:'ad',        ar:'الإعلانات',  en:'Advertisements' }
+  ];
+  var STATUS_OPTS = [
+    { k:'all',       ar:'كل الحالات', en:'All statuses' },
+    { k:'active',    ar:'نشط',        en:'Active' },
+    { k:'scheduled', ar:'مجدول',      en:'Scheduled' },
+    { k:'disabled',  ar:'موقوف',      en:'Disabled' }
+  ];
+  function statusLabel(s){
+    return s==='active'?T('نشط','Active')
+         : s==='scheduled'?T('مجدول','Scheduled')
+         : s==='expired'?T('منتهي','Expired')
+         : s==='disabled'?T('موقوف','Disabled')
+         : T('مسودة','Draft');
+  }
+
+  /* ---------- data ---------- */
+  function allRecords(){
+    var d = MK.listFor(SLUG);
+    return d.promotions.concat(d.coupons).concat(d.ads);
+  }
+  function matches(r, q){
+    if (!q) return true;
+    q = q.trim().toLowerCase();
+    var hay = [ (r.code||''), L(r.name||r.title||{}), (r.name&&r.name.ar)||'', (r.name&&r.name.en)||'',
+                (r.title&&r.title.ar)||'', (r.title&&r.title.en)||'' ].join(' ').toLowerCase();
+    return hay.indexOf(q) > -1;
+  }
+  function visible(){
+    var q = (el('q')||{}).value || '';
+    return allRecords().filter(function(r){
+      var hist = r.status === MK.STATUS.EXPIRED;
+      if (tab === 'history' ? !hist : hist) return false;
+      if (fKind !== 'all' && r.kind !== fKind) return false;
+      if (tab === 'current' && fStatus !== 'all' && r.status !== fStatus) return false;
+      return matches(r, q);
+    });
+  }
+
+  /* ---------- summary ---------- */
+  function renderSummary(){
+    var all = allRecords();
+    var s = { active:0, scheduled:0, soon:0, history:0 };
+    all.forEach(function(r){
+      if (r.status === MK.STATUS.ACTIVE) s.active++;
+      else if (r.status === MK.STATUS.SCHEDULED) s.scheduled++;
+      else if (r.status === MK.STATUS.EXPIRED) s.history++;
+      if (r.expiringSoon) s.soon++;
+    });
+    var rows = [
+      { n:s.active,    ar:'نشط',          en:'Active',        cls:'' },
+      { n:s.scheduled, ar:'مجدول',        en:'Scheduled',     cls:'' },
+      { n:s.soon,      ar:'ينتهي قريباً',  en:'Expiring soon', cls:'warn' },
+      { n:s.history,   ar:'في السجل',      en:'In history',    cls:'' }
+    ];
+    el('summary').innerHTML = rows.map(function(r){
+      return '<div class="mk-sum-c '+r.cls+'"><span class="mk-sum-n">'+r.n+'</span>'
+        + '<span class="mk-sum-l">'+T(r.ar,r.en)+'</span></div>';
+    }).join('');
+  }
+
+  function opt(list, cur){
+    return list.map(function(o){
+      return '<option value="'+o.k+'"'+(cur===o.k?' selected':'')+'>'+esc(T(o.ar,o.en))+'</option>';
+    }).join('');
+  }
+  function renderToolbar(){
+    el('fKind').innerHTML = opt(KIND_OPTS, fKind);
+    el('fKind').classList.toggle('on', fKind!=='all');
+    el('fStatus').innerHTML = opt(STATUS_OPTS, fStatus);
+    el('fStatus').classList.toggle('on', fStatus!=='all');
+    /* history is one state by definition — a status filter there would be noise */
+    el('statusWrap').style.display = tab === 'history' ? 'none' : '';
+    el('tabCurrent').setAttribute('aria-selected', tab==='current'?'true':'false');
+    el('tabHistory').setAttribute('aria-selected', tab==='history'?'true':'false');
+  }
+
+  window.setTab = function(t){ tab = t; render(); };
+  window.setKind = function(v){ fKind = v; render(); };
+  window.setStatus = function(v){ fStatus = v; render(); };
+  window.refreshAll = function(){ render(); toast(T('تم التحديث','Refreshed')); };
+
+  /* ---------- cards ---------- */
+  function fmtDate(d){
+    if (!d) return '—';
+    var p = d.split('-');
+    var mAr = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+    var mEn = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var i = parseInt(p[1],10)-1;
+    return parseInt(p[2],10) + ' ' + (isEn()?mEn[i]:mAr[i]) + ' ' + p[0];
+  }
+  function couponCard(c){
+    var canAct = MK.canEdit(ME) && c.status !== MK.STATUS.EXPIRED;
+    return '<article class="mk-card">'
+      + '<div class="mk-card-h"><div class="t"><b>'+esc(L(c.name))+'</b>'
+        + '<em>'+T('كوبون','Coupon')+' · '+T('خصم','Discount')+' '+c.value+'%</em></div>'
+        + '<span class="mk-state '+c.status+'">'+statusLabel(c.status)+'</span></div>'
+      + '<div><span class="mk-code"><i class="ti ti-ticket"></i>'+esc(c.code)+'</span></div>'
+      + '<div class="mk-rows">'
+        + '<div class="mk-row"><i class="ti ti-calendar"></i><span>'+fmtDate(c.startDate)+' — '+fmtDate(c.endDate)+'</span></div>'
+        + (c.expiringSoon ? '<div class="mk-row"><i class="ti ti-clock-exclamation"></i><span class="mk-soon">'
+            + T('ينتهي خلال '+c.daysLeft+' يوم','Ends in '+c.daysLeft+' day'+(c.daysLeft===1?'':'s'))+'</span></div>' : '')
+      + '</div>'
+      + (c.status === MK.STATUS.EXPIRED ? ''
+        : '<div class="mk-acts">'
+          + '<button class="grow" onclick="openEdit(\''+esc(c.id)+'\')"'+(canAct?'':' disabled')+'>'
+            + '<i class="ti ti-pencil"></i> '+T('تعديل','Edit')+'</button>'
+          + '<button onclick="toggleEnabled(\''+esc(c.id)+'\','+(c.enabled?'false':'true')+')"'+(canAct?'':' disabled')+'>'
+            + '<i class="ti ti-'+(c.enabled?'ban':'circle-check')+'"></i> '
+            + (c.enabled?T('إيقاف','Disable'):T('تفعيل','Enable'))+'</button>'
+        + '</div>')
+      + '</article>';
+  }
+  function adCard(a){
+    var canAct = MK.canEdit(ME) && a.status !== MK.STATUS.EXPIRED;
+    return '<article class="mk-card">'
+      + '<div class="mk-adthumb"'+(a.image?' style="background-image:url(\''+esc(a.image)+'\')"':'')+'>'
+        + (a.image?'':'<i class="ti ti-photo"></i>')+'</div>'
+      + '<div class="mk-card-h"><div class="t"><b>'+esc(L(a.title))+'</b>'
+        + '<em>'+T('إعلان','Advertisement')+' · '+T('صفحة متجرك','Your store page')+'</em></div>'
+        + '<span class="mk-state '+a.status+'">'+statusLabel(a.status)+'</span></div>'
+      + '<div class="mk-rows">'
+        + '<div class="mk-row"><i class="ti ti-calendar"></i><span>'+fmtDate(a.startDate)+' — '+fmtDate(a.endDate)+'</span></div>'
+        + (a.expiringSoon ? '<div class="mk-row"><i class="ti ti-clock-exclamation"></i><span class="mk-soon">'
+            + T('ينتهي خلال '+a.daysLeft+' يوم','Ends in '+a.daysLeft+' day'+(a.daysLeft===1?'':'s'))+'</span></div>' : '')
+      + '</div>'
+      + (a.status === MK.STATUS.EXPIRED ? ''
+        : '<div class="mk-acts">'
+          + '<button class="grow" onclick="openEdit(\''+esc(a.id)+'\')"'+(canAct?'':' disabled')+'>'
+            + '<i class="ti ti-pencil"></i> '+T('تعديل','Edit')+'</button>'
+          + '<button onclick="toggleEnabled(\''+esc(a.id)+'\','+(a.enabled?'false':'true')+')"'+(canAct?'':' disabled')+'>'
+            + '<i class="ti ti-'+(a.enabled?'ban':'circle-check')+'"></i> '
+            + (a.enabled?T('إيقاف','Disable'):T('تفعيل','Enable'))+'</button>'
+        + '</div>')
+      + '</article>';
+  }
+  function targetLabel(t){
+    if (!t) return '';
+    if (t.type === 'store') return T('كامل المتجر','Entire store');
+    if (t.type === 'category'){
+      var c = (RAFCatalog.categories()||[]).filter(function(x){ return x.k===t.categoryKey; })[0];
+      return T('فئة: ','Category: ') + (c ? T(c.ar,c.en) : t.categoryKey);
+    }
+    var n = (t.productIds||[]).length;
+    return T(n+' منتج', n+' product'+(n===1?'':'s'));
+  }
+  function promoCard(p){
+    var canAct = MK.canEdit(ME) && p.status !== MK.STATUS.EXPIRED;
+    return '<article class="mk-card">'
+      + '<div class="mk-card-h"><div class="t"><b>'+esc(L(p.name))+'</b>'
+        + '<em>'+T('عرض','Promotion')+' · '+T('خصم','Discount')+' '+p.value+'%</em></div>'
+        + '<span class="mk-state '+p.status+'">'+statusLabel(p.status)+'</span></div>'
+      + '<div class="mk-rows">'
+        + '<div class="mk-row"><i class="ti ti-target"></i><span>'+esc(targetLabel(p.target))+'</span></div>'
+        + '<div class="mk-row"><i class="ti ti-calendar"></i><span>'+fmtDate(p.startDate)+' — '+fmtDate(p.endDate)+'</span></div>'
+        + (p.expiringSoon ? '<div class="mk-row"><i class="ti ti-clock-exclamation"></i><span class="mk-soon">'
+            + T('ينتهي خلال '+p.daysLeft+' يوم','Ends in '+p.daysLeft+' day'+(p.daysLeft===1?'':'s'))+'</span></div>' : '')
+      + '</div>'
+      + (p.status === MK.STATUS.EXPIRED ? ''
+        : '<div class="mk-acts">'
+          + '<button class="grow" onclick="openEdit(\''+esc(p.id)+'\')"'+(canAct?'':' disabled')+'>'
+            + '<i class="ti ti-pencil"></i> '+T('تعديل','Edit')+'</button>'
+          + '<button onclick="toggleEnabled(\''+esc(p.id)+'\','+(p.enabled?'false':'true')+')"'+(canAct?'':' disabled')+'>'
+            + '<i class="ti ti-'+(p.enabled?'ban':'circle-check')+'"></i> '
+            + (p.enabled?T('إيقاف','Disable'):T('تفعيل','Enable'))+'</button>'
+        + '</div>')
+      + '</article>';
+  }
+  function historyCard(r){
+    var isC = r.kind === MK.KIND.COUPON, isP = r.kind === MK.KIND.PROMOTION;
+    return '<article class="mk-card">'
+      + '<div class="mk-card-h"><div class="t"><b>'+esc(L(isC||isP?r.name:r.title))+'</b>'
+        + '<em>'+(isC ? T('كوبون','Coupon')+' · '+T('خصم','Discount')+' '+r.value+'%'
+                : isP ? T('عرض','Promotion')+' · '+T('خصم','Discount')+' '+r.value+'%'
+                :       T('إعلان','Advertisement'))+'</em></div>'
+        + '<span class="mk-state expired">'+statusLabel('expired')+'</span></div>'
+      + '<div class="mk-rows">'
+        + (isC ? '<div class="mk-row"><i class="ti ti-ticket"></i><b class="mk-en">'+esc(r.code)+'</b></div>' : '')
+        + (isP ? '<div class="mk-row"><i class="ti ti-target"></i><span>'+esc(targetLabel(r.target))+'</span></div>' : '')
+        + '<div class="mk-row"><i class="ti ti-calendar"></i><span>'+fmtDate(r.startDate)+' — '+fmtDate(r.endDate)+'</span></div>'
+        + '<div class="mk-row"><i class="ti ti-archive"></i><span>'+T('سجل مرجعي — للاطلاع فقط','Reference record — view only')+'</span></div>'
+      + '</div></article>';
+  }
+
+  function sectionHTML(titleAr, titleEn, icon, rows, builder){
+    if (!rows.length) return '';
+    return '<section class="mk-sec"><div class="mk-sec-h"><i class="ti '+icon+'"></i>'
+      + '<b>'+T(titleAr,titleEn)+'</b><span>'+rows.length+'</span></div>'
+      + '<div class="mk-grid">'+rows.map(builder).join('')+'</div></section>';
+  }
+
+  window.render = function(){
+    renderSummary(); renderToolbar();
+    var rows = visible();
+    var board = el('board');
+    if (!rows.length){ board.innerHTML = '<div class="mk-grid">'+emptyHTML()+'</div>'; return; }
+    if (tab === 'history'){
+      board.innerHTML = sectionHTML('سجل التسويق','Marketing history','ti-archive', rows, historyCard);
+      return;
+    }
+    var pros = rows.filter(function(r){ return r.kind === MK.KIND.PROMOTION; });
+    var cps  = rows.filter(function(r){ return r.kind === MK.KIND.COUPON; });
+    var ads  = rows.filter(function(r){ return r.kind === MK.KIND.AD; });
+    board.innerHTML = sectionHTML('العروض والخصومات','Promotions & discounts','ti-rosette-discount', pros, promoCard)
+                    + sectionHTML('الكوبونات','Coupons','ti-ticket', cps, couponCard)
+                    + sectionHTML('الإعلانات','Advertisements','ti-speakerphone', ads, adCard);
+  };
+  function emptyHTML(){
+    var q = ((el('q')||{}).value||'').trim();
+    if (q) return '<div class="mk-empty"><i class="ti ti-search-off"></i>'
+      + '<b>'+T('لا نتائج','No results')+'</b><span>'
+      + T('لم يطابق أي سجل «'+q+'».','Nothing matched “'+q+'”.')+'</span>'
+      + '<button onclick="clearSearch()">'+T('مسح البحث','Clear search')+'</button></div>';
+    if (tab === 'history') return '<div class="mk-empty"><i class="ti ti-archive"></i>'
+      + '<b>'+T('لا يوجد سجل بعد','Nothing in history yet')+'</b><span>'
+      + T('عند انتهاء صلاحية كوبون أو إعلان ينتقل إلى هنا تلقائياً ويبقى للاطلاع.',
+          'When a coupon or advertisement ends it moves here automatically and stays for reference.')+'</span></div>';
+    if (fKind !== 'all' || fStatus !== 'all') return '<div class="mk-empty"><i class="ti ti-filter-off"></i>'
+      + '<b>'+T('لا سجلات بهذه الفلاتر','Nothing matches these filters')+'</b><span>'
+      + T('غيّر الفلاتر لعرض المزيد.','Change the filters to see more.')+'</span>'
+      + '<button onclick="clearFilters()">'+T('مسح الفلاتر','Clear filters')+'</button></div>';
+    return '<div class="mk-empty"><i class="ti ti-speakerphone"></i>'
+      + '<b>'+T('لم تنشئ أي نشاط تسويقي بعد','No marketing activity yet')+'</b><span>'
+      + T('أنشئ كوبون خصم أو إعلاناً لصفحة متجرك من «إضافة جديد».',
+          'Create a discount coupon or an advertisement for your store page from “Add New”.')+'</span>'
+      + (MK.canCreate(ME) ? '<button onclick="openPicker()">'+T('إضافة جديد','Add New')+'</button>' : '')
+      + '</div>';
+  }
+  window.clearSearch = function(){ el('q').value=''; render(); };
+  window.clearFilters = function(){ fKind='all'; fStatus='all'; el('q').value=''; render(); };
+
+  /* ---------- Add New picker ---------- */
+  var PICK = [
+    { k:'promotion', ic:'ti-rosette-discount', ar:'ترويج', en:'Promotion',
+      dAr:'خصم على فئة أو مجموعة منتجات.', dEn:'A discount across a category or selected products.', ready:true },
+    { k:'discount',  ic:'ti-tag', ar:'خصم', en:'Discount',
+      dAr:'خصم مباشر على كامل المتجر.', dEn:'A direct discount across your whole store.', ready:true },
+    { k:'coupon',    ic:'ti-ticket', ar:'كوبون', en:'Coupon',
+      dAr:'رمز يدخله العميل في السلة للحصول على خصم.', dEn:'A code the customer enters in the cart for a discount.', ready:true },
+    { k:'ad',        ic:'ti-speakerphone', ar:'إعلان', en:'Advertisement',
+      dAr:'لافتة تظهر في صفحة متجرك.', dEn:'A banner shown on your store page.', ready:true }
+  ];
+  window.openPicker = function(){
+    if (!MK.canCreate(ME)){ toast(T('لا تملك صلاحية الإضافة','You do not have permission to add')); return; }
+    el('pickList').innerHTML = PICK.map(function(p){
+      return '<button type="button" onclick="'+(p.ready?'pick(\''+p.k+'\')':'')+'"'+(p.ready?'':' disabled')+'>'
+        + '<span class="ic"><i class="ti '+p.ic+'"></i></span>'
+        + '<span class="tx"><b>'+T(p.ar,p.en)+'</b><span>'+T(p.dAr,p.dEn)+'</span>'
+        + (p.ready?'':'<span class="soon">'+T('بانتظار اعتماد قواعد التسعير','Awaiting pricing approval')+'</span>')
+        + '</span></button>';
+    }).join('');
+    el('picker').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  };
+  window.closePicker = function(){
+    el('picker').classList.remove('show');
+    if (!el('drawer').classList.contains('show')) document.body.style.overflow = '';
+  };
+  window.pick = function(kind){ closePicker(); openCreate(kind); };
+
+  /* ---------- create / edit ---------- */
+  function blankCoupon(){
+    return { kind:'coupon', code:'', name:{ar:'',en:''}, value:'',
+             startDate:MK.todayISO(), endDate:'' };
+  }
+  function blankAd(){
+    return { kind:'ad', title:{ar:'',en:''}, body:{ar:'',en:''}, image:'', destination:'',
+             startDate:MK.todayISO(), endDate:'' };
+  }
+  /* "Discount" and "Promotion" are the same business object; the two entry
+     points differ only in the target they open with, so a merchant who thinks
+     "discount my store" and one who thinks "promote this category" both land
+     in the right place without two implementations existing. */
+  function blankPromotion(target){
+    return { kind:'promotion', name:{ar:'',en:''}, value:'',
+             target:{ type:target||'store', productIds:[], categoryKey:'' },
+             startDate:MK.todayISO(), endDate:'' };
+  }
+  window.openCreate = function(kind){
+    editingId = null;
+    if (kind === 'coupon'){ draft = blankCoupon();
+      return openDrawer(T('كوبون جديد','New coupon'), T('سيُنشأ في متجر ','It will be created in ') + L(STORE.name)); }
+    if (kind === 'ad'){ draft = blankAd();
+      return openDrawer(T('إعلان جديد','New advertisement'), T('سيُنشأ في متجر ','It will be created in ') + L(STORE.name)); }
+    draft = blankPromotion(kind === 'discount' ? 'store' : 'category');
+    openDrawer(kind === 'discount' ? T('خصم جديد','New discount') : T('عرض جديد','New promotion'),
+               T('سيُطبَّق تلقائياً على أسعار العملاء خلال الفترة.',
+                 'It applies automatically to customer prices during the period.'));
+  };
+  window.openEdit = function(id){
+    var r = MK.byId(id);
+    if (!r){ toast(T('السجل غير موجود','Record not found')); return; }
+    if (r.status === MK.STATUS.EXPIRED){ toast(T('لا يمكن تعديل سجل منتهٍ','An expired record cannot be edited')); return; }
+    window.__pq = '';
+    draft = r.kind === MK.KIND.COUPON
+      ? { kind:'coupon', code:r.code, name:{ar:r.name.ar,en:r.name.en}, value:r.value,
+          startDate:r.startDate, endDate:r.endDate }
+      : r.kind === MK.KIND.PROMOTION
+      ? { kind:'promotion', name:{ar:r.name.ar,en:r.name.en}, value:r.value,
+          target:{ type:r.target.type, productIds:(r.target.productIds||[]).slice(),
+                   categoryKey:r.target.categoryKey||'' },
+          startDate:r.startDate, endDate:r.endDate }
+      : { kind:'ad', title:{ar:r.title.ar,en:r.title.en}, body:{ar:(r.body&&r.body.ar)||'',en:(r.body&&r.body.en)||''},
+          image:r.image||'', destination:r.destination||'', startDate:r.startDate, endDate:r.endDate };
+    editingId = id;
+    openDrawer(r.kind === MK.KIND.COUPON    ? T('تعديل الكوبون','Edit coupon')
+             : r.kind === MK.KIND.PROMOTION ? T('تعديل العرض','Edit promotion')
+             :                                T('تعديل الإعلان','Edit advertisement'),
+               T('التغييرات تسري فوراً.','Changes take effect immediately.'));
+  };
+  function openDrawer(title, sub){
+    el('drTitle').textContent = title;
+    el('drSub').textContent = sub;
+    renderForm();
+    el('drawer').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  window.closeDrawer = function(){
+    if (busy) return;
+    el('drawer').classList.remove('show');
+    draft = null; editingId = null;
+    document.body.style.overflow = '';
+  };
+  window.dSet = function(path, v){
+    var parts = path.split('.'), o = draft;
+    for (var i=0;i<parts.length-1;i++) o = o[parts[i]];
+    o[parts[parts.length-1]] = v;
+    if (path === 'code' || path === 'value') renderPreview();
+  };
+  function f(id, labelAr, labelEn, control, note){
+    return '<div class="mk-f"><label for="'+id+'">'+T(labelAr,labelEn)+'</label>'
+      + control + (note?'<div class="note">'+note+'</div>':'') + '</div>';
+  }
+  function renderForm(){
+    var d = draft;
+    var body = '<div class="mk-err" id="drErr"></div>';
+    if (d.kind === 'promotion'){
+      body += '<div class="mk-prev"><div class="mk-prev-h">'+T('معاينة','Preview')+'</div>'
+            + '<div id="prev"></div></div>'
+        + '<div class="mk-two">'
+          + f('dNameAr','الاسم (عربي)','Name (Arabic)',
+              '<input id="dNameAr" dir="rtl" value="'+esc(d.name.ar)+'" oninput="dSet(\'name.ar\',this.value)">')
+          + f('dNameEn','الاسم (إنجليزي)','Name (English)',
+              '<input id="dNameEn" dir="ltr" value="'+esc(d.name.en)+'" oninput="dSet(\'name.en\',this.value)">')
+        + '</div>'
+        + f('dValue','نسبة الخصم %','Discount %',
+            '<input id="dValue" class="mk-en" inputmode="numeric" dir="ltr" value="'+esc(d.value)+'" oninput="dSet(\'value\',this.value)">',
+            T('يُطبَّق على كل سطر مؤهل في سلة العميل.','Applied to every eligible line in the customer’s cart.'))
+        + f('dTarget','ينطبق على','Applies to',
+            '<select id="dTarget" onchange="setTarget(this.value)">'
+            + '<option value="store"'+(d.target.type==='store'?' selected':'')+'>'+T('كامل المتجر','Entire store')+'</option>'
+            + '<option value="category"'+(d.target.type==='category'?' selected':'')+'>'+T('فئة محددة','Selected category')+'</option>'
+            + '<option value="products"'+(d.target.type==='products'?' selected':'')+'>'+T('منتجات محددة','Selected products')+'</option>'
+            + '</select>')
+        + targetHTML();
+    } else if (d.kind === 'coupon'){
+      body += '<div class="mk-prev"><div class="mk-prev-h">'+T('معاينة','Preview')+'</div>'
+            + '<div id="prev"></div></div>'
+        + f('dCode','رمز الكوبون','Coupon code',
+            '<input id="dCode" class="mk-en" dir="ltr" value="'+esc(d.code)+'" oninput="dSet(\'code\',this.value)">',
+            T('يكتبه العميل في السلة. أحرف إنجليزية وأرقام، 3–24 خانة.',
+              'The customer types this in the cart. Letters, digits, 3–24 characters.'))
+        + '<div class="mk-two">'
+          + f('dNameAr','الاسم (عربي)','Name (Arabic)',
+              '<input id="dNameAr" dir="rtl" value="'+esc(d.name.ar)+'" oninput="dSet(\'name.ar\',this.value)">')
+          + f('dNameEn','الاسم (إنجليزي)','Name (English)',
+              '<input id="dNameEn" dir="ltr" value="'+esc(d.name.en)+'" oninput="dSet(\'name.en\',this.value)">')
+        + '</div>'
+        + f('dValue','نسبة الخصم %','Discount %',
+            '<input id="dValue" class="mk-en" inputmode="numeric" dir="ltr" value="'+esc(d.value)+'" oninput="dSet(\'value\',this.value)">',
+            T('نسبة مئوية من قيمة السلة، بين 1 و 90.','A percentage of the cart value, between 1 and 90.'));
+    } else {
+      body += f('dTitleAr','العنوان (عربي)','Title (Arabic)',
+            '<input id="dTitleAr" dir="rtl" value="'+esc(d.title.ar)+'" oninput="dSet(\'title.ar\',this.value)">')
+        + f('dTitleEn','العنوان (إنجليزي)','Title (English)',
+            '<input id="dTitleEn" dir="ltr" value="'+esc(d.title.en)+'" oninput="dSet(\'title.en\',this.value)">')
+        + '<div class="mk-two">'
+          + f('dBodyAr','الوصف (عربي)','Description (Arabic)',
+              '<textarea id="dBodyAr" dir="rtl" oninput="dSet(\'body.ar\',this.value)">'+esc(d.body.ar)+'</textarea>')
+          + f('dBodyEn','الوصف (إنجليزي)','Description (English)',
+              '<textarea id="dBodyEn" dir="ltr" oninput="dSet(\'body.en\',this.value)">'+esc(d.body.en)+'</textarea>')
+        + '</div>'
+        + f('dImage','رابط الصورة','Image URL',
+            '<input id="dImage" dir="ltr" value="'+esc(d.image)+'" oninput="dSet(\'image\',this.value)">',
+            T('اختياري. تُعرض داخل لافتة الإعلان.','Optional. Shown inside the banner.'))
+        + f('dDest','الوجهة','Destination',
+            '<input id="dDest" dir="ltr" value="'+esc(d.destination)+'" oninput="dSet(\'destination\',this.value)">',
+            T('رابط داخل متجرك يفتح عند الضغط على الإعلان.','A link inside your store, opened when the banner is clicked.'))
+        + '<div class="mk-f"><label>'+T('الموضع','Placement')+'</label>'
+          + '<input value="'+T('صفحة متجرك','Your store page')+'" readonly style="background:var(--bg2);color:var(--text3);">'
+          + '<div class="note">'+T('إعلانات المتاجر تظهر في صفحة المتجر. المواضع العامة تديرها رف.',
+                                   'Store advertisements appear on your store page. Platform-wide placements are managed by RAF.')+'</div></div>';
+    }
+    body += '<div class="mk-two">'
+      + f('dStart','تاريخ البداية','Start date',
+          '<input id="dStart" type="date" class="mk-en" value="'+esc(d.startDate)+'" oninput="dSet(\'startDate\',this.value)">')
+      + f('dEnd','تاريخ النهاية','End date',
+          '<input id="dEnd" type="date" class="mk-en" value="'+esc(d.endDate)+'" oninput="dSet(\'endDate\',this.value)">')
+      + '</div>'
+      + '<div class="mk-f"><div class="note">'
+      + T('التواريخ بتوقيت الكويت (UTC+3). تتحدد الحالة تلقائياً: مجدول قبل البداية، نشط خلال الفترة، ثم ينتقل إلى السجل.',
+          'Dates are Kuwait time (UTC+3). The status is derived: scheduled before the start, active during the period, then it moves to history.')
+      + '</div></div>';
+    el('drBody').innerHTML = body;
+    renderPreview();
+  }
+  /* ---------- promotion targeting ---------- */
+  window.setTarget = function(t){
+    draft.target.type = t;
+    if (t !== 'products') draft.target.productIds = [];
+    if (t !== 'category') draft.target.categoryKey = '';
+    renderForm();
+  };
+  function storeProducts(){
+    if (!window.RAFCatalog) return [];
+    return RAFCatalog.list({ visibleOnly:false }).filter(function(p){ return p.slug === SLUG; });
+  }
+  function targetHTML(){
+    var t = draft.target;
+    if (t.type === 'store')
+      return '<div class="mk-f"><div class="note">'
+        + T('سيحصل كل منتج في متجرك على هذا الخصم خلال الفترة.',
+            'Every product in your store gets this discount during the period.')+'</div></div>';
+    if (t.type === 'category'){
+      var used = {}; storeProducts().forEach(function(p){ if (p.cat) used[p.cat]=1; });
+      var cats = (RAFCatalog.categories()||[]).filter(function(c){ return used[c.k]; });
+      if (!cats.length) return '<div class="mk-f"><div class="note">'
+        + T('لا توجد فئات في متجرك.','Your store has no categories yet.')+'</div></div>';
+      return f('dCat','الفئة','Category',
+        '<select id="dCat" onchange="dSet(\'target.categoryKey\',this.value); renderPreviewOnly()">'
+        + '<option value="">'+T('اختر فئة','Choose a category')+'</option>'
+        + cats.map(function(c){
+            var n = storeProducts().filter(function(p){ return p.cat===c.k; }).length;
+            return '<option value="'+esc(c.k)+'"'+(t.categoryKey===c.k?' selected':'')+'>'
+              + esc(T(c.ar,c.en))+' ('+n+')</option>'; }).join('')
+        + '</select>');
+    }
+    /* selected products — search, multi-select, and what is chosen so far */
+    var q = (window.__pq||'').trim().toLowerCase();
+    var list = storeProducts().filter(function(p){
+      if (!q) return true;
+      return (L(p.name)+' '+p.id+' '+(p.ar||'')+' '+(p.en||'')).toLowerCase().indexOf(q) > -1;
+    });
+    var chosen = t.productIds || [];
+    return '<div class="mk-f"><label>'+T('المنتجات','Products')+'</label>'
+      + '<div class="mk-psel">'
+        + '<div class="mk-psel-h">'
+          + '<input id="pq" placeholder="'+T('ابحث في منتجاتك…','Search your products…')+'" value="'+esc(window.__pq||'')+'" oninput="pqSet(this.value)">'
+          + '<span class="mk-psel-n">'+T(chosen.length+' محدد', chosen.length+' selected')+'</span>'
+        + '</div>'
+        + (list.length
+            ? '<div class="mk-psel-list">' + list.map(function(p){
+                var on = chosen.indexOf(p.id) > -1;
+                return '<button type="button" class="mk-prow" aria-pressed="'+(on?'true':'false')+'" onclick="togProduct(\''+esc(p.id)+'\')">'
+                  + '<span class="tick"><i class="ti ti-check"></i></span>'
+                  + '<span class="th"'+(p.img?' style="background-image:url(\''+esc(p.img)+'\')"':'')+'>'
+                    + (p.img?'':'<i class="ti ti-box"></i>')+'</span>'
+                  + '<span class="nm"><b>'+esc(L(p.name))+'</b>'
+                    + '<em>'+esc(p.price)+' '+T('د.ك','KWD')+' · '+(p.status==='hidden'?T('مخفي','Hidden'):T('معروض','Active'))+'</em></span>'
+                + '</button>'; }).join('') + '</div>'
+            : '<div class="mk-psel-none">'+T('لا منتجات مطابقة.','No matching products.')+'</div>')
+      + '</div></div>';
+  }
+  window.pqSet = function(v){
+    window.__pq = v;
+    var box = el('drBody').querySelector('.mk-psel');
+    if (!box) return;
+    var wrap = box.parentNode;
+    wrap.outerHTML = targetHTML();
+    var i = el('pq'); if (i){ i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
+  };
+  window.togProduct = function(id){
+    var ids = draft.target.productIds;
+    var i = ids.indexOf(id);
+    if (i > -1) ids.splice(i,1); else ids.push(id);
+    var box = el('drBody').querySelector('.mk-psel');
+    if (box){ box.parentNode.outerHTML = targetHTML(); }
+    renderPreviewOnly();
+  };
+  window.renderPreviewOnly = function(){ renderPreview(); };
+
+  function renderPreview(){
+    var p = el('prev'); if (!p || !draft) return;
+    function catName(k){
+      var c = (RAFCatalog.categories()||[]).filter(function(x){ return x.k===k; })[0];
+      return c ? T(c.ar,c.en) : k;
+    }
+    if (draft.kind === 'promotion'){
+      var v = String(draft.value||'').trim() || '—';
+      var t = draft.target, who;
+      if (t.type === 'store') who = T('كل منتجات متجرك','every product in your store');
+      else if (t.type === 'category') who = t.categoryKey
+        ? T('فئة ','category ') + esc(catName(t.categoryKey)) : T('فئة لم تُحدد بعد','a category not chosen yet');
+      else who = T((t.productIds||[]).length+' منتج محدد', (t.productIds||[]).length+' selected product'+((t.productIds||[]).length===1?'':'s'));
+      p.innerHTML = '<div class="mk-row"><i class="ti ti-discount"></i><span>'
+        + T('خصم ','Discount ')+esc(v)+'% '+T('على ','on ')+who+'</span></div>'
+        + '<div class="mk-row"><i class="ti ti-info-circle"></i><span>'
+        + T('يُحسب لكل سطر على حدة في سلة العميل.','Calculated per line in the customer’s cart.')+'</span></div>';
+      return;
+    }
+    if (draft.kind !== 'coupon') return;
+    var code = String(draft.code||'').trim().toUpperCase() || '—';
+    var v = String(draft.value||'').trim() || '—';
+    p.innerHTML = '<span class="mk-code"><i class="ti ti-ticket"></i>'+esc(code)+'</span>'
+      + '<div class="mk-row" style="margin-top:9px;"><i class="ti ti-discount"></i><span>'
+      + T('خصم ','Discount ')+esc(v)+'% '+T('من قيمة السلة','off the cart value')+'</span></div>';
+  }
+  function showErrors(errors){
+    var b = el('drErr');
+    b.innerHTML = '<b>'+T('تعذّر الحفظ','Could not save')+'</b><ul>'
+      + errors.map(function(e){ return '<li>'+esc(e.message)+'</li>'; }).join('') + '</ul>';
+    b.classList.add('show');
+    el('drBody').scrollTop = 0;
+  }
+  window.saveDrawer = function(){
+    if (!draft || busy) return;
+    var b = el('drErr'); if (b){ b.classList.remove('show'); b.innerHTML=''; }
+    busy = true; el('drSave').disabled = true;
+
+    var res;
+    if (editingId){
+      var patch = draft.kind === 'coupon'
+        ? { code:draft.code, name:draft.name, value:Number(draft.value), startDate:draft.startDate, endDate:draft.endDate }
+        : draft.kind === 'promotion'
+        ? { name:draft.name, value:Number(draft.value), target:draft.target,
+            startDate:draft.startDate, endDate:draft.endDate }
+        : { title:draft.title, body:draft.body, image:draft.image, destination:draft.destination,
+            startDate:draft.startDate, endDate:draft.endDate };
+      res = MK.update(editingId, patch, { actor:ME });
+    } else if (draft.kind === 'promotion'){
+      res = MK.createPromotion({ name:draft.name, value:Number(draft.value), target:draft.target,
+                                 startDate:draft.startDate, endDate:draft.endDate }, { actor:ME });
+    } else if (draft.kind === 'coupon'){
+      res = MK.createCoupon({ code:draft.code, name:draft.name, value:Number(draft.value),
+                              discountType:MK.DISCOUNT.PERCENT,
+                              startDate:draft.startDate, endDate:draft.endDate }, { actor:ME });
+    } else {
+      res = MK.createAd({ title:draft.title, body:draft.body, image:draft.image,
+                          destination:draft.destination, placement:MK.PLACEMENT.STORE_PAGE,
+                          startDate:draft.startDate, endDate:draft.endDate }, { actor:ME });
+    }
+    busy = false; el('drSave').disabled = false;
+
+    if (!res.ok){
+      showErrors(res.errors || [{ message:res.message || T('تعذّر الحفظ','Could not save') }]);
+      return;
+    }
+    var wasEdit = !!editingId;
+    el('drawer').classList.remove('show');
+    draft = null; editingId = null;
+    document.body.style.overflow = '';
+    render();
+    toast(wasEdit ? T('تم حفظ التغييرات','Changes saved') : T('تم الإنشاء','Created'));
+  };
+
+  window.toggleEnabled = function(id, on){
+    var res = MK.setEnabled(id, on === true || on === 'true', { actor:ME });
+    if (!res.ok){ toast(res.message || T('تعذّر التغيير','Could not change')); return; }
+    render();
+    toast(res.record.enabled ? T('تم التفعيل','Enabled') : T('تم الإيقاف','Disabled'));
+  };
+
+  /* ---------- chrome ---------- */
+  var toastTimer = null;
+  function toast(msg){
+    el('toastMsg').textContent = msg;
+    el('toast').classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el('toast').classList.remove('show'); }, 2600);
+  }
+  window.toggleLang = function(){
+    var r = root(), en = r.lang === 'en';
+    r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+    try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+    applyLang(); render();
+    if (el('picker').classList.contains('show')) openPicker();
+    if (draft) renderForm();
+  };
+  function applyLang(){
+    var en = isEn();
+    document.querySelectorAll('[data-ar][data-en]').forEach(function(e){
+      var t = e.getAttribute('data-'+(en?'en':'ar')); if (t!==null) e.textContent = t;
+    });
+    document.querySelectorAll('[data-ar-ph][data-en-ph]').forEach(function(e){
+      e.placeholder = e.getAttribute('data-'+(en?'en':'ar')+'-ph');
+    });
+    el('langLabel').textContent = en ? 'ع' : 'EN';
+    document.title = en ? 'RAF — Marketing' : 'رف — التسويق';
+  }
+
+  function boot(){
+    var l=null; try{ l=localStorage.getItem('raf_lang'); }catch(e){}
+    if (l==='en'){ root().lang='en'; root().dir='ltr'; }
+    applyLang();
+
+    var link = window.RAFPerm ? RAFPerm.storeLinkOf() : { ok:false, reason:'unassigned' };
+    var me = window.RAFPerm ? RAFPerm.currentUser() : null;
+    ME = me ? { id:me.id, name:me.name, roleId:me.roleId } : null;
+
+    if (!link.ok || !MK.canView(ME)){
+      el('gate').style.display = '';
+      el('gateT').textContent = !link.ok
+        ? (link.reason==='store_not_found' ? T('المتجر المرتبط غير موجود','Linked store not found')
+                                           : T('لا يوجد متجر مرتبط بالحساب','No store linked to this account'))
+        : T('لا تملك صلاحية إدارة التسويق','You do not have permission to manage marketing');
+      el('gateP').textContent = !link.ok
+        ? T('لم يتم ربط هذا الحساب بمتجر. يتم الربط يدوياً ولا يُخمَّن تلقائياً.',
+            'This account is not linked to a store. Links are set explicitly and never inferred.')
+        : T('يتم التحكم بالصلاحيات من نظام صلاحيات رف.','Access is controlled by the RAF permission system.');
+      return;
+    }
+    STORE = link.store; SLUG = link.slug;
+
+    el('shell').style.display = '';
+    el('stName').textContent = L(STORE.name);
+    if (STORE.logo){ var lg = el('stLogo'); lg.style.backgroundImage = "url('"+STORE.logo+"')"; lg.innerHTML=''; }
+    if (MK.canCreate(ME)) el('addBtn').style.display = '';
+
+    render();
+    try { RAFPerm.enforce(); } catch(e){}
+
+    document.addEventListener('raf:marketing', render);
+    document.addEventListener('keydown', function(e){
+      if (e.key !== 'Escape') return;
+      if (el('drawer').classList.contains('show')) closeDrawer();
+      else if (el('picker').classList.contains('show')) closePicker();
+    });
+  }
+  if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+</body>
+</html>

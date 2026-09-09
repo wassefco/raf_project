@@ -67,6 +67,18 @@
 .oos-alt-l{display:flex;align-items:center;gap:6px;margin:12px 0 8px;font-size:12.5px;font-weight:700;color:var(--ink);}
 .oos-alt-l i{color:var(--gold2);font-size:15px;}
 .oos-alt-empty{font-size:12px;color:var(--text3);margin-top:10px;}
+
+/* PROMOTION on a cart line — visible, unlike a coupon allocation */
+.ci-promo{display:inline-flex;align-items:center;gap:5px;margin-top:4px;font-size:11.5px;font-weight:800;
+  color:var(--gold2);background:var(--gold-soft);border-radius:20px;padding:3px 9px;}
+.ci-promo i{font-size:14px;}
+.ci-price b.on-promo{color:var(--gold2);}
+.ci-price small.was{text-decoration:line-through;color:var(--text3);}
+.cpn-x{min-height:36px;margin-inline-start:8px;padding:0 11px;border-radius:20px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;gap:5px;vertical-align:middle;}
+.cpn-x:hover{border-color:var(--red);color:var(--red);}
+@media (pointer:coarse){ .cpn-x{min-height:44px;} }
 </style>
 </head>
 <body>
@@ -223,6 +235,7 @@
 <script src="raf_swipe.js"></script>
 <script src="raf_card.js"></script>
 <script src="raf_hscroll.js"></script>
+<script src="raf_marketing.js"></script>
 <script src="raf_checkout.js"></script>
 <script>
 /* ============================================================
@@ -232,6 +245,49 @@
    ============================================================ */
 (function(){
   var en = RAFCO.en, T = RAFCO.T, L = RAFCO.L, money = RAFCO.money;
+  /* merchant-entered text (promotion names) is escaped before it reaches HTML */
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+  /* ---- line pricing for display ----
+     Both come from the ONE pricing authority. A promotion is shown on the
+     line, because the shopper should see why the price moved. A coupon is
+     not: its per-line allocation stays internal and only the cart total
+     names it. That is the whole difference between the two. */
+  /* Removing a coupon is a real customer action: without it a shopper who
+     applies one can never get their store promotion back. Dropping the coupon
+     re-runs the pricing authority, which restores the eligible promotion
+     immediately — no reload. */
+  function couponRemoveBtn(){
+    return ' <button type="button" class="cpn-x" onclick="removeCoupon()">'
+      + '<i class="ti ti-x"></i> ' + T('إزالة','Remove') + '</button>';
+  }
+  window.removeCoupon = function(){
+    RAFCO.setCoupon(null);
+    var ci = document.getElementById('couponInput'); if (ci) ci.value = '';
+    var m = document.getElementById('couponMsg'); if (m){ m.className='msg'; m.innerHTML=''; }
+    render();
+  };
+  function pricedLine(l){
+    var t = RAFCO.totals(RAFShop.Cart.read());
+    for (var i=0;i<t.lines.length;i++) if (t.lines[i].key === l.key)
+      return { line:t.lines[i], source:t.discountSource };
+    return null;
+  }
+  function promoLine(l){
+    var r = pricedLine(l);
+    if (!r || r.source !== 'promotion' || !(r.line.lineDiscount > 0)) return null;
+    return { pct:r.line.lineDiscountPct, was:r.line.gross, now:r.line.finalPrice };
+  }
+  function priceHTML(l){
+    var pr = promoLine(l);
+    var gross = RAFCO.price(l) * l.qty;
+    if (!pr) return '<div class="ci-price"><b>'+money(gross)+' <small>'+T('د.ك','KWD')+'</small></b>'
+      + (l.qty>1 ? '<small>'+money(RAFCO.price(l))+' × '+l.qty+'</small>' : '') + '</div>';
+    return '<div class="ci-price"><b class="on-promo">'+money(pr.now)+' <small>'+T('د.ك','KWD')+'</small></b>'
+      + '<small class="was">'+money(pr.was)+'</small>'
+      + (l.qty>1 ? '<small>'+money(pr.now/l.qty)+' × '+l.qty+'</small>' : '') + '</div>';
+  }
   /* Arabic count agreement: 1 منتج · 2 منتجان · 3–10 منتجات · 11+ منتجاً */
   function plural(n){ return n===1?'منتج':(n===2?'منتجان':(n<=10?'منتجات':'منتجاً')); }
 
@@ -358,7 +414,7 @@
   /* the cart-scoped fields travel with the cart, so they are repainted on switch */
   function restoreCartState(){
     var c = RAFCO.getCoupon(), m = document.getElementById('couponMsg'), ci = document.getElementById('couponInput');
-    if(c){ ci.value=c.code; m.className='msg ok show'; m.innerHTML='<i class="ti ti-circle-check"></i> '+T('تم تطبيق الكوبون — خصم '+c.pct+'%','Coupon applied — '+c.pct+'% off'); }
+    if(c){ ci.value=c.code; m.className='msg ok show'; m.innerHTML='<i class="ti ti-circle-check"></i> '+T('تم تطبيق الكوبون — خصم '+c.pct+'%','Coupon applied — '+c.pct+'% off')+couponRemoveBtn(); }
     else { ci.value=''; m.className='msg'; m.innerHTML=''; }
     document.getElementById('orderNotes').value = RAFCO.get('raf_order_notes','');
   }
@@ -435,6 +491,9 @@
         + (l.img?'':'<i class="ti '+(l.ic||'ti-box')+'"></i>')+'</div>'
       + '<div class="ci-main">'
         + '<div class="ci-name">'+L(l.name)+'</div>'
+        /* the promotion is named on the line; a coupon never is */
+        + (promoLine(l) ? '<div class="ci-promo"><i class="ti ti-rosette-discount"></i> '
+            + T('عرض ','Offer ')+promoLine(l).pct+'%'+'</div>' : '')
         + (out ? '<div class="ci-oos"><i class="ti ti-ban"></i> '+T('غير متوفر حالياً','Currently unavailable')+'</div>' : '')
         + (vars.length
             ? '<div class="ci-vars">'+vars.map(function(k){
@@ -446,8 +505,7 @@
           + '<span>'+l.qty+'</span>'
           + '<button onclick="chQty(\''+l.key+'\',1)" aria-label="+"><i class="ti ti-plus"></i></button></div>'
           + '<button class="ci-rm" onclick="removeLine(\''+l.key+'\')"><i class="ti ti-trash"></i> '+T('حذف','Remove')+'</button>'
-          + '<div class="ci-price"><b>'+money(RAFCO.price(l)*l.qty)+' <small>'+T('د.ك','KWD')+'</small></b>'
-            + (l.qty>1 ? '<small>'+money(RAFCO.price(l))+' × '+l.qty+'</small>' : '') + '</div>'
+          + priceHTML(l)
         + '</div></div></div>';
   }
 
@@ -459,7 +517,15 @@
         '<div class="sum-row"><span>'+T('المجموع ('+t.count+' '+plural(t.count)+')','Subtotal ('+t.count+' item'+(t.count===1?'':'s')+')')+'</span><span>'+money(t.sub)+' '+T('د.ك','KWD')+'</span></div>'
       + '<div class="sum-row"><span>'+T('التوصيل','Delivery')+'</span>'
         + (t.ship===0 ? '<span class="free">'+T('مجاني','Free')+'</span>' : '<span>'+money(t.ship)+' '+T('د.ك','KWD')+'</span>')+'</div>'
-      + (t.disc>0 ? '<div class="sum-row disc"><span>'+T('خصم الكوبون','Coupon discount')+'</span><span>− '+money(t.disc)+' '+T('د.ك','KWD')+'</span></div>' : '')
+      /* A coupon shows ONE total only — never a per-product breakdown. A
+         promotion is named, because the customer did not ask for it and
+         should see why the price moved. The line-level figures behind both
+         stay in the order record either way. */
+      + (t.disc>0 ? '<div class="sum-row disc"><span>'
+          + (t.discountSource==='coupon'
+              ? T('الخصم','Discount')
+              : T('عرض: ','Offer: ') + esc(L((t.promotion&&t.promotion.name)||{ar:'خصم',en:'Discount'})))
+          + '</span><span>− '+money(t.disc)+' '+T('د.ك','KWD')+'</span></div>' : '')
       + '<div class="sum-row total"><span>'+T('الإجمالي','Total')+'</span><b>'+money(t.total)+' '+T('د.ك','KWD')+'</b></div>';
 
     /* stock validation surfaced before checkout (item 11) */
@@ -575,13 +641,18 @@
     var v = (document.getElementById('couponInput').value||'').trim().toUpperCase();
     var msg = document.getElementById('couponMsg');
     if(!v){ msg.className='msg err show'; msg.innerHTML='<i class="ti ti-alert-circle"></i> '+T('أدخل رمز الكوبون','Enter a coupon code'); return; }
-    var ok = RAFCO.COUPONS[v];
-    if(!ok){
+    /* the marketing authority decides; the cart only reports its answer, so
+       an expired or switched-off coupon is refused with the real reason */
+    var lines = RAFShop.Cart.read();
+    var slug = (lines.length && window.RAFCatalog) ? (RAFCatalog.get(lines[0].id)||{}).slug : null;
+    var res = RAFCO.checkCoupon(v, { storeSlug:slug });
+    if(!res.ok){
       RAFCO.setCoupon(null);
-      msg.className='msg err show'; msg.innerHTML='<i class="ti ti-circle-x"></i> '+T('رمز الكوبون غير صالح','Invalid coupon code');
+      msg.className='msg err show';
+      msg.innerHTML='<i class="ti ti-circle-x"></i> '+(res.message||T('رمز الكوبون غير صالح','Invalid coupon code'));
     } else {
-      RAFCO.setCoupon({code:v, pct:ok});
-      msg.className='msg ok show'; msg.innerHTML='<i class="ti ti-circle-check"></i> '+T('تم تطبيق الكوبون — خصم '+ok+'%','Coupon applied — '+ok+'% off');
+      RAFCO.setCoupon({code:res.code, pct:res.pct});
+      msg.className='msg ok show'; msg.innerHTML='<i class="ti ti-circle-check"></i> '+T('تم تطبيق الكوبون — خصم '+res.pct+'%','Coupon applied — '+res.pct+'% off')+couponRemoveBtn();
     }
     render();
   };

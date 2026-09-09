@@ -368,6 +368,31 @@
       opts = opts || {};
       var lines = Cart.items();
       if (!lines.length) return null;
+
+      /* Pricing is re-evaluated here through the one authority, so the order
+         is built from authoritative values rather than from whatever the cart
+         page last displayed. A tampered cart total cannot reach an order. */
+      var pricedByKey = {};
+      if (window.RAFCO) {
+        try {
+          RAFCO.totals(lines).lines.forEach(function (pl) { pricedByKey[pl.key] = pl; });
+        } catch (e) { pricedByKey = {}; }
+      }
+      function priceOf(l){
+        var p = pricedByKey[l.key];
+        return p ? { lineDiscount:p.lineDiscount, pct:p.lineDiscountPct, source:p.discountSource }
+                 : { lineDiscount:0, pct:0, source:null };
+      }
+      /* The snapshot builds its immutable per-line record from these lines and
+         reads `lineDiscount` off each one, so the authoritative figure has to
+         travel with them — not only on the order items. */
+      var pricedLines = lines.map(function (l) {
+        var out = {};
+        for (var k in l) if (l.hasOwnProperty(k)) out[k] = l[k];
+        out.lineDiscount = priceOf(l).lineDiscount;
+        return out;
+      });
+
       var items = lines.map(function (l) {
         var vparts = Object.keys(l.variant || {}).map(function (k) { return l.variant[k]; });
         var pre = vparts.length ? vparts.join(' · ') + ' · ' : '';
@@ -382,12 +407,24 @@
           store: l.store || null, variant: l.variant || {}, qty: l.qty || 1,
           /* the exact purchasable combination this line bought, by stable
              option ids — what inventory reserves, releases and sells */
-          combinationId: l.combinationId || null, vs: l.vs || null
+          combinationId: l.combinationId || null, vs: l.vs || null,
+          /* THE authoritative line-level financial result, computed once by
+             RAFCO.totals() and carried through unchanged. The snapshot reads
+             `lineDiscount` to build its immutable per-line record, so the
+             historical order knows exactly what each line actually cost. */
+          lineDiscount: priceOf(l).lineDiscount,
+          lineDiscountPct: priceOf(l).pct,
+          discountSource: priceOf(l).source
         };
       });
       var subtotal = Cart.subtotal();
       var ship = (opts.totals && typeof opts.totals.ship === 'number') ? opts.totals.ship : 1.000;
-      var discount = (opts.totals && opts.totals.disc) || 0;
+      /* the order discount IS the sum of the line discounts — never an
+         independently supplied figure. Falls back to the caller's total only
+         when the pricing authority is unavailable on this surface. */
+      var discount = Object.keys(pricedByKey).length
+        ? items.reduce(function (s, it) { return s + Math.round((it.lineDiscount || 0) * 1000); }, 0) / 1000
+        : ((opts.totals && opts.totals.disc) || 0);
       var tip = (opts.totals && opts.totals.tip) || 0;
       var tax = (opts.totals && opts.totals.tax) || 0;
       var total = Math.max(0, subtotal - discount) + ship + tip + tax;
@@ -427,8 +464,10 @@
           deliveryInstructions: opts.deliveryInstructions || null,
           oosPreference: opts.oosPreference || null,
           prepTimeShown: opts.prepTimeShown || null,
-          totals: opts.totals || {},
-          lines: lines,
+          /* the commercial block records the discount the lines actually
+             produced, so the snapshot can never disagree with its own items */
+          totals: Object.assign({}, opts.totals || {}, { disc: discount }),
+          lines: pricedLines,
           payment: opts.payment || null,
           paymentStatus: opts.paymentStatus || null
         });

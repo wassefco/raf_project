@@ -178,6 +178,7 @@
 <script src="raf_catalog.js"></script>
 <script src="raf_inventory.js"></script>
 <script src="raf_rules.js"></script>
+<script src="raf_marketing.js"></script>
 <script src="raf_checkout.js"></script>
 <script>
 /* ============================================================
@@ -388,7 +389,12 @@
     document.getElementById('sumBody').innerHTML =
         '<div class="sum-row"><span>'+T('المجموع','Subtotal')+'</span><span>'+money(t.sub)+' '+T('د.ك','KWD')+'</span></div>'
       + '<div class="sum-row"><span>'+T('التوصيل','Delivery')+'</span>'+(t.ship===0?'<span class="free">'+T('مجاني','Free')+'</span>':'<span>'+money(t.ship)+'</span>')+'</div>'
-      + (t.disc>0?'<div class="sum-row disc"><span>'+T('خصم الكوبون','Coupon')+' ('+t.coupon.code+')</span><span>− '+money(t.disc)+'</span></div>':'')
+      /* coupon → one total, no per-product breakdown; promotion → named */
+      + (t.disc>0?'<div class="sum-row disc"><span>'
+          + (t.discountSource==='coupon'
+              ? T('الخصم','Discount') + (t.coupon ? ' ('+String(t.coupon.code).replace(/[<>&"]/g,'')+')' : '')
+              : T('عرض','Offer'))
+          + '</span><span>− '+money(t.disc)+'</span></div>':'')
       + (t.tip>0&&showTip?'<div class="sum-row"><span>'+T('إكرامية السائق','Driver tip')+'</span><span>'+money(t.tip)+'</span></div>':'')
       + '<div class="sum-row total"><span>'+T('الإجمالي','Total')+'</span><b>'+money(t.total)+' '+T('د.ك','KWD')+'</b></div>';
     document.getElementById('payLabel').textContent = T('ادفع '+money(t.total)+' د.ك','Pay '+money(t.total)+' KWD');

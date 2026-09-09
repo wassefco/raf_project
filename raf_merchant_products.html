@@ -53,42 +53,270 @@ body{background:var(--bg2);margin:0;}
 .mw-search > i{position:absolute;top:50%;transform:translateY(-50%);inset-inline-start:15px;font-size:19px;
   color:var(--text3);pointer-events:none;}
 .mw-hint{font-size:11px;color:var(--text3);margin:0 2px 12px;}
-.mw-chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:16px;scrollbar-width:none;}
-.mw-chips::-webkit-scrollbar{display:none;}
-.mw-chip{flex:0 0 auto;min-height:44px;padding:0 14px;border-radius:30px;border:1px solid var(--border2);
-  background:var(--card);color:var(--text2);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;
-  display:inline-flex;align-items:center;gap:6px;transition:all .18s;}
-.mw-chip:hover{border-color:var(--gold);color:var(--gold2);}
-.mw-chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#F5F0E4;}
 
-.mw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px;}
-.mw-p{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px;display:flex;gap:12px;
-  transition:border-color .18s,box-shadow .18s;}
-.mw-p:hover{border-color:var(--gold);box-shadow:0 12px 26px -20px rgba(20,16,8,.5);}
-.mw-p-img{width:76px;height:76px;flex:0 0 auto;border-radius:12px;background:var(--bg3) center/cover no-repeat;
-  display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:26px;}
-.mw-p-b{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
-.mw-p-n{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.45;}
-.mw-p-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
-.mw-tag{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:20px;
-  background:var(--bg2);color:var(--text2);font-size:11.5px;font-weight:700;}
-.mw-tag.price{background:var(--gold-soft);color:var(--gold2);font-family:var(--font-en);font-weight:800;}
-.mw-tag.old{text-decoration:line-through;color:var(--text3);font-family:var(--font-en);}
-.mw-tag.disc{background:rgba(217,83,79,.12);color:#A63A36;font-family:var(--font-en);}
-.mw-tag.sku{font-family:var(--font-en);}
-.mw-st{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:20px;
-  font-size:11.5px;font-weight:800;}
-.st-available{background:rgba(46,158,91,.13);color:#1F7A45;}
-.st-out{background:rgba(217,83,79,.12);color:#A63A36;}
-.st-hidden{background:var(--bg3);color:var(--text2);}
-.mw-p-f{display:flex;align-items:center;gap:8px;margin-top:2px;}
-.mw-edit{min-height:44px;padding:0 15px;border-radius:30px;border:1px solid var(--border2);background:var(--card);
-  color:var(--text2);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;
-  display:inline-flex;align-items:center;gap:6px;transition:all .18s;margin-inline-start:auto;}
-.mw-edit:hover:not(:disabled){border-color:var(--gold);background:var(--gold-soft);color:var(--gold2);}
-.mw-edit:disabled{opacity:.45;cursor:not-allowed;}
-.mw-empty{border:1px dashed var(--border2);border-radius:14px;padding:26px;text-align:center;font-size:13px;
-  color:var(--text3);background:var(--card);grid-column:1/-1;}
+/* ══════════════════════════════════════════════════════════════
+   PRODUCTS WORKSPACE — calm hierarchy.
+   One idea per block: identity, then price, then inventory, then
+   actions. Numbers are grouped into a single inventory panel
+   instead of competing pills, so a card can be read at a glance.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ---------- header actions ---------- */
+/* the theme's `html:not([data-ui]) button` rule is (0,1,2); every touch
+   target below is scoped with two classes so 44px actually wins */
+.mw-hact{display:flex;align-items:center;gap:8px;}
+.mw-hact .mw-ico-b{min-height:44px;}
+.pw-bar .pw-view button{min-height:44px;}
+.pw-card .pw-f button{min-height:44px;}
+.pw-ws .mw-ed-x,.pw-ws .mw-add,.pw-ws .pw-mini,.pw-ws .pw-more-h,
+.pw-ws .pw-ws-f button,.pw-val .x,.pw-cb-grid .pw-cb{min-height:44px;}
+.pw-val .x{width:44px;height:44px;}
+.pw-ws .pw-ws-f button{min-height:50px;}
+.mw-ico-b{width:44px;height:44px;flex:0 0 auto;border-radius:13px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-size:18px;cursor:pointer;display:inline-flex;
+  align-items:center;justify-content:center;font-family:inherit;font-weight:800;transition:all .18s;}
+.mw-ico-b:hover{border-color:var(--gold);color:var(--gold2);}
+.mw-ico-b.lang{width:auto;padding:0 14px;font-size:12.5px;}
+
+/* ---------- summary strip ---------- */
+.pw-sum{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:14px;}
+.pw-sum-c{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:11px 13px;
+  text-align:start;cursor:pointer;font-family:inherit;transition:border-color .18s,background .18s;min-height:66px;}
+.pw-sum-c:hover{border-color:var(--gold);}
+.pw-sum-c[aria-pressed="true"]{border-color:var(--gold);background:var(--gold-soft);}
+.pw-sum-n{display:block;font-family:var(--font-en);font-size:21px;font-weight:800;color:var(--ink);line-height:1.2;}
+.pw-sum-l{display:block;font-size:11.5px;font-weight:700;color:var(--text3);margin-top:2px;}
+.pw-sum-c.warn .pw-sum-n{color:#C8791E;}
+.pw-sum-c.bad  .pw-sum-n{color:#A63A36;}
+
+/* ---------- unified toolbar ---------- */
+.pw-bar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:14px;}
+.pw-bar .mw-search{margin:0;flex:1 1 240px;max-width:420px;}
+.pw-sel{position:relative;flex:0 0 auto;}
+.pw-sel select{min-height:44px;border-radius:13px;border:1px solid var(--border2);background:var(--card);
+  font-family:inherit;font-size:12.5px;font-weight:700;color:var(--text2);padding:0 34px 0 13px;cursor:pointer;
+  appearance:none;-webkit-appearance:none;max-width:180px;}
+html[dir="rtl"] .pw-sel select{padding:0 13px 0 34px;}
+.pw-sel select:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+.pw-sel select.on{border-color:var(--gold);background:var(--gold-soft);color:var(--gold2);}
+.pw-sel > i{position:absolute;top:50%;transform:translateY(-50%);inset-inline-end:12px;font-size:15px;
+  color:var(--text3);pointer-events:none;}
+.pw-bar-sp{flex:1 1 auto;min-width:0;}
+.pw-view{display:inline-flex;flex:0 0 auto;border:1px solid var(--border2);border-radius:13px;overflow:hidden;background:var(--card);}
+.pw-view button{width:46px;min-height:44px;border:0;background:transparent;color:var(--text3);font-size:17px;
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .18s;}
+.pw-view button[aria-pressed="true"]{background:var(--ink);color:#F5F0E4;}
+.pw-clear{min-height:44px;padding:0 14px;border-radius:13px;border:1px solid var(--border2);background:var(--card);
+  color:var(--text2);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;display:none;
+  align-items:center;gap:6px;}
+.pw-clear.show{display:inline-flex;}
+.pw-clear:hover{border-color:var(--red);color:#A63A36;}
+
+/* ---------- product grid card ---------- */
+.mw-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));gap:13px;}
+.pw-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;
+  display:flex;flex-direction:column;transition:border-color .18s,box-shadow .18s;}
+.pw-card:hover{border-color:var(--gold);box-shadow:0 14px 30px -22px rgba(20,16,8,.5);}
+.pw-media{position:relative;aspect-ratio:16/10;background:var(--bg3) center/cover no-repeat;display:flex;
+  align-items:center;justify-content:center;color:var(--text3);font-size:34px;}
+.pw-media .pw-state{position:absolute;top:9px;inset-inline-start:9px;}
+.pw-media .pw-disc{position:absolute;top:9px;inset-inline-end:9px;background:rgba(217,83,79,.94);color:#fff;
+  font-family:var(--font-en);font-size:11px;font-weight:800;border-radius:20px;padding:4px 9px;}
+.pw-state{display:inline-flex;align-items:center;gap:5px;height:25px;padding:0 10px;border-radius:20px;
+  font-size:11px;font-weight:800;backdrop-filter:blur(6px);}
+.pw-state.ok  {background:rgba(46,158,91,.16);color:#1F7A45;}
+.pw-state.low {background:rgba(200,121,30,.16);color:#9A5B12;}
+.pw-state.out {background:rgba(217,83,79,.16);color:#A63A36;}
+.pw-state.hid {background:rgba(20,16,8,.10);color:var(--text2);}
+.pw-state.none{background:rgba(20,16,8,.08);color:var(--text3);}
+.pw-media .pw-state.ok{background:rgba(255,255,255,.9);}
+.pw-media .pw-state.low{background:rgba(255,255,255,.9);}
+.pw-media .pw-state.out{background:rgba(255,255,255,.9);}
+.pw-media .pw-state.hid{background:rgba(255,255,255,.9);}
+.pw-media .pw-state.none{background:rgba(255,255,255,.9);}
+.pw-b{padding:13px 14px 0;flex:1;min-width:0;}
+.pw-name{font-size:14px;font-weight:800;color:var(--ink);line-height:1.5;margin-bottom:5px;
+  display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.pw-price{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:11px;}
+.pw-price b{font-family:var(--font-en);font-size:17px;font-weight:800;color:var(--ink);}
+.pw-price span{font-family:var(--font-en);font-size:12px;color:var(--text3);text-decoration:line-through;}
+.pw-price em{font-style:normal;font-size:11.5px;color:var(--text3);font-weight:700;}
+
+/* the single inventory block — never split across loose badges */
+.pw-inv{background:var(--bg);border:1px solid var(--border);border-radius:13px;padding:9px 11px;}
+.pw-inv-h{display:flex;align-items:center;gap:7px;margin-bottom:7px;}
+.pw-inv-h b{flex:1;min-width:0;font-size:11px;font-weight:800;color:var(--text3);letter-spacing:.4px;text-transform:uppercase;}
+.pw-inv-n{display:flex;gap:6px;}
+.pw-inv-n span{flex:1;min-width:0;text-align:center;border-radius:9px;padding:5px 3px;background:var(--card);
+  border:1px solid var(--border);font-family:var(--font-en);font-size:14px;font-weight:800;color:var(--ink);}
+.pw-inv-n span em{display:block;font-family:var(--font-ar);font-style:normal;font-size:10px;font-weight:700;
+  color:var(--text3);margin-top:1px;}
+.pw-inv-n span.hi{background:var(--gold-soft);border-color:var(--gold);color:var(--gold2);}
+.pw-inv-n span.hi em{color:var(--gold2);}
+.pw-inv-miss{font-size:11.5px;color:#9A5B12;line-height:1.6;display:flex;gap:6px;align-items:flex-start;}
+.pw-combo{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;border-radius:20px;
+  padding:3px 8px;background:var(--gold-soft);color:var(--gold2);}
+.pw-sku{font-family:var(--font-en);font-size:11px;color:var(--text3);margin-top:9px;}
+.pw-f{display:flex;gap:8px;padding:12px 14px 14px;}
+.pw-f button{min-height:44px;border-radius:12px;font-family:inherit;font-size:12.5px;font-weight:800;
+  cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:all .18s;}
+.pw-f .pw-edit{flex:1;background:var(--ink);color:#F5F0E4;border:1px solid var(--ink);}
+.pw-f .pw-edit:hover:not(:disabled){background:#241F17;}
+.pw-f .pw-stock{flex:1;background:var(--card);color:var(--text2);border:1px solid var(--border2);}
+.pw-f .pw-stock:hover:not(:disabled){border-color:var(--gold);background:var(--gold-soft);color:var(--gold2);}
+.pw-f button:disabled{opacity:.45;cursor:not-allowed;}
+
+/* ---------- list view ---------- */
+.mw-grid.list{display:flex;flex-direction:column;gap:8px;}
+.mw-grid.list .pw-card{flex-direction:row;align-items:center;gap:13px;padding:11px 13px;border-radius:15px;}
+.mw-grid.list .pw-media{aspect-ratio:auto;width:58px;height:58px;flex:0 0 auto;border-radius:12px;font-size:23px;}
+.mw-grid.list .pw-media .pw-state,.mw-grid.list .pw-media .pw-disc{display:none;}
+.mw-grid.list .pw-b{padding:0;flex:1 1 190px;min-width:150px;}
+.mw-grid.list .pw-name{margin-bottom:3px;-webkit-line-clamp:1;line-clamp:1;font-size:13.5px;}
+.mw-grid.list .pw-price{margin-bottom:0;}
+.mw-grid.list .pw-price b{font-size:14.5px;}
+.mw-grid.list .pw-sku{margin-top:3px;}
+.mw-grid.list .pw-inv{flex:0 0 auto;width:212px;background:transparent;border:0;padding:0;}
+.mw-grid.list .pw-inv-h{margin-bottom:5px;}
+.mw-grid.list .pw-f{padding:0;flex:0 0 auto;}
+.mw-grid.list .pw-f button{flex:0 0 auto;padding:0 13px;}
+
+/* ---------- empty states ---------- */
+.mw-empty{border:1px dashed var(--border2);border-radius:16px;padding:34px 22px;text-align:center;
+  background:var(--card);grid-column:1/-1;}
+.mw-empty i{font-size:34px;color:var(--text3);display:block;margin-bottom:10px;}
+.mw-empty b{display:block;font-size:14.5px;font-weight:800;color:var(--ink);margin-bottom:5px;}
+.mw-empty span{display:block;font-size:12.5px;color:var(--text3);line-height:1.7;max-width:380px;margin:0 auto;}
+.mw-empty button{margin-top:13px;min-height:44px;padding:0 18px;border-radius:30px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;}
+.mw-empty button:hover{border-color:var(--gold);color:var(--gold2);}
+
+/* ---------- create product workspace ---------- */
+.pw-add{min-height:44px;padding:0 16px;border-radius:13px;border:1px solid var(--gold2);background:var(--gold);
+  color:#1C1606;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;display:inline-flex;
+  align-items:center;gap:7px;transition:filter .18s;}
+.mw-hact .pw-add{min-height:44px;}
+.pw-add:hover{filter:brightness(1.05);}
+.pw-ws{position:fixed;inset:0;z-index:96;display:none;background:var(--bg2);}
+.pw-ws.show{display:flex;flex-direction:column;}
+.pw-ws-h{display:flex;align-items:center;gap:12px;padding:13px clamp(14px,2.2vw,24px);background:var(--card);
+  border-bottom:1px solid var(--border);flex:0 0 auto;}
+.pw-ws-h .t{flex:1;min-width:0;}
+.pw-ws-h h2{font-family:var(--font-display);font-size:19px;font-weight:800;color:var(--ink);}
+.pw-ws-h .sub{font-size:11.5px;color:var(--text3);margin-top:2px;}
+.pw-ws-b{flex:1;overflow:auto;padding:20px clamp(14px,2.2vw,24px) 30px;}
+.pw-ws-in{max-width:760px;margin:0 auto;}
+.pw-ws-f{flex:0 0 auto;display:flex;gap:10px;padding:12px clamp(14px,2.2vw,24px) calc(12px + env(safe-area-inset-bottom,0px));
+  background:var(--card);border-top:1px solid var(--border);}
+.pw-ws-f .sp{flex:1;}
+.pw-ws-f button{min-height:50px;padding:0 22px;border-radius:30px;font-family:inherit;font-size:14.5px;
+  font-weight:800;cursor:pointer;border:1px solid transparent;}
+.pw-ws-f .pw-ws-cancel{background:var(--card);color:var(--text2);border-color:var(--border2);}
+.pw-ws-f .pw-ws-save{background:var(--gold);color:#1C1606;border-color:var(--gold2);min-width:190px;}
+.pw-ws-f .pw-ws-save:disabled{opacity:.55;cursor:progress;}
+
+/* numbered sections keep the sequence obvious without a wizard */
+.pw-step{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px 20px;margin-bottom:14px;}
+.pw-step-h{display:flex;align-items:center;gap:11px;margin-bottom:15px;}
+.pw-step-n{width:30px;height:30px;flex:0 0 auto;border-radius:10px;background:var(--bg3);color:var(--text2);
+  display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-en);font-size:13px;font-weight:800;}
+.pw-step-t{flex:1;min-width:0;}
+.pw-step-t b{display:block;font-size:15px;font-weight:800;color:var(--ink);}
+.pw-step-t span{display:block;font-size:11.5px;color:var(--text3);margin-top:2px;line-height:1.6;}
+.pw-step.opt .pw-step-n{background:var(--gold-soft);color:var(--gold2);}
+
+/* option groups + the combination picker */
+.pw-og{border:1px solid var(--border2);border-radius:14px;padding:13px;margin-bottom:11px;background:var(--bg);}
+.pw-og-h{display:flex;align-items:center;gap:8px;margin-bottom:11px;flex-wrap:wrap;}
+.pw-og-h select{min-height:44px;border-radius:11px;border:1px solid var(--border2);background:var(--card);
+  font-family:inherit;font-size:12.5px;font-weight:700;color:var(--ink);padding:0 12px;}
+.pw-og-h .sp{flex:1;}
+.pw-vals{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px;}
+.pw-val{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 6px 0 11px;border-radius:12px;
+  border:1px solid var(--border2);background:var(--card);font-size:12.5px;font-weight:700;color:var(--ink);
+  overflow:hidden;}
+html[dir="rtl"] .pw-val{padding:0 11px 0 6px;}
+/* the swatch is the colour control, so it gets a real touch target rather
+   than a decorative dot: it fills the chip's leading edge */
+.pw-val.col{padding-inline-start:0;}
+.pw-val .sw{width:44px;min-height:44px;height:44px;border:0;border-inline-end:1px solid var(--border2);
+  flex:0 0 auto;padding:0;cursor:pointer;background:none;border-radius:0;}
+.pw-val .lbl{max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pw-val .x{width:32px;height:32px;border-radius:9px;border:0;background:transparent;color:var(--text3);
+  font-size:15px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
+.pw-val .x:hover{background:rgba(217,83,79,.12);color:#A63A36;}
+.pw-val-add{display:flex;gap:7px;flex-wrap:wrap;}
+.pw-val-add input{flex:1 1 130px;min-width:0;min-height:44px;border-radius:11px;border:1px solid var(--border2);
+  background:var(--card);font-family:inherit;font-size:13px;color:var(--ink);padding:0 12px;}
+.pw-val-add input[type="color"]{flex:0 0 52px;padding:4px;cursor:pointer;}
+.pw-val-add button{min-height:44px;padding:0 14px;border-radius:11px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;}
+.pw-val-add button:hover{border-color:var(--gold);color:var(--gold2);}
+
+.pw-combos{border:1px solid var(--gold);background:var(--gold-soft);border-radius:14px;padding:13px;}
+.pw-combos-h{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:11px;}
+.pw-combos-h b{flex:1;min-width:120px;font-size:13px;font-weight:800;color:var(--ink);}
+.pw-mini{min-height:38px;padding:0 12px;border-radius:20px;border:1px solid var(--border2);background:var(--card);
+  color:var(--text2);font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer;}
+.pw-mini:hover{border-color:var(--gold);color:var(--gold2);}
+.pw-cb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:7px;}
+.pw-cb{display:flex;align-items:center;gap:8px;min-height:46px;padding:0 11px;border-radius:12px;
+  border:1px solid var(--border2);background:var(--card);cursor:pointer;font-family:inherit;font-size:12.5px;
+  font-weight:700;color:var(--text2);text-align:start;transition:all .16s;}
+.pw-cb .tick{width:20px;height:20px;flex:0 0 auto;border-radius:6px;border:1.5px solid var(--border2);
+  display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:transparent;}
+.pw-cb[aria-pressed="true"]{border-color:var(--gold);background:var(--gold-soft);color:var(--gold2);}
+.pw-cb[aria-pressed="true"] .tick{background:var(--gold2);border-color:var(--gold2);color:#fff;}
+.pw-cb .dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.18);flex:0 0 auto;}
+.pw-cb-sum{margin-top:11px;font-size:12px;font-weight:700;color:var(--text2);line-height:1.7;}
+.pw-none{font-size:12.5px;color:var(--text3);line-height:1.7;}
+
+/* collapsible advanced block */
+.pw-more{border:1px solid var(--border2);border-radius:14px;overflow:hidden;}
+.pw-more-h{display:flex;align-items:center;gap:9px;width:100%;min-height:52px;padding:0 14px;border:0;
+  background:var(--bg);color:var(--ink);font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;}
+.pw-more-h i:last-child{margin-inline-start:auto;color:var(--text3);}
+.pw-more-b{padding:14px;border-top:1px solid var(--border);}
+.pw-ro-note{font-size:11.5px;color:var(--text3);line-height:1.7;margin-top:4px;}
+
+@media (max-width:760px){
+  .pw-ws-f button{flex:1;min-width:0;padding:0 12px;}
+  .pw-ws-f .sp{display:none;}
+  .pw-cb-grid{grid-template-columns:1fr 1fr;}
+}
+
+/* ---------- inventory drawer ---------- */
+.pw-dr{position:fixed;inset:0;z-index:95;display:none;background:rgba(20,16,8,.5);}
+.pw-dr.show{display:block;}
+.pw-dr-c{position:absolute;inset-block:0;inset-inline-end:0;width:min(560px,100%);background:var(--card);
+  display:flex;flex-direction:column;border-inline-start:1px solid var(--border);}
+.pw-dr-h{display:flex;align-items:flex-start;gap:11px;padding:16px 20px;border-bottom:1px solid var(--border);}
+.pw-dr-h .t{flex:1;min-width:0;}
+.pw-dr-h h3{font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--ink);line-height:1.4;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pw-dr-h .sub{font-size:11.5px;color:var(--text3);margin-top:3px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.pw-dr-b{flex:1;overflow:auto;padding:18px 20px calc(20px + env(safe-area-inset-bottom,0px));}
+.pw-mode{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:800;border-radius:20px;
+  padding:3px 9px;background:var(--bg3);color:var(--text2);}
+.pw-mode.on{background:var(--gold-soft);color:var(--gold2);}
+
+@media (max-width:900px){
+  .pw-sum{grid-template-columns:repeat(5,minmax(112px,1fr));overflow-x:auto;scrollbar-width:none;
+    padding-bottom:4px;margin-inline:-2px;padding-inline:2px;}
+  .pw-sum::-webkit-scrollbar{display:none;}
+  .pw-sum-c{min-width:112px;}
+}
+@media (max-width:760px){
+  .pw-bar .mw-search{flex:1 1 100%;max-width:none;}
+  .pw-sel{flex:1 1 calc(50% - 5px);}
+  .pw-sel select{max-width:none;width:100%;}
+  .pw-bar-sp{display:none;}
+  .mw-grid.list .pw-card{flex-wrap:wrap;}
+  .mw-grid.list .pw-inv{width:100%;flex:1 1 100%;order:3;}
+  .mw-grid.list .pw-f{order:4;width:100%;}
+  .mw-grid.list .pw-f button{flex:1;}
+  .pw-dr-c{width:100%;border-inline-start:0;}
+}
 
 /* ---------- editor ---------- */
 .mw-ed{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:20px;
@@ -333,6 +561,7 @@ body{background:var(--bg2);margin:0;}
     <a class="mw-rail-logo" href="raf_homepage.html" aria-label="RAF">رف</a>
     <a class="mw-rail-b" href="raf_merchant.html"><i class="ti ti-clipboard-list"></i><span data-ar="الطلبات" data-en="Orders">الطلبات</span></a>
     <a class="mw-rail-b on" href="raf_merchant_products.html" aria-current="page"><i class="ti ti-package"></i><span data-ar="المنتجات" data-en="Products">المنتجات</span></a>
+    <a class="mw-rail-b" href="raf_marketing.html"><i class="ti ti-speakerphone"></i><span data-ar="التسويق" data-en="Marketing">التسويق</span></a>
     <div class="mw-rail-sp"></div>
   </aside>
 
@@ -345,16 +574,38 @@ body{background:var(--bg2);margin:0;}
       </div>
       <div class="mw-head-sp"></div>
       <span class="mw-count" id="pCount"></span>
+      <div class="mw-hact">
+        <button class="pw-add" id="addBtn" onclick="openCreate()" style="display:none">
+          <i class="ti ti-plus"></i> <span data-ar="إضافة منتج" data-en="Add Product">إضافة منتج</span></button>
+        <button class="mw-ico-b" id="refreshBtn" onclick="refreshAll()"
+                data-ar-t="تحديث" data-en-t="Refresh" aria-label="تحديث"><i class="ti ti-refresh"></i></button>
+        <button class="mw-ico-b lang" onclick="toggleLang()"><span id="langLabel">EN</span></button>
+      </div>
     </header>
 
     <div class="mw-body">
-      <div class="mw-search">
-        <i class="ti ti-search"></i>
-        <input id="q" type="search" autocomplete="off" oninput="render()"
-               data-ar-ph="ابحث في منتجاتك…" data-en-ph="Search your products…" placeholder="ابحث في منتجاتك…">
+      <!-- summary: derived live from the product and inventory authorities -->
+      <div class="pw-sum" id="summary"></div>
+
+      <!-- one toolbar; nothing is scattered elsewhere on the page -->
+      <div class="pw-bar">
+        <div class="mw-search">
+          <i class="ti ti-search"></i>
+          <input id="q" type="search" autocomplete="off" oninput="render()"
+                 data-ar-ph="ابحث في منتجاتك…" data-en-ph="Search your products…" placeholder="ابحث في منتجاتك…">
+        </div>
+        <div class="pw-sel"><select id="fStatus" onchange="setStatus(this.value)"></select><i class="ti ti-chevron-down"></i></div>
+        <div class="pw-sel"><select id="fStock"  onchange="setStock(this.value)"></select><i class="ti ti-chevron-down"></i></div>
+        <div class="pw-sel"><select id="fCat"    onchange="setCat(this.value)"></select><i class="ti ti-chevron-down"></i></div>
+        <button class="pw-clear" id="clearBtn" onclick="clearFilters()">
+          <i class="ti ti-x"></i> <span data-ar="مسح" data-en="Clear">مسح</span></button>
+        <div class="pw-bar-sp"></div>
+        <div class="pw-view" role="group">
+          <button id="vGrid" aria-pressed="true"  onclick="setView('grid')" aria-label="grid"><i class="ti ti-layout-grid"></i></button>
+          <button id="vList" aria-pressed="false" onclick="setView('list')" aria-label="list"><i class="ti ti-list"></i></button>
+        </div>
       </div>
       <div class="mw-hint" id="searchHint"></div>
-      <div class="mw-chips" id="chips" role="group"></div>
       <div class="mw-grid" id="grid"></div>
     </div>
   </div>
@@ -372,6 +623,40 @@ body{background:var(--bg2);margin:0;}
       <button class="mw-btn-ghost" onclick="tryClose()" data-ar="إلغاء" data-en="Cancel">إلغاء</button>
       <button class="mw-btn-gold" id="saveBtn" onclick="save()" data-ar="حفظ التغييرات" data-en="Save changes">حفظ التغييرات</button>
     </div>
+  </div>
+</div>
+
+<!-- CREATE PRODUCT WORKSPACE — one form, numbered sections, no wizard.
+     Every write goes through RAFMerchantProducts.create(); the page owns no
+     identity, no persistence and no business rule. -->
+<div class="pw-ws" id="createWs" role="dialog" aria-modal="true" aria-labelledby="cwTitle">
+  <div class="pw-ws-h">
+    <div class="t">
+      <h2 id="cwTitle" data-ar="منتج جديد" data-en="New product">منتج جديد</h2>
+      <div class="sub" id="cwSub"></div>
+    </div>
+    <button class="mw-ed-x" onclick="cancelCreate()" aria-label="close"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="pw-ws-b"><div class="pw-ws-in" id="cwBody"></div></div>
+  <div class="pw-ws-f">
+    <button class="pw-ws-cancel" onclick="cancelCreate()" data-ar="إلغاء" data-en="Cancel">إلغاء</button>
+    <div class="sp"></div>
+    <button class="pw-ws-save" id="cwSave" onclick="saveCreate()" data-ar="حفظ المنتج" data-en="Save product">حفظ المنتج</button>
+  </div>
+</div>
+
+<!-- INVENTORY WORKSPACE — the one place stock is managed. It reads and writes
+     only through RAFInventory; this page never computes or mutates stock. -->
+<div class="pw-dr" id="invDrawer" role="dialog" aria-modal="true" aria-labelledby="invTitle">
+  <div class="pw-dr-c">
+    <div class="pw-dr-h">
+      <div class="t">
+        <h3 id="invTitle">—</h3>
+        <div class="sub" id="invSub"></div>
+      </div>
+      <button class="mw-ed-x" onclick="closeInventory()" aria-label="close"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="pw-dr-b" id="invBox"></div>
   </div>
 </div>
 
@@ -410,14 +695,25 @@ body{background:var(--bg2);margin:0;}
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   function el(id){ return document.getElementById(id); }
 
-  /* ---------- filters, built only from data that exists ---------- */
-  var FILTERS = [
-    { k:'all',       ar:'الكل',        en:'All' },
+  /* ---------- filter state ----------
+     Three independent axes that intersect with AND. The status axis keeps the
+     exact meaning it always had (lifecycle + stock state), so nothing that
+     depended on it changes; stock and category are additional lenses. */
+  var fStatus = 'all', fStock = 'all', fCat = 'all', view = 'grid';
+
+  var STATUS_OPTS = [
+    { k:'all',       ar:'كل الحالات',  en:'All statuses' },
     { k:'available', ar:'متوفر',       en:'Available' },
     { k:'out',       ar:'غير متوفر',   en:'Unavailable' },
     { k:'hidden',    ar:'مخفي',        en:'Hidden' }
   ];
-  var filter = 'all';
+  var STOCK_OPTS = [
+    { k:'all',   ar:'كل المخزون',      en:'All stock' },
+    { k:'in',    ar:'متوفر بالمخزون',  en:'In stock' },
+    { k:'low',   ar:'مخزون منخفض',     en:'Low stock' },
+    { k:'zero',  ar:'نفد المخزون',     en:'Out of stock' },
+    { k:'combo', ar:'مخزون الخيارات',  en:'Combination inventory' }
+  ];
 
   /* Availability comes from the inventory authority; the page never computes
      it. Product lifecycle (hidden) stays separate from stock. */
@@ -434,41 +730,109 @@ body{background:var(--bg2);margin:0;}
     if (!s || s.stock == null) return null;
     return { onHand:INV.onHand(id), reserved:INV.reserved(id), available:INV.available(id) };
   }
+  /* LOW STOCK. There is no low-stock threshold in any authority, so none is
+     invented here: this reuses the ONE convention already shipped to
+     customers — raf_product.html / raf_quick.html call a product "only N
+     left" at 5 or fewer. The merchant therefore sees low exactly when a
+     shopper would. It is a display band only; nothing depends on it. */
+  var LOW_AT = 5;
+  function stockBand(p){
+    var v = invOf(p.id);
+    if (!v) return 'none';
+    if (v.available <= 0) return 'zero';
+    return v.available <= LOW_AT ? 'low' : 'in';
+  }
+  function isCombo(id){ return !!(INV && INV.isCombinationMode(id)); }
+
   function statusLabel(k){
     return k==='hidden'  ? T('مخفي','Hidden')
          : k==='out'     ? T('غير متوفر','Out of stock')
          : k==='unknown' ? T('بيانات المخزون غير متاحة','Inventory data unavailable')
          : T('متوفر','Available');
   }
-  /* compact inventory line for a product card */
-  function invTagsHTML(id){
-    var v = invOf(id);
-    if (!v) return '<span class="mw-tag warn"><i class="ti ti-alert-triangle"></i>'
-      + T('لا يوجد سجل مخزون','No inventory record')+'</span>';
-    return '<span class="mw-tag" title="'+T('المخزون','On hand')+'"><i class="ti ti-box"></i>'
-        + T('المخزون','On hand')+' '+v.onHand+'</span>'
-      + (v.reserved > 0
-          ? '<span class="mw-tag res" title="'+T('محجوز','Reserved')+'"><i class="ti ti-lock"></i>'
-            + T('محجوز','Reserved')+' '+v.reserved+'</span>' : '')
-      + '<span class="mw-tag avail" title="'+T('المتاح','Available')+'"><i class="ti ti-circle-check"></i>'
-        + T('المتاح','Available')+' '+v.available+'</span>';
+  /* one state chip per card: lifecycle first, then the stock band */
+  function stateChip(p){
+    if (p.status === 'hidden')
+      return '<span class="pw-state hid"><i class="ti ti-eye-off"></i>'+T('مخفي','Hidden')+'</span>';
+    var b = stockBand(p);
+    return b==='none' ? '<span class="pw-state none"><i class="ti ti-help-circle"></i>'+T('لا يوجد سجل','No record')+'</span>'
+         : b==='zero' ? '<span class="pw-state out"><i class="ti ti-ban"></i>'+T('نفد المخزون','Out of stock')+'</span>'
+         : b==='low'  ? '<span class="pw-state low"><i class="ti ti-alert-triangle"></i>'+T('مخزون منخفض','Low stock')+'</span>'
+         :              '<span class="pw-state ok"><i class="ti ti-circle-check"></i>'+T('متوفر','In stock')+'</span>';
   }
 
-  function renderChips(){
-    var cats = MP.categories();
-    var rows = FILTERS.slice();
-    /* category filters appear only for categories this store actually uses */
-    var used = {};
-    MP.list({ storeSlug:SLUG }).forEach(function(p){ if (p.cat) used[p.cat] = 1; });
-    cats.filter(function(c){ return used[c.k]; }).forEach(function(c){
-      rows.push({ k:'cat:'+c.k, ar:c.ar, en:c.en });
+  /* ---------- summary ----------
+     Counts only; every number is derived from the same authorities the cards
+     use, so the strip can never disagree with the list. */
+  function summaryOf(all){
+    var s = { total:all.length, active:0, hidden:0, low:0, zero:0 };
+    all.forEach(function(p){
+      if (p.status === 'hidden') s.hidden++; else s.active++;
+      var b = stockBand(p);
+      if (b === 'low') s.low++; else if (b === 'zero') s.zero++;
     });
-    el('chips').innerHTML = rows.map(function(r){
-      return '<button class="mw-chip" aria-pressed="'+(filter===r.k)+'" onclick="setFilter(\''+r.k+'\')">'
-        + T(r.ar,r.en)+'</button>';
+    return s;
+  }
+  function renderSummary(all){
+    var s = summaryOf(all);
+    var rows = [
+      { n:s.total,  ar:'إجمالي المنتجات', en:'Total products', cls:'',     act:"clearFilters()",        on:(fStatus==='all'&&fStock==='all'&&fCat==='all') },
+      { n:s.active, ar:'معروض',           en:'Active',         cls:'',     act:"setStatusFromSummary('available')", on:fStatus==='available' },
+      { n:s.hidden, ar:'مخفي',            en:'Hidden',         cls:'',     act:"setStatusFromSummary('hidden')",    on:fStatus==='hidden' },
+      { n:s.low,    ar:'مخزون منخفض',      en:'Low stock',      cls:'warn', act:"setStockFromSummary('low')",        on:fStock==='low' },
+      { n:s.zero,   ar:'نفد المخزون',      en:'Out of stock',   cls:'bad',  act:"setStockFromSummary('zero')",       on:fStock==='zero' }
+    ];
+    el('summary').innerHTML = rows.map(function(r){
+      return '<button class="pw-sum-c '+r.cls+'" aria-pressed="'+(r.on?'true':'false')+'" onclick="'+r.act+'">'
+        + '<span class="pw-sum-n">'+r.n+'</span>'
+        + '<span class="pw-sum-l">'+T(r.ar,r.en)+'</span></button>';
     }).join('');
   }
-  window.setFilter = function(k){ filter = k; renderChips(); render(); };
+
+  /* ---------- toolbar ---------- */
+  function opt(list, cur){
+    return list.map(function(o){
+      return '<option value="'+o.k+'"'+(cur===o.k?' selected':'')+'>'+esc(T(o.ar,o.en))+'</option>';
+    }).join('');
+  }
+  function renderToolbar(all){
+    /* category options appear only for categories this store actually uses */
+    var used = {};
+    all.forEach(function(p){ if (p.cat) used[p.cat] = 1; });
+    var cats = [{ k:'all', ar:'كل الفئات', en:'All categories' }]
+      .concat(MP.categories().filter(function(c){ return used[c.k]; }));
+
+    var st = el('fStatus'), sk = el('fStock'), ct = el('fCat');
+    st.innerHTML = opt(STATUS_OPTS, fStatus); st.classList.toggle('on', fStatus!=='all');
+    sk.innerHTML = opt(STOCK_OPTS,  fStock);  sk.classList.toggle('on', fStock!=='all');
+    ct.innerHTML = opt(cats,        fCat);    ct.classList.toggle('on', fCat!=='all');
+
+    var any = fStatus!=='all' || fStock!=='all' || fCat!=='all' || !!((el('q')||{}).value||'').trim();
+    el('clearBtn').classList.toggle('show', any);
+    el('vGrid').setAttribute('aria-pressed', view==='grid' ? 'true':'false');
+    el('vList').setAttribute('aria-pressed', view==='list' ? 'true':'false');
+  }
+  window.setStatus = function(v){ fStatus = v; render(); };
+  window.setStock  = function(v){ fStock  = v; render(); };
+  window.setCat    = function(v){ fCat    = v; render(); };
+  /* a summary tile toggles its own lens without disturbing the others */
+  window.setStatusFromSummary = function(v){ fStatus = (fStatus===v?'all':v); render(); };
+  window.setStockFromSummary  = function(v){ fStock  = (fStock===v?'all':v);  render(); };
+  window.clearFilters = function(){
+    fStatus='all'; fStock='all'; fCat='all';
+    var q = el('q'); if (q) q.value = '';
+    render();
+  };
+  window.setView = function(v){
+    view = (v==='list') ? 'list' : 'grid';
+    try { localStorage.setItem('raf_pw_view', view); } catch(e){}
+    render();
+  };
+  window.refreshAll = function(){
+    render();
+    if (invPid) renderInventory();
+    toast(T('تم التحديث','Refreshed'));
+  };
 
   /* ---------- list ---------- */
   function matches(p, q){
@@ -481,38 +845,84 @@ body{background:var(--bg2);margin:0;}
   window.render = function(){
     var q = (el('q')||{}).value || '';
     var all = MP.list({ storeSlug:SLUG });
+    renderSummary(all);
+    renderToolbar(all);
+
     var list = all.filter(function(p){
       if (!matches(p,q)) return false;
-      if (filter === 'all') return true;
-      if (filter.indexOf('cat:') === 0) return p.cat === filter.slice(4);
-      return statusOf(p) === filter;
+      if (fStatus !== 'all' && statusOf(p) !== fStatus) return false;
+      if (fCat    !== 'all' && p.cat !== fCat) return false;
+      if (fStock  !== 'all'){
+        if (fStock === 'combo') { if (!isCombo(p.id)) return false; }
+        else if (stockBand(p) !== fStock) return false;
+      }
+      return true;
     });
+
     el('pCount').textContent = T(all.length+' منتج', all.length+' products');
-    el('grid').innerHTML = list.length ? list.map(cardHTML).join('')
-      : '<div class="mw-empty">'+T('لا توجد منتجات مطابقة','No matching products')+'</div>';
+    var grid = el('grid');
+    grid.className = 'mw-grid' + (view==='list' ? ' list' : '');
+    grid.innerHTML = list.length ? list.map(cardHTML).join('') : emptyHTML(all.length, q);
   };
+  /* every empty situation says what happened and how to get out of it */
+  function emptyHTML(total, q){
+    if (!total) return '<div class="mw-empty"><i class="ti ti-package-off"></i>'
+      + '<b>'+T('لا توجد منتجات في متجرك بعد','No products in your store yet')+'</b>'
+      + '<span>'+T('عندما تُضاف منتجات إلى هذا المتجر ستظهر هنا مع مخزونها.',
+                   'When products are added to this store they appear here with their inventory.')+'</span></div>';
+    if (q.trim()) return '<div class="mw-empty"><i class="ti ti-search-off"></i>'
+      + '<b>'+T('لا نتائج للبحث','No search results')+'</b>'
+      + '<span>'+T('لم يطابق أي منتج «'+q.trim()+'». جرّب اسماً آخر أو رقم SKU.',
+                   'Nothing matched “'+q.trim()+'”. Try another name or a SKU.')+'</span>'
+      + '<button onclick="clearFilters()">'+T('مسح البحث والفلاتر','Clear search and filters')+'</button></div>';
+    return '<div class="mw-empty"><i class="ti ti-filter-off"></i>'
+      + '<b>'+T('لا منتجات بهذه الفلاتر','No products match these filters')+'</b>'
+      + '<span>'+T('لديك '+total+' منتج، لكن أياً منها لا يطابق الفلاتر الحالية.',
+                   'You have '+total+' products, but none match the current filters.')+'</span>'
+      + '<button onclick="clearFilters()">'+T('مسح الفلاتر','Clear filters')+'</button></div>';
+  }
+
+  /* ---------- product card ----------
+     Same markup for both views; the layout difference is CSS only, so there
+     is exactly one card builder and one source of truth behind it. */
   function cardHTML(p){
-    var st = statusOf(p);
     var canEdit = MP.canEdit();
-    return '<article class="mw-p">'
-      + '<div class="mw-p-img"'+(p.img?' style="background-image:url(\''+esc(p.img)+'\')"':'')+'>'
-        + (p.img?'':'<i class="ti '+esc(p.ic||'ti-box')+'"></i>')+'</div>'
-      + '<div class="mw-p-b">'
-        + '<div class="mw-p-n">'+esc(L(p.name))+'</div>'
-        + '<div class="mw-p-meta">'
-          + '<span class="mw-tag price">'+esc(p.price)+' '+MP.currency()+'</span>'
-          + (p.old ? '<span class="mw-tag old">'+esc(p.old)+'</span>' : '')
-          + (p.disc ? '<span class="mw-tag disc">-'+esc(p.disc)+'%</span>' : '')
+    var v = invOf(p.id), combo = isCombo(p.id);
+    var inv = !v
+      ? '<div class="pw-inv-miss"><i class="ti ti-alert-triangle"></i><span>'
+        + T('لا يوجد سجل مخزون لهذا المنتج','No inventory record for this product')+'</span></div>'
+      : '<div class="pw-inv-n">'
+          + '<span>'+v.onHand+'<em>'+T('المخزون','On hand')+'</em></span>'
+          + '<span>'+v.reserved+'<em>'+T('محجوز','Reserved')+'</em></span>'
+          + '<span class="hi">'+v.available+'<em>'+T('المتاح','Available')+'</em></span>'
+        + '</div>';
+
+    return '<article class="pw-card">'
+      + '<div class="pw-media"'+(p.img?' style="background-image:url(\''+esc(p.img)+'\')"':'')+'>'
+        + (p.img?'':'<i class="ti '+esc(p.ic||'ti-box')+'"></i>')
+        + stateChip(p)
+        + (p.disc ? '<span class="pw-disc">-'+esc(p.disc)+'%</span>' : '')
+      + '</div>'
+      + '<div class="pw-b">'
+        + '<div class="pw-name">'+esc(L(p.name))+'</div>'
+        + '<div class="pw-price"><b>'+esc(p.price)+'</b><em>'+MP.currency()+'</em>'
+          + (p.old ? '<span>'+esc(p.old)+'</span>' : '')+'</div>'
+        + '<div class="pw-inv">'
+          + '<div class="pw-inv-h"><b>'+T('المخزون','Inventory')+'</b>'
+            + (combo ? '<span class="pw-combo"><i class="ti ti-versions"></i>'
+                       + T('مخزون الخيارات','Combination')+'</span>' : '')
+            + (view==='list' ? stateChip(p) : '')
+          + '</div>'
+          + inv
         + '</div>'
-        + '<div class="mw-p-meta">'
-          + '<span class="mw-st st-'+st+'">'+statusLabel(st)+'</span>'
-          + invTagsHTML(p.id)
-          + (p.cat ? '<span class="mw-tag">'+esc(catName(p.cat))+'</span>' : '')
-          + '<span class="mw-tag sku">SKU '+esc(p.id)+'</span>'
-        + '</div>'
-        + '<div class="mw-p-f"><button class="mw-edit" onclick="openEditor(\''+esc(p.id)+'\')"'
+        + '<div class="pw-sku">SKU '+esc(p.sku || p.id)+(p.cat?' · '+esc(catName(p.cat)):'')+'</div>'
+      + '</div>'
+      + '<div class="pw-f">'
+        + '<button class="pw-edit" onclick="openEditor(\''+esc(p.id)+'\')"'
           + (canEdit?'':' disabled title="'+T('لا تملك صلاحية التعديل','No edit permission')+'"')+'>'
-          + '<i class="ti ti-pencil"></i> '+T('تعديل','Edit')+'</button></div>'
+          + '<i class="ti ti-pencil"></i> '+T('تعديل','Edit')+'</button>'
+        + '<button class="pw-stock" onclick="openInventory(\''+esc(p.id)+'\')">'
+          + '<i class="ti ti-box"></i> '+T('المخزون','Inventory')+'</button>'
       + '</div></article>';
   }
   function catName(key){
@@ -535,10 +945,7 @@ body{background:var(--bg2);margin:0;}
     vImages = MM.list(id);
     el('edTitle').textContent = L(p.name);
     el('edBody').innerHTML = editorHTML(p);
-    adjDir = 1;
-    /* the combination baseline is the version this merchant is now reading */
-    cmbResetDraft(id);
-    renderInventory(); renderMedia(); renderGroups(); renderGuide();
+    renderMedia(); renderGroups(); renderGuide();
     el('editor').classList.add('show');
     document.body.style.overflow = 'hidden';
     el('edBody').addEventListener('input', markDirty);
@@ -581,15 +988,17 @@ body{background:var(--bg2);margin:0;}
             T('يتطلب سعراً أصلياً أعلى من السعر الحالي','Requires an original price higher than the current price'))
       + '</section>'
 
-      /* AVAILABILITY — the customer-facing state only. Numeric inventory is
-         shown for reference and cannot be edited in this phase. */
+      /* AVAILABILITY — the customer-facing state only. Stock itself is managed
+         in the inventory workspace, so there is one place that writes stock
+         and the editor never becomes a second one. */
       + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-package"></i> '+T('التوفر','Availability')+'</div>'
         + field('status','حالة العرض للعملاء','Customer-facing state',
             '<select id="status">'
             + '<option value="active"'+(p.status==='active'?' selected':'')+'>'+T('معروض للعملاء','Available to customers')+'</option>'
             + '<option value="hidden"'+(p.status==='hidden'?' selected':'')+'>'+T('مخفي','Hidden')+'</option>'
             + '</select>')
-        + '<div id="invBox"></div>'
+        + '<button type="button" class="mw-add" onclick="openInventoryFromEditor()">'
+          + '<i class="ti ti-box"></i> '+T('إدارة المخزون','Manage inventory')+'</button>'
       + '</section>'
 
       /* CATEGORY — existing categories only */
@@ -633,8 +1042,62 @@ body{background:var(--bg2);margin:0;}
 
   /* ══════════ PHASE 3.4 · INVENTORY ══════════
      Every number comes from RAFInventory. The page keeps no inventory state
-     of its own — each render resolves from the authority. */
+     of its own — each render resolves from the authority.
+
+     The inventory workspace is its own drawer, opened from a product card or
+     from the editor. It carries its own product id and concurrency stamp so
+     stock can be managed without the editor being open, and so the editor
+     never becomes a second place that writes stock. */
   var adjDir = 1;
+  var invPid = null, invBase = null;
+
+  window.openInventory = function(id){
+    var p = MP.get(id);
+    if (!p){ toast(T('لا يمكن فتح هذا المنتج','This product cannot be opened')); return; }
+    invPid = id;
+    invBase = MP.versionOf(id);
+    adjDir = 1;
+    cmbResetDraft(id);                 /* the baseline this merchant is reading */
+    renderInvHeader();
+    renderInventory();
+    el('invDrawer').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  };
+  /* the mode can change under the merchant — configuring the first
+     combination switches a product onto combination stock — so the header is
+     re-derived on every render rather than fixed when the drawer opened */
+  function renderInvHeader(){
+    if (!invPid) return;
+    var p = MP.get(invPid); if (!p) return;
+    var combo = isCombo(invPid);
+    el('invTitle').textContent = L(p.name);
+    el('invSub').innerHTML =
+      '<span class="pw-mode'+(combo?' on':'')+'">'
+        + (combo ? T('مخزون الخيارات','Combination inventory')
+                 : T('مخزون على مستوى المنتج','Product-level inventory'))+'</span>'
+      + '<span>SKU '+esc(invPid)+'</span>'
+      + '<span>'+T('آخر تحديث','Updated')+': '+esc(lastUpdatedText(invPid))+'</span>';
+  }
+  /* human-readable, from the record's own timestamp — no internal ids shown */
+  function lastUpdatedText(id){
+    var t = 0;
+    if (isCombo(id)) INV.combinationsOf(id).forEach(function(r){ t = Math.max(t, r.updatedAt || 0); });
+    if (!t){ var s = RAFSource.product(id); t = (s && s.updatedAt) || 0; }
+    if (!t) return T('غير مسجَّل','Not recorded');
+    var d = new Date(t);
+    return d.toLocaleDateString(isEn()?'en-GB':'ar-EG', { day:'numeric', month:'short' })
+         + ' · ' + d.toLocaleTimeString(isEn()?'en-GB':'ar-EG', { hour:'2-digit', minute:'2-digit' });
+  }
+  window.openInventoryFromEditor = function(){ if (editing) openInventory(editing); };
+  window.closeInventory = function(){
+    /* an unsaved combination edit must not disappear silently */
+    if (invPid && cmbChangedCount() > 0 &&
+        !confirm(T('لديك تغييرات مخزون غير محفوظة.\n\nموافق = تجاهل التغييرات\nإلغاء = متابعة التعديل',
+                   'You have unsaved inventory changes.\n\nOK = discard them\nCancel = keep editing'))) return;
+    el('invDrawer').classList.remove('show');
+    invPid = null; invBase = null;
+    if (!el('editor').classList.contains('show')) document.body.style.overflow = '';
+  };
 
   /* ══════════ VARIANT COMBINATION INVENTORY ══════════
      Shown only for a product whose options can actually express more than
@@ -754,7 +1217,7 @@ body{background:var(--bg2);margin:0;}
   }
   function cmbCurrent(){
     var map = {};
-    if (editing) INV.combinationsOf(editing).forEach(function(r){ map[r.id] = r; });
+    if (invPid) INV.combinationsOf(invPid).forEach(function(r){ map[r.id] = r; });
     return map;
   }
   /* a row counts as edited only when its value actually differs from stock */
@@ -786,7 +1249,7 @@ body{background:var(--bg2);margin:0;}
     i.value = Math.max(0, n + d);
     cmbEdit(id, i.value);
   };
-  window.cmbDiscard = function(){ cmbResetDraft(editing); renderInventory(); };
+  window.cmbDiscard = function(){ cmbResetDraft(invPid); renderInventory(); };
   function cmbErr(msg){ var e = el('cmbErr'); if (e){ e.textContent = msg; e.classList.add('show'); } }
   function cmbLabel(id){
     var r = cmbCurrent()[id];
@@ -796,7 +1259,7 @@ body{background:var(--bg2);margin:0;}
      Nothing is written unless every entry passes; a single bad row leaves the
      whole product exactly as it was. */
   window.cmbSaveAll = function(){
-    if (!editing) return;
+    if (!invPid) return;
     var e = el('cmbErr'); if (e) e.classList.remove('show');
     var cur = cmbCurrent(), entries = {}, n = 0;
     for (var id in cmbDraft) if (cmbDraft.hasOwnProperty(id)) {
@@ -810,8 +1273,8 @@ body{background:var(--bg2);margin:0;}
     }
     if (!n) return cmbErr(T('لا توجد تغييرات لحفظها.','There is nothing to save.'));
 
-    var res = INV.setCombinations(editing, entries,
-      { actor:ME, baseVersion: (cmbBaseFor === editing && cmbBase != null) ? cmbBase : undefined });
+    var res = INV.setCombinations(invPid, entries,
+      { actor:ME, baseVersion: (cmbBaseFor === invPid && cmbBase != null) ? cmbBase : undefined });
     if (!res.ok){
       var who = res.combinationId ? ' — ' + cmbLabel(res.combinationId) : '';
       var m = res.code === 'BELOW_RESERVED'
@@ -829,17 +1292,17 @@ body{background:var(--bg2);margin:0;}
         : T('تعذّر حفظ المخزون. لم يتم حفظ أي تغيير.','Stock could not be saved. Nothing was saved.');
       return cmbErr(m);
     }
-    cmbResetDraft(editing);
-    renderInventory();
-    if (window.RAFShop) RAFShop.toast(T('تم حفظ '+n+' تركيبة','Saved '+n+' combination'+(n===1?'':'s')),
-                                      { icon:'ti-circle-check' });
+    cmbResetDraft(invPid);
+    renderInventory(); render();          /* the card's numbers move with it */
+    toast(T('تم حفظ '+n+' تركيبة','Saved '+n+' combination'+(n===1?'':'s')));
   };
 
   function renderInventory(){
-    var box = el('invBox'); if (!box || !editing) return;
+    var box = el('invBox'); if (!box || !invPid) return;
+    renderInvHeader();
     /* a multi-dimension product is governed by its combinations */
-    if (comboCapable(editing)){ box.innerHTML = comboInventoryHTML(editing); return; }
-    var v = invOf(editing);
+    if (comboCapable(invPid)){ box.innerHTML = comboInventoryHTML(invPid); return; }
+    var v = invOf(invPid);
     if (!v){
       box.innerHTML = '<div class="mw-inv-none"><i class="ti ti-alert-triangle"></i><div>'
         + '<b>'+T('لا يوجد سجل مخزون لهذا المنتج','No inventory record for this product')+'</b>'
@@ -847,7 +1310,7 @@ body{background:var(--bg2);margin:0;}
         + '</div></div>';
       return;
     }
-    var st = INV.stateOf(editing);
+    var st = INV.stateOf(invPid);
     box.innerHTML =
       '<div class="mw-inv-g">'
         + '<div class="mw-inv-c"><span>'+T('المخزون','On hand')+'</span><b>'+v.onHand+'</b></div>'
@@ -887,8 +1350,8 @@ body{background:var(--bg2);margin:0;}
   window.setAdjDir = function(d){ adjDir = d; renderInventory(); };
   window.clearAdjMsg = function(){ var e=el('adjErr'); if(e){ e.textContent=''; e.classList.remove('show'); } };
   window.previewAdj = function(){
-    var box = el('adjPreview'); if (!box || !editing) return;
-    var v = invOf(editing); if (!v) return;
+    var box = el('adjPreview'); if (!box || !invPid) return;
+    var v = invOf(invPid); if (!v) return;
     var raw = (el('adjQty')||{}).value || '';
     var n = Number(String(raw).trim());
     if (!raw || !isFinite(n) || n <= 0 || n % 1 !== 0){ box.textContent = ''; return; }
@@ -897,22 +1360,23 @@ body{background:var(--bg2);margin:0;}
       + (next < 0 ? ' <span class="bad">'+T('غير مسموح','not allowed')+'</span>' : '');
   };
   window.applyAdj = function(){
-    if (!editing) return;
+    if (!invPid) return;
     clearAdjMsg();
     var qty = Number(String((el('adjQty')||{}).value || '').trim());
     var reason = String((el('adjReason')||{}).value || '').trim();
     /* the authority validates; the page only passes the merchant's input */
-    var res = INV.adjust(editing, adjDir * qty, reason, { actor:ME, baseVersion:baseVersion });
+    var res = INV.adjust(invPid, adjDir * qty, reason, { actor:ME, baseVersion:invBase });
     if (!res.ok){
       var e = el('adjErr');
       e.textContent = (res.errors && res.errors[0] && res.errors[0].message) || adjErrorText(res.code);
       e.classList.add('show');
       /* a stale reading must be reloaded, not retried over newer data */
-      if (res.code === 'STALE'){ baseVersion = MP.versionOf(editing); renderInventory(); }
+      if (res.code === 'STALE'){ invBase = MP.versionOf(invPid); renderInventory(); }
       return;
     }
-    /* our own write moved the product's version — keep the editor in step */
-    baseVersion = MP.versionOf(editing);
+    /* our own write moved the product's version — keep both surfaces in step */
+    invBase = MP.versionOf(invPid);
+    if (editing === invPid) baseVersion = invBase;
     el('adjQty').value = ''; el('adjReason').value = '';
     renderInventory(); render();
     toast(T('تم تعديل المخزون','Stock adjusted'));
@@ -1024,6 +1488,411 @@ body{background:var(--bg2);margin:0;}
     replaceAt = -1;
     markDirty(); renderMedia();
   }
+
+  /* ══════════════════════════════════════════════════════════════
+     CREATE PRODUCT WORKSPACE
+     ──────────────────────────────────────────────────────────────
+     One form in the approved order. It collects a draft and hands it to
+     RAFMerchantProducts.create(); identity, ownership, permission,
+     validation, persistence and audit all live there.
+
+     Options and combinations are two separate ideas on purpose. The
+     merchant lists the values that exist (Black, White · S, M, L), then
+     ticks the pairings the product is actually sold in. Nothing is
+     assumed: an unticked pairing is not created.
+     ══════════════════════════════════════════════════════════════ */
+  var CW = null;                       /* the draft, or null when closed */
+  var cwDirty = false, cwBusy = false;
+
+  function cwBlank(){
+    return { name:{ar:'',en:''}, desc:{ar:'',en:''}, price:'', old:'', disc:'',
+             cat:(MP.categories()[0]||{}).k || '', status:'active',
+             sku:'', barcode:'', images:[], groups:[], combos:{}, guide:null, moreOpen:false };
+  }
+  window.openCreate = function(){
+    if (!MP.canCreate()){ toast(T('لا تملك صلاحية إضافة منتجات','You do not have permission to add products')); return; }
+    CW = cwBlank(); cwDirty = false; cwBusy = false;
+    el('cwSub').textContent = T('سيتم إنشاء المنتج في متجر ','The product will be created in ') + L(STORE.name);
+    renderCreate();
+    el('createWs').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  };
+  window.cancelCreate = function(){
+    if (cwBusy) return;
+    if (cwDirty && !confirm(T('لديك بيانات منتج غير محفوظة.\n\nموافق = تجاهل البيانات\nإلغاء = متابعة الإدخال',
+                             'You have unsaved product details.\n\nOK = discard them\nCancel = keep editing'))) return;
+    el('createWs').classList.remove('show');
+    CW = null; cwDirty = false;
+    document.body.style.overflow = '';
+  };
+  function cwMark(){ cwDirty = true; }
+  /* every field writes straight into the draft, so a re-render never loses input */
+  window.cwSet = function(path, v){
+    var parts = path.split('.'), o = CW;
+    for (var i=0;i<parts.length-1;i++) o = o[parts[i]];
+    o[parts[parts.length-1]] = v; cwMark();
+  };
+
+  function cwStep(n, titleAr, titleEn, hintAr, hintEn, body, cls){
+    return '<section class="pw-step'+(cls?' '+cls:'')+'">'
+      + '<div class="pw-step-h"><span class="pw-step-n">'+n+'</span>'
+        + '<div class="pw-step-t"><b>'+T(titleAr,titleEn)+'</b>'
+        + (hintAr?'<span>'+T(hintAr,hintEn)+'</span>':'')+'</div></div>'
+      + body + '</section>';
+  }
+  function cwField(id, labelAr, labelEn, control, note){
+    return '<div class="mw-f" id="f-'+id+'"><label for="'+id+'">'+T(labelAr,labelEn)+'</label>'
+      + control + (note?'<div class="note">'+note+'</div>':'') + '<div class="msg" id="m-'+id+'"></div></div>';
+  }
+
+  function renderCreate(){
+    if (!CW) return;
+    var cats = MP.categories();
+    el('cwBody').innerHTML =
+      '<div class="mw-ed-err" id="cwErr"></div>'
+
+      + cwStep(1,'صور المنتج','Product images',
+          'الصورة الأولى هي الصورة الرئيسية التي تظهر للعملاء.',
+          'The first image is the main one customers see.',
+          '<div id="cwMedia"></div>')
+
+      + cwStep(2,'اسم المنتج','Product name', null,null,
+          cwField('cwNameAr','الاسم (عربي)','Name (Arabic)',
+            '<input id="cwNameAr" dir="rtl" value="'+esc(CW.name.ar)+'" oninput="cwSet(\'name.ar\',this.value)">')
+        + cwField('cwNameEn','الاسم (إنجليزي)','Name (English)',
+            '<input id="cwNameEn" dir="ltr" value="'+esc(CW.name.en)+'" oninput="cwSet(\'name.en\',this.value)">'))
+
+      + cwStep(3,'الوصف','Description', null,null,
+          cwField('cwDescAr','الوصف (عربي)','Description (Arabic)',
+            '<textarea id="cwDescAr" dir="rtl" oninput="cwSet(\'desc.ar\',this.value)">'+esc(CW.desc.ar)+'</textarea>')
+        + cwField('cwDescEn','الوصف (إنجليزي)','Description (English)',
+            '<textarea id="cwDescEn" dir="ltr" oninput="cwSet(\'desc.en\',this.value)">'+esc(CW.desc.en)+'</textarea>'))
+
+      + cwStep(4,'السعر','Price',
+          'اترك السعر الأصلي فارغاً إن لم يوجد خصم.','Leave the original price empty when there is no discount.',
+          '<div class="mw-row">'
+          + cwField('cwPrice','السعر الحالي','Current price',
+              '<input id="cwPrice" class="mw-num" inputmode="decimal" dir="ltr" value="'+esc(CW.price)+'" oninput="cwSet(\'price\',this.value)">',
+              MP.currency())
+          + cwField('cwOld','السعر الأصلي','Original price',
+              '<input id="cwOld" class="mw-num" inputmode="decimal" dir="ltr" value="'+esc(CW.old)+'" oninput="cwSet(\'old\',this.value)">')
+          + '</div>'
+        + cwField('cwDisc','نسبة الخصم %','Discount %',
+            '<input id="cwDisc" class="mw-num" inputmode="numeric" dir="ltr" value="'+esc(CW.disc)+'" oninput="cwSet(\'disc\',this.value)">',
+            T('يتطلب سعراً أصلياً أعلى من السعر الحالي','Requires an original price higher than the current price')))
+
+      + cwStep(5,'الفئة','Category', null,null,
+          cwField('cwCat','الفئة','Category',
+            '<select id="cwCat" onchange="cwSet(\'cat\',this.value)">'
+            + cats.map(function(c){ return '<option value="'+esc(c.k)+'"'+(CW.cat===c.k?' selected':'')+'>'+esc(T(c.ar,c.en))+'</option>'; }).join('')
+            + '</select>'))
+
+      + cwStep(6,'حالة العرض','Visibility', null,null,
+          cwField('cwStatus','حالة العرض للعملاء','Customer-facing state',
+            '<select id="cwStatus" onchange="cwSet(\'status\',this.value)">'
+            + '<option value="active"'+(CW.status==='active'?' selected':'')+'>'+T('معروض للعملاء','Available to customers')+'</option>'
+            + '<option value="hidden"'+(CW.status==='hidden'?' selected':'')+'>'+T('مخفي','Hidden')+'</option>'
+            + '</select>'))
+
+      + cwStep(7,'الخيارات والتركيبات','Options & combinations',
+          'أضف القيم أولاً، ثم اختر التركيبات المتوفرة فعلاً في هذا المنتج.',
+          'Add the values first, then tick the combinations this product is actually sold in.',
+          cwOptionsHTML(), 'opt')
+
+      + cwStep(8,'دليل المقاسات','Size guide', null,null, cwGuideHTML())
+
+      + cwStep(9,'معلومات متقدمة','Advanced information', null,null,
+          '<div class="pw-more">'
+          + '<button type="button" class="pw-more-h" onclick="cwToggleMore()">'
+            + '<i class="ti ti-adjustments"></i> '+T('حقول إضافية','Additional fields')
+            + '<i class="ti ti-chevron-'+(CW.moreOpen?'up':'down')+'"></i></button>'
+          + (CW.moreOpen ? '<div class="pw-more-b">'
+              + cwField('cwSku','رمز التخزين SKU','SKU',
+                  '<input id="cwSku" dir="ltr" value="'+esc(CW.sku)+'" oninput="cwSet(\'sku\',this.value)">',
+                  T('رمزك الخاص للمنتج. معرّف المنتج يُنشأ تلقائياً وهو منفصل عن SKU.',
+                    'Your own product code. The product id is generated automatically and is separate from the SKU.'))
+              + cwField('cwBarcode','الباركود','Barcode',
+                  '<input id="cwBarcode" dir="ltr" value="'+esc(CW.barcode)+'" oninput="cwSet(\'barcode\',this.value)">')
+              + '<div class="pw-ro-note">'+T('معرّف المنتج: يُنشأ تلقائياً عند الحفظ.',
+                                             'Product id: generated automatically on save.')+'</div>'
+            + '</div>' : '')
+          + '</div>');
+
+    cwRenderMedia();
+  }
+  window.cwToggleMore = function(){ CW.moreOpen = !CW.moreOpen; renderCreate(); };
+
+  /* ---------- images: the existing media authority, nothing new ---------- */
+  function cwRenderMedia(){
+    var box = el('cwMedia'); if (!box) return;
+    box.innerHTML =
+      (CW.images.length
+        ? '<div class="mw-mg">' + CW.images.map(function(u,i){
+            return '<div class="mw-mi'+(i===0?' main':'')+'">'
+              + '<div class="mw-mi-t" style="background-image:url(\''+esc(u)+'\')"></div>'
+              + (i===0?'<span class="mw-mi-badge">'+T('الرئيسية','Main')+'</span>':'')
+              + '<div class="mw-mi-a">'
+                + '<button class="mw-ico" onclick="cwMoveImg('+i+',-1)" '+(i===0?'disabled':'')+' aria-label="up"><i class="ti ti-chevron-up"></i></button>'
+                + '<button class="mw-ico" onclick="cwMoveImg('+i+',1)" '+(i===CW.images.length-1?'disabled':'')+' aria-label="down"><i class="ti ti-chevron-down"></i></button>'
+                + (i!==0?'<button class="mw-ico" onclick="cwMakeMain('+i+')" aria-label="main"><i class="ti ti-star"></i></button>':'')
+                + '<button class="mw-ico danger" onclick="cwRemoveImg('+i+')" aria-label="remove"><i class="ti ti-trash"></i></button>'
+              + '</div>'
+              + '<span class="mw-mi-k">'+MM.kindOf(u)+'</span></div>';
+          }).join('') + '</div>'
+        : '<div class="mw-ro">'+T('لم تتم إضافة صور بعد.','No images added yet.')+'</div>')
+      + '<div class="mw-mg-add">'
+        + '<button class="mw-add" onclick="cwPickFile()"><i class="ti ti-upload"></i> '+T('إضافة من جهازك','Add from your device')+'</button>'
+        + '<button class="mw-add" onclick="cwAddByUrl()"><i class="ti ti-link"></i> '+T('إضافة برابط','Add by link')+'</button>'
+      + '</div>'
+      + '<div class="mw-mnote"><i class="ti ti-info-circle"></i><span>'
+        + T('حتى '+MM.MAX_IMAGES+' صور، وحجم الملف حتى '+Math.round(MM.MAX_DATA_URL_BYTES/1024)+' كيلوبايت.',
+            'Up to '+MM.MAX_IMAGES+' images, each file up to '+Math.round(MM.MAX_DATA_URL_BYTES/1024)+' KB.')
+      + '</span></div>'
+      + '<div class="mw-adj-err" id="cwMediaErr"></div>'
+      + '<input type="file" id="cwFile" accept="image/*" style="display:none" onchange="cwOnFile(event)">';
+  }
+  function cwMediaErr(msg){
+    var e = el('cwMediaErr'); if (!e) return;
+    e.textContent = msg || ''; e.classList.toggle('show', !!msg);
+  }
+  window.cwMoveImg = function(i,d){ var j=i+d; if(j<0||j>=CW.images.length) return;
+    var t=CW.images[i]; CW.images[i]=CW.images[j]; CW.images[j]=t; cwMark(); cwRenderMedia(); };
+  window.cwMakeMain = function(i){ CW.images.unshift(CW.images.splice(i,1)[0]); cwMark(); cwRenderMedia(); };
+  window.cwRemoveImg = function(i){ CW.images.splice(i,1); cwMark(); cwRenderMedia(); };
+  window.cwPickFile = function(){ cwMediaErr(''); el('cwFile').click(); };
+  window.cwOnFile = function(ev){
+    var f = ev.target.files && ev.target.files[0]; ev.target.value = '';
+    if (!f) return;
+    MM.fileToDataUrl(f).then(function(res){
+      if (!res.ok){ cwMediaErr(res.message || T('تعذّر قراءة الملف','The file could not be read')); return; }
+      cwTryAddImage(res.dataUrl);
+    }).catch(function(){ cwMediaErr(T('تعذّر قراءة الملف','The file could not be read')); });
+  };
+  window.cwAddByUrl = function(){
+    var u = prompt(T('أدخل رابط الصورة','Enter the image URL'));
+    if (u && u.trim()) cwTryAddImage(u.trim());
+  };
+  /* the media authority validates the resulting list, exactly as on edit */
+  function cwTryAddImage(url){
+    var next = CW.images.concat([url]);
+    var v = MM.validate(next);
+    if (!v.ok){ cwMediaErr((v.errors[0] && v.errors[0].message) || T('صورة غير صالحة','Invalid image')); return; }
+    CW.images = next; cwMark(); cwRenderMedia(); cwMediaErr('');
+  }
+
+  /* ---------- options and the combination picker ---------- */
+  function cwOptionsHTML(){
+    var h = '';
+    h += CW.groups.map(function(g, gi){
+      var isColor = g.kind === 'color';
+      return '<div class="pw-og">'
+        + '<div class="pw-og-h">'
+          + '<select onchange="cwSetGroupKind('+gi+',this.value)" aria-label="'+T('نوع المجموعة','Group type')+'">'
+            + '<option value="color"'+(isColor?' selected':'')+'>'+T('اللون','Colour')+'</option>'
+            + '<option value="size"'+(g.kind==='size'?' selected':'')+'>'+T('المقاس','Size')+'</option>'
+          + '</select>'
+          + '<span class="sp"></span>'
+          + '<button type="button" class="pw-mini" onclick="cwRemoveGroup('+gi+')">'
+            + '<i class="ti ti-trash"></i> '+T('حذف المجموعة','Remove group')+'</button>'
+        + '</div>'
+        + (g.options.length
+            ? '<div class="pw-vals">' + g.options.map(function(o, oi){
+                return '<span class="pw-val'+(isColor?' col':'')+'">'
+                  + (isColor ? '<input class="sw" type="color" value="'+esc(o.hex||'#cccccc')+'"'
+                               + ' onchange="cwSetHex('+gi+','+oi+',this.value)" aria-label="'+T('اللون','Colour')+'">' : '')
+                  + '<span class="lbl">'+esc(L(o.label))+'</span>'
+                  + '<button type="button" class="x" onclick="cwRemoveValue('+gi+','+oi+')" aria-label="'+T('حذف','Remove')+'"><i class="ti ti-x"></i></button>'
+                + '</span>';
+              }).join('') + '</div>'
+            : '<div class="pw-none" style="margin-bottom:9px;">'+T('لا قيم بعد.','No values yet.')+'</div>')
+        + '<div class="pw-val-add">'
+            + '<input id="cwv-ar-'+gi+'" dir="rtl" placeholder="'+T('القيمة (عربي)','Value (AR)')+'">'
+            + '<input id="cwv-en-'+gi+'" dir="ltr" placeholder="'+T('القيمة (إنجليزي)','Value (EN)')+'">'
+            + (isColor ? '<input id="cwv-hex-'+gi+'" type="color" value="#cccccc" aria-label="'+T('اللون','Colour')+'">' : '')
+            + '<button type="button" onclick="cwAddValue('+gi+')"><i class="ti ti-plus"></i> '+T('إضافة','Add')+'</button>'
+        + '</div>'
+      + '</div>';
+    }).join('');
+
+    if (CW.groups.length < 2)
+      h += '<button type="button" class="mw-add" onclick="cwAddGroup()"><i class="ti ti-plus"></i> '
+         + T('إضافة مجموعة خيارات','Add option group')+'</button>';
+
+    h += cwCombosHTML();
+    return h;
+  }
+  /* every pairing the values can express — the merchant ticks the real ones */
+  function cwCandidates(){
+    var gs = CW.groups.filter(function(g){ return g.options.length; });
+    if (!gs.length) return [];
+    var rows = [[]];
+    gs.forEach(function(g){
+      var next = [];
+      g.options.forEach(function(o){ rows.forEach(function(r){ next.push(r.concat([{g:g,o:o}])); }); });
+      rows = next;
+    });
+    return rows.map(function(r){
+      return { key:r.map(function(x){ return x.o.v; }).sort().join('|'),
+               vs:r.map(function(x){ return x.o.v; }),
+               label:r.map(function(x){ return L(x.o.label); }).join(' / '),
+               hex:(r.filter(function(x){ return x.g.kind==='color'; })[0]||{o:{}}).o.hex || null };
+    });
+  }
+  function cwCombosHTML(){
+    var cands = cwCandidates();
+    if (!cands.length)
+      return '<div class="pw-combos"><div class="pw-none">'
+        + T('أضف قيم الخيارات أولاً لتظهر التركيبات الممكنة. المنتج بدون تركيبات يستخدم مخزوناً على مستوى المنتج.',
+            'Add option values first and the possible combinations appear here. A product with no combinations uses product-level inventory.')
+        + '</div></div>';
+    var chosen = Object.keys(CW.combos).filter(function(k){ return CW.combos[k]; }).length;
+    return '<div class="pw-combos">'
+      + '<div class="pw-combos-h"><b>'+T('التركيبات المتوفرة','Available combinations')+'</b>'
+        + '<button type="button" class="pw-mini" onclick="cwAllCombos(true)">'+T('تحديد الكل','Select all')+'</button>'
+        + '<button type="button" class="pw-mini" onclick="cwAllCombos(false)">'+T('إلغاء الكل','Clear all')+'</button></div>'
+      + '<div class="pw-cb-grid">' + cands.map(function(c){
+          var on = !!CW.combos[c.key];
+          return '<button type="button" class="pw-cb" aria-pressed="'+(on?'true':'false')+'" onclick="cwToggleCombo(\''+esc(c.key)+'\')">'
+            + '<span class="tick"><i class="ti ti-check"></i></span>'
+            + (c.hex ? '<span class="dot" style="background:'+esc(c.hex)+'"></span>' : '')
+            + '<span>'+esc(c.label)+'</span></button>';
+        }).join('') + '</div>'
+      + '<div class="pw-cb-sum">' + (chosen
+          ? T('سيتم إنشاء '+chosen+' تركيبة. تُحدَّد الكميات لاحقاً من المنتجات ← المخزون.',
+              chosen+' combination'+(chosen===1?'':'s')+' will be created. Quantities are set afterwards in Products → Inventory.')
+          : T('لم تختر أي تركيبة — سيستخدم المنتج مخزوناً على مستوى المنتج.',
+              'No combinations selected — the product will use product-level inventory.'))
+      + '</div></div>';
+  }
+  window.cwAddGroup = function(){
+    var kind = CW.groups.some(function(g){ return g.kind==='color'; }) ? 'size' : 'color';
+    CW.groups.push({ kind:kind, options:[] }); cwMark(); renderCreate();
+  };
+  window.cwRemoveGroup = function(gi){ CW.groups.splice(gi,1); CW.combos = {}; cwMark(); renderCreate(); };
+  window.cwSetGroupKind = function(gi, k){ CW.groups[gi].kind = k; cwMark(); renderCreate(); };
+  window.cwSetHex = function(gi, oi, hex){ CW.groups[gi].options[oi].hex = hex; cwMark(); renderCreate(); };
+  window.cwAddValue = function(gi){
+    var ar = (el('cwv-ar-'+gi)||{}).value || '', en = (el('cwv-en-'+gi)||{}).value || '';
+    ar = ar.trim(); en = en.trim();
+    if (!ar && !en) return;
+    /* the option id comes from the variant authority, never from this page */
+    var v = MV.newOptionId(CW.groups[gi].options, en || ar);
+    var o = { v:v, label:{ ar:ar || en, en:en || ar } };
+    if (CW.groups[gi].kind === 'color') o.hex = (el('cwv-hex-'+gi)||{}).value || '#cccccc';
+    CW.groups[gi].options.push(o);
+    cwMark(); renderCreate();
+  };
+  /* nothing is saved yet, so an unsaved value can simply go */
+  window.cwRemoveValue = function(gi, oi){
+    var gone = CW.groups[gi].options.splice(oi,1)[0];
+    Object.keys(CW.combos).forEach(function(k){
+      if (k.split('|').indexOf(gone.v) > -1) delete CW.combos[k];
+    });
+    cwMark(); renderCreate();
+  };
+  window.cwToggleCombo = function(key){ CW.combos[key] = !CW.combos[key]; cwMark(); renderCreate(); };
+  window.cwAllCombos = function(on){
+    CW.combos = {};
+    if (on) cwCandidates().forEach(function(c){ CW.combos[c.key] = true; });
+    cwMark(); renderCreate();
+  };
+
+  /* ---------- size guide ---------- */
+  function cwGuideHTML(){
+    var hasSize = CW.groups.some(function(g){ return g.kind==='size' && g.options.length; });
+    if (!hasSize)
+      return '<div class="pw-none">'
+        + T('يظهر دليل المقاسات عند إضافة مجموعة مقاسات. يمكنك أيضاً إضافته لاحقاً من تعديل المنتج.',
+            'The size guide appears once you add a size group. You can also add it later from the product editor.')
+        + '</div>';
+    return '<div class="pw-none">'
+      + T('سيستخدم هذا المنتج دليل المقاسات المعتمد لفئته. يمكنك إنشاء دليل خاص بالمنتج بعد الحفظ من تعديل المنتج ← دليل المقاسات.',
+          'This product will use the approved size guide for its category. You can add a product-specific guide after saving, from the product editor → Size guide.')
+      + '</div>';
+  }
+
+  /* ---------- save ---------- */
+  function cwShowErrors(errors){
+    var b = el('cwErr');
+    b.innerHTML = '<b>'+T('تعذّر إنشاء المنتج','Could not create the product')+'</b><ul>'
+      + errors.map(function(e){ return '<li>'+esc(e.message)+'</li>'; }).join('') + '</ul>';
+    b.classList.add('show');
+    el('cwBody').parentNode.scrollTop = 0;
+  }
+  window.saveCreate = function(){
+    if (!CW || cwBusy) return;
+    var b = el('cwErr'); b.classList.remove('show'); b.innerHTML = '';
+    cwBusy = true; el('cwSave').disabled = true;
+
+    /* 1 — option groups, validated by the variant authority before anything */
+    var groups = CW.groups.filter(function(g){ return g.options.length; }).map(function(g){
+      return { label: g.kind==='color' ? { ar:'اللون', en:'Colour' } : { ar:'المقاس', en:'Size' },
+               options: g.options.map(function(o){
+                 var x = { v:o.v, label:{ ar:o.label.ar, en:o.label.en } };
+                 if (o.hex) x.hex = o.hex;
+                 return x;
+               }) };
+    });
+    if (groups.length){
+      var gv = MV.validateGroups(groups);
+      if (!gv.ok){ cwBusy=false; el('cwSave').disabled=false; return cwShowErrors(gv.errors); }
+    }
+    /* 2 — images, validated by the media authority */
+    if (CW.images.length){
+      var mv = MM.validate(CW.images);
+      if (!mv.ok){ cwBusy=false; el('cwSave').disabled=false; return cwShowErrors(mv.errors); }
+    }
+
+    /* 3 — the base product, created atomically by the authority */
+    var draft = {
+      name:{ ar:String(CW.name.ar).trim(), en:String(CW.name.en).trim() },
+      desc:{ ar:String(CW.desc.ar).trim(), en:String(CW.desc.en).trim() },
+      price:String(CW.price).trim(), cat:CW.cat, status:CW.status
+    };
+    if (String(CW.old).trim())  draft.old  = String(CW.old).trim();
+    if (String(CW.disc).trim()) draft.disc = Number(String(CW.disc).trim());
+    if (String(CW.sku).trim())     draft.sku = String(CW.sku).trim();
+    if (String(CW.barcode).trim()) draft.barcode = String(CW.barcode).trim();
+    if (groups.length) draft.variants = groups;
+    if (CW.images.length){ draft.images = CW.images.slice(); draft.img = CW.images[0]; }
+
+    var res = MP.create(draft, { actor:ME });
+    if (!res.ok){
+      cwBusy = false; el('cwSave').disabled = false;
+      return cwShowErrors(res.errors || [{ message:T('تعذّر إنشاء المنتج','Could not create the product') }]);
+    }
+
+    /* 4 — the chosen combinations, through the inventory authority. The base
+       product already exists and stays valid: if this step fails the merchant
+       is told plainly and can finish in Products → Inventory. */
+    var pid = res.productId, comboWarning = null;
+    var chosen = Object.keys(CW.combos).filter(function(k){ return CW.combos[k]; });
+    if (chosen.length && window.RAFInventory){
+      var entries = {}, bad = false;
+      chosen.forEach(function(k){
+        var id = RAFInventory.combinationIdFor(pid, k.split('|'));
+        if (!id) { bad = true; return; }
+        entries[id] = 0;               /* exists, no units yet — quantities live in Inventory */
+      });
+      if (bad || !Object.keys(entries).length){
+        comboWarning = T('تم إنشاء المنتج، لكن تعذّر تحديد بعض التركيبات. أكملها من المنتجات ← المخزون.',
+                         'The product was created, but some combinations could not be resolved. Finish them in Products → Inventory.');
+      } else {
+        var cres = RAFInventory.setCombinations(pid, entries, { actor:ME });
+        if (!cres.ok)
+          comboWarning = T('تم إنشاء المنتج، لكن تعذّر حفظ التركيبات. أكملها من المنتجات ← المخزون.',
+                           'The product was created, but its combinations could not be saved. Finish them in Products → Inventory.');
+      }
+    }
+
+    cwBusy = false; el('cwSave').disabled = false;
+    cwDirty = false;
+    el('createWs').classList.remove('show');
+    CW = null;
+    document.body.style.overflow = '';
+    render();
+    toast(comboWarning || T('تم إنشاء المنتج '+pid, 'Product '+pid+' created'));
+  };
 
   /* ══════════ PHASE 3.2 · OPTIONS + SIZE GUIDE ══════════
      The page holds a working copy; every write goes through
@@ -1262,7 +2131,7 @@ body{background:var(--bg2);margin:0;}
 
     dirty = false;
     closeEditor();
-    render(); renderChips();
+    render();
     toast(T('تم حفظ التغييرات','Changes saved'));
   };
   window.tryClose = function(){
@@ -1292,16 +2161,24 @@ body{background:var(--bg2);margin:0;}
     var r = root(), en = r.lang === 'en';
     r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
     try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
-    applyLang(); renderChips(); render();
+    applyLang(); render();
     /* rebuilding the editor body empties its panels, so they are repainted in
-       the new language. The unsaved combination draft is kept deliberately:
-       switching language must not silently discard what the merchant typed. */
+       the new language. */
     if (editing){
       var p = MP.get(editing);
       if (p){
         el('edBody').innerHTML = editorHTML(p);
-        renderInventory(); renderMedia(); renderGroups(); renderGuide();
+        renderMedia(); renderGroups(); renderGuide();
       }
+    }
+    /* the inventory drawer keeps its unsaved combination draft deliberately:
+       switching language must not silently discard what the merchant typed */
+    if (invPid) renderInventory();     /* re-derives its own header */
+    /* the create draft lives in CW, and every control writes to it on input,
+       so repainting in the new language cannot lose what the merchant typed */
+    if (CW){
+      el('cwSub').textContent = T('سيتم إنشاء المنتج في متجر ','The product will be created in ') + L(STORE.name);
+      renderCreate();
     }
   };
   function applyLang(){
@@ -1313,6 +2190,9 @@ body{background:var(--bg2);margin:0;}
       e.placeholder = e.getAttribute('data-'+(en?'en':'ar')+'-ph');
     });
     el('searchHint').textContent = T('اسم المنتج · SKU · الباركود','Product name · SKU · barcode');
+    el('langLabel').textContent = en ? 'ع' : 'EN';
+    var rb = el('refreshBtn');
+    if (rb) rb.setAttribute('aria-label', T('تحديث','Refresh'));
     document.title = en ? 'RAF — Products' : 'رف — المنتجات';
   }
 
@@ -1345,14 +2225,20 @@ body{background:var(--bg2);margin:0;}
     el('stName').textContent = L(STORE.name);
     if (STORE.logo){ var lg = el('stLogo'); lg.style.backgroundImage = "url('"+STORE.logo+"')"; lg.innerHTML=''; }
 
-    renderChips(); render();
+    try { var v = localStorage.getItem('raf_pw_view'); if (v==='list'||v==='grid') view = v; } catch(e){}
+    /* the action is offered only to an account the authority would accept */
+    if (MP.canCreate()) el('addBtn').style.display = '';
+    render();
     try { RAFPerm.enforce(); } catch(e){}
 
     /* another session changed a product — reflect it without losing the editor.
        Inventory uses the same propagation; no polling, no second state. */
-    document.addEventListener('raf:source', function(){ render(); if (editing) renderInventory(); });
-    document.addEventListener('raf:inventory', function(){ render(); if (editing) renderInventory(); });
-    document.addEventListener('keydown', function(e){ if (e.key==='Escape' && editing) tryClose(); });
+    document.addEventListener('raf:source', function(){ render(); if (invPid) renderInventory(); });
+    document.addEventListener('raf:inventory', function(){ render(); if (invPid) renderInventory(); });
+    document.addEventListener('keydown', function(e){
+      if (e.key !== 'Escape') return;
+      if (CW) cancelCreate(); else if (invPid) closeInventory(); else if (editing) tryClose();
+    });
     window.addEventListener('beforeunload', function(e){
       if (dirty){ e.preventDefault(); e.returnValue = ''; }
     });

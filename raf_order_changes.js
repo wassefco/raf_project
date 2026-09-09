@@ -246,11 +246,25 @@
     if (!item) return fail('INVALID_CHANGE_ITEM', { index:lineIndex });
 
     var ord = orderRecord(orderId);
-    /* an order-level discount is not attributable to any single line */
+    /* Discounts are now allocated per line, so the snapshot's `finalPrice` IS
+       the amount paid for this line and no reconstruction is needed.
+       The guard remains for orders whose discount was NOT allocated — legacy
+       records, or any future path that produces an order-level figure the
+       lines do not account for. In that case the per-line amount is genuinely
+       unrecorded and this module still refuses rather than apportioning. */
     var orderDiscount = ord ? num(ord.discount) : 0;
     if (orderDiscount > 0) {
-      return fail('PAID_AMOUNT_UNAVAILABLE',
-                  { reason:'order_level_discount_not_allocated_per_line', orderDiscount:ord.discount });
+      var lineSum = 0, allocated = true;
+      (snap.items || []).forEach(function (it) {
+        if (it.discount == null) allocated = false;
+        lineSum += num(it.discount);
+      });
+      /* the lines must account for the whole order discount, to the fils */
+      if (!allocated || Math.round(lineSum * 1000) !== Math.round(orderDiscount * 1000)) {
+        return fail('PAID_AMOUNT_UNAVAILABLE',
+                    { reason:'order_level_discount_not_allocated_per_line',
+                      orderDiscount:ord.discount, lineDiscountSum:money(lineSum) });
+      }
     }
     if (item.finalPrice == null) return fail('PAID_AMOUNT_UNAVAILABLE', { reason:'line_final_price_missing' });
 
@@ -263,8 +277,13 @@
   /* ---------- the active invoice ----------
      The live order carries the current commercial state. The snapshot's
      `commercial` block is the historical record and is never touched here.
-     Delivery, coupon, discount, tip and tax are copied forward untouched —
-     only the goods total moves. */
+     Delivery, coupon, tip and tax are copied forward untouched.
+
+     The DISCOUNT moves with the goods, because discounts are allocated per
+     line: when a line leaves the order its own discount leaves with it.
+     Copying the original order-level figure forward would keep subtracting a
+     discount for a product the customer no longer has, and undercharge them
+     by exactly that line's discount. */
   function applyInvoice(orderId, mutate){
     var all;
     try { all = JSON.parse(localStorage.getItem('raf_orders') || '[]'); } catch (e) { return false; }
@@ -275,13 +294,19 @@
     var ord = all[ix];
     if (!mutate(ord)) return false;
 
-    /* recompute ONLY the goods subtotal from the surviving lines */
-    var sub = (ord.items || []).reduce(function (s, l) {
-      if (l.removed) return s;
-      return s + num(l.price) * (l.qty || 1);
-    }, 0);
+    /* recompute the goods subtotal AND its discount from the surviving lines */
+    var sub = 0, lineDisc = 0, anyAllocated = false;
+    (ord.items || []).forEach(function (l) {
+      if (l.removed) return;
+      sub += num(l.price) * (l.qty || 1);
+      if (l.lineDiscount !== undefined) { anyAllocated = true; lineDisc += num(l.lineDiscount); }
+    });
     ord.subtotal = money(sub);
-    ord.total = money(Math.max(0, sub - num(ord.discount)) + num(ord.ship) + num(ord.tip) + num(ord.tax));
+    /* an order whose lines carry no allocation is a legacy record: its
+       order-level figure is all there is, so it is left exactly as it was */
+    var disc = anyAllocated ? lineDisc : num(ord.discount);
+    ord.discount = money(disc);
+    ord.total = money(Math.max(0, sub - disc) + num(ord.ship) + num(ord.tip) + num(ord.tax));
 
     all[ix] = ord;
     try { localStorage.setItem('raf_orders', JSON.stringify(all)); return true; }
@@ -856,6 +881,12 @@
           line.id = c.replacementProductId;
           line.name = { ar:c.replacementNameAr, en:c.replacementNameEn };
           line.price = c.replacementUnitPrice;
+          /* the replacement is priced at its own value, and the refund already
+             settled the difference against what the customer actually paid.
+             Carrying the original line's discount forward would subtract it a
+             second time. */
+          line.lineDiscount = 0;
+          line.lineDiscountPct = 0;
           line.variant = {};                 /* the replacement carries no prior options */
           line.replacedAt = Date.now();
           if (num(c.refundAmount) > 0) line.refundedAmount = c.refundAmount;
