@@ -143,7 +143,7 @@
       permissions: ['stores.view', 'stores.edit', 'products.view', 'products.create',
                     'products.edit', 'products.delete', 'orders.view', 'orders.manage',
                     'offers.view', 'offers.create', 'offers.edit', 'offers.delete',
-                    'auctions.view', 'auctions.create', 'reports.view']
+                    'auctions.view', 'auctions.create', 'reports.view', 'reports.export']
     },
     {
       id: 'merchant_employee', nameAr: 'موظف تاجر', nameEn: 'Merchant Employee', system: true,
@@ -262,7 +262,8 @@
     roles:     'raf_roles',
     users:     'raf_users',
     templates: 'raf_templates',
-    session:   'raf_current_user'   /* id of the acting staff member (demo) */
+    session:   'raf_current_user',  /* id of the acting staff member (demo) */
+    migrations:'raf_perm_migrations'
   };
 
   function read(key, fallback) {
@@ -283,6 +284,37 @@
     if (force || !localStorage.getItem(LS.templates)) write(LS.templates, TEMPLATES);
     if (force || !localStorage.getItem(LS.session))   write(LS.session, 'usr-001');
     backfillStoreSlugs();
+    migrateRoles();
+  }
+
+  /* Roles are seeded once, so a permission later added to a role's seed never
+     reaches a role that was already stored. Each migration below runs exactly
+     once and is recorded; an admin who afterwards revokes the key from that
+     role is never overridden. */
+  var ROLE_MIGRATIONS = [
+    /* merchants export their own store's reports */
+    { id:'merchant_reports_export_v1', roleId:'merchant', add:['reports.export'] }
+  ];
+  function migrateRoles() {
+    try {
+      var done = read(LS.migrations, []);
+      if (!Array.isArray(done)) done = [];
+      var roles = read(LS.roles, null);
+      if (!Array.isArray(roles)) return;
+      var changed = false, ran = false;
+      ROLE_MIGRATIONS.forEach(function (m) {
+        if (done.indexOf(m.id) > -1) return;
+        roles.forEach(function (r) {
+          if (r.id !== m.roleId || !Array.isArray(r.permissions)) return;
+          m.add.forEach(function (k) {
+            if (r.permissions.indexOf(k) === -1) { r.permissions.push(k); changed = true; }
+          });
+        });
+        done.push(m.id); ran = true;
+      });
+      if (changed) write(LS.roles, roles);
+      if (ran) write(LS.migrations, done);
+    } catch (e) {}
   }
 
   /* Accounts stored before the merchant ↔ store link existed have no

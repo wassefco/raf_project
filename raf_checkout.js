@@ -128,17 +128,25 @@
       if (couponOk) coupon = { code: chk.code, pct: chk.pct };
     }
     var useCoupon = couponOk && COUPON_OVERRIDES_PROMOTION;
+    /* who funds the discount is the marketing record's own answer; it is
+       captured with the line so settlement never has to work it out later */
+    function fundingOfRec(rec){ return (rec && window.RAFMarketing && RAFMarketing.fundingOf) ? RAFMarketing.fundingOf(rec) : null; }
+    var couponRec = (useCoupon && window.RAFMarketing) ? RAFMarketing.byCode(coupon.code) : null;
 
     var lines = items.map(function (l) {
       var unit = price(l), qty = l.qty || 1;
       var gross = fils(unit * qty);
-      var pct = 0, source = null;
+      var pct = 0, source = null, funding = null, ref = null;
 
-      if (useCoupon) { pct = coupon.pct; source = 'coupon'; }
+      if (useCoupon) { pct = coupon.pct; source = 'coupon'; funding = fundingOfRec(couponRec); ref = coupon.code; }
       else if (window.RAFMarketing) {
         /* eligibility is the marketing authority's answer, never the page's */
         var p = RAFMarketing.promotionPctFor(l.id, slugOf(l));
-        if (p > 0) { pct = p; source = 'promotion'; }
+        if (p > 0) {
+          pct = p; source = 'promotion';
+          var promoRec = RAFMarketing.activePromotion(slugOf(l));
+          funding = fundingOfRec(promoRec); ref = promoRec ? promoRec.id : null;
+        }
       }
 
       var dFils = pct > 0 ? Math.round(gross * pct / 100) : 0;
@@ -152,7 +160,10 @@
         lineDiscountPct: pct,
         lineDiscount: fromFils(dFils),
         finalPrice: fromFils(gross - dFils),
-        discountSource: source
+        discountSource: source,
+        /* 'merchant' | 'raf' — only when the line actually carries a discount */
+        discountFunding: dFils > 0 ? funding : null,
+        discountRef: dFils > 0 ? ref : null
       };
     });
 

@@ -380,8 +380,9 @@
       }
       function priceOf(l){
         var p = pricedByKey[l.key];
-        return p ? { lineDiscount:p.lineDiscount, pct:p.lineDiscountPct, source:p.discountSource }
-                 : { lineDiscount:0, pct:0, source:null };
+        return p ? { lineDiscount:p.lineDiscount, pct:p.lineDiscountPct, source:p.discountSource,
+                     funding:p.discountFunding || null, ref:p.discountRef || null }
+                 : { lineDiscount:0, pct:0, source:null, funding:null, ref:null };
       }
       /* The snapshot builds its immutable per-line record from these lines and
          reads `lineDiscount` off each one, so the authoritative figure has to
@@ -414,7 +415,12 @@
              historical order knows exactly what each line actually cost. */
           lineDiscount: priceOf(l).lineDiscount,
           lineDiscountPct: priceOf(l).pct,
-          discountSource: priceOf(l).source
+          discountSource: priceOf(l).source,
+          /* who funded that discount ('merchant' | 'raf') and which record
+             produced it — captured here, once, so the commission base of this
+             line is a historical fact rather than something worked out later */
+          discountFunding: priceOf(l).funding,
+          discountRef: priceOf(l).ref
         };
       });
       var subtotal = Cart.subtotal();

@@ -126,6 +126,9 @@
     'advertisement.updated':{ tl:false, ar:'تم تعديل إعلان',              en:'Advertisement updated' },
     'advertisement.enabled':{ tl:false, ar:'تم تفعيل إعلان',              en:'Advertisement enabled' },
     'advertisement.disabled':{tl:false, ar:'تم إيقاف إعلان',              en:'Advertisement disabled' },
+    /* finance */
+    'commission.rate_scheduled':{ tl:false, ar:'تمت جدولة نسبة عمولة رف', en:'RAF commission rate scheduled' },
+    'settlement.closed':    { tl:false, ar:'أُغلقت فترة محاسبية',         en:'Accounting period closed' },
     'image.added':          { tl:false, ar:'تمت إضافة صورة للمنتج',       en:'Product image added' },
     'image.updated':        { tl:false, ar:'تم استبدال صورة المنتج',      en:'Product image replaced' },
     'image.reordered':      { tl:false, ar:'تم إعادة ترتيب صور المنتج',   en:'Product images reordered' },

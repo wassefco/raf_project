@@ -63,6 +63,22 @@
     return k.getFullYear() + '-' + pad2(k.getMonth() + 1) + '-' + pad2(k.getDate());
   }
   function pad2(n){ return (n < 10 ? '0' : '') + n; }
+  /* a stored instant (epoch ms) read as Kuwait wall-clock — the same offset
+     arithmetic as kuwaitNow(), for records that were written earlier */
+  function kuwaitAt(ms){
+    var d = new Date(ms);
+    return new Date(d.getTime() + (d.getTimezoneOffset() + TZ_OFFSET_MIN) * 60000);
+  }
+  function dateOfInstant(ms){
+    if (typeof ms !== 'number' || !isFinite(ms)) return null;
+    var k = kuwaitAt(ms);
+    return k.getFullYear() + '-' + pad2(k.getMonth() + 1) + '-' + pad2(k.getDate());
+  }
+  function timeOfInstant(ms){
+    if (typeof ms !== 'number' || !isFinite(ms)) return null;
+    var k = kuwaitAt(ms);
+    return pad2(k.getHours()) + ':' + pad2(k.getMinutes());
+  }
   function isDateStr(s){ return typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s); }
   /* 'YYYY-MM-DD' compares correctly as a string, which keeps every window
      check free of timezone drift: both sides are Kuwait calendar days */
@@ -667,6 +683,20 @@
       .sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); });
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     DISCOUNT FUNDING — who pays for a discount
+     Read from the record's own `origin`, which is set at creation and can
+     never be edited: RAF's platform records are RAF-funded, anything a
+     merchant created is merchant-funded. Never inferred from an amount.
+     ══════════════════════════════════════════════════════════════ */
+  var FUNDING = { MERCHANT:'merchant', RAF:'raf' };
+  function fundingOf(rec){
+    if (!rec) return null;
+    if (rec.origin === 'platform') return FUNDING.RAF;
+    if (rec.origin === 'merchant') return FUNDING.MERCHANT;
+    return null;
+  }
+
   global.RAFMarketing = {
     KIND:KIND, STATUS:STATUS, DISCOUNT:DISCOUNT, PLACEMENT:PLACEMENT, TARGET:TARGET,
     /* promotions */
@@ -677,6 +707,7 @@
     displayPrice:displayPrice, hasActivePromotion:hasActivePromotion, promotedProducts:promotedProducts,
     /* time */
     todayISO:todayISO, kuwaitNow:kuwaitNow, statusOf:statusOf,
+    dateOfInstant:dateOfInstant, timeOfInstant:timeOfInstant,
     isHistory:isHistory, daysLeft:daysLeft, expiringSoon:expiringSoon,
     /* permission */
     canView:canView, canCreate:canCreate, canEdit:canEdit, storeOf:storeOf,
@@ -689,6 +720,8 @@
     /* write */
     createCoupon:createCoupon, createAd:createAd, update:update, setEnabled:setEnabled,
     /* customer surface */
-    storeAds:storeAds
+    storeAds:storeAds,
+    /* who funds a discount */
+    FUNDING:FUNDING, fundingOf:fundingOf
   };
 })(window);

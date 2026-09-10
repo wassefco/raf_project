@@ -82,7 +82,10 @@ body{background:var(--bg2);margin:0;}
 /* ---------- split workspace ---------- */
 .mw-split{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,420px);gap:0;align-items:start;}
 .mw-list{min-width:0;padding:16px clamp(14px,2.2vw,24px) 40px;}
-.mw-side{position:sticky;top:69px;height:calc(100vh - 69px);border-inline-start:1px solid var(--border);
+/* sized against the header's real height (set by the page as --mw-head-h), so
+   the drawer never runs past the bottom of the screen — its sticky action bar
+   and Focus Mode button stay fully in view */
+.mw-side{position:sticky;top:var(--mw-head-h,69px);height:calc(100vh - var(--mw-head-h,69px));border-inline-start:1px solid var(--border);
   background:var(--card);overflow:auto;}
 
 /* ---------- search + chips ---------- */
@@ -393,8 +396,9 @@ body.mw-focused{overflow:hidden;}
 
 /* ---------- PHASE 2.1 · processing ---------- */
 /* merchant action bar */
-.mw-acts{display:flex;gap:9px;margin-top:6px;}
-.mw-act{flex:1;min-height:52px;border-radius:14px;border:1px solid transparent;font-family:inherit;font-size:14.5px;
+/* actions wrap onto a second row rather than squeeze */
+.mw-acts{display:flex;flex-wrap:wrap;gap:9px;margin-top:6px;}
+.mw-act{flex:1 1 140px;min-width:0;min-height:52px;border-radius:14px;border:1px solid transparent;font-family:inherit;font-size:14.5px;
   font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .18s;}
 .mw-act i{font-size:19px;}
 .mw-act-accept{background:var(--ink);color:#F5F0E4;border-color:var(--ink);}
@@ -528,6 +532,15 @@ body.is-offline .mw-off{display:flex;}
 .mw-actbar{position:sticky;bottom:0;z-index:3;background:var(--card);margin:14px -16px -40px;
   padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--border);}
 .mw-panel .mw-actbar{position:static;margin:0;padding:0;border-top:0;background:transparent;}
+/* Focus Mode shares the sticky bar with the actions — its own full-width row,
+   so it can never end up underneath them */
+.mw-focus-b{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;min-height:44px;margin-top:9px;
+  padding:0 16px;border-radius:14px;border:1px solid var(--gold);background:var(--gold-soft);color:var(--gold2);
+  font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;transition:background .18s;}
+.mw-actbar .mw-focus-b{min-height:44px;}
+.mw-focus-b i{font-size:18px;}
+.mw-focus-b:hover{background:rgba(201,168,76,.22);}
+.mw-focus-b:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 
 /* ---------- missing-data notice (explicit, never inferred) ---------- */
 .mw-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;}
@@ -597,6 +610,7 @@ body.is-offline .mw-off{display:flex;}
     <button class="mw-rail-b on" aria-current="page"><i class="ti ti-clipboard-list"></i><span data-ar="الطلبات" data-en="Orders">الطلبات</span></button>
     <a class="mw-rail-b" href="raf_merchant_products.html" style="text-decoration:none;"><i class="ti ti-package"></i><span data-ar="المنتجات" data-en="Products">المنتجات</span></a>
     <a class="mw-rail-b" href="raf_marketing.html" style="text-decoration:none;"><i class="ti ti-speakerphone"></i><span data-ar="التسويق" data-en="Marketing">التسويق</span></a>
+    <a class="mw-rail-b" href="raf_analytics.html" style="text-decoration:none;" title="Analytics &amp; Finance"><i class="ti ti-chart-line"></i><span data-ar="التحليلات" data-en="Analytics">التحليلات</span></a>
     <div class="mw-rail-sp"></div>
   </aside>
 
@@ -1382,11 +1396,10 @@ body.is-offline .mw-off{display:flex;}
       + '<section class="mw-sec"><div class="mw-sec-h"><i class="ti ti-file-invoice"></i> '+T('ملخص الفاتورة','Invoice summary')+'</div>'
         + invoiceHTML(o)+'</section>'
 
-      /* merchant processing */
-      + actionsHTML(o)
-
-      + '<button class="mw-f-x" style="width:100%;justify-content:center;margin-top:10px;" onclick="openFocus()">'
-        + '<i class="ti ti-focus-2"></i> '+T('وضع التركيز','Focus mode')+'</button>';
+      /* merchant processing. Focus Mode sits INSIDE the sticky action bar as
+         its own row: it used to follow the bar, whose negative bottom margin
+         pulled it up underneath Ready / Request change. */
+      + actionsHTML(o, { focus:true });
   }
 
   /* ---------- merchant actions · lock · undo ---------- */
@@ -1421,8 +1434,14 @@ body.is-offline .mw-off{display:flex;}
       + '<button class="mw-undo-b" onclick="undoAction(\''+esc(o.id)+'\')">'
         + '<i class="ti ti-arrow-back-up"></i> '+T('تراجع','Undo')+'</button></div>';
   }
-  function actionsHTML(o){
-    return '<div class="mw-actbar">' + actionsInner(o) + '</div>';
+  function actionsHTML(o, opts){
+    /* the drawer offers Focus Mode alongside the actions; Focus Mode itself
+       renders the same bar without it */
+    var focus = (opts && opts.focus)
+      ? '<button class="mw-focus-b" onclick="openFocus()"><i class="ti ti-focus-2"></i> '
+        + T('وضع التركيز','Focus mode') + '</button>'
+      : '';
+    return '<div class="mw-actbar">' + actionsInner(o) + focus + '</div>';
   }
   function actionsInner(o){
     var html = undoHTML(o);
@@ -2154,6 +2173,18 @@ body.is-offline .mw-off{display:flex;}
     if (l === 'en'){ root().lang = 'en'; root().dir = 'ltr'; }
     applyLang();
 
+    /* the drawer is pinned below the header and sized to the rest of the
+       screen, so it needs the header's real height — which changes when the
+       header wraps. Layout only. */
+    var headEl = document.querySelector('.mw-head');
+    function syncHeadH(){
+      /* rounded up, so a sub-pixel header never overlaps the drawer's top */
+      var hh = headEl ? Math.ceil(headEl.getBoundingClientRect().height) : 0;
+      if (hh) document.documentElement.style.setProperty('--mw-head-h', hh + 'px');
+    }
+    window.addEventListener('resize', syncHeadH);
+    if (window.ResizeObserver && headEl) new ResizeObserver(syncHeadH).observe(headEl);
+
     var link = resolveStore();
     if (!link.ok){
       /* missing data is reported, never papered over with another store */
@@ -2172,6 +2203,10 @@ body.is-offline .mw-off{display:flex;}
     STORE = link.store;
     STORE_SLUG = link.slug;          /* the canonical scope key for every read */
     document.getElementById('shell').style.display = '';
+    /* the header only has a height once the shell is visible; measured again
+       after the first render fills in the store name and operating banner */
+    syncHeadH();
+    setTimeout(syncHeadH, 0);
 
     /* header identity */
     document.getElementById('stName').textContent = L(STORE.name);

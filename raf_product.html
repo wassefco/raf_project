@@ -830,7 +830,10 @@ function render(){
   document.getElementById('pPrice').textContent = showPromo ? promo.final : P.price;
   document.getElementById('pPrice').classList.toggle('is-promo', showPromo);
   var old = document.getElementById('pOld');
-  var wasPrice = showPromo ? promo.original : P.oldPrice;
+  /* a struck-through price is only shown when it is genuinely higher than the
+     price being charged */
+  var wasPrice = showPromo ? promo.original
+               : (P.oldPrice && parseFloat(P.oldPrice) > parseFloat(P.price) ? P.oldPrice : null);
   if (wasPrice){ old.textContent = wasPrice; old.style.display = ''; } else old.style.display = 'none';
 
   var save = document.getElementById('pSave');

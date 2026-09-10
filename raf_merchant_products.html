@@ -562,6 +562,7 @@ html[dir="rtl"] .pw-val{padding:0 11px 0 6px;}
     <a class="mw-rail-b" href="raf_merchant.html"><i class="ti ti-clipboard-list"></i><span data-ar="الطلبات" data-en="Orders">الطلبات</span></a>
     <a class="mw-rail-b on" href="raf_merchant_products.html" aria-current="page"><i class="ti ti-package"></i><span data-ar="المنتجات" data-en="Products">المنتجات</span></a>
     <a class="mw-rail-b" href="raf_marketing.html"><i class="ti ti-speakerphone"></i><span data-ar="التسويق" data-en="Marketing">التسويق</span></a>
+    <a class="mw-rail-b" href="raf_analytics.html" title="Analytics &amp; Finance"><i class="ti ti-chart-line"></i><span data-ar="التحليلات" data-en="Analytics">التحليلات</span></a>
     <div class="mw-rail-sp"></div>
   </aside>
 
@@ -1339,7 +1340,7 @@ html[dir="rtl"] .pw-val{padding:0 11px 0 6px;}
           + '<input id="adjQty" class="mw-num" inputmode="numeric" dir="ltr" value=""'
             + ' placeholder="'+T('الكمية','Quantity')+'" oninput="previewAdj()">'
         + '</div>'
-        + '<input id="adjReason" placeholder="'+T('سبب التعديل (مطلوب)','Reason (required)')+'" oninput="clearAdjMsg()">'
+        + '<input id="adjReason" placeholder="'+T('سبب التعديل (اختياري)','Reason (optional)')+'" oninput="clearAdjMsg()">'
         + '<div class="mw-adj-res" id="adjPreview"></div>'
         + '<div class="mw-adj-err" id="adjErr"></div>'
         + '<button type="button" class="mw-btn-gold mw-adj-apply" onclick="applyAdj()">'

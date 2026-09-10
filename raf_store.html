@@ -678,6 +678,10 @@ function applyLang(){
   renderCatChips();
   renderFilterSheet();
   render();               /* product grid re-renders in the new language */
+  /* the offers section and the store advertisement are built from the marketing
+     authority, so they are repainted here too — otherwise they keep the
+     language they were first mounted in. */
+  if (window.mountStoreSections) window.mountStoreSections();
 }
 window.toggleLang = function(){
   var r = root(), en = r.lang === 'en';
@@ -1139,11 +1143,11 @@ function shareStore(){
         }).join('') + '</div>';
     box.style.display = '';
   }
+  /* applyLang repaints these with everything else, in either language */
+  window.mountStoreSections = function(){ mountStoreOffers(); mountStoreAd(); };
   function boot(){
     if (!applyStorePolicy()) return;   /* suspended/deleted stores never render */
-    applyLang();                       /* renders store, chips, sheet and grid */
-    mountStoreOffers();
-    mountStoreAd();
+    applyLang();                       /* store, chips, sheet, grid, offers, ad */
     if (window.RAFShop) RAFShop.Cart.badge();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

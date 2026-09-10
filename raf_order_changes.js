@@ -355,7 +355,11 @@
     try { allowed = !!(global.RAFPerm && RAFPerm.can(actor.id, 'orders.manage')); } catch (e) { allowed = false; }
     if (!allowed) return fail('FORBIDDEN');
 
-    var mine = actor.storeSlug || null, theirs = slugOf(orderId);
+    /* the actor's store comes from the permission authority by id — a store
+       written onto the actor object by the caller is never trusted */
+    var mine = null;
+    try { mine = (global.RAFPerm && RAFPerm.storeSlugOf(actor.id)) || null; } catch (e) { mine = null; }
+    var theirs = slugOf(orderId);
     if (!mine || !theirs || mine !== theirs) return fail('CROSS_STORE', { actorStore:mine, orderStore:theirs });
 
     var eng = E();

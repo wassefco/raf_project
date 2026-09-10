@@ -342,8 +342,9 @@
     var n = typeof delta === 'number' ? delta : Number(delta);
     if (!isFinite(n) || n % 1 !== 0 || n === 0) return { ok:false, code:'INVALID_QUANTITY',
       errors:[{ field:'delta', message:T('أدخل عدداً صحيحاً غير صفري','Enter a non-zero whole number') }] };
-    if (!reason || !String(reason).trim()) return { ok:false, code:'REASON_REQUIRED',
-      errors:[{ field:'reason', message:T('سبب التعديل مطلوب','A reason is required') }] };
+    /* a reason is optional for a manual increase / decrease: recorded when the
+       merchant gives one, never demanded */
+    var why = reason == null ? '' : String(reason).trim();
 
     /* the same concurrency stamp the product editor uses — an adjustment made
        against an out-of-date reading is rejected, never merged */
@@ -368,10 +369,10 @@
       return { ok:false, code:'PERSIST_FAILED',
         errors:[{ message:T('تعذّر حفظ المخزون','Inventory could not be saved') }] };
 
-    addMovements([movement(productId, Math.abs(n), DIRECTION.ADJUSTMENT, String(reason).trim(), null, actor)]);
+    addMovements([movement(productId, Math.abs(n), DIRECTION.ADJUSTMENT, why || null, null, actor)]);
     audit('inventory.adjusted', { storeSlug:slugOf(productId), actor:actor, source:'merchant',
       key:productId + ':adj:' + Date.now(),
-      metadata:{ productId:productId, from:cur, to:next, delta:n, reason:String(reason).trim() } });
+      metadata:{ productId:productId, from:cur, to:next, delta:n, reason:why || null } });
     emit();
     return { ok:true, productId:productId, from:cur, to:next, delta:n };
   }

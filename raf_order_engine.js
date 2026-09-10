@@ -473,8 +473,9 @@
     if (!allowed) return rejectError('FORBIDDEN');
 
     /* ownership is proven from the canonical storeSlug on both sides, or the
-       action is refused — an unprovable link is never treated as a match */
-    var mine = actor.storeSlug || null, theirs = snapSlug(orderId);
+       action is refused — an unprovable link is never treated as a match.
+       The actor's store comes from the permission authority, never the caller. */
+    var mine = actorStoreOf(actor), theirs = snapSlug(orderId);
     if (!mine || !theirs || mine !== theirs) return rejectError('CROSS_STORE', { actorStore:mine, orderStore:theirs });
 
     var l = lockOf(orderId);
@@ -548,14 +549,21 @@
      proves the actor may perform them. It previously trusted the merchant
      page, which meant a direct API call bypassed every check. Reject already
      did this (Group B); this is the same gate, reused, not a second one. */
+  /* the acting account's store, from its stored link — by id only */
+  function actorStoreOf(actor){
+    if (!actor || !actor.id || !global.RAFPerm) return null;
+    try { return RAFPerm.storeSlugOf(actor.id) || null; } catch (e) { return null; }
+  }
   function processGuard(orderId, actor){
     if (!actor || !actor.id) return rejectError('FORBIDDEN');
     var allowed = false;
     try { allowed = !!(global.RAFPerm && RAFPerm.can(actor.id, 'orders.manage')); } catch (e) { allowed = false; }
     if (!allowed) return rejectError('FORBIDDEN');
 
-    /* ownership is proven from the canonical storeSlug on both sides */
-    var mine = actor.storeSlug || null, theirs = snapSlug(orderId);
+    /* ownership is proven from the canonical storeSlug on both sides. The
+       actor's store is resolved from the permission authority by id — a store
+       written onto the actor object by the caller is never trusted. */
+    var mine = actorStoreOf(actor), theirs = snapSlug(orderId);
     if (!mine || !theirs || mine !== theirs) return rejectError('CROSS_STORE', { actorStore:mine, orderStore:theirs });
 
     var l = lockOf(orderId);
