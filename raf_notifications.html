@@ -60,6 +60,7 @@
 <script src="raf_source.js"></script>
 <script src="raf_data.js"></script>
 <script src="raf_account.js"></script>
+<script src="raf_notify.js"></script>
 <script>
 /* ============================================================
    ACTIONABLE NOTIFICATIONS — every alert routes to its destination
@@ -124,10 +125,16 @@
   }
 
   function visible(){
-    return NOTIFS.filter(function(n){
+    /* order outcomes written by the Order Engine — only this customer's own,
+       filtered by RAFNotify against each order's snapshot owner */
+    var orders = (window.RAFNotify && RAFNotify.items)
+      ? RAFNotify.items().filter(function(n){ return String(n.id).indexOf('ord-') === 0; })
+          .map(function(n){ return { _id:n.id, type:'order', unread:n.unread, href:n.href, t:n.t, s:n.s }; })
+      : [];
+    return orders.concat(NOTIFS.filter(function(n){
       var k=TYPES[n.type]||{};
       return !(k.feature==='loyalty' && !loyaltyOn());   /* hide reward alerts while loyalty is off */
-    });
+    }));
   }
   function render(){
     var list=visible();
@@ -138,8 +145,13 @@
     var btn=document.getElementById('markAll');
     if(btn) btn.disabled = unread===0;
   }
-  window.markRead=function(i){ if(NOTIFS[i]) NOTIFS[i].unread=false; };
-  window.markAllRead=function(){ NOTIFS.forEach(function(n){n.unread=false;}); render();
+  window.markRead=function(i){
+    var n=visible()[i]; if(!n) return;
+    if(n._id && window.RAFNotify) RAFNotify.markRead(n._id); else n.unread=false;
+  };
+  window.markAllRead=function(){ NOTIFS.forEach(function(n){n.unread=false;});
+    if(window.RAFNotify) RAFNotify.markAllRead();
+    render();
     if(window.RAFShop&&RAFShop.toast) RAFShop.toast(T('تم تعليم الكل كمقروء','All marked as read'),{icon:'ti-checks'}); };
 
   function boot(){

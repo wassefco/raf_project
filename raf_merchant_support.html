@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — الدعم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   MERCHANT SUPPORT — merchant / employee ↔ RAF Management.
+   UI only: every read and write goes through RAFCustomerSupport.
+   ══════════════════════════════════════════════════════════════ */
+*{box-sizing:border-box;}
+[hidden]{display:none!important;}
+body{background:var(--bg2);margin:0;}
+.mw{display:flex;min-height:100vh;}
+.mw-rail{width:74px;flex:0 0 74px;background:var(--ink);display:flex;flex-direction:column;align-items:center;
+  gap:6px;padding:14px 0;position:sticky;top:0;height:100vh;z-index:40;}
+.mw-rail-logo{width:44px;height:44px;min-height:44px;border-radius:13px;background:var(--gold);color:#1C1606;display:flex;
+  align-items:center;justify-content:center;font-family:var(--font-display);font-size:19px;font-weight:900;
+  margin-bottom:10px;text-decoration:none;}
+.mw-rail-b{width:50px;min-height:50px;border-radius:14px;border:0;background:transparent;color:#8E877A;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;
+  font-family:inherit;font-size:9.5px;font-weight:700;text-decoration:none;transition:background .18s,color .18s;}
+.mw-rail-b i{font-size:21px;}
+.mw-rail-b:hover{background:rgba(255,255,255,.07);color:#EDE8DC;}
+.mw-rail-b.on{background:var(--gold-soft);color:var(--gold);}
+.mw-rail-sp{flex:1;}
+.mw-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.mw-head{position:sticky;top:0;z-index:35;background:var(--card);border-bottom:1px solid var(--border);
+  padding:12px clamp(14px,2.2vw,24px);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.mw-store{display:flex;align-items:center;gap:11px;min-width:0;}
+.mw-store-logo{width:44px;height:44px;flex:0 0 auto;border-radius:13px;background:var(--bg3) center/cover no-repeat;
+  display:flex;align-items:center;justify-content:center;color:var(--gold2);font-size:21px;}
+.mw-store-t{min-width:0;}
+.mw-store-t b{display:block;font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mw-store-t span{font-size:11.5px;color:var(--text3);}
+.mw-head-sp{flex:1;min-width:8px;}
+.mw-hact{display:flex;align-items:center;gap:8px;}
+.mw-hact .mw-ico-b{min-height:44px;}
+.mw-ico-b{width:44px;height:44px;flex:0 0 auto;border-radius:13px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-size:18px;cursor:pointer;display:inline-flex;
+  align-items:center;justify-content:center;font-family:inherit;font-weight:800;}
+.mw-ico-b:hover{border-color:var(--gold);color:var(--gold2);}
+.mw-ico-b.lang{width:auto;padding:0 14px;font-size:12.5px;}
+.mw-body{padding:18px clamp(14px,2.2vw,24px) 60px;width:100%;}
+
+.sp-wrap{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:14px;min-width:0;}
+.sp-sec{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px 20px;min-width:0;}
+.sp-sec-h{display:flex;align-items:center;gap:10px;min-height:44px;flex-wrap:wrap;}
+.sp-sec-h h3{margin:0;flex:1;min-width:0;font-size:15.5px;font-weight:800;color:var(--ink);overflow-wrap:anywhere;}
+.sp-small{font-size:13px;color:var(--text3);line-height:1.7;}
+.sp-num{font-family:var(--font-en);direction:ltr;unicode-bidi:isolate;}
+.sp-id{font-family:var(--font-en);direction:ltr;unicode-bidi:isolate;overflow-wrap:anywhere;}
+
+/* summary */
+.sp-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;}
+.sp-kpi{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px 16px;min-width:0;}
+.sp-kpi .l{font-size:12.5px;font-weight:800;color:var(--text3);}
+.sp-kpi .v{font-size:24px;font-weight:800;color:var(--ink);margin-top:6px;}
+
+/* filters */
+.sp-filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;align-items:end;}
+.sp-f label{display:block;font-size:12px;font-weight:800;color:var(--text3);margin-bottom:6px;}
+.sp-f select,.sp-f input{width:100%;min-height:46px;border-radius:12px;border:1px solid var(--border2);background:var(--card);
+  font-family:inherit;font-size:14px;color:var(--ink);padding:0 12px;}
+.sp-f textarea{width:100%;min-height:130px;border-radius:12px;border:1px solid var(--border2);background:var(--card);
+  font-family:inherit;font-size:15px;line-height:1.8;color:var(--ink);padding:12px 14px;resize:vertical;}
+.sp-f select:focus,.sp-f input:focus,.sp-f textarea:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+.sp-f.bad select,.sp-f.bad input,.sp-f.bad textarea{border-color:var(--red);}
+.sp-f .err{display:block;color:#A63A36;font-size:12px;font-weight:700;margin-top:5px;}
+.sp-f.wide{grid-column:1 / -1;}
+.sp-frow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;}
+.sp-count{font-size:12.5px;color:var(--text3);font-weight:700;}
+
+/* buttons */
+.sp-wrap .sp-btn{min-height:46px;}
+.sp-btn{min-height:46px;padding:0 18px;border-radius:13px;border:1px solid var(--border2);background:var(--card);
+  color:var(--text2);font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;display:inline-flex;
+  align-items:center;justify-content:center;gap:7px;}
+.sp-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold2);}
+.sp-btn.gold{background:var(--gold);border-color:var(--gold2);color:#1C1606;}
+.sp-btn.ink{background:var(--ink);border-color:var(--ink);color:#F5F0E4;}
+.sp-btn.green{background:var(--green);border-color:#25834A;color:#fff;}
+.sp-btn:disabled{opacity:.45;cursor:not-allowed;}
+.sp-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.sp-acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;margin-top:12px;}
+
+/* list */
+.sp-list{display:flex;flex-direction:column;gap:10px;}
+.sp-wrap .sp-card{min-height:44px;}
+.sp-card{width:100%;text-align:start;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;
+  cursor:pointer;font-family:inherit;color:inherit;display:block;min-width:0;}
+.sp-card:hover{border-color:var(--gold);}
+.sp-card:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.sp-card-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sp-card-top .sp-id{font-size:12px;color:var(--text3);font-weight:700;}
+.sp-card .subj{margin-top:8px;font-size:14.5px;font-weight:800;line-height:1.7;color:var(--ink);overflow-wrap:anywhere;}
+.sp-meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:12.5px;color:var(--text2);}
+.sp-meta span{display:inline-flex;align-items:center;gap:5px;min-width:0;overflow-wrap:anywhere;}
+.sp-meta i{color:var(--gold2);font-size:15px;flex:0 0 auto;}
+.sp-tag{display:inline-flex;align-items:center;gap:5px;min-height:26px;padding:3px 11px;border-radius:20px;font-size:11.5px;
+  font-weight:800;background:var(--bg3);color:var(--text2);}
+.sp-tag.blue{background:rgba(59,125,216,.13);color:#26507F;}
+.sp-tag.amber{background:rgba(200,121,30,.14);color:#9A5B12;}
+.sp-tag.gold{background:var(--gold-soft);color:var(--gold2);}
+.sp-tag.green{background:rgba(46,158,91,.14);color:#1F7A45;}
+
+/* detail */
+.sp-dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:12px;}
+.sp-dl div{min-width:0;}
+.sp-dl dt{font-size:11.5px;font-weight:800;color:var(--text3);}
+.sp-dl dd{margin:4px 0 0;font-size:14px;color:var(--ink);font-weight:700;overflow-wrap:anywhere;}
+.sp-msgs{display:flex;flex-direction:column;gap:10px;margin-top:12px;}
+.sp-msg{max-width:88%;border-radius:14px;padding:11px 13px;background:var(--gold-soft);border:1px solid rgba(201,168,76,.35);
+  align-self:flex-end;min-width:0;}
+.sp-msg.raf{align-self:flex-start;background:var(--bg);border-color:var(--border);}
+.sp-msg .h{display:flex;gap:8px;flex-wrap:wrap;font-size:11.5px;font-weight:800;color:var(--text2);}
+.sp-msg .h .d{margin-inline-start:auto;color:var(--text3);font-weight:600;}
+.sp-msg p{margin:6px 0 0;font-size:14px;line-height:1.8;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere;}
+.sp-atts{display:flex;flex-direction:column;gap:6px;margin-top:8px;}
+.sp-att{display:flex;align-items:center;gap:8px;min-height:40px;padding:6px 10px;border-radius:10px;background:var(--card);
+  border:1px solid var(--border);font-size:12.5px;color:var(--ink);min-width:0;}
+.sp-att i{font-size:18px;color:var(--gold2);flex:0 0 auto;}
+.sp-att .n{flex:1;min-width:0;overflow-wrap:anywhere;font-weight:700;}
+.sp-att .s{flex:0 0 auto;color:var(--text3);font-family:var(--font-en);direction:ltr;unicode-bidi:isolate;}
+.sp-att .x{flex:0 0 auto;min-height:44px;min-width:44px;border:0;background:transparent;color:#A63A36;cursor:pointer;font-size:18px;border-radius:10px;}
+.sp-note{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--text3);line-height:1.7;margin-top:12px;}
+.sp-note i{font-size:17px;flex:0 0 auto;margin-top:1px;}
+.sp-wait{margin-top:12px;border:1px dashed var(--border2);border-radius:14px;padding:12px 14px;font-size:13px;color:var(--text2);
+  display:flex;gap:8px;align-items:flex-start;line-height:1.7;}
+.sp-wait i{color:var(--gold2);font-size:18px;flex:0 0 auto;}
+.sp-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.sp-file{position:relative;display:inline-flex;}
+.sp-file input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;}
+.sp-msgbox{border-radius:12px;padding:11px 13px;font-size:12.5px;line-height:1.7;margin-top:12px;
+  background:rgba(217,83,79,.1);border:1px solid rgba(217,83,79,.34);color:#A63A36;}
+.sp-okbox{border-radius:12px;padding:11px 13px;font-size:12.5px;line-height:1.7;margin-top:12px;
+  background:rgba(46,158,91,.1);border:1px solid rgba(46,158,91,.3);color:#1F7A45;}
+
+.sp-state{padding:34px 16px;text-align:center;color:var(--text3);font-size:13.5px;line-height:1.8;}
+.sp-state i{font-size:36px;display:block;margin-bottom:8px;color:var(--border2);}
+.sp-state b{display:block;font-size:15px;color:var(--ink);margin-bottom:4px;}
+
+.mw-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;}
+.mw-gate-c{max-width:420px;text-align:center;}
+.mw-gate-c i{font-size:40px;color:var(--text3);}
+.mw-gate-c h1{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--ink);margin:12px 0 8px;}
+.mw-gate-c p{font-size:13px;color:var(--text2);line-height:1.8;}
+.mw-toast{position:fixed;inset-inline:0;bottom:26px;display:flex;justify-content:center;z-index:120;
+  pointer-events:none;opacity:0;transform:translateY(10px);transition:opacity .22s,transform .22s;}
+.mw-toast.show{opacity:1;transform:none;}
+.mw-toast > div{background:var(--ink);color:#F5F0E4;border-radius:30px;padding:12px 20px;font-size:13.5px;
+  font-weight:700;box-shadow:0 14px 30px -14px rgba(20,16,8,.6);max-width:90vw;text-align:center;}
+
+@media (max-width:640px){
+  .sp-sec{padding:16px;}
+  .sp-acts .sp-btn{flex:1 1 0;}
+  .sp-frow .sp-btn{flex:1 1 auto;}
+  .sp-actions .sp-btn{flex:1 1 auto;}
+  .sp-msg{max-width:100%;}
+}
+@media (max-width:560px){
+  .mw-rail{position:fixed;bottom:0;top:auto;width:100%;height:auto;flex-direction:row;justify-content:space-around;
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));}
+  .mw-rail-logo,.mw-rail-sp{display:none;}
+  /* eight destinations share the row: each takes an equal slice */
+  .mw-rail{gap:0;padding-inline:2px;}
+  .mw-rail-b{flex:1 1 0;min-width:0;width:auto;padding:0 1px;}
+  .mw-rail-b span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;}
+  .mw{flex-direction:column;}
+  .mw-body{padding-bottom:90px;}
+  .mw-store-logo{width:38px;height:38px;font-size:18px;}
+  .mw-store-t b{font-size:15px;}
+  .mw-toast{bottom:90px;}
+  .sp-kpis{grid-template-columns:1fr 1fr;}
+  .sp-filters{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="mw-gate" id="gate" style="display:none;">
+  <div class="mw-gate-c"><i class="ti ti-lifebuoy"></i>
+    <h1 id="gateT"></h1><p id="gateP"></p></div>
+</div>
+
+<div class="mw" id="shell" style="display:none;">
+  <aside class="mw-rail">
+    <a class="mw-rail-logo" href="raf_homepage.html" aria-label="RAF">رف</a>
+    <a class="mw-rail-b" href="raf_dashboard.html" title="Dashboard"><i class="ti ti-layout-dashboard"></i><span data-ar="الرئيسية" data-en="Dashboard">الرئيسية</span></a>
+    <a class="mw-rail-b" href="raf_merchant.html"><i class="ti ti-clipboard-list"></i><span data-ar="الطلبات" data-en="Orders">الطلبات</span></a>
+    <a class="mw-rail-b" href="raf_merchant_products.html"><i class="ti ti-package"></i><span data-ar="المنتجات" data-en="Products">المنتجات</span></a>
+    <a class="mw-rail-b" href="raf_marketing.html"><i class="ti ti-speakerphone"></i><span data-ar="التسويق" data-en="Marketing">التسويق</span></a>
+    <a class="mw-rail-b" href="raf_analytics.html" title="Analytics &amp; Finance"><i class="ti ti-chart-line"></i><span data-ar="التحليلات" data-en="Analytics">التحليلات</span></a>
+    <a class="mw-rail-b" href="raf_store_management.html" title="Store Management"><i class="ti ti-building-store"></i><span data-ar="المتجر" data-en="Store">المتجر</span></a>
+    <a class="mw-rail-b" href="raf_customer_experience.html" title="Customer Experience"><i class="ti ti-mood-smile"></i><span data-ar="العملاء" data-en="Customers">العملاء</span></a>
+    <a class="mw-rail-b on" href="raf_merchant_support.html" aria-current="page" title="Support"><i class="ti ti-lifebuoy"></i><span data-ar="الدعم" data-en="Support">الدعم</span></a>
+    <div class="mw-rail-sp"></div>
+  </aside>
+
+  <div class="mw-main">
+    <header class="mw-head">
+      <div class="mw-store">
+        <div class="mw-store-logo" id="stLogo"><i class="ti ti-building-store"></i></div>
+        <div class="mw-store-t"><b id="stName">—</b>
+          <span data-ar="الدعم" data-en="Support">الدعم</span></div>
+      </div>
+      <div class="mw-head-sp"></div>
+      <div class="mw-hact">
+        <button class="mw-ico-b" onclick="spRefresh()" aria-label="refresh"><i class="ti ti-refresh"></i></button>
+        <button class="mw-ico-b lang" onclick="toggleLang()"><span id="langLabel">EN</span></button>
+      </div>
+    </header>
+    <div class="mw-body"><section id="panel" aria-live="polite"></section></div>
+  </div>
+</div>
+
+<div class="mw-toast" id="toast"><div id="toastMsg"></div></div>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_customer_support.js"></script>
+<script>
+/* ============================================================
+   MERCHANT SUPPORT (merchant / employee ↔ RAF)
+   Tickets, messages, statuses and attachment metadata all go
+   through RAFCustomerSupport, scoped to the account's own store.
+   ============================================================ */
+(function(){
+  'use strict';
+  var SUP = window.RAFCustomerSupport;
+  var STATUS_TAG = { open:'blue', in_progress:'amber', waiting_merchant:'gold', resolved:'green' };
+  var MOVE = {
+    in_progress:      { ar:'نقل إلى قيد المعالجة',   en:'Move to In Progress',          ic:'ti-player-play', cls:'ink' },
+    waiting_merchant: { ar:'نقل إلى بانتظار التاجر', en:'Move to Waiting for Merchant', ic:'ti-hourglass',   cls:'' },
+    resolved:         { ar:'تم الحل',               en:'Resolve',                       ic:'ti-circle-check', cls:'green' }
+  };
+  var ME = null, SLUG = null;
+  var st = { view:'list', id:null, state:'loading', msg:null, ok:null };
+  var data = null;
+  var f = { q:'', status:'all', category:'all' };
+  var form = null;   /* { category, subject, message, relatedOrderId, files:[], errors:{}, msg } */
+  var reply = { body:'', files:[], err:null };
+
+  /* ---------- helpers ---------- */
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function L(o){ return (o && typeof o === 'object') ? (isEn() ? (o.en || o.ar) : (o.ar || o.en)) : (o || ''); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function el(id){ return document.getElementById(id); }
+  var toastTimer = null;
+  function toast(m){ el('toastMsg').textContent = m; el('toast').classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function(){ el('toast').classList.remove('show'); }, 2600); }
+  function fmt(ms){
+    try { return new Date(ms).toLocaleString(isEn() ? 'en-GB' : 'ar-KW-u-nu-latn', { day:'numeric', month:'short', year:'numeric', hour:'numeric', minute:'2-digit', timeZone:'Asia/Kuwait' }); }
+    catch(e){ return ''; }
+  }
+  function size(n){ return n < 1024 ? n + ' B' : n < 1048576 ? (n/1024).toFixed(1) + ' KB' : (n/1048576).toFixed(1) + ' MB'; }
+  function statusTag(s){ return '<span class="sp-tag '+(STATUS_TAG[s]||'')+'">'+esc(L(SUP.STATUS_TXT[s]||{ar:s,en:s}))+'</span>'; }
+  function catLabel(k){ var c = SUP.categoryOf(k); return c ? L(c) : k; }
+  function stateHTML(ic, title, txt){ return '<div class="sp-state"><i class="ti '+ic+'"></i><b>'+esc(title)+'</b>'+(txt?esc(txt):'')+'</div>'; }
+  function opt(v, label, cur){ return '<option value="'+esc(v)+'"'+(String(cur)===String(v)?' selected':'')+'>'+esc(label)+'</option>'; }
+  function fileIcon(a){ return /^image\//.test(a.type) ? 'ti-photo' : (a.ext === 'pdf' || a.type === 'application/pdf') ? 'ti-file-type-pdf' : 'ti-file'; }
+  /* only what the authority accepts: the browser's file metadata, never content */
+  function metaOf(fl){ return { name:fl.name, size:fl.size, type:fl.type || '', lastModified:fl.lastModified || 0 }; }
+
+  function load(){
+    try { var r = SUP.tickets({ actor:ME.id }); if (!r.ok) throw new Error('scope'); data = r.items; st.state = 'ready'; }
+    catch(e){ data = null; st.state = 'error'; }
+  }
+  function byId(id){ return (data || []).filter(function(t){ return t.ticketId === id; })[0]; }
+
+  function render(){
+    var h;
+    try {
+      if (st.state === 'loading') h = '<div class="sp-wrap"><section class="sp-sec">'+stateHTML('ti-loader-2', T('جارٍ التحميل…','Loading…'), '')+'</section></div>';
+      else if (st.state === 'error') h = errorHTML();
+      else if (st.view === 'create') h = createHTML();
+      else if (st.view === 'detail') h = detailHTML();
+      else h = listHTML();
+    } catch(e){ st.state = 'error'; h = errorHTML(); }
+    el('panel').innerHTML = h;
+  }
+  function errorHTML(){
+    return '<div class="sp-wrap"><section class="sp-sec">'+stateHTML('ti-alert-triangle', T('تعذّر تحميل تذاكر الدعم','Support tickets could not be loaded'), T('حاول مرة أخرى.','Please try again.'))
+      + '<div class="sp-acts" style="justify-content:center"><button class="sp-btn gold" onclick="spRefresh()"><i class="ti ti-refresh"></i>'+esc(T('إعادة المحاولة','Retry'))+'</button></div></section></div>';
+  }
+
+  /* ════════════════════ LIST ════════════════════ */
+  function filtered(){
+    var q = f.q.trim().toLowerCase();
+    return data.filter(function(t){
+      if (f.status !== 'all' && t.status !== f.status) return false;
+      if (f.category !== 'all' && t.category !== f.category) return false;
+      if (!q) return true;
+      var hay = [t.ticketId, t.subject, t.relatedOrderId || ''].concat(t.messages.map(function(m){ return m.body; })).join(' ').toLowerCase();
+      return hay.indexOf(q) > -1;
+    }).sort(function(a,b){ return b.updatedAt - a.updatedAt; });
+  }
+  function countText(n){ return T(n+' تذكرة', n+' ticket'+(n===1?'':'s')); }
+  function listHTML(){
+    var s = { total:data.length, open:0, in_progress:0, waiting_merchant:0, resolved:0 };
+    data.forEach(function(t){ if (s[t.status] != null) s[t.status]++; });
+    var h = '<div class="sp-wrap"><section class="sp-sec"><div class="sp-sec-h"><h3>'+esc(T('تذاكر الدعم','Support tickets'))+'</h3>'
+      + '<button class="sp-btn gold" id="spNew" onclick="newTicket()"><i class="ti ti-plus"></i>'+esc(T('تذكرة جديدة','New ticket'))+'</button></div>'
+      + '<div class="sp-small">'+esc(T('تواصل مع إدارة رف بخصوص طلب أو تسوية أو متجرك أو مشكلة تقنية.','Contact RAF Management about an order, a settlement, your store or a technical issue.'))+'</div></section>';
+    h += '<div class="sp-kpis" id="spKpis">' + [['total',T('إجمالي التذاكر','Total tickets')],['open',L(SUP.STATUS_TXT.open)],['in_progress',L(SUP.STATUS_TXT.in_progress)],
+          ['waiting_merchant',L(SUP.STATUS_TXT.waiting_merchant)],['resolved',L(SUP.STATUS_TXT.resolved)]].map(function(k){
+        return '<div class="sp-kpi"><div class="l">'+esc(k[1])+'</div><div class="v"><span class="sp-num">'+s[k[0]]+'</span></div></div>';
+      }).join('') + '</div>';
+    if (!data.length){
+      return h + '<section class="sp-sec">'+stateHTML('ti-lifebuoy', T('لا توجد تذاكر دعم بعد','No support tickets yet'),
+        T('افتح تذكرة جديدة للتواصل مع فريق رف.','Open a new ticket to contact the RAF team.'))+'</section></div>';
+    }
+    var list = filtered();
+    h += '<section class="sp-sec"><div class="sp-filters">'
+      + '<div class="sp-f wide"><label for="fQ">'+esc(T('بحث','Search'))+'</label><input id="fQ" type="search" value="'+esc(f.q)+'" oninput="setF(\'q\',this.value,true)"'
+        + ' placeholder="'+esc(T('رقم التذكرة أو الموضوع أو رقم الطلب','Ticket ID, subject or order number'))+'"></div>'
+      + '<div class="sp-f"><label for="fStatus">'+esc(T('الحالة','Status'))+'</label><select id="fStatus" onchange="setF(\'status\',this.value)">'
+        + opt('all', T('كل الحالات','All statuses'), f.status) + Object.keys(SUP.STATUS_TXT).map(function(k){ return opt(k, L(SUP.STATUS_TXT[k]), f.status); }).join('')+'</select></div>'
+      + '<div class="sp-f"><label for="fCat">'+esc(T('التصنيف','Category'))+'</label><select id="fCat" onchange="setF(\'category\',this.value)">'
+        + opt('all', T('كل التصنيفات','All categories'), f.category) + SUP.CATEGORIES.map(function(c){ return opt(c.key, L(c), f.category); }).join('')+'</select></div>'
+      + '</div><div class="sp-frow"><span class="sp-count" id="fCount">'+esc(countText(list.length))+'</span>'
+      + '<button class="sp-btn" onclick="clearF()"><i class="ti ti-filter-off"></i>'+esc(T('مسح الفلاتر','Clear filters'))+'</button></div></section>';
+    return h + '<div class="sp-list" id="spList">'+cardsHTML(list)+'</div></div>';
+  }
+  function cardsHTML(list){
+    if (!list.length) return '<section class="sp-sec">'+stateHTML('ti-filter-off', T('لا توجد نتائج مطابقة للفلاتر.','No results match your filters.'), '')+'</section>';
+    return list.map(function(t){
+      return '<button class="sp-card" data-id="'+esc(t.ticketId)+'" onclick="openTicket(\''+esc(t.ticketId)+'\')">'
+        + '<div class="sp-card-top">'+statusTag(t.status)+'<span class="sp-tag">'+esc(catLabel(t.category))+'</span><span class="sp-id">'+esc(t.ticketId)+'</span></div>'
+        + '<div class="subj">'+esc(t.subject)+'</div>'
+        + '<div class="sp-meta">'+(t.relatedOrderId ? '<span><i class="ti ti-receipt"></i><bdi>'+esc(t.relatedOrderId)+'</bdi></span>' : '')
+          + '<span><i class="ti ti-calendar-plus"></i>'+esc(T('أُنشئت ','Created '))+esc(fmt(t.createdAt))+'</span>'
+          + '<span><i class="ti ti-clock"></i>'+esc(T('آخر تحديث ','Updated '))+esc(fmt(t.updatedAt))+'</span></div>'
+        + '</button>';
+    }).join('');
+  }
+  window.setF = function(k, v, live){
+    f[k] = v;
+    if (live){ var l = filtered(); el('spList').innerHTML = cardsHTML(l); el('fCount').textContent = countText(l.length); }
+    else render();
+  };
+  window.clearF = function(){ f = { q:'', status:'all', category:'all' }; render(); };
+
+  /* ════════════════════ CREATE ════════════════════ */
+  function storeOrders(){
+    try { return (window.RAFOrderSnapshot ? RAFOrderSnapshot.forStore(SLUG) : []).slice().sort(function(a,b){ return (b.snapshot.checkoutAt||0) - (a.snapshot.checkoutAt||0); }); }
+    catch(e){ return []; }
+  }
+  function attListHTML(files, remover){
+    if (!files.length) return '';
+    return '<div class="sp-atts">' + files.map(function(fl, i){
+      return '<div class="sp-att"><i class="ti '+fileIcon({ type:fl.type, ext:(fl.name.split('.').pop()||'').toLowerCase() })+'"></i>'
+        + '<span class="n">'+esc(fl.name)+'</span><span class="s">'+esc(size(fl.size))+'</span>'
+        + '<button class="x" aria-label="'+esc(T('إزالة المرفق','Remove attachment'))+'" onclick="'+remover+'('+i+')"><i class="ti ti-x"></i></button></div>';
+    }).join('') + '</div>';
+  }
+  function createHTML(){
+    var e = form.errors || {};
+    function fld(key, inner, wide){ return '<div class="sp-f'+(wide?' wide':'')+(e[key]?' bad':'')+'">'+inner+(e[key]?'<span class="err">'+esc(e[key])+'</span>':'')+'</div>'; }
+    var h = '<div class="sp-wrap"><div><button class="sp-btn" onclick="backToList()"><i class="ti ti-arrow-'+(isEn()?'left':'right')+'"></i>'+esc(T('كل التذاكر','All tickets'))+'</button></div>'
+      + '<section class="sp-sec" id="spCreate"><div class="sp-sec-h"><h3>'+esc(T('تذكرة دعم جديدة','New support ticket'))+'</h3></div><div class="sp-filters" style="margin-top:8px">'
+      + fld('category', '<label for="cCat">'+esc(T('التصنيف','Category'))+' *</label><select id="cCat" onchange="setForm(\'category\',this.value)">'
+          + opt('', T('اختر التصنيف','Choose a category'), form.category) + SUP.CATEGORIES.map(function(c){ return opt(c.key, L(c), form.category); }).join('')+'</select>')
+      + fld('relatedOrderId', '<label for="cOrder">'+esc(T('الطلب المرتبط (اختياري)','Related order (optional)'))+'</label><select id="cOrder" onchange="setForm(\'relatedOrderId\',this.value)">'
+          + opt('', T('بدون طلب','No order'), form.relatedOrderId) + storeOrders().map(function(o){ return opt(o.id, o.id, form.relatedOrderId); }).join('')+'</select>')
+      + fld('subject', '<label for="cSubj">'+esc(T('الموضوع','Subject'))+' *</label><input id="cSubj" maxlength="'+SUP.LIMITS.subject+'" value="'+esc(form.subject)+'" oninput="setForm(\'subject\',this.value,true)">', true)
+      + fld('message', '<label for="cMsg">'+esc(T('وصف المشكلة','Description'))+' *</label><textarea id="cMsg" maxlength="'+SUP.LIMITS.message+'" oninput="setForm(\'message\',this.value,true)">'+esc(form.message)+'</textarea>', true)
+      + '</div>'
+      + '<div class="sp-actions"><span class="sp-file"><span class="sp-btn"><i class="ti ti-paperclip"></i>'+esc(T('إرفاق ملفات','Attach files'))+'</span>'
+        + '<input type="file" multiple aria-label="'+esc(T('إرفاق ملفات','Attach files'))+'" onchange="pickFiles(this,\'form\')"></span></div>'
+      + attListHTML(form.files, 'dropFormFile')
+      + '<div class="sp-note"><i class="ti ti-info-circle"></i>'+esc(T('يُسجَّل اسم كل ملف ونوعه وحجمه فقط — لا يتم رفع محتوى الملفات في هذه النسخة.','Only each file\'s name, type and size are recorded — file content is not uploaded in this version.'))+'</div>'
+      + (form.msg ? '<div class="sp-msgbox">'+esc(form.msg)+'</div>' : '')
+      + '<div class="sp-acts"><button class="sp-btn" onclick="backToList()">'+esc(T('إلغاء','Cancel'))+'</button>'
+      + '<button class="sp-btn gold" id="cSend" onclick="submitTicket()"><i class="ti ti-send"></i>'+esc(T('إرسال التذكرة','Submit ticket'))+'</button></div>'
+      + '</section></div>';
+    return h;
+  }
+  window.newTicket = function(){ form = { category:'', subject:'', message:'', relatedOrderId:'', files:[], errors:{}, msg:null }; st.view = 'create'; render(); window.scrollTo(0,0); };
+  window.setForm = function(k, v, live){ form[k] = v; if (form.errors[k]){ delete form.errors[k]; if (!live) render(); } else if (!live) render(); };
+  window.dropFormFile = function(i){ form.files.splice(i, 1); render(); };
+  window.pickFiles = function(input, where){
+    var list = [].slice.call(input.files || []).map(metaOf);
+    if (where === 'form') form.files = form.files.concat(list); else reply.files = reply.files.concat(list);
+    input.value = ''; render();
+  };
+  var FIELD_MSG = {
+    category: { ar:'اختر التصنيف.',            en:'Choose a category.' },
+    subject:  { ar:'اكتب موضوع التذكرة.',       en:'Enter a subject.' },
+    message:  { ar:'اكتب وصف المشكلة.',         en:'Enter a description.' }
+  };
+  function attError(res){
+    var e = (res.errors || [])[0] || {};
+    var nm = e.name ? ' «' + e.name + '»' : '';
+    return e.reason === 'size' ? T('الملف'+nm+' فارغ ولا يمكن إرفاقه.','The file'+nm+' is empty and cannot be attached.')
+         : e.reason === 'name' ? T('اسم أحد الملفات غير صالح.','One file name is not valid.') : res.message;
+  }
+  window.submitTicket = function(){
+    var res = SUP.createTicket({ category:form.category, subject:form.subject, message:form.message,
+                                 relatedOrderId:form.relatedOrderId || null, attachments:form.files }, { actor:ME.id });
+    if (!res.ok){
+      form.errors = {}; form.msg = null;
+      if (res.code === 'INVALID') (res.errors || []).forEach(function(e){ var m = FIELD_MSG[e.field]; if (m) form.errors[e.field] = T(m.ar, m.en); });
+      else if (res.code === 'INVALID_ATTACHMENT') form.msg = attError(res);
+      else if (res.code === 'INVALID_ORDER' || res.code === 'CROSS_STORE') form.errors.relatedOrderId = res.message;
+      else form.msg = res.message;
+      render(); return;
+    }
+    form = null; load(); st.view = 'detail'; st.id = res.ticket.ticketId; st.msg = null; st.ok = null;
+    reply = { body:'', files:[], err:null }; render(); toast(T('تم إرسال التذكرة','Ticket submitted'));
+  };
+
+  /* ════════════════════ DETAIL ════════════════════ */
+  function detailHTML(){
+    var t = byId(st.id);
+    if (!t){ st.view = 'list'; return listHTML(); }
+    var h = '<div class="sp-wrap"><div><button class="sp-btn" onclick="backToList()"><i class="ti ti-arrow-'+(isEn()?'left':'right')+'"></i>'+esc(T('كل التذاكر','All tickets'))+'</button></div>';
+    h += '<section class="sp-sec" id="spTicket"><div class="sp-sec-h"><h3>'+esc(t.subject)+'</h3>'+statusTag(t.status)+'</div>'
+      + '<dl class="sp-dl"><div><dt>'+esc(T('رقم التذكرة','Ticket ID'))+'</dt><dd class="sp-id">'+esc(t.ticketId)+'</dd></div>'
+      + '<div><dt>'+esc(T('التصنيف','Category'))+'</dt><dd>'+esc(catLabel(t.category))+'</dd></div>'
+      + '<div><dt>'+esc(T('الطلب المرتبط','Related order'))+'</dt><dd>'+(t.relatedOrderId ? '<bdi>'+esc(t.relatedOrderId)+'</bdi>' : esc(T('بدون','None')))+'</dd></div>'
+      + '<div><dt>'+esc(T('أُنشئت','Created'))+'</dt><dd>'+esc(fmt(t.createdAt))+'</dd></div>'
+      + '<div><dt>'+esc(T('آخر تحديث','Last updated'))+'</dt><dd>'+esc(fmt(t.updatedAt))+'</dd></div>'
+      + '<div><dt>'+esc(T('بواسطة','Opened by'))+'</dt><dd>'+esc(t.createdBy.actorName)+'</dd></div>'
+      + (t.resolvedAt ? '<div><dt>'+esc(T('تاريخ الحل','Resolved'))+'</dt><dd>'+esc(fmt(t.resolvedAt))+'</dd></div>' : '')
+      + (t.reopenedAt ? '<div><dt>'+esc(T('أُعيد فتحها','Reopened'))+'</dt><dd>'+esc(fmt(t.reopenedAt))+'</dd></div>' : '')
+      + '</dl>';
+    /* only the actions the authority allows from the current status */
+    var acts = (SUP.TRANSITIONS[t.status] || []).map(function(to){
+      var m = MOVE[to]; return '<button class="sp-btn '+m.cls+'" onclick="moveTicket(\''+to+'\')"><i class="ti '+m.ic+'"></i>'+esc(T(m.ar,m.en))+'</button>';
+    });
+    if (t.status === 'resolved') acts.push('<button class="sp-btn ink" onclick="reopen()"><i class="ti ti-refresh"></i>'+esc(T('إعادة فتح','Reopen'))+'</button>');
+    if (acts.length) h += '<div class="sp-actions" id="spActs">'+acts.join('')+'</div>';
+    if (st.msg) h += '<div class="sp-msgbox">'+esc(st.msg)+'</div>';
+    if (st.ok) h += '<div class="sp-okbox">'+esc(st.ok)+'</div>';
+    h += '</section>';
+
+    var hasRaf = t.messages.some(function(m){ return m.actorType === 'raf'; });
+    h += '<section class="sp-sec" id="spConv"><div class="sp-sec-h"><h3>'+esc(T('المحادثة','Conversation'))+'</h3></div><div class="sp-msgs">'
+      + t.messages.map(function(m){
+          var who = m.actorType === 'raf' ? T('فريق رف','RAF team') : m.actorType === 'merchant' ? T('التاجر','Merchant') : T('موظف المتجر','Store employee');
+          return '<div class="sp-msg'+(m.actorType === 'raf' ? ' raf' : '')+'"><div class="h">'+esc(who)+' · '+esc(m.actorName || '')
+            + '<span class="d">'+esc(fmt(m.createdAt))+'</span></div><p>'+esc(m.body)+'</p>'
+            + ((m.attachments || []).length ? '<div class="sp-atts">'+m.attachments.map(function(a){
+                return '<div class="sp-att"><i class="ti '+fileIcon(a)+'"></i><span class="n">'+esc(a.name)+'</span><span class="s">'+esc(size(a.size))+'</span></div>';
+              }).join('')+'</div>' : '')
+            + '</div>';
+        }).join('') + '</div>';
+    if (!hasRaf) h += '<div class="sp-wait"><i class="ti ti-clock-hour-4"></i>'+esc(T('لم يصل رد من فريق رف بعد. ستظهر ردود فريق رف هنا.','No reply from the RAF team yet. RAF replies will appear here.'))+'</div>';
+    if (t.status === 'resolved'){
+      h += '<div class="sp-note"><i class="ti ti-circle-check"></i>'+esc(T('تم حل هذه التذكرة. أعد فتحها إذا لم تُحل المشكلة فعلًا لإضافة رسالة.','This ticket is resolved. Reopen it if the problem was not actually solved, to add a message.'))+'</div>';
+    } else {
+      h += '<div class="sp-f wide" style="margin-top:14px"><label for="rBody">'+esc(T('رسالة جديدة','New message'))+'</label>'
+        + '<textarea id="rBody" maxlength="'+SUP.LIMITS.message+'" oninput="replyInput(this.value)">'+esc(reply.body)+'</textarea>'
+        + (reply.err ? '<span class="err" id="rErr">'+esc(reply.err)+'</span>' : '') + '</div>'
+        + '<div class="sp-actions"><span class="sp-file"><span class="sp-btn"><i class="ti ti-paperclip"></i>'+esc(T('إرفاق ملفات','Attach files'))+'</span>'
+          + '<input type="file" multiple aria-label="'+esc(T('إرفاق ملفات','Attach files'))+'" onchange="pickFiles(this,\'reply\')"></span></div>'
+        + attListHTML(reply.files, 'dropReplyFile')
+        + '<div class="sp-acts"><button class="sp-btn gold" id="rSend" onclick="sendMessage()"'+(reply.body.trim() ? '' : ' disabled')+'><i class="ti ti-send"></i>'+esc(T('إرسال','Send'))+'</button></div>';
+    }
+    return h + '</section></div>';
+  }
+  window.openTicket = function(id){ st.view = 'detail'; st.id = id; st.msg = null; st.ok = null; reply = { body:'', files:[], err:null }; render(); window.scrollTo(0,0); };
+  window.backToList = function(){ st.view = 'list'; st.id = null; form = null; reply = { body:'', files:[], err:null }; render(); };
+  window.replyInput = function(v){ reply.body = v; reply.err = null; var b = el('rSend'); if (b) b.disabled = !v.trim(); var e = el('rErr'); if (e) e.remove(); };
+  window.dropReplyFile = function(i){ reply.files.splice(i, 1); render(); };
+  window.sendMessage = function(){
+    var res = SUP.addMessage(st.id, { body:reply.body, attachments:reply.files }, { actor:ME.id });
+    if (!res.ok){ reply.err = res.code === 'INVALID_ATTACHMENT' ? attError(res) : res.code === 'INVALID' ? T('اكتب رسالة قبل الإرسال.','Write a message before sending.') : res.message; load(); render(); return; }
+    reply = { body:'', files:[], err:null }; st.msg = null; st.ok = null; load(); render(); toast(T('تم إرسال الرسالة','Message sent'));
+  };
+  window.moveTicket = function(to){
+    var t = byId(st.id); if (!t) return;
+    var res = SUP.changeStatus(t.ticketId, to, { actor:ME.id, baseVersion:t.updatedAt });
+    st.ok = null; st.msg = res.ok ? null : res.message; load(); render();
+    if (res.ok) toast(T('تم تحديث الحالة','Status updated'));
+  };
+  window.reopen = function(){
+    var t = byId(st.id); if (!t) return;
+    var res = SUP.reopenTicket(t.ticketId, { actor:ME.id, baseVersion:t.updatedAt });
+    st.msg = res.ok ? null : res.message;
+    st.ok = res.ok ? T('أُعيد فتح التذكرة وأصبحت نشطة من جديد.','The ticket was reopened and is active again.') : null;
+    load(); render();
+  };
+
+  /* ---------- chrome ---------- */
+  window.spRefresh = function(){ load(); render(); };
+  window.toggleLang = function(){
+    var r = root(), en = r.lang === 'en';
+    r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+    try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+    applyLang(); render();
+  };
+  function applyLang(){
+    var en = isEn();
+    document.querySelectorAll('[data-ar][data-en]').forEach(function(e){ var t = e.getAttribute('data-'+(en?'en':'ar')); if (t !== null) e.textContent = t; });
+    el('langLabel').textContent = en ? 'ع' : 'EN';
+    document.title = en ? 'RAF — Support' : 'رف — الدعم';
+  }
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && st.view !== 'list') backToList(); });
+  /* another session changed a ticket: re-read, keep what is being typed */
+  window.addEventListener('storage', function(e){ if (e.key === 'raf_customer_support' && st.state === 'ready'){ load(); render(); } });
+
+  function gate(title, text){ el('gate').style.display = ''; el('gateT').textContent = title; el('gateP').textContent = text; }
+  function boot(){
+    var l = null; try { l = localStorage.getItem('raf_lang'); } catch(e){}
+    if (l === 'en'){ root().lang = 'en'; root().dir = 'ltr'; }
+    applyLang();
+    if (!SUP || !window.RAFPerm){ gate(T('تعذّر التحميل','Could not load'), ''); return; }
+    var me = RAFPerm.currentUser();
+    if (!me || !RAFPerm.isMerchant(me.id)){
+      gate(T('الدعم متاح للتجار وموظفي المتاجر فقط','Support is available to merchants and store employees only'), '');
+      return;
+    }
+    var link = RAFPerm.storeLinkOf(me.id);
+    if (!link.ok){
+      gate(link.reason === 'store_not_found' ? T('المتجر المرتبط غير موجود','Linked store not found') : T('لا يوجد متجر مرتبط بالحساب','No store linked to this account'),
+           T('لم يتم ربط هذا الحساب بمتجر. يتم الربط يدوياً ولا يُخمَّن تلقائياً.','This account is not linked to a store. Links are set explicitly and never inferred.'));
+      return;
+    }
+    ME = me; SLUG = link.slug;
+    el('stName').textContent = L(link.store.name);
+    if (link.store.logo){ el('stLogo').style.backgroundImage = 'url("'+link.store.logo+'")'; el('stLogo').innerHTML = ''; }
+    el('shell').style.display = '';
+    st.state = 'loading'; render();
+    setTimeout(function(){ load(); render(); }, 0);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — لوحة التحكم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   MERCHANT DASHBOARD — read-only. Every figure comes from
+   RAFDashboard, which reads the owning modules; this page renders.
+   ══════════════════════════════════════════════════════════════ */
+*{box-sizing:border-box;}
+[hidden]{display:none!important;}
+body{background:var(--bg2);margin:0;}
+.mw{display:flex;min-height:100vh;}
+.mw-rail{width:74px;flex:0 0 74px;background:var(--ink);display:flex;flex-direction:column;align-items:center;
+  gap:6px;padding:14px 0;position:sticky;top:0;height:100vh;z-index:40;}
+.mw-rail-logo{width:44px;height:44px;min-height:44px;border-radius:13px;background:var(--gold);color:#1C1606;display:flex;
+  align-items:center;justify-content:center;font-family:var(--font-display);font-size:19px;font-weight:900;
+  margin-bottom:10px;text-decoration:none;}
+.mw-rail-b{width:50px;min-height:50px;border-radius:14px;border:0;background:transparent;color:#8E877A;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;
+  font-family:inherit;font-size:9.5px;font-weight:700;text-decoration:none;transition:background .18s,color .18s;}
+.mw-rail-b i{font-size:21px;}
+.mw-rail-b:hover{background:rgba(255,255,255,.07);color:#EDE8DC;}
+.mw-rail-b.on{background:var(--gold-soft);color:var(--gold);}
+.mw-rail-sp{flex:1;}
+.mw-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.mw-head{position:sticky;top:0;z-index:35;background:var(--card);border-bottom:1px solid var(--border);
+  padding:12px clamp(14px,2.2vw,24px);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.mw-store{display:flex;align-items:center;gap:11px;min-width:0;}
+.mw-store-logo{width:44px;height:44px;flex:0 0 auto;border-radius:13px;background:var(--bg3) center/cover no-repeat;
+  display:flex;align-items:center;justify-content:center;color:var(--gold2);font-size:21px;}
+.mw-store-t{min-width:0;}
+.mw-store-t b{display:block;font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mw-store-t span{font-size:11.5px;color:var(--text3);}
+.mw-head-sp{flex:1;min-width:8px;}
+.mw-hact{display:flex;align-items:center;gap:8px;}
+.mw-hact .mw-ico-b{min-height:44px;}
+.mw-ico-b{width:44px;height:44px;flex:0 0 auto;border-radius:13px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-size:18px;cursor:pointer;display:inline-flex;
+  align-items:center;justify-content:center;font-family:inherit;font-weight:800;}
+.mw-ico-b:hover{border-color:var(--gold);color:var(--gold2);}
+.mw-ico-b.lang{width:auto;padding:0 14px;font-size:12.5px;}
+.mw-body{padding:18px clamp(14px,2.2vw,24px) 60px;width:100%;}
+.db-upd{font-size:11.5px;color:var(--text3);white-space:nowrap;}
+
+/* layout */
+.db-wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;min-width:0;}
+.db-sec{grid-column:span 6;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px 18px;min-width:0;}
+.db-sec.full{grid-column:1 / -1;}
+.db-sec.third{grid-column:span 4;}
+.db-sec-h{display:flex;align-items:center;gap:10px;min-height:44px;flex-wrap:wrap;margin-bottom:6px;}
+.db-sec-h h3{margin:0;flex:1;min-width:0;font-size:15.5px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px;overflow-wrap:anywhere;}
+.db-sec-h h3 i{color:var(--gold2);font-size:19px;flex:0 0 auto;}
+.db-link{min-height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--border2);background:var(--card);color:var(--text2);
+  font-size:12.5px;font-weight:800;display:inline-flex;align-items:center;gap:6px;text-decoration:none;white-space:nowrap;}
+.db-link:hover{border-color:var(--gold);color:var(--gold2);}
+.db-link:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.db-sub{font-size:12px;color:var(--text3);line-height:1.7;}
+.db-num{font-family:var(--font-en);direction:ltr;unicode-bidi:isolate;}
+
+/* tiles */
+.db-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px;}
+.db-tile{border:1px solid var(--border);border-radius:14px;padding:12px 13px;min-width:0;background:var(--bg);}
+.db-tile .l{font-size:12px;font-weight:800;color:var(--text3);line-height:1.5;overflow-wrap:anywhere;}
+.db-tile .v{font-size:23px;font-weight:800;color:var(--ink);margin-top:4px;line-height:1.2;overflow-wrap:anywhere;}
+.db-tile .v.sm{font-size:15px;line-height:1.5;}
+.db-tile .v.muted{color:var(--text3);font-size:14px;font-weight:700;line-height:1.5;}
+.db-tile .s{font-size:11.5px;color:var(--text3);margin-top:3px;line-height:1.5;}
+.db-tile.hot{border-color:rgba(200,121,30,.45);background:rgba(200,121,30,.07);}
+.db-tile.bad{border-color:rgba(217,83,79,.4);background:rgba(217,83,79,.06);}
+.db-cur{font-size:12px;color:var(--text3);font-weight:700;}
+
+/* store status */
+.db-now{display:flex;align-items:center;gap:12px;padding:6px 0 10px;}
+.db-dot{width:12px;height:12px;border-radius:50%;flex:0 0 auto;background:var(--border2);}
+.db-dot.green{background:var(--green);} .db-dot.amber{background:#C8791E;} .db-dot.red{background:var(--red);}
+.db-now b{display:block;font-size:17px;font-weight:800;color:var(--ink);}
+.db-now span{font-size:12.5px;color:var(--text2);}
+.db-dl{display:grid;grid-template-columns:1fr;gap:0;margin:0;}
+.db-dl div{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;padding:9px 0;border-top:1px solid var(--border);min-width:0;}
+.db-dl dt{font-size:12.5px;font-weight:800;color:var(--text3);flex:0 0 auto;max-width:45%;}
+.db-dl dd{margin:0;font-size:13.5px;font-weight:700;color:var(--ink);text-align:end;min-width:0;overflow-wrap:anywhere;line-height:1.6;}
+
+/* attention */
+.db-att{display:flex;flex-direction:column;gap:8px;}
+.db-att a{display:flex;align-items:center;gap:10px;min-height:48px;padding:8px 12px;border-radius:13px;border:1px solid var(--border);
+  background:var(--bg);color:var(--ink);text-decoration:none;font-size:13.5px;font-weight:700;min-width:0;}
+.db-att a:hover{border-color:var(--gold);}
+.db-att a:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.db-att a i.lead{font-size:19px;flex:0 0 auto;color:#9A5B12;}
+.db-att a.bad i.lead{color:#A63A36;}
+.db-att a .t{flex:1;min-width:0;overflow-wrap:anywhere;line-height:1.6;}
+.db-att a i.go{color:var(--text3);flex:0 0 auto;}
+
+/* quick actions */
+.db-qa{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+.db-qa a{display:flex;align-items:center;gap:9px;min-height:50px;padding:8px 12px;border-radius:13px;border:1px solid var(--border2);
+  background:var(--card);color:var(--ink);text-decoration:none;font-size:13px;font-weight:800;min-width:0;}
+.db-qa a i{font-size:20px;color:var(--gold2);flex:0 0 auto;}
+.db-qa a span{min-width:0;overflow-wrap:anywhere;}
+.db-qa a:hover{border-color:var(--gold);}
+.db-qa a:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+/* activity */
+.db-act{list-style:none;margin:0;padding:0;}
+.db-act li{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--border);min-width:0;}
+.db-act li:first-child{border-top:0;}
+.db-act .t{flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--ink);line-height:1.6;overflow-wrap:anywhere;}
+.db-act .t small{display:block;font-size:11.5px;color:var(--text3);font-weight:600;}
+.db-act .d{flex:0 0 auto;font-size:11.5px;color:var(--text3);white-space:nowrap;}
+.db-tag{display:inline-flex;align-items:center;min-height:22px;padding:1px 9px;border-radius:20px;font-size:11px;font-weight:800;
+  background:var(--bg3);color:var(--text2);margin-inline-start:6px;}
+.db-tag.green{background:rgba(46,158,91,.14);color:#1F7A45;}
+.db-tag.amber{background:rgba(200,121,30,.14);color:#9A5B12;}
+.db-tag.red{background:rgba(217,83,79,.13);color:#A63A36;}
+
+/* states */
+.db-na{display:flex;gap:10px;align-items:flex-start;border:1px dashed var(--border2);border-radius:14px;padding:12px 14px;
+  font-size:13px;color:var(--text2);line-height:1.7;}
+.db-na i{font-size:19px;color:var(--text3);flex:0 0 auto;margin-top:1px;}
+.db-na b{display:block;color:var(--ink);font-size:13.5px;}
+.db-na.err{border-color:rgba(217,83,79,.4);background:rgba(217,83,79,.05);}
+.db-na.err i{color:#A63A36;}
+.db-empty{padding:14px 4px;font-size:13px;color:var(--text3);display:flex;gap:8px;align-items:center;}
+.db-empty i{font-size:19px;color:var(--green);}
+.db-load{grid-column:1 / -1;padding:50px 16px;text-align:center;color:var(--text3);font-size:14px;}
+.db-load i{font-size:34px;display:block;margin-bottom:8px;color:var(--border2);}
+.db-note{font-size:11.5px;color:var(--text3);margin-top:10px;line-height:1.7;display:flex;gap:6px;align-items:flex-start;}
+.db-note i{flex:0 0 auto;font-size:15px;margin-top:1px;}
+.db-btn{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--border2);background:var(--card);color:var(--text2);
+  font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;margin-top:10px;}
+.db-wrap .db-btn{min-height:44px;}
+
+.mw-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;}
+.mw-gate-c{max-width:420px;text-align:center;}
+.mw-gate-c i{font-size:40px;color:var(--text3);}
+.mw-gate-c h1{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--ink);margin:12px 0 8px;}
+.mw-gate-c p{font-size:13px;color:var(--text2);line-height:1.8;}
+
+@media (max-width:1100px){
+  .db-sec.third{grid-column:span 6;}
+}
+@media (max-width:820px){
+  .db-sec,.db-sec.third{grid-column:1 / -1;}
+}
+@media (max-width:560px){
+  .mw-rail{position:fixed;bottom:0;top:auto;width:100%;height:auto;flex-direction:row;justify-content:space-around;
+    padding:6px 2px calc(6px + env(safe-area-inset-bottom,0px));gap:0;}
+  .mw-rail-logo,.mw-rail-sp{display:none;}
+  .mw-rail-b{flex:1 1 0;min-width:0;width:auto;padding:0 1px;}
+  .mw-rail-b span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;}
+  .mw{flex-direction:column;}
+  .mw-body{padding-bottom:90px;}
+  .mw-store-logo{width:38px;height:38px;font-size:18px;}
+  .mw-store-t b{font-size:15px;}
+  .db-sec{padding:14px;}
+  .db-tiles{grid-template-columns:1fr 1fr;}
+  .db-upd{order:5;width:100%;}
+}
+</style>
+</head>
+<body>
+
+<div class="mw-gate" id="gate" style="display:none;">
+  <div class="mw-gate-c"><i class="ti ti-layout-dashboard"></i>
+    <h1 id="gateT"></h1><p id="gateP"></p></div>
+</div>
+
+<div class="mw" id="shell" style="display:none;">
+  <aside class="mw-rail">
+    <a class="mw-rail-logo" href="raf_homepage.html" aria-label="RAF">رف</a>
+    <a class="mw-rail-b on" href="raf_dashboard.html" aria-current="page" title="Dashboard"><i class="ti ti-layout-dashboard"></i><span data-ar="الرئيسية" data-en="Dashboard">الرئيسية</span></a>
+    <a class="mw-rail-b" href="raf_merchant.html"><i class="ti ti-clipboard-list"></i><span data-ar="الطلبات" data-en="Orders">الطلبات</span></a>
+    <a class="mw-rail-b" href="raf_merchant_products.html"><i class="ti ti-package"></i><span data-ar="المنتجات" data-en="Products">المنتجات</span></a>
+    <a class="mw-rail-b" href="raf_marketing.html"><i class="ti ti-speakerphone"></i><span data-ar="التسويق" data-en="Marketing">التسويق</span></a>
+    <a class="mw-rail-b" href="raf_analytics.html" title="Analytics &amp; Finance"><i class="ti ti-chart-line"></i><span data-ar="التحليلات" data-en="Analytics">التحليلات</span></a>
+    <a class="mw-rail-b" href="raf_store_management.html" title="Store Management"><i class="ti ti-building-store"></i><span data-ar="المتجر" data-en="Store">المتجر</span></a>
+    <a class="mw-rail-b" href="raf_customer_experience.html" title="Customer Experience"><i class="ti ti-mood-smile"></i><span data-ar="العملاء" data-en="Customers">العملاء</span></a>
+    <a class="mw-rail-b" href="raf_merchant_support.html" title="Support"><i class="ti ti-lifebuoy"></i><span data-ar="الدعم" data-en="Support">الدعم</span></a>
+    <div class="mw-rail-sp"></div>
+  </aside>
+
+  <div class="mw-main">
+    <header class="mw-head">
+      <div class="mw-store">
+        <div class="mw-store-logo" id="stLogo"><i class="ti ti-building-store"></i></div>
+        <div class="mw-store-t"><b id="stName">—</b>
+          <span data-ar="لوحة التحكم" data-en="Dashboard">لوحة التحكم</span></div>
+      </div>
+      <div class="mw-head-sp"></div>
+      <span class="db-upd" id="upd"></span>
+      <div class="mw-hact">
+        <button class="mw-ico-b" id="dbRefresh" onclick="dbRefresh()" aria-label="refresh"><i class="ti ti-refresh"></i></button>
+        <button class="mw-ico-b lang" onclick="toggleLang()"><span id="langLabel">EN</span></button>
+      </div>
+    </header>
+    <div class="mw-body"><div class="db-wrap" id="panel" aria-live="polite"></div></div>
+  </div>
+</div>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_store_ops.js"></script>
+<script src="raf_store_schedule.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_inventory.js"></script>
+<script src="raf_rules.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_order_changes.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_marketing.js"></script>
+<script src="raf_wallet.js"></script>
+<script src="raf_settlement.js"></script>
+<script src="raf_analytics.js"></script>
+<script src="raf_merchant_products.js"></script>
+<script src="raf_customer_experience.js"></script>
+<script src="raf_customer_support.js"></script>
+<script src="raf_dashboard.js"></script>
+<script>
+/* ============================================================
+   MERCHANT DASHBOARD — renders RAFDashboard.overview() for the
+   signed-in account's own store. Navigation only: nothing here
+   changes any data.
+   ============================================================ */
+(function(){
+  'use strict';
+  var D = window.RAFDashboard;
+  var ME = null, data = null, state = 'loading';
+
+  /* the pages the dashboard links to — existing routes only */
+  var PAGE = {
+    orders:'raf_merchant.html', products:'raf_merchant_products.html', marketing:'raf_marketing.html',
+    finance:'raf_analytics.html', store:'raf_store_management.html', customers:'raf_customer_experience.html',
+    support:'raf_merchant_support.html'
+  };
+  var STATUS_TXT = {
+    open:      { ar:'مفتوح',              en:'Open',               tag:'green' },
+    closed:    { ar:'مغلق مؤقتًا',        en:'Temporarily closed', tag:'amber' },
+    suspended: { ar:'موقوف من إدارة رف',  en:'Suspended by RAF',   tag:'red' },
+    deleted:   { ar:'محذوف',              en:'Deleted',            tag:'red' }
+  };
+  var LEVELS = { normal:{ ar:'عادي', en:'Normal' }, moderate:{ ar:'متوسط', en:'Moderate' }, high:{ ar:'مزدحم', en:'Heavy' } };
+
+  /* ---------- helpers ---------- */
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function lang(){ return isEn() ? 'en' : 'ar'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function L(o){ return (o && typeof o === 'object') ? (isEn() ? (o.en || o.ar) : (o.ar || o.en)) : (o || ''); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function el(id){ return document.getElementById(id); }
+  function num(n){ return '<span class="db-num">'+esc(n)+'</span>'; }
+  /* Kuwait time, Western digits, as the rest of the merchant workspace */
+  function kwTime(ms){
+    try { return new Date(ms).toLocaleTimeString(isEn() ? 'en-GB' : 'ar-KW-u-nu-latn', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kuwait' }); }
+    catch(e){ return ''; }
+  }
+  function kwStamp(ms){
+    try { return new Date(ms).toLocaleString(isEn() ? 'en-GB' : 'ar-KW-u-nu-latn', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kuwait' }); }
+    catch(e){ return ''; }
+  }
+  function money(minor){
+    if (minor == null || !window.RAFWallet) return null;
+    return num(RAFWallet.format(minor)) + ' <span class="db-cur">'+esc(T('د.ك','KWD'))+'</span>';
+  }
+  function t12(hhmm){ return (window.RAFStoreSchedule && hhmm) ? RAFStoreSchedule.format12(hhmm, lang()) : (hhmm || ''); }
+  function link(page, label){
+    return '<a class="db-link" href="'+PAGE[page]+'">'+esc(label)+'<i class="ti ti-chevron-'+(isEn()?'right':'left')+'"></i></a>';
+  }
+  function head(ic, title, page, linkLabel){
+    return '<div class="db-sec-h"><h3><i class="ti '+ic+'"></i>'+esc(title)+'</h3>'+(page ? link(page, linkLabel) : '')+'</div>';
+  }
+  function tile(label, value, sub, cls){
+    return '<div class="db-tile'+(cls ? ' '+cls : '')+'"><div class="l">'+esc(label)+'</div><div class="v">'+value+'</div>'
+      + (sub ? '<div class="s">'+sub+'</div>' : '') + '</div>';
+  }
+  function tileV(label, value, sub, vcls, cls){
+    return '<div class="db-tile'+(cls ? ' '+cls : '')+'"><div class="l">'+esc(label)+'</div><div class="v '+(vcls||'')+'">'+value+'</div>'
+      + (sub ? '<div class="s">'+sub+'</div>' : '') + '</div>';
+  }
+  /* a section the account cannot see, or that failed, says so — never a zero */
+  function unavailable(res){
+    if (res && res.code === 'NOT_PERMITTED')
+      return '<div class="db-na"><i class="ti ti-lock"></i><div><b>'+esc(T('غير متاح لصلاحيات حسابك','Not available for your role'))+'</b>'
+        + esc(T('هذا القسم يتطلب صلاحية لا يملكها حسابك.','This section needs a permission your account does not have.'))+'</div></div>';
+    return '<div class="db-na err"><i class="ti ti-alert-triangle"></i><div><b>'+esc(T('تعذّر تحميل هذا القسم','This section could not be loaded'))+'</b>'
+      + esc((res && res.message) || '')+'<br><button class="db-btn" onclick="dbRefresh()"><i class="ti ti-refresh"></i>'+esc(T('إعادة المحاولة','Retry'))+'</button></div></div>';
+  }
+  function sec(id, cls, headHTML, res, body){
+    var inner;
+    try { inner = (res && res.ok) ? body(res) : unavailable(res); }
+    catch(e){ inner = unavailable({ message:'' }); }
+    return '<section class="db-sec '+cls+'" id="'+id+'">'+headHTML+inner+'</section>';
+  }
+
+  /* ---------- load ---------- */
+  function load(){
+    try { data = D.overview({ actor:ME.id }); state = data && data.ok ? 'ready' : 'error'; }
+    catch(e){ data = null; state = 'error'; }
+  }
+
+  /* ════════════════════ SECTIONS ════════════════════ */
+  function attentionHTML(){
+    var items = data.attention || [];
+    var h = '<section class="db-sec full" id="dbAttention">'+head('ti-alert-circle', T('يحتاج انتباهك','Needs attention'));
+    if (!items.length) return h + '<div class="db-empty"><i class="ti ti-circle-check"></i>'+esc(T('لا شيء يحتاج انتباهك الآن.','Nothing needs your attention right now.'))+'</div></section>';
+    function txt(a){
+      var n = a.count;
+      switch (a.key){
+        case 'orders_pending':  return T(n+' طلب بانتظار القبول', n+' order'+(n===1?'':'s')+' awaiting acceptance');
+        case 'store_not_open':  return T('حالة المتجر: ','Store status: ') + L(STATUS_TXT[a.status] || { ar:a.status, en:a.status });
+        case 'store_busy':      return T('وضع الانشغال مفعّل حتى ','Busy Mode is on until ') + kwTime(a.until);
+        case 'schedule_unconfigured': return T('جدول العمل غير مُعدّ','The opening schedule is not set');
+        case 'out_of_stock':    return T(n+' منتج نفد مخزونه', n+' product'+(n===1?'':'s')+' out of stock');
+        case 'low_stock':       return T(n+' منتج مخزونه منخفض', n+' product'+(n===1?'':'s')+' low on stock');
+        case 'no_inventory':    return T(n+' منتج بلا سجل مخزون', n+' product'+(n===1?'':'s')+' without an inventory record');
+        case 'cx_open':         return T(n+' مشكلة عميل جديدة لم تبدأ معالجتها', n+' new customer issue'+(n===1?'':'s')+' not yet started');
+        case 'support_waiting': return T(n+' تذكرة دعم بانتظار ردك', n+' support ticket'+(n===1?'':'s')+' waiting for your reply');
+      }
+      return a.key;
+    }
+    var bad = { store_not_open:1, out_of_stock:1 };
+    return h + '<div class="db-att">' + items.map(function(a){
+      return '<a href="'+PAGE[a.target]+'" class="'+(bad[a.key]?'bad':'')+'" data-k="'+esc(a.key)+'"><i class="ti '+(bad[a.key]?'ti-alert-octagon':'ti-alert-triangle')+' lead"></i>'
+        + '<span class="t">'+esc(txt(a))+'</span><i class="ti ti-chevron-'+(isEn()?'right':'left')+' go"></i></a>';
+    }).join('') + '</div></section>';
+  }
+
+  function ordersHTML(){
+    return sec('dbOrders', 'full', head('ti-clipboard-list', T('الطلبات','Orders'), 'orders', T('فتح الطلبات','Open Orders')), data.orders, function(o){
+      var c = o.counts;
+      return '<div class="db-tiles">'
+        + tile(T('بانتظار القبول','Pending acceptance'), num(c.pending), '', c.pending ? 'hot' : '')
+        + tile(T('مقبول / قيد التجهيز','Accepted / Preparing'), num(c.preparing))
+        + tile(T('جاهز','Ready'), num(c.ready))
+        + tile(T('بانتظار السائق','Waiting for driver'), num(c.driver))
+        + tile(T('مجدول','Scheduled'), num(c.scheduled))
+        + '</div>';
+    });
+  }
+
+  function statusHTML(){
+    return sec('dbStatus', '', head('ti-building-store', T('حالة المتجر','Store status'), 'store', T('إدارة المتجر','Store Management')), data.status, function(s){
+      var open = s.status === 'open';
+      var dot = !open ? (s.status === 'closed' ? 'amber' : 'red') : s.busy ? 'amber' : 'green';
+      var big = !open ? L(STATUS_TXT[s.status] || { ar:s.status || '—', en:s.status || '—' }) : s.busy ? T('مشغول','Busy') : T('مفتوح','Open');
+      var sub = s.accepting ? T('يستقبل الطلبات الجديدة','Accepting new orders') : T('لا يستقبل طلبات جديدة','Not accepting new orders');
+      var sch = s.schedule || {}, nx = s.nextOpening;
+      var schTxt = !s.configured ? T('جدول العمل غير مُعدّ','Opening schedule not set')
+        : sch.state === 'open' ? T('ضمن ساعات العمل — يغلق ','Within opening hours — closes ') + t12(sch.closesAt)
+        : sch.state === 'before_open' ? T('قبل بداية الدوام — يفتح ','Before opening — opens ') + t12(sch.opensAt)
+        : sch.state === 'between_periods' ? T('بين فترتي العمل — يعود ','Between periods — reopens ') + t12(sch.opensAt)
+        : sch.state === 'after_close' ? T('انتهت ساعات العمل لليوم','Opening hours have ended for today')
+        : sch.state === 'closed_today' ? T('مغلق اليوم حسب الجدول','Closed today per the schedule')
+        : T('غير معروف','Unknown');
+      var ins = s.instant || {};
+      var insTxt = !s.accepting ? T('غير متاح — المتجر لا يستقبل طلبات جديدة','Unavailable — the store is not accepting new orders')
+        : ins.available ? T('متاح حتى ','Available until ') + t12(ins.cutoffAt)
+        : ins.reason === 'cutoff_passed' ? T('غير متاح — انتهى وقت آخر طلب','Unavailable — last-order time has passed')
+        : ins.reason === 'outside_period' ? T('غير متاح — خارج فترة العمل','Unavailable — outside an opening period')
+        : ins.reason === 'closed_today' ? T('غير متاح — مغلق اليوم','Unavailable — closed today')
+        : ins.reason === 'unconfigured' ? T('غير محدد — جدول العمل غير مُعدّ','Not determined — schedule not set')
+        : T('غير متاح','Unavailable');
+      var rows = [
+        [T('وضع الانشغال','Busy Mode'), s.busy ? T('مفعّل حتى ','On until ') + kwTime(s.busyUntil) : T('متوقف','Off')],
+        [T('وقت التجهيز','Preparation time'), (s.prep.range ? L(s.prep.range) : '—') + ' · ' + L(LEVELS[s.prep.state] || {}) + ' (' + (s.prep.manual ? T('يدوي','manual') : T('تلقائي','automatic')) + ')'],
+        [T('جدول العمل','Opening schedule'), schTxt],
+        [T('الافتتاح القادم','Next opening'), (sch.state === 'open') ? T('مفتوح الآن حسب الجدول','Open now per the schedule')
+            : nx ? RAFStoreSchedule.formatNextOpening(nx, lang()) : T('لا يوجد موعد افتتاح قادم','No upcoming opening')],
+        [T('التوصيل الفوري','Instant Delivery'), insTxt]
+      ];
+      return '<div class="db-now"><span class="db-dot '+dot+'"></span><div><b>'+esc(big)+'</b><span>'+esc(sub)+'</span></div></div>'
+        + '<dl class="db-dl">' + rows.map(function(r){ return '<div><dt>'+esc(r[0])+'</dt><dd>'+esc(r[1])+'</dd></div>'; }).join('') + '</dl>'
+        + '<div class="db-note"><i class="ti ti-info-circle"></i>'+esc(T('جدول العمل لا يغلق المتجر تلقائيًا؛ حالة المتجر يحددها التاجر.','The schedule never closes the store automatically; the store status is set by the merchant.'))+'</div>';
+    });
+  }
+
+  function productsHTML(){
+    return sec('dbProducts', '', head('ti-package', T('المنتجات والمخزون','Products & inventory'), 'products', T('المنتجات','Products')), data.products, function(p){
+      return '<div class="db-tiles">'
+        + tile(T('إجمالي المنتجات','Total products'), num(p.total))
+        + tile(T('معروض','Active'), num(p.active))
+        + tile(T('مخفي','Hidden'), num(p.hidden))
+        + tile(T('مخزون منخفض','Low stock'), num(p.low), esc(T('المتاح '+p.lowAt+' أو أقل','Available '+p.lowAt+' or fewer')), p.low ? 'hot' : '')
+        + tile(T('نفد المخزون','Out of stock'), num(p.zero), '', p.zero ? 'bad' : '')
+        + '</div>'
+        + (p.none ? '<div class="db-note"><i class="ti ti-help-circle"></i>'+esc(T(p.none+' منتج بلا سجل مخزون — لا يُحتسب كمنخفض أو نافد.', p.none+' product'+(p.none===1?'':'s')+' without an inventory record — not counted as low or out of stock.'))+'</div>' : '')
+        + '<div class="db-note"><i class="ti ti-info-circle"></i>'+esc(T('المتاح = الكمية المتوفرة − المحجوز للطلبات.','Available = on hand − reserved for orders.'))+'</div>';
+    });
+  }
+
+  function financeHTML(){
+    return sec('dbFinance', '', head('ti-chart-line', T('المبيعات والمالية','Sales & finance'), 'finance', T('التحليلات والمالية','Analytics & Finance')), data.finance, function(f){
+      var h = '<div class="db-tiles">';
+      var s = f.sales;
+      if (s && s.ok){
+        h += tileV(T('صافي المبيعات — آخر 30 يومًا','Net sales — last 30 days'), money(s.net), '', 'sm')
+          + tile(T('الطلبات — آخر 30 يومًا','Orders — last 30 days'), num(s.orders))
+          + tileV(T('متوسط قيمة الطلب','Average order value'), money(s.aov), '', 'sm');
+      } else h += '</div>' + unavailable(s) + '<div class="db-tiles" style="margin-top:10px">';
+      var st = f.settlement;
+      if (st && st.ok){
+        h += st.amount == null
+          ? tileV(T('التسوية حتى الآن — هذا الشهر','Settlement so far — this month'), esc(T('غير متاحة — نسبة العمولة غير محددة','Unavailable — commission rate not set')), '', 'muted')
+          : tileV(T('التسوية حتى الآن — هذا الشهر','Settlement so far — this month'), money(st.amount), num(st.period), 'sm');
+      } else if (st && st.code !== 'NOT_PERMITTED') {
+        h += tileV(T('التسوية','Settlement'), esc(T('تعذّر التحميل','Could not load')), '', 'muted');
+      }
+      /* RAF has no payout system (RAFSettlement.payouts): nothing is ever simulated */
+      h += tileV(T('التحويل','Payout'), esc(T('غير متاح — نظام التحويلات غير مُعدّ','Unavailable — payout system not configured')), '', 'muted');
+      h += '</div>';
+      if (s && s.ok) h += '<div class="db-note"><i class="ti ti-calendar"></i>'+esc(T('الفترة: ','Period: '))+num(s.range.from)+' – '+num(s.range.to)+'</div>';
+      return h;
+    });
+  }
+
+  function marketingHTML(){
+    return sec('dbMarketing', 'third', head('ti-speakerphone', T('التسويق','Marketing'), 'marketing', T('التسويق','Marketing')), data.marketing, function(m){
+      function sub(x){ return x.scheduled ? esc(T(x.scheduled+' مجدول', x.scheduled+' scheduled')) : ''; }
+      return '<div class="db-tiles">'
+        + tile(T('عروض نشطة','Active promotions'), num(m.promotions.active), sub(m.promotions))
+        + tile(T('كوبونات نشطة','Active coupons'), num(m.coupons.active), sub(m.coupons))
+        + tile(T('إعلانات نشطة','Active ads'), num(m.ads.active), sub(m.ads))
+        + '</div>';
+    });
+  }
+
+  function cxHTML(){
+    return sec('dbCx', 'third', head('ti-mood-smile', T('تجربة العملاء','Customer experience'), 'customers', T('العملاء','Customers')), data.cx, function(c){
+      var r = c.reviews, none = esc(T('لا توجد تقييمات بعد','No reviews yet'));
+      return '<div class="db-tiles">'
+        + (r.total ? tile(T('متوسط التقييم','Average rating'), num(r.average.toFixed(1))+' <span class="db-cur">★</span>') : tileV(T('متوسط التقييم','Average rating'), none, '', 'muted'))
+        + tile(T('إجمالي التقييمات','Total reviews'), num(r.total))
+        + (r.total ? tile(T('تجربة إيجابية','Positive'), num(Math.round(r.positivePct)+'%'), esc(T('4 و5 نجوم','4★ and 5★'))) : tileV(T('تجربة إيجابية','Positive'), none, '', 'muted'))
+        + tile(T('مشاكل مفتوحة','Open issues'), num(c.issues.active), esc(T('غير محلولة بعد','Not resolved yet')), c.issues.active ? 'hot' : '')
+        + '</div>';
+    });
+  }
+
+  function supportHTML(){
+    return sec('dbSupport', 'third', head('ti-lifebuoy', T('الدعم','Support'), 'support', T('الدعم','Support')), data.support, function(s){
+      return '<div class="db-tiles">'
+        + tile(T('مفتوحة','Open'), num(s.open))
+        + tile(T('قيد المعالجة','In progress'), num(s.in_progress))
+        + tile(T('بانتظار التاجر','Waiting for merchant'), num(s.waiting_merchant), '', s.waiting_merchant ? 'hot' : '')
+        + '</div>';
+    });
+  }
+
+  function quickHTML(){
+    var q = [
+      ['orders',    'ti-clipboard-list',  T('إدارة الطلبات','Manage orders')],
+      ['products',  'ti-package',         T('المنتجات والمخزون','Products & inventory')],
+      ['marketing', 'ti-speakerphone',    T('العروض والكوبونات','Promotions & coupons')],
+      ['finance',   'ti-chart-line',      T('التحليلات والمالية','Analytics & finance')],
+      ['store',     'ti-clock',           T('جدول العمل والتشغيل','Schedule & operations')],
+      ['customers', 'ti-message-star',    T('التقييمات والمشاكل','Reviews & issues')],
+      ['support',   'ti-lifebuoy',        T('التواصل مع رف','Contact RAF')]
+    ];
+    return '<section class="db-sec" id="dbQuick">'+head('ti-bolt', T('إجراءات سريعة','Quick actions'))
+      + '<div class="db-qa">' + q.map(function(x){ return '<a href="'+PAGE[x[0]]+'"><i class="ti '+x[1]+'"></i><span>'+esc(x[2])+'</span></a>'; }).join('') + '</div></section>';
+  }
+
+  function activityHTML(){
+    return sec('dbActivity', '', head('ti-history', T('آخر النشاطات','Recent activity')), data.activity, function(a){
+      if (!a.items.length) return '<div class="db-empty" style="color:var(--text3)"><i class="ti ti-history" style="color:var(--border2)"></i>'+esc(T('لا يوجد نشاط مسجّل بعد.','No recorded activity yet.'))+'</div>';
+      return '<ul class="db-act">' + a.items.map(function(e){
+        var who = e.automatic ? T('تلقائي','Automatic') : e.actorType === 'customer' ? T('العميل','Customer')
+          : e.actorType === 'driver' ? T('السائق','Driver') : (e.actorType === 'merchant' || e.actorType === 'merchant_employee') ? T('المتجر','Store')
+          : e.actorType === 'admin' ? T('إدارة رف','RAF') : '';
+        return '<li><div class="t">'+esc(RAFAudit.label(e.action))+(e.undone ? '<span class="db-tag amber">'+esc(T('تم التراجع','Undone'))+'</span>' : '')
+          + '<small>'+(e.orderId ? '<bdi>'+esc(e.orderId)+'</bdi>' : '')+(e.orderId && who ? ' · ' : '')+esc(who)+'</small></div>'
+          + '<span class="d">'+esc(kwStamp(e.timestamp))+'</span></li>';
+      }).join('') + '</ul>'
+        + (a.scope === 'timeline' ? '<div class="db-note"><i class="ti ti-info-circle"></i>'+esc(T('تُعرض أحداث الطلبات فقط؛ السجل التفصيلي يتطلب صلاحية التقارير.','Only order timeline events are shown; the detailed log needs the reports permission.'))+'</div>' : '');
+    });
+  }
+
+  function render(){
+    var h;
+    if (state === 'loading') h = '<div class="db-load"><i class="ti ti-loader-2"></i>'+esc(T('جارٍ تحميل لوحة التحكم…','Loading the dashboard…'))+'</div>';
+    else if (state === 'error' || !data || !data.ok) h = '<div class="db-load"><i class="ti ti-alert-triangle"></i>'+esc(T('تعذّر تحميل لوحة التحكم.','The dashboard could not be loaded.'))
+      + '<br><button class="db-btn" onclick="dbRefresh()"><i class="ti ti-refresh"></i>'+esc(T('إعادة المحاولة','Retry'))+'</button></div>';
+    else {
+      h = attentionHTML() + ordersHTML() + statusHTML() + productsHTML() + financeHTML()
+        + cxHTML() + marketingHTML() + supportHTML() + quickHTML() + activityHTML();
+    }
+    el('panel').innerHTML = h;
+    el('upd').textContent = (state === 'ready' && data) ? T('آخر تحديث ','Updated ') + kwTime(data.generatedAt) + T(' (بتوقيت الكويت)',' (Kuwait time)') : '';
+  }
+
+  /* ---------- chrome ---------- */
+  window.dbRefresh = function(){ state = 'loading'; render(); setTimeout(function(){ load(); render(); }, 0); };
+  window.toggleLang = function(){
+    var r = root(), en = r.lang === 'en';
+    r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+    try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+    applyLang(); render();
+  };
+  function applyLang(){
+    var en = isEn();
+    document.querySelectorAll('[data-ar][data-en]').forEach(function(e){ var t = e.getAttribute('data-'+(en?'en':'ar')); if (t !== null) e.textContent = t; });
+    el('langLabel').textContent = en ? 'ع' : 'EN';
+    document.title = en ? 'RAF — Dashboard' : 'رف — لوحة التحكم';
+  }
+  /* another tab changed RAF data: re-read from the authorities */
+  var pend = null;
+  window.addEventListener('storage', function(e){
+    if (!e.key || e.key.indexOf('raf_') !== 0 || e.key === 'raf_lang' || state !== 'ready') return;
+    clearTimeout(pend); pend = setTimeout(function(){ load(); render(); }, 250);
+  });
+
+  function gate(title, text){ el('gate').style.display = ''; el('gateT').textContent = title; el('gateP').textContent = text; }
+  function boot(){
+    var l = null; try { l = localStorage.getItem('raf_lang'); } catch(e){}
+    if (l === 'en'){ root().lang = 'en'; root().dir = 'ltr'; }
+    applyLang();
+    if (!D || !window.RAFPerm){ gate(T('تعذّر التحميل','Could not load'), ''); return; }
+    var me = RAFPerm.currentUser();
+    if (!me || !RAFPerm.isMerchant(me.id)){
+      gate(T('لوحة التحكم متاحة للتجار وموظفي المتاجر فقط','The dashboard is available to merchants and store employees only'), '');
+      return;
+    }
+    var link = RAFPerm.storeLinkOf(me.id);
+    if (!link.ok){
+      gate(link.reason === 'store_not_found' ? T('المتجر المرتبط غير موجود','Linked store not found') : T('لا يوجد متجر مرتبط بالحساب','No store linked to this account'),
+           T('لم يتم ربط هذا الحساب بمتجر. يتم الربط يدوياً ولا يُخمَّن تلقائياً.','This account is not linked to a store. Links are set explicitly and never inferred.'));
+      return;
+    }
+    ME = me;
+    el('stName').textContent = L(link.store.name);
+    if (link.store.logo){ el('stLogo').style.backgroundImage = 'url("'+link.store.logo+'")'; el('stLogo').innerHTML = ''; }
+    el('shell').style.display = '';
+    state = 'loading'; render();
+    setTimeout(function(){ load(); render(); }, 0);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+</body>
+</html>

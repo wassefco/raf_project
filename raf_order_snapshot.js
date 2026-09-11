@@ -30,6 +30,10 @@
   var OOS = { CONTINUE:'continue', CANCEL:'cancel' };
   /* how the order reaches the customer */
   var DELIVERY = { DELIVERY:'delivery', PICKUP:'pickup' };
+  /* WHEN it reaches them — the commitment made at checkout. Separate from
+     DELIVERY (delivery vs pickup), which keeps its existing meaning. */
+  var TIMING = { INSTANT:'instant', SCHEDULED:'scheduled', NEXT_OPENING:'next_opening' };
+  function timingOf(v){ return (v === TIMING.INSTANT || v === TIMING.SCHEDULED || v === TIMING.NEXT_OPENING) ? v : null; }
   var PAY_STATUS = { PAID:'paid', PENDING:'pending', COD:'cod', REFUNDED:'refunded' };
 
   function isEn(){ var r = document.getElementById('htmlRoot') || document.documentElement; return r.lang === 'en'; }
@@ -109,7 +113,12 @@
         building:     str(addr && addr.building),
         floor:        str(addr && addr.floor),
         apartment:    str(addr && addr.apartment),
-        instructions: str(ctx.deliveryInstructions) || null
+        instructions: str(ctx.deliveryInstructions) || null,
+        /* instant | scheduled | next_opening — null when the store had no
+           schedule (no commitment could be made). Frozen: never re-derived. */
+        timing:       timingOf(ctx.deliveryTiming),
+        receiveAt:    (ctx.receiveAt && ctx.receiveAt.date)
+                        ? { date:str(ctx.receiveAt.date), time:str(ctx.receiveAt.time) } : null
       },
 
       /* exactly what the customer selected — never defaulted */
@@ -147,7 +156,12 @@
       /* ---- reserved sections ----
          Present from v1 so the modules that come later can fill them in
          without a schema change or a migration. */
-      scheduled: null,        /* { at, window } — Scheduled Orders */
+      /* Scheduled Delivery — { date, from, to, createdAt }, the shape
+         RAFStoreOps.scheduleFor() gives and the merchant Orders page reads */
+      scheduled: (ctx.scheduled && ctx.scheduled.date)
+        ? { date:str(ctx.scheduled.date), from:str(ctx.scheduled.from), to:str(ctx.scheduled.to),
+            createdAt:ctx.scheduled.createdAt || null }
+        : null,
       fulfilment: { driverId:null, assignedAt:null, pickedUpAt:null, deliveredAt:null },
       returns: [],            /* Returns module */
       refunds: [],            /* Refunds module */
@@ -412,7 +426,7 @@
   }
 
   global.RAFOrderSnapshot = {
-    VERSION: VERSION, OOS: OOS, DELIVERY: DELIVERY, PAY_STATUS: PAY_STATUS, CURRENCY: CURRENCY,
+    VERSION: VERSION, OOS: OOS, DELIVERY: DELIVERY, TIMING: TIMING, PAY_STATUS: PAY_STATUS, CURRENCY: CURRENCY,
     /* create */
     build: build, buildItem: buildItem, validate: validate, attach: attach, persist: persist,
     /* read */

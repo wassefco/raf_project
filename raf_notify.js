@@ -66,19 +66,46 @@
     if (global.RAFFeatures && RAFFeatures.on) return RAFFeatures.on('loyalty');
     try { return (JSON.parse(localStorage.getItem('raf_features') || '{}')).loyalty === true; } catch(e){ return false; }
   }
+  /* order outcomes written by RAFOrderEngine (raf_notif_extra) — shown only
+     to the signed-in customer named on that order's own snapshot */
+  var LS_ORDER_NOTES = 'raf_notif_extra';
+  function currentUserId(){
+    try { if (global.RAFPerm && RAFPerm.currentUser){ var u = RAFPerm.currentUser(); return (u && u.id) || null; } } catch(e){}
+    try { var v = JSON.parse(localStorage.getItem('raf_current_user')); return typeof v === 'string' ? v : null; } catch(e){ return null; }
+  }
+  function when(ts){
+    function f(l){
+      try { return new Date(ts).toLocaleString(l === 'en' ? 'en-GB' : 'ar-KW-u-nu-latn',
+              { timeZone:'Asia/Kuwait', day:'numeric', month:'short', hour:'numeric', minute:'2-digit' }); }
+      catch(e){ return ''; }
+    }
+    return { ar:f('ar'), en:f('en') };
+  }
+  function orderNotes(){
+    var me = currentUserId();
+    if (!me) return [];
+    var a; try { a = JSON.parse(localStorage.getItem(LS_ORDER_NOTES) || '[]'); } catch(e){ a = []; }
+    return (Array.isArray(a) ? a : []).filter(function(n){ return n && n.customerId && n.customerId === me && n.t; })
+      .map(function(n){ return { id:n.id, type:'order', href:n.href, t:n.t, s:when(n.ts) }; });
+  }
   /* reward alerts stay hidden while the loyalty feature is off */
   function items(){
     var rd = readIds();
-    return DATA.filter(function(n){
+    return orderNotes().concat(DATA.filter(function(n){
       var k = TYPES[n.type] || {};
       return !(k.feature === 'loyalty' && !loyaltyOn());
-    }).map(function(n){
+    })).map(function(n){
       return { id:n.id, type:n.type, href:n.href, t:n.t, s:n.s, unread: rd.indexOf(n.id) < 0 };
     });
   }
   function unreadCount(){ return items().filter(function(n){ return n.unread; }).length; }
   function markRead(id){ var a = readIds(); if (a.indexOf(id) < 0){ a.push(id); writeIds(a); sync(); } }
-  function markAllRead(){ writeIds(DATA.map(function(n){ return n.id; })); sync(); }
+  function markAllRead(){
+    var a = readIds();
+    items().forEach(function(n){ if (a.indexOf(n.id) < 0) a.push(n.id); });
+    DATA.forEach(function(n){ if (a.indexOf(n.id) < 0) a.push(n.id); });
+    writeIds(a); sync();
+  }
 
   /* ---------- styles ---------- */
   function css(){
@@ -269,7 +296,7 @@
   }
 
   global.RAFNotify = {
-    items:items, unreadCount:unreadCount, markRead:markRead, markAllRead:markAllRead,
+    items:items, orderNotes:orderNotes, unreadCount:unreadCount, markRead:markRead, markAllRead:markAllRead,
     TYPES:TYPES, open:open, close:close, sync:sync, build:build
   };
 

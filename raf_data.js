@@ -468,6 +468,10 @@
           addressText: opts.addr ? (opts.addr.ar || opts.addr.en) : null,
           deliveryType: opts.deliveryType || null,
           deliveryInstructions: opts.deliveryInstructions || null,
+          /* the delivery commitment, already proved by RAFRules.placeOrder */
+          deliveryTiming: opts.deliveryTiming || null,
+          receiveAt: opts.receiveAt || null,
+          scheduled: opts.scheduled || null,
           oosPreference: opts.oosPreference || null,
           prepTimeShown: opts.prepTimeShown || null,
           /* the commercial block records the discount the lines actually

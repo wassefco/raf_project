@@ -306,6 +306,10 @@ html[dir="rtl"] .af-sel select{padding:0 14px 0 36px;}
   .mw-rail{position:fixed;bottom:0;top:auto;width:100%;height:auto;flex-direction:row;justify-content:space-around;
     padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));}
   .mw-rail-logo,.mw-rail-sp{display:none;}
+  /* eight destinations share the row: each takes an equal slice */
+  .mw-rail{gap:0;padding-inline:2px;}
+  .mw-rail-b{flex:1 1 0;min-width:0;width:auto;padding:0 1px;}
+  .mw-rail-b span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;}
   .mw{flex-direction:column;}
   .mw-body{padding-bottom:90px;}
   .mw-store-logo{width:38px;height:38px;font-size:18px;}
@@ -323,10 +327,14 @@ html[dir="rtl"] .af-sel select{padding:0 14px 0 36px;}
 <div class="mw" id="shell" style="display:none;">
   <aside class="mw-rail">
     <a class="mw-rail-logo" href="raf_homepage.html" aria-label="RAF">رف</a>
+    <a class="mw-rail-b" href="raf_dashboard.html" title="Dashboard"><i class="ti ti-layout-dashboard"></i><span data-ar="الرئيسية" data-en="Dashboard">الرئيسية</span></a>
     <a class="mw-rail-b" href="raf_merchant.html"><i class="ti ti-clipboard-list"></i><span data-ar="الطلبات" data-en="Orders">الطلبات</span></a>
     <a class="mw-rail-b" href="raf_merchant_products.html"><i class="ti ti-package"></i><span data-ar="المنتجات" data-en="Products">المنتجات</span></a>
     <a class="mw-rail-b" href="raf_marketing.html"><i class="ti ti-speakerphone"></i><span data-ar="التسويق" data-en="Marketing">التسويق</span></a>
     <a class="mw-rail-b on" href="raf_analytics.html" aria-current="page" title="Analytics &amp; Finance"><i class="ti ti-chart-line"></i><span data-ar="التحليلات" data-en="Analytics">التحليلات</span></a>
+    <a class="mw-rail-b" href="raf_store_management.html" title="Store Management"><i class="ti ti-building-store"></i><span data-ar="المتجر" data-en="Store">المتجر</span></a>
+    <a class="mw-rail-b" href="raf_customer_experience.html" title="Customer Experience"><i class="ti ti-mood-smile"></i><span data-ar="العملاء" data-en="Customers">العملاء</span></a>
+    <a class="mw-rail-b" href="raf_merchant_support.html" title="Support"><i class="ti ti-lifebuoy"></i><span data-ar="الدعم" data-en="Support">الدعم</span></a>
     <div class="mw-rail-sp"></div>
   </aside>
 

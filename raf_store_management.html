@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — إدارة المتجر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   STORE MANAGEMENT — view → edit → save.
+   Values are shown as plain text; a section becomes editable only when
+   the merchant asks, one section at a time, with Save beside it.
+   Every write still goes through RAFStoreProfile / RAFStoreOps.
+   ══════════════════════════════════════════════════════════════ */
+*{box-sizing:border-box;}
+[hidden]{display:none!important;}
+body{background:var(--bg2);margin:0;}
+.mw{display:flex;min-height:100vh;}
+.mw-rail{width:74px;flex:0 0 74px;background:var(--ink);display:flex;flex-direction:column;align-items:center;
+  gap:6px;padding:14px 0;position:sticky;top:0;height:100vh;z-index:40;}
+.mw-rail-logo{width:44px;height:44px;min-height:44px;border-radius:13px;background:var(--gold);color:#1C1606;display:flex;
+  align-items:center;justify-content:center;font-family:var(--font-display);font-size:19px;font-weight:900;
+  margin-bottom:10px;text-decoration:none;}
+.mw-rail-b{width:50px;min-height:50px;border-radius:14px;border:0;background:transparent;color:#8E877A;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;
+  font-family:inherit;font-size:9.5px;font-weight:700;text-decoration:none;transition:background .18s,color .18s;}
+.mw-rail-b i{font-size:21px;}
+.mw-rail-b:hover{background:rgba(255,255,255,.07);color:#EDE8DC;}
+.mw-rail-b.on{background:var(--gold-soft);color:var(--gold);}
+.mw-rail-sp{flex:1;}
+.mw-main{flex:1;min-width:0;display:flex;flex-direction:column;}
+
+.mw-head{position:sticky;top:0;z-index:35;background:var(--card);border-bottom:1px solid var(--border);
+  padding:12px clamp(14px,2.2vw,24px);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.mw-store{display:flex;align-items:center;gap:11px;min-width:0;}
+.mw-store-logo{width:44px;height:44px;flex:0 0 auto;border-radius:13px;background:var(--bg3) center/cover no-repeat;
+  display:flex;align-items:center;justify-content:center;color:var(--gold2);font-size:21px;}
+.mw-store-t{min-width:0;}
+.mw-store-t b{display:block;font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mw-store-t span{font-size:11.5px;color:var(--text3);}
+.mw-head-sp{flex:1;min-width:8px;}
+.mw-hact{display:flex;align-items:center;gap:8px;}
+.mw-ico-b{width:44px;height:44px;flex:0 0 auto;border-radius:13px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-size:18px;cursor:pointer;display:inline-flex;
+  align-items:center;justify-content:center;font-family:inherit;font-weight:800;transition:all .18s;}
+.mw-hact .mw-ico-b{min-height:44px;}
+.mw-ico-b:hover{border-color:var(--gold);color:var(--gold2);}
+.mw-ico-b.lang{width:auto;padding:0 14px;font-size:12.5px;}
+.mw-body{padding:18px clamp(14px,2.2vw,24px) 60px;width:100%;}
+
+/* ---------- tabs ---------- */
+.sm-tabs{display:flex;gap:4px;max-width:760px;margin:0 auto 16px;border:1px solid var(--border2);border-radius:15px;
+  background:var(--card);padding:4px;overflow-x:auto;scrollbar-width:none;}
+.sm-tabs::-webkit-scrollbar{display:none;}
+/* the theme's `html:not([data-ui]) button` rule is (0,1,2); touch targets are
+   scoped with two classes so 44px+ actually wins */
+.mw-body .sm-tabs button{min-height:46px;}
+.sm-tabs button{flex:1 0 auto;min-height:46px;padding:0 16px;border:0;border-radius:11px;background:transparent;
+  color:var(--text2);font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;white-space:nowrap;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:all .18s;}
+.sm-tabs button i{font-size:17px;}
+.sm-tabs button:hover{color:var(--ink);background:var(--bg);}
+.sm-tabs button[aria-selected="true"]{background:var(--ink);color:#F5F0E4;}
+.sm-tabs button:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+/* ---------- sections ---------- */
+.sm-wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
+.sm-sec{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px 20px;min-width:0;}
+.sm-sec.editing{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);}
+.sm-sec-h{display:flex;align-items:center;gap:10px;min-height:44px;}
+.sm-sec-h h3{margin:0;flex:1;min-width:0;font-size:15.5px;font-weight:800;color:var(--ink);}
+.sm-sec .sm-edit-b{min-height:44px;}
+.sm-edit-b{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--border2);background:var(--card);
+  color:var(--ink);font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;display:inline-flex;
+  align-items:center;gap:6px;flex:0 0 auto;transition:all .18s;}
+.sm-edit-b i{font-size:16px;color:var(--gold2);}
+.sm-edit-b:hover{border-color:var(--gold);background:var(--gold-soft);}
+.sm-edit-b:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+/* read values */
+.sm-val{margin-top:10px;}
+.sm-val + .sm-val{margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.sm-val .lg{display:block;font-size:11.5px;font-weight:800;color:var(--text3);margin-bottom:4px;}
+.sm-val p{margin:0;font-size:14.5px;line-height:1.85;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere;}
+.sm-val p[dir="ltr"]{font-family:var(--font-en);text-align:left;}
+html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:right;}
+html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
+.sm-big{font-size:22px;font-weight:800;color:var(--ink);margin-top:6px;line-height:1.3;}
+.sm-big.muted{font-size:17px;color:var(--text2);}
+.sm-small{font-size:13px;color:var(--text3);margin-top:4px;line-height:1.7;}
+
+/* identity (read-only) */
+.sm-cover{height:120px;border-radius:14px;background:var(--bg3) center/cover no-repeat;margin:-4px -6px 14px;}
+.sm-id{display:flex;align-items:center;gap:14px;min-width:0;}
+.sm-lg{width:60px;height:60px;flex:0 0 auto;border-radius:16px;background:var(--bg3) center/cover no-repeat;
+  display:flex;align-items:center;justify-content:center;color:var(--gold2);font-size:26px;}
+.sm-id .t{flex:1;min-width:0;}
+.sm-id h2{margin:0;font-family:var(--font-display);font-size:19px;font-weight:800;color:var(--ink);overflow-wrap:anywhere;}
+.sm-id .sub{font-size:12.5px;color:var(--text3);margin-top:3px;}
+.sm-id .sub bdi{font-family:var(--font-en);}
+.sm-id-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+.sm-ro-note{flex:1;min-width:200px;font-size:12px;color:var(--text3);display:flex;align-items:center;gap:6px;line-height:1.6;}
+.sm-ro-note i{font-size:15px;}
+.sm-link{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px;border-radius:12px;
+  border:1px solid var(--border2);color:var(--text2);text-decoration:none;font-size:12.5px;font-weight:800;}
+.sm-link:hover{border-color:var(--gold);color:var(--gold2);}
+.sm-tag{display:inline-flex;align-items:center;gap:5px;height:26px;padding:0 11px;border-radius:20px;font-size:11.5px;
+  font-weight:800;background:var(--bg3);color:var(--text2);white-space:nowrap;flex:0 0 auto;}
+.sm-tag.green{background:rgba(46,158,91,.14);color:#1F7A45;}
+.sm-tag.red{background:rgba(217,83,79,.13);color:#A63A36;}
+.sm-tag.amber{background:rgba(200,121,30,.14);color:#9A5B12;}
+.sm-tag.gold{background:var(--gold-soft);color:var(--gold2);}
+
+/* segmented choice (language, automatic/manual, levels) */
+.sm-seg{display:inline-flex;flex-wrap:wrap;gap:4px;background:var(--bg);border:1px solid var(--border2);border-radius:13px;padding:4px;margin-top:12px;}
+.sm-seg .sm-seg-b{min-height:44px;}
+.sm-seg-b{min-height:44px;padding:0 18px;border:0;border-radius:10px;background:transparent;color:var(--text2);
+  font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:8px;}
+.sm-seg-b[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(20,16,8,.14);}
+.sm-seg-b:focus-visible{outline:2px solid var(--gold);outline-offset:1px;}
+.sm-seg-b .dot{width:7px;height:7px;border-radius:50%;display:none;}
+.sm-seg-b .dot.chg{display:inline-block;background:var(--gold2);}
+.sm-seg-b .dot.err{display:inline-block;background:var(--red);}
+
+/* the one field being edited */
+.sm-field{margin-top:12px;}
+.sm-field textarea,.sm-field input{width:100%;border-radius:12px;border:1px solid var(--border2);background:var(--card);
+  font-family:inherit;font-size:15px;color:var(--ink);padding:12px 14px;line-height:1.8;}
+.sm-field textarea{min-height:130px;resize:vertical;}
+.sm-field input{min-height:50px;}
+.sm-field [dir="ltr"]{font-family:var(--font-en);}
+.sm-field textarea:focus,.sm-field input:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+.sm-field.bad textarea,.sm-field.bad input{border-color:var(--red);}
+.sm-meta{display:flex;justify-content:space-between;gap:10px;margin-top:6px;font-size:12px;color:var(--text3);min-height:18px;}
+.sm-meta .err{color:#A63A36;font-weight:700;}
+/* "113 / 1000" reads the same way in both languages */
+.sm-meta .cnt{font-family:var(--font-en);margin-inline-start:auto;direction:ltr;unicode-bidi:isolate;}
+.sm-msg{border-radius:12px;padding:11px 13px;font-size:12.5px;line-height:1.7;margin-top:12px;
+  background:rgba(217,83,79,.1);border:1px solid rgba(217,83,79,.34);color:#A63A36;}
+
+.sm-acts{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:14px;}
+.sm-sec .sm-btn{min-height:46px;}
+.sm-btn{min-height:46px;padding:0 20px;border-radius:13px;border:1px solid var(--border2);background:var(--card);
+  color:var(--text2);font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;display:inline-flex;
+  align-items:center;justify-content:center;gap:7px;transition:all .18s;}
+.sm-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold2);}
+.sm-btn.gold{background:var(--gold);border-color:var(--gold2);color:#1C1606;}
+.sm-btn.gold:hover:not(:disabled){filter:brightness(1.05);color:#1C1606;}
+.sm-btn:disabled{opacity:.45;cursor:not-allowed;}
+.sm-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+/* operations */
+.sm-now{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.sm-dot{width:14px;height:14px;border-radius:50%;flex:0 0 auto;}
+.sm-dot.green{background:var(--green);box-shadow:0 0 0 5px rgba(46,158,91,.16);}
+.sm-dot.amber{background:#E0A32E;box-shadow:0 0 0 5px rgba(224,163,46,.18);}
+.sm-dot.red{background:var(--red);box-shadow:0 0 0 5px rgba(217,83,79,.16);}
+.sm-now .t{flex:1;min-width:0;}
+.sm-now .t b{display:block;font-size:20px;font-weight:800;color:var(--ink);}
+.sm-now .t span{display:block;font-size:13px;color:var(--text3);margin-top:2px;}
+.sm-durs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px;}
+.sm-durs .sm-dur{min-height:52px;}
+.sm-dur{min-height:52px;border-radius:13px;border:1px solid var(--border2);background:var(--card);color:var(--ink);
+  font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;}
+.sm-dur[aria-pressed="true"]{border-color:var(--gold2);background:var(--gold-soft);box-shadow:inset 0 0 0 1px var(--gold2);}
+.sm-dur:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.sm-choose{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);}
+.sm-choose-l{font-size:13px;font-weight:800;color:var(--text2);}
+.sm-preview{display:flex;align-items:center;gap:7px;margin-top:12px;font-size:13px;color:var(--text2);}
+.sm-preview i{color:var(--gold2);font-size:16px;}
+.sm-preview b{font-family:var(--font-en);color:var(--ink);}
+.sm-levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px;}
+.sm-levels .sm-lvl{min-height:60px;}
+.sm-lvl{min-height:60px;border-radius:13px;border:1px solid var(--border2);background:var(--card);color:var(--ink);
+  font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:2px;padding:6px;}
+.sm-lvl small{font-size:12px;font-weight:600;color:var(--text3);font-family:var(--font-en);}
+.sm-lvl[aria-pressed="true"]{border-color:var(--gold2);background:var(--gold-soft);box-shadow:inset 0 0 0 1px var(--gold2);}
+.sm-lvl:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.sm-days{display:flex;flex-direction:column;margin-top:8px;}
+.sm-days div{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13.5px;}
+.sm-days div:last-child{border-bottom:0;}
+.sm-days div.today{font-weight:800;color:var(--ink);}
+.sm-days span:last-child{font-family:var(--font-en);direction:ltr;unicode-bidi:isolate;}
+
+/* opening schedule — view */
+.sm-nowline{display:flex;align-items:center;gap:12px;margin-top:8px;font-size:14px;font-weight:700;color:var(--ink);}
+.sm-nowline .sm-dot{width:10px;height:10px;box-shadow:none;}
+.sm-dayl{margin-top:10px;}
+.sm-day{display:grid;grid-template-columns:minmax(110px,1.1fr) minmax(76px,auto) minmax(0,2fr);gap:12px;align-items:center;
+  padding:11px 0;border-bottom:1px solid var(--border);font-size:14px;min-height:44px;}
+.sm-day:last-child{border-bottom:0;}
+.sm-day .d{font-weight:800;color:var(--ink);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sm-day .d .sm-tag{height:22px;font-size:10.5px;}
+.sm-day .s{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:800;}
+.sm-day .s i{width:8px;height:8px;border-radius:50%;flex:0 0 auto;}
+.sm-day .s.on{color:#1F7A45;} .sm-day .s.on i{background:var(--green);}
+.sm-day .s.off{color:var(--text3);} .sm-day .s.off i{border:1.5px solid var(--text3);}
+.sm-day .h{text-align:end;color:var(--ink);font-weight:700;}
+.sm-day .arr{color:var(--text3);}
+.sm-t{white-space:nowrap;}
+/* opening schedule — edit */
+.sm-sched{margin-top:6px;}
+.sm-sday{padding:14px 0;border-bottom:1px solid var(--border);}
+.sm-sday:last-child{border-bottom:0;}
+.sm-sday-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.sm-sday-h b{flex:1;min-width:90px;font-size:14.5px;font-weight:800;color:var(--ink);}
+.sm-sday .sm-oc{margin-top:0;}
+.sm-sday.closed .sm-small{margin-top:8px;}
+.sm-times{display:flex;align-items:flex-end;gap:10px 16px;flex-wrap:wrap;margin-top:12px;}
+.sm-tp label{display:block;font-size:12px;font-weight:800;color:var(--text3);margin-bottom:6px;}
+.sm-picker{display:inline-flex;align-items:center;gap:8px;}
+.sm-hm{display:inline-flex;align-items:center;gap:4px;direction:ltr;}
+.sm-hm .c{font-weight:800;color:var(--text3);}
+.sm-hm select{min-height:46px;min-width:64px;border-radius:12px;border:1px solid var(--border2);background:var(--card);
+  font-family:var(--font-en);font-size:15px;font-weight:700;color:var(--ink);padding:0 8px;text-align:center;cursor:pointer;}
+.sm-hm select:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+.sm-ap{display:inline-flex;border:1px solid var(--border2);border-radius:12px;overflow:hidden;background:var(--card);}
+.sm-ap .sm-ap-b{min-height:46px;}
+.sm-ap-b{min-height:46px;min-width:50px;border:0;background:transparent;font-family:inherit;font-weight:800;font-size:14px;
+  color:var(--text2);cursor:pointer;padding:0 10px;}
+.sm-ap-b[aria-pressed="true"]{background:var(--ink);color:#F5F0E4;}
+.sm-ap-b:focus-visible{outline:2px solid var(--gold);outline-offset:-2px;}
+.sm-sday.bad .sm-hm select,.sm-sday.bad .sm-ap{border-color:var(--red);}
+.sm-derr{color:#A63A36;font-size:12.5px;font-weight:700;margin-top:8px;line-height:1.6;}
+.sm-times .sm-copy-b{min-height:44px;}
+.sm-copy-b{min-height:44px;padding:0 12px;border-radius:12px;border:1px dashed var(--border2);background:transparent;
+  color:var(--gold2);font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+  margin-inline-start:auto;}
+.sm-copy-b:hover{border-color:var(--gold);background:var(--gold-soft);}
+/* opening schedule — periods */
+.sm-day .h .pl{display:block;white-space:nowrap;}
+.sm-day .h .pl + .pl{margin-top:4px;}
+.sm-per{margin-top:12px;}
+.sm-per-l{font-size:12px;font-weight:800;color:var(--text2);}
+.sm-per .sm-times{margin-top:6px;}
+.sm-per.bad .sm-hm select,.sm-per.bad .sm-ap{border-color:var(--red);}
+.sm-dtools{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.sm-dtools .sm-copy-b{min-height:44px;margin-inline-start:0;}
+.sm-copy-b.rm{color:#A63A36;}
+@media (max-width:640px){
+  .sm-dtools .sm-copy-b{flex:1 1 auto;justify-content:center;}
+}
+.sm-copy{margin-top:12px;padding:12px;border-radius:14px;background:var(--bg);}
+.sm-copy-days{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;}
+.sm-chk{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border:1px solid var(--border2);
+  border-radius:12px;background:var(--card);cursor:pointer;font-size:13px;font-weight:700;color:var(--ink);}
+.sm-chk input{width:18px;height:18px;accent-color:var(--gold2);margin:0;}
+@media (max-width:640px){
+  .sm-day{grid-template-columns:1fr auto;}
+  .sm-day .h{grid-column:1 / -1;text-align:start;margin-top:-4px;}
+  .sm-times{flex-direction:column;align-items:stretch;}
+  .sm-picker{display:flex;}
+  .sm-hm{flex:1;}
+  .sm-hm select{flex:1;}
+  .sm-copy-b{margin-inline-start:0;justify-content:center;}
+  .sm-sday .sm-oc{width:100%;}
+}
+
+/* team */
+.sm-mem{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-top:1px solid var(--border);}
+.sm-mem:first-of-type{border-top:0;}
+.sm-av{width:44px;height:44px;flex:0 0 auto;border-radius:50%;background:var(--gold-soft);color:var(--gold2);
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;}
+.sm-mem .who{flex:1;min-width:0;}
+.sm-mem .who b{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14.5px;font-weight:800;color:var(--ink);}
+.sm-mem .who .sub{font-size:12.5px;color:var(--text3);margin-top:3px;}
+.sm-perm summary{cursor:pointer;min-height:44px;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;
+  font-weight:800;color:var(--gold2);list-style:none;}
+.sm-perm summary::-webkit-details-marker{display:none;}
+.sm-perm summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:8px;}
+.sm-perm ul{margin:2px 0 0;padding-inline-start:18px;font-size:12.5px;color:var(--text2);line-height:1.9;columns:2;}
+.sm-info{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--text3);line-height:1.7;
+  margin-top:6px;padding-top:14px;border-top:1px solid var(--border);}
+.sm-info i{font-size:17px;flex:0 0 auto;margin-top:1px;}
+
+.sm-empty{padding:30px 10px;text-align:center;color:var(--text3);font-size:13px;}
+
+/* discard dialog */
+.sm-dlg{position:fixed;inset:0;z-index:130;background:rgba(20,16,8,.45);display:flex;align-items:center;justify-content:center;padding:20px;}
+.sm-dlg-c{width:100%;max-width:360px;background:var(--card);border-radius:20px;padding:22px;box-shadow:0 30px 60px -30px rgba(20,16,8,.6);}
+.sm-dlg-c h3{margin:0 0 18px;font-size:17px;font-weight:800;color:var(--ink);text-align:center;}
+.sm-dlg-a{display:flex;gap:10px;}
+.sm-dlg-a .sm-btn{flex:1;min-height:48px;}
+.sm-btn.danger{background:var(--red);border-color:var(--red);color:#fff;}
+.sm-btn.danger:hover{filter:brightness(1.05);color:#fff;}
+
+.mw-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;}
+.mw-gate-c{max-width:420px;text-align:center;}
+.mw-gate-c i{font-size:40px;color:var(--text3);}
+.mw-gate-c h1{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--ink);margin:12px 0 8px;}
+.mw-gate-c p{font-size:13px;color:var(--text2);line-height:1.8;}
+.mw-toast{position:fixed;inset-inline:0;bottom:26px;display:flex;justify-content:center;z-index:120;
+  pointer-events:none;opacity:0;transform:translateY(10px);transition:opacity .22s,transform .22s;}
+.mw-toast.show{opacity:1;transform:none;}
+.mw-toast > div{background:var(--ink);color:#F5F0E4;border-radius:30px;padding:12px 20px;font-size:13.5px;
+  font-weight:700;box-shadow:0 14px 30px -14px rgba(20,16,8,.6);max-width:90vw;text-align:center;}
+
+@media (max-width:640px){
+  .sm-sec{padding:16px;}
+  .sm-tabs button{padding:0 12px;font-size:13px;}
+  .sm-acts .sm-btn{flex:1 1 0;}
+  .sm-durs{grid-template-columns:repeat(2,minmax(0,1fr));}
+  .sm-levels{grid-template-columns:1fr;}
+  .sm-levels .sm-lvl{flex-direction:row;justify-content:space-between;padding:0 16px;}
+  .sm-seg{display:flex;}
+  .sm-seg .sm-seg-b{flex:1 1 0;justify-content:center;}
+  .sm-perm ul{columns:1;}
+  .sm-now .sm-btn{width:100%;}
+  .sm-cover{height:96px;}
+}
+@media (max-width:560px){
+  .mw-rail{position:fixed;bottom:0;top:auto;width:100%;height:auto;flex-direction:row;justify-content:space-around;
+    padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));}
+  .mw-rail-logo,.mw-rail-sp{display:none;}
+  /* eight destinations share the row: each takes an equal slice */
+  .mw-rail{gap:0;padding-inline:2px;}
+  .mw-rail-b{flex:1 1 0;min-width:0;width:auto;padding:0 1px;}
+  .mw-rail-b span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px;}
+  .mw{flex-direction:column;}
+  .mw-body{padding-bottom:90px;}
+  .mw-store-logo{width:38px;height:38px;font-size:18px;}
+  .mw-store-t b{font-size:15px;}
+  .mw-toast{bottom:90px;}
+}
+</style>
+</head>
+<body>
+
+<div class="mw-gate" id="gate" style="display:none;">
+  <div class="mw-gate-c"><i class="ti ti-building-store"></i>
+    <h1 id="gateT"></h1><p id="gateP"></p></div>
+</div>
+
+<div class="mw" id="shell" style="display:none;">
+  <aside class="mw-rail">
+    <a class="mw-rail-logo" href="raf_homepage.html" aria-label="RAF">رف</a>
+    <a class="mw-rail-b" href="raf_dashboard.html" title="Dashboard"><i class="ti ti-layout-dashboard"></i><span data-ar="الرئيسية" data-en="Dashboard">الرئيسية</span></a>
+    <a class="mw-rail-b" href="raf_merchant.html"><i class="ti ti-clipboard-list"></i><span data-ar="الطلبات" data-en="Orders">الطلبات</span></a>
+    <a class="mw-rail-b" href="raf_merchant_products.html"><i class="ti ti-package"></i><span data-ar="المنتجات" data-en="Products">المنتجات</span></a>
+    <a class="mw-rail-b" href="raf_marketing.html"><i class="ti ti-speakerphone"></i><span data-ar="التسويق" data-en="Marketing">التسويق</span></a>
+    <a class="mw-rail-b" href="raf_analytics.html" title="Analytics &amp; Finance"><i class="ti ti-chart-line"></i><span data-ar="التحليلات" data-en="Analytics">التحليلات</span></a>
+    <a class="mw-rail-b on" href="raf_store_management.html" aria-current="page" title="Store Management"><i class="ti ti-building-store"></i><span data-ar="المتجر" data-en="Store">المتجر</span></a>
+    <a class="mw-rail-b" href="raf_customer_experience.html" title="Customer Experience"><i class="ti ti-mood-smile"></i><span data-ar="العملاء" data-en="Customers">العملاء</span></a>
+    <a class="mw-rail-b" href="raf_merchant_support.html" title="Support"><i class="ti ti-lifebuoy"></i><span data-ar="الدعم" data-en="Support">الدعم</span></a>
+    <div class="mw-rail-sp"></div>
+  </aside>
+
+  <div class="mw-main">
+    <header class="mw-head">
+      <div class="mw-store">
+        <div class="mw-store-logo" id="stLogo"><i class="ti ti-building-store"></i></div>
+        <div class="mw-store-t"><b id="stName">—</b>
+          <span data-ar="إدارة المتجر" data-en="Store Management">إدارة المتجر</span></div>
+      </div>
+      <div class="mw-head-sp"></div>
+      <div class="mw-hact">
+        <button class="mw-ico-b" onclick="refreshAll()" aria-label="refresh"><i class="ti ti-refresh"></i></button>
+        <button class="mw-ico-b lang" onclick="toggleLang()"><span id="langLabel">EN</span></button>
+      </div>
+    </header>
+
+    <div class="mw-body">
+      <div class="sm-tabs" role="tablist" id="tabs"></div>
+      <section id="panel" role="tabpanel" aria-live="polite"></section>
+    </div>
+  </div>
+</div>
+
+<!-- the one confirmation this page asks -->
+<div class="sm-dlg" id="dlg" hidden>
+  <div class="sm-dlg-c" role="alertdialog" aria-modal="true" aria-labelledby="dlgT">
+    <h3 id="dlgT"></h3>
+    <div class="sm-dlg-a">
+      <button class="sm-btn" id="dlgKeep" onclick="dlgKeep()"></button>
+      <button class="sm-btn danger" id="dlgDiscard" onclick="dlgDiscard()"></button>
+    </div>
+  </div>
+</div>
+
+<div class="mw-toast" id="toast"><div id="toastMsg"></div></div>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_store_ops.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_inventory.js"></script>
+<script src="raf_rules.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_store_profile.js"></script>
+<script src="raf_store_schedule.js"></script>
+<script>
+/* ============================================================
+   STORE MANAGEMENT
+   Profile    → RAFStoreProfile (stores.edit + own store)
+   Operations → RAFStoreOps     (orders.manage + own store)
+   Team       → RAFPerm, read-only
+   The page shows values, edits one thing at a time, and never
+   writes storage or decides a rule itself.
+   ============================================================ */
+(function(){
+  'use strict';
+  var SP = window.RAFStoreProfile, OPS = window.RAFStoreOps;
+  var PREF = 'raf_sm_view';
+  var TABS = [
+    { k:'profile',    ic:'ti-building-store', ar:'ملف المتجر', en:'Store Profile' },
+    { k:'operations', ic:'ti-activity',       ar:'التشغيل',    en:'Operations' },
+    { k:'team',       ic:'ti-users',          ar:'الفريق',     en:'Team' },
+    { k:'settings',   ic:'ti-settings',       ar:'الإعدادات',  en:'Settings' }
+  ];
+  var STATUS_TXT = {
+    open:      { ar:'مفتوح',              en:'Open',               tag:'green' },
+    closed:    { ar:'مغلق مؤقتًا',        en:'Temporarily closed', tag:'amber' },
+    suspended: { ar:'موقوف من إدارة رف',  en:'Suspended by RAF',   tag:'red' },
+    deleted:   { ar:'محذوف',              en:'Deleted',            tag:'red' }
+  };
+  var LEVELS = {
+    normal:   { ar:'عادي',   en:'Normal' },
+    moderate: { ar:'متوسط',  en:'Moderate' },
+    high:     { ar:'مزدحم',  en:'Heavy' }
+  };
+  var SECTIONS = {
+    desc:  { ar:'وصف المتجر',  en:'Store description', eAr:'تعديل الوصف',   eEn:'Edit description' }
+  };
+  var DAY_TXT = {
+    sunday:{ar:'الأحد',en:'Sunday'}, monday:{ar:'الاثنين',en:'Monday'}, tuesday:{ar:'الثلاثاء',en:'Tuesday'},
+    wednesday:{ar:'الأربعاء',en:'Wednesday'}, thursday:{ar:'الخميس',en:'Thursday'},
+    friday:{ar:'الجمعة',en:'Friday'}, saturday:{ar:'السبت',en:'Saturday'}
+  };
+
+  var ME = null, SLUG = null, prof = null;
+  var st = { tab:'profile' };
+  var edit = null;      /* { section, lang, draft:{ar,en}, errors:{ar,en}, msg, base, focus } */
+  var prepEdit = null;  /* { mode:'auto'|'manual', level, msg } */
+  var busyPick = null;  /* { hours, msg } */
+  var busyMsg = null;
+  var lastBusy = null;
+  var SS = window.RAFStoreSchedule;
+  var schedEdit = null; /* { days, base, original, errors, msg, touched, copyFrom, copySel } */
+
+  /* ---------- helpers ---------- */
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function L(o){ return (o && typeof o==='object') ? (isEn()?(o.en||o.ar):(o.ar||o.en)) : (o||''); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function el(id){ return document.getElementById(id); }
+  function can(key){ try { return !!(ME && RAFPerm.can(ME.id, key)); } catch(e){ return false; } }
+  function actor(){ return { id:ME.id, name:ME.name }; }
+  var toastTimer = null;
+  function toast(msg){
+    el('toastMsg').textContent = msg; el('toast').classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function(){ el('toast').classList.remove('show'); }, 2400);
+  }
+  /* Kuwait time, in the Western digits the rest of RAF uses */
+  function kwTime(ms){
+    try { return new Date(ms).toLocaleTimeString(isEn() ? 'en-GB' : 'ar-KW-u-nu-latn', { hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kuwait' }); }
+    catch(e){ return new Date(ms).toTimeString().slice(0,5); }
+  }
+  function statusTag(s){
+    var x = STATUS_TXT[s] || { ar:s || '—', en:s || '—', tag:'' };
+    return '<span class="sm-tag '+x.tag+'">'+esc(T(x.ar,x.en))+'</span>';
+  }
+  function durLabel(h){ return T(h === 1 ? 'ساعة' : h === 2 ? 'ساعتان' : h + ' ساعات', h === 1 ? '1 hour' : h + ' hours'); }
+  function savePrefs(){ try { localStorage.setItem(PREF, JSON.stringify({ tab:st.tab })); } catch(e){} }
+  function loadPrefs(){
+    try { var p = JSON.parse(localStorage.getItem(PREF) || 'null');
+      if (p && TABS.some(function(t){ return t.k === p.tab; })) st.tab = p.tab; } catch(e){}
+  }
+  function loadProfile(){ prof = SP.read({ actor:ME.id }); }
+
+  /* ---------- unsaved changes ---------- */
+  function sectionDirty(){
+    if (!edit || !prof || !prof.ok) return false;
+    var cur = prof.fields[edit.section];
+    return edit.draft.ar !== cur.ar || edit.draft.en !== cur.en;
+  }
+  function prepTarget(){ return prepEdit ? (prepEdit.mode === 'auto' ? 'auto' : prepEdit.level) : null; }
+  function prepCurrent(){ var s = OPS.snapshot(SLUG); return s.manual ? s.state : 'auto'; }
+  function prepDirty(){ return !!prepEdit && prepTarget() !== prepCurrent(); }
+  function dirty(){ return sectionDirty() || prepDirty() || schedDirty(); }
+  function clearEdits(){ edit = null; prepEdit = null; busyPick = null; schedEdit = null; }
+
+  var pending = null;
+  function confirmDiscard(go){
+    if (!dirty()){ clearEdits(); go(); return; }
+    pending = go;
+    el('dlgT').textContent = T('تجاهل التغييرات؟','Discard changes?');
+    el('dlgKeep').textContent = T('متابعة التعديل','Keep editing');
+    el('dlgDiscard').textContent = T('تجاهل','Discard');
+    el('dlg').hidden = false;
+    el('dlgKeep').focus();
+  }
+  window.dlgKeep = function(){ el('dlg').hidden = true; pending = null; var f = el('smField'); if (f) f.focus(); };
+  window.dlgDiscard = function(){ el('dlg').hidden = true; var go = pending; pending = null; clearEdits(); if (go) go(); };
+
+  /* ---------- chrome ---------- */
+  function renderTabs(){
+    el('tabs').innerHTML = TABS.map(function(t){
+      var on = st.tab === t.k;
+      return '<button role="tab" id="tab-'+t.k+'" aria-controls="panel" aria-selected="'+on+'" tabindex="'+(on?0:-1)+'"'
+        + ' onclick="setTab(\''+t.k+'\')"><i class="ti '+t.ic+'"></i>'+esc(T(t.ar,t.en))+'</button>';
+    }).join('');
+    el('panel').setAttribute('aria-labelledby', 'tab-' + st.tab);
+  }
+  function render(){
+    renderTabs();
+    el('panel').innerHTML = st.tab === 'operations' ? renderOps()
+                          : st.tab === 'team'       ? renderTeam()
+                          : st.tab === 'settings'   ? renderSettings()
+                          :                           renderProfile();
+    if (edit && edit.focus){
+      var f = el('smField');
+      if (f){ f.focus(); var n = f.value.length; try { f.setSelectionRange(n, n); } catch(e){} }
+      edit.focus = false;
+    }
+  }
+
+  /* ════════════════════ STORE PROFILE ════════════════════ */
+  function renderProfile(){
+    if (!prof) loadProfile();
+    if (!prof.ok) return '<div class="sm-wrap"><section class="sm-sec"><div class="sm-empty">'+esc(prof.message)+'</div></section></div>';
+    var fx = prof.fixed;
+    var id = '<section class="sm-sec">'
+      + (fx.cover ? '<div class="sm-cover" style="background-image:url(\''+esc(fx.cover)+'\')"></div>' : '')
+      + '<div class="sm-id"><div class="sm-lg" style="'+(fx.logo ? 'background-image:url(\''+esc(fx.logo)+'\')' : '')+'">'
+          + (fx.logo ? '' : '<i class="ti '+esc(fx.icon || 'ti-building-store')+'"></i>')+'</div>'
+        + '<div class="t"><h2>'+esc(L(fx.name))+'</h2><div class="sub">'+esc(L(fx.cat))
+          + (fx.num ? ' · <bdi>'+esc(fx.num)+'</bdi>' : '')+'</div></div>'
+        + statusTag(fx.status) + '</div>'
+      + '<div class="sm-id-foot"><span class="sm-ro-note"><i class="ti ti-lock"></i>'
+          + esc(T('الاسم والشعار والفئة والحالة تديرها رف','Name, logo, category and status are managed by RAF'))+'</span>'
+        + '<a class="sm-link" href="raf_store.html?store='+encodeURIComponent(SLUG)+'" target="_blank" rel="noopener">'
+          + '<i class="ti ti-external-link"></i>'+esc(T('صفحة المتجر','Store page'))+'</a></div>'
+      + '</section>';
+    /* opening hours are read-only here — generated from the Opening schedule */
+    return '<div class="sm-wrap">' + id + textSection('desc') + hoursSection() + '</div>';
+  }
+  function textSection(f){
+    var S = SECTIONS[f], cur = prof.fields[f], editing = !!(edit && edit.section === f);
+    var h = '<section class="sm-sec'+(editing ? ' editing' : '')+'" id="sec-'+f+'"><div class="sm-sec-h"><h3>'+esc(T(S.ar,S.en))+'</h3>'
+      + (prof.editable && !editing
+          ? '<button class="sm-edit-b" onclick="startEdit(\''+f+'\')"><i class="ti ti-pencil"></i>'+esc(T(S.eAr,S.eEn))+'</button>'
+          : '')
+      + '</div>';
+    if (!editing){
+      return h + '<div class="sm-val"><span class="lg">العربية</span><p dir="rtl" lang="ar">'+esc(cur.ar)+'</p></div>'
+               + '<div class="sm-val"><span class="lg">English</span><p dir="ltr" lang="en">'+esc(cur.en)+'</p></div>'
+               + '</section>';
+    }
+    var rule = SP.FIELDS[f], l = edit.lang, v = edit.draft[l];
+    h += '<div class="sm-seg" role="group" aria-label="'+esc(T('اللغة','Language'))+'">'
+      + ['ar','en'].map(function(k){
+          return '<button class="sm-seg-b" aria-pressed="'+(k === l)+'" onclick="pickLang(\''+k+'\')">'
+            + (k === 'ar' ? 'العربية' : 'English') + '<span class="dot'+dotOf(k)+'"></span></button>';
+        }).join('') + '</div>';
+    var attrs = ' id="smField" dir="'+(l === 'ar' ? 'rtl' : 'ltr')+'" lang="'+l+'" maxlength="'+rule.max+'"'
+      + ' aria-label="'+esc(T(S.ar,S.en) + ' — ' + (l === 'ar' ? 'العربية' : 'English'))+'" oninput="editInput(this.value)"';
+    var ctl = rule.multiline
+      ? '<textarea'+attrs+' rows="5">'+esc(v)+'</textarea>'
+      : '<input'+attrs+' value="'+esc(v)+'" onkeydown="if(event.key===\'Enter\'){event.preventDefault();saveEdit();}">';
+    h += '<div class="sm-field'+(edit.errors[l] ? ' bad' : '')+'" id="smWrap">' + ctl
+      + '<div class="sm-meta"><span class="err" id="smErr">'+esc(edit.errors[l] || '')+'</span>'
+      + '<span class="cnt" id="smCount">'+v.length+' / '+rule.max+'</span></div></div>';
+    if (edit.msg) h += '<div class="sm-msg">'+esc(edit.msg)+'</div>';
+    h += '<div class="sm-acts"><button class="sm-btn" onclick="cancelEdit()">'+esc(T('إلغاء','Cancel'))+'</button>'
+      + '<button class="sm-btn gold" id="smSave" onclick="saveEdit()"'+(sectionDirty() ? '' : ' disabled')+'>'
+      + '<i class="ti ti-check"></i>'+esc(T('حفظ التغييرات','Save changes'))+'</button></div>';
+    return h + '</section>';
+  }
+  function dotOf(k){
+    if (!edit) return '';
+    if (edit.errors[k]) return ' err';
+    return edit.draft[k] !== prof.fields[edit.section][k] ? ' chg' : '';
+  }
+  window.startEdit = function(f){
+    confirmDiscard(function(){
+      var cur = prof.fields[f];
+      edit = { section:f, lang:isEn() ? 'en' : 'ar', draft:{ ar:cur.ar, en:cur.en },
+               errors:{ ar:'', en:'' }, msg:null, base:prof.version, focus:true };
+      render();
+    });
+  };
+  window.pickLang = function(l){ if (!edit) return; edit.lang = l; edit.focus = true; render(); };
+  window.editInput = function(v){
+    if (!edit) return;
+    edit.draft[edit.lang] = v; edit.errors[edit.lang] = '';
+    var c = el('smCount'); if (c) c.textContent = v.length + ' / ' + SP.FIELDS[edit.section].max;
+    var e = el('smErr'); if (e) e.textContent = '';
+    var w = el('smWrap'); if (w) w.classList.remove('bad');
+    var s = el('smSave'); if (s) s.disabled = !sectionDirty();
+    [].forEach.call(document.querySelectorAll('#sec-' + edit.section + ' .sm-seg-b'), function(b, i){
+      var d = b.querySelector('.dot'); if (d) d.className = 'dot' + dotOf(i === 0 ? 'ar' : 'en');
+    });
+  };
+  window.cancelEdit = function(){ edit = null; render(); };
+  window.saveEdit = function(){
+    if (!edit || !sectionDirty()) return;
+    var patch = {}; patch[edit.section] = { ar:edit.draft.ar, en:edit.draft.en };
+    var res = SP.update(patch, { actor:ME.id, baseVersion:edit.base });
+    if (!res.ok){
+      edit.errors = { ar:'', en:'' }; edit.msg = null;
+      (res.errors || []).forEach(function(e){
+        var p = String(e.field || '').split('.');
+        if (p[0] === edit.section && (p[1] === 'ar' || p[1] === 'en') && !edit.errors[p[1]]) edit.errors[p[1]] = e.message;
+      });
+      if (!edit.errors.ar && !edit.errors.en) edit.msg = res.message;
+      else if (!edit.errors[edit.lang]) edit.lang = edit.errors.ar ? 'ar' : 'en';   /* show the language with the problem */
+      edit.focus = true; render();
+      return;
+    }
+    edit = null; loadProfile(); render(); toast(T('تم الحفظ','Saved'));
+  };
+
+  /* ════════════════════ OPERATIONS ════════════════════ */
+  function renderOps(){
+    var s = OPS.snapshot(SLUG), store = RAFSource.store(SLUG) || {}, may = can('orders.manage');
+    var open = store.status === 'open';
+    lastBusy = s.busy;
+
+    /* store status — what customers get right now */
+    var dot = !open ? 'red' : s.busy ? 'amber' : 'green';
+    var big = !open ? T((STATUS_TXT[store.status] || {}).ar || '—', (STATUS_TXT[store.status] || {}).en || '—')
+            : s.busy ? T('مشغول','Busy') : T('مفتوح','Open');
+    var sub = !open ? T('لا يستقبل طلبات جديدة','Not accepting new orders')
+            : s.busy ? T('الطلبات الجديدة متوقفة حتى ','New orders paused until ') + kwTime(s.busyUntil)
+            : T('يستقبل الطلبات الجديدة','Accepting new orders');
+    var status = '<section class="sm-sec"><div class="sm-sec-h"><h3>'+esc(T('حالة المتجر','Store status'))+'</h3>'
+        + (may ? '' : '<span class="sm-tag">'+esc(T('للعرض فقط','View only'))+'</span>') + '</div>'
+      + '<div class="sm-now" style="margin-top:8px"><span class="sm-dot '+dot+'"></span><div class="t"><b>'+esc(big)+'</b><span>'+esc(sub)+'</span></div></div>'
+      + '</section>';
+
+    /* busy mode */
+    var busy = '<section class="sm-sec'+(busyPick ? ' editing' : '')+'"><div class="sm-sec-h"><h3>'+esc(T('وضع الانشغال','Busy Mode'))+'</h3>';
+    if (may && open && !s.busy && !busyPick)
+      busy += '<button class="sm-edit-b" onclick="openBusy()"><i class="ti ti-player-pause"></i>'+esc(T('تفعيل','Turn on'))+'</button>';
+    busy += '</div>';
+    if (s.busy){
+      busy += '<div class="sm-big">'+esc(T('مفعّل','On'))+'</div>'
+        + '<div class="sm-small">'+esc(T('تعود الطلبات الجديدة الساعة ','New orders resume at ') + kwTime(s.busyUntil))+'</div>'
+        + (may ? '<div class="sm-acts"><button class="sm-btn gold" onclick="reopenNow()"><i class="ti ti-player-play"></i>'
+                  + esc(T('إعادة الفتح الآن','Reopen now'))+'</button></div>' : '');
+    } else if (busyPick){
+      var h = busyPick.hours;
+      busy += '<div class="sm-choose-l" style="margin-top:4px">'+esc(T('إيقاف الطلبات الجديدة لمدة','Pause new orders for'))+'</div>'
+        + '<div class="sm-durs" role="group">' + OPS.BUSY_DURATIONS.map(function(x){
+            return '<button class="sm-dur" aria-pressed="'+(h === x)+'" onclick="pickBusy('+x+')">'+esc(durLabel(x))+'</button>';
+          }).join('') + '</div>'
+        + (h ? '<div class="sm-preview"><i class="ti ti-clock"></i>'+esc(T('تعود الطلبات الجديدة الساعة ','New orders resume at '))
+              + '<b>'+esc(kwTime(Date.now() + Math.min(h * 3600000, OPS.MAX_BUSY_MS)))+'</b></div>' : '')
+        + (busyPick.msg ? '<div class="sm-msg">'+esc(busyPick.msg)+'</div>' : '')
+        + '<div class="sm-acts"><button class="sm-btn" onclick="cancelBusy()">'+esc(T('إلغاء','Cancel'))+'</button>'
+        + '<button class="sm-btn gold" onclick="confirmBusy()"'+(h ? '' : ' disabled')+'><i class="ti ti-player-pause"></i>'
+        + esc(T('تفعيل','Turn on'))+'</button></div>';
+    } else {
+      busy += '<div class="sm-big muted">'+esc(T('متوقف','Off'))+'</div>'
+        + '<div class="sm-small">'+esc(T('يوقف الطلبات الجديدة مؤقتًا، والطلبات الحالية تستمر.','Pauses new orders for a while; orders already placed carry on.'))+'</div>';
+    }
+    if (busyMsg) busy += '<div class="sm-msg">'+esc(busyMsg)+'</div>';
+    busy += '</section>';
+
+    /* preparation time */
+    var prep = '<section class="sm-sec'+(prepEdit ? ' editing' : '')+'"><div class="sm-sec-h"><h3>'+esc(T('وقت التجهيز','Preparation time'))+'</h3>'
+      + (may && !prepEdit ? '<button class="sm-edit-b" onclick="openPrep()"><i class="ti ti-adjustments-horizontal"></i>'+esc(T('تغيير','Change'))+'</button>' : '')
+      + '</div>';
+    if (!prepEdit){
+      prep += '<div class="sm-big">'+esc(T(s.range.ar, s.range.en))+'</div>'
+        + '<div class="sm-small">'+esc(s.manual
+            ? T('يدوي · ' + LEVELS[s.state].ar, 'Manual · ' + LEVELS[s.state].en)
+            : T('تلقائي — حسب الطلبات النشطة (' + s.activeCount + ')', 'Automatic — based on active orders (' + s.activeCount + ')'))+'</div>';
+    } else {
+      prep += '<div class="sm-seg" role="group">'
+        + [['auto','تلقائي','Automatic'],['manual','يدوي','Manual']].map(function(m){
+            return '<button class="sm-seg-b" aria-pressed="'+(prepEdit.mode === m[0])+'" onclick="pickPrepMode(\''+m[0]+'\')">'+esc(T(m[1],m[2]))+'</button>';
+          }).join('') + '</div>';
+      if (prepEdit.mode === 'auto'){
+        var ar = OPS.RANGES[s.autoState];
+        prep += '<div class="sm-small" style="margin-top:12px">'+esc(T('يتغير حسب عدد الطلبات النشطة. الآن: ','Follows the number of active orders. Right now: ') + T(ar.ar, ar.en))+'</div>';
+      } else {
+        prep += '<div class="sm-levels" role="group">' + ['normal','moderate','high'].map(function(k){
+            var r = OPS.RANGES[k];
+            return '<button class="sm-lvl" aria-pressed="'+(prepEdit.level === k)+'" onclick="pickPrepLevel(\''+k+'\')">'
+              + esc(T(LEVELS[k].ar, LEVELS[k].en)) + '<small>'+esc(T(r.ar, r.en))+'</small></button>';
+          }).join('') + '</div>';
+      }
+      if (prepEdit.msg) prep += '<div class="sm-msg">'+esc(prepEdit.msg)+'</div>';
+      prep += '<div class="sm-acts"><button class="sm-btn" onclick="cancelPrep()">'+esc(T('إلغاء','Cancel'))+'</button>'
+        + '<button class="sm-btn gold" onclick="savePrep()"'+(prepDirty() ? '' : ' disabled')+'><i class="ti ti-check"></i>'
+        + esc(T('حفظ التغييرات','Save changes'))+'</button></div>';
+    }
+    prep += '</section>';
+
+    /* the structured weekly schedule — its own view / edit section */
+    var sched = renderSchedule();
+
+    return '<div class="sm-wrap">' + status + busy + prep + sched + '</div>';
+  }
+  function opsError(res){
+    if (res && res.reason === 'offline') return T('لا يوجد اتصال — لم يتم حفظ التغيير.','No connection — the change was not saved.');
+    return (res && res.message) || T('تعذّر تنفيذ التغيير.','The change could not be applied.');
+  }
+  window.openBusy = function(){ confirmDiscard(function(){ busyPick = { hours:null, msg:null }; busyMsg = null; render(); }); };
+  window.pickBusy = function(h){ if (!busyPick) return; busyPick.hours = h; busyPick.msg = null; render(); };
+  window.cancelBusy = function(){ busyPick = null; render(); };
+  window.confirmBusy = function(){
+    if (!busyPick || !busyPick.hours) return;
+    var res = OPS.setBusy(SLUG, busyPick.hours, actor());
+    if (!res.ok){ busyPick.msg = opsError(res); render(); return; }
+    busyPick = null; render(); toast(T('تم تفعيل وضع الانشغال','Busy Mode is on'));
+  };
+  window.reopenNow = function(){
+    var res = OPS.reopen(SLUG, actor());
+    busyMsg = res.ok ? null : opsError(res);
+    render(); if (res.ok) toast(T('أُعيد فتح المتجر','The store is open again'));
+  };
+  window.openPrep = function(){
+    confirmDiscard(function(){
+      var s = OPS.snapshot(SLUG);
+      prepEdit = { mode:s.manual ? 'manual' : 'auto', level:s.manual ? s.state : s.autoState, msg:null };
+      render();
+    });
+  };
+  window.pickPrepMode = function(m){ if (!prepEdit) return; prepEdit.mode = m; prepEdit.msg = null; render(); };
+  window.pickPrepLevel = function(k){ if (!prepEdit) return; prepEdit.level = k; prepEdit.msg = null; render(); };
+  window.cancelPrep = function(){ prepEdit = null; render(); };
+  window.savePrep = function(){
+    if (!prepDirty()) return;
+    var res = prepEdit.mode === 'auto' ? OPS.setAutomatic(SLUG, actor()) : OPS.setManual(SLUG, prepEdit.level, actor());
+    if (!res.ok){ prepEdit.msg = opsError(res); render(); return; }
+    prepEdit = null; render(); toast(T('تم الحفظ','Saved'));
+  };
+
+  /* ════════════════════ OPENING SCHEDULE ════════════════════
+     The structured weekly hours — the single source of the store's opening
+     hours. RAFStoreSchedule validates, saves, converts 12↔24-hour and
+     formats; RAFStoreOps evaluates them in Kuwait time. An open day has one
+     or two periods. Shown as a weekly list, edited with 12-hour pickers. */
+  function lng(){ return isEn() ? 'en' : 'ar'; }
+  function dayName(d){ return T(DAY_TXT[d].ar, DAY_TXT[d].en); }
+  function t12(s){ return '<bdi class="sm-t">'+esc(SS.format12(s, lng()) || '—')+'</bdi>'; }
+  function periodName(i){ return i === 0 ? T('الفترة الأولى','Period 1') : T('الفترة الثانية','Period 2'); }
+  function emptyTime(){ return { h:'', m:'', p:'' }; }
+  function emptyPeriod(){ return { from:emptyTime(), to:emptyTime() }; }
+  function toParts(s){ var t = SS.from24(s); return t ? { h:String(t.h), m:(t.m < 10 ? '0' : '') + t.m, p:t.period } : emptyTime(); }
+  function copyTime(t){ return { h:t.h, m:t.m, p:t.p }; }
+  function copyDay(x){ return { open:x.open, periods:x.periods.map(function(p){ return { from:copyTime(p.from), to:copyTime(p.to) }; }) }; }
+  /* the draft as the schedule the authority will judge — an incomplete time
+     is sent as missing, so the authority's own message explains it */
+  function buildSchedule(){
+    var out = {};
+    SS.DAYS.forEach(function(d){
+      var x = schedEdit.days[d];
+      if (!x.open){ out[d] = { closed:true }; return; }
+      function one(t){ return (t.h === '' || t.m === '' || !t.p) ? undefined : (SS.to24(t.h, t.m, t.p) || 'invalid'); }
+      out[d] = { periods:x.periods.map(function(p){ return { open:one(p.from), close:one(p.to) }; }) };
+    });
+    return out;
+  }
+  function schedDirty(){
+    if (!schedEdit || !schedEdit.touched) return false;
+    return JSON.stringify(buildSchedule()) !== JSON.stringify(schedEdit.original || null);
+  }
+
+  /* Store Profile → Opening hours: the customer-facing text, generated from
+     the schedule by RAFStoreSchedule. Read-only — hours are edited only in
+     the Opening schedule. */
+  function hoursSection(){
+    var ar = SS.publicHours(SLUG, 'ar'), en = SS.publicHours(SLUG, 'en');
+    var h = '<section class="sm-sec" id="sec-hours"><div class="sm-sec-h"><h3>'+esc(T('ساعات العمل','Opening hours'))+'</h3>'
+      + '<button class="sm-edit-b" onclick="goSchedule()"><i class="ti ti-calendar-time"></i>'+esc(T('جدول العمل','Opening schedule'))+'</button></div>';
+    if (ar.configured){
+      h += '<div class="sm-val"><span class="lg">العربية</span><p dir="rtl" lang="ar" id="pubHoursAr">'+esc(ar.text)+'</p></div>'
+         + '<div class="sm-val"><span class="lg">English</span><p dir="ltr" lang="en" id="pubHoursEn">'+esc(en.text)+'</p></div>';
+    } else {
+      h += '<div class="sm-big muted">'+esc(T('لم يُضبط بعد','Not configured yet'))+'</div>';
+    }
+    h += '<div class="sm-small" style="margin-top:10px">'+esc(T('ساعات العمل تُدار من جدول العمل، ويُنشأ هذا النص تلقائيًا ليراه العملاء.',
+                                                              'Opening hours are managed from Opening Schedule. Customers see this text, generated automatically.'))+'</div>';
+    return h + '</section>';
+  }
+  window.goSchedule = function(){
+    function show(){ var s = el('sec-sched'); if (s) s.scrollIntoView({ block:'start' }); }
+    if (st.tab === 'operations'){ show(); return; }
+    setTab('operations');
+    if (st.tab === 'operations') show();
+  };
+
+  function renderSchedule(){
+    var r = SS.read({ actor:ME.id }), editing = !!schedEdit;
+    var h = '<section class="sm-sec'+(editing ? ' editing' : '')+'" id="sec-sched"><div class="sm-sec-h"><h3>'+esc(T('جدول العمل','Opening schedule'))+'</h3>';
+    if (r.ok && r.editable && !editing)
+      h += '<button class="sm-edit-b" onclick="startSched()"><i class="ti ti-calendar-time"></i>'
+        + esc(r.configured ? T('تعديل الجدول','Edit schedule') : T('ضبط الجدول','Set up schedule'))+'</button>';
+    h += '</div>';
+    if (!r.ok) return h + '<div class="sm-small">'+esc(r.message)+'</div></section>';
+    if (editing) return h + schedEditHTML() + '</section>';
+    if (!r.configured){
+      return h + '<div class="sm-big muted">'+esc(T('لم يُضبط بعد','Not configured yet'))+'</div>'
+        + '<div class="sm-small">'+esc(T('لن تظهر ساعات العمل للعملاء قبل ضبط الجدول.','Customers see no opening hours until the schedule is set up.'))+'</div></section>';
+    }
+    var hs = OPS.hoursState(SLUG), today = OPS.DAYS[OPS.kuwaitNow().getDay()];
+    var nowLine = hs.state === 'open'            ? esc(T('مفتوح الآن · يغلق ','Open now · closes ')) + t12(hs.closesAt)
+                : hs.state === 'before_open'
+               || hs.state === 'between_periods' ? esc(T('مغلق الآن · يفتح ','Closed now · opens ')) + t12(hs.opensAt)
+                : hs.state === 'after_close'     ? esc(T('انتهى دوام اليوم عند ','Closed for today since ')) + t12(hs.closesAt)
+                : hs.state === 'closed_today'    ? esc(T('مغلق اليوم','Closed today')) : '';
+    if (nowLine) h += '<div class="sm-nowline" id="schedNow"><span class="sm-dot '+(hs.state === 'open' ? 'green' : 'red')+'"></span><span>'+nowLine+'</span></div>';
+    h += '<div class="sm-dayl">' + SS.DAYS.map(function(d){
+      var e = r.schedule[d], closed = e.closed === true;
+      return '<div class="sm-day'+(d === today ? ' today' : '')+'" data-day="'+d+'">'
+        + '<span class="d">'+esc(dayName(d))+(d === today ? ' <span class="sm-tag gold">'+esc(T('اليوم','Today'))+'</span>' : '')+'</span>'
+        + '<span class="s '+(closed ? 'off' : 'on')+'"><i></i>'+esc(closed ? T('مغلق','Closed') : T('مفتوح','Open'))+'</span>'
+        + '<span class="h">'+(closed ? '' : e.periods.map(function(p){
+            return '<span class="pl">' + t12(p.open) + '<span class="arr"> – </span>' + t12(p.close) + '</span>';
+          }).join(''))+'</span></div>';
+    }).join('') + '</div>';
+    h += '<div class="sm-small">'+esc(T('الأوقات بتوقيت الكويت.','Times are Kuwait time.'))+'</div>';
+    return h + '</section>';
+  }
+  function pickerHTML(d, i, which, t){
+    var hours = '<option value="">--</option>';
+    for (var n = 1; n <= 12; n++) hours += '<option value="'+n+'"'+(t.h === String(n) ? ' selected' : '')+'>'+n+'</option>';
+    var mins = '<option value="">--</option>';
+    for (var m = 0; m < 60; m++){ var mv = (m < 10 ? '0' : '') + m; mins += '<option value="'+mv+'"'+(t.m === mv ? ' selected' : '')+'>'+mv+'</option>'; }
+    var lab = dayName(d) + ' — ' + periodName(i) + ' — ' + (which === 'from' ? T('من','From') : T('إلى','To'));
+    var call = 'setTime(\''+d+'\','+i+',\''+which+'\',';
+    return '<div class="sm-picker" id="tp-'+d+'-'+i+'-'+which+'">'
+      + '<span class="sm-hm" dir="ltr">'
+        + '<select aria-label="'+esc(lab + ' · ' + T('الساعة','hour'))+'" onchange="'+call+'\'h\',this.value)">'+hours+'</select>'
+        + '<span class="c">:</span>'
+        + '<select aria-label="'+esc(lab + ' · ' + T('الدقيقة','minute'))+'" onchange="'+call+'\'m\',this.value)">'+mins+'</select>'
+      + '</span>'
+      + '<span class="sm-ap" role="group" aria-label="'+esc(lab)+'">' + ['am','pm'].map(function(p){
+          return '<button class="sm-ap-b" data-p="'+p+'" aria-pressed="'+(t.p === p)+'" onclick="'+call+'\'p\',\''+p+'\')">'
+            + esc(p === 'am' ? T('ص','AM') : T('م','PM')) + '</button>';
+        }).join('') + '</span>'
+      + '</div>';
+  }
+  function errText(d){
+    var err = schedEdit.errors[d]; if (!err) return '';
+    return (err.period !== null && schedEdit.days[d].periods.length > 1 ? periodName(err.period) + ': ' : '') + err.msg;
+  }
+  function schedEditHTML(){
+    var e = schedEdit;
+    var h = '<div class="sm-sched">' + SS.DAYS.map(function(d){
+      var x = e.days[d], err = e.errors[d], dayBad = err && err.period === null;
+      var row = '<div class="sm-sday'+(dayBad ? ' bad' : '')+(x.open ? '' : ' closed')+'" id="sd-'+d+'">'
+        + '<div class="sm-sday-h"><b>'+esc(dayName(d))+'</b>'
+        + '<div class="sm-seg sm-oc" role="group" aria-label="'+esc(dayName(d))+'">'
+          + '<button class="sm-seg-b" aria-pressed="'+x.open+'" onclick="setDayOpen(\''+d+'\',true)">'+esc(T('مفتوح','Open'))+'</button>'
+          + '<button class="sm-seg-b" aria-pressed="'+(!x.open)+'" onclick="setDayOpen(\''+d+'\',false)">'+esc(T('مغلق','Closed'))+'</button>'
+        + '</div></div>';
+      if (x.open){
+        row += x.periods.map(function(p, i){
+          return '<div class="sm-per'+(err && err.period === i ? ' bad' : '')+'" id="sp-'+d+'-'+i+'">'
+            + '<div class="sm-per-l">'+esc(periodName(i))+'</div>'
+            + '<div class="sm-times">'
+              + '<div class="sm-tp"><label>'+esc(T('من','From'))+'</label>'+pickerHTML(d, i, 'from', p.from)+'</div>'
+              + '<div class="sm-tp"><label>'+esc(T('إلى','To'))+'</label>'+pickerHTML(d, i, 'to', p.to)+'</div>'
+            + '</div></div>';
+        }).join('');
+      } else {
+        row += '<div class="sm-small">'+esc(T('المتجر مغلق هذا اليوم.','The store is closed this day.'))+'</div>';
+      }
+      row += '<div class="sm-dtools">'
+        + (x.open ? (x.periods.length < SS.MAX_PERIODS
+            ? '<button class="sm-copy-b sm-per-b" onclick="addPeriod(\''+d+'\')"><i class="ti ti-plus"></i>'+esc(T('إضافة فترة ثانية','Add second period'))+'</button>'
+            : '<button class="sm-copy-b sm-per-b rm" onclick="removePeriod(\''+d+'\')"><i class="ti ti-minus"></i>'+esc(T('حذف الفترة الثانية','Remove second period'))+'</button>') : '')
+        + '<button class="sm-copy-b" onclick="openCopy(\''+d+'\')"><i class="ti ti-copy"></i>'+esc(T('نسخ لأيام أخرى','Copy to other days'))+'</button>'
+        + '</div>';
+      if (e.copyFrom === d) row += copyHTML(d);
+      if (err) row += '<div class="sm-derr">'+esc(errText(d))+'</div>';
+      return row + '</div>';
+    }).join('') + '</div>';
+    if (e.msg) h += '<div class="sm-msg">'+esc(e.msg)+'</div>';
+    h += '<div class="sm-small" style="margin-top:12px">'+esc(T('الأوقات بتوقيت الكويت. فترة أو فترتان في اليوم، وكل فترة تُغلق بعد أن تفتح في اليوم نفسه.',
+                                                              'Times are Kuwait time. One or two periods a day; each closes later than it opens on the same day.'))+'</div>';
+    h += '<div class="sm-acts"><button class="sm-btn" onclick="cancelSched()">'+esc(T('إلغاء','Cancel'))+'</button>'
+      + '<button class="sm-btn gold" id="schedSave" onclick="saveSched()"'+(schedDirty() ? '' : ' disabled')+'><i class="ti ti-check"></i>'
+      + esc(T('حفظ التغييرات','Save changes'))+'</button></div>';
+    return h;
+  }
+  function copyHTML(d){
+    var src = schedEdit.days[d];
+    return '<div class="sm-copy"><div class="sm-choose-l">'+esc(src.open ? T('انسخ جدول هذا اليوم كاملًا إلى:','Copy this day\'s full schedule to:')
+                                                                     : T('انسخ «مغلق» إلى:','Copy "Closed" to:'))+'</div>'
+      + '<div class="sm-copy-days">' + SS.DAYS.filter(function(x){ return x !== d; }).map(function(x){
+          return '<label class="sm-chk"><input type="checkbox"'+(schedEdit.copySel[x] ? ' checked' : '')
+            + ' onchange="toggleCopy(\''+x+'\',this.checked)"><span>'+esc(dayName(x))+'</span></label>';
+        }).join('') + '</div>'
+      + '<div class="sm-acts"><button class="sm-btn" onclick="closeCopy()">'+esc(T('إلغاء','Cancel'))+'</button>'
+      + '<button class="sm-btn gold" onclick="applyCopy()">'+esc(T('نسخ','Copy'))+'</button></div></div>';
+  }
+  function schedSaveState(){ var sv = el('schedSave'); if (sv) sv.disabled = !schedDirty(); }
+  function schedTouched(d){ schedEdit.touched = true; delete schedEdit.errors[d]; schedEdit.msg = null; }
+  window.startSched = function(){
+    confirmDiscard(function(){
+      var r = SS.read({ actor:ME.id });
+      if (!r.ok || !r.editable) return;
+      var days = {};
+      SS.DAYS.forEach(function(d){
+        var e = r.configured ? r.schedule[d] : null;
+        /* an unconfigured schedule starts empty — no hours are assumed */
+        days[d] = !e ? { open:true, periods:[emptyPeriod()] }
+                : e.closed === true ? { open:false, periods:[emptyPeriod()] }
+                : { open:true, periods:e.periods.map(function(p){ return { from:toParts(p.open), to:toParts(p.close) }; }) };
+      });
+      schedEdit = { days:days, base:r.version, original:r.configured ? r.schedule : null,
+                    errors:{}, msg:null, touched:false, copyFrom:null, copySel:{} };
+      render();
+      var s = el('sec-sched'); if (s) s.scrollIntoView({ block:'nearest' });
+    });
+  };
+  window.setDayOpen = function(d, open){
+    if (!schedEdit) return;
+    var x = schedEdit.days[d];
+    x.open = open; if (!x.periods.length) x.periods.push(emptyPeriod());
+    schedTouched(d);
+    render();
+    var b = document.querySelector('#sd-' + d + ' .sm-oc [aria-pressed="true"]'); if (b) b.focus({ preventScroll:true });
+  };
+  window.addPeriod = function(d){
+    if (!schedEdit) return;
+    var x = schedEdit.days[d];
+    if (!x.open || x.periods.length >= SS.MAX_PERIODS) return;
+    x.periods.push(emptyPeriod()); schedTouched(d); render();
+    var s = document.querySelector('#tp-' + d + '-1-from select'); if (s) s.focus({ preventScroll:true });
+  };
+  window.removePeriod = function(d){
+    if (!schedEdit) return;
+    var x = schedEdit.days[d];
+    if (x.periods.length < 2) return;
+    x.periods = x.periods.slice(0, 1); schedTouched(d); render();
+    var b = document.querySelector('#sd-' + d + ' .sm-per-b'); if (b) b.focus({ preventScroll:true });
+  };
+  window.setTime = function(d, i, which, field, v){
+    if (!schedEdit) return;
+    var per = schedEdit.days[d].periods[i]; if (!per) return;
+    var t = per[which];
+    t[field] = v;
+    /* a picker convenience the merchant can see before saving: an hour
+       with no minute starts at :00, and an unset AM/PM starts as the usual
+       one — morning for the day's first opening, afternoon otherwise */
+    if (field === 'h' && v !== '' && t.m === '') t.m = '00';
+    if (field !== 'p' && t.h !== '' && !t.p) t.p = (i === 0 && which === 'from') ? 'am' : 'pm';
+    schedTouched(d);
+    var box = el('tp-' + d + '-' + i + '-' + which);
+    if (box){
+      var sels = box.querySelectorAll('select'); sels[0].value = t.h; sels[1].value = t.m;
+      [].forEach.call(box.querySelectorAll('.sm-ap-b'), function(b){ b.setAttribute('aria-pressed', String(b.getAttribute('data-p') === t.p)); });
+    }
+    var row = el('sd-' + d);
+    if (row){
+      row.classList.remove('bad');
+      [].forEach.call(row.querySelectorAll('.sm-per.bad'), function(p){ p.classList.remove('bad'); });
+      var er = row.querySelector('.sm-derr'); if (er) er.remove();
+    }
+    var m = document.querySelector('#sec-sched > .sm-msg'); if (m) m.remove();
+    schedSaveState();
+  };
+  window.openCopy = function(d){
+    if (!schedEdit) return;
+    schedEdit.copyFrom = d; schedEdit.copySel = {};
+    /* an open day offers the other open days; "Closed" is never pre-ticked onto anything */
+    if (schedEdit.days[d].open) SS.DAYS.forEach(function(x){ if (x !== d && schedEdit.days[x].open) schedEdit.copySel[x] = true; });
+    render();
+  };
+  window.toggleCopy = function(x, on){ if (schedEdit) schedEdit.copySel[x] = !!on; };
+  window.closeCopy = function(){ if (schedEdit){ schedEdit.copyFrom = null; render(); } };
+  window.applyCopy = function(){
+    if (!schedEdit || !schedEdit.copyFrom) return;
+    var src = schedEdit.days[schedEdit.copyFrom];
+    Object.keys(schedEdit.copySel).forEach(function(x){
+      if (!schedEdit.copySel[x]) return;
+      schedEdit.days[x] = copyDay(src);            /* open/closed, period 1 and period 2 */
+      delete schedEdit.errors[x];
+    });
+    schedEdit.touched = true; schedEdit.copyFrom = null; render();
+  };
+  window.cancelSched = function(){ schedEdit = null; render(); };
+  window.saveSched = function(){
+    if (!schedDirty()) return;
+    var res = SS.update(buildSchedule(), { actor:ME.id, baseVersion:schedEdit.base });
+    if (!res.ok){
+      schedEdit.errors = {}; schedEdit.msg = null;
+      (res.errors || []).forEach(function(e){
+        if (e.day){ if (!schedEdit.errors[e.day]) schedEdit.errors[e.day] = { msg:e.message, period:(e.period === undefined ? null : e.period) }; }
+        else if (!schedEdit.msg) schedEdit.msg = e.message;
+      });
+      if (!Object.keys(schedEdit.errors).length && !schedEdit.msg) schedEdit.msg = res.message;
+      render();
+      var first = SS.DAYS.filter(function(d){ return schedEdit.errors[d]; })[0];
+      if (first){ var row = el('sd-' + first); if (row) row.scrollIntoView({ block:'center' }); }
+      return;
+    }
+    schedEdit = null; render(); toast(T('تم حفظ جدول العمل','Opening schedule saved'));
+  };
+
+  /* ════════════════════ TEAM ════════════════════ */
+  function renderTeam(){
+    /* the accounts whose stored link is this store — resolved by id */
+    var members = RAFPerm.getUsers().filter(function(u){ return RAFPerm.storeSlugOf(u.id) === SLUG; });
+    var labelOf = {};
+    RAFPerm.getCatalog().forEach(function(p){ labelOf[p.key] = T(p.labelAr, p.labelEn); });
+    var n = members.length;
+    var h = '<section class="sm-sec"><div class="sm-sec-h"><h3>'+esc(T('الفريق','Team'))+'</h3>'
+      + '<span class="sm-tag">'+esc(T(n === 1 ? 'عضو واحد' : n + ' أعضاء', n === 1 ? '1 member' : n + ' members'))+'</span></div>';
+    h += members.length ? members.map(function(u){
+      var role = RAFPerm.getRole(u.roleId), perms = RAFPerm.effectivePermissions(u.id);
+      var active = u.status === 'active';
+      return '<div class="sm-mem"><div class="sm-av">'+esc(String(u.name || '?').trim().charAt(0))+'</div><div class="who">'
+        + '<b>'+esc(u.name)+(u.id === ME.id ? '<span class="sm-tag gold">'+esc(T('أنت','You'))+'</span>' : '')+'</b>'
+        + '<div class="sub">'+esc(role ? T(role.nameAr, role.nameEn) : '—')+' · '
+          + '<span style="color:'+(active ? '#1F7A45' : '#A63A36')+';font-weight:800">'+esc(active ? T('نشط','Active') : T('موقوف','Suspended'))+'</span></div>'
+        + '<details class="sm-perm"><summary><i class="ti ti-key"></i>'+esc(T('الصلاحيات الحالية (' + perms.length + ')','Current permissions (' + perms.length + ')'))+'</summary>'
+          + '<ul>'+perms.map(function(k){ return '<li>'+esc(labelOf[k] || k)+'</li>'; }).join('')+'</ul></details>'
+        + '</div></div>';
+    }).join('') : '<div class="sm-empty">'+esc(T('لا يوجد أعضاء مرتبطون بهذا المتجر.','No one is linked to this store yet.'))+'</div>';
+    h += '<div class="sm-info"><i class="ti ti-info-circle"></i><span>'
+      + esc(T('إدارة الموظفين ستتوفر عند اعتماد صلاحيات الفريق.','Employee management will be available when team permissions are configured.'))
+      + '</span></div></section>';
+    return '<div class="sm-wrap">' + h + '</div>';
+  }
+
+  /* ════════════════════ SETTINGS ════════════════════
+     Placeholder only: no store settings are defined yet, so nothing here
+     reads or writes store data. */
+  function renderSettings(){
+    return '<div class="sm-wrap"><section class="sm-sec"><div class="sm-sec-h"><h3>'+esc(T('الإعدادات','Settings'))+'</h3></div>'
+      + '<div class="sm-empty"><i class="ti ti-settings" style="font-size:32px;display:block;margin-bottom:8px;color:var(--border2)"></i>'
+      + esc(T('ستتوفر إعدادات المتجر هنا لاحقًا.','Store settings will be available here later.'))+'</div>'
+      + '<div class="sm-info"><i class="ti ti-info-circle"></i><span>'
+      + esc(T('لا توجد إعدادات قابلة للتعديل حاليًا.','There are no editable settings yet.'))
+      + '</span></div></section></div>';
+  }
+
+  /* ---------- navigation ---------- */
+  window.setTab = function(k){
+    if (!TABS.some(function(t){ return t.k === k; }) || k === st.tab) return;
+    confirmDiscard(function(){
+      st.tab = k; busyMsg = null; savePrefs(); render();
+      var b = el('tab-' + k); if (b) b.focus({ preventScroll:true });
+    });
+  };
+  window.refreshAll = function(){
+    confirmDiscard(function(){ busyMsg = null; loadProfile(); render(); });
+  };
+  window.toggleLang = function(){
+    var r = root(), en = r.lang === 'en';
+    r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+    try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+    applyLang(); if (edit) edit.focus = true; render();      /* an edit in progress is kept */
+  };
+  function applyLang(){
+    var en = isEn();
+    document.querySelectorAll('[data-ar][data-en]').forEach(function(e){
+      var t = e.getAttribute('data-'+(en?'en':'ar')); if (t !== null) e.textContent = t;
+    });
+    el('langLabel').textContent = en ? 'ع' : 'EN';
+    document.title = en ? 'RAF — Store Management' : 'رف — إدارة المتجر';
+  }
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape'){
+      if (!el('dlg').hidden){ dlgKeep(); return; }
+      if (edit || schedEdit){ confirmDiscard(function(){ render(); }); return; }
+      if (prepEdit || busyPick){ prepEdit = null; busyPick = null; render(); }
+      return;
+    }
+    if (!e.target || !e.target.closest || !e.target.closest('#tabs')) return;
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    var i = TABS.findIndex(function(t){ return t.k === st.tab; });
+    var fwd = (e.key === 'ArrowLeft') === !isEn();
+    e.preventDefault(); setTab(TABS[(i + (fwd ? 1 : -1) + TABS.length) % TABS.length].k);
+  });
+  /* leaving through the sidebar asks the same one question */
+  document.addEventListener('click', function(e){
+    var a = e.target && e.target.closest && e.target.closest('.mw-rail a[href]');
+    if (!a || !dirty() || a.target === '_blank') return;
+    e.preventDefault();
+    var href = a.getAttribute('href');
+    confirmDiscard(function(){ window.location.href = href; });
+  }, true);
+
+  /* ---------- another session changed the store ---------- */
+  function onExternal(){
+    if (schedEdit && schedDirty()){
+      var fr = SS.read({ actor:ME.id });
+      if (fr.ok && fr.version !== schedEdit.base){
+        schedEdit.msg = T('تم تعديل جدول العمل من جلسة أخرى. ألغِ التعديل لعرض أحدث نسخة.',
+                          'The schedule was changed in another session. Cancel to see the latest version.');
+        render();
+      }
+      return;
+    }
+    if (schedEdit) schedEdit = null;
+    if (edit && sectionDirty()){
+      var fresh = SP.read({ actor:ME.id });
+      if (fresh.ok && fresh.version !== edit.base){
+        edit.msg = T('تم تعديل هذه المعلومات من جلسة أخرى. ألغِ التعديل لعرض أحدث نسخة.',
+                     'This was changed in another session. Cancel to see the latest version.');
+        render();
+      }
+      return;
+    }
+    edit = null; loadProfile(); render();
+  }
+
+  function gate(title, text){
+    el('gate').style.display = ''; el('gateT').textContent = title; el('gateP').textContent = text;
+  }
+  function boot(){
+    var l = null; try { l = localStorage.getItem('raf_lang'); } catch(e){}
+    if (l === 'en'){ root().lang = 'en'; root().dir = 'ltr'; }
+    applyLang();
+
+    if (!SP || !OPS || !window.RAFPerm){ gate(T('تعذّر التحميل','Could not load'), ''); return; }
+    var me = RAFPerm.currentUser();
+    var link = RAFPerm.storeLinkOf(me ? me.id : null);
+    if (!me || !link.ok){
+      gate(link.reason === 'store_not_found' ? T('المتجر المرتبط غير موجود','Linked store not found') : T('لا يوجد متجر مرتبط بالحساب','No store linked to this account'),
+           T('لم يتم ربط هذا الحساب بمتجر. يتم الربط يدوياً ولا يُخمَّن تلقائياً.','This account is not linked to a store. Links are set explicitly and never inferred.'));
+      return;
+    }
+    if (!SP.canView(me.id)){
+      gate(T('لا تملك صلاحية إدارة المتجر','You do not have permission to manage the store'),
+           T('يتم التحكم بالصلاحيات من نظام صلاحيات رف.','Access is controlled by the RAF permission system.'));
+      return;
+    }
+    ME = { id:me.id, name:me.name };
+    SLUG = link.slug;
+    loadPrefs();
+    el('shell').style.display = '';
+    el('stName').textContent = L(link.store.name);
+    if (link.store.logo){ var lg = el('stLogo'); lg.style.backgroundImage = "url('"+link.store.logo+"')"; lg.innerHTML = ''; }
+    loadProfile();
+    render();
+
+    document.addEventListener('raf:ops', function(){ if (st.tab === 'operations') render(); });
+    document.addEventListener('raf:source', onExternal);
+    window.addEventListener('storage', function(e){
+      if (e.key === 'raf_source_overrides') onExternal();
+      else if ((e.key === 'raf_users' || e.key === 'raf_roles') && st.tab === 'team') render();
+    });
+    /* Busy Mode ends by time — reflect it when it does */
+    setInterval(function(){ if (st.tab === 'operations' && lastBusy !== null && OPS.isBusy(SLUG) !== lastBusy) render(); }, 15000);
+    window.addEventListener('beforeunload', function(e){ if (dirty()){ e.preventDefault(); e.returnValue = ''; } });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+</body>
+</html>

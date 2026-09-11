@@ -219,6 +219,7 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 <script src="raf_audit.js"></script>
 <script src="raf_data.js"></script>
 <script src="raf_order_snapshot.js"></script>
+<script src="raf_store_schedule.js"></script>
 <script src="raf_catalog.js"></script>
 <script src="raf_rules.js"></script>
 <script src="raf_inventory.js"></script>
@@ -370,6 +371,11 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
       + '<span class="side">'+(o.items||[]).length+' '+T('منتج','items')+'</span></div>'+rows
       + '<div class="panel-b" style="border-top:1px solid var(--border);">'
         + '<div class="sum-row"><span><i class="ti ti-map-pin" style="color:var(--gold2)"></i> '+T('عنوان التوصيل','Delivery address')+'</span><span style="max-width:60%;text-align:end">'+L(o.addr)+'</span></div>'
+        /* the delivery commitment frozen in the snapshot at checkout */
+        + (function(){
+            var c = (window.RAFStoreSchedule && o.snapshot) ? RAFStoreSchedule.formatCommitment(o.snapshot, T('ar','en')) : null;
+            return c ? '<div class="sum-row" id="dlvCommit"><span><i class="ti ti-clock-hour-4" style="color:var(--gold2)"></i> '+T('موعد التوصيل','Delivery time')+'</span><span style="max-width:60%;text-align:end">'+c+'</span></div>' : '';
+          })()
         + '<div class="sum-row"><span><i class="ti ti-credit-card" style="color:var(--gold2)"></i> '+T('طريقة الدفع','Payment method')+'</span><span>'+L(o.pay)+'</span></div>'
         + '<div class="sum-row"><span><i class="ti ti-calendar" style="color:var(--gold2)"></i> '+T('تاريخ الطلب','Order date')+'</span><span>'+L(o.date)+'</span></div>'
       + '</div></div>';

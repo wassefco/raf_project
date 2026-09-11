@@ -135,6 +135,9 @@
   .stag.closed { background: rgba(217,83,79,.14); border-color: rgba(217,83,79,.36); color: #F0A6A4; }
   .stag.open i, .stag.closed i { font-size: 8px; }
   .shero-desc { margin-top: 16px; font-size: 14px; line-height: 1.8; color: #A9A296; max-width: 640px; }
+  .shero-hours { margin-top: 10px; display: flex; align-items: flex-start; gap: 8px; font-size: 13.5px; line-height: 1.7; color: #CFC8BA; max-width: 640px; }
+  .shero-hours[hidden] { display: none; }
+  .shero-hours i { color: var(--gold); margin-top: 3px; flex-shrink: 0; }
 
   /* actions */
   .shero-act { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
@@ -482,6 +485,7 @@
         </div>
 
         <p class="shero-desc" id="storeDesc"></p>
+        <p class="shero-hours" id="storeHours" hidden><i class="ti ti-clock"></i><span></span></p>
 
         <div class="shero-social">
           <a class="social-btn" title="Instagram"><i class="ti ti-brand-instagram"></i></a>
@@ -640,6 +644,7 @@
 <script src="raf_rules.js"></script>
 <script src="raf_order_snapshot.js"></script>
 <script src="raf_store_ops.js"></script>
+<script src="raf_store_schedule.js"></script>
 <script src="raf_ads.js"></script>
 <script src="raf_marketing.js"></script>
 <script src="raf_swipe.js"></script>
@@ -813,6 +818,12 @@ function renderStore(){
   document.getElementById('closedBanner').classList.toggle('show', !open);
 
   document.getElementById('storeDesc').textContent = L(s.desc);
+  /* opening hours — generated from the structured schedule only; a store
+     without one shows none rather than a guessed or free-text value */
+  var hrs = document.getElementById('storeHours');
+  var ph = window.RAFStoreSchedule ? RAFStoreSchedule.publicHours(SLUG, isEn() ? 'en' : 'ar') : null;
+  hrs.hidden = !(ph && ph.configured);
+  hrs.querySelector('span').textContent = (ph && ph.configured) ? ph.text : '';
   document.getElementById('trProducts').textContent = s.products;
   document.getElementById('trSat').textContent = s.satisfaction;
 

@@ -126,6 +126,21 @@
     'advertisement.updated':{ tl:false, ar:'تم تعديل إعلان',              en:'Advertisement updated' },
     'advertisement.enabled':{ tl:false, ar:'تم تفعيل إعلان',              en:'Advertisement enabled' },
     'advertisement.disabled':{tl:false, ar:'تم إيقاف إعلان',              en:'Advertisement disabled' },
+    /* store profile */
+    'store.profile_updated':{ tl:false, ar:'تم تعديل ملف المتجر',         en:'Store profile updated' },
+    'store.schedule_updated':{ tl:false, ar:'تم تعديل جدول العمل',        en:'Opening schedule updated' },
+    /* customer experience — recorded against the store (audit log, not the order timeline) */
+    'customer_experience.review_created':       { tl:false, ar:'أضاف العميل تقييماً',        en:'Customer added a review' },
+    'customer_experience.review_replied':       { tl:false, ar:'ردّ المتجر على تقييم',       en:'Store replied to a review' },
+    'customer_experience.issue_created':        { tl:false, ar:'فتح العميل مشكلة',          en:'Customer opened an issue' },
+    'customer_experience.issue_message_added':  { tl:false, ar:'رسالة جديدة في مشكلة عميل', en:'Message added to a customer issue' },
+    'customer_experience.issue_status_changed': { tl:false, ar:'تغيّرت حالة مشكلة عميل',    en:'Customer issue status changed' },
+    'customer_experience.issue_reopened':       { tl:false, ar:'أعاد العميل فتح مشكلة',     en:'Customer reopened an issue' },
+    /* merchant support (merchant ↔ RAF) — recorded against the store */
+    'support.ticket_created':  { tl:false, ar:'فُتحت تذكرة دعم',          en:'Support ticket created' },
+    'support.message_added':   { tl:false, ar:'رسالة جديدة في تذكرة دعم', en:'Message added to a support ticket' },
+    'support.status_changed':  { tl:false, ar:'تغيّرت حالة تذكرة دعم',    en:'Support ticket status changed' },
+    'support.ticket_reopened': { tl:false, ar:'أُعيد فتح تذكرة دعم',       en:'Support ticket reopened' },
     /* finance */
     'commission.rate_scheduled':{ tl:false, ar:'تمت جدولة نسبة عمولة رف', en:'RAF commission rate scheduled' },
     'settlement.closed':    { tl:false, ar:'أُغلقت فترة محاسبية',         en:'Accounting period closed' },

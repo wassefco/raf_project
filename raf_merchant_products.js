@@ -89,6 +89,40 @@
       return p.store === slug && p.status !== 'deleted';
     });
   }
+  /* ---------- stock band (display only) ----------
+     There is no low-stock threshold in any authority, so none is invented:
+     this is the ONE convention already shipped to customers — raf_product
+     .html / raf_quick.html say "only N left" at 5 or fewer. Availability
+     itself always comes from RAFInventory. Nothing depends on the band; it
+     lives here so the Product Workspace and the Dashboard read one rule.
+       'none' — no readable inventory record (reported, never guessed)
+       'zero' — nothing available · 'low' — 1..LOW_STOCK_AT · 'in' — more */
+  var LOW_STOCK_AT = 5;
+  function stockOf(productId){
+    var S = src(), INV = global.RAFInventory;
+    if (!S || !INV) return null;
+    var p = S.product(productId);
+    if (!p || p.stock == null) return null;
+    return { onHand:INV.onHand(productId), reserved:INV.reserved(productId), available:INV.available(productId) };
+  }
+  function stockBand(productId){
+    var v = stockOf(productId);
+    if (!v) return 'none';
+    if (v.available <= 0) return 'zero';
+    return v.available <= LOW_STOCK_AT ? 'low' : 'in';
+  }
+  /* the Product Workspace summary strip, over a list this module returned */
+  function summarize(products){
+    var s = { total:0, active:0, hidden:0, low:0, zero:0, none:0 };
+    (products || []).forEach(function (p) {
+      s.total++;
+      if (p.status === STATUS.HIDDEN) s.hidden++; else s.active++;
+      var b = stockBand(p.id);
+      if (b === 'low') s.low++; else if (b === 'zero') s.zero++; else if (b === 'none') s.none++;
+    });
+    return s;
+  }
+
   function get(productId, userOrId){
     if (!owns(productId, userOrId)) return null;
     var S = src(); if (!S) return null;
@@ -406,6 +440,8 @@
     canView: canView, canEdit: canEdit, canCreate: canCreate,
     /* read */
     list: list, get: get, categories: categories, versionOf: versionOf,
+    /* stock band (display) */
+    LOW_STOCK_AT: LOW_STOCK_AT, stockOf: stockOf, stockBand: stockBand, summarize: summarize,
     /* write */
     validate: validate, validateNew: validateNew, update: update, create: create
   };

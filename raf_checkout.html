@@ -74,6 +74,14 @@
         </div>
       </div>
 
+      <!-- DELIVERY TIME — Instant / Scheduled / receive at next opening. Every
+           value comes from RAFStoreOps + RAFStoreSchedule; shown only when the
+           store has a structured schedule (otherwise checkout is unchanged). -->
+      <div class="panel" id="dlvPanel" style="display:none;">
+        <div class="panel-h"><i class="ti ti-clock-hour-4"></i> <span data-ar="وقت التوصيل" data-en="Delivery time">وقت التوصيل</span></div>
+        <div class="panel-b" id="dlvBody"></div>
+      </div>
+
       <!-- DRIVER TIP -->
       <div class="panel">
         <div class="panel-h"><i class="ti ti-coin"></i> <span data-ar="إكرامية السائق" data-en="Driver tip">إكرامية السائق</span><span class="side" data-ar="اختياري" data-en="Optional">اختياري</span></div>
@@ -175,6 +183,7 @@
 <script src="raf_data.js"></script>
 <script src="raf_order_snapshot.js"></script>
 <script src="raf_store_ops.js"></script>
+<script src="raf_store_schedule.js"></script>
 <script src="raf_catalog.js"></script>
 <script src="raf_inventory.js"></script>
 <script src="raf_rules.js"></script>
@@ -343,17 +352,107 @@
       rows.push('<div class="sum-row"><span>'+T('وقت التجهيز المتوقع','Expected preparation time')+'</span>'
         + '<span>'+T(r.ar, r.en)+'</span></div>');
     }
-    /* past the cutoff → say so plainly instead of implying same-day delivery */
-    var cut = RAFStoreOps.cutoff(slug);
-    if (cut.known && !cut.sameDay){
-      rows.push('<div class="alert warn" style="margin-top:10px;"><i class="ti ti-calendar-clock"></i><div>'+cut.message+'</div></div>');
-    }
+    /* when delivery happens (Instant cutoff, gaps, next opening) is explained
+       in the Delivery time panel — renderDelivery() */
     box.innerHTML = rows.join('');
     panel.style.display = '';
     /* a busy store cannot be checked out */
     var btn = document.getElementById('payBtn');
     if (btn && !btn.dataset.busy) btn.disabled = !accept.ok;
   }
+
+  /* ---- delivery time: Instant / Scheduled / receive at next opening ----
+     The page computes nothing itself: availability, the cutoff, the next
+     opening and every window come from RAFStoreOps / RAFStoreSchedule, and
+     the final choice is re-proved by RAFRules.placeOrder. The store's manual
+     Open / Closed / Busy state is shown by the notice above and never
+     changed by the schedule. */
+  var DLV = { timing:null, date:null, start:null, end:null, sig:null };
+  var WHY = {
+    cutoff_passed:  { ar:'التوصيل الفوري غير متاح حالياً لأن وقت التوصيل الفوري انتهى لهذا اليوم.',
+                      en:'Instant delivery is currently unavailable because today\'s instant-delivery cutoff has passed.' },
+    outside_period: { ar:'التوصيل الفوري غير متاح حالياً لأن المتجر خارج أوقات العمل الآن.',
+                      en:'Instant delivery is currently unavailable because the store is outside its working hours right now.' },
+    closed_today:   { ar:'التوصيل الفوري غير متاح اليوم لأن المتجر لا يعمل اليوم.',
+                      en:'Instant delivery is unavailable today because the store does not work today.' },
+    unknown:        { ar:'التوصيل الفوري غير متاح حالياً.', en:'Instant delivery is currently unavailable.' }
+  };
+  function dlvLang(){ return RAFCO.en() ? 'en' : 'ar'; }
+  function dlvAvail(){
+    var slug = storeSlugForCart();
+    return (slug && window.RAFStoreOps && RAFStoreOps.deliveryAvailability) ? RAFStoreOps.deliveryAvailability(slug) : null;
+  }
+  function dlvEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function dlvOpt(k, ic, title, sub, enabled){
+    var on = DLV.timing === k;
+    return '<button type="button" class="pay dlv-opt'+(on?' on':'')+'" role="radio" aria-checked="'+on+'"'
+      + (enabled?'':' disabled aria-disabled="true"')+' data-k="'+k+'" onclick="pickTiming(\''+k+'\')">'
+      + '<span class="pay-radio"></span><span class="pay-ic"><i class="ti '+ic+'"></i></span>'
+      + '<span><span class="pay-n" style="display:block">'+title+'</span><span class="pay-s" style="display:block">'+sub+'</span></span></button>';
+  }
+  function renderDelivery(){
+    var panel = document.getElementById('dlvPanel'), body = document.getElementById('dlvBody');
+    var a = dlvAvail();
+    /* no structured schedule → nothing is invented; checkout stays as it was */
+    if (!a || !a.configured || !window.RAFStoreSchedule){ panel.style.display='none'; DLV.timing=null; DLV.sig=null; return; }
+    panel.style.display = '';
+    var S = RAFStoreSchedule, lang = dlvLang(), inst = a.instant.available === true, sch = a.scheduled.available === true;
+    DLV.sig = JSON.stringify([a.instant, a.nextOpening, a.scheduled.available, a.scheduled.dates]);
+    /* keep a still-valid choice; otherwise the option the rules offer */
+    var ok = { instant:inst, scheduled:sch, next_opening:!inst };
+    if (!DLV.timing || !ok[DLV.timing]) DLV.timing = inst ? 'instant' : (sch ? 'scheduled' : 'next_opening');
+    var h = '';
+    if (!inst){
+      var why = WHY[a.instant.reason] || WHY.unknown;
+      h += '<div class="alert info dlv-why" id="dlvWhy"><i class="ti ti-info-circle"></i><div>'+T(why.ar, why.en)
+        + (a.nextOpening ? '<br><b>'+dlvEsc(S.formatNextOpening(a.nextOpening, lang))+'</b>' : '')
+        + (sch ? '<br>'+T('يمكنك اختيار موعد توصيل مجدول.','You can choose a scheduled delivery time.') : '')
+        + '</div></div>';
+    }
+    h += '<div role="radiogroup" aria-label="'+T('وقت التوصيل','Delivery time')+'">';
+    h += dlvOpt('instant', 'ti-bolt', T('توصيل فوري','Instant delivery'),
+                inst ? T('يُجهَّز طلبك ويُرسَل الآن','Your order is prepared and sent now') : T('غير متاح حالياً','Unavailable right now'), inst);
+    if (!inst) h += dlvOpt('next_opening', 'ti-building-store', T('الاستلام عند فتح المتجر','Receive when the store opens'),
+                           dlvEsc(S.formatReceive(a.nextOpening, lang)), true);
+    h += dlvOpt('scheduled', 'ti-calendar-time', T('توصيل مجدول','Scheduled delivery'),
+                sch ? T('اختر يوماً ووقتاً للتوصيل','Choose a day and time') : T('غير متاح حالياً','Unavailable right now'), sch);
+    h += '</div>';
+    if (DLV.timing === 'scheduled' && sch){
+      var dates = a.scheduled.dates;
+      if (!dates.some(function(d){ return d.date === DLV.date; })){ DLV.date = dates[0].date; DLV.start = DLV.end = null; }
+      var day = dates.filter(function(d){ return d.date === DLV.date; })[0];
+      if (!day.slots.some(function(w){ return w.start === DLV.start && w.end === DLV.end; })) DLV.start = DLV.end = null;
+      h += '<div class="dlv-l" id="dlvDateL">'+T('التاريخ','Date')+'</div><div class="tips" role="radiogroup" aria-labelledby="dlvDateL">'
+        + dates.map(function(d){
+            var on = d.date === DLV.date;
+            return '<button type="button" class="tip dlv-chip'+(on?' on':'')+'" role="radio" aria-checked="'+on+'" onclick="pickDlvDate(\''+d.date+'\')">'+dlvEsc(S.formatDate(d.date, lang))+'</button>';
+          }).join('') + '</div>';
+      h += '<div class="dlv-l" id="dlvSlotL">'+T('وقت التوصيل','Delivery time')+'</div><div class="tips" role="radiogroup" aria-labelledby="dlvSlotL">'
+        + day.slots.map(function(w){
+            var on = w.start === DLV.start && w.end === DLV.end;
+            return '<button type="button" class="tip dlv-chip'+(on?' on':'')+'" role="radio" aria-checked="'+on+'" onclick="pickSlot(\''+w.start+'\',\''+w.end+'\')"><bdi>'+dlvEsc(S.formatWindow(w, lang))+'</bdi></button>';
+          }).join('') + '</div>';
+    }
+    h += '<div class="msg" id="dlvMsg"></div>';
+    body.innerHTML = h;
+  }
+  window.pickTiming = function(k){ DLV.timing = k; renderDelivery(); };
+  window.pickDlvDate = function(d){ DLV.date = d; DLV.start = DLV.end = null; renderDelivery(); };
+  window.pickSlot = function(s, e){ DLV.start = s; DLV.end = e; renderDelivery(); };
+  /* what the customer is committing to, in words — for the confirmation */
+  function dlvSummary(){
+    if (!DLV.timing || !window.RAFStoreSchedule) return null;
+    var S = RAFStoreSchedule, lang = dlvLang();
+    if (DLV.timing === 'instant') return T('توصيل فوري','Instant delivery');
+    if (DLV.timing === 'scheduled') return T('توصيل مجدول','Scheduled delivery')+': '+S.formatDate(DLV.date, lang)+' · '+S.formatWindow({ start:DLV.start, end:DLV.end }, lang);
+    var a = dlvAvail(); return S.formatReceive(a && a.nextOpening, lang);
+  }
+  /* availability moves with the clock — the cutoff, a gap, a slot starting */
+  setInterval(function(){
+    var a = dlvAvail();
+    var sig = (a && a.configured) ? JSON.stringify([a.instant, a.nextOpening, a.scheduled.available, a.scheduled.dates]) : null;
+    if (sig !== DLV.sig) renderDelivery();
+  }, 30000);
 
   function oosSel(){ return RAFCO.get('raf_oos_pref',''); }
   function renderOos(){
@@ -448,6 +547,8 @@
             + '<div class="qc-items">'+items.map(qcItemHTML).join('')+'</div>'
             + '<div class="qc-row"><span>'+T('المنتجات','Items')+'</span><b>'+count+'</b></div>'
             + '<div class="qc-row"><span>'+T('طريقة الدفع','Payment')+'</span><b>'+(pay?L(pay):'')+'</b></div>'
+            /* the delivery commitment, stated before the order is confirmed */
+            + (dlvSummary() ? '<div class="qc-row" id="qcDelivery"><span>'+T('التوصيل','Delivery')+'</span><b style="text-align:end">'+dlvEsc(dlvSummary())+'</b></div>' : '')
             + '<div class="qc-row total"><span>'+T('الإجمالي','Total')+'</span><b>'+money(totals.total)+' '+T('د.ك','KWD')+'</b></div>'
           + '</div>'
           + '<div class="qc-f">'
@@ -516,6 +617,13 @@
       document.getElementById('oosRow').scrollIntoView({block:'center',behavior:'smooth'});
       return;
     }
+    /* a scheduled delivery needs its day and time picked */
+    if(DLV.timing==='scheduled' && !(DLV.date && DLV.start && DLV.end)){
+      var dm=document.getElementById('dlvMsg');
+      if(dm){ dm.className='msg err show'; dm.innerHTML='<i class="ti ti-alert-circle"></i> '+T('اختر يوم ووقت التوصيل','Choose a delivery day and time'); }
+      document.getElementById('dlvPanel').scrollIntoView({block:'center',behavior:'smooth'});
+      return;
+    }
     var payId=RAFCO.get('raf_pay_sel','cod');
     var pay=PAYMENTS.find(function(p){return p.id===payId;})||PAYMENTS[0];
 
@@ -539,6 +647,11 @@
         storeSlug: cat ? cat.slug : null,
         address: addr,
         deliveryType: 'delivery',
+        /* the customer's delivery choice — re-proved by RAFRules.placeOrder */
+        deliveryTiming: DLV.timing || undefined,
+        scheduledDate:  DLV.timing==='scheduled' ? DLV.date  : null,
+        scheduledStart: DLV.timing==='scheduled' ? DLV.start : null,
+        scheduledEnd:   DLV.timing==='scheduled' ? DLV.end   : null,
         deliveryInstructions: RAFCO.get('raf_driver_notes','') || null,
         customerNotes: RAFCO.get('raf_order_notes','') || null,
         customerId: (window.RAFPerm && RAFPerm.currentUser()) ? RAFPerm.currentUser().id : null,
@@ -551,6 +664,13 @@
       }).then(function(res){
         if(!res.ok){
           if(btn){ btn.disabled=false; delete btn.dataset.busy; }
+          /* the delivery choice no longer holds — show the fresh options and why */
+          if(res.delivery){
+            renderDelivery();
+            err.innerHTML='<div class="alert warn"><i class="ti ti-alert-triangle"></i><div>'+dlvEsc((res.errors[0]||{}).message)+'</div></div>';
+            document.getElementById('dlvPanel').scrollIntoView({block:'center',behavior:'smooth'});
+            return;
+          }
           if(!res.duplicate) showPayErrors(res.errors||[]);
           if(res.sync && res.sync.changed) render();
           return;
@@ -583,10 +703,10 @@
     if(!has){ RAFShop.Cart.badge(); return; }
     if(window.RAFRules) RAFRules.Reserve.hold(items);
     document.getElementById('driverNotes').value=RAFCO.get('raf_driver_notes','');
-    renderAddresses(); renderTips(); renderOos(); renderOpsNotice(); renderPayments(); renderSummary();
+    renderAddresses(); renderDelivery(); renderTips(); renderOos(); renderOpsNotice(); renderPayments(); renderSummary();
     RAFCO.applyLang(); RAFShop.Cart.badge();
     var root=document.getElementById('htmlRoot');
-    if(root) new MutationObserver(function(){ renderAddresses(); renderTips(); renderOos(); renderOpsNotice(); renderPayments(); renderSummary(); })
+    if(root) new MutationObserver(function(){ renderAddresses(); renderDelivery(); renderTips(); renderOos(); renderOpsNotice(); renderPayments(); renderSummary(); })
       .observe(root,{attributes:true,attributeFilter:['lang']});
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();

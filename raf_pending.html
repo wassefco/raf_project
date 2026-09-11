@@ -89,6 +89,10 @@
     border:1px solid rgba(46,158,91,.28);border-radius:14px;padding:13px 15px;font-size:13px;color:#2E7D32;
     line-height:1.7;margin-bottom:20px;}
   .refund i{font-size:19px;flex-shrink:0;}
+  .pend-dlv{display:flex;justify-content:center;align-items:center;gap:6px;margin-top:10px;font-size:13px;line-height:1.6;color:var(--text2);text-align:center;}
+  .pend-dlv[hidden]{display:none;}
+  .st-ic.later{background:rgba(201,168,76,.14);color:#A07828;}
+  .pend-dlv i{color:var(--gold2);flex-shrink:0;}
   @media(max-width:480px){.pend-card{padding:26px 20px;}.pend-acts a,.pend-acts button{width:100%;justify-content:center;}}
   @media(prefers-reduced-motion:reduce){.pend-ring .bar{transition:none;}}
 </style>
@@ -115,6 +119,8 @@
       <p data-ar="تم استلام دفعتك بنجاح. ننتظر الآن تأكيد المتجر لطلبك."
          data-en="Your payment went through. We are waiting for the store to accept your order.">تم استلام دفعتك بنجاح. ننتظر الآن تأكيد المتجر لطلبك.</p>
       <div class="pend-order"><i class="ti ti-receipt"></i> <span id="ordNo">—</span></div>
+      <!-- the delivery commitment frozen in the order snapshot -->
+      <div class="pend-dlv" id="dlvLine" hidden><i class="ti ti-clock-hour-4"></i> <span></span></div>
       <div class="pend-steps">
         <div class="pend-step done"><i class="ti ti-circle-check"></i> <span data-ar="تم الدفع بنجاح" data-en="Payment received">تم الدفع بنجاح</span></div>
         <div class="pend-step on"><i class="ti ti-clock-hour-4"></i> <span data-ar="بانتظار قبول المتجر" data-en="Awaiting store acceptance">بانتظار قبول المتجر</span></div>
@@ -134,13 +140,31 @@
            data-en="If the store does not accept within 5 minutes, the order is cancelled automatically and refunded in full.">إذا لم يقبل المتجر خلال 5 دقائق، سيُلغى الطلب تلقائياً ويُعاد المبلغ كاملاً.</div>
     </div>
 
+    <!-- LATER — a next-opening or scheduled order. There is no acceptance
+         countdown: the store handles it when its time begins. -->
+    <div class="pend-state" id="stLater">
+      <div class="st-ic later"><i class="ti ti-calendar-time"></i></div>
+      <h1 id="ltTitle"></h1>
+      <p id="ltSub"></p>
+      <div class="pend-order"><i class="ti ti-receipt"></i> <span class="ordNo">—</span></div>
+      <div class="pend-dlv" id="ltWhen" hidden><i class="ti ti-clock-hour-4"></i> <span></span></div>
+      <div class="pend-acts">
+        <a class="pend-primary" href="raf_homepage.html"><i class="ti ti-shopping-bag"></i>
+          <span data-ar="متابعة التسوق" data-en="Continue Shopping">متابعة التسوق</span></a>
+        <button class="pend-ghost" onclick="cancelOrder()"><i class="ti ti-x"></i> <span data-ar="إلغاء الطلب" data-en="Cancel order">إلغاء الطلب</span></button>
+      </div>
+      <div class="pend-note" data-ar="سنبلغك عندما يقبل المتجر طلبك أو يعتذر عنه."
+           data-en="We will let you know when the store accepts or declines your order.">سنبلغك عندما يقبل المتجر طلبك أو يعتذر عنه.</div>
+    </div>
+
     <!-- ACCEPTED -->
     <div class="pend-state" id="stOk">
       <div class="st-ic ok"><i class="ti ti-circle-check"></i></div>
-      <h1 data-ar="قبل المتجر طلبك" data-en="Your order was accepted">قبل المتجر طلبك</h1>
+      <h1 id="okTitle" data-ar="قبل المتجر طلبك" data-en="Your order was accepted">قبل المتجر طلبك</h1>
       <p data-ar="بدأ المتجر بتجهيز طلبك. يمكنك متابعة حالته لحظة بلحظة."
          data-en="The store has started preparing your order. You can follow it in real time.">بدأ المتجر بتجهيز طلبك. يمكنك متابعة حالته لحظة بلحظة.</p>
       <div class="pend-order"><i class="ti ti-receipt"></i> <span class="ordNo">—</span></div>
+      <div class="pend-dlv" id="okWhen" hidden><i class="ti ti-calendar-time"></i> <span></span></div>
       <div class="pend-acts">
         <a class="pend-primary" id="trackLink" href="#"><i class="ti ti-map-pin"></i> <span data-ar="تتبّع الطلب" data-en="Track order">تتبّع الطلب</span></a>
       </div>
@@ -190,6 +214,7 @@
 <script src="raf_data.js"></script>
 <script src="raf_order_snapshot.js"></script>
 <script src="raf_store_ops.js"></script>
+<script src="raf_store_schedule.js"></script>
 <script src="raf_catalog.js"></script>
 <script src="raf_inventory.js"></script>
 <script src="raf_rules.js"></script>
@@ -223,7 +248,7 @@
     var r=root(), en=r.lang==='en';
     r.lang=en?'ar':'en'; r.dir=en?'rtl':'ltr';
     try{ localStorage.setItem('raf_lang', r.lang); }catch(e){}
-    applyLang(); paint();
+    applyLang(); renderCommit(); paint();
   };
 
   var ORDER_ID = new URLSearchParams(location.search).get('id') || '';
@@ -234,8 +259,17 @@
     var t=document.getElementById('trackLink');
     if(t) t.href='raf_tracking.html?id='+encodeURIComponent(ORDER_ID)+'&new=1';
   }
+  /* the delivery commitment made at checkout — read from the snapshot and
+     worded by RAFStoreSchedule, never re-derived from today's schedule */
+  function renderCommit(){
+    var el=document.getElementById('dlvLine'); if(!el) return;
+    var snap = window.RAFOrderSnapshot ? RAFOrderSnapshot.of(ORDER_ID) : null;
+    var c = (snap && window.RAFStoreSchedule) ? RAFStoreSchedule.formatCommitment(snap, isEn()?'en':'ar') : null;
+    el.hidden = !c;
+    el.querySelector('span').textContent = c || '';
+  }
   function show(id){
-    ['stWait','stOk','stFail','stReject'].forEach(function(k){
+    ['stWait','stLater','stOk','stFail','stReject'].forEach(function(k){
       document.getElementById(k).classList.toggle('show', k===id);
     });
   }
@@ -331,11 +365,38 @@
     }
   }
 
+  /* ---- a next-opening or scheduled order: no countdown, its own copy ---- */
+  function isLater(s){ return !!(s && (s.timing === 'next_opening' || s.timing === 'scheduled')); }
+  function commitText(){
+    var snap = window.RAFOrderSnapshot ? RAFOrderSnapshot.of(ORDER_ID) : null;
+    return (snap && window.RAFStoreSchedule) ? RAFStoreSchedule.formatCommitment(snap, isEn()?'en':'ar') : null;
+  }
+  function paintLater(s){
+    var sch = s.timing === 'scheduled';
+    document.getElementById('ltTitle').textContent = sch
+      ? T('طلب مجدول','Scheduled order')
+      : T('سيتم استلام الطلب عند فتح المتجر','Your order will be received when the store opens');
+    document.getElementById('ltSub').textContent = sch
+      ? T('سيراجع المتجر طلبك عند بدء موعد التوصيل الذي اخترته.','The store will review your order when your chosen delivery time begins.')
+      : T('سيبدأ المتجر معالجة طلبك عند فتحه — لا يلزم الانتظار هنا.','The store will handle your order when it opens — no need to wait here.');
+    var w=document.getElementById('ltWhen'), txt=commitText();
+    w.hidden = !txt; w.querySelector('span').textContent = txt || '';
+  }
+  /* accepted: the approved wording for next-opening / scheduled orders, and a
+     scheduled order keeps showing its delivery commitment */
+  function paintAccepted(s){
+    var w=document.getElementById('okWhen');
+    if(!isLater(s)){ w.hidden = true; return; }
+    document.getElementById('okTitle').textContent = T('تم قبول طلبك','Your order has been accepted.');
+    var txt = s.timing === 'scheduled' ? commitText() : null;
+    w.hidden = !txt; w.querySelector('span').textContent = txt || '';
+  }
+
   /* ---- render whatever the engine currently says ---- */
   function paint(){
     var s = E.get(ORDER_ID);
     if(!s) return;
-    if(s.done === E.DECISION.ACCEPTED){ show('stOk'); announce('accepted'); return; }
+    if(s.done === E.DECISION.ACCEPTED){ paintAccepted(s); show('stOk'); announce('accepted'); return; }
     if(s.done === E.DECISION.REJECTED){
       renderReject();
       show('stReject'); announce('rejected'); return;
@@ -346,6 +407,9 @@
       show('stFail'); return;
     }
     if(s.done){ show('stFail'); return; }              /* timeout keeps its page copy */
+
+    /* no acceptance deadline — the order waits for its time, not a countdown */
+    if(!E.hasDeadline(ORDER_ID)){ paintLater(s); show('stLater'); return; }
 
     show('stWait');
     var c=document.getElementById('clock');
@@ -360,6 +424,7 @@
     applyLang(); setOrderNo();
 
     if(!ORDER_ID){ location.replace('raf_orders.html'); return; }
+    renderCommit();
 
     E.start(ORDER_ID);        /* idempotent: an open window is never restarted */
     paint();

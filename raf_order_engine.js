@@ -73,6 +73,28 @@
     var m = readAll(); delete m[orderId]; writeAll(m);
   }
 
+  /* ---------- who waits for what ----------
+     The 5-minute window is the INSTANT DELIVERY rule only. An order placed
+     for the next opening or for a scheduled window has NO acceptance
+     deadline (deadline:null) and becomes actionable at the moment it
+     committed to — read from its frozen snapshot, never re-derived from the
+     store's current schedule. An order with no delivery timing recorded (a
+     store without a schedule) keeps the existing 5-minute behaviour. */
+  function acceptancePlan(orderId){
+    var now = Date.now(), sn = null;
+    try { sn = global.RAFOrderSnapshot ? RAFOrderSnapshot.of(orderId) : null; } catch (e) { sn = null; }
+    var d = sn && sn.delivery, t = d && d.timing;
+    function at(date, time){
+      return (global.RAFStoreOps && RAFStoreOps.kuwaitWallMs) ? RAFStoreOps.kuwaitWallMs(date, time) : null;
+    }
+    if (t === 'next_opening')
+      return { timing:t, deadline:null,
+               actionableAt:(d.receiveAt && d.receiveAt.date) ? at(d.receiveAt.date, d.receiveAt.time) : null };
+    if (t === 'scheduled' && sn.scheduled && sn.scheduled.date)
+      return { timing:t, deadline:null, actionableAt:at(sn.scheduled.date, sn.scheduled.from) };
+    return { timing:t || null, deadline:now + WINDOW_MS, actionableAt:null };
+  }
+
   /* ---------- opening the window ----------
      Snapshots what was ordered so a cancellation can put the stock back.
      Idempotent: an existing window is never restarted. */
@@ -87,7 +109,9 @@
         if (it.id) items[it.id] = (items[it.id] || 0) + (it.qty || 1);
       });
     } catch (e) {}
-    var s = { id:orderId, deadline:Date.now() + WINDOW_MS, items:items, done:null, at:Date.now() };
+    var plan = acceptancePlan(orderId);
+    var s = { id:orderId, deadline:plan.deadline, items:items, done:null, at:Date.now(),
+              timing:plan.timing, actionableAt:plan.actionableAt };
     save(s);
     emit(orderId, 'started');
     return s;
@@ -96,16 +120,25 @@
   /* ---------- countdown ---------- */
   function msLeft(orderId){
     var s = get(orderId);
-    if (!s || s.done) return 0;
+    if (!s || s.done || s.deadline == null) return 0;
     return Math.max(0, s.deadline - Date.now());
   }
-  function isPending(s){ return !!(s && !s.done && s.deadline > Date.now()); }
-  function isExpired(s){ return !!(s && !s.done && s.deadline <= Date.now()); }
+  /* deadline:null means "no acceptance deadline" (next-opening / scheduled):
+     still awaiting a decision, and never expiring on its own */
+  function isPending(s){ return !!(s && !s.done && (s.deadline == null || s.deadline > Date.now())); }
+  function isExpired(s){ return !!(s && !s.done && s.deadline != null && s.deadline <= Date.now()); }
+  function hasDeadline(orderId){ var s = get(orderId); return !!(s && s.deadline != null); }
+  /* when a not-yet-actionable order becomes actionable (epoch ms), else 0 */
+  function waitOf(s){ return (s && !s.done && s.actionableAt && Date.now() < s.actionableAt) ? s.actionableAt : 0; }
+  function waitingUntil(orderId){ return waitOf(get(orderId)); }
   /* every order still awaiting a decision, soonest deadline first */
   function pending(){
     var m = readAll(), out = [];
     Object.keys(m).forEach(function (k) { if (isPending(m[k])) out.push(m[k]); });
-    return out.sort(function (a, b) { return a.deadline - b.deadline; });
+    return out.sort(function (a, b) {
+      var A = a.deadline == null ? Infinity : a.deadline, B = b.deadline == null ? Infinity : b.deadline;
+      return A === B ? 0 : (A < B ? -1 : 1);
+    });
   }
   /* formatted m:ss, as the pending screen has always shown it */
   function clock(orderId){
@@ -117,6 +150,7 @@
   function progress(orderId){
     var s = get(orderId);
     if (!s) return 1;
+    if (s.deadline == null) return 0;          /* no countdown to show */
     return 1 - (msLeft(orderId) / WINDOW_MS);
   }
 
@@ -127,6 +161,9 @@
   function decide(orderId, decision, why, context){
     var s = get(orderId);
     if (!s || s.done) return false;
+    /* a next-opening / scheduled order cannot be accepted or rejected before
+       its time — whichever path asks (merchant, cross-tab signal, admin) */
+    if ((decision === DECISION.ACCEPTED || decision === DECISION.REJECTED) && waitOf(s)) return false;
     s.done = decision; s.decidedAt = Date.now();
     /* the rejection context becomes part of the committed record here, once,
        guarded by the same `s.done` gate that makes the decision idempotent */
@@ -135,9 +172,7 @@
 
     if (decision === DECISION.ACCEPTED) {
       setOrderStatus(orderId, STATUS.PROGRESS);
-      notify(orderId,
-        T('قبل المتجر طلبك ' + orderId, 'Store accepted order ' + orderId),
-        'raf_tracking.html?id=' + encodeURIComponent(orderId));
+      notify(orderId, acceptedText(orderId, s), 'raf_tracking.html?id=' + encodeURIComponent(orderId));
     } else {
       /* the acceptance window closing on its own is a system event, never a
          merchant one */
@@ -180,16 +215,17 @@
     if (global.RAFRules) { try { RAFRules.Reserve.release(); } catch (e) {} }
     /* the refund wording states the expected processing period, never a
        guaranteed settlement date from the card provider */
+    /* same wording as before, now kept in both languages */
     var msg;
     if (rejection) {
       var ct = customerRejectionText(rejection);
-      msg = T(ct.ar + ' ' + REFUND_DAYS_TEXT.ar, ct.en + ' ' + REFUND_DAYS_TEXT.en);
+      msg = { ar:ct.ar + ' ' + REFUND_DAYS_TEXT.ar, en:ct.en + ' ' + REFUND_DAYS_TEXT.en };
     } else if (why === 'timeout') {
-      msg = T('تم إلغاء الطلب ' + orderId + ' تلقائياً وإعادة المبلغ. ' + REFUND_DAYS_TEXT.ar,
-              'Order ' + orderId + ' was auto-cancelled and refunded. ' + REFUND_DAYS_TEXT.en);
+      msg = { ar:'تم إلغاء الطلب ' + orderId + ' تلقائياً وإعادة المبلغ. ' + REFUND_DAYS_TEXT.ar,
+              en:'Order ' + orderId + ' was auto-cancelled and refunded. ' + REFUND_DAYS_TEXT.en };
     } else {
-      msg = T('تم إلغاء الطلب ' + orderId + ' وإعادة المبلغ. ' + REFUND_DAYS_TEXT.ar,
-              'Order ' + orderId + ' was cancelled and refunded. ' + REFUND_DAYS_TEXT.en);
+      msg = { ar:'تم إلغاء الطلب ' + orderId + ' وإعادة المبلغ. ' + REFUND_DAYS_TEXT.ar,
+              en:'Order ' + orderId + ' was cancelled and refunded. ' + REFUND_DAYS_TEXT.en };
     }
     notify(orderId, msg, 'raf_order_details.html?id=' + encodeURIComponent(orderId));
   }
@@ -221,13 +257,36 @@
     return { ok:false, code:'NO_INVENTORY' };
   }
 
-  /* surface the outcome in the notification centre */
+  /* surface the outcome in the notification centre. The recipient is the
+     customer on the order's own snapshot — never an id a caller supplies. */
   function notify(orderId, text, href){
     try {
+      var owner = null;
+      try { var sn = global.RAFOrderSnapshot ? RAFOrderSnapshot.of(orderId) : null;
+            owner = (sn && sn.customer && sn.customer.id) || null; } catch (e2) { owner = null; }
+      var t = (text && typeof text === 'object') ? { ar:String(text.ar), en:String(text.en) } : { ar:text, en:text };
       var a = JSON.parse(localStorage.getItem(LS_NOTIF) || '[]');
-      a.unshift({ id:'ord-' + orderId + '-' + Date.now(), t:{ ar:text, en:text }, href:href, ts:Date.now() });
+      a.unshift({ id:'ord-' + orderId + '-' + Date.now(), orderId:orderId, customerId:owner,
+                  t:t, href:href, ts:Date.now() });
       localStorage.setItem(LS_NOTIF, JSON.stringify(a.slice(0, 20)));
     } catch (e) {}
+  }
+  /* the customer's acceptance message. Instant keeps its existing wording; a
+     next-opening or scheduled order is told plainly, and a scheduled one is
+     reminded of the delivery commitment frozen in its snapshot */
+  function acceptedText(orderId, s){
+    if (!s || (s.timing !== 'next_opening' && s.timing !== 'scheduled'))
+      return { ar:'قبل المتجر طلبك ' + orderId, en:'Store accepted order ' + orderId };
+    var ar = 'تم قبول طلبك ' + orderId + '.', en = 'Your order ' + orderId + ' has been accepted.';
+    if (s.timing === 'scheduled' && global.RAFStoreSchedule && global.RAFOrderSnapshot) {
+      try {
+        var sn = RAFOrderSnapshot.of(orderId);
+        var cAr = RAFStoreSchedule.formatCommitment(sn, 'ar'), cEn = RAFStoreSchedule.formatCommitment(sn, 'en');
+        if (cAr) ar += ' ' + cAr;
+        if (cEn) en += ' ' + cEn;
+      } catch (e) {}
+    }
+    return { ar:ar, en:en };
   }
 
   /* ══════════════════════════════════════════════════════════════
@@ -399,10 +458,17 @@
     if (undoOf(orderId))             return { ok:false, reason:'in_undo_window' };
     return { ok:true };
   }
+  /* a next-opening / scheduled order before its time */
+  var NOT_YET = { ar:'لم يحن وقت معالجة هذا الطلب بعد.', en:'This order cannot be processed yet.' };
+  function notYet(orderId){
+    return { ok:false, reason:'not_yet_actionable', code:'NOT_YET_ACTIONABLE',
+             actionableAt:waitingUntil(orderId), message:T(NOT_YET.ar, NOT_YET.en) };
+  }
   function merchantAccept(orderId, actor){
     var auth = processGuard(orderId, actor); if (!auth.ok) return auth;
     var g = actionable(orderId, actor); if (!g.ok) return g;
     if (mstate(orderId) !== MSTATE.PENDING) return { ok:false, reason:'not_pending' };
+    if (waitingUntil(orderId)) return notYet(orderId);
     var prev = mrecord(orderId);
     setMState(orderId, MSTATE.PREPARING, actor);
     appendTimeline(orderId, 'm-accept', 'قبل المتجر الطلب', 'Store accepted the order');
@@ -581,6 +647,7 @@
     }
     if (!g.ok) return g;
     if (mstate(orderId) !== MSTATE.PENDING) return { ok:false, reason:'not_pending' };
+    if (waitingUntil(orderId)) return notYet(orderId);
     var v = validateRejection(orderId, context, actor); if (!v.ok) return v;
     var ctx = v.context;
     var prev = mrecord(orderId);
@@ -630,6 +697,27 @@
   function merchantDone(orderId){
     var s = mstate(orderId);
     return s === MSTATE.READY || s === MSTATE.WAITING_DRIVER || s === 'rejected';
+  }
+
+  /* ---------- merchant queue group ----------
+     The one placement of an order (a RAFOrderSnapshot record) into the
+     merchant's queue groups, read by the Orders page and the Dashboard so
+     the two can never disagree. Every order lands in exactly one group:
+     the first match wins. A scheduled order waits under Scheduled until its
+     window begins; from then on it is an ordinary order awaiting a decision. */
+  function queueOf(o){
+    if (!o || !o.id) return null;
+    var OPS = global.RAFStoreOps;
+    if (OPS && OPS.isScheduled(o) && (!get(o.id) || waitingUntil(o.id))) return 'scheduled';
+    var m = mstate(o.id);
+    if (m === MSTATE.WAITING_DRIVER) return 'driver';
+    if (m === MSTATE.READY)          return 'ready';
+    if (m === MSTATE.PREPARING || m === MSTATE.ACCEPTED) return 'preparing';
+    if (m === 'rejected')            return 'cancelled';
+    if (m === MSTATE.PENDING)        return 'pending';
+    if (o.status === 'cancelled') return 'cancelled';
+    if (o.status === 'delivered') return 'done';
+    return 'preparing';
   }
 
   /* ---------- driver recovery ----------
@@ -836,7 +924,7 @@
     /* merchant processing */
     MSTATE: MSTATE, ACTION: ACTION, UNDO_MS: UNDO_MS,
     LOCK_HEARTBEAT_MS: LOCK_HEARTBEAT_MS, LOCK_STALE_MS: LOCK_STALE_MS,
-    mstate: mstate, mrecord: mrecord, merchantDone: merchantDone,
+    mstate: mstate, mrecord: mrecord, merchantDone: merchantDone, queueOf: queueOf,
     merchantAccept: merchantAccept, merchantReject: merchantReject, merchantReady: merchantReady,
     undo: undo, undoOf: undoOf, undoMsLeft: undoMsLeft, commitUndo: commitUndo, sweepUndo: sweepUndo,
     driverPickedUp: driverPickedUp, driverAssigned: driverAssigned,
@@ -854,6 +942,7 @@
     /* window */
     start: start, get: get, clear: clear, pending: pending,
     isPending: isPending, isExpired: isExpired,
+    acceptancePlan: acceptancePlan, hasDeadline: hasDeadline, waitingUntil: waitingUntil,
     /* countdown */
     msLeft: msLeft, clock: clock, progress: progress,
     /* decisions */

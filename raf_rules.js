@@ -398,7 +398,20 @@
     return new Promise(function (resolve) {
       var check = finalValidate();
       if (!check.ok) { placing = false; return resolve({ ok:false, errors:check.errors, sync:check.sync }); }
-      var order = RAFShop.Orders.create(opts || {});
+      /* the delivery choice is re-proved here for the cart's OWN store —
+         Instant availability, the next opening and any scheduled window come
+         from RAFStoreOps, and whatever the page sent for them is replaced */
+      opts = opts || {};
+      if (global.RAFStoreOps && RAFStoreOps.checkDeliveryChoice && global.RAFCatalog) {
+        var l0 = RAFShop.Cart.read()[0], p0 = l0 ? RAFCatalog.get(l0.id) : null;
+        var dc = RAFStoreOps.checkDeliveryChoice(p0 && p0.slug, { timing:opts.deliveryTiming,
+                   date:opts.scheduledDate, start:opts.scheduledStart, end:opts.scheduledEnd });
+        if (!dc.ok) { placing = false; return resolve({ ok:false, delivery:true, errors:[{ code:dc.code, message:dc.message }] }); }
+        opts = Object.assign({}, opts, { deliveryTiming:dc.timing, scheduled:dc.scheduled, receiveAt:dc.receiveAt });
+      } else {
+        opts = Object.assign({}, opts, { deliveryTiming:null, scheduled:null, receiveAt:null });
+      }
+      var order = RAFShop.Orders.create(opts);
       /* an incomplete commercial snapshot must never commit */
       if (order && order.error === 'INCOMPLETE_SNAPSHOT') { placing = false; return resolve({ ok:false,
         errors:[{ code:'INCOMPLETE_SNAPSHOT', fields:order.missing,

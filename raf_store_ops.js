@@ -243,33 +243,66 @@
   }
   var DAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
   var HHMM = /^([01]?\d|2[0-3]):([0-5]\d)$/;
+  /* Business time is Asia/Kuwait (UTC+3) — the same wall clock RAFMarketing
+     uses. Today's weekday and today's closing time are read on it, never on
+     the viewer's own timezone. */
+  var TZ_OFFSET_MIN = 3 * 60;
+  function kuwaitNow(){
+    var d = new Date();
+    return new Date(d.getTime() + (d.getTimezoneOffset() + TZ_OFFSET_MIN) * 60000);
+  }
+  /* a Kuwait wall-clock date + 'HH:MM' → the real instant (epoch ms), or null */
+  function kuwaitWallMs(dateISO, hhmm){
+    var d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(typeof dateISO === 'string' ? dateISO : '');
+    var t = HHMM.exec(typeof hhmm === 'string' ? hhmm : '');
+    if (!d || !t) return null;
+    return Date.UTC(+d[1], +d[2] - 1, +d[3], +t[1], +t[2]) - TZ_OFFSET_MIN * 60000;
+  }
 
   /* The structured schedule, or null when the store has none recorded.
-     A day-keyed `hours` object is accepted too, so a store may carry the
-     schema under either name; the free-text {ar,en} hours is never read. */
+     `schedule` on the store record is the ONLY source of opening hours; the
+     free-text `hours` copy is never read. RAFStoreSchedule validates every
+     write — this reader only interprets what is stored. A day is
+     { closed:true }, { periods:[{open,close}, …] } (one or two periods), or
+     the earlier single-period { open, close }. */
+  function minutesOf(t){
+    if (typeof t !== 'string' || !HHMM.test(t)) return null;
+    var p = t.split(':'); return parseInt(p[0], 10) * 60 + parseInt(p[1], 10);
+  }
+  /* a day's periods in time order: [] for a closed day, null when unreadable */
+  function periodsOf(e){
+    if (!e || typeof e !== 'object') return null;
+    if (e.closed === true) return [];
+    var list = Array.isArray(e.periods) ? e.periods
+             : (typeof e.close === 'string' ? [{ open:e.open, close:e.close }] : null);
+    if (!list || !list.length) return null;
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+      var o = minutesOf(list[i] && list[i].open), c = minutesOf(list[i] && list[i].close);
+      if (o === null || c === null || c <= o) return null;
+      out.push({ open:list[i].open, close:list[i].close, o:o, c:c });
+    }
+    return out.sort(function (a, b) { return a.o - b.o; });
+  }
   function scheduleOf(slug){
     var s = storeOf(slug);
     if (!s) return null;
     var cand = s.schedule || null;
-    if (!cand && s.hours && typeof s.hours === 'object' && !s.hours.ar && !s.hours.en) cand = s.hours;
     if (!cand || typeof cand !== 'object') return null;
-    /* only accept a shape that actually validates */
-    var ok = DAYS.some(function (d) {
-      var e = cand[d];
-      return e && (e.closed === true || (typeof e.close === 'string' && HHMM.test(e.close)));
-    });
+    /* only accept a shape that actually reads */
+    var ok = DAYS.some(function (d) { return periodsOf(cand[d]) !== null; });
     return ok ? cand : null;
   }
   function dayEntry(slug, date){
     var sch = scheduleOf(slug);
     if (!sch) return null;
-    return sch[DAYS[(date || new Date()).getDay()]] || null;
+    return sch[DAYS[(date || kuwaitNow()).getDay()]] || null;
   }
-  /* today's closing time as 'HH:MM', or null when unavailable / closed today */
+  /* today's final closing time as 'HH:MM' — the end of the day's last
+     period — or null when unavailable / closed today */
   function closingTimeOf(slug){
-    var e = dayEntry(slug);
-    if (!e || e.closed === true) return null;
-    return (typeof e.close === 'string' && HHMM.test(e.close)) ? e.close : null;
+    var p = periodsOf(dayEntry(slug));
+    return (p && p.length) ? p[p.length - 1].close : null;
   }
   function isClosedDay(slug){
     var e = dayEntry(slug);
@@ -279,7 +312,8 @@
   function msUntilClose(slug){
     var t = closingTimeOf(slug);
     if (!t) return null;
-    var parts = t.split(':'), now = new Date();
+    /* both sides are Kuwait wall-clock, so the difference is real time */
+    var parts = t.split(':'), now = kuwaitNow();
     var close = new Date(now.getFullYear(), now.getMonth(), now.getDate(),
                          parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
     if (close <= now) return 0;                    /* today's window has passed */
@@ -289,9 +323,9 @@
     return T('سيتم تجهيز وتوصيل طلبك في يوم العمل التالي.',
              'Your order will be prepared and delivered on the next business day.');
   };
-  /* Can a NEW order still be fulfilled today?
-     known:false means the store has no structured schedule recorded — a
-     genuine "closing time unavailable" state, never a guessed time. */
+  /* Can a NEW order still be fulfilled today? Measured against the day's
+     final closing time, as before. known:false means the store has no
+     structured schedule recorded — never a guessed time. */
   function cutoff(slug){
     if (!scheduleOf(slug)) {
       return { known:false, reason:'closing_time_unavailable',
@@ -314,6 +348,135 @@
       sameDay: left > CUTOFF_MS,
       message: left > CUTOFF_MS ? null : NEXT_DAY_MSG()
     };
+  }
+
+  /* Where the store stands against today's periods, in Kuwait time.
+     DESCRIPTIVE ONLY: it does not decide whether an order is accepted — that
+     stays acceptsNewOrders() and cutoff(), unchanged.
+       closed_today · before_open · open (period 1 or 2) · between_periods ·
+       after_close · unconfigured · unknown
+     `at` (optional) is a Kuwait wall-clock Date, as kuwaitNow() returns. */
+  function hoursState(slug, at){
+    if (!scheduleOf(slug)) return { configured:false, state:'unconfigured' };
+    var now = at instanceof Date ? at : kuwaitNow(), e = dayEntry(slug, now);
+    if (!e) return { configured:true, state:'unknown' };
+    if (e.closed === true) return { configured:true, state:'closed_today' };
+    var p = periodsOf(e);
+    if (!p || !p.length) return { configured:true, state:'unknown' };
+    var m = now.getHours() * 60 + now.getMinutes(), n = p.length;
+    if (m < p[0].o) return { configured:true, state:'before_open', period:1, periods:n, opensAt:p[0].open, closesAt:p[0].close };
+    for (var i = 0; i < n; i++) {
+      if (m >= p[i].o && m < p[i].c)
+        return { configured:true, state:'open', period:i + 1, periods:n, opensAt:p[i].open, closesAt:p[i].close };
+      if (i + 1 < n && m >= p[i].c && m < p[i + 1].o)
+        return { configured:true, state:'between_periods', period:i + 2, periods:n,
+                 closedAt:p[i].close, opensAt:p[i + 1].open, closesAt:p[i + 1].close };
+    }
+    return { configured:true, state:'after_close', periods:n, closesAt:p[n - 1].close };
+  }
+
+  /* ---------- delivery availability ----------
+     Three separate things, never collapsed into one flag:
+       manual   — the merchant's Open / Closed / Busy / Suspended state
+       schedule — where today stands against the structured periods
+       delivery — Instant Delivery now, Scheduled Delivery, next opening
+     The schedule never changes the manual state, and being outside a
+     period is not "closed". Schedule arithmetic stays in RAFStoreSchedule;
+     the Kuwait clock and availability stay here. */
+  function two(n){ return (n < 10 ? '0' : '') + n; }
+  /* RAF has not defined a delivery-slot policy (slot length, days ahead).
+     This is the single plug-in point for it; until one is configured,
+     Scheduled Delivery reports itself unavailable instead of guessing. */
+  var SLOT_POLICY = null;
+  function configureSlotPolicy(policy){
+    if (policy === null) { SLOT_POLICY = null; return { ok:true }; }
+    if (!global.RAFStoreSchedule || !RAFStoreSchedule.validSlotPolicy(policy)) return { ok:false, reason:'invalid_policy' };
+    SLOT_POLICY = { slotMinutes:Number(policy.slotMinutes), horizonDays:Number(policy.horizonDays) };
+    return { ok:true };
+  }
+  function slotPolicy(){ return SLOT_POLICY ? { slotMinutes:SLOT_POLICY.slotMinutes, horizonDays:SLOT_POLICY.horizonDays } : null; }
+
+  /* Instant Delivery stops CUTOFF_MS before the END OF THE DAY'S FINAL
+     PERIOD — never the end of an earlier period. 'HH:MM' or null. */
+  function instantCutoffOf(slug, at){
+    var now = at instanceof Date ? at : kuwaitNow();
+    var p = periodsOf(dayEntry(slug, now));
+    if (!p || !p.length) return null;
+    var c = Math.max(0, p[p.length - 1].c - CUTOFF_MS / 60000);
+    return two(Math.floor(c / 60)) + ':' + two(c % 60);
+  }
+
+  /* `at` (optional) is a Kuwait wall-clock Date, as kuwaitNow() returns */
+  function deliveryAvailability(slug, at){
+    var now = at instanceof Date ? at : kuwaitNow();
+    var s = storeOf(slug), hs = hoursState(slug, now);
+    var out = {
+      configured: !!hs.configured,
+      manual:   { status:(s && s.status) || null, busy:isBusy(slug) },
+      schedule: hs,
+      instant:  { available:null, reason:null, cutoffAt:null },
+      nextOpening: null,
+      scheduled: { available:false, reason:null, dates:[] }
+    };
+    /* no schedule → nothing is invented: no cutoff, no windows, no opening */
+    if (!hs.configured) { out.instant.reason = 'unconfigured'; out.scheduled.reason = 'unconfigured'; return out; }
+
+    var cut = instantCutoffOf(slug, now), m = now.getHours() * 60 + now.getMinutes();
+    out.instant.cutoffAt = cut;
+    if (hs.state === 'open' && cut !== null && m < minutesOf(cut)) out.instant.available = true;
+    else {
+      out.instant.available = false;
+      out.instant.reason = (hs.state === 'open' || hs.state === 'after_close') ? 'cutoff_passed'
+                         : (hs.state === 'between_periods' || hs.state === 'before_open') ? 'outside_period'
+                         : hs.state === 'closed_today' ? 'closed_today' : 'unknown';
+    }
+    var lib = global.RAFStoreSchedule, sch = s && s.schedule;
+    if (!lib || !sch) { out.scheduled.reason = 'unavailable'; return out; }
+    out.nextOpening = lib.nextOpening(sch, now);
+    var pol = slotPolicy();
+    if (!pol) out.scheduled.reason = 'no_slot_policy';
+    else {
+      out.scheduled.dates = lib.deliveryDates(sch, pol, now) || [];
+      out.scheduled.available = out.scheduled.dates.length > 0;
+      out.scheduled.reason = out.scheduled.available ? null : 'no_windows';
+    }
+    return out;
+  }
+
+  var DELIVERY_ERRORS = {
+    DELIVERY_OPTION_REQUIRED: { ar:'اختر طريقة التوصيل.', en:'Choose a delivery option.' },
+    DELIVERY_CHANGED:         { ar:'تغيّرت خيارات التوصيل المتاحة. راجع اختيارك ثم أكّد الطلب.',
+                                en:'The available delivery options have changed. Review your choice and confirm again.' },
+    SCHEDULED_UNAVAILABLE:    { ar:'التوصيل المجدول غير متاح حالياً.', en:'Scheduled delivery is not available right now.' },
+    SCHEDULED_INVALID:        { ar:'موعد التوصيل المختار غير متاح. اختر موعداً آخر.', en:'The selected delivery time is not available. Choose another time.' }
+  };
+  function derr(code){ var e = DELIVERY_ERRORS[code]; return { ok:false, code:code, message:T(e.ar, e.en) }; }
+  /* The one authoritative check of a delivery choice at order placement,
+     for the cart's own store. Returns exactly what the order records:
+       { timing:'instant' | 'scheduled' | 'next_opening' | null, scheduled, receiveAt }
+     Nothing the page computed is trusted. */
+  function checkDeliveryChoice(slug, choice, at){
+    choice = choice || {};
+    var now = at instanceof Date ? at : kuwaitNow();
+    var av = deliveryAvailability(slug, now), t = choice.timing || null;
+    if (!av.configured) {
+      if (t && t !== 'instant') return derr('SCHEDULED_UNAVAILABLE');
+      return { ok:true, timing:null, scheduled:null, receiveAt:null };      /* unchanged behaviour */
+    }
+    if (t === 'instant')
+      return av.instant.available ? { ok:true, timing:'instant', scheduled:null, receiveAt:null } : derr('DELIVERY_CHANGED');
+    if (t === 'next_opening') {
+      if (av.instant.available) return derr('DELIVERY_CHANGED');
+      var n = av.nextOpening;
+      return { ok:true, timing:'next_opening', scheduled:null, receiveAt:n ? { date:n.date, time:n.time } : null };
+    }
+    if (t === 'scheduled') {
+      if (!av.scheduled.available) return derr('SCHEDULED_UNAVAILABLE');
+      if (!RAFStoreSchedule.isValidWindow(storeOf(slug).schedule, choice.date, choice.start, choice.end, slotPolicy(), now))
+        return derr('SCHEDULED_INVALID');
+      return { ok:true, timing:'scheduled', scheduled:scheduleFor(choice.date, choice.start, choice.end), receiveAt:null };
+    }
+    return derr('DELIVERY_OPTION_REQUIRED');
   }
 
   /* ---------- can this store take a new order right now? ----------
@@ -385,8 +548,12 @@
     /* gates */
     acceptsNewOrders: acceptsNewOrders, cutoff: cutoff, closingTimeOf: closingTimeOf,
     scheduleOf: scheduleOf, isClosedDay: isClosedDay, DAYS: DAYS,
+    hoursState: hoursState, kuwaitNow: kuwaitNow, kuwaitWallMs: kuwaitWallMs,
     /* scheduled */
     scheduleFor: scheduleFor, isScheduled: isScheduled, scheduledAt: scheduledAt,
+    /* delivery availability */
+    instantCutoffOf: instantCutoffOf, deliveryAvailability: deliveryAvailability,
+    checkDeliveryChoice: checkDeliveryChoice, configureSlotPolicy: configureSlotPolicy, slotPolicy: slotPolicy,
     /* misc */
     offline: offline, watch: watch
   };

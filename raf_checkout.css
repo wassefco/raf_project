@@ -181,6 +181,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);display:flex
 .pay-ic{width:42px;height:30px;flex-shrink:0;border-radius:7px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text2);}
 .pay-n{font-size:14px;font-weight:700;color:var(--ink);}
 .pay-s{font-size:12px;color:var(--text3);margin-top:2px;}
+/* delivery time — reuses the payment rows and the tip chips */
+.dlv-opt{width:100%;text-align:start;background:var(--card);font:inherit;color:inherit;}
+.dlv-opt[disabled]{opacity:.55;cursor:not-allowed;}
+.dlv-opt[disabled]:hover{border-color:var(--border);}
+.dlv-why{margin-bottom:12px;}
+.dlv-l{font-size:12.5px;font-weight:700;color:var(--text2);margin:14px 0 8px;}
+.tip.dlv-chip{flex:0 1 auto;min-width:0;padding:0 14px;}
+.dlv-chip bdi{white-space:nowrap;}
 
 /* ---------- cross-sell ---------- */
 .xs-track{display:flex;gap:12px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none;}

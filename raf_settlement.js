@@ -341,7 +341,9 @@
 
   /* Every month of the store's activity that has ended is closed, oldest
      first, exactly once. Idempotent: a closed month is never recomputed. */
-  function ensureClosed(slug){
+  /* `preview` — compute the same closures in memory, persist nothing (no
+     write, no audit, no event), for read-only surfaces */
+  function ensureClosed(slug, preview){
     var cur = currentPeriod();
     var econ = storeEconomics(slug);
     var first = null;
@@ -365,7 +367,7 @@
       };
       closedNow.push(P);
     }
-    if (closedNow.length) {
+    if (closedNow.length && !preview) {
       /* re-read just before writing: only this store's missing months are added */
       var all = readSettlements();
       var stored = all[slug] || {};
@@ -461,13 +463,23 @@
     var ctx = context(); if (!ctx.ok) return ctx;
     return { ok:true, available:false, reason:'PAYOUT_SYSTEM_NOT_CONFIGURED', records:[] };
   }
+  /* The open month exactly as statement(currentPeriod()) reports it — same
+     computation, same figures — but without closing any earlier month, so
+     a read-only surface (the Dashboard) never creates a settlement record. */
+  function currentPreview(opts){
+    if (scopeFieldSupplied(opts)) return fail('FIELD_NOT_ACCEPTED');
+    var ctx = context(); if (!ctx.ok) return ctx;
+    var st = ensureClosed(ctx.slug, true), cur = currentPeriod();
+    return Object.assign({ ok:true, preview:true, canExport:ctx.canExport },
+      shape(computePeriod(ctx.slug, cur, st.econ, st.closed), STATUS.OPEN, st.econ));
+  }
 
   global.RAFSettlement = {
     STATUS:STATUS, PAYOUT:PAYOUT, ERRORS:ERRORS,
     /* rate */
     currentRate:currentRate, rateSchedule:rateSchedule, scheduleRate:scheduleRate,
     /* periods */
-    currentPeriod:currentPeriod, periods:periods, statement:statement,
+    currentPeriod:currentPeriod, periods:periods, statement:statement, currentPreview:currentPreview,
     /* classification for reporting */
     orderEconomics:orderEconomics,
     /* payouts */
