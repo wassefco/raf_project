@@ -154,8 +154,12 @@
     try { allowed = !!(global.RAFPerm && RAFPerm.can(actor.id, 'orders.manage')); } catch (e) { allowed = false; }
     if (!allowed) return { ok:false, reason:'FORBIDDEN', code:'FORBIDDEN',
                         message:T('ليس لديك صلاحية لهذا الإجراء.','You do not have permission for this action.') };
-    if (!actor.storeSlug || actor.storeSlug !== slug)
-      return { ok:false, reason:'CROSS_STORE', code:'CROSS_STORE', actorStore:actor.storeSlug || null,
+    /* the actor's store comes from the permission authority by id — a store
+       written onto the actor object by the caller is never trusted */
+    var mine = null;
+    try { mine = (global.RAFPerm && RAFPerm.storeSlugOf(actor.id)) || null; } catch (e) { mine = null; }
+    if (!mine || mine !== slug)
+      return { ok:false, reason:'CROSS_STORE', code:'CROSS_STORE', actorStore:mine,
                targetStore:slug, message:T('هذا المتجر لا يخصك.','This store does not belong to you.') };
     return { ok:true };
   }

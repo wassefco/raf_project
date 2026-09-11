@@ -36,9 +36,14 @@
      A product belongs to a merchant only when the product's authoritative
      storeSlug equals the authenticated merchant's storeSlug. Nothing else
      is consulted — not names, not emails, not usernames. */
+  /* by id only: RAFPerm returns a passed object as-is, so an object's own
+     storeSlug / roleId fields would otherwise be trusted */
+  function idOf(userOrId){
+    return (userOrId && typeof userOrId === 'object') ? userOrId.id : userOrId;
+  }
   function merchantSlug(userOrId){
     if (!global.RAFPerm) return null;
-    try { return RAFPerm.storeSlugOf(userOrId) || null; } catch (e) { return null; }
+    try { return RAFPerm.storeSlugOf(idOf(userOrId)) || null; } catch (e) { return null; }
   }
   function productSlug(productId){
     var S = src(); if (!S) return null;
@@ -55,7 +60,7 @@
   function can(key, userOrId){
     if (!global.RAFPerm) return false;
     try {
-      var who = userOrId;
+      var who = idOf(userOrId);
       if (!who) { var cu = RAFPerm.currentUser(); who = cu && cu.id; }
       if (!who) return false;
       return RAFPerm.can(who, key);
@@ -73,8 +78,12 @@
   function list(opts){
     opts = opts || {};
     var S = src(); if (!S) return [];
-    var slug = opts.storeSlug || merchantSlug(opts.user);
+    /* the scope is the account's own store, resolved by RAFPerm. A supplied
+       storeSlug is only a consistency check: naming another store refuses
+       the read, it is never honoured (this list includes hidden products) */
+    var slug = merchantSlug(opts.user);
     if (!slug) return [];
+    if (opts.storeSlug !== undefined && opts.storeSlug !== slug) return [];
     /* visibleOnly:false so the merchant also sees hidden / out-of-stock items */
     return S.products({ visibleOnly:false }).filter(function (p) {
       return p.store === slug && p.status !== 'deleted';

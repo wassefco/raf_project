@@ -577,8 +577,12 @@
     if (!can) return { ok:false, code:'FORBIDDEN' };
     var p = global.RAFCatalog ? RAFCatalog.get(productId) : null;
     if (!p) return { ok:false, code:'INVALID_PRODUCT' };
-    if (!actor.storeSlug || !p.slug || actor.storeSlug !== p.slug)
-      return { ok:false, code:'CROSS_STORE', actorStore:actor.storeSlug || null, productStore:p.slug || null };
+    /* the actor's store comes from the permission authority by id — a store
+       written onto the actor object by the caller is never trusted */
+    var mine = null;
+    try { mine = (global.RAFPerm && RAFPerm.storeSlugOf(actor.id)) || null; } catch (e) { mine = null; }
+    if (!mine || !p.slug || mine !== p.slug)
+      return { ok:false, code:'CROSS_STORE', actorStore:mine, productStore:p.slug || null };
     return { ok:true, product:p };
   }
   function wholeQty(n){ return typeof n === 'number' && isFinite(n) && n === Math.floor(n) && n >= 0; }
