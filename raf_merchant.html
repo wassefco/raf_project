@@ -31,6 +31,10 @@ body{background:var(--bg2);margin:0;}
 .mw-rail-b{width:50px;min-height:50px;border-radius:14px;border:0;background:transparent;color:#8E877A;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;
   font-family:inherit;font-size:9.5px;font-weight:700;transition:background .18s,color .18s;}
+/* the rail's Orders item is a <button>, so the theme's `html:not([data-ui])
+   button{min-height:40px}` rule (0,1,2) outranked the single class above and
+   rendered it below the 44px target — two classes plus the element win it back */
+.mw-rail button.mw-rail-b{min-height:50px;}
 .mw-rail-b i{font-size:21px;}
 .mw-rail-b:hover:not(:disabled){background:rgba(255,255,255,.07);color:#EDE8DC;}
 .mw-rail-b.on{background:var(--gold-soft);color:var(--gold);}
@@ -609,18 +613,8 @@ body.is-offline .mw-off{display:flex;}
        Not a designed navigation. It holds the Orders slot only so Focus Mode
        has a sidebar to hide. The real Merchant Workspace navigation is to be
        designed later — do not expand this. -->
-  <aside class="mw-rail" id="rail">
-    <a class="mw-rail-logo" href="raf_homepage.html" aria-label="RAF">رف</a>
-    <a class="mw-rail-b" href="raf_dashboard.html" style="text-decoration:none;" title="Dashboard"><i class="ti ti-layout-dashboard"></i><span data-ar="الرئيسية" data-en="Dashboard">الرئيسية</span></a>
-    <button class="mw-rail-b on" aria-current="page"><i class="ti ti-clipboard-list"></i><span data-ar="الطلبات" data-en="Orders">الطلبات</span></button>
-    <a class="mw-rail-b" href="raf_merchant_products.html" style="text-decoration:none;"><i class="ti ti-package"></i><span data-ar="المنتجات" data-en="Products">المنتجات</span></a>
-    <a class="mw-rail-b" href="raf_marketing.html" style="text-decoration:none;"><i class="ti ti-speakerphone"></i><span data-ar="التسويق" data-en="Marketing">التسويق</span></a>
-    <a class="mw-rail-b" href="raf_analytics.html" style="text-decoration:none;" title="Analytics &amp; Finance"><i class="ti ti-chart-line"></i><span data-ar="التحليلات" data-en="Analytics">التحليلات</span></a>
-    <a class="mw-rail-b" href="raf_store_management.html" style="text-decoration:none;" title="Store Management"><i class="ti ti-building-store"></i><span data-ar="المتجر" data-en="Store">المتجر</span></a>
-    <a class="mw-rail-b" href="raf_customer_experience.html" style="text-decoration:none;" title="Customer Experience"><i class="ti ti-mood-smile"></i><span data-ar="العملاء" data-en="Customers">العملاء</span></a>
-    <a class="mw-rail-b" href="raf_merchant_support.html" style="text-decoration:none;" title="Support"><i class="ti ti-lifebuoy"></i><span data-ar="الدعم" data-en="Support">الدعم</span></a>
-    <div class="mw-rail-sp"></div>
-  </aside>
+  <!-- drawn by RAFMerchantNav from the account's own saved order -->
+  <aside class="mw-rail" id="rail" data-nav="orders"></aside>
 
   <div class="mw-main">
 
@@ -822,6 +816,10 @@ body.is-offline .mw-off{display:flex;}
 <script src="raf_order_engine.js"></script>
 <script src="raf_order_changes.js"></script>
 <script src="raf_permissions.js"></script>
+<!-- read-only: who took the delivery, by name and time (RAFDriver.assignmentOf) -->
+<script src="raf_driver.js"></script>
+<script src="raf_merchant_prefs.js"></script>
+<script src="raf_merchant_nav.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════════════
    MERCHANT WORKSPACE — ORDERS
@@ -921,8 +919,17 @@ body.is-offline .mw-off{display:flex;}
       if (p && p.catch) p.catch(function(){});   /* autoplay policy — stay silent */
     } catch(e){}
   }
+  /* The merchant may silence either alert from Store Management → Settings.
+     It is a sound preference and nothing more: the notification record, the
+     badge, the queue position and the acceptance window are untouched, and a
+     missing or unreadable preference always leaves the alert audible. */
+  function soundOn(kind){
+    try { return !window.RAFMerchantPrefs || RAFMerchantPrefs.soundEnabled(kind, ME ? ME.id : null); }
+    catch(e){ return true; }
+  }
   function beep(kind){
     var key = kind === 'warn' ? 'warn' : 'new';
+    if (!soundOn(key)) return;
     try {
       primeSounds();
       var a = audio[key];
@@ -1477,6 +1484,21 @@ body.is-offline .mw-off{display:flex;}
       : '';
     return '<div class="mw-actbar">' + actionsInner(o) + focus + '</div>';
   }
+  /* who is carrying the order, read from the driver authority. The merchant
+     sees the driver's name and the timestamps only; the delivery lifecycle
+     itself stays entirely on the driver side. */
+  function driverLine(orderId){
+    if (!window.RAFDriver) return '';
+    var a; try { a = RAFDriver.assignmentOf(orderId); } catch(e){ return ''; }
+    if (!a || !a.claimed) return '';
+    var who = a.driverName ? ' — ' + esc(a.driverName) : '';
+    var when = a.deliveredAt || a.pickedUpAt || a.assignedAt;
+    var head = a.stage === 'delivered' ? T('تم تسليم الطلب للعميل','The order was delivered to the customer')
+             : a.pickedUpAt ? T('استلم السائق الطلب وهو في الطريق','The driver collected the order and is on the way')
+             : T('تم سحب الطلب بواسطة السائق','The order was taken by a driver');
+    return '<div class="mw-readonly"><i class="ti ti-truck-delivery"></i> ' + head + who
+      + (when ? '<br><span style="opacity:.75">' + esc(relTime(when)) + '</span>' : '') + '</div>';
+  }
   function actionsInner(o){
     var html = undoHTML(o);
     if (E.undoOf(o.id)) return html;                 /* the undo bar is the state */
@@ -1488,6 +1510,12 @@ body.is-offline .mw-off{display:flex;}
       var doneLbl = m === 'rejected' ? T('تم رفض هذا الطلب','This order was rejected')
                   : T('انتهت مسؤولية المتجر — الطلب بانتظار السائق',
                       'Merchant work is complete — the order is waiting for a driver');
+      /* Once a driver pulls the order the store can see that it is on its way,
+         by the driver's name and the time — never an account id, and never as
+         an action: the merchant's responsibility ended at Ready and delivery
+         is not theirs to steer. */
+      var dl = driverLine(o.id);
+      if (m !== 'rejected' && dl) return html + dl;
       return html + '<div class="mw-readonly">'+doneLbl+'</div>';
     }
     if (!mayProcess) return html + '<div class="mw-readonly">'+T('للقراءة فقط','Read only')+'</div>';

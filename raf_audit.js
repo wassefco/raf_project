@@ -93,6 +93,17 @@
                                         en:'Ready auto-completed after driver pickup' },
     'driver.delivery_start':{ tl:true,  ar:'بدأ التوصيل',                 en:'Delivery started' },
     'driver.delivered':     { tl:true,  ar:'تم التسليم',                  en:'Delivered' },
+    /* the driver handed an unclaimed-again order back to the pool, before
+       pickup. It is an ownership event on the order, so it belongs on the
+       timeline beside the assignment it reverses. */
+    'driver.returned':      { tl:true,  ar:'أعاد السائق الطلب إلى قائمة الطلبات المتاحة',
+                                        en:'Driver returned the order to the available pool' },
+    /* driver EMPLOYEE ACCOUNT administration — recorded against the account,
+       never against an order. Separate from the delivery events above. */
+    'driver.created':       { tl:false, ar:'تم إنشاء حساب سائق',          en:'Driver account created' },
+    'driver.updated':       { tl:false, ar:'تم تعديل بيانات سائق',        en:'Driver account updated' },
+    'driver.suspended':     { tl:false, ar:'تم إيقاف حساب سائق',          en:'Driver account suspended' },
+    'driver.reactivated':   { tl:false, ar:'تمت إعادة تفعيل حساب سائق',   en:'Driver account reactivated' },
     /* system */
     'system.timeout':       { tl:true,  ar:'انتهت مهلة القبول تلقائيًا',   en:'Acceptance window timed out' },
     'system.cancelled':     { tl:true,  ar:'أُلغي الطلب تلقائيًا',         en:'Order cancelled automatically' },

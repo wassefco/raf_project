@@ -693,6 +693,23 @@
       key:(mrecord(orderId) || {}).at, previousState:MSTATE.READY, newState:MSTATE.WAITING_DRIVER });
     return { ok:true };
   }
+  /* The reverse of driverAssigned, for a driver who hands an order back
+     BEFORE collecting it: the order returns to Ready, which is exactly where
+     the merchant left it, and becomes available to the pool again. The
+     merchant's work is not reopened and nothing commercial is touched —
+     only the delivery-side assignment is undone. Refused once the order has
+     been picked up, because the goods have left the store. */
+  function driverUnassigned(orderId, actor){
+    if (mstate(orderId) !== MSTATE.WAITING_DRIVER) return { ok:false, reason:'not_assigned' };
+    setMState(orderId, MSTATE.READY, actor);
+    dropTimeline(orderId, 'm-waiting-driver');
+    appendTimeline(orderId, 'm-returned', 'أعاد السائق الطلب إلى قائمة الطلبات المتاحة',
+                   'Driver returned the order to the available pool');
+    audit('driver.returned', orderId, { actor:actor, source:'driver',
+      key:Date.now(), previousState:MSTATE.WAITING_DRIVER, newState:MSTATE.READY });
+    emit(orderId, 'returned');
+    return { ok:true, state:MSTATE.READY };
+  }
   /* after Ready the merchant has no further processing actions */
   function merchantDone(orderId){
     var s = mstate(orderId);
@@ -746,6 +763,40 @@
       previousState:recovered ? MSTATE.READY : cur, newState:MSTATE.WAITING_DRIVER });
     emit(orderId, 'pickup');
     return true;
+  }
+  /* ---------- delivery completion ----------
+     The transition the delivery workflow was missing: the order leaves the
+     live queue and becomes a delivered order. It is the engine's decision, so
+     no surface writes an order status itself.
+
+     The merchant's boundary is unchanged — Ready already ended the store's
+     responsibility — so this does not reopen anything on the merchant side;
+     it closes the order the customer is waiting for. WHO may call it (the
+     driver holding the order) is proved by the driver authority before it
+     gets here, exactly as the merchant actions are guarded by theirs.
+
+     Guarded, idempotent and honest about refusing: an order that was never
+     picked up, or is already delivered or cancelled, is refused rather than
+     forced. */
+  function driverDelivered(orderId, actor){
+    var all = global.RAFShop ? RAFShop.Orders.all() : [];
+    var o = all.filter(function (x) { return x.id === orderId; })[0];
+    if (!o) return { ok:false, reason:'order_not_found' };
+    if (o.status === STATUS.DELIVERED) return { ok:false, reason:'already_delivered' };
+    if (o.status === STATUS.CANCELLED) return { ok:false, reason:'order_cancelled' };
+    var cur = mstate(orderId);
+    if (cur !== MSTATE.WAITING_DRIVER) return { ok:false, reason:'not_with_driver' };
+
+    setOrderStatus(orderId, STATUS.DELIVERED);
+    appendTimeline(orderId, 'm-delivered', 'تم تسليم الطلب للعميل', 'Order delivered to the customer', 'done');
+    audit('driver.delivered', orderId, { actor:actor, source:'driver',
+      key:(mrecord(orderId) || {}).at, previousState:cur, newState:STATUS.DELIVERED });
+    /* the customer hears it through the same notification path every other
+       order event uses — no second notification system */
+    notify(orderId, { ar:'تم تسليم طلبك ' + orderId, en:'Your order ' + orderId + ' has been delivered' },
+           'raf_tracking.html?id=' + encodeURIComponent(orderId));
+    emit(orderId, 'delivered');
+    return { ok:true, status:STATUS.DELIVERED };
   }
 
   /* ---------- smart order lock ----------
@@ -928,6 +979,7 @@
     merchantAccept: merchantAccept, merchantReject: merchantReject, merchantReady: merchantReady,
     undo: undo, undoOf: undoOf, undoMsLeft: undoMsLeft, commitUndo: commitUndo, sweepUndo: sweepUndo,
     driverPickedUp: driverPickedUp, driverAssigned: driverAssigned,
+    driverUnassigned: driverUnassigned, driverDelivered: driverDelivered,
     /* locking */
     lockOf: lockOf, acquireLock: acquireLock, heartbeat: heartbeat, releaseLock: releaseLock,
     overrideLock: overrideLock, lockedByOther: lockedByOther, canProcess: canProcess, sweepLocks: sweepLocks,

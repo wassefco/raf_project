@@ -399,8 +399,10 @@
     var S = RAFStoreSchedule, lang = dlvLang(), inst = a.instant.available === true, sch = a.scheduled.available === true;
     DLV.sig = JSON.stringify([a.instant, a.nextOpening, a.scheduled.available, a.scheduled.dates]);
     /* keep a still-valid choice; otherwise the option the rules offer */
-    var ok = { instant:inst, scheduled:sch, next_opening:!inst };
-    if (!DLV.timing || !ok[DLV.timing]) DLV.timing = inst ? 'instant' : (sch ? 'scheduled' : 'next_opening');
+    /* a next-opening order is only offered when there IS a next opening */
+    var nxt = !inst && !!a.nextOpening;
+    var ok = { instant:inst, scheduled:sch, next_opening:nxt };
+    if (!DLV.timing || !ok[DLV.timing]) DLV.timing = inst ? 'instant' : (sch ? 'scheduled' : (nxt ? 'next_opening' : null));
     var h = '';
     if (!inst){
       var why = WHY[a.instant.reason] || WHY.unknown;
@@ -412,8 +414,8 @@
     h += '<div role="radiogroup" aria-label="'+T('وقت التوصيل','Delivery time')+'">';
     h += dlvOpt('instant', 'ti-bolt', T('توصيل فوري','Instant delivery'),
                 inst ? T('يُجهَّز طلبك ويُرسَل الآن','Your order is prepared and sent now') : T('غير متاح حالياً','Unavailable right now'), inst);
-    if (!inst) h += dlvOpt('next_opening', 'ti-building-store', T('الاستلام عند فتح المتجر','Receive when the store opens'),
-                           dlvEsc(S.formatReceive(a.nextOpening, lang)), true);
+    if (nxt) h += dlvOpt('next_opening', 'ti-building-store', T('الاستلام عند فتح المتجر','Receive when the store opens'),
+                         dlvEsc(S.formatReceive(a.nextOpening, lang)), true);
     h += dlvOpt('scheduled', 'ti-calendar-time', T('توصيل مجدول','Scheduled delivery'),
                 sch ? T('اختر يوماً ووقتاً للتوصيل','Choose a day and time') : T('غير متاح حالياً','Unavailable right now'), sch);
     h += '</div>';

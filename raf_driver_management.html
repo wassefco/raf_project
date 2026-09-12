@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — إدارة السائقين</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   DRIVER MANAGEMENT — an ADMINISTRATIVE surface, deliberately not the
+   driver's app. It lists the driver employees RAF's user authority holds,
+   offers only the operations the authority can actually back, and says
+   plainly which ones it cannot.
+   ══════════════════════════════════════════════════════════════ */
+*{box-sizing:border-box;}
+[hidden]{display:none!important;}
+body{background:var(--bg2);margin:0;}
+.dm{max-width:940px;margin:0 auto;padding:0 clamp(14px,3vw,22px) 60px;}
+
+.dm-head{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--border);
+  margin-inline:calc(-1 * clamp(14px,3vw,22px));padding:12px clamp(14px,3vw,22px);
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.dm-head .mark{width:42px;height:42px;flex:0 0 auto;border-radius:13px;background:var(--ink);color:var(--gold);
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:19px;font-weight:900;}
+.dm-head .t{flex:1;min-width:0;}
+.dm-head .t b{display:block;font-family:var(--font-display);font-size:17px;font-weight:800;color:var(--ink);}
+.dm-head .t span{display:block;font-size:11.5px;color:var(--text3);margin-top:1px;}
+.dm-head .dm-ico{min-height:44px;min-width:44px;padding:0 13px;border-radius:13px;border:1px solid var(--border2);
+  background:var(--card);color:var(--text2);font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+.dm-head .dm-ico:hover{border-color:var(--gold);color:var(--gold2);}
+
+.dm-sec{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px 20px;margin-top:14px;min-width:0;}
+.dm-sec-h{display:flex;align-items:center;gap:10px;min-height:44px;flex-wrap:wrap;}
+.dm-sec-h h2{margin:0;flex:1;min-width:140px;font-size:15.5px;font-weight:800;color:var(--ink);}
+.dm-sub{font-size:13px;color:var(--text3);line-height:1.75;margin-top:2px;}
+
+.dm-tag{display:inline-flex;align-items:center;gap:5px;height:27px;padding:0 11px;border-radius:20px;font-size:11.5px;
+  font-weight:800;background:var(--bg3);color:var(--text2);white-space:nowrap;flex:0 0 auto;}
+.dm-tag.green{background:rgba(46,158,91,.14);color:#1F7A45;}
+.dm-tag.red{background:rgba(217,83,79,.13);color:#A63A36;}
+.dm-tag.amber{background:rgba(200,121,30,.14);color:#9A5B12;}
+.dm-tag i{font-size:14px;}
+
+/* toolbar */
+.dm-tools{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px;}
+.dm-search{flex:1 1 220px;min-width:0;display:flex;align-items:center;gap:8px;min-height:46px;padding:0 13px;
+  border:1px solid var(--border2);border-radius:13px;background:var(--card);}
+.dm-search i{color:var(--text3);font-size:18px;}
+.dm-search input{flex:1;min-width:0;border:0;background:transparent;font-family:inherit;font-size:14px;color:var(--ink);outline:none;}
+.dm-filter{display:inline-flex;gap:4px;background:var(--bg);border:1px solid var(--border2);border-radius:13px;padding:4px;}
+.dm-filter .dm-fb{min-height:38px;padding:0 14px;border:0;border-radius:10px;background:transparent;color:var(--text2);
+  font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;}
+.dm-filter .dm-fb[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(20,16,8,.14);}
+.dm-filter .dm-fb:focus-visible{outline:2px solid var(--gold);outline-offset:1px;}
+
+/* one driver employee */
+.dm-row{display:flex;align-items:flex-start;gap:13px;padding:15px 0;border-top:1px solid var(--border);}
+.dm-row:first-of-type{border-top:0;}
+.dm-row.editing{background:var(--bg);border-radius:14px;padding:15px 13px;}
+.dm-av{width:46px;height:46px;flex:0 0 auto;border-radius:50%;background:var(--gold-soft);color:var(--gold2);
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;}
+.dm-who{flex:1;min-width:0;}
+.dm-who b{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:14.5px;font-weight:800;color:var(--ink);}
+.dm-kv{display:grid;grid-template-columns:minmax(96px,auto) minmax(0,1fr);gap:4px 14px;margin-top:8px;font-size:12.5px;}
+.dm-kv dt{color:var(--text3);font-weight:800;}
+.dm-kv dd{margin:0;color:var(--text2);overflow-wrap:anywhere;}
+.dm-kv dd bdi{font-family:var(--font-en);}
+.dm-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px;}
+.dm-b{min-height:44px;padding:0 15px;border-radius:12px;border:1px solid var(--border2);background:var(--card);
+  color:var(--ink);font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;display:inline-flex;
+  align-items:center;justify-content:center;gap:6px;transition:all .18s;}
+.dm-b i{font-size:16px;}
+.dm-b:hover:not(:disabled){border-color:var(--gold);color:var(--gold2);}
+.dm-b.gold{background:var(--gold);border-color:var(--gold2);color:#1C1606;}
+.dm-b.gold:hover:not(:disabled){filter:brightness(1.05);color:#1C1606;}
+.dm-b.danger{color:#A63A36;border-color:rgba(217,83,79,.4);}
+.dm-b:disabled{opacity:.45;cursor:not-allowed;}
+.dm-b:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+/* edit / create form */
+.dm-form{margin-top:10px;display:flex;flex-direction:column;gap:11px;}
+.dm-f label{display:block;font-size:12.5px;font-weight:800;color:var(--text3);margin-bottom:5px;}
+.dm-f input{width:100%;min-height:48px;border-radius:12px;border:1px solid var(--border2);background:var(--card);
+  font-family:inherit;font-size:15px;color:var(--ink);padding:0 13px;}
+.dm-f input[dir="ltr"]{font-family:var(--font-en);}
+.dm-f input:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+.dm-f.bad input{border-color:var(--red);}
+.dm-msg{border-radius:12px;padding:11px 13px;font-size:12.5px;line-height:1.7;
+  background:rgba(217,83,79,.1);border:1px solid rgba(217,83,79,.34);color:#A63A36;}
+.dm-ok{border-radius:12px;padding:11px 13px;font-size:12.5px;line-height:1.7;
+  background:rgba(46,158,91,.1);border:1px solid rgba(46,158,91,.3);color:#1F7A45;}
+.dm-live{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;line-height:1.7;margin-top:10px;
+  padding:11px 13px;border-radius:12px;background:rgba(200,121,30,.1);border:1px solid rgba(200,121,30,.3);color:#9A5B12;}
+.dm-live i{font-size:16px;flex:0 0 auto;margin-top:1px;}
+
+.dm-na{display:flex;align-items:flex-start;gap:10px;padding:12px 13px;border-radius:14px;
+  border:1px dashed var(--border2);margin-top:10px;}
+.dm-na i{font-size:18px;color:var(--text3);flex:0 0 auto;margin-top:1px;}
+.dm-na .t{flex:1;min-width:0;}
+.dm-na .t b{display:block;font-size:13.5px;font-weight:800;color:var(--text2);}
+.dm-na .t span{display:block;font-size:12.5px;color:var(--text3);line-height:1.65;margin-top:3px;}
+.dm-na .dm-tag{align-self:center;}
+
+.dm-note{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--text3);line-height:1.75;
+  margin-top:14px;padding-top:13px;border-top:1px solid var(--border);}
+.dm-note i{font-size:16px;flex:0 0 auto;margin-top:1px;}
+.dm-empty{padding:30px 10px;text-align:center;color:var(--text3);font-size:13.5px;}
+
+.dm-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;}
+.dm-gate-c{max-width:420px;text-align:center;}
+.dm-gate-c i{font-size:42px;color:var(--text3);}
+.dm-gate-c h1{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--ink);margin:12px 0 8px;}
+.dm-gate-c p{font-size:13.5px;color:var(--text2);line-height:1.9;}
+
+/* the one confirmation this page asks */
+.dm-dlg{position:fixed;inset:0;z-index:90;background:rgba(20,16,8,.5);display:flex;align-items:center;
+  justify-content:center;padding:20px;}
+.dm-dlg-c{width:100%;max-width:380px;background:var(--card);border-radius:20px;padding:22px;
+  box-shadow:0 30px 60px -30px rgba(20,16,8,.6);}
+.dm-dlg-c h3{margin:0 0 8px;font-size:17px;font-weight:800;color:var(--ink);}
+.dm-dlg-c p{margin:0 0 18px;font-size:13.5px;line-height:1.8;color:var(--text2);}
+.dm-dlg-a{display:flex;gap:10px;flex-wrap:wrap;}
+.dm-dlg-a .dm-b{flex:1 1 130px;min-height:48px;}
+
+.dm-toast{position:fixed;inset-inline:0;bottom:26px;display:flex;justify-content:center;z-index:120;
+  pointer-events:none;opacity:0;transform:translateY(10px);transition:opacity .22s,transform .22s;}
+.dm-toast.show{opacity:1;transform:none;}
+.dm-toast > div{background:var(--ink);color:#F5F0E4;border-radius:30px;padding:12px 20px;font-size:13.5px;
+  font-weight:700;max-width:90vw;text-align:center;}
+
+@media (max-width:560px){
+  .dm-sec{padding:16px;}
+  .dm-kv{grid-template-columns:1fr;gap:1px 0;}
+  .dm-kv dt{margin-top:7px;}
+  .dm-row{flex-direction:column;}
+  .dm-acts .dm-b{flex:1 1 auto;}
+  .dm-filter{width:100%;}
+  .dm-filter .dm-fb{flex:1 1 0;}
+}
+</style>
+</head>
+<body>
+
+<div class="dm-gate" id="gate" hidden>
+  <div class="dm-gate-c"><i class="ti ti-shield-lock"></i><h1 id="gateT"></h1><p id="gateP"></p></div>
+</div>
+
+<div class="dm" id="shell" hidden>
+  <header class="dm-head">
+    <span class="mark" aria-hidden="true">R</span>
+    <div class="t"><b data-ar="إدارة السائقين" data-en="Driver Management">إدارة السائقين</b>
+      <span data-ar="حسابات موظفي التوصيل" data-en="Delivery employee accounts">حسابات موظفي التوصيل</span></div>
+    <button class="dm-ico" onclick="refreshAll()" id="btnRefresh"><i class="ti ti-refresh"></i></button>
+    <button class="dm-ico" onclick="toggleLang()"><span id="langLabel">EN</span></button>
+  </header>
+  <main id="view" aria-live="polite"></main>
+</div>
+
+<div class="dm-dlg" id="dlg" hidden>
+  <div class="dm-dlg-c" role="alertdialog" aria-modal="true" aria-labelledby="dlgT" aria-describedby="dlgP">
+    <h3 id="dlgT"></h3><p id="dlgP"></p>
+    <div class="dm-dlg-a">
+      <button class="dm-b" id="dlgNo" onclick="dlgCancel()"></button>
+      <button class="dm-b gold" id="dlgYes" onclick="dlgConfirm()"></button>
+    </div>
+  </div>
+</div>
+
+<div class="dm-toast" id="toast"><div id="toastMsg"></div></div>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_store_ops.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_inventory.js"></script>
+<script src="raf_rules.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_driver.js"></script>
+<script src="raf_driver_management.js"></script>
+<script>
+/* ============================================================
+   DRIVER MANAGEMENT
+   Every account fact and every refusal comes from RAFDriverManagement,
+   which authorises against the existing permission system and writes
+   only through RAFPerm's narrow account operations. This page renders;
+   it decides nothing and never reports a save it has not read back.
+   ============================================================ */
+(function(){
+  'use strict';
+  var DM = window.RAFDriverManagement;
+  var ME = null, CAN = null;
+  var state = { q:'', filter:'all' };
+  var edit = null;     /* { id:'new'|driverId, draft:{name,email,phone}, base:{...}, msg, focus } */
+  var flash = null;    /* { ok:true|false, text } — only ever set after a real readback */
+
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function L(o){ return (o && typeof o==='object') ? (isEn()?(o.en||o.ar):(o.ar||o.en)) : (o||''); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function el(id){ return document.getElementById(id); }
+  var toastTimer = null;
+  function toast(m){
+    el('toastMsg').textContent = m; el('toast').classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function(){ el('toast').classList.remove('show'); }, 2400);
+  }
+
+  /* ---------- unsaved changes ---------- */
+  function dirty(){
+    if (!edit) return false;
+    return ['name','email','phone'].some(function(k){ return String(edit.draft[k]||'') !== String(edit.base[k]||''); });
+  }
+  var pending = null;
+  function confirmDiscard(go){
+    if (!dirty()){ edit = null; go(); return; }
+    pending = go;
+    openDialog('تجاهل التغييرات؟','Discard changes?',
+               'لم يتم حفظ التعديلات على هذا الحساب.','The changes to this account have not been saved.',
+               'تجاهل','Discard', function(){ edit = null; var g = pending; pending = null; if (g) g(); });
+  }
+
+  /* ---------- dialog ---------- */
+  var dlgAction = null, dlgFocus = null;
+  function openDialog(tAr,tEn,pAr,pEn,yAr,yEn,fn){
+    dlgAction = fn; dlgFocus = document.activeElement;
+    el('dlgT').textContent = T(tAr,tEn); el('dlgP').textContent = T(pAr,pEn);
+    el('dlgYes').innerHTML = '<i class="ti ti-check"></i>'+esc(T(yAr,yEn));
+    el('dlgNo').innerHTML  = '<i class="ti ti-x"></i>'+esc(T('إلغاء','Cancel'));
+    el('dlg').hidden = false; el('dlgNo').focus();
+  }
+  function closeDialog(){
+    el('dlg').hidden = true; dlgAction = null;
+    if (dlgFocus && document.contains(dlgFocus)) dlgFocus.focus();
+    dlgFocus = null;
+  }
+  window.dlgCancel = function(){ closeDialog(); pending = null; };
+  window.dlgConfirm = function(){ var fn = dlgAction; closeDialog(); if (fn) fn(); };
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && !el('dlg').hidden){ e.preventDefault(); window.dlgCancel(); }
+  });
+
+  /* ---------- rendering ---------- */
+  function naRow(titleAr, titleEn, whyAr, whyEn){
+    return '<div class="dm-na"><i class="ti ti-lock" aria-hidden="true"></i><div class="t">'
+      + '<b>'+esc(T(titleAr,titleEn))+'</b><span>'+esc(T(whyAr,whyEn))+'</span></div>'
+      + '<span class="dm-tag">'+esc(T('غير متاح','Unavailable'))+'</span></div>';
+  }
+  function statusTag(d){
+    var on = d.status === 'active';
+    return '<span class="dm-tag '+(on?'green':'red')+'"><i class="ti '+(on?'ti-circle-check':'ti-ban')+'" aria-hidden="true"></i>'
+      + esc(on ? T('نشط','Active') : T('موقوف','Suspended'))+'</span>';
+  }
+  function field(key, labelAr, labelEn, type, bad){
+    var v = edit.draft[key] || '';
+    return '<div class="dm-f'+(bad?' bad':'')+'"><label for="f-'+key+'">'+esc(T(labelAr,labelEn))+'</label>'
+      + '<input id="f-'+key+'" value="'+esc(v)+'"'+(type==='ltr'?' dir="ltr"':'')
+      + ' oninput="fieldInput(\''+key+'\', this.value)"></div>';
+  }
+  function editForm(isNew){
+    var h = '<div class="dm-form">'
+      + field('name','الاسم','Name')
+      + field('email','البريد الإلكتروني','Email','ltr')
+      + field('phone','رقم الجوال','Phone','ltr');
+    if (edit.msg) h += '<div class="dm-msg">'+esc(edit.msg)+'</div>';
+    h += '<div class="dm-acts"><button class="dm-b" onclick="cancelEdit()">'+esc(T('إلغاء','Cancel'))+'</button>'
+      + '<button class="dm-b gold" onclick="saveEdit()"'+((isNew || dirty()) ? '' : ' disabled')+'>'
+      + '<i class="ti ti-check"></i>'+esc(T(isNew ? 'إنشاء الحساب' : 'حفظ', isNew ? 'Create account' : 'Save'))+'</button></div>'
+      + '<div class="dm-note"><i class="ti ti-info-circle"></i><span>'
+      + esc(T('يمكن تعديل الاسم والبريد والجوال فقط. الدور والصلاحيات وارتباط المتجر لا تُدار من هنا.',
+              'Only name, email and phone can be changed here. Role, permissions and store links are not managed from this page.'))
+      + '</span></div></div>';
+    return h;
+  }
+  function driverRow(d){
+    var editing = !!(edit && edit.id === d.id);
+    var h = '<div class="dm-row'+(editing?' editing':'')+'"><div class="dm-av" aria-hidden="true">'
+      + esc(String(d.name||'?').trim().charAt(0))+'</div><div class="dm-who">'
+      + '<b>'+esc(d.name)+statusTag(d)
+      + (d.live.length ? '<span class="dm-tag amber"><i class="ti ti-truck-delivery" aria-hidden="true"></i>'
+          + esc(T(d.live.length===1 ? 'توصيلة جارية' : d.live.length+' توصيلات جارية',
+                  d.live.length===1 ? '1 live delivery' : d.live.length+' live deliveries'))+'</span>' : '')
+      + '</b>';
+    if (editing) return h + editForm(false) + '</div></div>';
+
+    h += '<dl class="dm-kv">'
+      + '<dt>'+esc(T('البريد الإلكتروني','Email'))+'</dt><dd><bdi>'+esc(d.email||'—')+'</bdi></dd>'
+      + '<dt>'+esc(T('رقم الجوال','Phone'))+'</dt><dd><bdi>'+esc(d.phone||'—')+'</bdi></dd>'
+      + '<dt>'+esc(T('الدور','Role'))+'</dt><dd>'+esc(d.role ? L(d.role) : '—')+'</dd>'
+      + '<dt>'+esc(T('تاريخ الانضمام','Member since'))+'</dt><dd><bdi>'+esc(d.since||'—')+'</bdi></dd>'
+      + '</dl>';
+
+    var acts = [];
+    if (CAN.edit)
+      acts.push('<button class="dm-b" onclick="startEdit(\''+esc(d.id)+'\')"><i class="ti ti-pencil"></i>'
+        + esc(T('تعديل','Edit'))+'</button>');
+    if (CAN.status)
+      acts.push(d.status === 'active'
+        ? '<button class="dm-b danger" onclick="askSuspend(\''+esc(d.id)+'\')"><i class="ti ti-ban"></i>'
+          + esc(T('إيقاف الحساب','Suspend'))+'</button>'
+        : '<button class="dm-b" onclick="askReactivate(\''+esc(d.id)+'\')"><i class="ti ti-player-play"></i>'
+          + esc(T('إعادة التفعيل','Reactivate'))+'</button>');
+    if (acts.length) h += '<div class="dm-acts">'+acts.join('')+'</div>';
+
+    /* the operational consequence of a status change, from the real orders */
+    if (d.live.length && d.status !== 'active')
+      h += '<div class="dm-live"><i class="ti ti-alert-triangle" aria-hidden="true"></i><span>'
+        + esc(T('هذا الحساب موقوف وما زال مسؤولاً عن ' + d.live.length + ' طلب. لم يُعَد أي طلب للقائمة ولم يُلغَ — تحتاج معالجة تشغيلية.',
+                'This suspended account still owns ' + d.live.length + ' order(s). Nothing was re-pooled or cancelled — this needs operational handling.'))
+        + ' <bdi>'+esc(d.live.map(function(x){ return x.orderId; }).join('، '))+'</bdi></span></div>';
+    return h + '</div></div>';
+  }
+
+  function render(){
+    var res = DM.list({ actor:ME.id });
+    if (!res.ok){ el('view').innerHTML = '<section class="dm-sec"><div class="dm-empty">'+esc(res.message)+'</div></section>'; return; }
+    CAN = res.can;
+    var all = res.drivers;
+    var q = state.q.trim().toLowerCase();
+    var list = all.filter(function(d){
+      if (state.filter === 'active'    && d.status !== 'active')    return false;
+      if (state.filter === 'suspended' && d.status !== 'suspended') return false;
+      if (!q) return true;
+      return [d.name, d.email, d.phone].some(function(v){ return String(v||'').toLowerCase().indexOf(q) > -1; });
+    });
+    var active = all.filter(function(d){ return d.status === 'active'; }).length;
+
+    var h = '<section class="dm-sec"><div class="dm-sec-h"><h2>'+esc(T('موظفو التوصيل','Driver employees'))+'</h2>'
+      + '<span class="dm-tag">'+esc(T(all.length + ' حساب', all.length + (all.length === 1 ? ' account' : ' accounts')))+'</span>'
+      + '<span class="dm-tag green"><i class="ti ti-circle-check" aria-hidden="true"></i>'
+      + esc(T(active + ' نشط', active + ' active'))+'</span>'
+      + (CAN.create ? '<button class="dm-b gold" onclick="startCreate()"><i class="ti ti-plus"></i>'
+          + esc(T('إضافة سائق','Add driver'))+'</button>' : '')
+      + '</div>'
+      + '<div class="dm-sub">'+esc(T('تُقرأ الحسابات من نظام حسابات وصلاحيات رف، وهو المصدر الوحيد لهوية الموظف.',
+              'Accounts are read from RAF’s accounts and permissions system, the single source of employee identity.'))+'</div>';
+
+    if (flash) h += '<div class="'+(flash.ok?'dm-ok':'dm-msg')+'" style="margin-top:12px">'+esc(flash.text)+'</div>';
+
+    h += '<div class="dm-tools">'
+      + '<div class="dm-search"><i class="ti ti-search" aria-hidden="true"></i>'
+      + '<input id="dmSearch" value="'+esc(state.q)+'" oninput="setQuery(this.value)" placeholder="'
+      + esc(T('بحث بالاسم أو البريد أو الجوال','Search name, email or phone'))+'" aria-label="'
+      + esc(T('بحث','Search'))+'"></div>'
+      + '<div class="dm-filter" role="group" aria-label="'+esc(T('تصفية الحالة','Filter by status'))+'">'
+      + [['all','الكل','All'],['active','نشط','Active'],['suspended','موقوف','Suspended']].map(function(f){
+          return '<button class="dm-fb" aria-pressed="'+(state.filter===f[0])+'" onclick="setFilter(\''+f[0]+'\')">'
+            + esc(T(f[1],f[2]))+'</button>'; }).join('')
+      + '</div></div>';
+
+    if (edit && edit.id === 'new')
+      h += '<div class="dm-row editing"><div class="dm-av" aria-hidden="true"><i class="ti ti-user-plus"></i></div>'
+        + '<div class="dm-who"><b>'+esc(T('سائق جديد','New driver'))+'</b>' + editForm(true) + '</div></div>';
+
+    h += list.length ? list.map(driverRow).join('')
+       : '<div class="dm-empty">'+esc(all.length ? T('لا نتائج مطابقة.','No matching accounts.')
+                                                 : T('لا توجد حسابات سائقين.','There are no driver accounts.'))+'</div>';
+
+    h += '<div class="dm-note"><i class="ti ti-info-circle"></i><span>'
+      + esc(T('السائق موظف توصيل فقط: لا يصل إلى لوحة التاجر أو المنتجات أو التسويق أو التحليلات أو إدارة المتجر، ولا يرى هذه الصفحة.',
+              'A driver is a delivery employee only: no access to the merchant dashboard, products, marketing, analytics or store management — and no access to this page.'))
+      + '</span></div></section>';
+
+    /* what this manager is not permitted to do, named rather than hidden */
+    var missing = [];
+    if (!CAN.create) missing.push(['إضافة سائق','Add a driver', CAN.permissions.create]);
+    if (!CAN.edit)   missing.push(['تعديل بيانات سائق','Edit driver details', CAN.permissions.edit]);
+    if (!CAN.status) missing.push(['إيقاف أو تفعيل حساب','Suspend or reactivate an account', CAN.permissions.status]);
+    if (missing.length){
+      h += '<section class="dm-sec"><div class="dm-sec-h"><h2>'+esc(T('عمليات غير مصرّح بها لحسابك','Operations your account cannot perform'))+'</h2></div>';
+      missing.forEach(function(m){
+        h += naRow(m[0], m[1], 'تحتاج صلاحية ' + m[2] + '.', 'Requires the ' + m[2] + ' permission.');
+      });
+      h += '</section>';
+    }
+
+    /* nothing about performance is invented */
+    h += '<section class="dm-sec"><div class="dm-sec-h"><h2>'+esc(T('الأداء والتشغيل','Performance and operations'))+'</h2></div>'
+      + naRow('حالة الاتصال والموقع','Availability and location',
+              'لا توجد حالة اتصال أو موقع للسائق في بيانات رف.','RAF holds no driver availability or location data.')
+      + naRow('عدد التوصيلات والأرباح والتقييم','Deliveries, earnings and rating',
+              'لا توجد بيانات أداء للسائق في النظام.','No driver performance data exists in the system.')
+      + naRow('المركبة والرخصة','Vehicle and licence',
+              'لا يحتوي سجل المستخدم على بيانات مركبة أو رخصة.','The user record holds no vehicle or licence data.')
+      + naRow('إعادة إسناد طلب سائق موقوف','Reassigning a suspended driver’s order',
+              'لم تُعتمد بعد قاعدة إعادة الإسناد؛ لا يتم تغيير ملكية طلب قائم تلقائياً.',
+              'No reassignment rule is approved; a live order’s ownership is never changed automatically.')
+      + '</section>';
+
+    el('view').innerHTML = h;
+    if (edit && edit.focus){ var f = el('f-' + edit.focus); if (f){ f.focus();
+      try { f.setSelectionRange(f.value.length, f.value.length); } catch(e){} } edit.focus = null; }
+  }
+
+  /* ---------- interactions ---------- */
+  window.setQuery = function(v){ state.q = v; var sel = null;
+    render(); var s = el('dmSearch'); if (s){ s.focus(); try { s.setSelectionRange(s.value.length, s.value.length); } catch(e){} } };
+  window.setFilter = function(f){ state.filter = f; render(); };
+  window.refreshAll = function(){ confirmDiscard(function(){ flash = null; render(); toast(T('تم التحديث','Refreshed')); }); };
+
+  window.startCreate = function(){
+    confirmDiscard(function(){
+      edit = { id:'new', draft:{ name:'', email:'', phone:'' }, base:{ name:'', email:'', phone:'' }, msg:null, focus:'name' };
+      flash = null; render();
+    });
+  };
+  window.startEdit = function(id){
+    confirmDiscard(function(){
+      var r = DM.get(id, { actor:ME.id });
+      if (!r.ok){ flash = { ok:false, text:r.message }; render(); return; }
+      var d = r.driver;
+      var base = { name:d.name||'', email:d.email||'', phone:d.phone||'' };
+      edit = { id:id, draft:Object.assign({}, base), base:base, msg:null, focus:'name' };
+      flash = null; render();
+    });
+  };
+  window.fieldInput = function(k, v){ if (!edit) return; edit.draft[k] = v;
+    var btn = document.querySelector('.dm-row.editing .dm-b.gold'); if (btn) btn.disabled = !(edit.id === 'new' || dirty()); };
+  window.cancelEdit = function(){ confirmDiscard(function(){ render(); }); };
+
+  window.saveEdit = function(){
+    if (!edit) return;
+    var d = edit.draft;
+    var res = edit.id === 'new'
+      ? DM.createDriver({ name:d.name, email:d.email, phone:d.phone }, { actor:ME.id })
+      : DM.updateDriver(edit.id, { name:d.name, email:d.email, phone:d.phone }, { actor:ME.id });
+    if (!res.ok){ edit.msg = res.message; render(); return; }
+    /* only now, with the authority's own readback in hand, is it a success */
+    var wasNew = edit.id === 'new';
+    edit = null;
+    flash = { ok:true, text:wasNew ? T('تم إنشاء حساب السائق: ' + res.driver.name, 'Driver account created: ' + res.driver.name)
+                                   : T('تم حفظ بيانات ' + res.driver.name, res.driver.name + '’s details were saved') };
+    render(); toast(T('تم الحفظ','Saved'));
+  };
+
+  window.askSuspend = function(id){
+    var r = DM.get(id, { actor:ME.id }); if (!r.ok){ flash = { ok:false, text:r.message }; render(); return; }
+    var live = r.driver.live.length;
+    openDialog('إيقاف حساب السائق؟','Suspend this driver account?',
+      'سيفقد السائق الوصول إلى تطبيق السائق فوراً ولن يستطيع سحب طلبات جديدة.'
+        + (live ? ' الطلبات التي يحملها حالياً (' + live + ') تبقى مسندة إليه ولن تُعاد للقائمة أو تُلغى.' : ''),
+      'The driver loses access to the Driver App immediately and cannot take new deliveries.'
+        + (live ? ' The ' + live + ' delivery/deliveries they already hold stay with them — nothing is re-pooled or cancelled.' : ''),
+      'إيقاف الحساب','Suspend', function(){ doStatus(id, 'suspend'); });
+  };
+  window.askReactivate = function(id){
+    openDialog('إعادة تفعيل الحساب؟','Reactivate this account?',
+      'سيعود السائق إلى استخدام تطبيق السائق. لا تُستعاد أي طلبات سابقة تلقائياً.',
+      'The driver can use the Driver App again. No previous deliveries are restored automatically.',
+      'إعادة التفعيل','Reactivate', function(){ doStatus(id, 'reactivate'); });
+  };
+  function doStatus(id, what){
+    var res = what === 'suspend' ? DM.suspend(id, { actor:ME.id }) : DM.reactivate(id, { actor:ME.id });
+    if (!res.ok){ flash = { ok:false, text:res.message }; render(); return; }
+    var held = (res.heldDeliveries || []).length;
+    flash = { ok:true, text: what === 'suspend'
+      ? T('تم إيقاف حساب ' + res.driver.name + '.' + (held ? ' ما زال مسؤولاً عن ' + held + ' طلب.' : ''),
+          res.driver.name + '’s account was suspended.' + (held ? ' They still own ' + held + ' delivery/deliveries.' : ''))
+      : T('تمت إعادة تفعيل حساب ' + res.driver.name + '.', res.driver.name + '’s account was reactivated.') };
+    render(); toast(T('تم الحفظ','Saved'));
+  }
+
+  window.toggleLang = function(){
+    var r = root(), en = r.lang === 'en';
+    r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+    try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+    applyLang(); render();
+  };
+  function applyLang(){
+    var en = isEn();
+    document.querySelectorAll('[data-ar][data-en]').forEach(function(e){
+      var t = e.getAttribute('data-'+(en?'en':'ar')); if (t !== null) e.textContent = t;
+    });
+    el('langLabel').textContent = en ? 'ع' : 'EN';
+    el('btnRefresh').setAttribute('aria-label', en ? 'Refresh' : 'تحديث');
+    document.title = en ? 'RAF — Driver Management' : 'رف — إدارة السائقين';
+  }
+  function gate(tAr, tEn, pAr, pEn){
+    el('shell').hidden = true; el('gate').hidden = false;
+    el('gateT').textContent = T(tAr, tEn); el('gateP').textContent = T(pAr, pEn);
+  }
+  function boot(){
+    var l = null; try { l = localStorage.getItem('raf_lang'); } catch(e){}
+    if (l === 'en'){ root().lang = 'en'; root().dir = 'ltr'; }
+    applyLang();
+
+    if (!DM || !window.RAFPerm){
+      gate('تعذّر التحميل','Could not load','لم يتم تحميل وحدات رف المطلوبة.','The required RAF modules did not load.'); return;
+    }
+    /* the authority decides, not this page */
+    var probe = DM.list({});
+    if (!probe.ok){
+      gate('لا تملك صلاحية إدارة السائقين','You do not have permission to manage drivers', probe.message, probe.message);
+      el('gateP').textContent = probe.message;
+      return;
+    }
+    var me = RAFPerm.currentUser();
+    ME = { id:me.id, name:me.name };
+    el('gate').hidden = true; el('shell').hidden = false;
+    render();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

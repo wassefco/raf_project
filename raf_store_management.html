@@ -284,6 +284,52 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
 
 .sm-empty{padding:30px 10px;text-align:center;color:var(--text3);font-size:13px;}
 
+/* ---------- settings · navigation preferences ---------- */
+.sm-nav-list{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.sm-nav-row{display:flex;align-items:center;gap:10px;min-height:56px;padding:8px 12px;border:1px solid var(--border);
+  border-radius:14px;background:var(--card);min-width:0;}
+.sm-nav-row.drag{opacity:.45;}
+.sm-nav-row.over{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);}
+.sm-nav-row .gr{cursor:grab;color:var(--text3);font-size:19px;flex:0 0 auto;}
+.sm-nav-row .ic{width:34px;height:34px;flex:0 0 auto;border-radius:10px;background:var(--bg3);color:var(--gold2);
+  display:flex;align-items:center;justify-content:center;font-size:18px;}
+.sm-nav-row .nm{flex:1;min-width:0;font-size:14px;font-weight:800;color:var(--ink);overflow-wrap:anywhere;}
+.sm-nav-row .pos{font-size:11.5px;color:var(--text3);font-family:var(--fen);flex:0 0 auto;}
+.sm-nav-row .mv{display:flex;gap:4px;flex:0 0 auto;}
+.sm-sec .sm-nav-b{min-height:44px;}
+.sm-nav-b{min-width:44px;min-height:44px;border-radius:11px;border:1px solid var(--border2);background:var(--card);
+  color:var(--text2);font-size:17px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;}
+.sm-nav-b:hover:not(:disabled){border-color:var(--gold);color:var(--gold2);}
+.sm-nav-b:disabled{opacity:.35;cursor:not-allowed;}
+.sm-nav-b:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.sm-nav-f{margin-top:16px;}
+.sm-nav-f label{display:block;font-size:12.5px;font-weight:800;color:var(--text3);margin-bottom:6px;}
+.sm-nav-f select{width:100%;max-width:340px;min-height:46px;border-radius:12px;border:1px solid var(--border2);
+  background:var(--card);font-family:inherit;font-size:14px;color:var(--ink);padding:0 12px;}
+.sm-nav-f select:focus{outline:2px solid var(--gold);outline-offset:1px;border-color:var(--gold);}
+.sm-okbox{border-radius:12px;padding:11px 13px;font-size:12.5px;line-height:1.7;margin-top:12px;
+  background:rgba(46,158,91,.1);border:1px solid rgba(46,158,91,.3);color:#1F7A45;}
+
+/* ---------- settings · account, notifications, security ---------- */
+.sm-kv{display:grid;grid-template-columns:minmax(120px,auto) minmax(0,1fr);gap:10px 16px;margin-top:12px;}
+.sm-kv dt{font-size:12.5px;font-weight:800;color:var(--text3);min-height:22px;}
+.sm-kv dd{margin:0;font-size:14px;font-weight:700;color:var(--ink);overflow-wrap:anywhere;min-height:22px;}
+.sm-kv dd bdi,.sm-kv dd .en{font-family:var(--font-en);}
+.sm-kv dd .muted{font-weight:600;color:var(--text3);}
+.sm-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:13px 0;border-top:1px solid var(--border);}
+.sm-row:first-of-type{border-top:0;}
+.sm-row .rb{flex:1 1 220px;min-width:0;}
+.sm-row .rb b{display:block;font-size:14px;font-weight:800;color:var(--ink);}
+.sm-row .rb span{display:block;font-size:12.5px;color:var(--text3);line-height:1.65;margin-top:3px;}
+.sm-row .sm-seg{margin-top:0;flex:0 0 auto;}
+.sm-row .sm-tag{align-self:center;}
+@media (max-width:640px){
+  .sm-kv{grid-template-columns:1fr;gap:2px 0;}
+  .sm-kv dt{margin-top:10px;}
+  .sm-row .sm-seg{width:100%;display:flex;}
+  .sm-row .sm-seg .sm-seg-b{flex:1 1 0;justify-content:center;}
+}
+
 /* discard dialog */
 .sm-dlg{position:fixed;inset:0;z-index:130;background:rgba(20,16,8,.45);display:flex;align-items:center;justify-content:center;padding:20px;}
 .sm-dlg-c{width:100%;max-width:360px;background:var(--card);border-radius:20px;padding:22px;box-shadow:0 30px 60px -30px rgba(20,16,8,.6);}
@@ -341,18 +387,8 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
 </div>
 
 <div class="mw" id="shell" style="display:none;">
-  <aside class="mw-rail">
-    <a class="mw-rail-logo" href="raf_homepage.html" aria-label="RAF">رف</a>
-    <a class="mw-rail-b" href="raf_dashboard.html" title="Dashboard"><i class="ti ti-layout-dashboard"></i><span data-ar="الرئيسية" data-en="Dashboard">الرئيسية</span></a>
-    <a class="mw-rail-b" href="raf_merchant.html"><i class="ti ti-clipboard-list"></i><span data-ar="الطلبات" data-en="Orders">الطلبات</span></a>
-    <a class="mw-rail-b" href="raf_merchant_products.html"><i class="ti ti-package"></i><span data-ar="المنتجات" data-en="Products">المنتجات</span></a>
-    <a class="mw-rail-b" href="raf_marketing.html"><i class="ti ti-speakerphone"></i><span data-ar="التسويق" data-en="Marketing">التسويق</span></a>
-    <a class="mw-rail-b" href="raf_analytics.html" title="Analytics &amp; Finance"><i class="ti ti-chart-line"></i><span data-ar="التحليلات" data-en="Analytics">التحليلات</span></a>
-    <a class="mw-rail-b on" href="raf_store_management.html" aria-current="page" title="Store Management"><i class="ti ti-building-store"></i><span data-ar="المتجر" data-en="Store">المتجر</span></a>
-    <a class="mw-rail-b" href="raf_customer_experience.html" title="Customer Experience"><i class="ti ti-mood-smile"></i><span data-ar="العملاء" data-en="Customers">العملاء</span></a>
-    <a class="mw-rail-b" href="raf_merchant_support.html" title="Support"><i class="ti ti-lifebuoy"></i><span data-ar="الدعم" data-en="Support">الدعم</span></a>
-    <div class="mw-rail-sp"></div>
-  </aside>
+  <!-- drawn by RAFMerchantNav from the account's own saved order -->
+  <aside class="mw-rail" data-nav="store"></aside>
 
   <div class="mw-main">
     <header class="mw-head">
@@ -400,6 +436,8 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
 <script src="raf_permissions.js"></script>
 <script src="raf_store_profile.js"></script>
 <script src="raf_store_schedule.js"></script>
+<script src="raf_merchant_prefs.js"></script>
+<script src="raf_merchant_nav.js"></script>
 <script>
 /* ============================================================
    STORE MANAGEMENT
@@ -448,6 +486,8 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
   var lastBusy = null;
   var SS = window.RAFStoreSchedule;
   var schedEdit = null; /* { days, base, original, errors, msg, touched, copyFrom, copySel } */
+  var navDraft = null;  /* { order:[keys], landing:key, msg, ok, dragFrom, focus } */
+  var sndDraft = null;  /* { newOrder:bool, warning:bool, msg, ok } */
 
   /* ---------- helpers ---------- */
   function root(){ return document.getElementById('htmlRoot'); }
@@ -490,8 +530,16 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
   function prepTarget(){ return prepEdit ? (prepEdit.mode === 'auto' ? 'auto' : prepEdit.level) : null; }
   function prepCurrent(){ var s = OPS.snapshot(SLUG); return s.manual ? s.state : 'auto'; }
   function prepDirty(){ return !!prepEdit && prepTarget() !== prepCurrent(); }
-  function dirty(){ return sectionDirty() || prepDirty() || schedDirty(); }
-  function clearEdits(){ edit = null; prepEdit = null; busyPick = null; schedEdit = null; }
+  /* an unsaved sound choice is a pending change like any other, so leaving the
+     tab asks the same one question. The sidebar order keeps its existing
+     behaviour: it is redrawn from the saved preference and nothing else. */
+  function soundsDirty(){
+    if (!sndDraft || !PREFS || !ME) return false;
+    var pr = PREFS.read({ actor:ME.id });
+    return pr.ok && sndDirty(pr);
+  }
+  function dirty(){ return sectionDirty() || prepDirty() || schedDirty() || soundsDirty(); }
+  function clearEdits(){ edit = null; prepEdit = null; busyPick = null; schedEdit = null; sndDraft = null; }
 
   var pending = null;
   function confirmDiscard(go){
@@ -526,6 +574,8 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
       if (f){ f.focus(); var n = f.value.length; try { f.setSelectionRange(n, n); } catch(e){} }
       edit.focus = false;
     }
+    /* a keyboard reorder keeps the caret on the button that did the moving */
+    if (st.tab === 'settings') navAfterRender();
   }
 
   /* ════════════════════ STORE PROFILE ════════════════════ */
@@ -1035,16 +1085,273 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
   }
 
   /* ════════════════════ SETTINGS ════════════════════
-     Placeholder only: no store settings are defined yet, so nothing here
-     reads or writes store data. */
-  function renderSettings(){
-    return '<div class="sm-wrap"><section class="sm-sec"><div class="sm-sec-h"><h3>'+esc(T('الإعدادات','Settings'))+'</h3></div>'
-      + '<div class="sm-empty"><i class="ti ti-settings" style="font-size:32px;display:block;margin-bottom:8px;color:var(--border2)"></i>'
-      + esc(T('ستتوفر إعدادات المتجر هنا لاحقًا.','Store settings will be available here later.'))+'</div>'
-      + '<div class="sm-info"><i class="ti ti-info-circle"></i><span>'
-      + esc(T('لا توجد إعدادات قابلة للتعديل حاليًا.','There are no editable settings yet.'))
-      + '</span></div></section></div>';
+     Four sections, all of them about the SIGNED-IN ACCOUNT rather than the
+     store: Account, Notifications, Preferences and Security.
+
+     · Account       — read-only. RAF's user record is the only account
+                       authority, and it has no self-service update path, so
+                       the values are shown and not offered for editing.
+     · Notifications — only the two alerts the workspace really produces.
+                       The setting decides audibility and nothing else.
+     · Preferences   — sidebar order + landing page (RAFMerchantPrefs) and the
+                       app language, which keeps using RAF's existing
+                       `raf_lang` switch rather than a second store.
+     · Security      — the prototype has no password, session or 2FA
+                       authority, so the capabilities are named and marked
+                       unavailable instead of being simulated.
+
+     Nothing here changes a permission, a store setting or a business rule. */
+  var PREFS = window.RAFMerchantPrefs;
+  function navDirty(saved){
+    return JSON.stringify(navDraft.order) !== JSON.stringify(saved.order) || navDraft.landing !== saved.landing;
   }
+  function settingsShell(body){
+    return '<div class="sm-wrap"><section class="sm-sec"><div class="sm-sec-h"><h3>'+esc(T('الإعدادات','Settings'))+'</h3></div>'
+      + '<div class="sm-empty">'+esc(body)+'</div></section></div>';
+  }
+
+  /* ---------- A · Account (read-only) ----------
+     Identity comes from RAFPerm and is never derived from the store. Only
+     fields the user record actually carries are shown. */
+  var ACCOUNT_TYPE = {
+    merchant:{ ar:'حساب تاجر', en:'Merchant account' }, staff:{ ar:'حساب موظف رف', en:'RAF staff account' },
+    driver:{ ar:'حساب سائق', en:'Driver account' },     customer:{ ar:'حساب عميل', en:'Customer account' }
+  };
+  function renderAccount(){
+    var u = null; try { u = RAFPerm.getUser(ME.id); } catch(e){}
+    var h = '<section class="sm-sec"><div class="sm-sec-h"><h3>'+esc(T('الحساب','Account'))+'</h3>'
+      + '<span class="sm-tag"><i class="ti ti-lock"></i>'+esc(T('للعرض فقط','Read-only'))+'</span></div>';
+    if (!u) return h + '<div class="sm-empty">'+esc(T('تعذّر قراءة بيانات الحساب.','Your account details could not be read.'))+'</div></section>';
+
+    var role = null; try { role = RAFPerm.getRole(u.roleId); } catch(e){}
+    var typ = ACCOUNT_TYPE[u.accountType];
+    var rows = [
+      [T('الاسم','Name'), esc(u.name || '—')],
+      [T('البريد الإلكتروني','Email'), u.email ? '<bdi>'+esc(u.email)+'</bdi>' : '<span class="muted">—</span>'],
+      [T('رقم الجوال','Phone'), u.phone ? '<bdi>'+esc(u.phone)+'</bdi>' : '<span class="muted">—</span>'],
+      [T('نوع الحساب','Account type'), esc(typ ? T(typ.ar, typ.en) : (u.accountType || '—'))],
+      [T('الدور','Role'), esc(role ? T(role.nameAr, role.nameEn) : '—')],
+      [T('الحالة','Status'), '<span class="sm-tag '+(u.status === 'active' ? 'green' : 'red')+'">'
+        + esc(u.status === 'active' ? T('نشط','Active') : T('موقوف','Suspended'))+'</span>'],
+      [T('المتجر المرتبط','Linked store'), prof && prof.ok ? esc(L(prof.fixed.name)) + ' · <bdi class="en">'+esc(SLUG)+'</bdi>' : '<bdi class="en">'+esc(SLUG)+'</bdi>'],
+      [T('تاريخ الانضمام','Member since'), '<bdi class="en">'+esc(u.regDate || '—')+'</bdi>']
+    ];
+    h += '<dl class="sm-kv">' + rows.map(function(r){
+      return '<dt>'+esc(r[0])+'</dt><dd>'+r[1]+'</dd>'; }).join('') + '</dl>';
+    h += '<div class="sm-info"><i class="ti ti-info-circle"></i><span>'
+      + esc(T('بيانات الحساب تديرها إدارة رف من نظام الحسابات والصلاحيات، ولا يمكن تعديلها من هنا. لا تُحفظ أي كلمات مرور أو بيانات اعتماد في هذا الجهاز.',
+              'Account details are managed by RAF through the accounts and permissions system and cannot be edited here. No passwords or credentials are stored on this device.'))
+      + '</span></div></section>';
+    return h;
+  }
+
+  /* ---------- B · Notifications ----------
+     Two real alerts exist in the merchant workspace, both produced by the
+     Orders page: the new-order alert and the acceptance-window warning. The
+     toggles below change whether those two make a sound. Everything else in
+     this section is named honestly as not built. */
+  function sndDirty(saved){
+    return !!sndDraft && (sndDraft.newOrder !== saved.sounds.newOrder || sndDraft.warning !== saved.sounds.warning);
+  }
+  function onOff(field, on){
+    return '<span class="sm-seg" role="group">'
+      + '<button class="sm-seg-b" aria-pressed="'+(on ? 'true' : 'false')+'" onclick="sndSet(\''+field+'\',true)">'
+        + esc(T('مفعّل','On'))+'</button>'
+      + '<button class="sm-seg-b" aria-pressed="'+(!on ? 'true' : 'false')+'" onclick="sndSet(\''+field+'\',false)">'
+        + esc(T('صامت','Off'))+'</button></span>';
+  }
+  function notAvailableRow(ar, en, subAr, subEn){
+    return '<div class="sm-row"><div class="rb"><b>'+esc(T(ar,en))+'</b><span>'+esc(T(subAr,subEn))+'</span></div>'
+      + '<span class="sm-tag">'+esc(T('غير مُهيّأ','Not configured'))+'</span></div>';
+  }
+  function renderNotifs(pr){
+    if (!sndDraft) sndDraft = { newOrder:pr.sounds.newOrder, warning:pr.sounds.warning, msg:null, ok:null };
+    var h = '<section class="sm-sec"><div class="sm-sec-h"><h3>'+esc(T('الإشعارات','Notifications'))+'</h3>'
+      + '<span class="sm-tag">'+esc(T('خاصة بحسابك','Personal to your account'))+'</span></div>'
+      + '<div class="sm-small">'+esc(T('تنبيهات لوحة التاجر داخل التطبيق. التحكم هنا بالصوت فقط: الإشعار ومهلة القبول ووضع التركيز لا تتغيّر.',
+              'Merchant alerts inside the workspace. These control sound only: the notification itself, the acceptance window and Focus Mode are unchanged.'))+'</div>'
+      + '<div class="sm-row"><div class="rb"><b>'+esc(T('صوت الطلب الجديد','New order sound'))+'</b>'
+        + '<span>'+esc(T('عند وصول طلب يحتاج قراراً. الطلبات المجدولة وطلبات الافتتاح التالي تُنبّه عند موعدها فقط.',
+                        'When an order arrives that needs a decision. Scheduled and next-opening orders alert only once they are actionable.'))+'</span></div>'
+        + onOff('newOrder', sndDraft.newOrder)+'</div>'
+      + '<div class="sm-row"><div class="rb"><b>'+esc(T('صوت تحذير قرب انتهاء المهلة','Acceptance warning sound'))+'</b>'
+        + '<span>'+esc(T('قبل انتهاء مهلة قبول الطلب. المهلة نفسها لا تتأثر بهذا الإعداد.',
+                        'Before the acceptance window runs out. The window itself is not affected by this setting.'))+'</span></div>'
+        + onOff('warning', sndDraft.warning)+'</div>'
+      + (sndDraft.msg ? '<div class="sm-msg">'+esc(sndDraft.msg)+'</div>' : '')
+      + (sndDraft.ok ? '<div class="sm-okbox">'+esc(sndDraft.ok)+'</div>' : '')
+      + '<div class="sm-acts"><button class="sm-btn" onclick="sndCancel()"'+(sndDirty(pr) ? '' : ' disabled')+'>'
+        + esc(T('إلغاء','Cancel'))+'</button>'
+      + '<button class="sm-btn gold" onclick="sndSave()"'+(sndDirty(pr) ? '' : ' disabled')+'><i class="ti ti-check"></i>'
+        + esc(T('حفظ','Save'))+'</button></div>'
+      + '<div class="sm-sec-h" style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)"><h3 style="font-size:13.5px">'
+        + esc(T('قنوات غير متوفرة في هذه النسخة','Channels not built in this prototype'))+'</h3></div>'
+      + notAvailableRow('إشعارات تجربة العملاء','Customer Experience notifications',
+                        'لا يوجد مصدر إشعارات للتقييمات أو البلاغات حتى الآن.','Reviews and issues do not emit a notification yet.')
+      + notAvailableRow('إشعارات الدعم','Support notifications',
+                        'تذاكر الدعم تُقرأ من صفحة الدعم ولا ترسل تنبيهاً.','Support tickets are read from the Support page and send no alert.')
+      + notAvailableRow('إشعارات المخزون','Inventory notifications',
+                        'تنبيه نفاد المخزون يُعرض داخل صفحة المنتجات فقط.','Low stock is shown inside Products & Inventory only.')
+      + notAvailableRow('البريد والرسائل والإشعارات الفورية','Email, SMS and push',
+                        'لا توجد بنية إرسال خارجية في هذه النسخة.','The prototype has no external delivery of any kind.')
+      + '</section>';
+    return h;
+  }
+  window.sndSet = function(field, on){
+    if (!sndDraft || (field !== 'newOrder' && field !== 'warning')) return;
+    sndDraft[field] = !!on; sndDraft.msg = null; sndDraft.ok = null; render();
+  };
+  window.sndSave = function(){
+    var res = PREFS.saveSounds({ newOrder:sndDraft.newOrder, warning:sndDraft.warning }, { actor:ME.id });
+    if (!res.ok){ sndDraft.msg = res.message; sndDraft.ok = null; render(); return; }
+    sndDraft = { newOrder:res.sounds.newOrder, warning:res.sounds.warning, msg:null,
+                 ok:T('تم حفظ إعدادات التنبيه الصوتي.','Your alert sound settings were saved.') };
+    render(); toast(T('تم الحفظ','Saved'));
+  };
+  window.sndCancel = function(){ sndDraft = null; render(); };
+
+  /* ---------- D · Security ----------
+     Nothing is simulated here. RAF's prototype has no password store, no
+     session registry and no second factor, so each capability is named and
+     marked unavailable. The one real action is the existing sign-out. */
+  function renderSecurity(){
+    var u = null; try { u = RAFPerm.getUser(ME.id); } catch(e){}
+    return '<section class="sm-sec"><div class="sm-sec-h"><h3>'+esc(T('الأمان','Security'))+'</h3></div>'
+      + '<div class="sm-row"><div class="rb"><b>'+esc(T('الجلسة الحالية','Current session'))+'</b>'
+        + '<span>'+esc(T('مسجّل الدخول باسم','Signed in as'))+' '+esc((u && u.name) || ME.name || '—')+'</span></div>'
+        + '<a class="sm-link" href="raf_login.html"><i class="ti ti-logout"></i>'+esc(T('تسجيل الخروج','Sign out'))+'</a></div>'
+      + notAvailableRow('تغيير كلمة المرور','Change password',
+                        'لا يوجد نظام كلمات مرور في هذه النسخة، ولا تُحفظ أي كلمة مرور.','The prototype has no password system, and no password is stored anywhere.')
+      + notAvailableRow('الجلسات النشطة وسجل الدخول','Active sessions and login activity',
+                        'لا يوجد سجل جلسات يمكن عرضه.','There is no session registry to show.')
+      + notAvailableRow('التحقق بخطوتين','Two-factor authentication',
+                        'لا توجد بنية تحقق ثانية في هذه النسخة.','No second-factor infrastructure exists in this prototype.')
+      + '<div class="sm-info"><i class="ti ti-shield-lock"></i><span>'
+      + esc(T('لا تُخزَّن كلمات مرور أو رموز أو بيانات اعتماد في هذا المتصفح. هذه الحالات معروضة كما هي بدل محاكاة ميزات غير موجودة.',
+              'No passwords, tokens or credentials are stored in this browser. These states are shown as they are rather than simulating features that do not exist.'))
+      + '</span></div></section>';
+  }
+
+  function renderSettings(){
+    if (!PREFS) return settingsShell(T('تعذّر تحميل التفضيلات.','Preferences could not be loaded.'));
+    var pr = PREFS.read({ actor:ME.id });
+    if (!pr.ok) return settingsShell(pr.message);
+    if (!navDraft) navDraft = { order:pr.order.slice(), landing:pr.landing, msg:null, ok:null, dragFrom:null, focus:null };
+
+    var n = navDraft.order.length;
+    var rows = navDraft.order.map(function(k, i){
+      var item = PREFS.itemOf(k);
+      return '<div class="sm-nav-row" draggable="true" data-i="'+i+'"'
+        + ' ondragstart="navDragStart(event,'+i+')" ondragover="navDragOver(event,'+i+')"'
+        + ' ondrop="navDrop(event,'+i+')" ondragend="navDragEnd(event)" ondragleave="navDragLeave(event)">'
+        + '<i class="ti ti-grip-vertical gr" aria-hidden="true"></i>'
+        + '<span class="ic"><i class="ti '+esc(item.ic)+'"></i></span>'
+        + '<span class="nm">'+esc(PREFS.label(item, true))+'</span>'
+        + '<span class="pos">'+(i+1)+'/'+n+'</span>'
+        + '<span class="mv">'
+        + '<button class="sm-nav-b" id="navUp'+i+'" onclick="navMove('+i+',-1)"'+(i === 0 ? ' disabled' : '')
+          + ' aria-label="'+esc(T('تحريك '+PREFS.label(item, true)+' لأعلى','Move '+PREFS.label(item, true)+' up'))+'"><i class="ti ti-chevron-up"></i></button>'
+        + '<button class="sm-nav-b" id="navDn'+i+'" onclick="navMove('+i+',1)"'+(i === n - 1 ? ' disabled' : '')
+          + ' aria-label="'+esc(T('تحريك '+PREFS.label(item, true)+' لأسفل','Move '+PREFS.label(item, true)+' down'))+'"><i class="ti ti-chevron-down"></i></button>'
+        + '</span></div>';
+    }).join('');
+
+    var opts = pr.allowed.map(function(k){
+      var item = PREFS.itemOf(k);
+      return '<option value="'+esc(k)+'"'+(navDraft.landing === k ? ' selected' : '')+'>'+esc(PREFS.label(item, true))+'</option>';
+    }).join('');
+
+    var prefs = '<section class="sm-sec"><div class="sm-sec-h"><h3>'+esc(T('التفضيلات','Preferences'))+'</h3>'
+      + '<span class="sm-tag">'+esc(T('خاصة بحسابك','Personal to your account'))+'</span></div>'
+      + '<div class="sm-small" style="font-size:13px;color:var(--text3);line-height:1.7">'
+      + esc(T('رتّب قائمة التنقل واختر الصفحة التي تفتح أولاً. تُطبَّق على حسابك في كل صفحات لوحة التاجر، ولا تؤثر على حسابات أخرى.',
+              'Arrange the navigation and choose which page opens first. This applies to your account across every Merchant Dashboard page and never affects anyone else.'))+'</div>'
+      + '<div class="sm-nav-list" id="navList" role="list" aria-label="'+esc(T('ترتيب قائمة التنقل','Sidebar order'))+'">'+rows+'</div>'
+      + '<div class="sm-nav-f"><label for="navLanding">'+esc(T('الصفحة الافتراضية عند الدخول','Default landing page'))+'</label>'
+      + '<select id="navLanding" onchange="navLanding(this.value)">'+opts+'</select></div>'
+      + (pr.landingFellBack ? '<div class="sm-info"><i class="ti ti-info-circle"></i><span>'
+          + esc(T('الصفحة المحفوظة لم تعد متاحة لصلاحياتك، لذلك تم الرجوع إلى صفحة متاحة.',
+                  'Your saved page is no longer available to your permissions, so an available page was used instead.'))+'</span></div>' : '')
+      + (navDraft.msg ? '<div class="sm-msg">'+esc(navDraft.msg)+'</div>' : '')
+      + (navDraft.ok ? '<div class="sm-okbox">'+esc(navDraft.ok)+'</div>' : '')
+      + '<div class="sm-acts"><button class="sm-btn" onclick="navReset()"><i class="ti ti-rotate"></i>'
+        + esc(T('إعادة التعيين للوضع الافتراضي','Reset to default'))+'</button>'
+      + '<button class="sm-btn gold" onclick="navSave()"'+(navDirty(pr) ? '' : ' disabled')+'><i class="ti ti-check"></i>'
+        + esc(T('حفظ','Save'))+'</button></div>'
+      + '<div class="sm-info"><i class="ti ti-info-circle"></i><span>'
+      + esc(T('إعادة التعيين تعيد ترتيب القائمة والصفحة الافتراضية فقط، ولا تمس أي إعدادات أخرى.',
+              'Reset restores only the sidebar order and the default page; no other settings are touched.'))+'</span></div>'
+      /* the app language keeps using RAF's own `raf_lang` switch — this is the
+         same control as the header toggle, not a second language store */
+      + '<div class="sm-row" style="margin-top:16px;border-top:1px solid var(--border)">'
+        + '<div class="rb"><b>'+esc(T('لغة التطبيق','App language'))+'</b>'
+        + '<span>'+esc(T('تُطبَّق فوراً على هذا المتصفح، مثل زر اللغة في الأعلى.',
+                        'Applies immediately on this browser, exactly like the language button in the header.'))+'</span></div>'
+        + '<span class="sm-seg" role="group">'
+        + '<button class="sm-seg-b" aria-pressed="'+(!isEn() ? 'true' : 'false')+'" onclick="setLang(\'ar\')">العربية</button>'
+        + '<button class="sm-seg-b" aria-pressed="'+(isEn() ? 'true' : 'false')+'" onclick="setLang(\'en\')">English</button>'
+        + '</span></div>'
+      + '</section>';
+    return '<div class="sm-wrap">' + renderAccount() + renderNotifs(pr) + prefs + renderSecurity() + '</div>';
+  }
+  /* the rail is redrawn from the same authority, so the page the merchant is
+     standing on shows the new order immediately */
+  function navRepaint(){ try { if (window.RAFMerchantNav) RAFMerchantNav.render(); } catch(e){} }
+  function navAfterRender(){
+    if (!navDraft || !navDraft.focus) return;
+    var b = el(navDraft.focus); navDraft.focus = null;
+    if (b && !b.disabled) b.focus();
+  }
+  window.navMove = function(i, dir){
+    var j = i + dir;
+    if (!navDraft || j < 0 || j >= navDraft.order.length) return;
+    var o = navDraft.order; var t = o[i]; o[i] = o[j]; o[j] = t;
+    navDraft.msg = null; navDraft.ok = null;
+    navDraft.focus = (dir < 0 ? 'navUp' : 'navDn') + j;
+    render();
+  };
+  window.navDragStart = function(e, i){
+    if (!navDraft) return;
+    navDraft.dragFrom = i;
+    try { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(i)); } catch(x){}
+    var row = e.currentTarget; setTimeout(function(){ row.classList.add('drag'); }, 0);
+  };
+  window.navDragOver = function(e, i){
+    if (!navDraft || navDraft.dragFrom === null) return;
+    e.preventDefault();
+    try { e.dataTransfer.dropEffect = 'move'; } catch(x){}
+    if (navDraft.dragFrom !== i) e.currentTarget.classList.add('over');
+  };
+  window.navDragLeave = function(e){ e.currentTarget.classList.remove('over'); };
+  window.navDrop = function(e, i){
+    e.preventDefault();
+    if (!navDraft || navDraft.dragFrom === null) return;
+    var from = navDraft.dragFrom; navDraft.dragFrom = null;
+    if (from === i) { render(); return; }
+    var o = navDraft.order, moved = o.splice(from, 1)[0];
+    o.splice(i, 0, moved);
+    navDraft.msg = null; navDraft.ok = null;
+    render();
+  };
+  window.navDragEnd = function(){
+    if (navDraft) navDraft.dragFrom = null;
+    document.querySelectorAll('.sm-nav-row').forEach(function(r){ r.classList.remove('drag','over'); });
+  };
+  window.navLanding = function(v){ if (!navDraft) return; navDraft.landing = v; navDraft.msg = null; navDraft.ok = null; render(); };
+  window.navSave = function(){
+    var res = PREFS.save({ order:navDraft.order, landing:navDraft.landing }, { actor:ME.id });
+    if (!res.ok){ navDraft.msg = res.message; navDraft.ok = null; render(); return; }
+    navDraft = { order:res.order.slice(), landing:res.landing, msg:null,
+                 ok:T('تم حفظ تفضيلات التنقل.','Your navigation preferences were saved.'), dragFrom:null, focus:null };
+    navRepaint(); render(); toast(T('تم الحفظ','Saved'));
+  };
+  window.navReset = function(){
+    var res = PREFS.reset({ actor:ME.id });
+    if (!res.ok){ navDraft.msg = res.message; navDraft.ok = null; render(); return; }
+    navDraft = { order:res.order.slice(), landing:res.landing, msg:null,
+                 ok:T('تمت إعادة التعيين للوضع الافتراضي.','Reset to the default order and page.'), dragFrom:null, focus:null };
+    navRepaint(); render(); toast(T('تمت إعادة التعيين','Reset'));
+  };
 
   /* ---------- navigation ---------- */
   window.setTab = function(k){
@@ -1063,6 +1370,8 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
     try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
     applyLang(); if (edit) edit.focus = true; render();      /* an edit in progress is kept */
   };
+  /* the Preferences control and the header button are the same switch */
+  window.setLang = function(l){ if ((l === 'en') !== isEn()) toggleLang(); };
   function applyLang(){
     var en = isEn();
     document.querySelectorAll('[data-ar][data-en]').forEach(function(e){

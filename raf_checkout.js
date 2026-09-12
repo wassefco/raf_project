@@ -14,8 +14,14 @@
      It falls back to the original five codes only when the marketing
      authority is not loaded on a page, so nothing regresses. */
   var COUPON_FALLBACK = { WELCOME20: 20, FLASH10: 10, VIP30: 30, RAMADAN25: 25, SUMMER15: 15 };
+  /* RAFMarketing's reads are pure: the platform codes are adopted by this
+     explicit initialisation, on the surfaces that actually offer coupons. */
+  function seedCoupons() {
+    if (window.RAFMarketing && RAFMarketing.ensureSeeded) RAFMarketing.ensureSeeded();
+  }
   function couponMap() {
     if (!window.RAFMarketing) return COUPON_FALLBACK;
+    seedCoupons();
     var out = {};
     RAFMarketing.coupons().forEach(function (c) {
       /* only a usable coupon appears in the map, so a code that has expired
@@ -27,7 +33,7 @@
   }
   /* the authority's own answer, with a typed reason when it refuses */
   function checkCoupon(code, ctx) {
-    if (window.RAFMarketing) return RAFMarketing.checkCoupon(code, ctx);
+    if (window.RAFMarketing) { seedCoupons(); return RAFMarketing.checkCoupon(code, ctx); }
     var pct = COUPON_FALLBACK[String(code || '').trim().toUpperCase()];
     return pct ? { ok:true, code:String(code).trim().toUpperCase(), pct:pct }
                : { ok:false, code:'UNKNOWN_CODE', message:T('رمز الكوبون غير صالح','Invalid coupon code') };

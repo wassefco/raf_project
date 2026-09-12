@@ -561,18 +561,8 @@ html[dir="rtl"] .pw-val{padding:0 11px 0 6px;}
 
 <div class="mw" id="shell" style="display:none;">
   <!-- TEMPORARY NAVIGATION PLACEHOLDER — not a designed navigation. -->
-  <aside class="mw-rail">
-    <a class="mw-rail-logo" href="raf_homepage.html" aria-label="RAF">رف</a>
-    <a class="mw-rail-b" href="raf_dashboard.html" title="Dashboard"><i class="ti ti-layout-dashboard"></i><span data-ar="الرئيسية" data-en="Dashboard">الرئيسية</span></a>
-    <a class="mw-rail-b" href="raf_merchant.html"><i class="ti ti-clipboard-list"></i><span data-ar="الطلبات" data-en="Orders">الطلبات</span></a>
-    <a class="mw-rail-b on" href="raf_merchant_products.html" aria-current="page"><i class="ti ti-package"></i><span data-ar="المنتجات" data-en="Products">المنتجات</span></a>
-    <a class="mw-rail-b" href="raf_marketing.html"><i class="ti ti-speakerphone"></i><span data-ar="التسويق" data-en="Marketing">التسويق</span></a>
-    <a class="mw-rail-b" href="raf_analytics.html" title="Analytics &amp; Finance"><i class="ti ti-chart-line"></i><span data-ar="التحليلات" data-en="Analytics">التحليلات</span></a>
-    <a class="mw-rail-b" href="raf_store_management.html" title="Store Management"><i class="ti ti-building-store"></i><span data-ar="المتجر" data-en="Store">المتجر</span></a>
-    <a class="mw-rail-b" href="raf_customer_experience.html" title="Customer Experience"><i class="ti ti-mood-smile"></i><span data-ar="العملاء" data-en="Customers">العملاء</span></a>
-    <a class="mw-rail-b" href="raf_merchant_support.html" title="Support"><i class="ti ti-lifebuoy"></i><span data-ar="الدعم" data-en="Support">الدعم</span></a>
-    <div class="mw-rail-sp"></div>
-  </aside>
+  <!-- drawn by RAFMerchantNav from the account's own saved order -->
+  <aside class="mw-rail" data-nav="products"></aside>
 
   <div class="mw-main">
     <header class="mw-head">
@@ -682,6 +672,8 @@ html[dir="rtl"] .pw-val{padding:0 11px 0 6px;}
 <script src="raf_merchant_products.js"></script>
 <script src="raf_merchant_variants.js"></script>
 <script src="raf_merchant_media.js"></script>
+<script src="raf_merchant_prefs.js"></script>
+<script src="raf_merchant_nav.js"></script>
 <script>
 /* ============================================================
    MERCHANT PRODUCTS — PHASE 3.1

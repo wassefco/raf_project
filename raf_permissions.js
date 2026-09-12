@@ -376,6 +376,91 @@
   function setCurrentUser(userId) { write(LS.session, userId); }
 
   /* -------------------------------------------------------------------------
+   * 6b) NARROW ACCOUNT MUTATIONS
+   * -------------------------------------------------------------------------
+   * saveUser() above replaces a whole user record. That is right for the
+   * permissions administration screen, which edits the whole record on
+   * purpose, and wrong for every other surface: a narrow change ("suspend
+   * this driver", "fix this phone number") must not be able to carry a role,
+   * an override or a store link along with it.
+   *
+   * These two operations are the safe path. They read the STORED record, copy
+   * only the fields named below onto it, and write it back. Identity and
+   * authorisation fields — id, accountType, roleId, overrides, storeSlug,
+   * regDate — are never taken from the caller and cannot be reached through
+   * here at all, whatever the caller passes. Authorisation itself is NOT
+   * decided here: the calling authority proves the actor may do this first.
+   * ---------------------------------------------------------------------- */
+  var PROFILE_FIELDS = ['name', 'email', 'phone'];
+  var STATUSES = ['active', 'suspended'];
+
+  function updateProfile(userId, patch) {
+    var users = getUsers();
+    var i = users.findIndex(function (u) { return u.id === userId; });
+    if (i < 0) return { ok: false, reason: 'user_not_found' };
+    var keys = Object.keys(patch || {});
+    if (!keys.length) return { ok: false, reason: 'nothing_to_update' };
+    for (var k = 0; k < keys.length; k++)
+      if (PROFILE_FIELDS.indexOf(keys[k]) < 0) return { ok: false, reason: 'field_not_updatable', field: keys[k] };
+
+    var next = Object.assign({}, users[i]);
+    PROFILE_FIELDS.forEach(function (f) {
+      if (patch[f] !== undefined) next[f] = String(patch[f]);
+    });
+    users[i] = next;
+    write(LS.users, users);
+    /* readback: the record that now exists, not the one we hoped for */
+    var saved = getUser(userId);
+    return saved ? { ok: true, user: saved } : { ok: false, reason: 'persist_failed' };
+  }
+  function setStatus(userId, status) {
+    if (STATUSES.indexOf(status) < 0) return { ok: false, reason: 'invalid_status' };
+    var users = getUsers();
+    var i = users.findIndex(function (u) { return u.id === userId; });
+    if (i < 0) return { ok: false, reason: 'user_not_found' };
+    var next = Object.assign({}, users[i]);
+    next.status = status;
+    users[i] = next;
+    write(LS.users, users);
+    var saved = getUser(userId);
+    if (!saved || saved.status !== status) return { ok: false, reason: 'persist_failed' };
+    return { ok: true, user: saved };
+  }
+  /* Account creation. The id is generated HERE, in the project's existing
+     `usr-0NN` shape, from the accounts that actually exist — never supplied by
+     a caller and never derived from an array length, so a deleted account can
+     never hand its id to somebody new. accountType and roleId are chosen by
+     the calling authority from its own fixed values, never forwarded from a
+     browser, and no other field is accepted. */
+  function nextUserId() {
+    var used = {}, max = 0;
+    getUsers().forEach(function (u) {
+      used[u.id] = 1;
+      var m = /^usr-(\d+)$/.exec(u.id || '');
+      if (m) max = Math.max(max, parseInt(m[1], 10));
+    });
+    var n = max + 1, id;
+    do { id = 'usr-' + String(n).padStart(3, '0'); n++; } while (used[id]);
+    return id;
+  }
+  function createAccount(spec) {
+    spec = spec || {};
+    if (!spec.accountType || !spec.roleId) return { ok: false, reason: 'account_type_required' };
+    if (!getRole(spec.roleId)) return { ok: false, reason: 'role_not_found' };
+    var id = nextUserId();
+    var user = u(id, String(spec.name || ''), String(spec.email || ''), String(spec.phone || ''),
+                 spec.accountType, spec.roleId, 'active',
+                 new Date().toISOString().slice(0, 10), null, null);
+    var users = getUsers();
+    if (users.some(function (x) { return x.id === id; })) return { ok: false, reason: 'id_collision' };
+    users.push(user);
+    write(LS.users, users);
+    var saved = getUser(id);
+    if (!saved) return { ok: false, reason: 'persist_failed' };
+    return { ok: true, user: saved };
+  }
+
+  /* -------------------------------------------------------------------------
    * 7) RESOLUTION  ——  can(user, key) = (role ∪ grants) − revokes
    * ---------------------------------------------------------------------- */
   function resolveUser(userOrId) {
@@ -508,6 +593,9 @@
     /* mutators */
     saveRole: saveRole,
     saveUser: saveUser,
+    /* narrow, field-scoped account mutations (see section 6b) */
+    PROFILE_FIELDS: PROFILE_FIELDS,
+    updateProfile: updateProfile, setStatus: setStatus, createAccount: createAccount,
     saveTemplate: saveTemplate,
     setOverride: setOverride,
     /* resolution */

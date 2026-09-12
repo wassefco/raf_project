@@ -150,6 +150,13 @@
     { code:'SUMMER15',  pct:15, storeSlug:null, startDate:'2026-01-01', endDate:'2026-06-01',
       name:{ ar:'تخفيضات الصيف', en:'Summer sale' } }
   ];
+  /* Seeding is an explicit WRITE, never a side effect of reading. Every read
+     below (coupons, byCode, checkCoupon, listFor…) is pure, so a read-only
+     consumer such as the Dashboard can never create marketing data by
+     loading or refreshing. The surfaces whose shipped behaviour depends on
+     these platform codes existing — the cart/checkout coupon gate — call
+     ensureSeeded() themselves, and creating a coupon seeds first so a
+     merchant can never claim a platform code. The seed data is unchanged. */
   var seeded = false;
   function ensureSeed(){
     if (seeded) return;
@@ -333,7 +340,6 @@
     return out;
   }
   function coupons(opts){
-    ensureSeed();
     opts = opts || {};
     return readAll().coupons
       .filter(function (c) { return opts.storeSlug === undefined || c.storeSlug === opts.storeSlug; })
@@ -458,7 +464,6 @@
       .filter(function (p) { return p.slug === slug && promotionCovers(promo, p.id); });
   }
   function byCode(code){
-    ensureSeed();
     var c = normCode(code);
     var hit = readAll().coupons.filter(function (x) { return x.code === c; })[0];
     return hit ? decorate(hit) : null;
@@ -514,6 +519,8 @@
   function createCoupon(draft, opts){
     opts = opts || {};
     var g = guard(opts.actor, true); if (!g.ok) return g;
+    /* a write path: the platform codes must exist before uniqueness is judged */
+    ensureSeed();
     var d = draft || {};
     if (d.storeSlug !== undefined || d.store !== undefined || d.id !== undefined)
       return fail('FIELD_NOT_ACCEPTED');
@@ -711,8 +718,10 @@
     isHistory:isHistory, daysLeft:daysLeft, expiringSoon:expiringSoon,
     /* permission */
     canView:canView, canCreate:canCreate, canEdit:canEdit, storeOf:storeOf,
-    /* read */
+    /* read — all pure, no seeding, no writes */
     coupons:coupons, ads:ads, listFor:listFor, byId:byId, byCode:byCode,
+    /* explicit initialisation (write): adopts the platform coupon codes */
+    ensureSeeded:ensureSeed,
     /* the coupon gate used by cart + checkout */
     checkCoupon:checkCoupon,
     /* validation (UI may preview it; the authority still decides) */

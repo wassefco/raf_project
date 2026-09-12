@@ -448,6 +448,7 @@
     DELIVERY_CHANGED:         { ar:'تغيّرت خيارات التوصيل المتاحة. راجع اختيارك ثم أكّد الطلب.',
                                 en:'The available delivery options have changed. Review your choice and confirm again.' },
     SCHEDULED_UNAVAILABLE:    { ar:'التوصيل المجدول غير متاح حالياً.', en:'Scheduled delivery is not available right now.' },
+    NEXT_OPENING_UNAVAILABLE: { ar:'لا يوجد موعد افتتاح قادم لهذا المتجر.', en:'This store has no upcoming opening.' },
     SCHEDULED_INVALID:        { ar:'موعد التوصيل المختار غير متاح. اختر موعداً آخر.', en:'The selected delivery time is not available. Choose another time.' }
   };
   function derr(code){ var e = DELIVERY_ERRORS[code]; return { ok:false, code:code, message:T(e.ar, e.en) }; }
@@ -468,7 +469,9 @@
     if (t === 'next_opening') {
       if (av.instant.available) return derr('DELIVERY_CHANGED');
       var n = av.nextOpening;
-      return { ok:true, timing:'next_opening', scheduled:null, receiveAt:n ? { date:n.date, time:n.time } : null };
+      /* no future opening → no commitment can be made, so no order is created */
+      if (!n) return derr('NEXT_OPENING_UNAVAILABLE');
+      return { ok:true, timing:'next_opening', scheduled:null, receiveAt:{ date:n.date, time:n.time } };
     }
     if (t === 'scheduled') {
       if (!av.scheduled.available) return derr('SCHEDULED_UNAVAILABLE');

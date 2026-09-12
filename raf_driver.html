@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — مساحة السائق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<style>
+/* ══════════════════════════════════════════════════════════════
+   DRIVER WORKSPACE — one-handed, mobile first.
+   The screen is a stack: what I am carrying now, then what is waiting,
+   then everything else. It renders from RAFDriver and owns no rules.
+   ══════════════════════════════════════════════════════════════ */
+*{box-sizing:border-box;}
+[hidden]{display:none!important;}
+body{background:var(--bg2);margin:0;}
+
+.dv{min-height:100vh;display:flex;flex-direction:column;max-width:640px;margin:0 auto;
+  background:var(--bg2);position:relative;}
+
+/* ---------- header ---------- */
+.dv-head{position:sticky;top:0;z-index:30;background:var(--ink);color:#F5F0E4;
+  padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;display:flex;align-items:center;gap:11px;}
+.dv-mark{width:40px;height:40px;flex:0 0 auto;border-radius:12px;background:var(--gold);color:#1C1606;
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;font-weight:900;}
+.dv-who{flex:1;min-width:0;}
+.dv-who b{display:block;font-size:14.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dv-who span{display:block;font-size:11.5px;color:#B9B1A0;margin-top:1px;}
+.dv-head .dv-ico{min-height:44px;min-width:44px;border-radius:13px;border:1px solid rgba(255,255,255,.18);
+  background:transparent;color:#F5F0E4;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:0 12px;}
+.dv-head .dv-ico:hover{background:rgba(255,255,255,.09);}
+.dv-head .dv-ico i{font-size:18px;}
+
+/* ---------- body ---------- */
+.dv-body{flex:1;padding:14px 14px calc(90px + env(safe-area-inset-bottom,0px));}
+.dv-h1{font-family:var(--font-display);font-size:19px;font-weight:800;color:var(--ink);margin:2px 0 10px;}
+.dv-sub{font-size:13px;color:var(--text3);line-height:1.7;margin:-6px 0 12px;}
+
+.dv-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:15px 16px;
+  margin-bottom:12px;min-width:0;}
+.dv-card.live{border-color:var(--gold2);box-shadow:0 0 0 3px var(--gold-soft);}
+.dv-card h2{margin:0;font-size:15px;font-weight:800;color:var(--ink);}
+.dv-card-h{display:flex;align-items:center;gap:9px;min-height:32px;margin-bottom:4px;}
+.dv-card-h h2{flex:1;min-width:0;}
+
+.dv-stage{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px;border-radius:20px;
+  font-size:11.5px;font-weight:800;background:var(--bg3);color:var(--text2);white-space:nowrap;flex:0 0 auto;}
+.dv-stage i{font-size:15px;}
+.dv-stage.wait{background:rgba(200,121,30,.14);color:#9A5B12;}
+.dv-stage.mine{background:var(--gold-soft);color:var(--gold2);}
+.dv-stage.hold{background:rgba(46,158,91,.13);color:#1F7A45;}
+
+.dv-oid{font-family:var(--font-en);font-size:13px;font-weight:800;color:var(--text3);direction:ltr;unicode-bidi:isolate;}
+.dv-line{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-top:1px solid var(--border);font-size:13.5px;color:var(--ink);}
+.dv-line:first-of-type{border-top:0;}
+.dv-line i{font-size:17px;color:var(--gold2);flex:0 0 auto;margin-top:1px;}
+.dv-line .k{flex:0 0 auto;color:var(--text3);font-size:12.5px;font-weight:800;min-width:72px;}
+.dv-line .v{flex:1;min-width:0;line-height:1.7;overflow-wrap:anywhere;}
+.dv-line .v bdi,.dv-line .v .en{font-family:var(--font-en);}
+
+.dv-leg{display:flex;align-items:center;gap:8px;margin:14px 0 6px;}
+.dv-leg .n{width:26px;height:26px;flex:0 0 auto;border-radius:9px;background:var(--ink);color:#F5F0E4;
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;font-family:var(--font-en);}
+.dv-leg b{font-size:13.5px;font-weight:800;color:var(--ink);}
+.dv-leg span{font-size:12px;color:var(--text3);}
+
+.dv-items{margin-top:8px;font-size:13.5px;color:var(--ink);}
+.dv-items div{display:flex;gap:10px;padding:7px 0;border-top:1px solid var(--border);}
+.dv-items div:first-child{border-top:0;}
+.dv-items .q{font-family:var(--font-en);font-weight:800;color:var(--gold2);flex:0 0 auto;}
+.dv-items .n{flex:1;min-width:0;overflow-wrap:anywhere;}
+
+/* calling the customer is a real action, so it gets a real target */
+.dv-line .dv-call{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:0 13px;border-radius:12px;
+  border:1px solid var(--border2);background:var(--card);color:var(--ink);font-size:13.5px;font-weight:800;
+  text-decoration:none;}
+.dv-line .dv-call:hover{border-color:var(--gold);color:var(--gold2);}
+.dv-line .dv-call bdi{font-family:var(--font-en);}
+
+.dv-pay{display:flex;align-items:center;gap:10px;margin-top:12px;padding:11px 13px;border-radius:14px;background:var(--bg);}
+.dv-pay i{font-size:20px;color:var(--gold2);}
+.dv-pay .t{flex:1;min-width:0;font-size:13px;color:var(--text2);}
+.dv-pay .t b{display:block;font-size:15px;color:var(--ink);font-family:var(--font-en);direction:ltr;unicode-bidi:isolate;}
+
+/* ---------- actions ---------- */
+.dv-acts{margin-top:14px;display:flex;flex-direction:column;gap:9px;}
+.dv-acts .dv-b{min-height:52px;}
+.dv-b{width:100%;min-height:52px;border-radius:15px;border:1px solid var(--border2);background:var(--card);
+  color:var(--ink);font-family:inherit;font-size:14.5px;font-weight:800;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:all .18s;}
+.dv-b i{font-size:20px;}
+.dv-b.gold{background:var(--gold);border-color:var(--gold2);color:#1C1606;}
+.dv-b.gold:hover:not(:disabled){filter:brightness(1.05);}
+.dv-b:hover:not(:disabled){border-color:var(--gold);}
+.dv-b:disabled{opacity:.5;cursor:not-allowed;}
+.dv-b:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+/* an operation RAF cannot perform yet: named, explained, never faked */
+.dv-na{display:flex;align-items:flex-start;gap:10px;padding:12px 13px;border-radius:14px;
+  border:1px dashed var(--border2);background:transparent;}
+.dv-na i{font-size:18px;color:var(--text3);flex:0 0 auto;margin-top:1px;}
+.dv-na .t{flex:1;min-width:0;}
+.dv-na .t b{display:block;font-size:13.5px;font-weight:800;color:var(--text2);}
+.dv-na .t span{display:block;font-size:12.5px;color:var(--text3);line-height:1.65;margin-top:3px;}
+.dv-na .tag{flex:0 0 auto;align-self:center;font-size:11px;font-weight:800;color:var(--text3);
+  background:var(--bg3);border-radius:20px;padding:5px 10px;white-space:nowrap;}
+
+.dv-note{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--text3);line-height:1.7;
+  margin-top:12px;padding-top:12px;border-top:1px solid var(--border);}
+.dv-note i{font-size:16px;flex:0 0 auto;margin-top:1px;}
+.dv-msg{border-radius:13px;padding:11px 13px;font-size:12.5px;line-height:1.7;margin-top:10px;
+  background:rgba(217,83,79,.1);border:1px solid rgba(217,83,79,.34);color:#A63A36;}
+.dv-ok{border-radius:13px;padding:11px 13px;font-size:12.5px;line-height:1.7;margin-top:10px;
+  background:rgba(46,158,91,.1);border:1px solid rgba(46,158,91,.3);color:#1F7A45;}
+.dv-empty{padding:28px 12px;text-align:center;color:var(--text3);font-size:13.5px;line-height:1.8;}
+.dv-empty i{display:block;font-size:34px;color:var(--border2);margin-bottom:8px;}
+
+/* the whole card is the way into a delivery */
+.dv-open{display:block;width:100%;text-align:start;border:0;background:transparent;padding:0;
+  font-family:inherit;color:inherit;cursor:pointer;min-height:44px;}
+.dv-open:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:18px;}
+
+/* ---------- bottom navigation ---------- */
+.dv-nav{position:fixed;inset-inline:0;bottom:0;z-index:40;display:flex;justify-content:center;
+  background:var(--card);border-top:1px solid var(--border);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));}
+.dv-nav-in{display:flex;width:100%;max-width:640px;}
+.dv-nav .dv-tab{flex:1 1 0;min-width:0;min-height:54px;border:0;background:transparent;cursor:pointer;
+  font-family:inherit;font-size:10.5px;font-weight:800;color:var(--text3);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:14px;padding:0 2px;}
+.dv-nav .dv-tab i{font-size:21px;}
+.dv-nav .dv-tab span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dv-nav .dv-tab[aria-current="page"]{color:var(--gold2);background:var(--gold-soft);}
+.dv-nav .dv-tab:focus-visible{outline:2px solid var(--gold);outline-offset:-2px;}
+.dv-nav .dv-tab .pip{position:absolute;transform:translate(0,-16px);margin-inline-start:20px;
+  min-width:18px;height:18px;border-radius:20px;background:var(--gold2);color:#fff;font-size:10px;
+  font-family:var(--font-en);display:flex;align-items:center;justify-content:center;padding:0 4px;}
+
+/* ---------- gate ---------- */
+.dv-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:30px;}
+.dv-gate-c{max-width:400px;text-align:center;}
+.dv-gate-c i{font-size:42px;color:var(--text3);}
+.dv-gate-c h1{font-family:var(--font-display);font-size:20px;font-weight:800;color:var(--ink);margin:12px 0 8px;}
+.dv-gate-c p{font-size:13.5px;color:var(--text2);line-height:1.9;}
+.dv-gate-c .dv-b{margin-top:18px;}
+
+/* a secondary action: quieter than the delivery actions, and never beside
+   Confirm delivery without a separator */
+.dv-second{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+.dv-second .dv-b{min-height:48px;font-size:13.5px;color:var(--text2);background:transparent;}
+.dv-second .dv-b:hover{border-color:var(--gold);color:var(--gold2);background:var(--card);}
+
+/* the one question this app asks */
+.dv-dlg{position:fixed;inset:0;z-index:90;background:rgba(20,16,8,.5);display:flex;align-items:center;
+  justify-content:center;padding:20px;}
+.dv-dlg-c{width:100%;max-width:380px;background:var(--card);border-radius:20px;padding:22px;
+  box-shadow:0 30px 60px -30px rgba(20,16,8,.6);}
+.dv-dlg-c h3{margin:0 0 8px;font-size:17px;font-weight:800;color:var(--ink);}
+.dv-dlg-c p{margin:0 0 18px;font-size:13.5px;line-height:1.8;color:var(--text2);}
+.dv-dlg-a{display:flex;flex-direction:column;gap:9px;}
+.dv-dlg-a .dv-b{min-height:50px;}
+
+.dv-toast{position:fixed;inset-inline:0;bottom:calc(78px + env(safe-area-inset-bottom,0px));display:flex;
+  justify-content:center;z-index:60;pointer-events:none;opacity:0;transform:translateY(10px);
+  transition:opacity .22s,transform .22s;}
+.dv-toast.show{opacity:1;transform:none;}
+.dv-toast > div{background:var(--ink);color:#F5F0E4;border-radius:30px;padding:12px 20px;font-size:13.5px;
+  font-weight:700;max-width:90vw;text-align:center;}
+
+@media (min-width:700px){
+  .dv{border-inline:1px solid var(--border);min-height:100vh;}
+  .dv-body{padding:18px 18px 40px;}
+  .dv-nav{position:sticky;bottom:0;}
+}
+</style>
+</head>
+<body>
+
+<div class="dv-gate" id="gate" hidden>
+  <div class="dv-gate-c">
+    <i class="ti ti-steering-wheel"></i>
+    <h1 id="gateT"></h1>
+    <p id="gateP"></p>
+    <button class="dv-b" onclick="location.href='raf_login.html'" id="gateB"></button>
+  </div>
+</div>
+
+<div class="dv" id="shell" hidden>
+  <header class="dv-head">
+    <span class="dv-mark" aria-hidden="true">R</span>
+    <div class="dv-who"><b id="whoName">—</b><span id="whoRole"></span></div>
+    <button class="dv-ico" onclick="refreshAll()" id="btnRefresh"><i class="ti ti-refresh"></i></button>
+    <button class="dv-ico" onclick="toggleLang()"><span id="langLabel">EN</span></button>
+  </header>
+
+  <main class="dv-body" id="view" aria-live="polite"></main>
+
+  <nav class="dv-nav" aria-label="Driver" id="nav"><div class="dv-nav-in" id="navIn"></div></nav>
+</div>
+
+<div class="dv-dlg" id="dlg" hidden>
+  <div class="dv-dlg-c" role="alertdialog" aria-modal="true" aria-labelledby="dlgT" aria-describedby="dlgP">
+    <h3 id="dlgT"></h3>
+    <p id="dlgP"></p>
+    <div class="dv-dlg-a">
+      <button class="dv-b gold" id="dlgYes" onclick="dlgConfirm()"></button>
+      <button class="dv-b" id="dlgNo" onclick="dlgCancel()"></button>
+    </div>
+  </div>
+</div>
+
+<div class="dv-toast" id="toast"><div id="toastMsg"></div></div>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_store_ops.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_inventory.js"></script>
+<script src="raf_rules.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_driver.js"></script>
+<script>
+/* ============================================================
+   DRIVER WORKSPACE
+   Every fact and every refusal comes from RAFDriver, which reads
+   RAFOrderEngine and RAFOrderSnapshot. This file renders; it holds
+   no lifecycle rule and performs no state change of its own.
+   ============================================================ */
+(function(){
+  'use strict';
+  var D = window.RAFDriver;
+  var ME = null, CAP = null, msg = null, ok = null, openId = null;
+  var st = { tab:'home' };
+  var PREF = 'raf_driver_view';
+
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function L(o){ return (o && typeof o==='object') ? (isEn()?(o.en||o.ar):(o.ar||o.en)) : (o||''); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function el(id){ return document.getElementById(id); }
+  var toastTimer = null;
+  function toast(m){
+    el('toastMsg').textContent = m; el('toast').classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(function(){ el('toast').classList.remove('show'); }, 2400);
+  }
+  /* Kuwait time, Western digits, like the rest of RAF */
+  function kwDateTime(ms){
+    if (!ms) return '—';
+    try { return new Date(ms).toLocaleString(isEn() ? 'en-GB' : 'ar-KW-u-nu-latn',
+      { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kuwait' }); }
+    catch(e){ return new Date(ms).toISOString().slice(0,16).replace('T',' '); }
+  }
+
+  var TABS = [
+    { k:'home',    ic:'ti-home',           ar:'الرئيسية', en:'Home' },
+    { k:'tasks',   ic:'ti-package',        ar:'المتاح',   en:'Available' },
+    { k:'active',  ic:'ti-truck-delivery', ar:'توصيلتي',  en:'My delivery' },
+    { k:'history', ic:'ti-history',        ar:'السجل',    en:'History' },
+    { k:'profile', ic:'ti-user',           ar:'حسابي',    en:'Profile' }
+  ];
+
+  /* ---------- small building blocks ---------- */
+  function stageChip(stage){
+    var txt = D.STAGE_TEXT[stage] || { ar:'—', en:'—' };
+    var cls = stage === 'awaiting_driver' ? 'wait' : stage === 'claimed' ? 'mine'
+            : stage === 'out_for_delivery' ? 'hold' : stage === 'delivered' ? 'hold' : '';
+    var ic  = stage === 'awaiting_driver' ? 'ti-clock-hour-4' : stage === 'claimed' ? 'ti-hand-grab'
+            : stage === 'out_for_delivery' ? 'ti-truck-delivery' : 'ti-circle-check';
+    /* the state is never colour alone: an icon and a word carry it too */
+    return '<span class="dv-stage '+cls+'"><i class="ti '+ic+'" aria-hidden="true"></i>'+esc(T(txt.ar,txt.en))+'</span>';
+  }
+  var TIMING = {
+    instant:      { ar:'فوري',            en:'Instant' },
+    scheduled:    { ar:'موعد محدد',       en:'Scheduled' },
+    next_opening: { ar:'عند الافتتاح',    en:'Next opening' }
+  };
+  function timingText(t){
+    var d = t.delivery || {};
+    var base = d.timing && TIMING[d.timing] ? T(TIMING[d.timing].ar, TIMING[d.timing].en) : T('غير محدد','Not specified');
+    if (d.timing === 'scheduled' && d.scheduled && d.scheduled.date)
+      base += ' · <bdi>'+esc(d.scheduled.date)+' '+esc(d.scheduled.from||'')+'–'+esc(d.scheduled.to||'')+'</bdi>';
+    else if (d.receiveAt && d.receiveAt.date)
+      base += ' · <bdi>'+esc(d.receiveAt.date)+(d.receiveAt.time ? ' '+esc(d.receiveAt.time) : '')+'</bdi>';
+    return base;
+  }
+  function addressText(t){
+    var d = t.delivery || {};
+    var parts = [d.area, d.block ? T('قطعة ','Block ')+d.block : null, d.street ? T('شارع ','Street ')+d.street : null,
+                 d.building, d.floor ? T('الدور ','Floor ')+d.floor : null, d.apartment].filter(Boolean);
+    return parts.length ? parts.join(' · ') : (d.address || T('لا يوجد عنوان في سجل الطلب','No address in the order record'));
+  }
+  function unavailable(cap, icon){
+    if (!cap || cap.available) return '';
+    return '<div class="dv-na"><i class="ti '+(icon||'ti-lock')+'" aria-hidden="true"></i><div class="t">'
+      + '<b>'+esc(cap.title)+'</b><span>'+esc(T(cap.ar, cap.en))+'</span></div>'
+      + '<span class="tag">'+esc(T('غير مُهيّأ','Not configured'))+'</span></div>';
+  }
+  function cap(key, titleAr, titleEn){
+    var c = CAP[key] || { available:false, ar:'', en:'' };
+    return { available:c.available, ar:c.ar, en:c.en, title:T(titleAr, titleEn) };
+  }
+
+  /* ---------- a delivery card in a list ---------- */
+  /* a pool card: the primary action says exactly what it does — the driver
+     pulls the delivery and owns it */
+  function poolCard(t){
+    return '<section class="dv-card">'
+      + '<div class="dv-card-h"><h2>'+esc(L(t.store.name))+'</h2>'+stageChip(t.stage)+'</div>'
+      + '<div class="dv-oid">'+esc(t.orderId)+'</div>'
+      + '<div class="dv-line"><i class="ti ti-map-pin" aria-hidden="true"></i><span class="v">'+addressText(t)+'</span></div>'
+      + '<div class="dv-line"><i class="ti ti-clock" aria-hidden="true"></i><span class="v">'+timingText(t)+'</span></div>'
+      + '<div class="dv-line"><i class="ti ti-shopping-bag" aria-hidden="true"></i><span class="v">'
+        + esc(T(t.itemCount + ' قطعة', t.itemCount + (t.itemCount === 1 ? ' item' : ' items')))
+        + (t.payment.collect ? ' · ' + esc(T('يُحصَّل عند التسليم','Collect on delivery')) + ' <bdi>' + esc(t.payment.collect) + ' ' + esc(t.payment.currency||'') + '</bdi>' : '')
+        + '</span></div>'
+      + '<div class="dv-acts"><button class="dv-b gold" onclick="doClaim(\''+esc(t.orderId)+'\')" aria-label="'
+        + esc(T('سحب الطلب ' + t.orderId, 'Take delivery ' + t.orderId))+'">'
+        + '<i class="ti ti-hand-grab"></i>'+esc(T('سحب الطلب','Take delivery'))+'</button></div>'
+      + '</section>';
+  }
+  function taskCard(t, clickable){
+    var inner = '<div class="dv-card-h"><h2>'+esc(L(t.store.name))+'</h2>'+stageChip(t.stage)+'</div>'
+      + '<div class="dv-oid">'+esc(t.orderId)+'</div>'
+      + '<div class="dv-line"><i class="ti ti-map-pin" aria-hidden="true"></i><span class="v">'+addressText(t)+'</span></div>'
+      + '<div class="dv-line"><i class="ti ti-clock" aria-hidden="true"></i><span class="v">'+timingText(t)+'</span></div>'
+      + '<div class="dv-line"><i class="ti ti-shopping-bag" aria-hidden="true"></i><span class="v">'
+        + esc(T(t.itemCount + ' قطعة', t.itemCount + (t.itemCount === 1 ? ' item' : ' items')))
+        + (t.payment.collect ? ' · ' + esc(T('يُحصَّل عند التسليم','Collect on delivery')) + ' <bdi>' + esc(t.payment.collect) + ' ' + esc(t.payment.currency||'') + '</bdi>' : '')
+        + '</span></div>';
+    if (!clickable) return '<section class="dv-card">'+inner+'</section>';
+    return '<section class="dv-card'+(t.stage === 'assigned' || t.stage === 'picked_up' ? ' live' : '')+'">'
+      + '<button class="dv-open" onclick="openTask(\''+esc(t.orderId)+'\')" aria-label="'
+      + esc(T('فتح توصيلة ' + t.orderId, 'Open delivery ' + t.orderId))+'">'+inner+'</button></section>';
+  }
+
+  /* ════════════════ HOME ════════════════
+     What am I carrying, what is waiting, what RAF cannot tell me yet. */
+  function renderHome(){
+    var a = D.active({ actor:ME.id }), q = D.queue({ actor:ME.id });
+    var h = '<h1 class="dv-h1">'+esc(T('مساحة السائق','Driver workspace'))+'</h1>'
+      + '<p class="dv-sub">'+esc(T('كل ما تحتاجه لتوصيل الطلبات المسندة إليك.',
+                                   'Everything you need for the deliveries assigned to you.'))+'</p>';
+
+    /* availability — RAF has no such state, so nothing pretends to be a switch */
+    h += '<section class="dv-card">'
+      + '<div class="dv-card-h"><h2>'+esc(T('حالة الاتصال','Availability'))+'</h2></div>'
+      + unavailable(cap('availabilityToggle','متصل / غير متصل','Online / offline'), 'ti-wifi-off')
+      + '</section>';
+
+    /* the current task always comes before anything else on this screen */
+    h += '<section class="dv-card'+(a.ok && a.task ? ' live' : '')+'">'
+      + '<div class="dv-card-h"><h2>'+esc(T('توصيلتي الحالية','My current delivery'))+'</h2></div>';
+    if (a.ok && a.task){
+      h += taskCard(a.task, true);
+      if (a.others) h += '<div class="dv-note"><i class="ti ti-info-circle"></i><span>'
+        + esc(T('لديك ' + a.others + ' توصيلة أخرى مسندة إليك.', 'You have ' + a.others + ' other assigned deliveries.'))+'</span></div>';
+    } else {
+      h += '<div class="dv-empty"><i class="ti ti-steering-wheel"></i>'
+        + esc(T('لا توجد توصيلة مسندة إليك الآن.','No delivery is assigned to you right now.'))+'</div>';
+    }
+    h += '</section>';
+
+    var n = q.ok ? q.tasks.length : 0;
+    h += '<section class="dv-card"><div class="dv-card-h"><h2>'+esc(T('طلبات بانتظار سائق','Orders waiting for a driver'))+'</h2>'
+      + '<span class="dv-stage wait"><i class="ti ti-clock-hour-4" aria-hidden="true"></i><bdi>'+n+'</bdi></span></div>'
+      + '<div class="dv-line"><i class="ti ti-info-circle" aria-hidden="true"></i><span class="v">'
+      + esc(T('هذه الطلبات أنهى المتجر تجهيزها وتنتظر سائقاً.','These orders are finished by the store and are waiting for a driver.'))
+      + '</span></div>'
+      + '<div class="dv-acts"><button class="dv-b" onclick="setTab(\'tasks\')"><i class="ti ti-list"></i>'
+      + esc(T('عرض الطلبات المتاحة','View available orders'))+'</button></div></section>';
+
+    /* no invented driver statistics */
+    h += '<section class="dv-card"><div class="dv-card-h"><h2>'+esc(T('إحصائياتي','My statistics'))+'</h2></div>'
+      + unavailable(cap('metrics','الأرباح والمسافات والتقييم','Earnings, distance and rating'), 'ti-chart-bar')
+      + '</section>';
+    return h;
+  }
+
+  /* ════════════════ AVAILABLE ════════════════
+     Visible, not claimable: RAF has no approved assignment rule. */
+  function renderTasks(){
+    var q = D.queue({ actor:ME.id });
+    if (!q.ok) return '<div class="dv-card"><div class="dv-empty">'+esc(q.message)+'</div></div>';
+    var h = '<h1 class="dv-h1">'+esc(T('الطلبات المتاحة','Available deliveries'))+'</h1>'
+      + '<p class="dv-sub">'+esc(T('أول سائق يسحب الطلب يصبح مسؤولاً عنه. الطلب يختفي من القائمة فور سحبه.',
+                                   'The first driver to take a delivery owns it. It leaves this list the moment somebody takes it.'))+'</p>';
+    if (msg) h += '<div class="dv-msg">'+esc(msg)+'</div>';
+    if (ok)  h += '<div class="dv-ok">'+esc(ok)+'</div>';
+    h += q.tasks.length ? q.tasks.map(poolCard).join('')
+       : '<section class="dv-card"><div class="dv-empty"><i class="ti ti-package-off"></i>'
+         + esc(T('لا توجد طلبات بانتظار سائق الآن.','No deliveries are waiting for a driver right now.'))+'</div></section>';
+    return h;
+  }
+
+  /* ════════════════ MY DELIVERY ════════════════ */
+  function renderActive(){
+    var r = openId ? D.task(openId, { actor:ME.id }) : D.active({ actor:ME.id });
+    if (!r.ok) return '<div class="dv-card"><div class="dv-empty">'+esc(r.message)+'</div></div>';
+    var t = r.task;
+    if (!t) return '<h1 class="dv-h1">'+esc(T('توصيلتي','My delivery'))+'</h1>'
+      + '<section class="dv-card"><div class="dv-empty"><i class="ti ti-steering-wheel"></i>'
+      + esc(T('لا توجد توصيلة مسندة إليك.','No delivery is assigned to you.'))+'<br>'
+      + esc(T('يظهر هنا الطلب فور إسناده لحسابك.','An order appears here as soon as it is assigned to your account.'))+'</div></section>';
+
+    var mine = t.fulfilment.driverId === ME.id;
+    var h = '<h1 class="dv-h1">'+esc(T('توصيلتي','My delivery'))+'</h1>'
+      + '<section class="dv-card live"><div class="dv-card-h"><h2 class="dv-oid">'+esc(t.orderId)+'</h2>'+stageChip(t.stage)+'</div>';
+
+    /* 1 · PICKUP — the store */
+    h += '<div class="dv-leg"><span class="n" aria-hidden="true">1</span><div><b>'+esc(T('الاستلام','Pickup'))+'</b>'
+       + ' <span>'+esc(T('من المتجر','from the store'))+'</span></div></div>'
+      + '<div class="dv-line"><i class="ti ti-building-store" aria-hidden="true"></i><span class="v">'+esc(L(t.store.name))
+        + (t.store.number ? ' · <bdi>'+esc(t.store.number)+'</bdi>' : '')+'</span></div>'
+      + unavailable(cap('navigation','عنوان المتجر والملاحة','Store address and navigation'), 'ti-map-off');
+
+    /* 2 · DELIVERY — the customer */
+    h += '<div class="dv-leg"><span class="n" aria-hidden="true">2</span><div><b>'+esc(T('التسليم','Delivery'))+'</b>'
+       + ' <span>'+esc(T('إلى العميل','to the customer'))+'</span></div></div>'
+      + '<div class="dv-line"><i class="ti ti-user" aria-hidden="true"></i><span class="k">'+esc(T('العميل','Customer'))+'</span>'
+        + '<span class="v">'+esc(t.customer.name || '—')+'</span></div>'
+      + '<div class="dv-line"><i class="ti ti-phone" aria-hidden="true"></i><span class="k">'+esc(T('الهاتف','Phone'))+'</span>'
+        + '<span class="v">'+(t.customer.phone
+            ? '<a class="dv-call" href="tel:'+esc(String(t.customer.phone).replace(/\s/g,''))+'" aria-label="'
+              + esc(T('اتصال بالعميل','Call the customer'))+'"><i class="ti ti-phone-call" aria-hidden="true"></i>'
+              + '<bdi>'+esc(t.customer.phone)+'</bdi></a>'
+            : '—')+'</span></div>'
+      + '<div class="dv-line"><i class="ti ti-map-pin" aria-hidden="true"></i><span class="k">'+esc(T('العنوان','Address'))+'</span>'
+        + '<span class="v">'+addressText(t)+'</span></div>'
+      + (t.delivery.instructions ? '<div class="dv-line"><i class="ti ti-note" aria-hidden="true"></i><span class="k">'
+        + esc(T('تعليمات','Instructions'))+'</span><span class="v">'+esc(t.delivery.instructions)+'</span></div>' : '')
+      + '<div class="dv-line"><i class="ti ti-clock" aria-hidden="true"></i><span class="k">'+esc(T('التوقيت','Timing'))+'</span>'
+        + '<span class="v">'+timingText(t)+'</span></div>';
+
+    /* what is in the bag */
+    h += '<div class="dv-leg"><span class="n" aria-hidden="true">3</span><div><b>'+esc(T('محتوى الطلب','Order contents'))+'</b>'
+       + ' <span>'+esc(T(t.itemCount+' قطعة', t.itemCount + (t.itemCount === 1 ? ' item' : ' items')))+'</span></div></div>'
+      + '<div class="dv-items">'+t.items.map(function(it){
+          return '<div><span class="q"><bdi>'+esc(it.qty)+'×</bdi></span><span class="n">'+esc(L(it.name))+'</span></div>'; }).join('')+'</div>';
+
+    h += '<div class="dv-pay"><i class="ti ti-cash" aria-hidden="true"></i><div class="t">'
+      + esc(t.payment.collect ? T('المبلغ المطلوب تحصيله','Amount to collect') : T('مدفوع مسبقاً','Already paid'))
+      + (t.payment.collect ? '<b>'+esc(t.payment.collect)+' '+esc(t.payment.currency||'')+'</b>' : '')
+      + '</div><span class="dv-stage">'+esc(L(t.payment.method) || '—')+'</span></div>';
+
+    /* ---- the operations that genuinely exist ---- */
+    h += '<div class="dv-acts">';
+    if (mine && t.stage === 'claimed')
+      h += '<button class="dv-b gold" onclick="doPickup(\''+esc(t.orderId)+'\')"><i class="ti ti-package-import"></i>'
+        + esc(T('تأكيد استلام الطلب من المتجر','Confirm pickup from the store'))+'</button>';
+    else if (mine && t.stage === 'out_for_delivery'){
+      h += '<div class="dv-ok"><i class="ti ti-check"></i> '
+        + esc(T('استلمت الطلب في ','Picked up at ')) + esc(kwDateTime(t.fulfilment.pickedUpAt)) + ' — '
+        + esc(T('الطلب في طريقه للعميل.','the order is on its way to the customer.'))+'</div>'
+        + '<button class="dv-b gold" onclick="doDeliver(\''+esc(t.orderId)+'\')"><i class="ti ti-circle-check"></i>'
+        + esc(T('تأكيد تسليم الطلب للعميل','Confirm delivery to the customer'))+'</button>';
+    } else if (mine && t.stage === 'delivered')
+      h += '<div class="dv-ok"><i class="ti ti-circle-check"></i> '
+        + esc(T('تم تسليم الطلب في ','Delivered at ')) + esc(kwDateTime(t.fulfilment.deliveredAt))+'</div>';
+    h += '</div>';
+
+    if (msg) h += '<div class="dv-msg">'+esc(msg)+'</div>';
+    if (ok)  h += '<div class="dv-ok">'+esc(ok)+'</div>';
+
+    /* handing the delivery back — only before pickup, and kept away from the
+       delivery actions so it can never be hit by mistake */
+    if (mine && t.stage === 'claimed')
+      h += '<div class="dv-second"><button class="dv-b" onclick="askReturn(\''+esc(t.orderId)+'\')">'
+        + '<i class="ti ti-arrow-back-up"></i>'
+        + esc(T('إعادة الطلب إلى قائمة الطلبات المتاحة','Return this delivery to the pool'))+'</button>'
+        + '<div class="dv-note"><i class="ti ti-info-circle"></i><span>'
+        + esc(T('ممكن قبل استلام الطلب من المتجر فقط. لا يُلغى طلب العميل.',
+                'Possible only before you collect the order from the store. The customer’s order is not cancelled.'))
+        + '</span></div></div>';
+
+    h += '<div class="dv-acts" style="margin-top:12px">'
+      + unavailable(cap('deliveryException','تعذّر التسليم','Delivery exception'), 'ti-alert-triangle')
+      + unavailable(cap('proofOfDelivery','إثبات التسليم','Proof of delivery'), 'ti-camera')
+      + '</div>';
+
+    h += '<div class="dv-note"><i class="ti ti-info-circle"></i><span>'
+      + esc(T('حالة الطلب يديرها محرك الطلبات؛ هذه الشاشة تعرضها ولا تغيّرها.',
+              'The order state is owned by the order engine; this screen shows it and never changes it.'))+'</span></div>';
+    return h + '</section>';
+  }
+
+  /* ════════════════ HISTORY ════════════════ */
+  function renderHistory(){
+    var r = D.history({ actor:ME.id });
+    if (!r.ok) return '<div class="dv-card"><div class="dv-empty">'+esc(r.message)+'</div></div>';
+    var h = '<h1 class="dv-h1">'+esc(T('سجل التوصيل','Delivery history'))+'</h1>'
+      + '<p class="dv-sub">'+esc(T('التوصيلات المنتهية المسندة إلى حسابك.','Completed deliveries assigned to your account.'))+'</p>';
+    h += r.tasks.length ? r.tasks.map(function(t){ return taskCard(t, false); }).join('')
+       : '<section class="dv-card"><div class="dv-empty"><i class="ti ti-history"></i>'
+         + esc(T('لا يوجد سجل توصيل بعد.','No delivery history yet.'))+'</div></section>';
+    h += '<section class="dv-card">'
+      + unavailable(cap('metrics','ملخص الأداء','Performance summary'), 'ti-chart-bar')+'</section>';
+    return h;
+  }
+
+  /* ════════════════ PROFILE ════════════════ */
+  function renderProfile(){
+    var p = D.profile({ actor:ME.id });
+    if (!p.ok) return '<div class="dv-card"><div class="dv-empty">'+esc(p.message)+'</div></div>';
+    var rows = [
+      [T('الاسم','Name'), esc(p.name || '—')],
+      [T('البريد الإلكتروني','Email'), p.email ? '<bdi>'+esc(p.email)+'</bdi>' : '—'],
+      [T('رقم الجوال','Phone'), p.phone ? '<bdi>'+esc(p.phone)+'</bdi>' : '—'],
+      [T('الدور','Role'), esc(p.role ? L(p.role) : '—')],
+      [T('الحالة','Status'), esc(p.status === 'active' ? T('نشط','Active') : T('موقوف','Suspended'))],
+      [T('تاريخ الانضمام','Member since'), '<bdi>'+esc(p.since || '—')+'</bdi>']
+    ];
+    var h = '<h1 class="dv-h1">'+esc(T('حسابي','My account'))+'</h1>'
+      + '<section class="dv-card"><div class="dv-card-h"><h2>'+esc(T('بيانات الحساب','Account details'))+'</h2>'
+      + '<span class="dv-stage"><i class="ti ti-lock" aria-hidden="true"></i>'+esc(T('للعرض فقط','Read-only'))+'</span></div>'
+      + rows.map(function(r){ return '<div class="dv-line"><span class="k">'+esc(r[0])+'</span><span class="v">'+r[1]+'</span></div>'; }).join('')
+      + '<div class="dv-note"><i class="ti ti-info-circle"></i><span>'
+      + esc(T('بيانات الحساب تديرها إدارة رف ولا يمكن تعديلها من هنا. لا تُحفظ كلمات مرور أو بيانات اعتماد في هذا الجهاز.',
+              'Account details are managed by RAF and cannot be edited here. No passwords or credentials are stored on this device.'))
+      + '</span></div></section>';
+
+    h += '<section class="dv-card"><div class="dv-card-h"><h2>'+esc(T('الإشعارات','Notifications'))+'</h2></div>'
+      + unavailable(cap('notifications','إشعارات السائق','Driver notifications'), 'ti-bell-off')+'</section>';
+
+    h += '<section class="dv-card"><div class="dv-card-h"><h2>'+esc(T('اللغة','Language'))+'</h2></div>'
+      + '<div class="dv-acts"><button class="dv-b" onclick="toggleLang()"><i class="ti ti-language"></i>'
+      + esc(isEn() ? 'العربية' : 'English')+'</button>'
+      + '<button class="dv-b" onclick="location.href=\'raf_login.html\'"><i class="ti ti-logout"></i>'
+      + esc(T('تسجيل الخروج','Sign out'))+'</button></div></section>';
+    return h;
+  }
+
+  /* ---------- chrome ---------- */
+  function renderNav(){
+    var q = D.queue({ actor:ME.id }), a = D.active({ actor:ME.id });
+    var counts = { tasks:(q.ok ? q.tasks.length : 0), active:(a.ok && a.task ? 1 : 0) };
+    el('navIn').innerHTML = TABS.map(function(t){
+      var on = st.tab === t.k, n = counts[t.k] || 0;
+      return '<button class="dv-tab" type="button" onclick="setTab(\''+t.k+'\')"'
+        + (on ? ' aria-current="page"' : '') + ' aria-label="'+esc(T(t.ar,t.en))+'">'
+        + '<i class="ti '+t.ic+'" aria-hidden="true"></i><span>'+esc(T(t.ar,t.en))+'</span>'
+        + (n ? '<span class="pip"><bdi>'+n+'</bdi></span>' : '')+'</button>';
+    }).join('');
+  }
+  function render(){
+    renderNav();
+    el('view').innerHTML = st.tab === 'tasks'   ? renderTasks()
+                         : st.tab === 'active'  ? renderActive()
+                         : st.tab === 'history' ? renderHistory()
+                         : st.tab === 'profile' ? renderProfile()
+                         :                        renderHome();
+    el('view').scrollTop = 0;
+  }
+  window.setTab = function(k){
+    if (!TABS.some(function(t){ return t.k === k; })) return;
+    if (k !== 'active') openId = null;
+    st.tab = k; msg = null; ok = null;
+    try { localStorage.setItem(PREF, JSON.stringify({ tab:k })); } catch(e){}
+    render();
+    window.scrollTo({ top:0 });
+  };
+  window.openTask = function(id){ openId = id; st.tab = 'active'; msg = null; ok = null; render(); window.scrollTo({ top:0 }); };
+  window.refreshAll = function(){ msg = null; ok = null; render(); toast(T('تم التحديث','Refreshed')); };
+
+  /* every mutation is a request to the authority; the page decides nothing.
+     A claim that lost the race is reported plainly and the pool is re-read,
+     so the driver never sees a card the authority has already given away. */
+  window.doClaim = function(id){
+    var res = D.claim(id, { actor:ME.id });
+    if (!res.ok){
+      msg = res.message; ok = null;
+      st.tab = 'tasks';                       /* stay on the pool and show it fresh */
+      render(); toast(res.message);
+      return;
+    }
+    msg = null; ok = null;
+    openId = id; st.tab = 'active'; render();
+    toast(T('تم سحب الطلب — أصبح مسؤوليتك','Delivery taken — it is yours now'));
+    window.scrollTo({ top:0 });
+  };
+  /* the confirmation this app asks before delivery ownership changes hands.
+     Escape closes it, focus starts inside it and returns to the control that
+     opened it. */
+  var dlgAction = null, dlgReturnFocus = null;
+  function openDialog(titleAr, titleEn, bodyAr, bodyEn, yesAr, yesEn, fn){
+    dlgAction = fn; dlgReturnFocus = document.activeElement;
+    el('dlgT').textContent = T(titleAr, titleEn);
+    el('dlgP').textContent = T(bodyAr, bodyEn);
+    el('dlgYes').innerHTML = '<i class="ti ti-check"></i>' + esc(T(yesAr, yesEn));
+    el('dlgNo').innerHTML  = '<i class="ti ti-x"></i>' + esc(T('إلغاء','Cancel'));
+    el('dlg').hidden = false;
+    el('dlgYes').focus();
+  }
+  function closeDialog(){
+    el('dlg').hidden = true; dlgAction = null;
+    if (dlgReturnFocus && document.contains(dlgReturnFocus)) dlgReturnFocus.focus();
+    dlgReturnFocus = null;
+  }
+  window.dlgCancel = function(){ closeDialog(); };
+  window.dlgConfirm = function(){ var fn = dlgAction; closeDialog(); if (fn) fn(); };
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape' && !el('dlg').hidden){ e.preventDefault(); closeDialog(); }
+  });
+  window.askReturn = function(id){
+    openDialog('إعادة الطلب إلى قائمة الطلبات المتاحة؟','Return this delivery to the available pool?',
+               'سيصبح الطلب متاحاً لسائق آخر. طلب العميل لا يُلغى ولا يتغيّر شيء في تفاصيله.',
+               'The order will become available for another driver. The customer’s order is not cancelled and nothing about it changes.',
+               'إعادة الطلب','Return delivery',
+               function(){ doReturn(id); });
+  };
+  function doReturn(id){
+    var res = D.returnDelivery(id, { actor:ME.id });
+    if (!res.ok){ msg = res.message; ok = null; render(); toast(res.message); return; }
+    msg = null; ok = null; openId = null;
+    st.tab = 'tasks'; render();
+    toast(T('تمت إعادة الطلب إلى القائمة','The delivery went back to the pool'));
+    window.scrollTo({ top:0 });
+  }
+  window.doDeliver = function(id){
+    var res = D.completeDelivery(id, { actor:ME.id });
+    if (!res.ok){ msg = res.message; ok = null; render(); return; }
+    msg = null; ok = T('تم تسجيل تسليم الطلب للعميل.','The delivery was recorded.');
+    openId = id; render(); toast(T('تم التسليم','Delivered'));
+  };
+  window.doPickup = function(id){
+    var res = D.confirmPickup(id, { actor:ME.id });
+    if (!res.ok){ msg = res.message; ok = null; render(); return; }
+    msg = null; ok = T('تم تسجيل استلام الطلب من المتجر.','The pickup was recorded.');
+    openId = id; render(); toast(T('تم تسجيل الاستلام','Pickup recorded'));
+  };
+  window.toggleLang = function(){
+    var r = root(), en = r.lang === 'en';
+    r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+    try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+    applyChrome(); render();
+  };
+  function applyChrome(){
+    var en = isEn();
+    el('langLabel').textContent = en ? 'ع' : 'EN';
+    el('btnRefresh').setAttribute('aria-label', en ? 'Refresh' : 'تحديث');
+    document.title = en ? 'RAF — Driver' : 'رف — مساحة السائق';
+    if (ME) el('whoRole').textContent = en ? 'Driver' : 'سائق';
+  }
+  function gate(titleAr, titleEn, textAr, textEn){
+    el('shell').hidden = true; el('gate').hidden = false;
+    el('gateT').textContent = T(titleAr, titleEn);
+    el('gateP').textContent = T(textAr, textEn);
+    el('gateB').innerHTML = '<i class="ti ti-login"></i>' + T('تسجيل الدخول','Sign in');
+  }
+
+  function boot(){
+    var l = null; try { l = localStorage.getItem('raf_lang'); } catch(e){}
+    if (l === 'en'){ root().lang = 'en'; root().dir = 'ltr'; }
+
+    if (!D || !window.RAFPerm || !window.RAFOrderEngine || !window.RAFOrderSnapshot){
+      gate('تعذّر التحميل','Could not load','لم يتم تحميل وحدات رف المطلوبة.','The required RAF modules did not load.');
+      applyChrome(); return;
+    }
+    /* fail closed: the authority decides, not this page */
+    var sc = D.scope();
+    if (!sc.ok){
+      gate('مساحة السائق','Driver workspace', sc.message, sc.message);
+      el('gateP').textContent = sc.message;
+      applyChrome(); return;
+    }
+    ME = { id:sc.id, name:sc.name };
+    CAP = D.capabilities();
+    el('gate').hidden = true; el('shell').hidden = false;
+    el('whoName').textContent = ME.name;
+    try { var p = JSON.parse(localStorage.getItem(PREF) || 'null');
+      if (p && TABS.some(function(t){ return t.k === p.tab; })) st.tab = p.tab; } catch(e){}
+    applyChrome();
+    render();
+
+    /* another surface changed an order — the merchant marking it ready, the
+       engine sweeping a timeout — so the screen re-reads rather than guesses */
+    document.addEventListener('raf:order', function(){ render(); });
+    document.addEventListener('raf:snapshot', function(){ render(); });
+    window.addEventListener('storage', function(e){
+      /* another driver claimed something, or a store finished an order: the
+         pool is re-read from the authority. No realtime infrastructure is
+         simulated — this is the browser's own storage event. */
+      if (e.key && /^raf_(orders|order_mstate|driver_pickup|driver_claims)$/.test(e.key)) render();
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>
