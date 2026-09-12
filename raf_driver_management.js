@@ -83,8 +83,21 @@
      else is refused rather than honoured, a suspended manager is refused, and
      the permission is proved for every single operation — never once at page
      load and then trusted. */
+  /* RAFPerm.currentUser() falls back to the first administrator when no
+     session is stored — a demo convenience that predates this module. An
+     administrative surface must not inherit it: with nobody signed in there
+     is no actor, and every operation here refuses. */
   function sessionId(){
-    try { var u = global.RAFPerm && RAFPerm.currentUser(); return (u && u.id) || null; } catch (e) { return null; }
+    try {
+      var key = (global.RAFPerm && RAFPerm.LS && RAFPerm.LS.session) || 'raf_current_user';
+      var raw = localStorage.getItem(key);
+      if (raw == null || raw === '') return null;
+      var id = null;
+      try { id = JSON.parse(raw); } catch (e) { id = raw; }
+      if (typeof id !== 'string' || !id) return null;
+      var u = RAFPerm.getUser(id);
+      return (u && u.id) || null;
+    } catch (e) { return null; }
   }
   function actorId(a){ return typeof a === 'string' ? a : ((a && a.id) || null); }
   function manager(actor, permKey){

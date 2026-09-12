@@ -702,7 +702,11 @@
   function driverUnassigned(orderId, actor){
     if (mstate(orderId) !== MSTATE.WAITING_DRIVER) return { ok:false, reason:'not_assigned' };
     setMState(orderId, MSTATE.READY, actor);
+    /* the assignment line goes with the assignment it described, and only the
+       latest hand-back is kept: an order that is taken and returned several
+       times leaves one line, not a growing stack of identical ones */
     dropTimeline(orderId, 'm-waiting-driver');
+    dropTimeline(orderId, 'm-returned');
     appendTimeline(orderId, 'm-returned', 'أعاد السائق الطلب إلى قائمة الطلبات المتاحة',
                    'Driver returned the order to the available pool');
     audit('driver.returned', orderId, { actor:actor, source:'driver',

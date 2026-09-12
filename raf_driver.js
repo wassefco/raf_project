@@ -73,8 +73,21 @@
      is not a driver at all and an unknown session all get the same refusal,
      and no surface can talk this module into a different answer. */
   function actorId(a){ return typeof a === 'string' ? a : ((a && a.id) || null); }
+  /* The signed-in account, and only an explicitly signed-in one. RAFPerm's
+     currentUser() falls back to the first administrator when no session is
+     stored; that demo convenience is not inherited here, so "nobody is signed
+     in" resolves to nobody rather than to somebody. */
   function sessionId(){
-    try { var u = global.RAFPerm && RAFPerm.currentUser(); return (u && u.id) || null; } catch (e) { return null; }
+    try {
+      var key = (global.RAFPerm && RAFPerm.LS && RAFPerm.LS.session) || 'raf_current_user';
+      var raw = localStorage.getItem(key);
+      if (raw == null || raw === '') return null;
+      var id = null;
+      try { id = JSON.parse(raw); } catch (e) { id = raw; }
+      if (typeof id !== 'string' || !id) return null;
+      var u = RAFPerm.getUser(id);
+      return (u && u.id) || null;
+    } catch (e) { return null; }
   }
   function driverRecord(id){
     if (!id || !global.RAFPerm) return null;

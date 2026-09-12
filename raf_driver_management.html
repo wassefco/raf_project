@@ -54,9 +54,10 @@ body{background:var(--bg2);margin:0;}
 .dm-search{flex:1 1 220px;min-width:0;display:flex;align-items:center;gap:8px;min-height:46px;padding:0 13px;
   border:1px solid var(--border2);border-radius:13px;background:var(--card);}
 .dm-search i{color:var(--text3);font-size:18px;}
-.dm-search input{flex:1;min-width:0;border:0;background:transparent;font-family:inherit;font-size:14px;color:var(--ink);outline:none;}
+.dm-search input{flex:1;min-width:0;min-height:44px;border:0;background:transparent;font-family:inherit;font-size:14px;
+  color:var(--ink);outline:none;}
 .dm-filter{display:inline-flex;gap:4px;background:var(--bg);border:1px solid var(--border2);border-radius:13px;padding:4px;}
-.dm-filter .dm-fb{min-height:38px;padding:0 14px;border:0;border-radius:10px;background:transparent;color:var(--text2);
+.dm-filter .dm-fb{min-height:44px;padding:0 14px;border:0;border-radius:10px;background:transparent;color:var(--text2);
   font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;}
 .dm-filter .dm-fb[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(20,16,8,.14);}
 .dm-filter .dm-fb:focus-visible{outline:2px solid var(--gold);outline-offset:1px;}
@@ -74,6 +75,10 @@ body{background:var(--bg2);margin:0;}
 .dm-kv dd{margin:0;color:var(--text2);overflow-wrap:anywhere;}
 .dm-kv dd bdi{font-family:var(--font-en);}
 .dm-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px;}
+/* the theme's `html:not([data-ui]) button{min-height:40px}` is (0,1,2); every
+   control here is scoped with two selectors so 44px actually wins */
+.dm .dm-b,.dm-dlg .dm-b{min-height:44px;}
+.dm-dlg .dm-b{min-height:48px;}
 .dm-b{min-height:44px;padding:0 15px;border-radius:12px;border:1px solid var(--border2);background:var(--card);
   color:var(--ink);font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;display:inline-flex;
   align-items:center;justify-content:center;gap:6px;transition:all .18s;}
