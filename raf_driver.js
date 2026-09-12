@@ -487,18 +487,25 @@
   }
 
   /* ══════════════════ WHO IS CARRYING THIS ORDER ══════════════════
-     Read by the merchant's Orders page so the store can see that a driver has
-     taken the order. It answers with the driver's NAME and the timestamps
-     only — never the account id, and never anything else about the driver. It
-     needs no driver session, because it tells the merchant nothing private. */
+     Read by the merchant's Orders page and the customer's tracking page so
+     both can see that a driver has taken the order. It answers with the
+     driver's NAME, the contact number the account already holds and the
+     timestamps — never the account id, never a permission, never anything
+     else about the driver, and nothing invented: a field absent from the
+     record comes back null. It needs no driver session, because it reveals
+     nothing private about the delivery itself. */
   function assignmentOf(orderId){
     var o = allOrders().filter(function (x) { return x.id === orderId; })[0];
     if (!o || !o.snapshot) return { claimed:false };
     var f = fulfilmentOf(o.snapshot);
     if (!f.driverId) return { claimed:false };
-    var name = null;
-    try { var u = global.RAFPerm && RAFPerm.getUser(f.driverId); name = (u && u.name) || null; } catch (e) {}
-    return { claimed:true, driverName:name, assignedAt:f.assignedAt || null,
+    var name = null, phone = null;
+    try {
+      var u = global.RAFPerm && RAFPerm.getUser(f.driverId);
+      name  = (u && u.name)  || null;
+      phone = (u && u.phone) || null;
+    } catch (e) {}
+    return { claimed:true, driverName:name, driverPhone:phone, assignedAt:f.assignedAt || null,
              pickedUpAt:f.pickedUpAt || null, deliveredAt:f.deliveredAt || null,
              stage:stageOf(o) };
   }

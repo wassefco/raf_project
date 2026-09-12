@@ -16,96 +16,51 @@
 /* ===== page-specific: confirmation · timeline · driver · map ===== */
 .od-wrap{max-width:860px;}
 
-/* 1 · confirmation card */
-.cf{position:relative;overflow:hidden;background:linear-gradient(150deg,var(--ink),#1c180f);border:1px solid rgba(201,168,76,.34);
-  border-radius:var(--rl);padding:22px;margin-bottom:16px;color:#F3EEDD;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
-.cf::after{content:'';position:absolute;inset:0;background:radial-gradient(420px 180px at 88% -30%,rgba(201,168,76,.2),transparent 62%);pointer-events:none;}
-.cf>*{position:relative;}
-.cf-ic{width:56px;height:56px;flex-shrink:0;border-radius:50%;background:rgba(46,158,91,.16);border:1px solid rgba(46,158,91,.45);
-  display:flex;align-items:center;justify-content:center;font-size:28px;color:#5FD08A;}
-.cf.is-cancelled .cf-ic{background:rgba(217,83,79,.16);border-color:rgba(217,83,79,.5);color:#F09490;}
-.cf-b{flex:1;min-width:180px;}
-.cf-t{font-family:var(--fdisplay);font-size:20px;font-weight:800;color:#fff;margin-bottom:4px;}
-.cf-s{font-size:13px;color:#c2b9a6;line-height:1.6;}
-.cf-facts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
-.cf-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);
-  border-radius:20px;padding:7px 13px;font-size:12.5px;color:#F3EEDD;}
-.cf-chip.gold{background:rgba(201,168,76,.15);border-color:rgba(201,168,76,.42);color:var(--gold);font-weight:700;}
-.cf-chip.paid{background:rgba(46,158,91,.14);border-color:rgba(46,158,91,.4);color:#7FD9A2;font-weight:700;}
-.cf-chip i{font-size:14px;}
+/* 1 · the order header — one dark, premium card carrying the state,
+      the live indicator and the three facts that matter at a glance */
+.hero{position:relative;overflow:hidden;background:linear-gradient(150deg,var(--ink),#1c180f);
+  border:1px solid rgba(201,168,76,.34);border-radius:var(--rl);padding:20px 20px 16px;margin-bottom:14px;color:#F3EEDD;}
+.hero::after{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(420px 190px at 88% -30%,rgba(201,168,76,.22),transparent 62%);}
+.hero>*{position:relative;}
+.hero-top{display:flex;align-items:flex-start;gap:13px;}
+.hero-ic{width:50px;height:50px;flex:0 0 auto;border-radius:16px;background:rgba(201,168,76,.16);
+  border:1px solid rgba(201,168,76,.42);display:flex;align-items:center;justify-content:center;font-size:25px;color:var(--gold);}
+.hero.is-done .hero-ic{background:rgba(46,158,91,.16);border-color:rgba(46,158,91,.45);color:#5FD08A;}
+.hero.is-cancelled .hero-ic{background:rgba(217,83,79,.16);border-color:rgba(217,83,79,.5);color:#F09490;}
+.hero-t{flex:1;min-width:0;}
+.hero-t h1{margin:0;font-family:var(--fdisplay);font-size:21px;font-weight:800;color:#fff;line-height:1.35;}
+.hero-t p{margin:5px 0 0;font-size:13px;color:#c2b9a6;line-height:1.6;}
+.hero-live{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;height:28px;padding:0 11px;border-radius:20px;
+  background:rgba(46,158,91,.18);border:1px solid rgba(46,158,91,.45);color:#8FE0AF;font-size:11.5px;font-weight:800;}
+.hero-live b{width:7px;height:7px;border-radius:50%;background:#5FD08A;animation:heroBlink 1.8s ease-in-out infinite;}
+@keyframes heroBlink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.hero-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:16px;}
+.hero-fact{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:10px 11px;min-width:0;}
+.hero-fact span{display:block;font-size:10.5px;font-weight:700;color:#a99f8c;margin-bottom:4px;line-height:1.4;}
+.hero-fact b{display:block;font-size:13.5px;font-weight:800;color:#F7F2E4;line-height:1.45;overflow-wrap:anywhere;}
+.hero-fact.gold b{color:var(--gold);}
+.hero-fact.muted b{color:#a99f8c;font-weight:700;}
+@media (max-width:400px){ .hero-facts{grid-template-columns:1fr 1fr;} .hero-fact:last-child{grid-column:1 / -1;} }
 
-/* 2 · interactive vertical timeline */
-.tl{position:relative;}
-.tl-step{display:flex;gap:14px;position:relative;}
-.tl-rail{position:relative;display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:38px;}
-.tl-dot{width:38px;height:38px;border-radius:50%;border:2px solid var(--border2);background:var(--card);display:flex;align-items:center;
-  justify-content:center;font-size:18px;color:var(--text3);z-index:1;transition:transform .3s,background .3s,border-color .3s,color .3s;}
-.tl-line{flex:1;width:2px;background:var(--border2);margin:2px 0;transition:background .35s;}
-.tl-step:last-child .tl-line{display:none;}
-.tl-body{flex:1;min-width:0;padding-bottom:24px;transition:opacity .3s;}
-.tl-step:last-child .tl-body{padding-bottom:0;}
-.tl-name{font-size:15px;font-weight:700;color:var(--text3);transition:color .3s;}
-.tl-time{font-size:12.5px;color:var(--text3);margin-top:3px;display:flex;align-items:center;gap:5px;}
-.tl-desc{font-size:13px;color:var(--text3);line-height:1.7;margin-top:6px;}
-/* completed */
-.tl-step.done .tl-dot{background:var(--green);border-color:var(--green);color:#fff;}
-.tl-step.done .tl-line{background:var(--green);}
-.tl-step.done .tl-name{color:var(--ink);}
-.tl-step.done .tl-time,.tl-step.done .tl-desc{color:var(--text2);}
-/* cancelled */
-.tl-step.cancel .tl-dot{background:var(--red);border-color:var(--red);color:#fff;}
-.tl-step.cancel .tl-name{color:var(--red);}
-/* active — accent + pulse */
-.tl-step.active .tl-dot{background:var(--gold);border-color:var(--gold);color:#1C1606;transform:scale(1.06);
-  box-shadow:0 0 0 0 rgba(201,168,76,.55);animation:tlPulse 2s infinite;}
-.tl-step.active .tl-name{color:var(--ink);font-weight:800;}
-.tl-step.active .tl-desc,.tl-step.active .tl-time{color:var(--text2);}
-@keyframes tlPulse{0%{box-shadow:0 0 0 0 rgba(201,168,76,.5);}70%{box-shadow:0 0 0 12px rgba(201,168,76,0);}100%{box-shadow:0 0 0 0 rgba(201,168,76,0);}}
-@media(prefers-reduced-motion:reduce){.tl-step.active .tl-dot{animation:none;}}
-/* pending */
-.tl-step.pending .tl-body{opacity:.62;}
-/* ETA merged into the active step */
-.tl-eta{display:inline-flex;align-items:center;gap:8px;margin-top:10px;background:var(--gold-soft);border:1px solid rgba(201,168,76,.35);
-  border-radius:12px;padding:9px 13px;font-size:13px;color:var(--gold2);font-weight:700;}
-.tl-eta i{font-size:16px;}
-
-/* 3 · driver */
-.dr{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
-.dr-av{width:54px;height:54px;flex-shrink:0;border-radius:50%;background:var(--gold-soft);display:flex;align-items:center;
-  justify-content:center;font-size:25px;color:var(--gold2);}
-.dr-b{flex:1;min-width:150px;}
-.dr-n{font-size:15px;font-weight:700;color:var(--ink);}
-.dr-m{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:5px;font-size:12.5px;color:var(--text3);}
-.dr-rate{display:inline-flex;align-items:center;gap:4px;background:var(--gold-soft);color:var(--gold2);border-radius:20px;padding:3px 9px;font-weight:700;}
-.dr-rate i{font-size:12px;}
-.dr-veh{display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;
-  padding:4px 10px;margin-top:8px;font-family:var(--fen);font-size:12px;font-weight:600;color:var(--text2);}
-.dr-acts{display:flex;gap:8px;flex-shrink:0;}
-.dr-btn{display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 16px;border-radius:30px;border:1px solid var(--border2);
-  background:var(--card);color:var(--text2);font-family:var(--font);font-size:13.5px;font-weight:700;cursor:pointer;transition:all .2s;}
-.dr-btn:hover{border-color:var(--gold);color:var(--gold2);}
-.dr-btn.primary{background:var(--green);border-color:var(--green);color:#fff;}
-.dr-btn.primary:hover{background:#26834b;color:#fff;}
-
-/* 4 · map (reduced height) */
-.map{height:190px;border-radius:var(--r);overflow:hidden;position:relative;background:
-  linear-gradient(0deg,rgba(201,168,76,.05),rgba(201,168,76,.05)),
-  repeating-linear-gradient(0deg,var(--bg2) 0 1px,transparent 1px 34px),
-  repeating-linear-gradient(90deg,var(--bg2) 0 1px,transparent 1px 34px),var(--bg);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;text-align:center;padding:16px;}
-.map i{font-size:34px;color:var(--gold2);opacity:.8;}
-.map-t{font-size:13.5px;font-weight:700;color:var(--text2);}
-.map-s{font-size:12px;color:var(--text3);}
-.map.live{background:linear-gradient(150deg,#EDF3EE,#E4EDE6);}
-.map-live-badge{position:absolute;top:12px;inset-inline-start:12px;display:inline-flex;align-items:center;gap:6px;background:var(--green);
-  color:#fff;border-radius:20px;padding:5px 11px;font-size:11.5px;font-weight:700;}
-.map-live-badge .pulse{width:7px;height:7px;border-radius:50%;background:#fff;animation:tlPulse 1.6s infinite;}
-
-/* 5 · order details rows (reuses .ci from raf_checkout.css) */
-.oi-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;}
-.oi-tag{display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;
+/* 2 · the products in the order — products only, nothing else */
+.pr-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid var(--border);}
+.pr-row:first-of-type{border-top:0;}
+.pr-img{width:54px;height:54px;flex:0 0 auto;border-radius:14px;background:var(--bg2) center/cover no-repeat;
+  display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--gold2);}
+.pr-b{flex:1;min-width:0;}
+.pr-b b{display:block;font-size:14.5px;font-weight:800;color:var(--ink);line-height:1.5;overflow-wrap:anywhere;}
+.pr-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.pr-tag{display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;
   padding:4px 10px;font-size:11.5px;color:var(--text2);}
-.oi-tag b{color:var(--ink);font-weight:700;}
+.pr-tag b{color:var(--ink);font-weight:700;}
+.pr-price{flex:0 0 auto;font-size:14px;font-weight:800;color:var(--ink);white-space:nowrap;}
+.pr-price small{font-size:11px;font-weight:700;color:var(--text3);}
+.pr-more{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;min-height:46px;margin-top:4px;
+  border:1px dashed var(--border2);border-radius:13px;background:transparent;color:var(--gold2);
+  font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;}
+.pr-more:hover{border-color:var(--gold);background:var(--gold-soft);}
+.pr-more:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 
 /* 7 · action buttons */
 .od-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
@@ -181,6 +136,116 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
   border:1px solid rgba(217,83,79,.32);color:var(--red);font-size:12.5px;font-weight:700;line-height:1.6;}
 .cc-err.show{display:block;}
 @media (min-width:560px){ .cc-acts{flex-direction:row;} .cc-acts button{flex:1;} }
+
+/* ══════════════════════════════════════════════════════════════
+   CUSTOMER TRACKING — three stages, horizontally.
+   The whole component is written in logical properties, so the
+   progression runs right→left in Arabic and left→right in English
+   from the same markup: the connector fills from `inset-inline-start`
+   and the row is an ordinary flex row, which the document direction
+   already reverses. Nothing here is mirrored by hand.
+   ══════════════════════════════════════════════════════════════ */
+.trk-steps{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);
+  padding:20px 18px 16px;margin-bottom:14px;}
+.trk-row{display:flex;align-items:flex-start;gap:0;position:relative;}
+.trk-step{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:9px;position:relative;}
+/* the connector lives behind the nodes and runs between them */
+.trk-step::before{content:'';position:absolute;top:21px;height:3px;border-radius:3px;background:var(--border2);
+  inset-inline-start:-50%;width:100%;z-index:0;}
+.trk-step:first-child::before{display:none;}
+.trk-step::after{content:'';position:absolute;top:21px;height:3px;border-radius:3px;background:var(--gold2);
+  inset-inline-start:-50%;width:0;z-index:1;transition:width .55s cubic-bezier(.22,1,.36,1);}
+.trk-step:first-child::after{display:none;}
+.trk-step.done::after,.trk-step.current::after{width:100%;}
+.trk-node{position:relative;z-index:2;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:21px;background:var(--bg2);border:2px solid var(--border2);color:var(--text3);
+  transition:background .35s,border-color .35s,color .35s,transform .35s;}
+.trk-step.done .trk-node{background:rgba(46,158,91,.14);border-color:#2E9E5B;color:#1F7A45;}
+.trk-step.current .trk-node{background:var(--gold-soft);border-color:var(--gold2);color:var(--gold2);transform:scale(1.06);}
+.trk-step.current .trk-node::after{content:'';position:absolute;inset:-6px;border-radius:50%;
+  border:2px solid var(--gold2);opacity:.55;animation:trkPulse 2.1s ease-out infinite;}
+@keyframes trkPulse{0%{transform:scale(.92);opacity:.5;}70%{transform:scale(1.22);opacity:0;}100%{opacity:0;}}
+.trk-lbl{font-size:12.5px;font-weight:800;line-height:1.5;text-align:center;color:var(--text3);
+  max-width:11ch;overflow-wrap:anywhere;transition:color .35s;}
+.trk-step.done .trk-lbl{color:var(--text2);}
+.trk-step.current .trk-lbl{color:var(--ink);}
+.trk-state{font-size:11px;font-weight:700;color:var(--text3);}
+.trk-step.current .trk-state{color:var(--gold2);}
+.trk-steps.is-cancelled .trk-node{background:rgba(217,83,79,.1);border-color:rgba(217,83,79,.4);color:var(--red);}
+.trk-steps.is-cancelled .trk-step::after{background:var(--red);}
+.trk-note{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:flex-start;
+  gap:8px;font-size:12.5px;line-height:1.7;color:var(--text3);}
+.trk-note i{font-size:16px;color:var(--gold2);flex:0 0 auto;margin-top:1px;}
+
+/* live delivery */
+.trk-live{background:var(--card);border:1px solid rgba(201,168,76,.4);border-radius:var(--rl);
+  padding:18px;margin-bottom:14px;box-shadow:0 0 0 3px var(--gold-soft);}
+.trk-live-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
+.trk-live-h h2{margin:0;flex:1;min-width:140px;font-size:15.5px;font-weight:800;color:var(--ink);}
+.trk-dot{display:inline-flex;align-items:center;gap:6px;height:27px;padding:0 11px;border-radius:20px;
+  background:rgba(46,158,91,.13);color:#1F7A45;font-size:11.5px;font-weight:800;white-space:nowrap;}
+.trk-dot span{width:8px;height:8px;border-radius:50%;background:#2E9E5B;animation:trkBlink 1.8s ease-in-out infinite;}
+@keyframes trkBlink{0%,100%{opacity:1;}50%{opacity:.35;}}
+.trk-sub{font-size:13px;color:var(--text2);line-height:1.7;}
+.trk-leg{display:flex;align-items:flex-start;gap:11px;padding:12px 0;border-top:1px solid var(--border);margin-top:12px;}
+.trk-leg:first-of-type{border-top:0;margin-top:6px;}
+.trk-leg .ic{width:36px;height:36px;flex:0 0 auto;border-radius:11px;background:var(--bg2);color:var(--gold2);
+  display:flex;align-items:center;justify-content:center;font-size:18px;}
+.trk-leg .b{flex:1;min-width:0;}
+.trk-leg .b b{display:block;font-size:11.5px;font-weight:800;color:var(--text3);margin-bottom:3px;}
+.trk-leg .b span{display:block;font-size:14px;color:var(--ink);line-height:1.6;overflow-wrap:anywhere;}
+.trk-na{display:flex;align-items:flex-start;gap:9px;margin-top:12px;padding:12px 13px;border-radius:13px;
+  border:1px dashed var(--border2);font-size:12.5px;line-height:1.7;color:var(--text3);}
+.trk-na i{font-size:17px;flex:0 0 auto;margin-top:1px;}
+
+/* driver */
+.trk-driver{display:flex;align-items:center;gap:13px;flex-wrap:wrap;}
+.trk-av{width:52px;height:52px;flex:0 0 auto;border-radius:50%;background:var(--gold-soft);color:var(--gold2);
+  display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;}
+.trk-driver .who{flex:1 1 160px;min-width:0;}
+.trk-driver .who b{display:block;font-size:15.5px;font-weight:800;color:var(--ink);overflow-wrap:anywhere;}
+.trk-driver .who span{display:block;font-size:12.5px;color:var(--text3);margin-top:2px;}
+.trk-phone{display:block;font-family:var(--fen);font-size:13px;color:var(--text2);margin-top:4px;direction:ltr;unicode-bidi:isolate;}
+.trk-acts{display:flex;gap:9px;flex-wrap:wrap;width:100%;margin-top:13px;padding-top:13px;border-top:1px solid var(--border);}
+.trk-call,.trk-msg{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:48px;padding:0 18px;
+  border-radius:14px;text-decoration:none;font-family:inherit;font-size:14px;font-weight:800;flex:1 1 130px;border:1px solid transparent;}
+.trk-call{background:var(--ink);color:#F5F0E4;}
+.trk-call:hover{filter:brightness(1.12);}
+/* messaging has no backend in RAF, so the control says so instead of
+   pretending a message was sent */
+.trk-msg{background:var(--card);border-color:var(--border2);color:var(--text3);cursor:not-allowed;}
+.trk-msg small{font-weight:700;font-size:11px;}
+.trk-call:focus-visible,.trk-msg:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+/* compact summary + support */
+.trk-kv{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-top:1px solid var(--border);
+  font-size:13.5px;line-height:1.6;}
+.trk-kv:first-of-type{border-top:0;}
+.trk-kv .k{color:var(--text3);font-weight:700;display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;}
+.trk-kv .k i{color:var(--gold2);font-size:16px;}
+.trk-kv .v{color:var(--ink);font-weight:700;text-align:end;max-width:62%;overflow-wrap:anywhere;}
+.trk-help{display:flex;align-items:center;gap:13px;flex-wrap:wrap;}
+.trk-help .b{flex:1 1 180px;min-width:0;}
+.trk-help .b b{display:block;font-size:15px;font-weight:800;color:var(--ink);}
+.trk-help .b span{display:block;font-size:13px;color:var(--text3);margin-top:3px;line-height:1.6;}
+.trk-help a{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:48px;padding:0 18px;
+  border-radius:14px;border:1px solid var(--border2);background:var(--card);color:var(--ink);text-decoration:none;
+  font-size:14px;font-weight:800;flex:0 0 auto;}
+.trk-help a:hover{border-color:var(--gold);color:var(--gold2);}
+.trk-help a:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+@media (max-width:420px){
+  .trk-steps{padding:18px 12px 14px;}
+  .trk-lbl{font-size:11.5px;max-width:9ch;}
+  .trk-call,.trk-help a{width:100%;}
+}
+/* motion is a flourish, never the message */
+@media (prefers-reduced-motion:reduce){
+  .trk-step::after{transition:none;}
+  .trk-step.current .trk-node::after{animation:none;opacity:.4;}
+  .trk-dot span{animation:none;}
+  .trk-node{transition:none;}
+}
 </style>
 <script src="raf_features.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
@@ -227,6 +292,8 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 <script src="raf_permissions.js"></script>
 <script src="raf_wallet.js"></script>
 <script src="raf_order_changes.js"></script>
+<!-- read-only: the name and contact of whoever is carrying this order -->
+<script src="raf_driver.js"></script>
 <script src="raf_checkout.js"></script>
 <script>
 /* ============================================================
@@ -235,6 +302,8 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
    ============================================================ */
 (function(){
   var T=RAFCO.T, L=RAFCO.L, money=RAFCO.money;
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 
   function getOrder(){
     var id=new URLSearchParams(location.search).get('id');
@@ -242,20 +311,68 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     return (id && RAFShop.Orders.get(id)) || all[0] || null;
   }
 
-  /* step copy keyed by timeline stage */
-  var STEP={
-    placed:{ic:'ti-receipt',   d:{ar:'تم استلام طلبك وتأكيد الدفع بنجاح.',en:'Your order was received and payment confirmed.'}},
-    prep:  {ic:'ti-package',   d:{ar:'المتجر يجهّز ويعبّئ منتجاتك الآن.',en:'The store is preparing and packing your items.'}},
-    ship:  {ic:'ti-truck-delivery', d:{ar:'المندوب في الطريق إليك.',en:'Your courier is on the way to you.'}},
-    done:  {ic:'ti-home-check',d:{ar:'تم تسليم الطلب بنجاح. نتمنى لك تجربة سعيدة!',en:'Delivered successfully. We hope you enjoy it!'}},
-    cancel:{ic:'ti-circle-x',  d:{ar:'تم إلغاء هذا الطلب.',en:'This order was cancelled.'}}
-  };
-  /* ETA shown inside the ACTIVE step only (single source of truth) */
-  var ETA={
-    prep:{ar:'يجهز الآن — يغادر المتجر خلال 20–30 دقيقة',en:'Preparing — leaves the store in 20–30 min'},
-    ship:{ar:'يصل خلال 15–25 دقيقة تقريباً',en:'Arriving in about 15–25 min'},
-    placed:{ar:'سيبدأ التجهيز خلال دقائق',en:'Preparation starts in a few minutes'}
-  };
+  /* ══════════════════════════════════════════════════════════════
+     THE CUSTOMER'S VIEW OF THE ORDER — three stages, nothing else.
+
+     The order lifecycle inside RAF has many more states than this, and the
+     customer is shown none of them: no queue names, no engine states, no
+     driver assignment wording, and none of the audit vocabulary that the
+     record keeps internally. What follows is a PROJECTION of the existing
+     authoritative data onto exactly three stages. It reads state, it never
+     decides it, and it writes nothing.
+
+       Stage 1 · جاري تجهيز طلبك   the store still has the order — placed,
+                                   accepted, preparing, ready, or ready and
+                                   waiting for a driver to take it
+       Stage 2 · قيد التوصيل        a driver owns the delivery: from the
+                                   moment the order is taken, through pickup,
+                                   until it is handed over
+       Stage 3 · تم التوصيل         the order was delivered
+
+     Source of truth, in order of preference:
+       · RAFOrderSnapshot fulfilment  (driverId / pickedUpAt / deliveredAt)
+       · order.status                 (delivered / cancelled)
+       · the order's own stages       — legacy orders carry no snapshot; their
+                                        `ship` / `done` stages answer the same
+                                        question without exposing any wording
+     ══════════════════════════════════════════════════════════════ */
+  var STAGES=[
+    { key:'prep', ic:'ti-package',        ar:'جاري تجهيز طلبك', en:'Order being prepared' },
+    { key:'ship', ic:'ti-truck-delivery', ar:'قيد التوصيل',     en:'Out for delivery' },
+    { key:'done', ic:'ti-home-check',     ar:'تم التوصيل',      en:'Delivered' }
+  ];
+  function fulfilmentOf(o){
+    var f = (o && o.snapshot && o.snapshot.fulfilment) || null;
+    return (f && typeof f==='object') ? f : null;
+  }
+  /* legacy fallback: an order with no snapshot still knows how far it got */
+  function legacyStage(o){
+    var tl=o.tl||[];
+    function at(k){ return tl.filter(function(s){ return s.k===k; })[0]; }
+    var done=at('done'), ship=at('ship');
+    if(done && done.s==='done') return 2;
+    if(ship && (ship.s==='active'||ship.s==='done')) return 1;
+    return 0;
+  }
+  function stageOf(o){
+    var cancelled = o.status==='cancelled';
+    var f = fulfilmentOf(o);
+    var idx;
+    if(o.status==='delivered' || (f && f.deliveredAt)) idx=2;
+    else if(f && f.driverId)                           idx=1;   /* taken, picked up or on the way */
+    else if(f)                                         idx=0;   /* still the store's */
+    else                                               idx=legacyStage(o);
+    return { index:idx, cancelled:cancelled,
+             claimed:!!(f && f.driverId), picked:!!(f && f.pickedUpAt),
+             delivered: idx===2 };
+  }
+  /* the driver carrying this order, from the delivery authority. Never a
+     fabricated name, rating, vehicle or photo — only what the record holds. */
+  function assignment(o){
+    if(!window.RAFDriver || !RAFDriver.assignmentOf) return { claimed:false };
+    try { return RAFDriver.assignmentOf(o.id) || { claimed:false }; }
+    catch(e){ return { claimed:false }; }
+  }
 
   function statusMeta(st){
     if(st==='delivered') return {cls:'b-delivered',ic:'ti-circle-check',label:T('تم التسليم','Delivered')};
@@ -263,122 +380,218 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     return {cls:'b-progress',ic:'ti-truck-delivery',label:T('قيد التوصيل','In progress')};
   }
 
-  /* ---------- 1 · confirmation ---------- */
+  /* the delivery commitment frozen into the snapshot at checkout. It is the
+     only authoritative "when" RAF has: there is no live ETA anywhere, so when
+     this is absent the page says so rather than estimating. */
+  function commitmentOf(o){
+    try { return (window.RAFStoreSchedule && o.snapshot) ? RAFStoreSchedule.formatCommitment(o.snapshot, T('ar','en')) : null; }
+    catch(e){ return null; }
+  }
+
+  /* ---------- 1 · header — the current stage, in the customer's words ---------- */
   function confirmationHTML(o){
-    var cancelled=o.status==='cancelled', delivered=o.status==='delivered';
+    var cancelled=o.status==='cancelled';
+    var st=stageOf(o);
     var title = cancelled ? T('تم إلغاء الطلب','Order cancelled')
-              : delivered ? T('تم تسليم طلبك','Order delivered')
-              : T('تم تأكيد طلبك!','Order confirmed!');
+              : st.index===2 ? T('تم توصيل طلبك','Your order was delivered')
+              : st.index===1 ? T('طلبك قيد التوصيل','Your order is out for delivery')
+              : T('جاري تجهيز طلبك','Your order is being prepared');
     var sub = cancelled ? T('إذا كان لديك أي استفسار تواصل مع الدعم.','Contact support if you have any questions.')
-            : delivered ? T('شكراً لتسوقك من رف.','Thanks for shopping with RAF.')
-            : T('شكراً لك — يمكنك متابعة حالة طلبك من هنا.','Thank you — you can follow your order status here.');
-    /* payment status derived from the payment method */
-    var payTxt=L(o.pay)||'';
-    var isCOD=/الدفع عند الاستلام|cash on delivery/i.test(payTxt);
-    var payState = cancelled ? T('مسترجع','Refunded') : (isCOD ? T('الدفع عند الاستلام','Pay on delivery') : T('مدفوع','Paid'));
-    return '<div class="cf'+(cancelled?' is-cancelled':'')+'">'
-      + '<div class="cf-ic"><i class="ti '+(cancelled?'ti-x':'ti-check')+'"></i></div>'
-      + '<div class="cf-b"><div class="cf-t">'+title+'</div><div class="cf-s">'+sub+'</div>'
-        + '<div class="cf-facts">'
-          + '<span class="cf-chip gold"><i class="ti ti-hash"></i>'+o.id+'</span>'
-          + '<span class="cf-chip"><i class="ti ti-coin"></i>'+o.total+' '+T('د.ك','KWD')+'</span>'
-          + '<span class="cf-chip '+(cancelled?'':'paid')+'"><i class="ti ti-credit-card"></i>'+payState+'</span>'
-        + '</div></div></div>';
+            : st.index===2 ? T('شكراً لتسوقك من رف.','Thanks for shopping with RAF.')
+            : st.index===1 ? T('سيصل إليك قريباً..','It will reach you shortly…')
+            : T('المتجر يجهّز طلبك الآن، وسنخبرك فور خروجه للتوصيل.','The store is preparing your order — we will tell you as soon as it leaves for delivery.');
+    var icon = cancelled ? 'ti-x' : st.index===2 ? 'ti-circle-check' : st.index===1 ? 'ti-truck-delivery' : 'ti-package';
+    var commit = commitmentOf(o);
+    /* the live badge belongs to a delivery that is actually happening */
+    var live = (!cancelled && st.index===1)
+      ? '<span class="hero-live"><b aria-hidden="true"></b>'+T('مباشر','Live')+'</span>' : '';
+    return '<header class="hero'+(cancelled?' is-cancelled':'')+(st.index===2?' is-done':'')+'">'
+      + '<div class="hero-top"><span class="hero-ic" aria-hidden="true"><i class="ti '+icon+'"></i></span>'
+        + '<div class="hero-t"><h1>'+title+'</h1><p>'+sub+'</p></div>'+live+'</div>'
+      + '<div class="hero-facts">'
+        + '<div class="hero-fact'+(commit?'':' muted')+'"><span>'+T('الوقت المتوقع للوصول','Expected arrival')+'</span>'
+          + '<b>'+(commit ? commit : T('غير متاح','Not available'))+'</b></div>'
+        + '<div class="hero-fact"><span>'+T('إجمالي الطلب','Order total')+'</span><b>'+o.total+' '+T('د.ك','KWD')+'</b></div>'
+        + '<div class="hero-fact gold"><span>'+T('رقم الطلب','Order number')+'</span><b>'+o.id+'</b></div>'
+      + '</div></header>';
   }
 
-  /* ---------- 2 · timeline (ETA merged into active step) ---------- */
+  /* ---------- 2 · the three-stage tracker ----------
+     One horizontal row. Every stage carries an icon AND its own word, so the
+     state never depends on colour, and the whole row is announced to a screen
+     reader as a progress bar with the stage the order is actually at. */
   function timelineHTML(o){
-    var steps=(o.tl||[]);
-    var activeIdx=steps.findIndex(function(s){ return s.s==='active'; });
-    var rows=steps.map(function(s,i){
-      var meta=STEP[s.k]||{ic:'ti-point',d:{ar:'',en:''}};
-      var state = s.s==='cancel' ? 'cancel' : (s.s==='done' ? 'done' : (s.s==='active' ? 'active' : 'pending'));
-      var icon = state==='done' ? 'ti-check' : (state==='cancel' ? 'ti-x' : meta.ic);
-      var eta = (state==='active' && ETA[s.k])
-        ? '<div class="tl-eta"><i class="ti ti-clock-hour-4"></i> '+L(ETA[s.k])+'</div>' : '';
-      return '<div class="tl-step '+state+'">'
-        + '<div class="tl-rail"><div class="tl-dot"><i class="ti '+icon+'"></i></div><div class="tl-line"></div></div>'
-        + '<div class="tl-body"><div class="tl-name">'+L(s.t)+'</div>'
-          + '<div class="tl-time"><i class="ti ti-clock" style="font-size:13px"></i> '+(L(s.time)||'—')+'</div>'
-          + '<div class="tl-desc">'+L(meta.d)+'</div>' + eta
-        + '</div></div>';
+    var st=stageOf(o);
+    var stages=STAGES.map(function(s,i){
+      /* a delivered order has no "current" stage left — all three are done,
+         so the finished tracker rests instead of pulsing forever */
+      var state = st.cancelled ? (i<=st.index?'done':'')
+                : i<st.index ? 'done'
+                : i===st.index ? (st.delivered ? 'done' : 'current') : '';
+      var icon  = st.cancelled ? 'ti-circle-x' : (state==='done' ? 'ti-check' : s.ic);
+      var word  = state==='done' ? T('تم','Done') : state==='current' ? T('الآن','Now') : T('قادم','Next');
+      return '<div class="trk-step '+state+'">'
+        + '<span class="trk-node" aria-hidden="true"><i class="ti '+icon+'"></i></span>'
+        + '<span class="trk-lbl">'+T(s.ar,s.en)+'</span>'
+        + '<span class="trk-state">'+(st.cancelled?'—':word)+'</span>'
+        + '</div>';
     }).join('');
-    var sm=statusMeta(o.status);
-    return '<div class="panel"><div class="panel-h"><i class="ti ti-timeline"></i> '+T('مراحل الطلب','Order progress')
-      + '<span class="side"><span class="badge '+sm.cls+'"><i class="ti '+sm.ic+'"></i> '+sm.label+'</span></span></div>'
-      + '<div class="panel-b"><div class="tl">'+rows+'</div></div></div>';
+    var current=STAGES[Math.min(st.index,2)];
+    var reading = st.cancelled
+      ? T('الطلب ملغى','Order cancelled')
+      : T('المرحلة '+(st.index+1)+' من 3: '+current.ar, 'Stage '+(st.index+1)+' of 3: '+current.en);
+    return '<section class="trk-steps'+(st.cancelled?' is-cancelled':'')+'" aria-label="'+T('مراحل الطلب','Order progress')+'">'
+      + '<div class="trk-row" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="'+(st.index+1)+'"'
+        + ' aria-valuetext="'+reading+'">'+stages+'</div>'
+      + '<p class="trk-note"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'+reading+'</span></p>'
+      + '</section>';
   }
 
-  /* ---------- 3 · driver ---------- */
+  /* ---------- 3 · live delivery ----------
+     Shown while the order is out for delivery. It states what is genuinely
+     known — that a driver has the order, where it came from and where it is
+     going — and says plainly that live location is not configured. RAF holds
+     no coordinates, no route and no ETA, so none is drawn or estimated. */
+  function liveHTML(o){
+    var st=stageOf(o); if(st.cancelled || st.index!==1) return '';
+    var a=assignment(o);
+    var storeName=L(o.store);
+    var commitment=commitmentOf(o);
+    var statusLine = a.picked || st.picked
+      ? T('استلم المندوب طلبك من المتجر وهو في طريقه إليك.','The driver collected your order from the store and is on the way to you.')
+      : T('طلبك جاهز ومع مندوب التوصيل الآن.','Your order is ready and with the delivery driver now.');
+    return '<section class="trk-live" aria-label="'+T('التتبع المباشر','Live tracking')+'">'
+      + '<div class="trk-live-h"><h2>'+T('التتبع المباشر','Live tracking')+'</h2>'
+        + '<span class="trk-dot"><span aria-hidden="true"></span>'+T('مباشر','Live')+'</span></div>'
+      + '<p class="trk-sub">'+statusLine+'</p>'
+      + '<div class="trk-leg"><span class="ic" aria-hidden="true"><i class="ti ti-building-store"></i></span>'
+        + '<span class="b"><b>'+T('من المتجر','From the store')+'</b><span>'+(storeName||'—')+'</span></span></div>'
+      + '<div class="trk-leg"><span class="ic" aria-hidden="true"><i class="ti ti-map-pin"></i></span>'
+        + '<span class="b"><b>'+T('إلى عنوانك','To your address')+'</b><span>'+(L(o.addr)||'—')+'</span></span></div>'
+      + (commitment
+          ? '<div class="trk-leg"><span class="ic" aria-hidden="true"><i class="ti ti-clock-hour-4"></i></span>'
+            + '<span class="b"><b>'+T('موعد التوصيل','Delivery time')+'</b><span>'+commitment+'</span></span></div>'
+          : '')
+      + '<div class="trk-na"><i class="ti ti-map-off" aria-hidden="true"></i><span>'
+        + T('التتبع على الخريطة والوقت المتبقي غير مُهيّأين في هذه النسخة. حالة التوصيل أعلاه محدّثة وصحيحة.',
+            'Map tracking and a remaining-time estimate are not configured in this version. The delivery status above is live and accurate.')
+        + '</span></div></section>';
+  }
+
+  /* ---------- 4 · the driver ----------
+     Only a real, named driver appears here. Before anybody takes the order
+     there is no driver to show and the card stays away entirely — the
+     customer is never told about assignment, queues or waiting. Nothing is
+     invented: no rating, no vehicle, no photo, no location, because RAF holds
+     none of them. */
   function driverHTML(o){
-    if(o.status==='cancelled') return '';
-    var assigned = !!o.driverName || (o.status==='progress' && hasShipped(o));
-    var name = o.driverName || (assigned ? T('خالد العنزي','Khaled Al-Anzi') : T('قيد التعيين','Being assigned'));
-    var rating = o.driverRating || '4.8';
-    var vehicle = o.driverVehicle || 'KWT · 45 B 2291';
-    var trips = o.driverTrips || '238';
-    if(!assigned){
-      return '<div class="panel"><div class="panel-h"><i class="ti ti-motorbike"></i> '+T('مندوب التوصيل','Courier')+'</div>'
-        + '<div class="panel-b"><div class="alert info"><i class="ti ti-info-circle"></i><div>'
-        + T('سيتم تعيين مندوب فور جاهزية الطلب، وستظهر بياناته هنا.','A courier will be assigned once your order is ready — their details will appear here.')
-        + '</div></div></div></div>';
+    var st=stageOf(o); if(st.cancelled) return '';
+    var a=assignment(o);
+    if(!a.claimed || !a.driverName) return '';
+    var delivered = st.index===2;
+    var line = delivered
+      ? T('سلّم طلبك بنجاح.','Delivered your order.')
+      : (a.pickedUpAt ? T('في الطريق إليك الآن.','On the way to you now.')
+                      : T('مسؤول عن توصيل طلبك.','Responsible for delivering your order.'));
+    var phone = a.driverPhone ? String(a.driverPhone) : null;
+    /* the avatar is RAF's own initial mark — no photo exists in the record and
+       none is invented */
+    var acts = '';
+    if(!delivered){
+      acts = '<div class="trk-acts">'
+        + (phone
+            ? '<a class="trk-call" href="tel:'+esc(phone.replace(/\s/g,''))+'" aria-label="'
+              + T('الاتصال بمندوب التوصيل','Call the delivery driver')+'">'
+              + '<i class="ti ti-phone" aria-hidden="true"></i>'+T('اتصال','Call')+'</a>'
+            : '')
+        /* RAF has no customer↔driver messaging backend, so the control is
+           disabled and says why instead of faking a sent message */
+        + '<button class="trk-msg" type="button" disabled aria-disabled="true">'
+          + '<i class="ti ti-message-off" aria-hidden="true"></i>'+T('مراسلة','Message')
+          + ' <small>('+T('غير مُهيّأ','not configured')+')</small></button>'
+        + '</div>';
     }
-    return '<div class="panel"><div class="panel-h"><i class="ti ti-motorbike"></i> '+T('مندوب التوصيل','Courier')+'</div>'
-      + '<div class="panel-b"><div class="dr">'
-        + '<div class="dr-av"><i class="ti ti-user"></i></div>'
-        + '<div class="dr-b"><div class="dr-n">'+name+'</div>'
-          + '<div class="dr-m"><span class="dr-rate"><i class="ti ti-star-filled"></i> '+rating+'</span>'
-          + '<span>'+trips+' '+T('توصيلة','deliveries')+'</span></div>'
-          + '<div class="dr-veh"><i class="ti ti-motorbike"></i> '+vehicle+'</div></div>'
-        + '<div class="dr-acts">'
-          + '<button class="dr-btn primary" onclick="callDriver()"><i class="ti ti-phone"></i> '+T('اتصال','Call')+'</button>'
-          + '<button class="dr-btn" onclick="chatDriver()"><i class="ti ti-message-2"></i> '+T('محادثة','Chat')+'</button>'
-        + '</div></div></div></div>';
-  }
-  function hasShipped(o){ return (o.tl||[]).some(function(s){ return s.k==='ship' && (s.s==='active'||s.s==='done'); }); }
-
-  /* ---------- 4 · map (placeholder → live when a driver location exists) ---------- */
-  function mapHTML(o){
-    if(o.status==='cancelled') return '';
-    var live = !!o.driverLocation || hasShipped(o);
-    return '<div class="panel"><div class="panel-h"><i class="ti ti-map-2"></i> '+T('موقع الطلب','Order location')+'</div>'
-      + '<div class="panel-b"><div class="map'+(live?' live':'')+'">'
-        + (live ? '<span class="map-live-badge"><span class="pulse"></span> '+T('تتبع مباشر','Live')+'</span>' : '')
-        + '<i class="ti '+(live?'ti-truck-delivery':'ti-map-2')+'"></i>'
-        + '<div class="map-t">'+(live?T('المندوب في الطريق إليك','Your courier is on the way'):T('التتبع المباشر غير متاح بعد','Live tracking not available yet'))+'</div>'
-        + '<div class="map-s">'+(live?T('يتم تحديث الموقع تلقائياً','Location updates automatically'):T('ستظهر الخريطة فور انطلاق المندوب','The map appears once the courier departs'))+'</div>'
+    return '<div class="panel"><div class="panel-h" role="heading" aria-level="2"><i class="ti ti-motorbike"></i> '+T('معلومات مندوب التوصيل','Delivery driver')+'</div>'
+      + '<div class="panel-b"><div class="trk-driver">'
+        + '<span class="trk-av" aria-hidden="true">'+esc(String(a.driverName).trim().charAt(0))+'</span>'
+        + '<span class="who"><b>'+esc(a.driverName)+'</b>'
+          + '<span>'+T('مندوب توصيل رف','RAF delivery driver')+' · '+line+'</span>'
+          + (phone && !delivered ? '<span class="trk-phone">'+esc(phone)+'</span>' : '')+'</span>'
+        + acts
       + '</div></div></div>';
   }
 
-  /* ---------- 5 · order details (products shown ONCE) ---------- */
-  function detailsHTML(o){
-    var storeName=L(o.store);
-    var rows=(o.items||[]).map(function(it){
+  /* ---------- 5 · the products, and only the products ----------
+     No address, no payment, no order metadata: those belong to their own
+     cards below. A long order shows the first two and opens on request. */
+  var SHOWALL=false;
+  window.showAllItems=function(){ SHOWALL=true; render(); };
+  function productsHTML(o){
+    var items=o.items||[];
+    var count=items.reduce(function(n,it){ return n + (parseInt(it.qty,10)||1); },0);
+    var COMPACT=2, shown=(SHOWALL || items.length<=COMPACT) ? items : items.slice(0,COMPACT);
+    var rows=shown.map(function(it){
+      var qty=parseInt(it.qty,10)||1;
       var v=it.variant||{};
-      var tags=Object.keys(v).map(function(k){ return '<span class="oi-tag">'+k+': <b>'+v[k]+'</b></span>'; });
-      if(!tags.length && it.meta) tags.push('<span class="oi-tag">'+L(it.meta)+'</span>');
-      tags.push('<span class="oi-tag">'+T('الكمية','Qty')+': <b>'+(it.qty||1)+'</b></span>');
-      var st=it.store?L(it.store):storeName;
-      return '<div class="ci">'
-        + '<div class="ci-img"><i class="ti '+(it.ic||'ti-box')+'"></i></div>'
-        + '<div class="ci-main"><div class="ci-name">'+L(it.name)+'</div>'
-          + (st?'<div class="rc-store" style="margin-top:5px;font-size:12px;color:var(--text3);display:flex;align-items:center;gap:5px;"><i class="ti ti-building-store" style="color:var(--gold2)"></i> '+st+'</div>':'')
-          + '<div class="oi-tags">'+tags.join('')+'</div>'
-          + '<div class="ci-bot"><div class="ci-price" style="margin-inline-start:0"><b>'+it.price+' <small>'+T('د.ك','KWD')+'</small></b></div></div>'
-        + '</div></div>';
+      var tags=Object.keys(v).map(function(k){ return '<span class="pr-tag">'+esc(k)+': <b>'+esc(v[k])+'</b></span>'; });
+      if(!tags.length && it.meta) tags.push('<span class="pr-tag">'+L(it.meta)+'</span>');
+      tags.push('<span class="pr-tag">'+T('الكمية','Qty')+': <b>'+qty+'</b></span>');
+      /* a real product image when the record has one; RAF's own icon otherwise */
+      var media = it.img ? ' style="background-image:url(\''+esc(it.img)+'\')"' : '';
+      return '<div class="pr-row"><span class="pr-img"'+media+' aria-hidden="true">'
+        + (it.img ? '' : '<i class="ti '+esc(it.ic||'ti-box')+'"></i>')+'</span>'
+        + '<span class="pr-b"><b>'+L(it.name)+'</b><span class="pr-meta">'+tags.join('')+'</span></span>'
+        + (it.price ? '<span class="pr-price">'+it.price+' <small>'+T('د.ك','KWD')+'</small></span>' : '')
+        + '</div>';
     }).join('');
-    return '<div class="panel"><div class="panel-h"><i class="ti ti-shopping-bag"></i> '+T('تفاصيل الطلب','Order Details')
-      + '<span class="side">'+(o.items||[]).length+' '+T('منتج','items')+'</span></div>'+rows
-      + '<div class="panel-b" style="border-top:1px solid var(--border);">'
-        + '<div class="sum-row"><span><i class="ti ti-map-pin" style="color:var(--gold2)"></i> '+T('عنوان التوصيل','Delivery address')+'</span><span style="max-width:60%;text-align:end">'+L(o.addr)+'</span></div>'
-        /* the delivery commitment frozen in the snapshot at checkout */
-        + (function(){
-            var c = (window.RAFStoreSchedule && o.snapshot) ? RAFStoreSchedule.formatCommitment(o.snapshot, T('ar','en')) : null;
-            return c ? '<div class="sum-row" id="dlvCommit"><span><i class="ti ti-clock-hour-4" style="color:var(--gold2)"></i> '+T('موعد التوصيل','Delivery time')+'</span><span style="max-width:60%;text-align:end">'+c+'</span></div>' : '';
-          })()
-        + '<div class="sum-row"><span><i class="ti ti-credit-card" style="color:var(--gold2)"></i> '+T('طريقة الدفع','Payment method')+'</span><span>'+L(o.pay)+'</span></div>'
-        + '<div class="sum-row"><span><i class="ti ti-calendar" style="color:var(--gold2)"></i> '+T('تاريخ الطلب','Order date')+'</span><span>'+L(o.date)+'</span></div>'
+    var more = (!SHOWALL && items.length>COMPACT)
+      ? '<button class="pr-more" type="button" onclick="showAllItems()"><i class="ti ti-chevron-down" aria-hidden="true"></i>'
+        + T('عرض جميع المنتجات','View all products')+' ('+items.length+')</button>' : '';
+    return '<div class="panel"><div class="panel-h" role="heading" aria-level="2"><i class="ti ti-shopping-bag"></i> '+T('المنتجات في طلبك','Products in your order')
+      + '<span class="side">'+count+' '+T('قطعة','items')+'</span></div>'
+      + '<div class="panel-b">'+(rows||('<div class="trk-kv"><span class="v">'+T('لا توجد منتجات','No products')+'</span></div>'))+more+'</div></div>';
+  }
+
+  /* ---------- 6 · order details — order-level facts, stored values only ---------- */
+  function orderDetailsHTML(o){
+    return '<div class="panel"><div class="panel-h" role="heading" aria-level="2"><i class="ti ti-file-description"></i> '+T('تفاصيل الطلب','Order details')+'</div>'
+      + '<div class="panel-b">'
+        + '<div class="trk-kv"><span class="k"><i class="ti ti-hash" aria-hidden="true"></i>'+T('رقم الطلب','Order number')+'</span><span class="v">'+o.id+'</span></div>'
+        + '<div class="trk-kv"><span class="k"><i class="ti ti-building-store" aria-hidden="true"></i>'+T('المتجر','Store')+'</span><span class="v">'+(L(o.store)||'—')+'</span></div>'
+        + '<div class="trk-kv"><span class="k"><i class="ti ti-calendar" aria-hidden="true"></i>'+T('تاريخ الطلب','Order date')+'</span><span class="v">'+(L(o.date)||'—')+'</span></div>'
+        + '<div class="trk-kv"><span class="k"><i class="ti ti-credit-card" aria-hidden="true"></i>'+T('طريقة الدفع','Payment method')+'</span><span class="v">'+(L(o.pay)||'—')+'</span></div>'
+        + '<div class="trk-kv"><span class="k"><i class="ti ti-coin" aria-hidden="true"></i>'+T('الإجمالي','Total')+'</span><span class="v">'+o.total+' '+T('د.ك','KWD')+'</span></div>'
       + '</div></div>';
+  }
+
+  /* ---------- 7 · delivery information ----------
+     The address and the commitment exactly as the order holds them. There is
+     no live ETA in RAF, so none is shown and none is estimated. */
+  function deliveryHTML(o){
+    var commitment=commitmentOf(o);
+    var d=(o.snapshot && o.snapshot.delivery) || {};
+    var TYPE={ delivery:{ar:'توصيل إلى العنوان',en:'Delivery to your address'}, pickup:{ar:'استلام من المتجر',en:'Pickup from the store'} };
+    var TIMING={ instant:{ar:'فوري',en:'Instant'}, scheduled:{ar:'موعد محدد',en:'Scheduled'}, next_opening:{ar:'عند افتتاح المتجر',en:'At the next opening'} };
+    return '<div class="panel"><div class="panel-h" role="heading" aria-level="2"><i class="ti ti-map-pin"></i> '+T('معلومات التوصيل','Delivery information')+'</div>'
+      + '<div class="panel-b">'
+        + '<div class="trk-kv"><span class="k"><i class="ti ti-map-pin" aria-hidden="true"></i>'+T('عنوان التوصيل','Delivery address')+'</span><span class="v">'+(L(o.addr)||'—')+'</span></div>'
+        + (TYPE[d.type] ? '<div class="trk-kv"><span class="k"><i class="ti ti-truck-delivery" aria-hidden="true"></i>'+T('نوع التوصيل','Delivery type')+'</span><span class="v">'+T(TYPE[d.type].ar,TYPE[d.type].en)+'</span></div>' : '')
+        + (TIMING[d.timing] ? '<div class="trk-kv"><span class="k"><i class="ti ti-clock" aria-hidden="true"></i>'+T('وقت التوصيل','Delivery timing')+'</span><span class="v">'+T(TIMING[d.timing].ar,TIMING[d.timing].en)+'</span></div>' : '')
+        + '<div class="trk-kv" id="dlvCommit"><span class="k"><i class="ti ti-clock-hour-4" aria-hidden="true"></i>'+T('الوقت المتوقع للوصول','Expected arrival')+'</span>'
+          + '<span class="v">'+(commitment ? commitment : '<span style="color:var(--text3);font-weight:700">'+T('غير متاح','Not available')+'</span>')+'</span></div>'
+      + '</div></div>';
+  }
+
+  /* ---------- 6 · help ----------
+     Points at RAF's existing support centre. No ticket is opened from here
+     and no message is faked. */
+  function supportHTML(){
+    return '<div class="panel"><div class="panel-b"><div class="trk-help">'
+      + '<span class="b"><b>'+T('تحتاج إلى مساعدة؟','Need help?')+'</b>'
+      + '<span>'+T('فريق الدعم جاهز لمساعدتك في أي استفسار عن طلبك.',
+                   'Our support team is ready to help with anything about your order.')+'</span></span>'
+      + '<a href="raf_support.html"><i class="ti ti-headset" aria-hidden="true"></i>'+T('مركز الدعم','Support centre')+'</a>'
+      + '</div></div></div>';
   }
 
   /* ---------- 6 · invoice summary ---------- */
@@ -389,7 +602,7 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
        total so the receipt always adds up (legacy orders have no breakdown) */
     var sub = o.subtotal!=null ? parseFloat(o.subtotal)
             : Math.max(0, total - ship - tax - tip + disc);
-    return '<div class="panel"><div class="panel-h"><i class="ti ti-receipt"></i> '+T('ملخص الفاتورة','Invoice summary')+'</div>'
+    return '<div class="panel"><div class="panel-h" role="heading" aria-level="2"><i class="ti ti-receipt"></i> '+T('ملخص الفاتورة','Invoice summary')+'</div>'
       + '<div class="panel-b">'
         + '<div class="sum-row"><span>'+T('المجموع الفرعي','Subtotal')+'</span><span>'+money(sub)+' '+T('د.ك','KWD')+'</span></div>'
         + (disc>0?'<div class="sum-row disc"><span>'+T('الخصم','Discount')+(o.coupon?' ('+o.coupon+')':'')+'</span><span>− '+money(disc)+'</span></div>':'')
@@ -624,13 +837,13 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
         + '<div class="empty-actions"><a href="raf_orders.html" class="btn btn-gold"><i class="ti ti-receipt"></i> '+T('طلباتي','My Orders')+'</a></div></div>';
       return;
     }
-    root.innerHTML = confirmationHTML(o) + changeHTML(o) + timelineHTML(o) + driverHTML(o) + mapHTML(o)
-                   + detailsHTML(o) + invoiceHTML(o) + actionsHTML();
+    /* progress first, then the delivery itself, then the order's own detail */
+    root.innerHTML = confirmationHTML(o) + changeHTML(o) + timelineHTML(o) + liveHTML(o) + driverHTML(o)
+                   + productsHTML(o) + orderDetailsHTML(o) + deliveryHTML(o)
+                   + invoiceHTML(o) + supportHTML() + actionsHTML();
     RAFShop.Cart.badge();
   }
 
-  window.callDriver=function(){ RAFShop.toast(T('جارٍ الاتصال بالمندوب…','Calling your courier…'),{icon:'ti-phone'}); };
-  window.chatDriver=function(){ RAFShop.toast(T('جارٍ فتح المحادثة…','Opening chat…'),{icon:'ti-message-2'}); };
   window.goBack=function(){ if(history.length>1) history.back(); else window.location='raf_orders.html'; };
 
   function boot(){
