@@ -33,8 +33,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .sb-avatar{width:36px;height:36px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.25);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--gold);flex-shrink:0;}
 .sb-admin-name{font-size:13px;font-weight:700;}
 .sb-admin-role{font-size:11px;color:var(--purple);}
-.sb-logout{width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text3);font-family:var(--font);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
-.sb-logout:hover{border-color:var(--red);color:var(--red);}
 /* MAIN */
 .content{flex:1;overflow-y:auto;min-height:100vh;display:flex;flex-direction:column;max-width:100%;}
 .top-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
@@ -197,10 +195,6 @@ select.field-inp{cursor:pointer;appearance:auto;}
       <div class="sb-item" data-view="roles" onclick="sw('roles',this)"><i class="ti ti-shield-lock"></i> <span data-ar="الأدوار والمصفوفة" data-en="Roles &amp; Matrix">الأدوار والمصفوفة</span></div>
       <div class="sb-item" data-view="templates" onclick="sw('templates',this)"><i class="ti ti-template"></i> <span data-ar="قوالب الصلاحيات" data-en="Templates">قوالب الصلاحيات</span></div>
     </div>
-    <div class="sb-section">
-      <div class="sb-section-lbl" data-ar="التنقل" data-en="NAVIGATE">التنقل</div>
-      <a class="sb-item" href="raf_management.html"><i class="ti ti-layout-dashboard"></i> <span data-ar="لوحة الإدارة" data-en="Management">لوحة الإدارة</span></a>
-    </div>
   </div>
   <div class="sb-footer">
     <div class="sb-admin">
@@ -214,7 +208,6 @@ select.field-inp{cursor:pointer;appearance:auto;}
       <button class="lang-btn" onclick="toggleLang()" data-ar="EN" data-en="ع" style="flex:1;">EN</button>
       <button class="lang-btn" onclick="resetData()" data-ar="إعادة تعيين" data-en="Reset" style="flex:1;">إعادة تعيين</button>
     </div>
-    <button class="sb-logout" onclick="window.location='raf_management.html'"><i class="ti ti-arrow-right"></i> <span data-ar="رجوع للوحة الإدارة" data-en="Back to Admin">رجوع للوحة الإدارة</span></button>
   </div>
 </div>
 

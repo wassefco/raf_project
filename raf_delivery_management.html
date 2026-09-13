@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl" data-ui="admin">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — إدارة التوصيل</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   RAF DELIVERY MANAGEMENT — a standalone operations interface.
+   Own shell, own navigation, own visual identity. It opts out of the
+   storefront theme (data-ui="admin") and is written in logical properties,
+   so Arabic and English share one layout.
+   The page renders what RAFDeliveryOps answers; it holds no delivery logic.
+   ══════════════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#F2F3F0; --surface:#FFFFFF; --surface-2:#F7F8F6; --line:#E1E4DF; --line-2:#CED3CC;
+  --ink:#141917; --text:#29302D; --muted:#5F6965; --faint:#88918D;
+  --nav:#0E1C1A; --nav-2:#162825; --nav-3:#1E3531; --nav-text:#D3DDD9; --nav-muted:#8A9A95;
+  --accent:#1C7466; --accent-2:#155C51; --accent-soft:#E2F0EC;
+  --gold:#C9A84C;
+  --wait:#9A6414; --wait-bg:#FBF0DA;
+  --claim:#2D5B97; --claim-bg:#E5EDF8;
+  --out:#1C7466;  --out-bg:#E2F0EC;
+  --done:#2B7446; --done-bg:#E3F1E7;
+  --alert:#A8412D; --alert-bg:#FAE8E3;
+  --r-sm:8px; --r:10px; --r-lg:14px;
+  --shadow:0 1px 2px rgba(14,28,26,.05), 0 1px 1px rgba(14,28,26,.03);
+  --shadow-pop:0 12px 32px rgba(14,28,26,.16);
+  --head-h:64px; --nav-w:272px;
+  --font:'Tajawal',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+html[lang="en"]{ --font:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif; }
+*{ box-sizing:border-box; }
+html,body{ margin:0; }
+body{ background:var(--bg); color:var(--text); font-family:var(--font); font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+[hidden]{ display:none !important; }
+button,input,select{ font:inherit; color:inherit; }
+a{ color:inherit; }
+:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.sr-only{ position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+bdi{ unicode-bidi:isolate; }
+
+/* ───────── APP GRID ───────── */
+.dm{ min-height:100vh; display:grid; grid-template-columns:var(--nav-w) minmax(0,1fr); }
+.dm-main{ min-width:0; display:flex; flex-direction:column; }
+
+/* ───────── SIDEBAR ───────── */
+.dm-nav{ background:var(--nav); color:var(--nav-text); display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh; min-width:0; }
+.dm-brand{ display:flex; align-items:center; gap:12px; padding:0 18px; height:var(--head-h); border-block-end:1px solid rgba(255,255,255,.06); flex-shrink:0; }
+.dm-brand-mark{ width:36px; height:36px; border-radius:9px; background:var(--accent); color:#fff; display:grid; place-items:center; flex-shrink:0; position:relative; }
+.dm-brand-mark i{ font-size:20px; }
+.dm-brand-mark::after{ content:""; position:absolute; inset-inline-end:-3px; inset-block-end:-3px; width:10px; height:10px; border-radius:3px; background:var(--gold); border:2px solid var(--nav); }
+.dm-brand-t{ min-width:0; line-height:1.2; }
+.dm-brand-t b{ display:block; color:#fff; font-size:15px; font-weight:800; letter-spacing:.1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dm-brand-t span{ display:block; color:var(--nav-muted); font-size:11.5px; font-weight:600; }
+.ibtn.dm-nav-x{ display:none; margin-inline-start:auto; }
+.dm-nav-scroll{ flex:1; overflow-y:auto; padding:12px 10px 16px; overscroll-behavior:contain; }
+.dm-nav-scroll::-webkit-scrollbar{ width:6px; } .dm-nav-scroll::-webkit-scrollbar-thumb{ background:var(--nav-3); border-radius:3px; }
+.dm-nav ul{ list-style:none; margin:0; padding:0; }
+.dm-group{ margin-block-end:2px; }
+.dm-group-btn{ width:100%; min-height:44px; display:flex; align-items:center; gap:12px; padding:0 12px; border:0; background:transparent;
+  color:var(--nav-text); border-radius:var(--r-sm); cursor:pointer; font-size:14px; font-weight:600; text-align:start; }
+.dm-group-btn:hover{ background:var(--nav-2); color:#fff; }
+.dm-group-btn > i:first-child{ font-size:19px; color:var(--nav-muted); flex-shrink:0; width:20px; text-align:center; }
+.dm-group-btn .lbl{ flex:1; min-width:0; }
+.dm-group-btn .chev{ font-size:16px; color:var(--nav-muted); transition:transform .18s ease; }
+[dir="rtl"] .dm-group-btn .chev{ transform:scaleX(-1); }
+.dm-group-btn[aria-expanded="true"] .chev{ transform:rotate(90deg); }
+.dm-group.is-current > .dm-group-btn{ color:#fff; }
+.dm-group.is-current > .dm-group-btn > i:first-child{ color:var(--gold); }
+.dm-sub{ padding:2px 0 8px; margin-inline-start:22px; border-inline-start:1px solid var(--nav-3); }
+.dm-sub a{ display:flex; align-items:center; gap:8px; min-height:44px; padding:0 12px 0 14px; margin-inline-start:-1px;
+  border-inline-start:2px solid transparent; color:var(--nav-muted); text-decoration:none; font-size:13.5px; font-weight:500; border-radius:0 var(--r-sm) var(--r-sm) 0; }
+[dir="rtl"] .dm-sub a{ border-radius:var(--r-sm) 0 0 var(--r-sm); }
+.dm-sub a:hover{ color:#fff; background:var(--nav-2); }
+.dm-sub a[aria-current="page"]{ color:#fff; font-weight:700; border-inline-start-color:var(--gold); background:var(--nav-2); }
+.dm-sub a .n{ margin-inline-start:auto; min-width:22px; padding:0 6px; height:20px; border-radius:10px; background:var(--nav-3); color:var(--nav-text);
+  font-size:11px; font-weight:700; display:inline-grid; place-items:center; font-family:'DM Sans',sans-serif; }
+.dm-sub a .soon{ margin-inline-start:auto; font-size:10.5px; color:var(--nav-muted); font-weight:600; opacity:.8; }
+
+/* ───────── HEADER ───────── */
+.dm-head{ position:sticky; top:0; z-index:40; height:var(--head-h); background:rgba(255,255,255,.92); backdrop-filter:saturate(1.4) blur(8px);
+  -webkit-backdrop-filter:saturate(1.4) blur(8px); border-block-end:1px solid var(--line); display:flex; align-items:center; gap:10px; padding:0 24px; }
+.ibtn.dm-burger{ display:none; }
+.dm-crumb{ min-width:0; flex:1; display:flex; align-items:center; gap:8px; }
+.dm-crumb .mob-brand{ display:none; width:34px; height:34px; border-radius:9px; background:var(--accent); color:#fff; place-items:center; flex-shrink:0; }
+.dm-crumb .mob-brand i{ font-size:19px; }
+.dm-crumb-t{ min-width:0; line-height:1.25; }
+.dm-crumb-t small{ display:block; color:var(--faint); font-size:11.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dm-crumb-t b{ display:block; color:var(--ink); font-size:15px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dm-tools{ display:flex; align-items:center; gap:6px; flex-shrink:0; }
+.ibtn{ width:44px; height:44px; min-height:44px; border-radius:var(--r); border:1px solid transparent; background:transparent; color:var(--muted);
+  display:inline-grid; place-items:center; cursor:pointer; position:relative; padding:0; }
+.ibtn:hover{ background:var(--surface-2); border-color:var(--line); color:var(--ink); }
+.ibtn i{ font-size:20px; }
+.ibtn.lang{ width:auto; min-width:44px; padding:0 12px; font-weight:800; font-size:13px; color:var(--text); border-color:var(--line); }
+.dm-user{ display:flex; align-items:center; gap:10px; min-height:44px; padding:0 8px 0 6px; border-radius:var(--r); border:1px solid transparent;
+  background:transparent; cursor:pointer; text-align:start; max-width:240px; }
+.dm-user:hover{ background:var(--surface-2); border-color:var(--line); }
+.dm-av{ width:32px; height:32px; border-radius:50%; background:var(--nav); color:#fff; display:grid; place-items:center; font-size:13px; font-weight:800; flex-shrink:0; }
+.dm-user-t{ min-width:0; line-height:1.2; }
+.dm-user-t b{ display:block; font-size:13px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dm-user-t span{ display:block; font-size:11.5px; color:var(--faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pop-wrap{ position:relative; }
+.pop{ position:absolute; top:calc(100% + 8px); inset-inline-end:0; width:300px; max-width:calc(100vw - 24px); background:var(--surface);
+  border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow-pop); z-index:60; overflow:hidden; }
+.pop-h{ padding:14px 16px; border-block-end:1px solid var(--line); font-weight:800; color:var(--ink); font-size:14px; }
+.pop-b{ padding:16px; color:var(--muted); font-size:13px; }
+.pop-empty{ display:flex; gap:12px; align-items:flex-start; }
+.pop-empty i{ font-size:22px; color:var(--faint); }
+.pop-id{ display:flex; gap:12px; align-items:center; padding:16px; }
+.pop-id .dm-av{ width:40px; height:40px; font-size:15px; }
+.pop-id b{ display:block; color:var(--ink); }
+.pop-id span{ display:block; color:var(--faint); font-size:12px; }
+
+/* ───────── CONTENT ───────── */
+.dm-content{ padding:28px 28px 48px; width:100%; max-width:1440px; margin-inline:auto; }
+.pg-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-block-end:22px; flex-wrap:wrap; }
+.pg-head h1{ margin:0; font-size:24px; line-height:1.25; font-weight:800; color:var(--ink); letter-spacing:-.2px; }
+.pg-head p{ margin:4px 0 0; color:var(--muted); font-size:13.5px; }
+.pg-actions{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:44px; padding:0 16px; border-radius:var(--r);
+  border:1px solid var(--line-2); background:var(--surface); color:var(--text); font-weight:700; font-size:13.5px; cursor:pointer; text-decoration:none; white-space:nowrap; }
+.btn:hover{ border-color:var(--accent); color:var(--accent-2); }
+.btn i{ font-size:18px; }
+.btn.primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
+.btn.primary:hover{ background:var(--accent-2); color:#fff; }
+.live-pill{ display:inline-flex; align-items:center; gap:7px; height:30px; padding:0 12px; border-radius:15px; background:var(--accent-soft); color:var(--accent-2); font-size:12px; font-weight:700; }
+.live-pill b{ width:7px; height:7px; border-radius:50%; background:var(--accent); }
+
+.card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow); min-width:0; }
+.card-h{ display:flex; align-items:center; gap:10px; padding:16px 18px; border-block-end:1px solid var(--line); }
+.card-h h2{ margin:0; font-size:15px; font-weight:800; color:var(--ink); display:flex; align-items:center; gap:8px; }
+.card-h h2 i{ font-size:18px; color:var(--muted); }
+.card-h .sp{ flex:1; }
+.card-h .count{ font-size:12px; color:var(--faint); font-weight:700; }
+.card-h a.more{ display:inline-flex; align-items:center; gap:4px; min-height:44px; padding:0 4px; font-size:12.5px; font-weight:700; color:var(--accent-2); text-decoration:none; }
+[dir="rtl"] .card-h a.more i{ transform:scaleX(-1); }
+.card-note{ padding:12px 18px; border-block-start:1px solid var(--line); color:var(--faint); font-size:12px; display:flex; gap:8px; align-items:flex-start; }
+.card-note i{ font-size:15px; margin-block-start:1px; }
+
+/* KPI row */
+.kpis{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; margin-block-end:18px; }
+.kpi{ display:flex; flex-direction:column; gap:10px; padding:16px 18px; text-decoration:none; color:inherit; position:relative; min-height:112px; }
+.kpi:hover{ border-color:var(--line-2); }
+.kpi-top{ display:flex; align-items:center; gap:10px; padding-inline-end:22px; }
+.kpi-ic{ width:34px; height:34px; border-radius:9px; display:grid; place-items:center; flex-shrink:0; }
+.kpi-ic i{ font-size:19px; }
+.kpi-l{ font-size:13px; font-weight:700; color:var(--muted); min-width:0; }
+.kpi-v{ font-family:'DM Sans',sans-serif; font-size:32px; line-height:1; font-weight:700; color:var(--ink); letter-spacing:-.5px; }
+.kpi-s{ font-size:12px; color:var(--faint); }
+.kpi .go{ position:absolute; top:16px; inset-inline-end:14px; color:var(--faint); font-size:16px; }
+[dir="rtl"] .kpi .go{ transform:scaleX(-1); }
+.kpi.wait .kpi-ic{ background:var(--wait-bg); color:var(--wait); }
+.kpi.claim .kpi-ic{ background:var(--claim-bg); color:var(--claim); }
+.kpi.out .kpi-ic{ background:var(--out-bg); color:var(--out); }
+.kpi.done .kpi-ic{ background:var(--done-bg); color:var(--done); }
+
+.dash-grid{ display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:18px; align-items:start; }
+.dash-grid > .col{ display:flex; flex-direction:column; gap:18px; min-width:0; }
+
+/* status chip */
+.chip{ display:inline-flex; align-items:center; gap:5px; height:24px; padding:0 9px; border-radius:12px; font-size:12px; font-weight:700; white-space:nowrap; background:var(--surface-2); color:var(--muted); }
+.chip i{ font-size:14px; }
+.chip.wait{ background:var(--wait-bg); color:var(--wait); }
+.chip.claim{ background:var(--claim-bg); color:var(--claim); }
+.chip.out{ background:var(--out-bg); color:var(--out); }
+.chip.done{ background:var(--done-bg); color:var(--done); }
+.chip.alert{ background:var(--alert-bg); color:var(--alert); }
+.chip.muted{ background:var(--surface-2); color:var(--muted); border:1px solid var(--line); }
+
+/* table (becomes cards on narrow screens) */
+.tbl-wrap{ width:100%; overflow-x:auto; }
+.tbl td.first, .tbl td.nw{ white-space:nowrap; }
+.tbl{ width:100%; border-collapse:collapse; font-size:13.5px; }
+.tbl th{ text-align:start; font-size:11.5px; font-weight:700; color:var(--faint); padding:10px 14px; background:var(--surface-2); border-block-end:1px solid var(--line); white-space:nowrap; }
+.tbl td{ padding:10px 14px; border-block-end:1px solid var(--line); vertical-align:middle; color:var(--text); }
+.tbl tbody tr:last-child td{ border-block-end:0; }
+.tbl tbody tr{ cursor:pointer; }
+.tbl tbody tr:hover td{ background:#FAFBF9; }
+.tbl .strong{ font-weight:700; color:var(--ink); }
+.tbl .sub{ display:block; font-size:12px; color:var(--faint); }
+.tbl .num{ font-family:'DM Sans',sans-serif; }
+.order-btn{ display:inline-flex; align-items:center; min-height:44px; padding:0; border:0; background:transparent; font-weight:800; color:var(--accent-2); cursor:pointer; font-family:'DM Sans',sans-serif; font-size:13.5px; }
+.order-btn:hover{ text-decoration:underline; }
+.cell-muted{ color:var(--faint); }
+
+/* side panels */
+.list{ list-style:none; margin:0; padding:0; }
+.list li{ display:flex; gap:12px; padding:14px 18px; border-block-end:1px solid var(--line); align-items:flex-start; }
+.list li:last-child{ border-block-end:0; }
+.list .ic{ width:30px; height:30px; border-radius:8px; display:grid; place-items:center; flex-shrink:0; }
+.list .ic i{ font-size:16px; }
+.list .ic.alert{ background:var(--alert-bg); color:var(--alert); }
+.list .ic.wait{ background:var(--wait-bg); color:var(--wait); }
+.list .ic.claim{ background:var(--claim-bg); color:var(--claim); }
+.list .ic.out{ background:var(--out-bg); color:var(--out); }
+.list .ic.done{ background:var(--done-bg); color:var(--done); }
+.list .bd{ min-width:0; flex:1; }
+.list .bd b{ display:block; color:var(--ink); font-size:13.5px; font-weight:700; }
+.list .bd span{ display:block; color:var(--muted); font-size:12.5px; overflow-wrap:anywhere; }
+.list .tm{ font-size:12px; color:var(--faint); white-space:nowrap; font-family:'DM Sans',sans-serif; }
+.list .order-btn{ font-size:12.5px; }
+.list .bd > span{ display:flex; flex-wrap:wrap; align-items:center; column-gap:6px; }
+.ok-state{ display:flex; gap:12px; align-items:center; padding:18px; }
+.ok-state .ic{ width:36px; height:36px; border-radius:50%; background:var(--done-bg); color:var(--done); display:grid; place-items:center; flex-shrink:0; }
+.ok-state b{ display:block; color:var(--ink); font-size:14px; }
+.ok-state span{ display:block; color:var(--muted); font-size:12.5px; }
+.status-rows{ padding:6px 18px 12px; }
+.status-row{ display:flex; align-items:center; gap:10px; min-height:40px; border-block-end:1px dashed var(--line); font-size:13px; }
+.status-row:last-child{ border-block-end:0; }
+.status-row .k{ flex:1; color:var(--muted); }
+.status-row .v{ font-weight:700; color:var(--ink); }
+
+/* empty / not configured */
+.empty{ padding:40px 24px; text-align:center; color:var(--muted); }
+.empty i{ font-size:34px; color:var(--line-2); display:block; margin-block-end:10px; }
+.empty b{ display:block; color:var(--ink); font-size:15px; margin-block-end:4px; }
+.empty span{ display:block; font-size:13px; max-width:460px; margin-inline:auto; }
+.nc{ display:grid; grid-template-columns:minmax(0,1fr); place-items:center; padding:56px 24px; text-align:center; }
+.nc-ic{ width:64px; height:64px; border-radius:18px; background:var(--surface-2); border:1px solid var(--line); display:grid; place-items:center; color:var(--muted); margin-block-end:18px; }
+.nc-ic i{ font-size:30px; }
+.nc-tag{ display:inline-flex; align-items:center; gap:6px; height:26px; padding:0 10px; border-radius:13px; background:var(--surface-2); border:1px solid var(--line); color:var(--muted); font-size:12px; font-weight:700; margin-block-end:12px; }
+.nc h2{ margin:0 0 8px; font-size:19px; color:var(--ink); font-weight:800; }
+.nc p{ margin:0 auto; max-width:520px; color:var(--muted); font-size:14px; }
+.nc .pg-actions{ justify-content:center; margin-block-start:20px; }
+
+/* toolbar */
+.toolbar{ display:flex; flex-wrap:wrap; gap:10px; padding:14px 18px; border-block-end:1px solid var(--line); align-items:center; }
+.search{ position:relative; flex:1 1 240px; min-width:0; }
+.search i{ position:absolute; inset-inline-start:12px; top:50%; transform:translateY(-50%); color:var(--faint); font-size:17px; pointer-events:none; }
+.search input{ width:100%; min-height:44px; border:1px solid var(--line-2); border-radius:var(--r); background:var(--surface); padding:0 12px; padding-inline-start:38px; }
+.sel{ min-height:44px; border:1px solid var(--line-2); border-radius:var(--r); background:var(--surface); padding:0 10px; min-width:0; max-width:100%; flex:0 1 170px; }
+.search input:focus, .sel:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+.note-bar{ display:flex; gap:8px; align-items:flex-start; padding:12px 18px; background:var(--surface-2); border-block-end:1px solid var(--line); color:var(--muted); font-size:12.5px; }
+.note-bar i{ font-size:16px; margin-block-start:1px; }
+
+/* ───────── DETAIL DRAWER ───────── */
+.dw{ position:fixed; inset:0; background:rgba(14,28,26,.38); z-index:90; display:flex; justify-content:flex-end; }
+.dw-c{ width:min(460px,100%); height:100%; background:var(--surface); display:flex; flex-direction:column; box-shadow:var(--shadow-pop); }
+.dw-h{ display:flex; align-items:center; gap:10px; padding:14px 16px 14px 18px; border-block-end:1px solid var(--line); }
+.dw-h .t{ flex:1; min-width:0; }
+.dw-h .t b{ display:block; color:var(--ink); font-size:16px; font-family:'DM Sans',sans-serif; }
+.dw-h .t span{ display:block; color:var(--muted); font-size:12.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dw-b{ flex:1; overflow-y:auto; padding:6px 18px 24px; }
+.dw-sec{ padding:14px 0; border-block-end:1px solid var(--line); }
+.dw-sec:last-child{ border-block-end:0; }
+.dw-sec h3{ margin:0 0 10px; font-size:12px; letter-spacing:.3px; color:var(--faint); font-weight:800; display:flex; gap:6px; align-items:center; }
+.dw-sec h3 i{ font-size:15px; }
+.kv{ display:flex; gap:12px; padding:5px 0; font-size:13.5px; }
+.kv .k{ color:var(--muted); flex-shrink:0; min-width:110px; }
+.kv .v{ color:var(--ink); font-weight:600; min-width:0; overflow-wrap:anywhere; }
+.tml{ display:flex; flex-direction:column; }
+.tml-s{ display:flex; gap:10px; position:relative; padding-block-end:12px; }
+.tml-s::before{ content:""; position:absolute; inset-inline-start:11px; top:24px; bottom:0; width:2px; background:var(--line); }
+.tml-s:last-child::before{ display:none; }
+.tml-s .dot{ width:24px; height:24px; border-radius:50%; display:grid; place-items:center; background:var(--surface-2); border:1px solid var(--line-2); color:var(--faint); flex-shrink:0; z-index:1; }
+.tml-s.done .dot{ background:var(--accent); border-color:var(--accent); color:#fff; }
+.tml-s .dot i{ font-size:13px; }
+.tml-s b{ display:block; font-size:13px; color:var(--ink); }
+.tml-s span{ display:block; font-size:12px; color:var(--faint); }
+.dw-item{ display:flex; gap:10px; padding:6px 0; font-size:13px; }
+.dw-item .q{ color:var(--faint); font-family:'DM Sans',sans-serif; flex-shrink:0; }
+.dw-item .n{ flex:1; min-width:0; color:var(--ink); }
+.dw-item .n span{ display:block; color:var(--faint); font-size:12px; }
+.dw-call{ margin-block-start:10px; }
+.dw-foot{ margin-block-start:14px; padding:12px; border-radius:var(--r); background:var(--surface-2); color:var(--muted); font-size:12.5px; display:flex; gap:8px; }
+.dw-foot i{ font-size:16px; }
+
+/* ───────── GATE ───────── */
+.gate{ min-height:100vh; display:grid; place-items:center; padding:24px; background:var(--bg); }
+.gate-c{ width:min(440px,100%); background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow); padding:32px 28px; text-align:center; }
+.gate-c .nc-ic{ margin-inline:auto; color:var(--alert); background:var(--alert-bg); border-color:transparent; }
+.gate-c h1{ margin:0 0 8px; font-size:19px; color:var(--ink); }
+.gate-c p{ margin:0 0 20px; color:var(--muted); }
+
+.scrim{ display:none; }
+
+/* ───────── RESPONSIVE ───────── */
+@media (max-width:1439px){
+  .dash-grid{ grid-template-columns:minmax(0,1fr); }
+  .dash-grid > .col.side{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; }
+}
+@media (max-width:1023px){
+  .dm{ grid-template-columns:minmax(0,1fr); }
+  .dm-nav{ position:fixed; top:0; bottom:0; inset-inline-start:0; width:min(300px,86vw); height:100%; z-index:80; transform:translateX(-105%);
+    transition:transform .22s ease; box-shadow:var(--shadow-pop); visibility:hidden; }
+  [dir="rtl"] .dm-nav{ transform:translateX(105%); }
+  .dm.nav-open .dm-nav{ transform:none; visibility:visible; }
+  .dm-brand{ padding-inline:16px 12px; gap:10px; }
+  .dm-brand-t b{ white-space:normal; font-size:14px; }
+  .ibtn.dm-nav-x{ display:inline-grid; color:var(--nav-text); flex-shrink:0; }
+  .ibtn.dm-nav-x:hover{ background:var(--nav-2); border-color:transparent; color:#fff; }
+  .scrim{ display:block; position:fixed; inset:0; background:rgba(14,28,26,.42); z-index:70; opacity:0; pointer-events:none; transition:opacity .2s; }
+  .dm.nav-open .scrim{ opacity:1; pointer-events:auto; }
+  .ibtn.dm-burger{ display:inline-grid; color:var(--ink); }
+  .dm-crumb .mob-brand{ display:grid; }
+  .dm-head{ padding:0 12px; gap:6px; }
+  .dm-content{ padding:20px 16px 40px; }
+  .kpis{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:760px){
+  .dm-user-t{ display:none; }
+  .dm-user{ padding:0; width:44px; justify-content:center; }
+  .dash-grid > .col.side{ grid-template-columns:minmax(0,1fr); }
+  .pg-head h1{ font-size:20px; }
+  .kpi{ min-height:0; padding:14px; }
+  .kpi-v{ font-size:26px; }
+  .sel{ flex:1 1 calc(50% - 5px); }
+}
+/* the full column set needs ~860px of content width; below that each
+   delivery becomes a labelled card instead of scrolling sideways */
+@media (max-width:1180px){
+  .tbl thead{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+  .tbl, .tbl tbody, .tbl tr, .tbl td{ display:block; width:100%; }
+  .tbl tr{ padding:6px 16px 10px; border-block-end:1px solid var(--line); }
+  .tbl tbody tr:last-child{ border-block-end:0; }
+  .tbl td{ display:flex; gap:12px; align-items:center; justify-content:space-between; border:0; padding:5px 0; min-width:0; }
+  .tbl td::before{ content:attr(data-label); color:var(--faint); font-size:12px; font-weight:700; flex-shrink:0; }
+  .tbl td > *{ min-width:0; text-align:end; }
+  .tbl td.first{ padding-block-start:0; }
+  .tbl td.first::before{ display:none; }
+  .tbl td.first{ justify-content:space-between; }
+  .tbl .sub{ display:inline; margin-inline-start:6px; }
+}
+@media (max-width:430px){
+  .dm-crumb-t small{ display:none; }
+  .dm-tools{ gap:2px; }
+  .ibtn.lang{ padding:0 10px; }
+  .kpis{ gap:10px; }
+  .kpi-l{ font-size:12px; }
+  .sel{ flex:1 1 100%; }
+  .kv .k{ min-width:92px; }
+}
+@media (prefers-reduced-motion:reduce){ *{ transition:none !important; } }
+</style>
+</head>
+<body>
+
+<!-- access refused: nothing of the console is rendered -->
+<div class="gate" id="gate" hidden>
+  <div class="gate-c" role="alert">
+    <div class="nc-ic"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
+    <h1 id="gateT"></h1>
+    <p id="gateP"></p>
+    <a class="btn" href="raf_login.html"><i class="ti ti-login" aria-hidden="true"></i><span data-ar="تسجيل الدخول" data-en="Sign in">تسجيل الدخول</span></a>
+  </div>
+</div>
+
+<div class="dm" id="shell" hidden>
+  <aside class="dm-nav" id="dmNav" aria-label="">
+    <div class="dm-brand">
+      <span class="dm-brand-mark" aria-hidden="true"><i class="ti ti-truck-delivery"></i></span>
+      <span class="dm-brand-t"><b data-ar="إدارة التوصيل" data-en="Delivery Management">إدارة التوصيل</b>
+        <span data-ar="منصة رف" data-en="RAF platform">منصة رف</span></span>
+      <button class="ibtn dm-nav-x" type="button" id="navClose" onclick="DM.closeNav()"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <nav class="dm-nav-scroll" id="navTree" aria-label=""></nav>
+  </aside>
+  <div class="scrim" onclick="DM.closeNav()" aria-hidden="true"></div>
+
+  <div class="dm-main">
+    <header class="dm-head">
+      <button class="ibtn dm-burger" type="button" id="navOpen" aria-controls="dmNav" aria-expanded="false" onclick="DM.openNav()"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+      <div class="dm-crumb">
+        <span class="mob-brand" aria-hidden="true"><i class="ti ti-truck-delivery"></i></span>
+        <div class="dm-crumb-t"><small id="crumbGroup"></small><b id="crumbPage"></b></div>
+      </div>
+      <div class="dm-tools">
+        <button class="ibtn lang" type="button" id="langBtn" onclick="DM.toggleLang()"></button>
+        <div class="pop-wrap">
+          <button class="ibtn" type="button" id="notifBtn" aria-haspopup="true" aria-expanded="false" aria-controls="notifPop" onclick="DM.togglePop('notif')"><i class="ti ti-bell" aria-hidden="true"></i></button>
+          <div class="pop" id="notifPop" hidden>
+            <div class="pop-h" data-ar="الإشعارات" data-en="Notifications">الإشعارات</div>
+            <div class="pop-b"><div class="pop-empty"><i class="ti ti-bell-off" aria-hidden="true"></i>
+              <span data-ar="لا يوجد مصدر إشعارات مُهيّأ لإدارة التوصيل بعد." data-en="No notification source is configured for Delivery Management yet.">لا يوجد مصدر إشعارات مُهيّأ لإدارة التوصيل بعد.</span></div></div>
+          </div>
+        </div>
+        <div class="pop-wrap">
+          <button class="dm-user" type="button" id="userBtn" aria-haspopup="true" aria-expanded="false" aria-controls="userPop" onclick="DM.togglePop('user')">
+            <span class="dm-av" id="userAv" aria-hidden="true"></span>
+            <span class="dm-user-t"><b id="userName"></b><span id="userRole"></span></span>
+          </button>
+          <div class="pop" id="userPop" hidden>
+            <div class="pop-id"><span class="dm-av" id="userAv2" aria-hidden="true"></span><div><b id="userName2"></b><span id="userRole2"></span></div></div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <main class="dm-content" id="view" tabindex="-1"></main>
+  </div>
+</div>
+
+<div id="drawerHost"></div>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_store_ops.js"></script>
+<script src="raf_store_schedule.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_inventory.js"></script>
+<script src="raf_rules.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_driver.js"></script>
+<script src="raf_delivery_management.js"></script>
+<script>
+/* ============================================================================
+   DELIVERY MANAGEMENT — presentation only.
+   Every delivery fact comes from RAFDeliveryOps (which reads RAFDriver, the
+   order engine and the snapshot); identity comes from RAFPerm. This page
+   renders, filters and navigates. It never changes a delivery, invents a
+   figure, or decides who may see anything — the authority does that on
+   every read.
+   ============================================================================ */
+(function(){
+  'use strict';
+  var OPS = window.RAFDeliveryOps;
+  var ME = null, DATA = null, openId = null, drawerTrigger = null, navTrigger = null;
+  var route = { g:'dashboard', s:'overview' };
+  var expanded = 'dashboard';
+  var F = { q:'', driver:'', store:'', timing:'', day:'' };
+  var mq = window.matchMedia('(max-width:1023px)');
+
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function L(o){ return (o && typeof o==='object') ? (isEn()?(o.en||o.ar):(o.ar||o.en)) : (o||''); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function el(id){ return document.getElementById(id); }
+
+  /* Kuwait time, Western digits — the clock every RAF surface uses */
+  function locale(){ return isEn() ? 'en-GB' : 'ar-KW-u-nu-latn'; }
+  function kwTime(ms){
+    if(!ms) return null;
+    try { return new Date(ms).toLocaleString(locale(), { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kuwait' }); }
+    catch(e){ return new Date(ms).toISOString().slice(0,16).replace('T',' '); }
+  }
+  function today(){
+    try { return new Date().toLocaleDateString(locale(), { weekday:'long', day:'numeric', month:'long', year:'numeric', timeZone:'Asia/Kuwait' }); }
+    catch(e){ return ''; }
+  }
+  /* time since a real timestamp — computed at render, never an estimate */
+  function ago(ms){
+    if(!ms) return null;
+    var m = Math.max(0, Math.floor((Date.now()-ms)/60000));
+    if(m < 1)  return T('الآن','just now');
+    if(m < 60) return T('قبل '+m+' د', m+' min ago');
+    var h = Math.floor(m/60);
+    if(h < 24) return T('قبل '+h+' س', h+' h ago');
+    return kwTime(ms);
+  }
+  function between(a,b){
+    if(!a || !b) return null;
+    var m = Math.max(0, Math.round((b-a)/60000));
+    return m < 60 ? T(m+' دقيقة', m+' min') : (Math.floor(m/60)+T(' س ','h ')+(m%60)+T(' د',' min'));
+  }
+  function latest(d){ return d.deliveredAt || d.pickedUpAt || d.assignedAt || d.placedAt || null; }
+  function initials(name){
+    var p = String(name||'').trim().split(/\s+/).filter(Boolean);
+    return p.length ? (p[0].charAt(0) + (p[1] ? p[1].charAt(0) : '')).toUpperCase() : '·';
+  }
+
+  /* ───────── the lifecycle's own stages, presented ───────── */
+  var STAGE = {
+    awaiting_driver: { cls:'wait',  ic:'ti-clock-hour-4',   ar:'بانتظار سائق',  en:'Waiting for driver' },
+    claimed:         { cls:'claim', ic:'ti-hand-grab',      ar:'سحبه سائق',     en:'Claimed by driver' },
+    out_for_delivery:{ cls:'out',   ic:'ti-truck-delivery', ar:'قيد التوصيل',   en:'Out for delivery' },
+    delivered:       { cls:'done',  ic:'ti-circle-check',   ar:'تم التوصيل',    en:'Delivered' },
+    /* the lifecycle's own end state for an order closed without delivery */
+    closed:          { cls:'muted', ic:'ti-circle-minus',   ar:'منتهٍ',          en:'Closed' }
+  };
+  var LIVE = ['awaiting_driver','claimed','out_for_delivery'];
+  function chip(stage){
+    var s = STAGE[stage]; if(!s) return '';
+    return '<span class="chip '+s.cls+'"><i class="ti '+s.ic+'" aria-hidden="true"></i>'+T(s.ar,s.en)+'</span>';
+  }
+
+  /* ───────── NAVIGATION MAP ─────────
+     `view` names the pages that render real data; everything else is a
+     navigation target that honestly says it is not configured yet. */
+  var NAV = [
+    { k:'dashboard', ic:'ti-layout-dashboard', ar:'لوحة المتابعة', en:'Dashboard', items:[
+      { k:'overview',    ar:'نظرة عامة',          en:'Overview',             view:'overview' },
+      { k:'active',      ar:'التوصيلات الجارية',  en:'Active Deliveries',    view:'list', stages:LIVE },
+      { k:'performance', ar:'أداء التوصيل',        en:'Delivery Performance' },
+      { k:'exceptions',  ar:'الاستثناءات',         en:'Exceptions',           view:'exceptions' } ]},
+    { k:'deliveries', ic:'ti-packages', ar:'التوصيلات', en:'Deliveries', items:[
+      { k:'all',        ar:'كل التوصيلات',       en:'All Deliveries',   view:'list', stages:null },
+      { k:'unassigned', ar:'بانتظار سائق',       en:'Unassigned',       view:'list', stages:['awaiting_driver'] },
+      { k:'assigned',   ar:'لدى سائق',           en:'Assigned',         view:'list', stages:['claimed'] },
+      { k:'picked',     ar:'تم الاستلام',         en:'Picked Up',        view:'list', stages:['out_for_delivery'], samestage:true },
+      { k:'out',        ar:'قيد التوصيل',        en:'Out for Delivery', view:'list', stages:['out_for_delivery'], samestage:true },
+      { k:'delivered',  ar:'تم التوصيل',          en:'Delivered',        view:'list', stages:['delivered'] },
+      { k:'failed',     ar:'تعذّر التسليم',       en:'Failed / Exceptions' } ]},
+    { k:'companies', ic:'ti-building-warehouse', ar:'شركات التوصيل', en:'Delivery Companies', items:[
+      { k:'list',     ar:'الشركات',                 en:'Companies' },
+      { k:'profile',  ar:'ملف الشركة',              en:'Company Profile' },
+      { k:'contracts',ar:'العقود',                  en:'Contracts' },
+      { k:'areas',    ar:'مناطق الخدمة',            en:'Service Areas' },
+      { k:'rates',    ar:'الأسعار والتعرفة',        en:'Pricing / Rates' },
+      { k:'sla',      ar:'اتفاقية مستوى الخدمة',    en:'SLA' },
+      { k:'status',   ar:'حالة الشركة',             en:'Status' } ]},
+    { k:'drivers', ic:'ti-steering-wheel', ar:'السائقون', en:'Drivers', items:[
+      { k:'all',      ar:'كل السائقين',     en:'All Drivers', view:'drivers', filter:null },
+      { k:'active',   ar:'النشطون',         en:'Active',      view:'drivers', filter:'active' },
+      { k:'inactive', ar:'غير النشطين',     en:'Inactive',    view:'drivers', filter:'inactive' },
+      { k:'company',  ar:'حسب الشركة',      en:'Company' },
+      { k:'details',  ar:'بيانات السائق',   en:'Driver Details' } ]},
+    { k:'dispatch', ic:'ti-route', ar:'التشغيل والتوزيع', en:'Dispatch & Operations', items:[
+      { k:'live',       ar:'العمليات المباشرة', en:'Live Operations' },
+      { k:'assignment', ar:'الإسناد',           en:'Assignment' },
+      { k:'manual',     ar:'التدخل اليدوي',     en:'Manual Intervention' },
+      { k:'exceptions', ar:'الاستثناءات',       en:'Exceptions' },
+      { k:'reassign',   ar:'إعادة الإسناد',     en:'Reassignment' } ]},
+    { k:'areas', ic:'ti-map-2', ar:'مناطق الخدمة', en:'Service Areas', items:[
+      { k:'kuwait',       ar:'مناطق الكويت',   en:'Kuwait Areas' },
+      { k:'coverage',     ar:'التغطية',        en:'Coverage' },
+      { k:'company',      ar:'تغطية الشركات',  en:'Company Coverage' },
+      { k:'availability', ar:'توفّر التوصيل',  en:'Delivery Availability' } ]},
+    { k:'pricing', ic:'ti-file-dollar', ar:'الأسعار والعقود', en:'Pricing & Contracts', items:[
+      { k:'contracts', ar:'العقود',          en:'Contracts' },
+      { k:'fees',      ar:'رسوم التوصيل',    en:'Delivery Fees' },
+      { k:'rates',     ar:'أسعار الشركات',   en:'Company Rates' },
+      { k:'effective', ar:'تواريخ السريان',  en:'Effective Dates' },
+      { k:'history',   ar:'سجل العقود',      en:'Contract History' } ]},
+    { k:'performance', ic:'ti-chart-line', ar:'الأداء', en:'Performance', items:[
+      { k:'sla',        ar:'مستوى الخدمة',          en:'SLA' },
+      { k:'time',       ar:'زمن التوصيل',           en:'Delivery Time' },
+      { k:'acceptance', ar:'معدل القبول',           en:'Acceptance Rate' },
+      { k:'failure',    ar:'الإلغاء وتعذّر التسليم', en:'Cancellation / Failure' },
+      { k:'comparison', ar:'مقارنة الشركات',        en:'Company Comparison' } ]},
+    { k:'reports', ic:'ti-report-analytics', ar:'التقارير', en:'Reports', items:[
+      { k:'delivery',  ar:'تقارير التوصيل',   en:'Delivery Reports' },
+      { k:'company',   ar:'تقارير الشركات',   en:'Company Reports' },
+      { k:'driver',    ar:'تقارير السائقين',  en:'Driver Reports' },
+      { k:'financial', ar:'التقارير المالية', en:'Financial Reports' } ]},
+    { k:'settings', ic:'ti-settings', ar:'الإعدادات', en:'Settings', items:[
+      { k:'config',        ar:'إعدادات التوصيل',     en:'Delivery Configuration' },
+      { k:'status',        ar:'قواعد الحالات',        en:'Status Rules' },
+      { k:'notifications', ar:'الإشعارات',            en:'Notifications' },
+      { k:'operational',   ar:'الإعدادات التشغيلية', en:'Operational Settings' },
+      { k:'integrations',  ar:'التكاملات',            en:'Integrations' } ]}
+  ];
+  function groupOf(k){ for(var i=0;i<NAV.length;i++) if(NAV[i].k===k) return NAV[i]; return null; }
+  function itemOf(g,k){ var G = groupOf(g); if(!G) return null; for(var i=0;i<G.items.length;i++) if(G.items[i].k===k) return G.items[i]; return null; }
+  function href(g,s){ return '#/'+g+'/'+s; }
+
+  /* why a module shows nothing — stated per section, never as fake content */
+  function capabilityText(key){
+    try {
+      var c = window.RAFDriver && RAFDriver.capabilities ? RAFDriver.capabilities()[key] : null;
+      return c && !c.available ? T(c.ar, c.en) : null;
+    } catch(e){ return null; }
+  }
+  var REASONS = {
+    'dashboard/performance': function(){ return T('لم تُعتمد بعد مقاييس لأداء التوصيل (مستوى الخدمة أو أزمنة مستهدفة)، لذلك لا تُعرض أي نسبة أو متوسط.',
+                                                   'No delivery performance measures (service level or target times) have been approved yet, so no rate or average is shown.'); },
+    'deliveries/failed': function(){ return capabilityText('deliveryException') || T('لا يوجد مسار معتمد لتعذّر التسليم.','No failed-delivery workflow has been approved.'); },
+    'companies': function(){ return T('لا يوجد في رف نموذج لشركات التوصيل بعد. ستُضاف الشركات وعقودها وأسعارها في مرحلة لاحقة.',
+                                     'RAF has no delivery-company model yet. Companies, their contracts and rates will be added in a later phase.'); },
+    'drivers/company': function(){ return T('السائقون غير مرتبطين بشركات توصيل في رف حاليًا.','Drivers are not linked to delivery companies in RAF yet.'); },
+    'drivers/details': function(){ return T('بيانات السائقين تُدار من صفحة إدارة السائقين. لا تُكرَّر هنا.','Driver records are managed in Driver Management and are not duplicated here.'); },
+    'dispatch': function(){ return T('السحب يتم من تطبيق السائق بنظام «الأسبق يسحب». لا توجد أدوات إسناد أو تدخّل يدوي أو إعادة إسناد مُهيّأة.',
+                                    'Deliveries are claimed by drivers in the Driver App, first come first served. No assignment, manual intervention or reassignment controls are configured.'); },
+    'areas': function(){ return T('لا توجد بيانات مناطق خدمة أو تغطية في رف بعد، ولا تُعرض خرائط.','RAF holds no service-area or coverage data yet, and no maps are shown.'); },
+    'pricing': function(){ return T('لا تُدار رسوم التوصيل أو أسعار الشركات أو العقود من هذه الواجهة بعد.','Delivery fees, company rates and contracts are not managed from this interface yet.'); },
+    'performance': function(){ return T('لم تُعتمد تعريفات للأداء (أهداف مستوى الخدمة أو حدود زمنية)، لذلك لا يُعرض أي مقياس.','No performance definitions (service-level targets or time thresholds) have been approved, so no measure is shown.'); },
+    'reports': function(){ return T('لم تُهيّأ التقارير بعد. لا تُولَّد تقارير أو أرقام مالية تجريبية.','Reports are not configured yet. No sample reports or financial figures are generated.'); },
+    'settings': function(){ return T('لم تُهيّأ الإعدادات بعد. لا شيء هنا يغيّر طريقة عمل التوصيل.','Settings are not configured yet. Nothing here changes how deliveries work.'); }
+  };
+  function reasonFor(g,s){ var f = REASONS[g+'/'+s] || REASONS[g]; return f ? f() : ''; }
+
+  /* ───────── ROUTING (the URL hash; no state system) ───────── */
+  function parseHash(){
+    var m = /^#\/([a-z]+)\/([a-z]+)$/.exec(location.hash || '');
+    if(m && itemOf(m[1], m[2])) return { g:m[1], s:m[2] };
+    return { g:'dashboard', s:'overview' };
+  }
+  function onRoute(){
+    var r = parseHash();
+    var changed = r.g !== route.g || r.s !== route.s;
+    route = r; expanded = r.g;
+    if(changed){ F = { q:'', driver:'', store:'', timing:'', day:'' }; }
+    renderNav(); renderView();
+    if(mq.matches && isNavOpen()) closeNav(false);
+    if(changed){ var v = el('view'); if(v) v.focus({ preventScroll:true }); window.scrollTo(0,0); }
+  }
+
+  /* ───────── SIDEBAR ───────── */
+  function countFor(it){
+    if(!DATA || it.view !== 'list') return null;
+    if(!it.stages) return DATA.deliveries.length;
+    return DATA.deliveries.filter(function(d){ return it.stages.indexOf(d.stage) > -1; }).length;
+  }
+  function renderNav(){
+    var html = '<ul>' + NAV.map(function(G){
+      var open = expanded === G.k, current = route.g === G.k;
+      return '<li class="dm-group'+(current?' is-current':'')+'">'
+        + '<button class="dm-group-btn" type="button" aria-expanded="'+open+'" aria-controls="sub-'+G.k+'" onclick="DM.toggleGroup(\''+G.k+'\')">'
+          + '<i class="ti '+G.ic+'" aria-hidden="true"></i><span class="lbl">'+T(G.ar,G.en)+'</span>'
+          + '<i class="ti ti-chevron-right chev" aria-hidden="true"></i></button>'
+        + '<ul class="dm-sub" id="sub-'+G.k+'"'+(open?'':' hidden')+'>'
+        + G.items.map(function(it){
+            var here = current && route.s === it.k, n = countFor(it);
+            return '<li><a href="'+href(G.k,it.k)+'"'+(here?' aria-current="page"':'')+'><span>'+T(it.ar,it.en)+'</span>'
+              + (n != null ? '<span class="n">'+n+'</span>' : (it.view ? '' : '<span class="soon">'+T('غير مُهيّأ','Not set up')+'</span>'))
+              + '</a></li>';
+          }).join('')
+        + '</ul></li>';
+    }).join('') + '</ul>';
+    el('navTree').innerHTML = html;
+  }
+  function isNavOpen(){ return el('shell').classList.contains('nav-open'); }
+  function syncNavA11y(){
+    var nav = el('dmNav'), open = isNavOpen();
+    if(mq.matches){ if(open) nav.removeAttribute('inert'); else nav.setAttribute('inert',''); }
+    else nav.removeAttribute('inert');
+    el('navOpen').setAttribute('aria-expanded', String(mq.matches && open));
+  }
+  function openNav(){
+    navTrigger = document.activeElement;
+    el('shell').classList.add('nav-open'); syncNavA11y();
+    var cur = el('navTree').querySelector('[aria-current="page"]') || el('navClose');
+    setTimeout(function(){ (cur || el('navClose')).focus(); }, 30);
+  }
+  function closeNav(restore){
+    el('shell').classList.remove('nav-open'); syncNavA11y();
+    if(restore !== false && navTrigger && document.contains(navTrigger)) navTrigger.focus();
+    navTrigger = null;
+  }
+
+  /* ───────── HEADER ───────── */
+  function renderHeader(){
+    var G = groupOf(route.g), it = itemOf(route.g, route.s);
+    el('crumbGroup').textContent = T('إدارة التوصيل','Delivery Management') + (G ? ' · ' + T(G.ar,G.en) : '');
+    el('crumbPage').textContent = it ? T(it.ar,it.en) : '';
+    el('langBtn').textContent = isEn() ? 'ع' : 'EN';
+    el('langBtn').setAttribute('aria-label', isEn() ? 'التبديل إلى العربية' : 'Switch to English');
+    el('langBtn').setAttribute('lang', isEn() ? 'ar' : 'en');
+    el('notifBtn').setAttribute('aria-label', T('الإشعارات','Notifications'));
+    el('navOpen').setAttribute('aria-label', T('فتح القائمة','Open menu'));
+    el('navClose').setAttribute('aria-label', T('إغلاق القائمة','Close menu'));
+    el('dmNav').setAttribute('aria-label', T('إدارة التوصيل','Delivery Management'));
+    el('navTree').setAttribute('aria-label', T('أقسام إدارة التوصيل','Delivery Management sections'));
+    if(ME){
+      var role = null; try { role = RAFPerm.getRole(ME.roleId); } catch(e){}
+      var roleName = role ? T(role.nameAr, role.nameEn) : '';
+      ['userName','userName2'].forEach(function(i){ el(i).textContent = ME.name || ''; });
+      ['userRole','userRole2'].forEach(function(i){ el(i).textContent = roleName; });
+      ['userAv','userAv2'].forEach(function(i){ el(i).textContent = initials(ME.name); });
+      el('userBtn').setAttribute('aria-label', T('الحساب: ','Account: ') + (ME.name||'') + (roleName ? ' — '+roleName : ''));
+    }
+    document.title = T('رف — إدارة التوصيل','RAF — Delivery Management') + (it ? ' · ' + T(it.ar,it.en) : '');
+  }
+
+  /* ───────── VIEWS ───────── */
+  function pageHead(title, sub, actions){
+    return '<div class="pg-head"><div><h1>'+esc(title)+'</h1>'+(sub?'<p>'+sub+'</p>':'')+'</div>'
+      + (actions?'<div class="pg-actions">'+actions+'</div>':'')+'</div>';
+  }
+  function refreshBtn(){
+    return '<button class="btn" type="button" onclick="DM.refresh()"><i class="ti ti-refresh" aria-hidden="true"></i>'+T('تحديث','Refresh')+'</button>';
+  }
+
+  function rowsTable(list, opts){
+    opts = opts || {};
+    if(!list.length) return '<div class="empty"><i class="ti ti-package-off" aria-hidden="true"></i><b>'+esc(opts.emptyT)+'</b>'
+      + (opts.emptyP ? '<span>'+esc(opts.emptyP)+'</span>' : '')+'</div>';
+    var H = [T('الطلب','Order'), T('المتجر','Store'), T('العميل','Customer'), T('السائق','Driver'), T('الحالة','Status'), T('توقيت التوصيل','Delivery timing'), T('آخر تحديث','Updated')];
+    return '<div class="tbl-wrap"><table class="tbl"><caption class="sr-only">'+esc(opts.caption||'')+'</caption>'
+      + '<thead><tr>'+H.map(function(h){ return '<th scope="col">'+h+'</th>'; }).join('')+'</tr></thead><tbody>'
+      + list.map(function(d){
+          var drv = d.driver
+            ? '<span class="strong">'+esc(d.driver.name||'—')+'</span>'+(d.driver.status==='suspended' ? ' <span class="chip alert">'+T('موقوف','Suspended')+'</span>' : '')
+            : '<span class="cell-muted">'+T('لا يوجد بعد','None yet')+'</span>';
+          return '<tr onclick="DM.open(\''+esc(d.orderId)+'\', this)">'
+            + '<td class="first" data-label="'+esc(H[0])+'"><button class="order-btn" type="button" onclick="event.stopPropagation();DM.open(\''+esc(d.orderId)+'\', this)" aria-label="'
+              + esc(T('تفاصيل التوصيل ','Delivery details ')+d.orderId)+'"><bdi>'+esc(d.orderId)+'</bdi></button></td>'
+            + '<td data-label="'+esc(H[1])+'"><span><span class="strong">'+esc(L(d.store)||'—')+'</span></span></td>'
+            + '<td data-label="'+esc(H[2])+'"><span>'+esc(d.customer.name||'—')+'</span></td>'
+            + '<td data-label="'+esc(H[3])+'"><span>'+drv+'</span></td>'
+            + '<td class="nw" data-label="'+esc(H[4])+'">'+chip(d.stage)+'</td>'
+            + '<td class="nw" data-label="'+esc(H[5])+'"><span'+(d.commitment?' title="'+esc(d.commitment)+'"':'')+'>'+(d.timingText?esc(d.timingText):'<span class="cell-muted">—</span>')+'</span></td>'
+            + '<td class="nw" data-label="'+esc(H[6])+'"><span class="num">'+(latest(d)?esc(ago(latest(d))):'<span class="cell-muted">—</span>')+'</span></td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table></div>';
+  }
+  function byLatest(a,b){ return (latest(b)||0) - (latest(a)||0); }
+
+  function viewOverview(){
+    var c = DATA.counts;
+    var K = [
+      { cls:'wait',  ic:'ti-clock-hour-4',   ar:'متاحة للسائقين', en:'Available',        v:c.available,      to:href('deliveries','unassigned'), sar:'بانتظار أن يسحبها سائق', sen:'Waiting for a driver to claim' },
+      { cls:'claim', ic:'ti-hand-grab',      ar:'مسحوبة',          en:'Claimed',          v:c.claimed,        to:href('deliveries','assigned'),   sar:'لم تُستلم من المتجر بعد', sen:'Not collected from the store yet' },
+      { cls:'out',   ic:'ti-truck-delivery', ar:'قيد التوصيل',     en:'Out for Delivery', v:c.out,            to:href('deliveries','out'),        sar:'استُلمت وفي الطريق',       sen:'Collected and on the way' },
+      { cls:'done',  ic:'ti-circle-check',   ar:'تم التوصيل اليوم', en:'Delivered Today',  v:c.deliveredToday, to:href('deliveries','delivered'),  sar:'حسب وقت التسليم المسجّل', sen:'By recorded delivery time' }
+    ];
+    var kpis = '<section class="kpis" aria-label="'+esc(T('ملخص التوصيل الحالي','Current delivery summary'))+'">'
+      + K.map(function(k){
+          return '<a class="card kpi '+k.cls+'" href="'+k.to+'" aria-label="'+esc(T(k.ar,k.en)+': '+k.v)+'">'
+            + '<i class="ti ti-arrow-up-right go" aria-hidden="true"></i>'
+            + '<span class="kpi-top"><span class="kpi-ic"><i class="ti '+k.ic+'" aria-hidden="true"></i></span><span class="kpi-l">'+T(k.ar,k.en)+'</span></span>'
+            + '<span class="kpi-v">'+k.v+'</span><span class="kpi-s">'+T(k.sar,k.sen)+'</span></a>';
+        }).join('') + '</section>';
+
+    var live = DATA.deliveries.filter(function(d){ return LIVE.indexOf(d.stage) > -1; }).sort(byLatest);
+    var liveCard = '<section class="card" aria-labelledby="h-live"><div class="card-h"><h2 id="h-live"><i class="ti ti-activity" aria-hidden="true"></i>'
+      + T('التوصيلات الجارية','Live deliveries')+'</h2><span class="count">'+live.length+'</span><span class="sp"></span>'
+      + '<a class="more" href="'+href('deliveries','all')+'">'+T('كل التوصيلات','All deliveries')+'<i class="ti ti-chevron-right" aria-hidden="true"></i></a></div>'
+      + rowsTable(live.slice(0,8), { caption:T('التوصيلات الجارية','Live deliveries'),
+          emptyT:T('لا توجد توصيلات جارية الآن','No live deliveries right now'),
+          emptyP:T('تظهر هنا الطلبات الجاهزة بانتظار سائق، والمسحوبة، وقيد التوصيل.','Orders waiting for a driver, claimed or out for delivery appear here.') })
+      + (live.length > 8 ? '<div class="card-note"><i class="ti ti-list" aria-hidden="true"></i><span>'+T('يُعرض أحدث 8. ','Showing the latest 8. ')
+          + '<a href="'+href('dashboard','active')+'">'+T('عرض الكل','View all')+'</a></span></div>' : '')
+      + '</section>';
+
+    var att = DATA.attention;
+    var excCard = '<section class="card" aria-labelledby="h-exc"><div class="card-h"><h2 id="h-exc"><i class="ti ti-alert-triangle" aria-hidden="true"></i>'
+      + T('الحالة التشغيلية','Operational status')+'</h2><span class="sp"></span>'
+      + '<a class="more" href="'+href('dashboard','exceptions')+'">'+T('التفاصيل','Details')+'<i class="ti ti-chevron-right" aria-hidden="true"></i></a></div>'
+      + (att.length ? attentionList(att.slice(0,4))
+          : '<div class="ok-state"><span class="ic"><i class="ti ti-check" aria-hidden="true"></i></span><div><b>'
+            + T('لا توجد استثناءات نشطة','No active exceptions')+'</b><span>'+T('لا توجد حالات تحتاج متابعة حسب البيانات الحالية.','Nothing needs attention according to the current data.')+'</span></div></div>')
+      + '<div class="status-rows">'
+        + statusRow(T('في انتظار سائق','Waiting for a driver'), c.available)
+        + statusRow(T('لدى سائقين','With drivers'), c.claimed + c.out)
+        + statusRow(T('تحتاج متابعة','Needs attention'), att.length)
+      + '</div></section>';
+
+    var act = activity().slice(0,8);
+    var actCard = '<section class="card" aria-labelledby="h-act"><div class="card-h"><h2 id="h-act"><i class="ti ti-history" aria-hidden="true"></i>'
+      + T('آخر نشاط التوصيل','Recent delivery activity')+'</h2></div>'
+      + (act.length ? '<ul class="list">'+act.map(function(a){
+            return '<li><span class="ic '+a.cls+'"><i class="ti '+a.ic+'" aria-hidden="true"></i></span><span class="bd"><b>'+esc(a.title)+'</b>'
+              + '<span><button class="order-btn" type="button" onclick="DM.open(\''+esc(a.orderId)+'\', this)"><bdi>'+esc(a.orderId)+'</bdi></button>'
+              + (a.who ? ' · '+esc(a.who) : '')+'</span></span><span class="tm">'+esc(ago(a.at)||'')+'</span></li>';
+          }).join('')+'</ul>'
+        : '<div class="empty"><i class="ti ti-history-off" aria-hidden="true"></i><b>'+T('لا يوجد نشاط مسجّل بعد','No recorded activity yet')+'</b>'
+          + '<span>'+T('يظهر هنا سحب الطلبات واستلامها وتسليمها عند حدوثها.','Claims, pickups and deliveries appear here as they happen.')+'</span></div>')
+      + '<div class="card-note"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+        + T('من الأوقات المسجّلة لكل توصيل (السحب، الاستلام، التسليم).','From each delivery’s recorded times (claim, pickup, delivery).')+'</span></div></section>';
+
+    return pageHead(T('نظرة عامة','Overview'), esc(today()),
+             '<span class="live-pill"><b aria-hidden="true"></b>'+T('بيانات مباشرة','Live data')+'</span>'+refreshBtn())
+      + kpis
+      + '<div class="dash-grid"><div class="col">'+liveCard+'</div><div class="col side">'+excCard+actCard+'</div></div>';
+  }
+  function statusRow(k,v){ return '<div class="status-row"><span class="k">'+k+'</span><span class="v num">'+v+'</span></div>'; }
+  function attentionList(list){
+    return '<ul class="list">'+list.map(function(a){
+      var sus = a.kind === 'suspended_driver';
+      return '<li><span class="ic '+(sus?'alert':'wait')+'"><i class="ti '+(sus?'ti-ban':'ti-clock-pause')+'" aria-hidden="true"></i></span>'
+        + '<span class="bd"><b>'+esc(T(a.ar,a.en))+'</b><span><button class="order-btn" type="button" onclick="DM.open(\''+esc(a.orderId)+'\', this)"><bdi>'+esc(a.orderId)+'</bdi></button>'
+        + (a.driver ? ' · '+esc(a.driver) : '')+'</span></span>'
+        + (a.since ? '<span class="tm">'+esc(ago(a.since))+'</span>' : '')+'</li>';
+    }).join('')+'</ul>';
+  }
+  /* the recorded moments of each delivery, newest first — no event is invented */
+  function activity(){
+    var out = [];
+    DATA.deliveries.forEach(function(d){
+      var who = d.driver && d.driver.name;
+      if(d.assignedAt)  out.push({ at:d.assignedAt,  orderId:d.orderId, who:who, cls:'claim', ic:'ti-hand-grab',      title:T('سحب سائق الطلب','Driver claimed the order') });
+      if(d.pickedUpAt)  out.push({ at:d.pickedUpAt,  orderId:d.orderId, who:who, cls:'out',   ic:'ti-truck-delivery', title:T('استُلم من المتجر','Picked up from the store') });
+      if(d.deliveredAt) out.push({ at:d.deliveredAt, orderId:d.orderId, who:who, cls:'done',  ic:'ti-circle-check',   title:T('تم التسليم','Delivered') });
+    });
+    return out.sort(function(a,b){ return b.at - a.at; });
+  }
+
+  function viewExceptions(){
+    var att = DATA.attention;
+    var failed = capabilityText('deliveryException');
+    return pageHead(T('الاستثناءات','Exceptions'), T('حالات تُثبتها البيانات الحالية فقط، دون أي حدود زمنية مفترضة.','Only conditions the current data can prove — no assumed time thresholds.'), refreshBtn())
+      + '<section class="card" aria-labelledby="h-att"><div class="card-h"><h2 id="h-att"><i class="ti ti-alert-triangle" aria-hidden="true"></i>'
+      + T('تحتاج متابعة','Needs attention')+'</h2><span class="count">'+att.length+'</span></div>'
+      + (att.length ? attentionList(att)
+          : '<div class="ok-state"><span class="ic"><i class="ti ti-check" aria-hidden="true"></i></span><div><b>'+T('لا توجد استثناءات نشطة','No active exceptions')
+            + '</b><span>'+T('لا يوجد سائق موقوف يملك توصيلًا جاريًا، ولا طلب مسحوب بانتظار الاستلام.','No suspended driver owns a live delivery, and no claimed order is waiting for pickup.')+'</span></div></div>')
+      + (failed ? '<div class="card-note"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'+T('تعذّر التسليم: ','Failed deliveries: ')+esc(failed)+'</span></div>' : '')
+      + '</section>';
+  }
+
+  function visible(it){
+    var list = DATA.deliveries.slice();
+    if(it.stages) list = list.filter(function(d){ return it.stages.indexOf(d.stage) > -1; });
+    if(F.driver) list = list.filter(function(d){ return d.driver && d.driver.name === F.driver; });
+    if(F.store)  list = list.filter(function(d){ return d.storeSlug === F.store; });
+    if(F.timing) list = list.filter(function(d){ return d.timing === F.timing; });
+    if(F.day)    list = list.filter(function(d){
+      var t = latest(d); if(!t) return false;
+      var dt = new Date(t), iso = dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+      return iso === F.day;
+    });
+    var q = F.q.trim().toLowerCase();
+    if(q) list = list.filter(function(d){
+      return [d.orderId, L(d.store), d.driver&&d.driver.name, d.driver&&d.driver.phone, d.customer.name, d.customer.phone, d.destination]
+        .some(function(v){ return String(v||'').toLowerCase().indexOf(q) > -1; });
+    });
+    return list.sort(byLatest);
+  }
+  function viewList(it){
+    var list = visible(it);
+    var total = it.stages ? DATA.deliveries.filter(function(d){ return it.stages.indexOf(d.stage) > -1; }).length : DATA.deliveries.length;
+    var filtered = F.q || F.driver || F.store || F.timing || F.day;
+    var drvOpts = DATA.drivers.map(function(d){
+      return '<option value="'+esc(d.name)+'"'+(F.driver===d.name?' selected':'')+'>'+esc(d.name)+(d.status==='suspended'?' — '+T('موقوف','suspended'):'')+'</option>'; }).join('');
+    var storeOpts = DATA.stores.map(function(s){
+      return '<option value="'+esc(s.slug)+'"'+(F.store===s.slug?' selected':'')+'>'+esc(L(s.name)||s.slug)+'</option>'; }).join('');
+    var timingOpts = Object.keys(OPS.TIMING).map(function(k){
+      return '<option value="'+k+'"'+(F.timing===k?' selected':'')+'>'+T(OPS.TIMING[k].ar, OPS.TIMING[k].en)+'</option>'; }).join('');
+    var sub = {
+      all:       T('كل التوصيلات من جميع المتاجر، الأحدث نشاطًا أولًا.','Every delivery across all stores, most recent activity first.'),
+      active:    T('بانتظار سائق، أو مسحوبة، أو قيد التوصيل.','Waiting for a driver, claimed, or out for delivery.'),
+      unassigned:T('طلبات جاهزة لم يسحبها أي سائق بعد.','Ready orders no driver has claimed yet.'),
+      assigned:  T('سحبها سائق ولم يستلمها من المتجر بعد.','Claimed by a driver, not yet collected from the store.'),
+      picked:    T('استلمها السائق من المتجر.','Collected from the store by the driver.'),
+      out:       T('في الطريق إلى العميل.','On the way to the customer.'),
+      delivered: T('توصيلات مكتملة.','Completed deliveries.')
+    }[it.k] || '';
+    return pageHead(T(it.ar,it.en), sub, refreshBtn())
+      + '<section class="card" aria-labelledby="h-list">'
+      + '<h2 class="sr-only" id="h-list">'+esc(T(it.ar,it.en))+'</h2>'
+      + (it.samestage ? '<div class="note-bar"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+          + T('في دورة التوصيل الحالية يبدأ التوصيل لحظة الاستلام من المتجر، لذا تعرض «تم الاستلام» و«قيد التوصيل» المرحلة نفسها.',
+              'In the current lifecycle, collecting from the store starts the delivery, so “Picked Up” and “Out for Delivery” show the same stage.')+'</span></div>' : '')
+      + '<div class="toolbar" role="search">'
+        + '<div class="search"><i class="ti ti-search" aria-hidden="true"></i><input id="fQ" type="search" value="'+esc(F.q)+'" oninput="DM.setQuery(this.value)" placeholder="'
+          + esc(T('ابحث برقم الطلب أو السائق أو العميل أو المتجر','Search order, driver, customer or store'))+'" aria-label="'+esc(T('بحث في التوصيلات','Search deliveries'))+'"></div>'
+        + '<select class="sel" onchange="DM.setFilter(\'driver\',this.value)" aria-label="'+esc(T('السائق','Driver'))+'"><option value="">'+T('كل السائقين','All drivers')+'</option>'+drvOpts+'</select>'
+        + '<select class="sel" onchange="DM.setFilter(\'store\',this.value)" aria-label="'+esc(T('المتجر','Store'))+'"><option value="">'+T('كل المتاجر','All stores')+'</option>'+storeOpts+'</select>'
+        + '<select class="sel" onchange="DM.setFilter(\'timing\',this.value)" aria-label="'+esc(T('توقيت التوصيل','Delivery timing'))+'"><option value="">'+T('كل التوقيتات','All timings')+'</option>'+timingOpts+'</select>'
+        + '<input class="sel" type="date" value="'+esc(F.day)+'" onchange="DM.setFilter(\'day\',this.value)" aria-label="'+esc(T('تاريخ آخر نشاط','Date of latest activity'))+'">'
+        + (filtered ? '<button class="btn" type="button" onclick="DM.clearFilters()"><i class="ti ti-filter-off" aria-hidden="true"></i>'+T('مسح','Clear')+'</button>' : '')
+      + '</div>'
+      + '<div class="card-h" style="border-block-start:0;padding-block:10px"><span class="count" aria-live="polite">'
+        + (filtered ? T(list.length+' من '+total, list.length+' of '+total) : T(total+' توصيل', total+' deliveries'))+'</span></div>'
+      + rowsTable(list, { caption:T(it.ar,it.en),
+          emptyT: total ? T('لا توجد نتائج مطابقة','No matching deliveries') : T('لا توجد توصيلات في هذه القائمة','No deliveries in this list'),
+          emptyP: total ? T('غيّر البحث أو امسح الفلاتر.','Change the search or clear the filters.') : '' })
+      + '</section>';
+  }
+
+  function viewDrivers(it){
+    var list = DATA.drivers.slice();
+    if(it.filter === 'active')   list = list.filter(function(d){ return d.status === 'active'; });
+    if(it.filter === 'inactive') list = list.filter(function(d){ return d.status !== 'active'; });
+    var body = list.length
+      ? '<ul class="list">'+list.map(function(d){
+          var on = d.status === 'active';
+          return '<li><span class="dm-av" aria-hidden="true" style="width:32px;height:32px;background:'+(on?'var(--nav)':'var(--line-2)')+'">'+esc(initials(d.name))+'</span>'
+            + '<span class="bd"><b>'+esc(d.name||'—')+'</b></span>'
+            + '<span class="chip '+(on?'done':'alert')+'">'+(on?T('نشط','Active'):T('موقوف','Suspended'))+'</span></li>';
+        }).join('')+'</ul>'
+      : '<div class="empty"><i class="ti ti-user-off" aria-hidden="true"></i><b>'+T('لا يوجد سائقون في هذه القائمة','No drivers in this list')+'</b></div>';
+    return pageHead(T(it.ar,it.en), T('حسابات السائقين المسجّلة في رف — للاطلاع فقط.','Driver accounts registered in RAF — view only.'),
+             '<a class="btn" href="raf_driver_management.html"><i class="ti ti-external-link" aria-hidden="true"></i>'+T('إدارة السائقين','Driver Management')+'</a>')
+      + '<section class="card" aria-labelledby="h-drv"><div class="card-h"><h2 id="h-drv"><i class="ti ti-steering-wheel" aria-hidden="true"></i>'
+      + T(it.ar,it.en)+'</h2><span class="count">'+list.length+'</span></div>' + body
+      + '<div class="card-note"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+      + T('إنشاء الحسابات وتعديلها وإيقافها يتم من إدارة السائقين. لا تتوفر في رف بيانات توفّر أو مركبات أو تقييمات للسائقين.',
+          'Accounts are created, edited and suspended in Driver Management. RAF holds no driver availability, vehicle or rating data.')+'</span></div></section>';
+  }
+
+  function viewNotConfigured(G, it){
+    var isCompanies = G.k === 'companies' && it.k === 'list';
+    var title = isCompanies ? T('لا توجد شركات توصيل مُهيّأة','No delivery companies configured') : T('هذه الوحدة غير مُهيّأة بعد','This module is not configured yet');
+    var actions = '';
+    if(G.k === 'dispatch' && (it.k === 'live' || it.k === 'exceptions'))
+      actions = it.k === 'live'
+        ? '<a class="btn primary" href="'+href('dashboard','active')+'"><i class="ti ti-activity" aria-hidden="true"></i>'+T('التوصيلات الجارية','Active deliveries')+'</a>'
+        : '<a class="btn primary" href="'+href('dashboard','exceptions')+'"><i class="ti ti-alert-triangle" aria-hidden="true"></i>'+T('الاستثناءات الحالية','Current exceptions')+'</a>';
+    if(G.k === 'drivers' && it.k === 'details')
+      actions = '<a class="btn primary" href="raf_driver_management.html"><i class="ti ti-external-link" aria-hidden="true"></i>'+T('فتح إدارة السائقين','Open Driver Management')+'</a>';
+    if(G.k === 'deliveries' && it.k === 'failed')
+      actions = '<a class="btn" href="'+href('dashboard','exceptions')+'"><i class="ti ti-alert-triangle" aria-hidden="true"></i>'+T('الاستثناءات الحالية','Current exceptions')+'</a>';
+    return '<section class="card nc" aria-labelledby="h-nc">'
+      + '<div class="nc-ic"><i class="ti '+G.ic+'" aria-hidden="true"></i></div>'
+      + '<span class="nc-tag"><i class="ti ti-tool" aria-hidden="true"></i>'+esc(T(G.ar,G.en)+' · '+T(it.ar,it.en))+'</span>'
+      + '<h1 id="h-nc" class="sr-only">'+esc(T(it.ar,it.en))+'</h1>'
+      + '<h2>'+esc(title)+'</h2><p>'+esc(reasonFor(G.k, it.k))+'</p>'
+      + (actions ? '<div class="pg-actions">'+actions+'</div>' : '')
+      + '</section>';
+  }
+
+  function renderView(){
+    if(!DATA) return;
+    renderHeader();
+    var G = groupOf(route.g), it = itemOf(route.g, route.s), html;
+    if(it.view === 'overview') html = viewOverview();
+    else if(it.view === 'exceptions') html = viewExceptions();
+    else if(it.view === 'list') html = viewList(it);
+    else if(it.view === 'drivers') html = viewDrivers(it);
+    else html = viewNotConfigured(G, it);
+    el('view').innerHTML = html;
+    if(openId) renderDrawer();
+  }
+
+  /* ───────── DETAIL DRAWER (read-only) ───────── */
+  function renderDrawer(){
+    var res = OPS.detail(openId, { actor:ME.id });
+    if(!res.ok){ closeDrawer(); return; }
+    var d = res.delivery;
+    var items = d.items.map(function(x){
+      var v = x.variant || {}, bits = Object.keys(v).map(function(k){ return k+': '+v[k]; });
+      if(!bits.length && x.meta) bits.push(L(x.meta));
+      return '<div class="dw-item"><span class="q">'+x.qty+'×</span><span class="n">'+esc(L(x.name)||'—')
+        + (bits.length?'<span>'+esc(bits.join(' · '))+'</span>':'')+'</span>'+(x.price!=null?'<span class="q">'+esc(x.price)+'</span>':'')+'</div>';
+    }).join('');
+    var tml = res.timeline.map(function(s){
+      return '<div class="tml-s'+(s.done?' done':'')+'"><span class="dot" aria-hidden="true"><i class="ti '+(s.done?'ti-check':'ti-point')+'"></i></span>'
+        + '<span><b>'+T(s.ar,s.en)+'</b><span>'+(s.at?esc(kwTime(s.at)):(s.done?T('تم','Done'):T('لم يحدث بعد','Not yet')))+'</span></span></div>';
+    }).join('');
+    function kv(k,v){ return '<div class="kv"><span class="k">'+k+'</span><span class="v">'+v+'</span></div>'; }
+    var drv = d.driver
+      ? kv(T('الاسم','Name'), esc(d.driver.name||'—')+(d.driver.status==='suspended'?' <span class="chip alert">'+T('موقوف','Suspended')+'</span>':''))
+        + (d.driver.phone ? kv(T('الهاتف','Phone'), '<bdi>'+esc(d.driver.phone)+'</bdi>') : '')
+        + kv(T('وقت السحب','Claimed at'), esc(kwTime(d.assignedAt)||'—'))
+        + kv(T('وقت الاستلام','Picked up at'), esc(kwTime(d.pickedUpAt)||'—'))
+        + kv(T('وقت التسليم','Delivered at'), esc(kwTime(d.deliveredAt)||'—'))
+        + (between(d.pickedUpAt,d.deliveredAt) ? kv(T('مدة التوصيل','Delivery duration'), esc(between(d.pickedUpAt,d.deliveredAt))) : '')
+        + (d.driver.phone ? '<a class="btn dw-call" href="tel:'+esc(String(d.driver.phone).replace(/\s/g,''))+'"><i class="ti ti-phone" aria-hidden="true"></i>'+T('اتصال بالسائق','Call the driver')+'</a>' : '')
+      : '<div class="kv"><span class="v" style="color:var(--muted);font-weight:500">'+T('لم يسحب أي سائق هذا الطلب بعد. السحب يتم من تطبيق السائق فقط.','No driver has claimed this delivery yet. Claiming happens in the Driver App only.')+'</span></div>';
+    el('drawerHost').innerHTML =
+      '<div class="dw" id="dw" onclick="if(event.target===this)DM.close()">'
+      + '<div class="dw-c" role="dialog" aria-modal="true" aria-labelledby="dwT">'
+        + '<div class="dw-h"><div class="t"><b id="dwT"><bdi>'+esc(d.orderId)+'</bdi></b><span>'+esc(L(d.store)||'—')+'</span></div>'+chip(d.stage)
+          + '<button class="ibtn dw-x" type="button" onclick="DM.close()" aria-label="'+esc(T('إغلاق','Close'))+'"><i class="ti ti-x" aria-hidden="true"></i></button></div>'
+        + '<div class="dw-b">'
+          + '<section class="dw-sec"><h3><i class="ti ti-timeline" aria-hidden="true"></i>'+T('مسار التوصيل','Delivery progress')+'</h3><div class="tml">'+tml+'</div></section>'
+          + '<section class="dw-sec"><h3><i class="ti ti-steering-wheel" aria-hidden="true"></i>'+T('السائق','Driver')+'</h3>'+drv+'</section>'
+          + '<section class="dw-sec"><h3><i class="ti ti-user" aria-hidden="true"></i>'+T('العميل','Customer')+'</h3>'
+            + kv(T('الاسم','Name'), esc(d.customer.name||'—'))
+            + kv(T('الهاتف','Phone'), '<bdi>'+esc(d.customer.phone||'—')+'</bdi>')
+            + kv(T('العنوان','Address'), esc(d.address||d.destination||'—'))
+            + (d.instructions ? kv(T('تعليمات','Instructions'), esc(d.instructions)) : '')
+          + '</section>'
+          + '<section class="dw-sec"><h3><i class="ti ti-shopping-bag" aria-hidden="true"></i>'+T('الطلب','Order')+' · '+d.itemCount+' '+T('قطعة','items')+'</h3>'+items
+            + kv(T('الإجمالي','Total'), esc(d.total||'—')+' '+T('د.ك','KWD'))
+            + kv(T('طريقة الدفع','Payment'), esc(L(d.payment.method)||'—'))
+            + (d.timingText ? kv(T('توقيت التوصيل','Delivery timing'), esc(d.timingText)) : '')
+            + kv(T('موعد التوصيل','Delivery commitment'), d.commitment ? esc(d.commitment) : '<span style="color:var(--faint)">'+T('غير متاح','Not available')+'</span>')
+          + '</section>'
+          + '<div class="dw-foot"><i class="ti ti-eye" aria-hidden="true"></i><span>'
+            + T('للمتابعة فقط. السحب والاستلام والتسليم تتم من تطبيق السائق، ولا يوجد إسناد يدوي.','View only. Claiming, pickup and delivery happen in the Driver App; there is no manual assignment.')+'</span></div>'
+        + '</div></div></div>';
+    var x = el('dw').querySelector('.dw-x'); if(x) x.focus();
+  }
+  function closeDrawer(){
+    openId = null; el('drawerHost').innerHTML = '';
+    if(drawerTrigger && document.contains(drawerTrigger)) drawerTrigger.focus();
+    drawerTrigger = null;
+  }
+
+  /* ───────── POPOVERS ───────── */
+  function closePops(except){
+    [['notif','notifBtn','notifPop'],['user','userBtn','userPop']].forEach(function(p){
+      if(p[0] === except) return;
+      el(p[2]).hidden = true; el(p[1]).setAttribute('aria-expanded','false');
+    });
+  }
+  function togglePop(k){
+    var ids = k === 'notif' ? ['notifBtn','notifPop'] : ['userBtn','userPop'];
+    var open = el(ids[1]).hidden;
+    closePops(k);
+    el(ids[1]).hidden = !open; el(ids[0]).setAttribute('aria-expanded', String(open));
+  }
+  document.addEventListener('click', function(e){
+    if(!e.target.closest || !e.target.closest('.pop-wrap')) closePops();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Escape') return;
+    if(openId){ e.preventDefault(); closeDrawer(); return; }
+    if(!el('notifPop').hidden || !el('userPop').hidden){ closePops(); return; }
+    if(mq.matches && isNavOpen()){ closeNav(); }
+  });
+
+  /* ───────── LANGUAGE (the existing raf_lang preference) ───────── */
+  function applyLang(){
+    var en = isEn();
+    document.querySelectorAll('[data-ar][data-en]').forEach(function(e){
+      var t = e.getAttribute('data-'+(en?'en':'ar')); if(t !== null) e.textContent = t;
+    });
+  }
+  function toggleLang(){
+    var r = root(), en = r.lang === 'en';
+    r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+    try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+    applyLang(); renderHeader(); renderNav(); renderView();
+    el('langBtn').focus();
+  }
+
+  /* ───────── DATA ───────── */
+  function gate(tAr,tEn,msg){
+    el('shell').hidden = true; el('gate').hidden = false; el('drawerHost').innerHTML = '';
+    el('gateT').textContent = T(tAr,tEn); el('gateP').textContent = msg;
+    document.title = T('رف — إدارة التوصيل','RAF — Delivery Management');
+  }
+  function load(){
+    var res = OPS.board({ actor:ME.id });
+    /* the signed-in account changed in another tab: ask again as whoever is
+       signed in now, so they get their own answer rather than a mismatch */
+    if(!res.ok && res.code === 'OTHER_ACTOR'){
+      res = OPS.board({});
+      if(res.ok){ var me = RAFPerm.currentUser(); ME = { id:me.id, name:me.name, roleId:me.roleId }; renderHeader(); }
+    }
+    if(!res.ok){ DATA = null; gate('لا تملك صلاحية الوصول إلى إدارة التوصيل','You do not have access to Delivery Management', res.message); return false; }
+    DATA = res; el('gate').hidden = true; el('shell').hidden = false; return true;
+  }
+  function reload(){ if(load()){ renderNav(); renderView(); } }
+
+  window.DM = {
+    open: function(id, trigger){ drawerTrigger = trigger || document.activeElement; openId = id; renderDrawer(); },
+    close: closeDrawer,
+    toggleGroup: function(k){ expanded = expanded === k ? null : k; renderNav();
+      var b = el('navTree').querySelector('[aria-controls="sub-'+k+'"]'); if(b) b.focus(); },
+    openNav: openNav, closeNav: closeNav, togglePop: togglePop, toggleLang: toggleLang,
+    refresh: reload,
+    setFilter: function(k,v){ F[k] = v; renderView(); },
+    setQuery: function(v){ F.q = v; renderView();
+      var i = el('fQ'); if(i){ i.focus(); try { i.setSelectionRange(i.value.length, i.value.length); } catch(e){} } },
+    clearFilters: function(){ F = { q:'', driver:'', store:'', timing:'', day:'' }; renderView(); }
+  };
+
+  function boot(){
+    var l = null; try { l = localStorage.getItem('raf_lang'); } catch(e){}
+    if(l === 'en'){ root().lang = 'en'; root().dir = 'ltr'; }
+    applyLang();
+    if(!OPS || !window.RAFPerm || !window.RAFDriver){
+      gate('تعذّر التحميل','Could not load', T('لم يتم تحميل وحدات رف المطلوبة.','The required RAF modules did not load.')); return;
+    }
+    /* the authority decides — the page only renders its answer */
+    var probe = OPS.board({});
+    if(!probe.ok){ gate('لا تملك صلاحية الوصول إلى إدارة التوصيل','You do not have access to Delivery Management', probe.message); return; }
+    var me = RAFPerm.currentUser();
+    ME = { id:me.id, name:me.name, roleId:me.roleId };
+    DATA = probe;
+    el('gate').hidden = true; el('shell').hidden = false;
+    route = parseHash(); expanded = route.g;
+    function onViewport(){ if(!mq.matches) el('shell').classList.remove('nav-open'); syncNavA11y(); }
+    if(mq.addEventListener) mq.addEventListener('change', onViewport);
+    else if(mq.addListener) mq.addListener(onViewport);
+    window.addEventListener('resize', onViewport);
+    renderNav(); renderView(); syncNavA11y();
+
+    window.addEventListener('hashchange', onRoute);
+    /* the storage events the driver and merchant surfaces already emit — no polling */
+    window.addEventListener('storage', function(e){
+      if(e.key && /^raf_(orders|order_mstate|driver_claims|driver_pickup|users|current_user)$/.test(e.key)) reload();
+    });
+    document.addEventListener('raf:order', reload);
+    document.addEventListener('raf:snapshot', reload);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

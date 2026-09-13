@@ -55,9 +55,38 @@
       { href: 'raf_seller.html',      icon: 'ti-building-store',    ar: 'افتح متجرك',     en: 'Open Your Store' },
       { href: 'raf_plans.html',       icon: 'ti-tag',              ar: 'الباقات والأسعار', en: 'Pricing & Plans' },
       { href: 'raf_merchant.html',    icon: 'ti-layout-dashboard', ar: 'لوحة التاجر',     en: 'Merchant Dashboard' },
-      { href: 'raf_join_driver.html', icon: 'ti-motorbike',        ar: 'انضم كسائق',      en: 'Join as Driver' }
+      { href: 'raf_join_driver.html', icon: 'ti-motorbike',        ar: 'انضم كسائق',      en: 'Join as Driver' },
+      /* RAF's own delivery operations board — a separate top-level interface.
+         `perms` lists the EXISTING permissions the
+         board's authority already requires, and BOTH must be held: the entry
+         is drawn for nobody else. It is a convenience only — the page itself
+         still refuses anyone RAFDeliveryOps does not authorise. */
+      { href: 'raf_delivery_management.html', icon: 'ti-truck-delivery',
+        ar: 'عمليات التوصيل', en: 'Delivery Operations',
+        perms: ['orders.view', 'drivers.view'] }
     ]}
   ];
+
+  /* Does the SIGNED-IN account hold every one of these permissions?
+     Resolution is RAFPerm's, never this file's: no role is read, no override
+     is interpreted and no permission is re-implemented here. It fails closed —
+     with no permission system loaded, no explicit session, or a single missing
+     key, the answer is no and the link is not drawn. Hiding a link is never
+     the protection: the destination refuses unauthorised callers itself. */
+  function holdsAll(keys) {
+    try {
+      if (!window.RAFPerm || !RAFPerm.can) return false;
+      var sessionKey = (RAFPerm.LS && RAFPerm.LS.session) || 'raf_current_user';
+      var raw = localStorage.getItem(sessionKey);
+      if (raw == null || raw === '') return false;
+      var id = null;
+      try { id = JSON.parse(raw); } catch (e) { id = raw; }
+      if (typeof id !== 'string' || !id) return false;
+      var u = RAFPerm.getUser(id);
+      if (!u || u.status !== 'active') return false;
+      return keys.every(function (k) { return !!RAFPerm.can(u.id, k); });
+    } catch (e) { return false; }
+  }
 
   function lang() {
     var r = document.getElementById('htmlRoot') || document.documentElement;
@@ -139,6 +168,10 @@
   drawer.appendChild(head);
 
   var body = el('div', 'raf-drawer-body');
+  /* items whose permissions could not be judged yet, because the permission
+     system is not on this page. They are left OUT of the drawer and only
+     reconsidered once RAFPerm is available — never rendered on a maybe. */
+  var gatedLater = [];
   SECTIONS.forEach(function (sec) {
     var s = el('div', 'raf-drawer-section');
     s.setAttribute('data-ar', sec.labelAr);
@@ -147,6 +180,7 @@
     body.appendChild(s);
     sec.items.forEach(function (it) {
       if (it.feature && !rafFeatureOn(it.feature)) return;   /* hidden while feature is OFF */
+      if (it.perms && !holdsAll(it.perms)) { gatedLater.push({ sec:sec, item:it, after:body.lastChild }); return; }
       var a = el('a', 'raf-drawer-link' + (it.href === here ? ' active' : ''));
       a.href = it.href;
       a.innerHTML = '<i class="ti ' + it.icon + '"></i><span data-ar="' + it.ar + '" data-en="' + it.en + '">'
@@ -155,6 +189,40 @@
     });
   });
   drawer.appendChild(body);
+
+  /* ---- permission-gated entries -----------------------------------------
+     A storefront page carries no permission system, so a gated entry cannot
+     be judged at build time. Rather than leaving those entries permanently
+     invisible (or, worse, showing them to everyone), the navigation asks for
+     the permission system ONCE, here, and then re-checks only the entries it
+     had to hold back. Loading it grants nothing: after the seed stopped
+     creating a session, an anonymous browser stays anonymous and the gate
+     answers no — so nothing appears for a visitor who never signed in. */
+  function placeGatedEntries() {
+    gatedLater.forEach(function (g) {
+      if (!holdsAll(g.item.perms)) return;
+      if (body.querySelector('a[href="' + g.item.href + '"]')) return;   /* never twice */
+      var a = el('a', 'raf-drawer-link' + (g.item.href === here ? ' active' : ''));
+      a.href = g.item.href;
+      a.innerHTML = '<i class="ti ' + g.item.icon + '"></i><span data-ar="' + g.item.ar + '" data-en="' + g.item.en + '">'
+        + (isEn() ? g.item.en : g.item.ar) + '</span>';
+      /* back into the section it belongs to, in its declared position */
+      if (g.after && g.after.parentNode === body) body.insertBefore(a, g.after.nextSibling);
+      else body.appendChild(a);
+    });
+    gatedLater = [];
+  }
+  if (gatedLater.length) {
+    if (window.RAFPerm) placeGatedEntries();
+    else if (!document.querySelector('script[data-raf-perm-nav]')) {
+      var ps = document.createElement('script');
+      ps.src = 'raf_permissions.js';
+      ps.setAttribute('data-raf-perm-nav', '1');
+      ps.onload = placeGatedEntries;
+      ps.onerror = function () { gatedLater = []; };    /* unavailable stays hidden */
+      document.head.appendChild(ps);
+    }
+  }
 
   var auth = el('div', 'raf-drawer-auth');
   auth.innerHTML =

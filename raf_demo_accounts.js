@@ -60,11 +60,12 @@
   ];
 
   /* Dashboard each role lands on — mirrors the map already used by the login
-     page; kept here only for the QA summary table, not for routing. */
+     page; kept here only for the QA summary table, not for routing. RAF staff
+     roles have no landing page: RAF Management is not built yet. */
   var LANDING = {
-    super_admin: 'raf_management.html', higher_mgmt: 'raf_management.html',
+    super_admin: null, higher_mgmt: null,
     merchant: 'raf_merchant.html', merchant_employee: 'raf_merchant.html',
-    driver: 'raf_driver_app.html', customer: 'raf_account.html'
+    driver: 'raf_driver.html', customer: 'raf_account.html'
   };
 
   function toUser(a) {
@@ -117,7 +118,7 @@
         status: u ? (u.status === 'active' ? 'Active' : u.status) : 'not installed',
         verified: u ? !!u.verified : false,
         permissions: (role.permissions || []).length,
-        landing: LANDING[a.roleId] || 'raf_account.html'
+        landing: a.roleId in LANDING ? (LANDING[a.roleId] || 'not built yet') : 'raf_account.html'
       };
     });
   }

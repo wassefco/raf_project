@@ -213,7 +213,7 @@
     u('usr-014', 'ماجد العنزي', 'majed.driver@raf.kw', '+965 9000 1014', 'driver', 'driver', 'active', '2024-03-14'),
     u('usr-015', 'حمد القحطاني', 'hamad.driver@raf.kw', '+965 9000 1015', 'driver', 'driver', 'suspended', '2024-04-02'),
     /* 3 Customers */
-    u('usr-016', 'محمد العنزي', 'm.anzi@gmail.com', '+965 9000 1016', 'customer', 'customer', 'active', '2024-05-21'),
+    u('usr-016', 'محمد العنزي', 'm.anzi@gmail.com', '+965 99096686', 'customer', 'customer', 'active', '2024-05-21'),
     u('usr-017', 'دانة الصباح', 'dana.s@gmail.com', '+965 9000 1017', 'customer', 'customer', 'active', '2024-06-17'),
     u('usr-018', 'عبدالعزيز الحربي', 'a.harbi@gmail.com', '+965 9000 1018', 'customer', 'customer', 'active', '2024-07-09')
   ];
@@ -282,7 +282,11 @@
     if (force || !localStorage.getItem(LS.roles))     write(LS.roles, ROLES);
     if (force || !localStorage.getItem(LS.users))     write(LS.users, USERS);
     if (force || !localStorage.getItem(LS.templates)) write(LS.templates, TEMPLATES);
-    if (force || !localStorage.getItem(LS.session))   write(LS.session, 'usr-001');
+    /* Seeding creates ACCOUNT RECORDS, never a SESSION. Loading this script
+       used to sign the visitor in as the first administrator, so any page that
+       included it treated an anonymous browser as staff. Accounts are data;
+       being signed in is an act. Only the login flow performs that act, through
+       setCurrentUser(), and a browser that has never signed in stays anonymous. */
     backfillStoreSlugs();
     migrateRoles();
   }
@@ -351,8 +355,11 @@
   function getUser(userId) {
     return getUsers().filter(function (uu) { return uu.id === userId; })[0] || null;
   }
+  /* The signed-in account, or null. There is no default identity: with no
+     stored session nobody is signed in, so every caller either handles an
+     anonymous visitor or refuses them. */
   function currentUser() {
-    return getUser(read(LS.session, 'usr-001'));
+    return getUser(read(LS.session, null));
   }
 
   function saveRole(role) {
@@ -516,18 +523,18 @@
    *    Usage in markup:
    *      <button data-perm="orders.refund"> ... </button>
    *      <section data-perm="reports.view"> ... </section>
-   *      <body data-perm-guard="permissions.view" data-perm-redirect="raf_management.html">
+   *      <body data-perm-guard="permissions.view" data-perm-redirect="raf_login.html">
    * ---------------------------------------------------------------------- */
   /* ---- merchant ↔ store resolution ----
      The single accepted way for a merchant surface to learn which store it is
      looking at. Resolution is by stored id only; display name, email and
      username are never consulted. */
   function isMerchant(userOrId) {
-    var user = resolveUser(userOrId || read(LS.session, 'usr-001'));
+    var user = resolveUser(userOrId || read(LS.session, null));
     return !!(user && (user.roleId === 'merchant' || user.roleId === 'merchant_employee'));
   }
   function storeSlugOf(userOrId) {
-    var user = resolveUser(userOrId || read(LS.session, 'usr-001'));
+    var user = resolveUser(userOrId || read(LS.session, null));
     return (user && user.storeSlug) || null;
   }
   /* The store record itself, straight from the central authority.
@@ -543,7 +550,7 @@
      "assigned to a store that is missing" and report it as the data problem it
      is instead of guessing. reason: null | 'unassigned' | 'store_not_found'. */
   function storeLinkOf(userOrId) {
-    var user = resolveUser(userOrId || read(LS.session, 'usr-001'));
+    var user = resolveUser(userOrId || read(LS.session, null));
     var slug = (user && user.storeSlug) || null;
     if (!slug) return { slug:null, store:null, ok:false, reason:'unassigned' };
     var store = global.RAFSource ? global.RAFSource.store(slug) : null;
@@ -552,7 +559,7 @@
   }
 
   function enforce(userOrId) {
-    var user = resolveUser(userOrId || read(LS.session, 'usr-001'));
+    var user = resolveUser(userOrId || read(LS.session, null));
     /* page-level guard */
     var guard = document.body ? document.body.getAttribute('data-perm-guard') : null;
     if (guard && user && !can(user, guard)) {

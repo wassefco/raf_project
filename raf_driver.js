@@ -548,6 +548,15 @@
     STAGE:STAGE, STAGE_TEXT:STAGE_TEXT, ERRORS:ERRORS,
     isDriver:isDriver, scope:scope, profile:profile, capabilities:capabilities,
     queue:queue, mine:mine, active:active, history:history, task:task, assignmentOf:assignmentOf,
+    /* the derived delivery stage of one order, read-only. Exposed so another
+       surface (RAF delivery operations) can read the same stage this module
+       shows a driver instead of deriving it a second time. */
+    stageOfOrder:function(order){
+      var o = (typeof order === 'string')
+        ? allOrders().filter(function (x) { return x.id === order; })[0]
+        : order;
+      return o ? stageOf(o) : null;
+    },
     claim:claim, returnDelivery:returnDelivery, confirmPickup:confirmPickup, completeDelivery:completeDelivery,
     label:L
   };

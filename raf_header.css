@@ -94,11 +94,6 @@ nav.top{
 /* ==========================================================================
    PAGE-SPECIFIC TOP CONTAINERS (unique class names) — same safe-area handling.
    ========================================================================== */
-/* Driver app — custom sticky top header (.header, 12px top padding) */
-.header{ padding-top: calc(12px + env(safe-area-inset-top, 0px)); }
-@media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui){
-  .header{ padding-top: calc(12px + max(env(safe-area-inset-top, 0px), 24px)); }
-}
 /* Login / Register — centered auth card; keep it clear of the status bar */
 @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui){
   .login-card{ margin-top: max(env(safe-area-inset-top, 0px), 24px); }

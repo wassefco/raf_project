@@ -185,7 +185,7 @@ GET    /admin/orders                     # كل الطلبات
 GET    /admin/orders/:id                 # تفاصيل طلب
 PATCH  /admin/orders/:id/status         # تغيير الحالة يدوياً
 POST   /admin/orders/:id/cancel          # إلغاء طلب { reason }
-POST   /admin/orders/:id/assign          # تعيين سائق { driver_id }
+POST   /admin/orders/:id/assign          # [LEGACY / OUTDATED] تعيين سائق { driver_id } — لا يوجد إسناد يدوي؛ السائق يسحب الطلب بنفسه (أول من يسحب يملكه)
 
 # --- المالية والعمولات ---
 GET    /admin/commissions                # كل العمولات
@@ -238,19 +238,24 @@ GET    /admin/reports/users              # نشاط المستخدمين
 # Prefix: /delivery
 # Auth: Bearer Token (role = supervisor | driver)
 # ============================================================
+# [LEGACY / OUTDATED] This section predates the implemented prototype delivery
+# lifecycle (Ready → Waiting for Driver → driver claims, first come first served
+# → Picked Up → Out for Delivery → Delivered; return only before pickup).
+# Endpoints marked [LEGACY / OUTDATED] contradict it and are NOT the current
+# design. The Delivery Management API will be designed later.
 
 # --- مشرف التوصيل ---
 GET    /delivery/orders                  # كل الطلبات
 GET    /delivery/orders/:id              # تفاصيل طلب
-POST   /delivery/orders/:id/assign       # تعيين سائق { driver_id }
-POST   /delivery/orders/:id/reassign    # إعادة التعيين { driver_id }
-PATCH  /delivery/orders/:id/status      # تغيير حالة يدوياً
+POST   /delivery/orders/:id/assign       # [LEGACY / OUTDATED] تعيين سائق — لا إسناد يدوي
+POST   /delivery/orders/:id/reassign    # [LEGACY / OUTDATED] إعادة التعيين — لا إعادة إسناد
+PATCH  /delivery/orders/:id/status      # [LEGACY / OUTDATED] تغيير حالة يدوياً — الحالة تتقدم عبر السائق فقط
 
 GET    /delivery/drivers                 # قائمة السائقين
 GET    /delivery/drivers/:id             # ملف سائق
 POST   /delivery/drivers                 # إضافة سائق
 PATCH  /delivery/drivers/:id            # تعديل بيانات
-DELETE /delivery/drivers/:id             # حذف سائق
+DELETE /delivery/drivers/:id             # [LEGACY / OUTDATED] حذف سائق — السائق يُوقف ويُعاد تفعيله فقط
 PATCH  /delivery/drivers/:id/toggle     # تفعيل/إيقاف { is_active }
 
 GET    /delivery/reports                 # تقارير التوصيل

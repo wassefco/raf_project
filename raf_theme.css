@@ -7,8 +7,8 @@
  *
  * SCOPE RULE
  *   Everything colour-related is scoped to html:not([data-ui="admin"]).
- *   The back-office pages (management, permissions) run a dark palette using
- *   the same token names, so they opt out with <html data-ui="admin">.
+ *   Pages with their own palette (permissions, delivery management) opt out
+ *   with <html data-ui="admin">.
  *
  * WHAT THIS FILE OWNS
  *   1. Canonical tokens        — colour, radius, shadow, spacing, type scale
