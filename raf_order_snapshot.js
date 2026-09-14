@@ -271,6 +271,25 @@
   function pathAllowed(path){
     return ALLOWED_PATHS.some(function (p) { return path === p || path.indexOf(p + '.') === 0; });
   }
+  /* The audit SOURCE of a snapshot change is the surface of whoever made it,
+     resolved from the actor's own account record — never assumed. It uses the
+     audit engine's existing source vocabulary only (customer · merchant ·
+     driver · admin · system); staff roles map to admin exactly as the audit
+     engine already maps them to the admin actor type. No actor means the
+     system made the change. Only new events are affected; history is not
+     rewritten. */
+  function sourceOf(actor){
+    if (!actor || actor.type === 'system') return 'system';
+    var role = actor.roleId || null;
+    if (!role && actor.id && global.RAFPerm){
+      try { var u = RAFPerm.getUser(actor.id); role = (u && u.roleId) || null; } catch (e) { role = null; }
+    }
+    if (role === 'driver') return 'driver';
+    if (role === 'merchant' || role === 'merchant_employee') return 'merchant';
+    if (role === 'customer') return 'customer';
+    if (role) return 'admin';
+    return 'system';
+  }
   /* reason is the approved workflow that authorised the change */
   function update(orderId, path, value, reason, actor){
     if (!pathAllowed(path)) return { ok:false, reason:'path_not_updatable', path:path };
@@ -303,7 +322,7 @@
       try {
         RAFAudit.record({
           action: isApproved ? 'modify.applied' : 'snapshot.updated',
-          orderId: orderId, actor: actor, source: 'merchant',
+          orderId: orderId, actor: actor, source: sourceOf(actor),
           key: snap.audit[snap.audit.length - 1].at,
           reason: reason, metadata: { path: path },
           snapshotVersion: snap.v

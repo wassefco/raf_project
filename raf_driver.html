@@ -11,6 +11,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
 <style>
 /* ══════════════════════════════════════════════════════════════
@@ -154,9 +158,6 @@ body{background:var(--bg2);margin:0;}
 
 /* a secondary action: quieter than the delivery actions, and never beside
    Confirm delivery without a separator */
-.dv-second{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
-.dv-second .dv-b{min-height:48px;font-size:13.5px;color:var(--text2);background:transparent;}
-.dv-second .dv-b:hover{border-color:var(--gold);color:var(--gold2);background:var(--card);}
 
 /* the one question this app asks */
 .dv-dlg{position:fixed;inset:0;z-index:90;background:rgba(20,16,8,.5);display:flex;align-items:center;
@@ -210,6 +211,15 @@ body{background:var(--bg2);margin:0;}
   <div class="dv-dlg-c" role="alertdialog" aria-modal="true" aria-labelledby="dlgT" aria-describedby="dlgP">
     <h3 id="dlgT"></h3>
     <p id="dlgP"></p>
+    <div id="dlgCatWrap" hidden>
+      <label for="dlgCat" id="dlgCatL" style="display:block;font-weight:700;margin:4px 0 6px"></label>
+      <select id="dlgCat" style="width:100%;box-sizing:border-box;min-height:48px;border:1px solid var(--border);border-radius:12px;padding:0 10px;font:inherit;margin-bottom:8px"></select>
+    </div>
+    <div id="dlgReasonWrap" hidden>
+      <label for="dlgReason" id="dlgReasonL" style="display:block;font-weight:700;margin:4px 0 6px"></label>
+      <textarea id="dlgReason" rows="3" style="width:100%;box-sizing:border-box;min-height:84px;border:1px solid var(--border);border-radius:12px;padding:10px;font:inherit;resize:vertical"></textarea>
+      <div id="dlgReasonErr" class="dv-msg" hidden style="margin-top:8px"></div>
+    </div>
     <div class="dv-dlg-a">
       <button class="dv-b gold" id="dlgYes" onclick="dlgConfirm()"></button>
       <button class="dv-b" id="dlgNo" onclick="dlgCancel()"></button>
@@ -230,6 +240,11 @@ body{background:var(--bg2);margin:0;}
 <script src="raf_order_engine.js"></script>
 <script src="raf_permissions.js"></script>
 <script src="raf_driver.js"></script>
+<!-- the driver availability authority (own state, self-unavailable, schedule) -->
+<script src="raf_driver_management.js"></script>
+<!-- the Logistics operations authority: the driver's exception actions and the
+     delivery auto-close hook (it renders nothing; every call proves the session) -->
+<script src="raf_delivery_management.js"></script>
 <script>
 /* ============================================================
    DRIVER WORKSPACE
@@ -320,6 +335,10 @@ body{background:var(--bg2);margin:0;}
     return '<section class="dv-card">'
       + '<div class="dv-card-h"><h2>'+esc(L(t.store.name))+'</h2>'+stageChip(t.stage)+'</div>'
       + '<div class="dv-oid">'+esc(t.orderId)+'</div>'
+      + (t.fulfilment && t.fulfilment.pickedUpAt
+          ? '<div class="dv-line"><i class="ti ti-package-export" aria-hidden="true"></i><span class="v">'
+            + esc(T('استُلم من المتجر مسبقًا — البضاعة ليست في المتجر','Already collected from the store — the goods are not at the store'))+'</span></div>'
+          : '')
       + '<div class="dv-line"><i class="ti ti-map-pin" aria-hidden="true"></i><span class="v">'+addressText(t)+'</span></div>'
       + '<div class="dv-line"><i class="ti ti-clock" aria-hidden="true"></i><span class="v">'+timingText(t)+'</span></div>'
       + '<div class="dv-line"><i class="ti ti-shopping-bag" aria-hidden="true"></i><span class="v">'
@@ -328,7 +347,14 @@ body{background:var(--bg2);margin:0;}
         + '</span></div>'
       + '<div class="dv-acts"><button class="dv-b gold" onclick="doClaim(\''+esc(t.orderId)+'\')" aria-label="'
         + esc(T('سحب الطلب ' + t.orderId, 'Take delivery ' + t.orderId))+'">'
-        + '<i class="ti ti-hand-grab"></i>'+esc(T('سحب الطلب','Take delivery'))+'</button></div>'
+        + '<i class="ti ti-hand-grab"></i>'+esc(T('سحب الطلب','Take delivery'))+'</button>'
+        /* skipping is recorded, never ownership; a skipped delivery stays here */
+        + (t.skippedByMe
+            ? '<span class="dv-stage"><i class="ti ti-player-skip-forward" aria-hidden="true"></i>'+esc(T('تخطيته','Skipped'))+'</span>'
+            : '<button class="dv-b" onclick="doSkip(\''+esc(t.orderId)+'\')" aria-label="'
+              + esc(T('تخطي الطلب ' + t.orderId, 'Skip delivery ' + t.orderId))+'">'
+              + '<i class="ti ti-player-skip-forward"></i>'+esc(T('تخطي','Skip'))+'</button>')
+        + '</div>'
       + '</section>';
   }
   function taskCard(t, clickable){
@@ -346,6 +372,84 @@ body{background:var(--bg2);margin:0;}
       + esc(T('فتح توصيلة ' + t.orderId, 'Open delivery ' + t.orderId))+'">'+inner+'</button></section>';
   }
 
+  /* ---------- notifications (read from RAFNotify for the signed-in driver) ---------- */
+  function myNotifs(){
+    try { return window.RAFNotify && RAFNotify.forRecipient ? RAFNotify.forRecipient({ audience:'driver' }) : []; }
+    catch(e){ return []; }
+  }
+  function notifLine(n){
+    return '<button class="dv-open" type="button" onclick="openNotif(\''+esc(n.notificationId)+'\',\''+esc(n.entityId||'')+'\')">'
+      + '<div class="dv-line"><i class="ti '+(n.read ? 'ti-bell' : 'ti-bell-ringing')+'" aria-hidden="true"></i>'
+      + '<span class="v"><b>'+esc(L(n.title))+'</b>'+(n.message ? ' · <bdi>'+esc(L(n.message))+'</bdi>' : '')
+      + '<br><span style="opacity:.75">'+esc(kwDateTime(n.timestamp))+(n.read ? '' : ' · '+esc(T('غير مقروء','Unread')))+'</span></span></div></button>';
+  }
+
+  /* ---------- availability (RAFDriverManagement.availability is the authority) ----------
+     The driver sees their state, why, and the schedule management set. There is
+     no overtime counter and no way to make oneself Available — only management
+     does that. Going Unavailable never touches a delivery already held. */
+  var DAYS = { ar:['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'],
+               en:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'] };
+  function AV(){ return window.RAFDriverManagement && RAFDriverManagement.availability; }
+  function renderAvailability(){
+    var A = AV(), h = '<section class="dv-card" id="avCard"><div class="dv-card-h"><h2>'+esc(T('حالة التوفر','Availability'))+'</h2>';
+    var m = A ? A.mine() : null;
+    if (!m || !m.ok){
+      return h + '</div><div class="dv-na"><i class="ti ti-lock" aria-hidden="true"></i><div class="t"><b>'
+        + esc(T('تعذّر قراءة حالة التوفر','Availability could not be read'))+'</b><span>'
+        + esc(m && m.message ? L(m.message) : T('خدمة التوفر غير محمّلة.','The availability service is not loaded.'))+'</span></div></div></section>';
+    }
+    var on = m.state === 'available';
+    h += '<span class="dv-stage'+(on ? ' mine' : '')+'" data-av-state="'+esc(m.state||'')+'"><i class="ti '+(on ? 'ti-circle-check' : 'ti-circle-minus')+'" aria-hidden="true"></i>'
+      + esc(on ? T('متاح','Available') : T('غير متاح','Unavailable'))+'</span></div>';
+    h += '<div class="dv-line"><i class="ti ti-info-circle" aria-hidden="true"></i><span class="v">'
+      + esc(on ? T('تظهر لك الطلبات الجديدة ويمكنك سحبها.','New deliveries are shown to you and you can take them.')
+               : T('لا تصلك مهام جديدة الآن. أي توصيلة لديك تستمر كالمعتاد.','You receive no new tasks now. Any delivery you already hold continues as normal.'))+'</span></div>';
+    if (m.sourceLabel) h += '<div class="dv-line"><i class="ti ti-tag" aria-hidden="true"></i><span class="v">'+esc(T('المصدر: ','Source: '))+esc(L(m.sourceLabel))
+      + (m.since ? ' · <bdi>'+esc(kwDateTime(m.since))+'</bdi>' : '')+'</span></div>';
+    if (m.reason) h += '<div class="dv-line"><i class="ti ti-message" aria-hidden="true"></i><span class="v">'+esc(T('السبب: ','Reason: '))+'<bdi>'+esc(m.reason)+'</bdi></span></div>';
+    if (m.source === 'auto_offline') h += '<div class="dv-note"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+      + esc(T('تم التحويل تلقائيًا لعدم سحب أي طلب خلال المدة المحددة. هذا ليس إجراءً تأديبيًا وحسابك نشط. الإدارة تعيدك متاحًا.',
+              'Switched automatically because no delivery was taken within the set time. This is not disciplinary and your account stays active. Management can make you Available again.'))+'</span></div>';
+    /* schedule — set by management, read-only here */
+    h += '<div class="dv-note" style="display:block"><b style="display:block;color:var(--text2);margin-bottom:4px">'+esc(T('جدول العمل (تحدده الإدارة)','Work schedule (set by management)'))+'</b>';
+    if (m.schedule && m.schedule.windows && m.schedule.windows.length){
+      h += '<ul style="margin:0;padding-inline-start:18px">' + m.schedule.windows.map(function(w){
+        return '<li>'+esc(T(DAYS.ar[w.day], DAYS.en[w.day]))+' · <bdi dir="ltr">'+esc(w.start)+'–'+esc(w.end)+'</bdi></li>'; }).join('') + '</ul>'
+        + '<span>'+esc(T('المنطقة الزمنية: ','Timezone: '))+'<bdi dir="ltr">'+esc(m.schedule.timezone||'')+'</bdi></span>';
+    } else h += '<span>'+esc(T('لم تحدد الإدارة جدولًا بعد.','Management has not set a schedule yet.'))+'</span>';
+    h += '</div>';
+    if (m.canSetUnavailable){
+      h += '<div style="margin-top:12px"><button class="dv-b" type="button" id="avSelfBtn" onclick="doSelfUnavailable()"><i class="ti ti-player-pause" aria-hidden="true"></i>'
+        + esc(T('تحويل نفسي إلى غير متاح','Set myself Unavailable'))+'</button></div>';
+      if (m.liveDeliveries) h += '<div class="dv-note"><i class="ti ti-truck-delivery" aria-hidden="true"></i><span>'
+        + esc(T('لديك توصيلات قائمة — ستبقى معك ويجب إكمالها.','You hold deliveries — they stay with you and must be completed.'))+'</span></div>';
+    } else {
+      h += '<div class="dv-note"><i class="ti ti-lock" aria-hidden="true"></i><span>'+esc(T('العودة إلى «متاح» تتم عبر الإدارة فقط.','Only management can make you Available again.'))+'</span></div>';
+    }
+    return h + '</section>';
+  }
+  window.doSelfUnavailable = function(){
+    var m = AV() && AV().mine();
+    openDialog('التحويل إلى غير متاح', 'Set yourself Unavailable',
+      'لن تصلك مهام جديدة. التوصيلات التي لديك تبقى معك.' + (m && m.liveDeliveries ? ' لديك ' + m.liveDeliveries + ' توصيلة قائمة.' : ''),
+      'You will not receive new tasks. Deliveries you hold stay with you.' + (m && m.liveDeliveries ? ' You hold ' + m.liveDeliveries + ' delivery(ies).' : ''),
+      'تأكيد', 'Confirm', function(reason){
+        var res = AV().setSelfUnavailable({ reason:reason });
+        if (!res.ok){ toast(res.message ? L(res.message) : res.code || res.reason); render(); return; }
+        toast(T('أصبحت غير متاح لمهام جديدة','You are now unavailable for new tasks')); render();
+      }, true);
+  };
+  /* one timer to the next availability threshold (work duration / overtime /
+     auto-offline) — it asks the authority to evaluate, it does not poll */
+  var avTimer = null;
+  function scheduleAvDeadline(){
+    clearTimeout(avTimer); var A = AV(); if (!A) return;
+    var at = null; try { at = A.nextDeadline(); } catch(e){}
+    if (!at) return;
+    avTimer = setTimeout(function(){ try { A.evaluate(); } catch(e){} if (el('dlg').hidden) render(); scheduleAvDeadline(); }, Math.max(0, Math.min(at - Date.now() + 250, 2147483000)));
+  }
+
   /* ════════════════ HOME ════════════════
      What am I carrying, what is waiting, what RAF cannot tell me yet. */
   function renderHome(){
@@ -354,11 +458,15 @@ body{background:var(--bg2);margin:0;}
       + '<p class="dv-sub">'+esc(T('كل ما تحتاجه لتوصيل الطلبات المسندة إليك.',
                                    'Everything you need for the deliveries assigned to you.'))+'</p>';
 
-    /* availability — RAF has no such state, so nothing pretends to be a switch */
-    h += '<section class="dv-card">'
-      + '<div class="dv-card-h"><h2>'+esc(T('حالة الاتصال','Availability'))+'</h2></div>'
-      + unavailable(cap('availabilityToggle','متصل / غير متصل','Online / offline'), 'ti-wifi-off')
-      + '</section>';
+    /* unread notifications addressed to this driver (RAFNotify) */
+    var unread = myNotifs().filter(function(n){ return !n.read; });
+    if (unread.length){
+      h += '<section class="dv-card live"><div class="dv-card-h"><h2>'+esc(T('إشعارات جديدة','New notifications'))+'</h2>'
+        + '<span class="dv-stage mine"><i class="ti ti-bell" aria-hidden="true"></i><bdi>'+unread.length+'</bdi></span></div>'
+        + unread.slice(0,3).map(notifLine).join('') + '</section>';
+    }
+
+    h += renderAvailability();
 
     /* the current task always comes before anything else on this screen */
     h += '<section class="dv-card'+(a.ok && a.task ? ' live' : '')+'">'
@@ -395,8 +503,8 @@ body{background:var(--bg2);margin:0;}
     var q = D.queue({ actor:ME.id });
     if (!q.ok) return '<div class="dv-card"><div class="dv-empty">'+esc(q.message)+'</div></div>';
     var h = '<h1 class="dv-h1">'+esc(T('الطلبات المتاحة','Available deliveries'))+'</h1>'
-      + '<p class="dv-sub">'+esc(T('أول سائق يسحب الطلب يصبح مسؤولاً عنه. الطلب يختفي من القائمة فور سحبه.',
-                                   'The first driver to take a delivery owns it. It leaves this list the moment somebody takes it.'))+'</p>';
+      + '<p class="dv-sub">'+esc(T('أول سائق يسحب الطلب يصبح مسؤولاً عنه، وقد يسنده فريق اللوجستيات إلى سائق. الطلب يختفي من القائمة فور ذلك.',
+                                   'The first driver to take a delivery owns it, or Logistics may assign it to a driver. It leaves this list the moment that happens.'))+'</p>';
     if (msg) h += '<div class="dv-msg">'+esc(msg)+'</div>';
     if (ok)  h += '<div class="dv-ok">'+esc(ok)+'</div>';
     h += q.tasks.length ? q.tasks.map(poolCard).join('')
@@ -456,8 +564,18 @@ body{background:var(--bg2);margin:0;}
       + '</div><span class="dv-stage">'+esc(L(t.payment.method) || '—')+'</span></div>';
 
     /* ---- the operations that genuinely exist ---- */
+    var pendReq = mine && t.reassignmentRequest;
+    if (pendReq){
+      /* a pending reassignment request pauses pickup and delivery */
+      h += '<div class="dv-msg" role="status"><b>'+esc(T('طلب إعادة الإسناد قيد المراجعة','Reassignment request under review'))+'</b><br>'
+        + esc(T('السبب: ','Reason: ')) + esc(pendReq.reason) + '<br>'
+        + esc(T('إجراءات الاستلام والتسليم متوقفة حتى يبت فريق اللوجستيات في الطلب.','Pickup and delivery are paused until Logistics decides.'))+'</div>'
+        + '<div class="dv-acts"><button class="dv-b" onclick="doCancelRequest(\''+esc(t.orderId)+'\')"><i class="ti ti-arrow-back-up"></i>'
+        + esc(T('إلغاء طلب إعادة الإسناد','Cancel reassignment request'))+'</button></div>';
+    }
     h += '<div class="dv-acts">';
-    if (mine && t.stage === 'claimed')
+    if (pendReq) { /* no delivery actions while the request is pending */ }
+    else if (mine && t.stage === 'claimed')
       h += '<button class="dv-b gold" onclick="doPickup(\''+esc(t.orderId)+'\')"><i class="ti ti-package-import"></i>'
         + esc(T('تأكيد استلام الطلب من المتجر','Confirm pickup from the store'))+'</button>';
     else if (mine && t.stage === 'out_for_delivery'){
@@ -474,19 +592,41 @@ body{background:var(--bg2);margin:0;}
     if (msg) h += '<div class="dv-msg">'+esc(msg)+'</div>';
     if (ok)  h += '<div class="dv-ok">'+esc(ok)+'</div>';
 
-    /* handing the delivery back — only before pickup, and kept away from the
-       delivery actions so it can never be hit by mistake */
-    if (mine && t.stage === 'claimed')
-      h += '<div class="dv-second"><button class="dv-b" onclick="askReturn(\''+esc(t.orderId)+'\')">'
-        + '<i class="ti ti-arrow-back-up"></i>'
-        + esc(T('إعادة الطلب إلى قائمة الطلبات المتاحة','Return this delivery to the pool'))+'</button>'
-        + '<div class="dv-note"><i class="ti ti-info-circle"></i><span>'
-        + esc(T('ممكن قبل استلام الطلب من المتجر فقط. لا يُلغى طلب العميل.',
-                'Possible only before you collect the order from the store. The customer’s order is not cancelled.'))
-        + '</span></div></div>';
+    /* a driver cannot hand a claimed delivery back directly; the problem flow
+       is a reassignment request decided by Logistics, which is not configured
+       yet — so it is shown as unavailable rather than offered */
+    /* ---- delivery exception (Phase E): state, instruction, call attempts, report ---- */
+    var EX = window.RAFDeliveryOps && RAFDeliveryOps.exceptions;
+    if (EX && mine && (t.stage === 'claimed' || t.stage === 'out_for_delivery')){
+      var xv = EX.driverView(t.orderId);
+      if (xv.ok){
+        h += '<div class="dv-leg"><span class="n" aria-hidden="true">!</span><div><b>'+esc(T('مشكلة في التوصيل','Delivery problem'))+'</b></div></div>';
+        if (xv.active){
+          var stTxt = xv.active.status === 'escalated' ? T('لدى الإدارة','With management') : T('مفتوح','Open');
+          h += '<div class="dv-msg" role="status"><b>'+esc(L({ ar:xv.active.category.ar || xv.active.category.en, en:xv.active.category.en }))+'</b> · '+esc(stTxt)
+            + (xv.active.instruction ? '<br>'+esc(T('تعليمات الإدارة: ','Management instruction: '))+esc(xv.active.instruction) : '')+'</div>';
+          if (xv.active.canClose) h += '<div class="dv-acts"><button class="dv-b" onclick="doCloseException(\''+esc(xv.active.exceptionId)+'\')"><i class="ti ti-circle-check"></i>'
+            + esc(T('تم الوصول إلى العميل — إغلاق','Customer reached — close'))+'</button></div>';
+        } else if (xv.last && xv.last.status === 'closed'){
+          h += '<div class="dv-ok">'+esc(T('آخر مشكلة أُغلقت','The last problem was closed'))
+            + (xv.last.resolutionType === 'driver_must_continue' ? ' — '+esc(T('تابع التوصيل','continue the delivery')) : '')
+            + (xv.last.autoClosed ? '' : '')+'</div>';
+        }
+        var ca = xv.callAttempts;
+        h += '<div class="dv-line"><i class="ti ti-phone-x" aria-hidden="true"></i><span class="v">'
+          + esc(T('محاولات الاتصال بالعميل المسجّلة: ','Recorded customer call attempts: ')) + '<bdi>' + ca.count + (ca.required != null ? ' / ' + ca.required : '') + '</bdi></span></div>'
+          + '<div class="dv-acts"><button class="dv-b" onclick="doCallAttempt(\''+esc(t.orderId)+'\')"><i class="ti ti-phone-off"></i>'
+          + esc(T('اتصلت ولم يرد العميل — تسجيل محاولة','I called, no answer — record attempt'))+'</button>'
+          + (!xv.active ? '<button class="dv-b" onclick="doReport(\''+esc(t.orderId)+'\')"><i class="ti ti-alert-triangle"></i>'+esc(T('الإبلاغ عن مشكلة','Report a problem'))+'</button>' : '')
+          + '</div>';
+      }
+    }
 
     h += '<div class="dv-acts" style="margin-top:12px">'
-      + unavailable(cap('deliveryException','تعذّر التسليم','Delivery exception'), 'ti-alert-triangle')
+      + (mine && !pendReq && (t.stage === 'claimed' || t.stage === 'out_for_delivery')
+          ? '<button class="dv-b" onclick="doRequest(\''+esc(t.orderId)+'\')"><i class="ti ti-arrows-exchange"></i>'
+            + esc(T('طلب إعادة الإسناد','Request reassignment'))+'</button>'
+          : '')
       + unavailable(cap('proofOfDelivery','إثبات التسليم','Proof of delivery'), 'ti-camera')
       + '</div>';
 
@@ -531,8 +671,16 @@ body{background:var(--bg2);margin:0;}
               'Account details are managed by RAF and cannot be edited here. No passwords or credentials are stored on this device.'))
       + '</span></div></section>';
 
+    var all = myNotifs();
+    var sp = null; try { sp = RAFNotify.soundPreference(); } catch(e){}
     h += '<section class="dv-card"><div class="dv-card-h"><h2>'+esc(T('الإشعارات','Notifications'))+'</h2></div>'
-      + unavailable(cap('notifications','إشعارات السائق','Driver notifications'), 'ti-bell-off')+'</section>';
+      + '<div class="dv-line"><i class="ti ti-volume" aria-hidden="true"></i><span class="v">'+esc(T('صوت الإشعارات: ','Notification sound: '))
+      + '<b>'+esc(sp && sp.enabled === true ? T('مفعّل','On') : (sp && sp.configured ? T('متوقف','Off') : T('غير مُهيّأ (متوقف)','Not set (off)')))+'</b></span></div>'
+      + '<div class="dv-acts"><button class="dv-b" onclick="doSoundToggle()"><i class="ti ti-volume-2"></i>'
+      + esc(sp && sp.enabled === true ? T('إيقاف الصوت','Turn sound off') : T('تشغيل الصوت','Turn sound on'))+'</button></div>'
+      + (all.length ? all.slice(0,20).map(notifLine).join('')
+         : '<div class="dv-empty"><i class="ti ti-bell-off"></i>'+esc(T('لا توجد إشعارات.','No notifications.'))+'</div>')
+      + '</section>';
 
     h += '<section class="dv-card"><div class="dv-card-h"><h2>'+esc(T('اللغة','Language'))+'</h2></div>'
       + '<div class="dv-acts"><button class="dv-b" onclick="toggleLang()"><i class="ti ti-language"></i>'
@@ -594,40 +742,143 @@ body{background:var(--bg2);margin:0;}
      Escape closes it, focus starts inside it and returns to the control that
      opened it. */
   var dlgAction = null, dlgReturnFocus = null;
-  function openDialog(titleAr, titleEn, bodyAr, bodyEn, yesAr, yesEn, fn){
-    dlgAction = fn; dlgReturnFocus = document.activeElement;
+  /* withReason: the dialog collects a required free-text reason and hands it
+     to fn; an empty reason keeps the dialog open (the authority checks again) */
+  var dlgWithReason = false, dlgCats = null;
+  /* categories (optional): [{ key, label, requiresDescription, disabled, hint }] — adds a category
+     select; the text then is required only when the chosen category requires it */
+  function openDialog(titleAr, titleEn, bodyAr, bodyEn, yesAr, yesEn, fn, withReason, categories){
+    dlgAction = fn; dlgReturnFocus = document.activeElement; dlgWithReason = !!withReason; dlgCats = categories || null;
+    el('dlgCatWrap').hidden = !dlgCats;
+    if (dlgCats){
+      el('dlgCatL').textContent = T('الفئة','Category');
+      el('dlgCat').innerHTML = '<option value="">—</option>' + dlgCats.map(function(c){
+        return '<option value="'+esc(c.key)+'"'+(c.disabled ? ' disabled' : '')+'>'+esc(c.label + (c.hint ? ' — ' + c.hint : ''))+'</option>'; }).join('');
+    }
     el('dlgT').textContent = T(titleAr, titleEn);
     el('dlgP').textContent = T(bodyAr, bodyEn);
     el('dlgYes').innerHTML = '<i class="ti ti-check"></i>' + esc(T(yesAr, yesEn));
     el('dlgNo').innerHTML  = '<i class="ti ti-x"></i>' + esc(T('إلغاء','Cancel'));
+    el('dlgReasonWrap').hidden = !dlgWithReason; el('dlgReason').value = ''; el('dlgReasonErr').hidden = true;
+    el('dlgReasonL').textContent = dlgCats ? T('الوصف (إلزامي لفئة «أخرى»)','Description (required for “Other”)') : T('السبب (إلزامي)','Reason (required)');
     el('dlg').hidden = false;
-    el('dlgYes').focus();
+    (dlgWithReason ? el('dlgReason') : el('dlgYes')).focus();
   }
   function closeDialog(){
-    el('dlg').hidden = true; dlgAction = null;
+    el('dlg').hidden = true; dlgAction = null; dlgWithReason = false; dlgCats = null; el('dlgReasonWrap').hidden = true; el('dlgCatWrap').hidden = true;
     if (dlgReturnFocus && document.contains(dlgReturnFocus)) dlgReturnFocus.focus();
     dlgReturnFocus = null;
   }
   window.dlgCancel = function(){ closeDialog(); };
-  window.dlgConfirm = function(){ var fn = dlgAction; closeDialog(); if (fn) fn(); };
+  window.dlgConfirm = function(){
+    var fn = dlgAction, reason = null, category = null;
+    if (dlgCats){
+      category = el('dlgCat').value;
+      var cat = dlgCats.filter(function(c){ return c.key === category; })[0];
+      reason = el('dlgReason').value.trim();
+      if (!cat || cat.disabled){ el('dlgReasonErr').textContent = T('اختر الفئة.','Choose the category.'); el('dlgReasonErr').hidden = false; el('dlgCat').focus(); return; }
+      if (cat.requiresDescription && !reason){ el('dlgReasonErr').textContent = T('الوصف إلزامي لهذه الفئة.','A description is required for this category.'); el('dlgReasonErr').hidden = false; el('dlgReason').focus(); return; }
+    } else if (dlgWithReason){
+      reason = el('dlgReason').value.trim();
+      if (!reason){ el('dlgReasonErr').textContent = T('اكتب السبب.','Enter the reason.'); el('dlgReasonErr').hidden = false; el('dlgReason').focus(); return; }
+    }
+    closeDialog(); if (fn) fn(reason, category);
+  };
+  /* reassignment request: a request to Logistics, never a reassignment */
+  window.doRequest = function(id){
+    openDialog('طلب إعادة الإسناد', 'Request reassignment',
+      'سيراجع فريق اللوجستيات طلبك. تتوقف إجراءات الاستلام والتسليم حتى يُبت فيه، ويمكنك إلغاء الطلب.',
+      'Logistics will review your request. Pickup and delivery pause until it is decided, and you can cancel the request.',
+      'إرسال الطلب', 'Send request', function(reason){
+        var res = D.requestReassignment(id, { reason:reason, actor:ME.id });
+        if (!res.ok){ msg = res.message; ok = null; openId = id; render(); toast(res.message); return; }
+        msg = null; ok = T('تم إرسال طلب إعادة الإسناد.','Reassignment request sent.');
+        openId = id; render(); toast(T('تم إرسال الطلب','Request sent'));
+      }, true);
+  };
+  /* delivery exceptions (RAFDeliveryOps.exceptions — the session is the driver) */
+  window.doReport = function(id){
+    var EX = window.RAFDeliveryOps && RAFDeliveryOps.exceptions; if (!EX) return;
+    var xv = EX.driverView(id); if (!xv.ok){ toast(xv.message); return; }
+    var need = xv.callAttempts.required, have = xv.callAttempts.count;
+    var cats = xv.categories.map(function(c){
+      var cu = c.key === 'customer_unreachable', blocked = cu && (need == null || have < need);
+      return { key:c.key, label:isEn() ? c.en : (c.ar || c.en), requiresDescription:!!c.requiresDescription, disabled:blocked,
+               hint:cu ? (need == null ? T('غير مُهيّأ','not configured') : T('محاولات الاتصال ','call attempts ') + have + '/' + need) : null };
+    });
+    openDialog('الإبلاغ عن مشكلة في التوصيل', 'Report a delivery problem',
+      'يصل البلاغ إلى فريق اللوجستيات وتبدأ مهلة المعالجة. لا تُرسل تفاصيله الداخلية للعميل.',
+      'Logistics is notified and the handling SLA starts. Internal details are not sent to the customer.',
+      'إرسال البلاغ', 'Send report', function(desc, category){
+        var res = EX.open(id, { category:category, description:desc || undefined });
+        if (!res.ok){ msg = res.message; ok = null; openId = id; render(); toast(res.message); return; }
+        msg = null; ok = T('تم إرسال البلاغ.','The problem was reported.'); openId = id; render(); toast(T('تم الإبلاغ','Reported'));
+      }, true, cats);
+  };
+  window.doCallAttempt = function(id){
+    var EX = window.RAFDeliveryOps && RAFDeliveryOps.exceptions; if (!EX) return;
+    openDialog('تسجيل محاولة اتصال', 'Record a call attempt',
+      'سجّل فقط مكالمة هاتفية أجريتها ولم يرد فيها العميل. الرسائل لا تُحتسب.',
+      'Record only a phone call you made that the customer did not answer. Messages do not count.',
+      'تسجيل المحاولة', 'Record attempt', function(){
+        var res = EX.recordCallAttempt(id);
+        if (!res.ok){ msg = res.message; ok = null; openId = id; render(); toast(res.message); return; }
+        msg = null; ok = T('سُجّلت محاولة الاتصال ','Call attempt recorded ') + res.count + (res.required != null ? '/' + res.required : '');
+        openId = id; render(); toast(ok);
+      });
+  };
+  window.doCloseException = function(exceptionId){
+    var EX = window.RAFDeliveryOps && RAFDeliveryOps.exceptions; if (!EX) return;
+    openDialog('إغلاق مشكلة «تعذّر الوصول إلى العميل»؟', 'Close “Customer Unreachable”?',
+      'استخدم هذا عند الوصول إلى العميل ومتابعة التوصيل.', 'Use this when you reached the customer and continue the delivery.',
+      'إغلاق', 'Close', function(){
+        var res = EX.driverClose(exceptionId, { resolutionType:'driver_must_continue' });
+        if (!res.ok){ msg = res.message; ok = null; render(); toast(res.message); return; }
+        msg = null; ok = T('أُغلقت المشكلة — تابع التوصيل.','Closed — continue the delivery.'); render(); toast(ok);
+      });
+  };
+  window.doSoundToggle = function(){
+    try { var p = RAFNotify.soundPreference(); RAFNotify.setSoundPreference(!(p && p.enabled === true)); } catch(e){}
+    render();
+  };
+  var audioCtx = null;
+  function beep(){
+    try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      var o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = 880; g.gain.value = 0.06;
+      o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + 0.18); } catch(e){}
+  }
+  window.doCancelRequest = function(id){
+    openDialog('إلغاء طلب إعادة الإسناد؟', 'Cancel the reassignment request?',
+      'تستمر في التوصيل كالمعتاد.', 'You continue the delivery as usual.',
+      'إلغاء الطلب', 'Cancel request', function(){
+        var res = D.cancelReassignmentRequest(id, { actor:ME.id });
+        if (!res.ok){ msg = res.message; ok = null; openId = id; render(); toast(res.message); return; }
+        /* the approved wording for this outcome */
+        msg = null; ok = res.message;
+        openId = id; render(); toast(res.message);
+      });
+  };
   document.addEventListener('keydown', function(e){
     if (e.key === 'Escape' && !el('dlg').hidden){ e.preventDefault(); closeDialog(); }
   });
-  window.askReturn = function(id){
-    openDialog('إعادة الطلب إلى قائمة الطلبات المتاحة؟','Return this delivery to the available pool?',
-               'سيصبح الطلب متاحاً لسائق آخر. طلب العميل لا يُلغى ولا يتغيّر شيء في تفاصيله.',
-               'The order will become available for another driver. The customer’s order is not cancelled and nothing about it changes.',
-               'إعادة الطلب','Return delivery',
-               function(){ doReturn(id); });
+  /* skip: confirmed first, then one request to the authority */
+  window.doSkip = function(id){
+    openDialog('تخطي هذا الطلب؟', 'Skip this delivery?',
+      'يُسجَّل التخطي في سجلك بشكل دائم. لن تصبح مسؤولاً عن الطلب، ويبقى متاحاً في القائمة.',
+      'The skip is permanently recorded on your history. You will not own the delivery, and it stays available in the pool.',
+      'تخطي', 'Skip', function(){
+        var res = D.skip(id, { actor:ME.id });
+        if (!res.ok){ msg = res.message; ok = null; st.tab = 'tasks'; render(); toast(res.message); return; }
+        msg = null; ok = T('تم تسجيل التخطي.','The skip was recorded.');
+        st.tab = 'tasks'; render(); toast(T('تم التخطي','Skipped'));
+      });
   };
-  function doReturn(id){
-    var res = D.returnDelivery(id, { actor:ME.id });
-    if (!res.ok){ msg = res.message; ok = null; render(); toast(res.message); return; }
-    msg = null; ok = null; openId = null;
-    st.tab = 'tasks'; render();
-    toast(T('تمت إعادة الطلب إلى القائمة','The delivery went back to the pool'));
-    window.scrollTo({ top:0 });
-  }
+  /* opening a notification marks it read (for this driver only) and opens the delivery */
+  window.openNotif = function(nid, orderId){
+    try { RAFNotify.markRead(nid); } catch(e){}
+    if (orderId && D.task(orderId, { actor:ME.id }).ok){ openTask(orderId); return; }
+    render();
+  };
   window.doDeliver = function(id){
     var res = D.completeDelivery(id, { actor:ME.id });
     if (!res.ok){ msg = res.message; ok = null; render(); return; }
@@ -683,16 +934,54 @@ body{background:var(--bg2);margin:0;}
       if (p && TABS.some(function(t){ return t.k === p.tab; })) st.tab = p.tab; } catch(e){}
     applyChrome();
     render();
+    scheduleAvDeadline();
 
     /* another surface changed an order — the merchant marking it ready, the
        engine sweeping a timeout — so the screen re-reads rather than guesses */
-    document.addEventListener('raf:order', function(){ render(); });
-    document.addEventListener('raf:snapshot', function(){ render(); });
+    if (window.RAFEventBus){
+      /* live news on RAFEventBus — the screen re-reads RAFDriver, never the payload */
+      ['order.*','ownership.*','logistics.delivery.*','driver.delivery.*'].forEach(function(p){
+        RAFEventBus.subscribe(p, function(){ if (el('dlg').hidden) render(); });
+      });
+      /* Phase F: availability / schedule / auto-offline / account changes for
+         this driver re-read the authority and re-arm the one deadline timer */
+      ['driver.availability.*','driver.schedule.*','driver.overtime.*','driver.auto_offline','driver.auto_offline.*','driver.account.*'].forEach(function(p){
+        RAFEventBus.subscribe(p, function(ev){
+          if (ev && ev.entityId && ev.entityId !== ME.id) return;
+          scheduleAvDeadline(); if (el('dlg').hidden) render();
+        });
+      });
+      RAFEventBus.subscribe('notification.*', function(ev){
+        if (!ev || !ev.payload || ev.payload.recipientUserId !== ME.id) return;
+        var TOAST = {
+          'driver.delivery.assigned':            T('أُسند إليك توصيل جديد','A delivery was assigned to you'),
+          'driver.delivery.reassigned':          T('أصبحت مسؤولاً عن توصيل','You are now responsible for a delivery'),
+          'driver.delivery.removed':             T('لم تعد مسؤولاً عن أحد التوصيلات','You are no longer responsible for a delivery'),
+          'driver.reassignment_request.approved':T('تمت الموافقة على طلب إعادة الإسناد','Your reassignment request was approved'),
+          'driver.reassignment_request.rejected':T('لم تتم الموافقة على الطلب — تابع التوصيل','Request not approved — continue the delivery'),
+          'driver.exception.opened':             T('فُتح استثناء على توصيلك','An exception was opened on your delivery'),
+          'driver.exception.closed':             T('أُغلق الاستثناء على توصيلك','The exception on your delivery was closed'),
+          'driver.exception.reopened':           T('أُعيد فتح الاستثناء على توصيلك','The exception on your delivery was reopened'),
+          'driver.exception.instruction':        T('تعليمات من الإدارة','Instruction from management'),
+          'driver.delivery.eta_updated':         T('تم تحديث الوقت المتوقع للتوصيل','The delivery ETA was updated'),
+          'driver.availability.changed':         T('تغيّرت حالة توفرك','Your availability changed'),
+          'driver.availability.auto_offline':    T('أصبحت غير متاح تلقائيًا — ليس إجراءً تأديبيًا','You were set Unavailable automatically — not disciplinary'),
+          'driver.schedule.changed':             T('حدّثت الإدارة جدول عملك','Management updated your work schedule')
+        };
+        /* sound only if this driver's own preference is ON (the notification exists either way) */
+        if (ev.eventType === 'notification.created'){ try { var sp = RAFNotify.soundPreference(); if (sp && sp.enabled === true) beep(); } catch(e){} }
+        if (ev.eventType === 'notification.created' && TOAST[ev.payload.eventType]) toast(TOAST[ev.payload.eventType]);
+        if (el('dlg').hidden) render();
+      });
+    } else {
+      document.addEventListener('raf:order', function(){ render(); });
+      document.addEventListener('raf:snapshot', function(){ render(); });
+    }
     window.addEventListener('storage', function(e){
       /* another driver claimed something, or a store finished an order: the
          pool is re-read from the authority. No realtime infrastructure is
          simulated — this is the browser's own storage event. */
-      if (e.key && /^raf_(orders|order_mstate|driver_pickup|driver_claims)$/.test(e.key)) render();
+      if (e.key && /^raf_(orders|order_mstate|driver_claims)$/.test(e.key)) render();
     });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

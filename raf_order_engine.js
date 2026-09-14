@@ -31,7 +31,7 @@
 
   var WINDOW_MS = 5 * 60 * 1000;          /* unchanged: 5-minute acceptance window */
   var LS        = 'raf_pending';          /* unchanged storage key */
-  var LS_NOTIF  = 'raf_notif_extra';
+  /* customer notifications go through RAFNotify (see notify()) */
   var LS_ORDERS = 'raf_orders';
   var LS_ACCEPT = 'raf_order_accept';     /* unchanged cross-tab accept signal */
 
@@ -172,7 +172,7 @@
 
     if (decision === DECISION.ACCEPTED) {
       setOrderStatus(orderId, STATUS.PROGRESS);
-      notify(orderId, acceptedText(orderId, s), 'raf_tracking.html?id=' + encodeURIComponent(orderId));
+      notify(orderId, acceptedText(orderId, s), 'raf_tracking.html?id=' + encodeURIComponent(orderId), 'order.accepted');
     } else {
       /* the acceptance window closing on its own is a system event, never a
          merchant one */
@@ -227,7 +227,7 @@
       msg = { ar:'تم إلغاء الطلب ' + orderId + ' وإعادة المبلغ. ' + REFUND_DAYS_TEXT.ar,
               en:'Order ' + orderId + ' was cancelled and refunded. ' + REFUND_DAYS_TEXT.en };
     }
-    notify(orderId, msg, 'raf_order_details.html?id=' + encodeURIComponent(orderId));
+    notify(orderId, msg, 'raf_order_details.html?id=' + encodeURIComponent(orderId), 'order.cancelled');
   }
 
   /* ---------- order status + timeline ---------- */
@@ -257,19 +257,21 @@
     return { ok:false, code:'NO_INVENTORY' };
   }
 
-  /* surface the outcome in the notification centre. The recipient is the
-     customer on the order's own snapshot — never an id a caller supplies. */
-  function notify(orderId, text, href){
+  /* surface the outcome in the notification centre — through RAFNotify, the
+     single notification authority. The recipient is the customer on the
+     order's own snapshot, never an id a caller supplies. A guest order has no
+     account to notify, so no notification is created for it. The legacy key
+     'raf_notif_extra' is no longer written (RAFNotify still reads it). */
+  function notify(orderId, text, href, eventType){
     try {
       var owner = null;
       try { var sn = global.RAFOrderSnapshot ? RAFOrderSnapshot.of(orderId) : null;
             owner = (sn && sn.customer && sn.customer.id) || null; } catch (e2) { owner = null; }
-      var t = (text && typeof text === 'object') ? { ar:String(text.ar), en:String(text.en) } : { ar:text, en:text };
-      var a = JSON.parse(localStorage.getItem(LS_NOTIF) || '[]');
-      a.unshift({ id:'ord-' + orderId + '-' + Date.now(), orderId:orderId, customerId:owner,
-                  t:t, href:href, ts:Date.now() });
-      localStorage.setItem(LS_NOTIF, JSON.stringify(a.slice(0, 20)));
-    } catch (e) {}
+      if (!owner || !global.RAFNotify || !RAFNotify.create) return null;
+      var t = (text && typeof text === 'object') ? { ar:String(text.ar), en:String(text.en) } : { ar:String(text), en:String(text) };
+      return RAFNotify.create({ recipientUserId:owner, eventType:eventType || 'order.change', title:t,
+        entityType:'order', entityId:orderId, href:href || null, source:'system' });
+    } catch (e) { return null; }
   }
   /* the customer's acceptance message. Instant keeps its existing wording; a
      next-opening or scheduled order is told plainly, and a scheduled one is
@@ -312,7 +314,6 @@
   var LS_MSTATE = 'raf_order_mstate';
   var LS_LOCKS  = 'raf_order_locks';
   var LS_UNDO   = 'raf_order_undo';
-  var LS_PICKUP = 'raf_driver_pickup';
 
   /* ---------- audit bridge ----------
      The engine performs the action; RAFAudit records it. Audit is never
@@ -685,34 +686,71 @@
   /* Driver workflow hook: the order has a driver on the way. Out of scope for
      the merchant phases, exposed so the driver module never has to reach into
      merchant state itself. */
-  function driverAssigned(orderId, actor){
+  /* ctx (optional): { via:'dispatch', metadata } — a Logistics employee
+     assigned the order to a driver instead of a driver claiming it. The state
+     transition is the same one; only the recorded action and the neutral
+     timeline wording differ, so one business action leaves one audit event
+     ('dispatch.assigned' instead of 'driver.assigned'). The caller (RAFDriver)
+     has already proved the staff session, the lock and the target driver. */
+  function driverAssigned(orderId, actor, ctx){
     if (mstate(orderId) !== MSTATE.READY) return { ok:false, reason:'not_ready' };
+    var dispatch = !!(ctx && ctx.via === 'dispatch');
+    /* NOTE ON NAMING: the stored state WAITING_DRIVER ('waiting_driver') is
+       entered when a driver CLAIMS the order and kept through pickup, so it
+       means "a driver has it". It is not renamed here (stored data); every
+       surface labels it by that meaning, never as "waiting for a driver". */
     setMState(orderId, MSTATE.WAITING_DRIVER, actor);
-    appendTimeline(orderId, 'm-waiting-driver', 'بانتظار السائق', 'Waiting for driver', 'active');
-    audit('driver.assigned', orderId, { actor:actor, source:'driver',
-      key:(mrecord(orderId) || {}).at, previousState:MSTATE.READY, newState:MSTATE.WAITING_DRIVER });
+    if (dispatch) {
+      appendTimeline(orderId, 'm-waiting-driver', 'تم إسناد الطلب إلى سائق', 'A driver was assigned to the order', 'active');
+      audit('dispatch.assigned', orderId, { actor:actor, source:'admin',
+        key:(mrecord(orderId) || {}).at, previousState:MSTATE.READY, newState:MSTATE.WAITING_DRIVER,
+        metadata:(ctx.metadata && typeof ctx.metadata === 'object') ? ctx.metadata : null });
+    } else {
+      appendTimeline(orderId, 'm-waiting-driver', 'سحب السائق الطلب', 'A driver took the order', 'active');
+      audit('driver.assigned', orderId, { actor:actor, source:'driver',
+        key:(mrecord(orderId) || {}).at, previousState:MSTATE.READY, newState:MSTATE.WAITING_DRIVER });
+    }
     return { ok:true };
   }
-  /* The reverse of driverAssigned, for a driver who hands an order back
-     BEFORE collecting it: the order returns to Ready, which is exactly where
+  /* The reverse of driverAssigned: the order returns to Ready, exactly where
      the merchant left it, and becomes available to the pool again. The
-     merchant's work is not reopened and nothing commercial is touched —
-     only the delivery-side assignment is undone. Refused once the order has
-     been picked up, because the goods have left the store. */
-  function driverUnassigned(orderId, actor){
+     merchant's work is not reopened and nothing commercial is touched — only
+     the delivery-side claim is undone. Refused once the order has been picked
+     up. INTERNAL PRIMITIVE: drivers no longer return deliveries directly (that
+     action was removed from RAFDriver and the Driver App); it is kept only for
+     the future ownership-transfer / reassignment flow, which must prove its
+     own authority before calling it. */
+  /* ctx (optional): { via:'return_to_pool', metadata } — Phase D: a Logistics
+     employee returned the delivery to the pool (RAFDriver proved the staff
+     session, the lock and the reason first). Same transition; the action is
+     recorded as 'dispatch.returned_to_pool' and the customer-visible timeline
+     line is neutral — no internal reason, no staff identity. Pickup (if it
+     happened) is not undone: the engine keeps no pickup flag of its own and
+     the snapshot keeps fulfilment.pickedUpAt. */
+  function driverUnassigned(orderId, actor, ctx){
     if (mstate(orderId) !== MSTATE.WAITING_DRIVER) return { ok:false, reason:'not_assigned' };
+    var ret = !!(ctx && ctx.via === 'return_to_pool');
     setMState(orderId, MSTATE.READY, actor);
     /* the assignment line goes with the assignment it described, and only the
        latest hand-back is kept: an order that is taken and returned several
        times leaves one line, not a growing stack of identical ones */
     dropTimeline(orderId, 'm-waiting-driver');
     dropTimeline(orderId, 'm-returned');
-    appendTimeline(orderId, 'm-returned', 'أعاد السائق الطلب إلى قائمة الطلبات المتاحة',
-                   'Driver returned the order to the available pool');
-    audit('driver.returned', orderId, { actor:actor, source:'driver',
-      key:Date.now(), previousState:MSTATE.WAITING_DRIVER, newState:MSTATE.READY });
+    var a;
+    if (ret) {
+      appendTimeline(orderId, 'm-returned', 'الطلب بانتظار سائق', 'The order is waiting for a driver');
+      a = audit('dispatch.returned_to_pool', orderId, { actor:actor, source:'admin',
+        key:(mrecord(orderId) || {}).at, previousState:MSTATE.WAITING_DRIVER, newState:MSTATE.READY,
+        reason:ctx.reason || null,
+        metadata:(ctx.metadata && typeof ctx.metadata === 'object') ? ctx.metadata : null });
+    } else {
+      appendTimeline(orderId, 'm-returned', 'أعاد السائق الطلب إلى قائمة الطلبات المتاحة',
+                     'Driver returned the order to the available pool');
+      a = audit('driver.returned', orderId, { actor:actor, source:'driver',
+        key:Date.now(), previousState:MSTATE.WAITING_DRIVER, newState:MSTATE.READY });
+    }
     emit(orderId, 'returned');
-    return { ok:true, state:MSTATE.READY };
+    return { ok:true, state:MSTATE.READY, auditEventId:(a && a.event && a.event.eventId) || null };
   }
   /* after Ready the merchant has no further processing actions */
   function merchantDone(orderId){
@@ -798,7 +836,7 @@
     /* the customer hears it through the same notification path every other
        order event uses — no second notification system */
     notify(orderId, { ar:'تم تسليم طلبك ' + orderId, en:'Your order ' + orderId + ' has been delivered' },
-           'raf_tracking.html?id=' + encodeURIComponent(orderId));
+           'raf_tracking.html?id=' + encodeURIComponent(orderId), 'order.delivered');
     emit(orderId, 'delivered');
     return { ok:true, status:STATUS.DELIVERED };
   }
@@ -961,13 +999,49 @@
      plus any change to the shared window store */
   global.addEventListener('storage', function (e) {
     if (e.key === LS_ACCEPT && e.newValue) accept(e.newValue);
-    /* a driver pickup reported by another surface always wins over UI state */
-    else if (e.key === LS_PICKUP && e.newValue) driverPickedUp(e.newValue);
+    /* there is deliberately no storage signal for a driver pickup: a pickup is
+       performed only through RAFDriver.confirmPickup, which proves the
+       authenticated driver owns the order before the engine is asked */
     else if (e.key === LS || e.key === LS_ORDERS || e.key === LS_MSTATE ||
              e.key === LS_LOCKS || e.key === LS_UNDO) {
       watchers.forEach(function (fn) { try { fn({ kind:'sync' }); } catch (e2) {} });
     }
   });
+  /* ---------- canonical merchant milestones (read-only projections) ----------
+     The authoritative record of WHEN the merchant accepted or finished an order
+     is the append-only audit event the engine wrote at that moment
+     ('order.accept', 'order.ready'). The merchant state record is overwritten
+     by later states, so it is not a reliable source, and no second timestamp
+     field is added. An action that was undone does not count; if it was
+     performed again, the latest non-undone one is the milestone. Returns
+     { at, eventId, source } or null — never an estimate.
+     acceptedAt() is the approved base for the future Promised ETA
+     (RAFConfig 'eta.base' / 'eta.promisedDurationMinutes'); no ETA is computed
+     here. */
+  function milestoneOf(orderId, action){
+    if (!orderId || !global.RAFAudit || !RAFAudit.forOrder) return null;
+    var hit = null;
+    try {
+      RAFAudit.forOrder(orderId).forEach(function (e) { if (e.action === action && !e.undone) hit = e; });
+    } catch (e) { return null; }
+    return hit ? { at:hit.timestamp, eventId:hit.eventId, source:'RAFAudit:' + action } : null;
+  }
+  function acceptedAt(orderId){ return milestoneOf(orderId, 'order.accept'); }
+  function readyAt(orderId){ return milestoneOf(orderId, 'order.ready'); }
+  /* THE PROMISED ETA — the one place it is computed. Approved rule:
+     Merchant Accepted Time + RAFConfig 'eta.promisedDurationMinutes'. Read-only
+     and used for Priority Pool ordering only; no surface displays or edits it
+     in this phase. null when the accept milestone or the duration is missing. */
+  function promisedEtaAt(orderId){
+    var acc = acceptedAt(orderId);
+    var cfg = global.RAFConfig;
+    var base = cfg ? cfg.value('eta.base') : null;
+    var mins = cfg ? cfg.value('eta.promisedDurationMinutes') : null;
+    if (!acc || base !== 'merchant_accepted_at' || typeof mins !== 'number') return null;
+    return { at:acc.at + mins * 60000, acceptedAt:acc.at, durationMinutes:mins,
+             source:acc.source + ' + RAFConfig:eta.promisedDurationMinutes' };
+  }
+
   /* a surface without the engine loaded can still hand over an acceptance */
   function signalAccept(orderId){
     try { localStorage.setItem(LS_ACCEPT, orderId); } catch (e) {}
@@ -982,6 +1056,7 @@
     mstate: mstate, mrecord: mrecord, merchantDone: merchantDone, queueOf: queueOf,
     merchantAccept: merchantAccept, merchantReject: merchantReject, merchantReady: merchantReady,
     undo: undo, undoOf: undoOf, undoMsLeft: undoMsLeft, commitUndo: commitUndo, sweepUndo: sweepUndo,
+    acceptedAt: acceptedAt, readyAt: readyAt, promisedEtaAt: promisedEtaAt,
     driverPickedUp: driverPickedUp, driverAssigned: driverAssigned,
     driverUnassigned: driverUnassigned, driverDelivered: driverDelivered,
     /* locking */

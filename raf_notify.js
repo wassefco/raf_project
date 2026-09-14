@@ -1,18 +1,23 @@
 /* ============================================================
-   RAF Notifications — shared header bell + dropdown
+   RAF Notifications — shared header bell + dropdown  (UI CONSUMER)
    ------------------------------------------------------------
-   One source of truth for notification data and read state, used by
-   both the header dropdown and the full Notifications page, so the
-   two can never disagree.
+   The header bell for customer-facing pages. It owns NO notification data
+   and NO read state: everything is read from and written through the
+   RAFNotify authority's data layer (raf_notify_core.js, which must load
+   first) — per recipient, with read receipts isolated per account.
      • injects the bell into the shared topbar beside Favorites/Cart
      • desktop · tablet · mobile
      • bilingual (ar/en) + RTL/LTR
-   Read state persists in localStorage 'raf_notif_read'.
+     • live: repaints on RAFEventBus 'notification.*' — no polling
+   Producers (RAFOrderEngine, RAFOrderChanges, the merchant workspace scan)
+   create notifications through RAFNotify.create only.
    ============================================================ */
 (function (global) {
-  if (global.RAFNotify) return;
+  var N = global.RAFNotify;
+  /* without the authority there is nothing to show — never a parallel store */
+  if (!N || !N.__core || N.__bell) return;
+  N.__bell = true;
 
-  var LS_READ = 'raf_notif_read';
   function root(){ return document.getElementById('htmlRoot') || document.documentElement; }
   function en(){ return root().lang === 'en'; }
   function T(ar, e){ return en() ? e : ar; }
@@ -29,50 +34,6 @@
     delivered: { ic:'ti-circle-check',    bg:'rgba(46,158,91,.12)',   fg:'#2E9E5B', act:{ar:'عرض الطلب',en:'View order'},      icon:'ti-receipt' }
   };
 
-  /* ---------- data (stable ids so read state survives reordering) ---------- */
-  var DATA = [
-    { id:'n1', type:'order',     href:'raf_tracking.html?id=ORD-1284',
-      t:{ar:'طلبك ‎#ORD-1284 في الطريق', en:'Order #ORD-1284 is on the way'},
-      s:{ar:'منذ 10 دقائق', en:'10 minutes ago'} },
-    { id:'n2', type:'promo',     href:'raf_store.html?store=casa-mode',
-      t:{ar:'عرض حصري من Casa Mode — خصم 25%', en:'Exclusive 25% off from Casa Mode'},
-      s:{ar:'منذ ساعة', en:'1 hour ago'} },
-    { id:'n3', type:'coupon',    href:'raf_coupons.html',
-      t:{ar:'كوبون جديد بانتظارك — خصم 20%', en:'A new coupon is waiting — 20% off'},
-      s:{ar:'منذ 90 دقيقة', en:'90 minutes ago'} },
-    { id:'n4', type:'reward',    href:'raf_rewards.html',
-      t:{ar:'ربحت 120 نقطة مكافآت', en:'You earned 120 reward points'},
-      s:{ar:'منذ ساعتين', en:'2 hours ago'} },
-    { id:'n5', type:'product',   href:'raf_product.html?id=P-001',
-      t:{ar:'عاد للمخزون: قميص أوفرسايز كلاسيك', en:'Back in stock: Classic Oversize Shirt'},
-      s:{ar:'منذ 3 ساعات', en:'3 hours ago'} },
-    { id:'n6', type:'store',     href:'raf_storespage.html',
-      t:{ar:'متجر جديد انضم — Nova Shoes', en:'New store joined — Nova Shoes'},
-      s:{ar:'منذ 4 ساعات', en:'4 hours ago'} },
-    { id:'n7', type:'delivered', href:'raf_order_details.html?id=ORD-1280',
-      t:{ar:'تم تسليم طلبك ‎#ORD-1280 بنجاح', en:'Order #ORD-1280 delivered successfully'},
-      s:{ar:'أمس', en:'Yesterday'} }
-  ];
-  /* notifications seeded as already-read */
-  var SEEN_BY_DEFAULT = ['n5','n6','n7'];
-
-  function readIds(){
-    try { var a = JSON.parse(localStorage.getItem(LS_READ)); return Array.isArray(a) ? a : SEEN_BY_DEFAULT.slice(); }
-    catch(e){ return SEEN_BY_DEFAULT.slice(); }
-  }
-  function writeIds(a){ try { localStorage.setItem(LS_READ, JSON.stringify(a)); } catch(e){} }
-
-  function loyaltyOn(){
-    if (global.RAFFeatures && RAFFeatures.on) return RAFFeatures.on('loyalty');
-    try { return (JSON.parse(localStorage.getItem('raf_features') || '{}')).loyalty === true; } catch(e){ return false; }
-  }
-  /* order outcomes written by RAFOrderEngine (raf_notif_extra) — shown only
-     to the signed-in customer named on that order's own snapshot */
-  var LS_ORDER_NOTES = 'raf_notif_extra';
-  function currentUserId(){
-    try { if (global.RAFPerm && RAFPerm.currentUser){ var u = RAFPerm.currentUser(); return (u && u.id) || null; } } catch(e){}
-    try { var v = JSON.parse(localStorage.getItem('raf_current_user')); return typeof v === 'string' ? v : null; } catch(e){ return null; }
-  }
   function when(ts){
     function f(l){
       try { return new Date(ts).toLocaleString(l === 'en' ? 'en-GB' : 'ar-KW-u-nu-latn',
@@ -81,31 +42,17 @@
     }
     return { ar:f('ar'), en:f('en') };
   }
-  function orderNotes(){
-    var me = currentUserId();
-    if (!me) return [];
-    var a; try { a = JSON.parse(localStorage.getItem(LS_ORDER_NOTES) || '[]'); } catch(e){ a = []; }
-    return (Array.isArray(a) ? a : []).filter(function(n){ return n && n.customerId && n.customerId === me && n.t; })
-      .map(function(n){ return { id:n.id, type:'order', href:n.href, t:n.t, s:when(n.ts) }; });
-  }
-  /* reward alerts stay hidden while the loyalty feature is off */
+  /* the signed-in account's customer-facing notifications, in the bell's shape */
   function items(){
-    var rd = readIds();
-    return orderNotes().concat(DATA.filter(function(n){
-      var k = TYPES[n.type] || {};
-      return !(k.feature === 'loyalty' && !loyaltyOn());
-    })).map(function(n){
-      return { id:n.id, type:n.type, href:n.href, t:n.t, s:n.s, unread: rd.indexOf(n.id) < 0 };
+    return N.forRecipient({ audience:'customer' }).map(function(r){
+      return { id:r.notificationId, type:'order',
+               href:r.href || (r.entityId ? 'raf_tracking.html?id=' + encodeURIComponent(r.entityId) : 'raf_notifications.html'),
+               t:r.title, s:when(r.timestamp), unread:!r.read };
     });
   }
-  function unreadCount(){ return items().filter(function(n){ return n.unread; }).length; }
-  function markRead(id){ var a = readIds(); if (a.indexOf(id) < 0){ a.push(id); writeIds(a); sync(); } }
-  function markAllRead(){
-    var a = readIds();
-    items().forEach(function(n){ if (a.indexOf(n.id) < 0) a.push(n.id); });
-    DATA.forEach(function(n){ if (a.indexOf(n.id) < 0) a.push(n.id); });
-    writeIds(a); sync();
-  }
+  function unreadCount(){ return N.unreadCount({ audience:'customer' }); }
+  function markRead(id){ N.markRead(id); sync(); }
+  function markAllRead(){ N.markAllRead({ audience:'customer' }); sync(); }
 
   /* ---------- styles ---------- */
   function css(){
@@ -295,10 +242,10 @@
     document.dispatchEvent(new CustomEvent('raf:notify'));
   }
 
-  global.RAFNotify = {
-    items:items, orderNotes:orderNotes, unreadCount:unreadCount, markRead:markRead, markAllRead:markAllRead,
-    TYPES:TYPES, open:open, close:close, sync:sync, build:build
-  };
+  /* UI helpers on the same authority object; the data API (create,
+     forRecipient, markRead, markAllRead, unreadCount…) belongs to the core */
+  N.bell = { items:items, unreadCount:unreadCount, markRead:markRead, markAllRead:markAllRead,
+             TYPES:TYPES, open:open, close:close, sync:sync, build:build };
 
   function init(){
     build();
@@ -306,6 +253,8 @@
     if (!document.querySelector('.rn-wrap')) setTimeout(build, 0);
     var r = document.getElementById('htmlRoot');
     if (r) new MutationObserver(sync).observe(r, { attributes:true, attributeFilter:['lang'] });
+    /* live: another tab, or a producer on this page, created or read one */
+    if (global.RAFEventBus) RAFEventBus.subscribe('notification.*', function(){ sync(); });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();

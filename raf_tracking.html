@@ -205,7 +205,6 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 .trk-driver .who{flex:1 1 160px;min-width:0;}
 .trk-driver .who b{display:block;font-size:15.5px;font-weight:800;color:var(--ink);overflow-wrap:anywhere;}
 .trk-driver .who span{display:block;font-size:12.5px;color:var(--text3);margin-top:2px;}
-.trk-phone{display:block;font-family:var(--fen);font-size:13px;color:var(--text2);margin-top:4px;direction:ltr;unicode-bidi:isolate;}
 .trk-acts{display:flex;gap:9px;flex-wrap:wrap;width:100%;margin-top:13px;padding-top:13px;border-top:1px solid var(--border);}
 .trk-call,.trk-msg{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:48px;padding:0 18px;
   border-radius:14px;text-decoration:none;font-family:inherit;font-size:14px;font-weight:800;flex:1 1 130px;border:1px solid transparent;}
@@ -248,6 +247,10 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 }
 </style>
 <script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
 </head>
 <body>
@@ -493,20 +496,20 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
       ? T('سلّم طلبك بنجاح.','Delivered your order.')
       : (a.pickedUpAt ? T('في الطريق إليك الآن.','On the way to you now.')
                       : T('مسؤول عن توصيل طلبك.','Responsible for delivering your order.'));
-    var phone = a.driverPhone ? String(a.driverPhone) : null;
     /* the avatar is RAF's own initial mark — no photo exists in the record and
        none is invented */
     var acts = '';
     if(!delivered){
       acts = '<div class="trk-acts">'
-        + (phone
-            ? '<a class="trk-call" href="tel:'+esc(phone.replace(/\s/g,''))+'" aria-label="'
-              + T('الاتصال بمندوب التوصيل','Call the delivery driver')+'">'
-              + '<i class="ti ti-phone" aria-hidden="true"></i>'+T('اتصال','Call')+'</a>'
-            : '')
+        /* the customer never receives the driver's phone number. Calling needs
+           a number-masking service RAF does not have yet, so Call is shown as
+           not configured instead of dialling the driver's real number */
+        + '<button class="trk-msg" type="button" disabled aria-disabled="true" data-future="masked-call">'
+          + '<i class="ti ti-phone-off" aria-hidden="true"></i>'+T('اتصال','Call')
+          + ' <small>('+T('غير مُهيّأ','not configured')+')</small></button>'
         /* RAF has no customer↔driver messaging backend, so the control is
            disabled and says why instead of faking a sent message */
-        + '<button class="trk-msg" type="button" disabled aria-disabled="true">'
+        + '<button class="trk-msg" type="button" disabled aria-disabled="true" data-future="chat">'
           + '<i class="ti ti-message-off" aria-hidden="true"></i>'+T('مراسلة','Message')
           + ' <small>('+T('غير مُهيّأ','not configured')+')</small></button>'
         + '</div>';
@@ -516,7 +519,7 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
         + '<span class="trk-av" aria-hidden="true">'+esc(String(a.driverName).trim().charAt(0))+'</span>'
         + '<span class="who"><b>'+esc(a.driverName)+'</b>'
           + '<span>'+T('مندوب توصيل رف','RAF delivery driver')+' · '+line+'</span>'
-          + (phone && !delivered ? '<span class="trk-phone">'+esc(phone)+'</span>' : '')+'</span>'
+          +'</span>'
         + acts
       + '</div></div></div>';
   }

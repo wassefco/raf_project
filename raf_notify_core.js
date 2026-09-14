@@ -1,0 +1,340 @@
+/* ==========================================================================
+ * RAF — NOTIFICATION AUTHORITY  (RAFNotify — data layer)
+ * --------------------------------------------------------------------------
+ * The ONE notification authority. Producers call create(); every surface
+ * reads through forRecipient(). No page stores notification state of its own.
+ * The header bell (raf_notify.js) is a consumer of this layer, not a second
+ * engine; both live on the same RAFNotify object.
+ *
+ * MODEL (version 1) — one record per recipient:
+ *   { notificationId, recipientUserId, timestamp, eventType, title{ar,en},
+ *     message{ar,en}|null, entityType, entityId, href, source, metadata,
+ *     dedupeKey, version }
+ *
+ *   · READ STATE IS PER RECIPIENT and is never written onto the record: a
+ *     read is an append-only receipt { receiptId, notificationId,
+ *     recipientUserId, at }. Reading a notification can never mark it read
+ *     for anybody else.
+ *   · There is NO severity hierarchy.
+ *   · eventType is registered below; only events that actually happen in
+ *     RAF today are registered. Future logistics notification types are
+ *     added by the phases that implement those events — none is fabricated.
+ *   · SOUND is per account and affects sound only: a notification with sound
+ *     off is still created and still listed. Merchant accounts keep their
+ *     existing alert preferences in RAFMerchantPrefs (delegated, not copied).
+ *
+ * IDENTITY — every read and every read-receipt is scoped to the signed-in
+ * account resolved here; no caller can pass a recipient to read or mark
+ * somebody else's notifications. Recipients of create() are resolved by the
+ * PRODUCING authority from authoritative records (the order snapshot's
+ * customer, the store's own accounts) — never from page input.
+ *
+ * LEGACY BRIDGE (read-only) — records written before this authority existed
+ * are still shown to their rightful recipient and are never rewritten:
+ *   · 'raf_notif_extra'      customer order notifications (recipient =
+ *                            the record's customerId); legacy global read ids
+ *                            'raf_notif_read' seed their initial read state;
+ *   · 'raf_merchant_notifs'  the old store inbox, shown to the accounts of the
+ *                            store that owns each order (snapshot.storeSlug);
+ *                            its old shared read flag seeds initial state.
+ * Nothing writes those keys any more. Per-recipient receipts override them.
+ *
+ * STORAGE — RAFRecordStore collections 'notifications' and
+ * 'notification_reads' (append-only) and state map 'notification_prefs'.
+ * Prototype localStorage only; not production-safe for concurrency.
+ * ==========================================================================*/
+(function (global) {
+  'use strict';
+  var N = global.RAFNotify = global.RAFNotify || {};
+  if (N.__core) return;
+
+  var VERSION = 1;
+  var LEGACY_CUSTOMER = 'raf_notif_extra';
+  var LEGACY_CUSTOMER_READ = 'raf_notif_read';
+  var LEGACY_MERCHANT = 'raf_merchant_notifs';
+
+  /* the registered notification types — only events RAF performs today */
+  var TYPES = {
+    /* customer, produced by RAFOrderEngine / RAFOrderChanges */
+    'order.accepted':                    { audience:'customer' },
+    'order.cancelled':                   { audience:'customer' },
+    'order.delivered':                   { audience:'customer' },
+    'order.change':                      { audience:'customer' },
+    /* merchant store accounts — titles are the workspace's existing wording */
+    'merchant.order.new':                { audience:'merchant', legacyType:'new',
+                                           title:{ ar:'طلب جديد', en:'New order' } },
+    'merchant.order.acceptance_warning': { audience:'merchant', legacyType:'timeout',
+                                           title:{ ar:'تحذير: قارب وقت القبول على الانتهاء', en:'Acceptance window almost over' } },
+    'merchant.change.approved':          { audience:'merchant', legacyType:'change_approved',
+                                           title:{ ar:'وافق العميل على التعديل', en:'Customer approved the change' } },
+    'merchant.change.rejected':          { audience:'merchant', legacyType:'change_rejected',
+                                           title:{ ar:'رفض العميل التعديل', en:'Customer declined the change' } },
+    'merchant.change.failed':            { audience:'merchant', legacyType:'change_failed',
+                                           title:{ ar:'تعذّر تطبيق التعديل', en:'The change could not be applied' } },
+    /* driver, produced by RAFDriver when Logistics assigns a pool delivery (Phase C) */
+    'driver.delivery.assigned':          { audience:'driver',
+                                           title:{ ar:'أُسند إليك توصيل جديد', en:'A delivery was assigned to you' } },
+    /* driver, produced by RAFDriver reassignment / return to pool (Phase D).
+       Operational wording only: nothing implies the order was cancelled and no
+       internal reason or staff identity is included. */
+    'driver.delivery.reassigned':        { audience:'driver',
+                                           title:{ ar:'أصبحت مسؤولاً عن توصيل', en:'You are now responsible for a delivery' } },
+    'driver.delivery.removed':           { audience:'driver',
+                                           title:{ ar:'لم تعد مسؤولاً عن هذا التوصيل', en:'You are no longer responsible for this delivery' } },
+    'driver.reassignment_request.approved':{ audience:'driver',
+                                           title:{ ar:'تمت الموافقة على طلب إعادة الإسناد', en:'Your reassignment request was approved' } },
+    'driver.reassignment_request.rejected':{ audience:'driver',
+                                           title:{ ar:'لم تتم الموافقة على طلب إعادة الإسناد — تابع التوصيل', en:'Reassignment request not approved — continue the delivery' } },
+    /* Logistics staff (the temporary Logistics scope), produced by RAFDriver */
+    'logistics.reassignment_request.submitted':{ audience:'logistics',
+                                           title:{ ar:'طلب إعادة إسناد جديد من سائق', en:'New driver reassignment request' } },
+    'logistics.reassignment_request.cancelled':{ audience:'logistics',
+                                           title:{ ar:'ألغى السائق طلب إعادة الإسناد', en:'A driver cancelled a reassignment request' } },
+    /* Phase E — produced by RAFDeliveryOps.exceptions. Titles are operational
+       labels; customer wording comes from RAFConfig templates. */
+    'order.delay':                       { audience:'customer' },
+    'order.eta_updated':                 { audience:'customer' },
+    'logistics.exception.opened':        { audience:'logistics', title:{ ar:'استثناء جديد', en:'New exception' } },
+    'logistics.exception.updated':       { audience:'logistics', title:{ ar:'تحديث على استثناء', en:'Exception updated' } },
+    'logistics.exception.closed':        { audience:'logistics', title:{ ar:'أُغلق استثناء', en:'Exception closed' } },
+    'logistics.exception.reopened':      { audience:'logistics', title:{ ar:'أُعيد فتح استثناء', en:'Exception reopened' } },
+    'logistics.exception.escalated':     { audience:'logistics', title:{ ar:'تصعيد — يتطلب إجراء الإدارة', en:'Escalation — requires management action' } },
+    'logistics.exception.management_action':{ audience:'logistics', title:{ ar:'إجراء من الإدارة على استثناء', en:'Management action on an exception' } },
+    'logistics.exception.sla_approaching':{ audience:'logistics', title:{ ar:'اقتراب انتهاء مهلة الاستثناء', en:'Exception SLA approaching' } },
+    'logistics.exception.sla_breached':  { audience:'logistics', title:{ ar:'تجاوز مهلة الاستثناء — صُعّد للإدارة', en:'Exception SLA breached — escalated to management' } },
+    'logistics.delivery.penalty_risk':   { audience:'logistics', title:{ ar:'خطر غرامة التأخير — يلزم تدخل فوري', en:'Penalty Risk — Immediate Intervention Required' } },
+    'logistics.delivery.eta_updated':    { audience:'logistics', title:{ ar:'تم تحديث الوقت المتوقع', en:'ETA updated' } },
+    'logistics.customer_unreachable_attempt':{ audience:'logistics', title:{ ar:'محاولة اتصال بعميل لم يُرد', en:'Customer call attempt recorded' } },
+    'driver.exception.opened':           { audience:'driver', title:{ ar:'فُتح استثناء على توصيلك', en:'An exception was opened on your delivery' } },
+    'driver.exception.closed':           { audience:'driver', title:{ ar:'أُغلق الاستثناء على توصيلك', en:'The exception on your delivery was closed' } },
+    'driver.exception.reopened':         { audience:'driver', title:{ ar:'أُعيد فتح الاستثناء على توصيلك', en:'The exception on your delivery was reopened' } },
+    'driver.exception.instruction':      { audience:'driver', title:{ ar:'تعليمات من الإدارة', en:'Instruction from management' } },
+    'driver.delivery.eta_updated':       { audience:'driver', title:{ ar:'تم تحديث الوقت المتوقع للتوصيل', en:'The delivery ETA was updated' } },
+    /* Phase F — produced by RAFDriverManagement.availability */
+    'driver.availability.changed':       { audience:'driver', title:{ ar:'تغيّرت حالة توفرك', en:'Your availability changed' } },
+    'driver.availability.auto_offline':  { audience:'driver', title:{ ar:'أصبحت غير متاح تلقائيًا', en:'You were set Unavailable automatically' } },
+    'driver.schedule.changed':           { audience:'driver', title:{ ar:'تم تحديث جدول عملك', en:'Your work schedule was updated' } },
+    'logistics.driver.availability_changed':{ audience:'logistics', title:{ ar:'تغيّرت حالة توفر سائق', en:'A driver’s availability changed' } },
+    'logistics.driver.auto_offline':     { audience:'logistics', title:{ ar:'سائق أصبح غير متاح تلقائيًا', en:'A driver was set Unavailable automatically' } }
+  };
+  var LEGACY_MERCHANT_TYPE = {
+    'new':'merchant.order.new', 'timeout':'merchant.order.acceptance_warning',
+    'change_approved':'merchant.change.approved', 'change_rejected':'merchant.change.rejected',
+    'change_failed':'merchant.change.failed'
+  };
+  var SOURCES = ['customer', 'merchant', 'driver', 'admin', 'system', 'automation'];
+
+  function isEn(){ var r = document.getElementById('htmlRoot') || document.documentElement; return r.lang === 'en'; }
+  function T(ar, en){ return isEn() ? en : ar; }
+  var ERRORS = {
+    UNAUTHENTICATED:   { ar:'يجب تسجيل الدخول.',                  en:'You need to be signed in.' },
+    NOT_FOUND:         { ar:'الإشعار غير موجود.',                 en:'That notification does not exist.' },
+    NOT_RECIPIENT:     { ar:'هذا الإشعار ليس لك.',                en:'That notification is not yours.' },
+    UNKNOWN_TYPE:      { ar:'نوع الإشعار غير معروف.',             en:'Unknown notification type.' },
+    RECIPIENT_INVALID: { ar:'مستلم الإشعار غير صالح.',            en:'The notification recipient is not valid.' },
+    FIELDS_REQUIRED:   { ar:'بيانات الإشعار غير مكتملة.',         en:'The notification is incomplete.' },
+    USE_MERCHANT_PREFS:{ ar:'تنبيهات التاجر الصوتية تُدار من إعدادات التاجر.', en:'Merchant alert sounds are managed in the merchant settings.' },
+    PERSIST_FAILED:    { ar:'تعذّر حفظ الإشعار.',                 en:'The notification could not be saved.' }
+  };
+  function fail(code, extra){
+    var m = ERRORS[code] || { ar:'', en:'' };
+    return Object.assign({ ok:false, code:code, message:T(m.ar, m.en) }, extra || {});
+  }
+
+  function coll(name){ return global.RAFRecordStore ? RAFRecordStore.collection(name) : null; }
+  function prefs(){ return global.RAFRecordStore ? RAFRecordStore.stateMap('notification_prefs') : null; }
+
+  /* ---------- who is asking ----------
+     RAFPerm's signed-in account when RAFPerm is loaded; on storefront pages
+     that load it lazily, the stored session id (the prototype session). */
+  function me(){
+    try {
+      if (global.RAFPerm && RAFPerm.currentUser) {
+        var u = RAFPerm.currentUser();
+        return u && u.id ? { id:u.id, roleId:u.roleId || null, status:u.status || null, verified:true } : null;
+      }
+      var raw = localStorage.getItem('raf_current_user');
+      if (!raw) return null;
+      var id = null; try { id = JSON.parse(raw); } catch (e) { id = raw; }
+      return typeof id === 'string' && id ? { id:id, roleId:null, status:null, verified:false } : null;
+    } catch (e) { return null; }
+  }
+  function isMerchantRole(r){ return r === 'merchant' || r === 'merchant_employee'; }
+
+  /* ---------- produce ---------- */
+  function create(n){
+    n = n || {};
+    if (!TYPES[n.eventType]) return fail('UNKNOWN_TYPE', { eventType:n.eventType });
+    if (!n.recipientUserId || typeof n.recipientUserId !== 'string') return fail('RECIPIENT_INVALID');
+    if (global.RAFPerm && RAFPerm.getUser) {
+      var ru = null; try { ru = RAFPerm.getUser(n.recipientUserId); } catch (e) { ru = null; }
+      if (!ru) return fail('RECIPIENT_INVALID');
+    }
+    if (!n.title || typeof n.title !== 'object') return fail('FIELDS_REQUIRED');
+    var c = coll('notifications'); if (!c) return fail('PERSIST_FAILED');
+    if (n.dedupeKey) {
+      var dup = c.filter(function (r) { return r.recipientUserId === n.recipientUserId && r.dedupeKey === n.dedupeKey; })[0];
+      if (dup) return { ok:true, duplicate:true, notification:dup };
+    }
+    var rec = {
+      notificationId:  RAFRecordStore.makeId('ntf'),
+      recipientUserId: n.recipientUserId,
+      timestamp:       Date.now(),
+      eventType:       n.eventType,
+      title:           { ar:String(n.title.ar || n.title.en || ''), en:String(n.title.en || n.title.ar || '') },
+      message:         n.message && typeof n.message === 'object' ? { ar:String(n.message.ar || ''), en:String(n.message.en || '') } : null,
+      entityType:      n.entityType || null,
+      entityId:        n.entityId != null ? String(n.entityId) : null,
+      href:            n.href || null,
+      source:          SOURCES.indexOf(n.source) > -1 ? n.source : 'system',
+      metadata:        n.metadata && typeof n.metadata === 'object' ? n.metadata : null,
+      dedupeKey:       n.dedupeKey || null,
+      version:         VERSION
+    };
+    var r = c.append('notificationId', rec);
+    if (!r.ok) return fail('PERSIST_FAILED', { reason:r.reason });
+    if (global.RAFEventBus) RAFEventBus.publish('notification.created', { entityId:rec.notificationId, source:rec.source,
+      payload:{ recipientUserId:rec.recipientUserId, eventType:rec.eventType } });
+    return { ok:true, notification:r.record };
+  }
+
+  /* ---------- store recipients ----------
+     The accounts that work for the store that owns an order: resolved from the
+     order's immutable snapshot (storeSlug) and RAFPerm's store link by account
+     id — never from a store slug or recipient list a caller supplies. Only
+     active merchant and merchant-employee accounts are recipients. */
+  function storeRecipients(orderId){
+    if (!global.RAFOrderSnapshot || !global.RAFPerm) return [];
+    var slug = null; try { slug = RAFOrderSnapshot.storeSlugOf(orderId); } catch (e) { slug = null; }
+    if (!slug) return [];
+    var users = []; try { users = RAFPerm.getUsers() || []; } catch (e) { users = []; }
+    return users.filter(function (u) {
+      if (!u || u.status !== 'active' || !isMerchantRole(u.roleId)) return false;
+      var s = null; try { s = RAFPerm.storeSlugOf(u.id); } catch (e) { s = null; }
+      return s === slug;
+    }).map(function (u) { return u.id; });
+  }
+  /* one notification per store account, de-duplicated per recipient by
+     (eventType, orderId) — the rule the old shared inbox applied */
+  function notifyStore(eventType, orderId, opts){
+    opts = opts || {};
+    var def = TYPES[eventType];
+    if (!def || def.audience !== 'merchant') return fail('UNKNOWN_TYPE', { eventType:eventType });
+    var ids = storeRecipients(orderId);
+    var created = 0, existing = 0;
+    ids.forEach(function (rid) {
+      var r = create({ recipientUserId:rid, eventType:eventType, title:def.title, entityType:'order', entityId:orderId,
+                       source:opts.source || 'system', metadata:{ legacyType:def.legacyType }, dedupeKey:eventType + '|' + orderId });
+      if (r.ok && r.duplicate) existing++; else if (r.ok) created++;
+    });
+    return { ok:true, recipients:ids.length, created:created, existing:existing };
+  }
+
+  /* ---------- legacy (read-only) ---------- */
+  function readJSON(key, dflt){ try { var v = JSON.parse(localStorage.getItem(key)); return v == null ? dflt : v; } catch (e) { return dflt; } }
+  function legacyFor(u){
+    var out = [];
+    var cust = readJSON(LEGACY_CUSTOMER, []);
+    var custRead = readJSON(LEGACY_CUSTOMER_READ, []);
+    (Array.isArray(cust) ? cust : []).forEach(function (x) {
+      if (!x || !x.id || !x.t || x.customerId !== u.id) return;
+      out.push({ notificationId:x.id, recipientUserId:u.id, timestamp:x.ts || 0, eventType:'order.change',
+        title:{ ar:String(x.t.ar || ''), en:String(x.t.en || '') }, message:null, entityType:'order',
+        entityId:x.orderId || null, href:x.href || null, source:'system', metadata:null, dedupeKey:null,
+        version:0, legacy:true, legacyRead:Array.isArray(custRead) && custRead.indexOf(x.id) > -1 });
+    });
+    /* the old store inbox belongs to the accounts of the store that owns each order */
+    if (isMerchantRole(u.roleId) && global.RAFPerm && global.RAFOrderSnapshot) {
+      var slug = null; try { slug = RAFPerm.storeSlugOf(u.id); } catch (e) { slug = null; }
+      if (slug) {
+        (readJSON(LEGACY_MERCHANT, []) || []).forEach(function (x) {
+          if (!x || !x.id || !x.orderId) return;
+          var s = null; try { s = RAFOrderSnapshot.storeSlugOf(x.orderId); } catch (e) { s = null; }
+          if (s !== slug) return;
+          out.push({ notificationId:x.id, recipientUserId:u.id, timestamp:x.ts || 0,
+            eventType:LEGACY_MERCHANT_TYPE[x.type] || 'merchant.order.new', title:{ ar:'', en:'' }, message:null,
+            entityType:'order', entityId:x.orderId, href:null, source:'system', metadata:{ legacyType:x.type },
+            dedupeKey:null, version:0, legacy:true, legacyRead:!!x.read });
+        });
+      }
+    }
+    return out;
+  }
+
+  /* ---------- read (always the signed-in recipient) ---------- */
+  function receiptsFor(uid){
+    var c = coll('notification_reads');
+    var set = {};
+    if (c) c.filter(function (r) { return r.recipientUserId === uid; }).forEach(function (r) { set[r.notificationId] = r.at; });
+    return set;
+  }
+  function forRecipient(opts){
+    opts = opts || {};
+    var u = me(); if (!u) return [];
+    var c = coll('notifications');
+    var own = c ? c.filter(function (r) { return r.recipientUserId === u.id; }) : [];
+    var reads = receiptsFor(u.id);
+    var list = own.concat(legacyFor(u)).map(function (r) {
+      var out = Object.assign({}, r);
+      out.read = !!reads[r.notificationId] || !!r.legacyRead;
+      out.readAt = reads[r.notificationId] || null;
+      delete out.legacyRead;
+      return out;
+    });
+    if (opts.entityType) list = list.filter(function (r) { return r.entityType === opts.entityType; });
+    if (opts.audience) list = list.filter(function (r) { return (TYPES[r.eventType] || {}).audience === opts.audience; });
+    return list.sort(function (a, b) { return (b.timestamp || 0) - (a.timestamp || 0); });
+  }
+  function unreadCount(opts){ return forRecipient(opts).filter(function (r) { return !r.read; }).length; }
+
+  function markRead(notificationId){
+    var u = me(); if (!u) return fail('UNAUTHENTICATED');
+    var mine = forRecipient().filter(function (r) { return r.notificationId === notificationId; })[0];
+    if (!mine) {
+      var c = coll('notifications');
+      var exists = c && c.byId('notificationId', notificationId);
+      return fail(exists ? 'NOT_RECIPIENT' : 'NOT_FOUND');
+    }
+    if (mine.read) return { ok:true, already:true };
+    var rc = coll('notification_reads'); if (!rc) return fail('PERSIST_FAILED');
+    var r = rc.append('receiptId', { receiptId:u.id + '|' + notificationId, notificationId:notificationId,
+                                     recipientUserId:u.id, at:Date.now() });
+    if (!r.ok) return fail('PERSIST_FAILED');
+    if (global.RAFEventBus) RAFEventBus.publish('notification.read', { entityId:notificationId, payload:{ recipientUserId:u.id } });
+    return { ok:true };
+  }
+  function markAllRead(opts){
+    var u = me(); if (!u) return fail('UNAUTHENTICATED');
+    var n = 0;
+    forRecipient(opts).forEach(function (r) { if (!r.read && markRead(r.notificationId).ok) n++; });
+    return { ok:true, marked:n };
+  }
+
+  /* ---------- sound (per account; sound only) ---------- */
+  function soundPreference(kind){
+    var u = me(); if (!u) return { ok:false, code:'UNAUTHENTICATED' };
+    if (isMerchantRole(u.roleId) && global.RAFMerchantPrefs && RAFMerchantPrefs.soundEnabled) {
+      var on = null; try { on = RAFMerchantPrefs.soundEnabled(kind || 'newOrder'); } catch (e) { on = null; }
+      return { ok:true, configured:on !== null, enabled:on, via:'RAFMerchantPrefs' };
+    }
+    var p = prefs(); var rec = p ? p.get(u.id) : null;
+    if (rec && typeof rec.sound === 'boolean') return { ok:true, configured:true, enabled:rec.sound, via:'RAFNotify' };
+    var dflt = global.RAFConfig ? RAFConfig.value('notifications.soundDefault') : null;
+    return { ok:true, configured:dflt !== null, enabled:dflt, via:dflt !== null ? 'RAFConfig' : null };
+  }
+  function setSoundPreference(enabled){
+    var u = me(); if (!u) return fail('UNAUTHENTICATED');
+    if (isMerchantRole(u.roleId)) return fail('USE_MERCHANT_PREFS');
+    if (typeof enabled !== 'boolean') return fail('FIELDS_REQUIRED');
+    var p = prefs(); if (!p || !p.set(u.id, { sound:enabled, at:Date.now() })) return fail('PERSIST_FAILED');
+    if (global.RAFEventBus) RAFEventBus.publish('notification.preference.changed', { entityId:u.id, payload:{ sound:enabled } });
+    return { ok:true, enabled:enabled };
+  }
+
+  Object.assign(N, {
+    __core:true, VERSION:VERSION, EVENT_TYPES:TYPES, ERRORS:ERRORS,
+    create:create, notifyStore:notifyStore, forRecipient:forRecipient, unreadCount:unreadCount,
+    markRead:markRead, markAllRead:markAllRead,
+    soundPreference:soundPreference, setSoundPreference:setSoundPreference
+  });
+})(window);

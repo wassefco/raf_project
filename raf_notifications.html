@@ -25,6 +25,10 @@
 .n-act.primary:hover{background:var(--gold2);color:#fff;}
 </style>
 <script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
 </head>
 <body>
@@ -89,29 +93,9 @@
                act:{ar:'عرض المكافآت',en:'View Rewards'}, icon:'ti-gift', feature:'loyalty' }
   };
 
-  var NOTIFS = [
-    { type:'order', unread:true, href:'raf_tracking.html?id=ORD-1284',
-      t:{ar:'طلبك ‎#ORD-1284 في الطريق',en:'Order #ORD-1284 is on the way'},
-      s:{ar:'منذ 10 دقائق',en:'10 minutes ago'} },
-    { type:'promo', unread:true, href:'raf_store.html?store=casa-mode',
-      t:{ar:'عرض حصري من Casa Mode — خصم 25%',en:'Exclusive 25% off from Casa Mode'},
-      s:{ar:'منذ ساعة',en:'1 hour ago'} },
-    { type:'coupon', unread:true, href:'raf_coupons.html',
-      t:{ar:'كوبون جديد بانتظارك — خصم 20%',en:'A new coupon is waiting — 20% off'},
-      s:{ar:'منذ 90 دقيقة',en:'90 minutes ago'} },
-    { type:'reward', unread:true, href:'raf_rewards.html',
-      t:{ar:'ربحت 120 نقطة مكافآت',en:'You earned 120 reward points'},
-      s:{ar:'منذ ساعتين',en:'2 hours ago'} },
-    { type:'product', unread:false, href:'raf_product.html?id=P-001',
-      t:{ar:'عاد للمخزون: قميص أوفرسايز كلاسيك',en:'Back in stock: Classic Oversize Shirt'},
-      s:{ar:'منذ 3 ساعات',en:'3 hours ago'} },
-    { type:'store', unread:false, href:'raf_storespage.html',
-      t:{ar:'متجر جديد انضم — Nova Shoes',en:'New store joined — Nova Shoes'},
-      s:{ar:'منذ 4 ساعات',en:'4 hours ago'} },
-    { type:'delivered', unread:false, href:'raf_order_details.html?id=ORD-1280',
-      t:{ar:'تم تسليم طلبك ‎#ORD-1280 بنجاح',en:'Order #ORD-1280 delivered successfully'},
-      s:{ar:'أمس',en:'Yesterday'} }
-  ];
+  /* No sample notifications: the page shows only real order outcomes read
+     through RAFNotify (the per-recipient authority in raf_notify_core.js). */
+  var NOTIFS = [];
 
   function rowHTML(n,i){
     var k=TYPES[n.type]||TYPES.store;
@@ -127,8 +111,8 @@
   function visible(){
     /* order outcomes written by the Order Engine — only this customer's own,
        filtered by RAFNotify against each order's snapshot owner */
-    var orders = (window.RAFNotify && RAFNotify.items)
-      ? RAFNotify.items().filter(function(n){ return String(n.id).indexOf('ord-') === 0; })
+    var orders = (window.RAFNotify && RAFNotify.bell)
+      ? RAFNotify.bell.items()
           .map(function(n){ return { _id:n.id, type:'order', unread:n.unread, href:n.href, t:n.t, s:n.s }; })
       : [];
     return orders.concat(NOTIFS.filter(function(n){
@@ -147,10 +131,10 @@
   }
   window.markRead=function(i){
     var n=visible()[i]; if(!n) return;
-    if(n._id && window.RAFNotify) RAFNotify.markRead(n._id); else n.unread=false;
+    if(n._id && window.RAFNotify && RAFNotify.bell) RAFNotify.bell.markRead(n._id); else n.unread=false;
   };
   window.markAllRead=function(){ NOTIFS.forEach(function(n){n.unread=false;});
-    if(window.RAFNotify) RAFNotify.markAllRead();
+    if(window.RAFNotify && RAFNotify.bell) RAFNotify.bell.markAllRead();
     render();
     if(window.RAFShop&&RAFShop.toast) RAFShop.toast(T('تم تعليم الكل كمقروء','All marked as read'),{icon:'ti-checks'}); };
 
@@ -158,6 +142,8 @@
     render();
     var root=document.getElementById('htmlRoot');
     if(root) new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
+    /* live: a notification created or read anywhere for this account */
+    if(window.RAFEventBus) RAFEventBus.subscribe('notification.*', render);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();

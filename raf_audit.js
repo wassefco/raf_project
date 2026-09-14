@@ -86,7 +86,9 @@
     'net.offline':          { tl:false, ar:'انقطع الاتصال',               en:'Connection lost' },
     'net.online':           { tl:false, ar:'عاد الاتصال',                 en:'Connection restored' },
     /* driver */
-    'driver.assigned':      { tl:true,  ar:'تم تعيين السائق',             en:'Driver assigned' },
+    /* recorded when a driver CLAIMS an order from the pool — the only way a
+       driver takes ownership today; labelled by what actually happened */
+    'driver.assigned':      { tl:true,  ar:'سحب السائق الطلب',            en:'Driver claimed the order' },
     'driver.ready_ack':     { tl:false, ar:'أكد السائق جاهزية الطلب',     en:'Driver acknowledged ready' },
     'driver.pickup':        { tl:true,  ar:'استلم السائق الطلب',          en:'Driver picked up the order' },
     'driver.pickup_recovery':{tl:true,  ar:'اكتمل "جاهز" تلقائيًا بعد استلام السائق',
@@ -100,6 +102,56 @@
                                         en:'Driver returned the order to the available pool' },
     /* driver EMPLOYEE ACCOUNT administration — recorded against the account,
        never against an order. Separate from the delivery events above. */
+    /* ---- Logistics foundations (Phase B) ----
+       REGISTRY ONLY. An action listed here is recorded ONLY when the owning
+       authority actually performs it; registering a name never creates
+       history. Actions marked (active) have a live producer today; the rest
+       are reserved for the phases that implement them. */
+    'ownership.transferred':    { tl:true,  ar:'نُقلت مسؤولية التوصيل إلى سائق آخر', en:'Delivery ownership transferred' },   /* historical (Phase B primitive); Phase D records reassignments as dispatch.reassigned */
+    'logistics.lock.acquired':  { tl:false, ar:'بدأ العمل على التوصيل',          en:'Delivery operation lock acquired' },   /* (active) RAFDeliveryOps */
+    'logistics.lock.released':  { tl:false, ar:'انتهى العمل على التوصيل',         en:'Delivery operation lock released' },   /* (active) RAFDeliveryOps */
+    'logistics.lock.recovered': { tl:false, ar:'استُعيد قفل عملية متوقف',         en:'Stale operation lock recovered' },     /* (active) RAFDeliveryOps */
+    'config.changed':           { tl:false, ar:'تم تعديل إعداد',                 en:'Configuration changed' },              /* (active) RAFConfig.set */
+    'dispatch.assigned':        { tl:true,  ar:'أُسند التوصيل إلى سائق',          en:'Delivery assigned to a driver' },      /* (active) RAFOrderEngine.driverAssigned via RAFDriver first assignment */
+    'dispatch.reassigned':      { tl:false,  ar:'أُعيد إسناد التوصيل',             en:'Delivery reassigned' },               /* (active) RAFDriver reassignment */
+    'dispatch.returned_to_pool':{ tl:false,  ar:'أُعيد التوصيل إلى القائمة',        en:'Delivery returned to the pool' },     /* (active) RAFOrderEngine.driverUnassigned via RAFDriver return to pool */
+    'reassignment.requested':   { tl:false,  ar:'طلب السائق إعادة الإسناد',        en:'Driver requested reassignment' },     /* (active) RAFDriver.requestReassignment */
+    'reassignment.cancelled':   { tl:false,  ar:'ألغى السائق طلب إعادة الإسناد',   en:'Driver cancelled the reassignment request' }, /* (active) RAFDriver.cancelReassignmentRequest */
+    'reassignment.decided':     { tl:false,  ar:'تم البت في طلب إعادة الإسناد',    en:'Reassignment request decided' },     /* (active) RAFDriver.decideReassignmentRequest */
+    'driver.skipped':           { tl:false, ar:'تخطى السائق توصيلاً متاحاً',       en:'Driver skipped an available delivery' },   /* (active) RAFDriver.skip */
+    'exception.opened':         { tl:false, ar:'فُتح استثناء',                    en:'Exception opened' },
+    'exception.action':         { tl:false, ar:'إجراء على استثناء',               en:'Exception action' },
+    'exception.resolved':       { tl:false, ar:'تمت معالجة استثناء',              en:'Exception resolved' },
+    'exception.closed':         { tl:false, ar:'أُغلق استثناء',                   en:'Exception closed' },
+    'exception.reopened':       { tl:false, ar:'أُعيد فتح استثناء',               en:'Exception reopened' },
+    'exception.escalated':      { tl:false, ar:'صُعّد استثناء',                   en:'Exception escalated' },
+    'exception.taken':          { tl:false, ar:'تولّت الإدارة استثناءً',           en:'Exception taken by management' },
+    'exception.returned':       { tl:false, ar:'أُعيد استثناء إلى الموظف',         en:'Exception returned to the employee' },
+    'exception.sla_approaching':{ tl:false, ar:'اقتراب انتهاء مهلة استثناء',       en:'Exception SLA approaching' },
+    'exception.sla_breached':   { tl:false, ar:'تجاوز مهلة استثناء',              en:'Exception SLA breached' },
+    /* Phase E — every exception.* action above is (active) in RAFDeliveryOps.exceptions */
+    'exception.auto_closed':    { tl:false, ar:'أُغلق استثناء تلقائيًا — تم تسليم الطلب', en:'Exception auto-closed — order delivered' },
+    'exception.call_attempt':   { tl:false, ar:'سجّل السائق محاولة اتصال بالعميل',   en:'Driver recorded a customer call attempt' },
+    'delivery.penalty_risk':    { tl:false, ar:'خطر غرامة التأخير — يلزم تدخل فوري', en:'Penalty risk — immediate intervention required' },
+    'delivery.arrived':         { tl:true,  ar:'وصل السائق',                      en:'Driver arrived' },
+    'otp.issued':               { tl:false, ar:'تم إصدار رمز التسليم',            en:'Delivery code issued' },
+    'otp.attempt_failed':       { tl:false, ar:'رمز تسليم غير صحيح',              en:'Incorrect delivery code' },
+    'otp.blocked':              { tl:false, ar:'تم إيقاف رمز التسليم',             en:'Delivery code blocked' },
+    'otp.reopened':             { tl:false, ar:'أُعيد فتح محاولات رمز التسليم',     en:'Delivery code attempts reopened' },
+    'eta.updated':              { tl:false, ar:'تم تحديث الوقت المتوقع',           en:'ETA updated' },   /* (active) RAFDeliveryOps.exceptions.updateEta */
+    'availability.changed':     { tl:false, ar:'تغيّر توفر السائق',               en:'Driver availability changed' },
+    'availability.auto_offline':{ tl:false, ar:'تحوّل السائق إلى غير متاح تلقائياً', en:'Driver set unavailable automatically' },
+    'schedule.changed':         { tl:false, ar:'تغيّر جدول عمل السائق',           en:'Driver schedule changed' },
+    'overtime.changed':         { tl:false, ar:'تغيّر العمل الإضافي',              en:'Overtime changed' },
+    /* Phase F — availability.changed / auto_offline, schedule.changed and
+       overtime.changed above are (active) in RAFDriverManagement.availability */
+    'availability.self_unavailable':{ tl:false, ar:'جعل السائق نفسه غير متاح',       en:'Driver set themselves unavailable' },
+    'communication.message':    { tl:false, ar:'رسالة بين العميل والسائق',         en:'Customer–driver message' },
+    'communication.call':       { tl:false, ar:'مكالمة بين العميل والسائق',        en:'Customer–driver call' },
+    'rating.submitted':         { tl:false, ar:'قيّم العميل السائق',               en:'Customer rated the driver' },
+    'compensation.issued':      { tl:false, ar:'صدر تعويض',                        en:'Compensation issued' },
+    'compensation.voided':      { tl:false, ar:'أُلغي تعويض',                      en:'Compensation voided' },
+    'compensation.reversed':    { tl:false, ar:'عُكس تعويض',                       en:'Compensation reversed' },
     'driver.created':       { tl:false, ar:'تم إنشاء حساب سائق',          en:'Driver account created' },
     'driver.updated':       { tl:false, ar:'تم تعديل بيانات سائق',        en:'Driver account updated' },
     'driver.suspended':     { tl:false, ar:'تم إيقاف حساب سائق',          en:'Driver account suspended' },
@@ -251,14 +303,36 @@
   /* ---------- actor resolution ----------
      Never guessed. With no identifiable user the actor is `unknown` and no
      name is invented. */
+  /* WHO DID IT — resolved from authoritative identity, never from the text a
+     caller passes. When RAFPerm is loaded:
+       · a signed-in session is the actor. If the caller named a different
+         account, the event is still attributed to the session and the claimed
+         id is kept only as metadata (actorClaimedId) for investigation;
+       · with no session, a named account is looked up and its OWN name and
+         role are used (a caller-supplied name or role is ignored);
+     Existing events are never re-attributed: this applies to new events. */
+  function sessionUser(){
+    try { return global.RAFPerm && RAFPerm.currentUser ? RAFPerm.currentUser() : null; } catch (e) { return null; }
+  }
   function resolveActor(actor){
     if (actor && actor.type === ACTOR.SYSTEM) {
       return { actorType:ACTOR.SYSTEM, actorId:null, actorName:null };
     }
+    if (global.RAFPerm && actor && actor.id) {
+      var s = sessionUser();
+      if (s && s.id) {
+        var r = { actorType:roleToActor(s.roleId), actorId:s.id, actorName:s.name || null };
+        if (s.id !== actor.id) r.claimedId = actor.id;
+        return r;
+      }
+      var rec = null; try { rec = RAFPerm.getUser(actor.id); } catch (e) { rec = null; }
+      if (rec) return { actorType:roleToActor(rec.roleId), actorId:rec.id, actorName:rec.name || null };
+      return { actorType:ACTOR.UNKNOWN, actorId:null, actorName:null, claimedId:actor.id };
+    }
     if (actor && actor.id) {
-      var role = actor.roleId || null;
-      if (!role && global.RAFPerm) { var u = RAFPerm.getUser(actor.id); role = u && u.roleId; }
-      return { actorType: roleToActor(role), actorId:actor.id, actorName:actor.name || null };
+      /* RAFPerm is not loaded on this surface: the id is recorded, but no
+         caller-supplied name or role is trusted */
+      return { actorType:ACTOR.UNKNOWN, actorId:actor.id, actorName:null };
     }
     if (global.RAFPerm && RAFPerm.currentUser) {
       var cu = RAFPerm.currentUser();
@@ -337,7 +411,7 @@
       previousState:  opts.previousState == null ? null : opts.previousState,
       newState:       opts.newState == null ? null : opts.newState,
       reason:         opts.reason || null,
-      metadata:       opts.metadata || null,
+      metadata:       who.claimedId ? Object.assign({}, opts.metadata || {}, { actorClaimedId:who.claimedId }) : (opts.metadata || null),
       reversible:     !!opts.reversible,
       undone:         false,
       undoOf:         opts.undoOf || null,

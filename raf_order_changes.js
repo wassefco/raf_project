@@ -165,21 +165,21 @@
     try { var o = opts || {}; o.action = action; o.orderId = orderId; return RAFAudit.record(o); }
     catch (e) { return null; }
   }
-  /* the customer inbox the order engine already owns */
+  /* the customer's notification, through the order engine's notify (which
+     resolves the recipient from the snapshot and writes through RAFNotify) */
   function notifyCustomer(orderId, text, href){
     if (!E() || !E().notify) return;
-    try { E().notify(orderId, text, href); } catch (e) {}
+    try { E().notify(orderId, text, href, 'order.change'); } catch (e) {}
   }
-  /* the merchant inbox the workspace already reads, same key and record
-     shape, deduped by (type, orderId) exactly as the workspace does */
-  var MNKEY = 'raf_merchant_notifs';
+  /* the store's accounts, through RAFNotify — one notification per recipient,
+     de-duplicated by (type, orderId) as the old shared inbox was. The legacy
+     key 'raf_merchant_notifs' is no longer written (RAFNotify still reads it). */
+  var MERCHANT_EVENT = { change_approved:'merchant.change.approved', change_rejected:'merchant.change.rejected',
+                         change_failed:'merchant.change.failed' };
   function notifyMerchant(type, orderId){
-    var a = [];
-    try { a = JSON.parse(localStorage.getItem(MNKEY)) || []; } catch (e) { a = []; }
-    if (a.some(function (n) { return n.type === type && n.orderId === orderId; })) return false;
-    a.unshift({ id:type + '-' + orderId + '-' + Date.now(), type:type, orderId:orderId, ts:Date.now(), read:false });
-    try { localStorage.setItem(MNKEY, JSON.stringify(a.slice(0, 60))); } catch (e) {}
-    return true;
+    if (!global.RAFNotify || !RAFNotify.notifyStore || !MERCHANT_EVENT[type]) return false;
+    try { var r = RAFNotify.notifyStore(MERCHANT_EVENT[type], orderId, { source:'system' }); return !!(r && r.ok && r.created); }
+    catch (e) { return false; }
   }
 
   /* ---------- option resolution ----------

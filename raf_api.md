@@ -1,4 +1,9 @@
 # API Design — منصة رف
+# NOTE: the client-side foundations the server API must eventually back
+# (RAFConfig, RAFEventBus, RAFNotify per-recipient model, ownership history,
+# Logistics operation locks, audit registry, storage boundaries) are documented
+# in raf_foundations.md, including what is prototype-only and what requires
+# production server support.
 # RESTful API — Node.js + Express
 # Base URL: https://api.ruph.com/v1
 # Authentication: Bearer JWT Token
@@ -185,7 +190,7 @@ GET    /admin/orders                     # كل الطلبات
 GET    /admin/orders/:id                 # تفاصيل طلب
 PATCH  /admin/orders/:id/status         # تغيير الحالة يدوياً
 POST   /admin/orders/:id/cancel          # إلغاء طلب { reason }
-POST   /admin/orders/:id/assign          # [LEGACY / OUTDATED] تعيين سائق { driver_id } — لا يوجد إسناد يدوي؛ السائق يسحب الطلب بنفسه (أول من يسحب يملكه)
+POST   /admin/orders/:id/assign          # [MOVED] إسناد السائق يتبع إدارة اللوجستيات (انظر قسم LOGISTICS) — لم يُصمَّم بعد
 
 # --- المالية والعمولات ---
 GET    /admin/commissions                # كل العمولات
@@ -234,22 +239,25 @@ GET    /admin/reports/users              # نشاط المستخدمين
 
 # ============================================================
 # ============================================================
-# DELIVERY — لوحة التوصيل
-# Prefix: /delivery
-# Auth: Bearer Token (role = supervisor | driver)
+# LOGISTICS — إدارة اللوجستيات (Logistics Management)
+# Prefix: /delivery (placeholder; the final prefix will be set with the API design)
+# Auth: Bearer Token (Logistics staff | driver)
 # ============================================================
-# [LEGACY / OUTDATED] This section predates the implemented prototype delivery
-# lifecycle (Ready → Waiting for Driver → driver claims, first come first served
-# → Picked Up → Out for Delivery → Delivered; return only before pickup).
-# Endpoints marked [LEGACY / OUTDATED] contradict it and are NOT the current
-# design. The Delivery Management API will be designed later.
+# [PLANNED — NOT FINAL] This section is an early sketch. The Logistics
+# Management API has not been designed yet and will follow the approved model:
+# a RAF-wide driver pool with first-come-first-served claims (Ready → Waiting for
+# Driver → Claimed → Picked Up → Out for Delivery → Arrived → Delivered), plus
+# Logistics dispatch (direct assignment, reassignment with reason), driver
+# reassignment requests, exceptions, OTP, ETA and notifications.
+# Endpoints marked [LEGACY / OUTDATED] contradict the approved model.
+# Drivers do not return a claimed delivery directly (reassignment request flow).
 
-# --- مشرف التوصيل ---
+# --- عمليات اللوجستيات ---
 GET    /delivery/orders                  # كل الطلبات
 GET    /delivery/orders/:id              # تفاصيل طلب
-POST   /delivery/orders/:id/assign       # [LEGACY / OUTDATED] تعيين سائق — لا إسناد يدوي
-POST   /delivery/orders/:id/reassign    # [LEGACY / OUTDATED] إعادة التعيين — لا إعادة إسناد
-PATCH  /delivery/orders/:id/status      # [LEGACY / OUTDATED] تغيير حالة يدوياً — الحالة تتقدم عبر السائق فقط
+POST   /delivery/orders/:id/assign       # [PLANNED] إسناد مباشر لسائق نشط — لم يُصمَّم بعد
+POST   /delivery/orders/:id/reassign    # [PLANNED] إعادة إسناد (السبب إلزامي بعد الاستلام) — لم يُصمَّم بعد
+PATCH  /delivery/orders/:id/status      # [LEGACY / OUTDATED] تغيير حالة يدوياً — الحالة لا تُغيَّر يدوياً
 
 GET    /delivery/drivers                 # قائمة السائقين
 GET    /delivery/drivers/:id             # ملف سائق
@@ -264,7 +272,7 @@ GET    /delivery/reports                 # تقارير التوصيل
 GET    /delivery/driver/available        # الطلبات المتاحة للاستلام
 POST   /delivery/driver/accept/:orderId  # استلام طلب (Transaction — حماية تضارب)
 GET    /delivery/driver/active           # طلبي الحالي
-PATCH  /delivery/driver/orders/:id/status  # تحديث الحالة { status: in_delivery|delivered|returned }
+PATCH  /delivery/driver/orders/:id/status  # [LEGACY / OUTDATED] تحديث الحالة { status: in_delivery|delivered|returned } — لا إرجاع مباشر من السائق؛ الإجراءات المعتمدة: استلام، وصول، تسليم برمز OTP
 GET    /delivery/driver/history          # سجل توصيلاتي
 GET    /delivery/driver/stats            # إحصاءاتي
 

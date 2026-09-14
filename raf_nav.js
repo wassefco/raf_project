@@ -56,13 +56,13 @@
       { href: 'raf_plans.html',       icon: 'ti-tag',              ar: 'الباقات والأسعار', en: 'Pricing & Plans' },
       { href: 'raf_merchant.html',    icon: 'ti-layout-dashboard', ar: 'لوحة التاجر',     en: 'Merchant Dashboard' },
       { href: 'raf_join_driver.html', icon: 'ti-motorbike',        ar: 'انضم كسائق',      en: 'Join as Driver' },
-      /* RAF's own delivery operations board — a separate top-level interface.
-         `perms` lists the EXISTING permissions the
-         board's authority already requires, and BOTH must be held: the entry
-         is drawn for nobody else. It is a convenience only — the page itself
-         still refuses anyone RAFDeliveryOps does not authorise. */
+      /* Logistics Management — RAF's own separate top-level interface.
+         `perms` lists the EXISTING permissions its authority already
+         requires, and BOTH must be held: the entry is drawn for nobody else.
+         It is a convenience only — the page itself still refuses anyone
+         RAFDeliveryOps does not authorise. */
       { href: 'raf_delivery_management.html', icon: 'ti-truck-delivery',
-        ar: 'عمليات التوصيل', en: 'Delivery Operations',
+        ar: 'إدارة اللوجستيات', en: 'Logistics Management',
         perms: ['orders.view', 'drivers.view'] }
     ]}
   ];

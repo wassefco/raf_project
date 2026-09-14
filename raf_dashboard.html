@@ -11,6 +11,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
 <style>
 /* ══════════════════════════════════════════════════════════════
@@ -339,7 +343,7 @@ body{background:var(--bg2);margin:0;}
         + tile(T('بانتظار القبول','Pending acceptance'), num(c.pending), '', c.pending ? 'hot' : '')
         + tile(T('مقبول / قيد التجهيز','Accepted / Preparing'), num(c.preparing))
         + tile(T('جاهز','Ready'), num(c.ready))
-        + tile(T('بانتظار السائق','Waiting for driver'), num(c.driver))
+        + tile(T('مع السائق','With driver'), num(c.driver))
         + tile(T('مجدول','Scheduled'), num(c.scheduled))
         + '</div>';
     });

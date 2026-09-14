@@ -11,6 +11,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
 <style>
 /* ══════════════════════════════════════════════════════════════
@@ -882,14 +886,26 @@ body.is-offline .mw-off{display:flex;}
 
   /* ---------- merchant notifications ----------
      Workspace-only. No push notifications. */
-  var NKEY = 'raf_merchant_notifs', SEENKEY = 'raf_merchant_seen', WARNKEY = 'raf_merchant_warned';
-  function notifs(){ try { var a = JSON.parse(localStorage.getItem(NKEY)); return Array.isArray(a)?a:[]; } catch(e){ return []; } }
-  function writeNotifs(a){ try { localStorage.setItem(NKEY, JSON.stringify(a.slice(0,60))); } catch(e){} }
+  /* Notifications belong to RAFNotify, the single per-recipient authority.
+     This page only detects the moments worth announcing (below) and reads the
+     signed-in account's own notifications; read state is per account. */
+  var SEENKEY = 'raf_merchant_seen', WARNKEY = 'raf_merchant_warned';
+  var N_EVENT = { 'new':'merchant.order.new', 'timeout':'merchant.order.acceptance_warning' };
+  var N_LEGACY = { 'merchant.order.new':'new', 'merchant.order.acceptance_warning':'timeout',
+                   'merchant.change.approved':'change_approved', 'merchant.change.rejected':'change_rejected',
+                   'merchant.change.failed':'change_failed' };
+  function notifs(){
+    if (!window.RAFNotify || !RAFNotify.forRecipient) return [];
+    return RAFNotify.forRecipient({ audience:'merchant' }).map(function(r){
+      return { id:r.notificationId, type:(r.metadata && r.metadata.legacyType) || N_LEGACY[r.eventType] || 'new',
+               orderId:r.entityId, ts:r.timestamp, read:!!r.read };
+    });
+  }
+  /* announce to every account of this store; true when this account received a new one */
   function pushNotif(type, orderId){
-    var a = notifs();
-    if (a.some(function(n){ return n.type===type && n.orderId===orderId; })) return false;
-    a.unshift({ id:type+'-'+orderId+'-'+Date.now(), type:type, orderId:orderId, ts:Date.now(), read:false });
-    writeNotifs(a); return true;
+    if (!window.RAFNotify || !RAFNotify.notifyStore || !N_EVENT[type]) return false;
+    var r = RAFNotify.notifyStore(N_EVENT[type], orderId, { source:'merchant' });
+    return !!(r && r.ok && r.created > 0);
   }
   function unreadCount(){ return notifs().filter(function(n){ return !n.read; }).length; }
   function readSet(key){ try { var a=JSON.parse(localStorage.getItem(key)); return Array.isArray(a)?a:[]; } catch(e){ return []; } }
@@ -950,7 +966,8 @@ body.is-offline .mw-off{display:flex;}
     { k:'pending',   pip:'pip-pending',   st:'st-pending',   ar:'بانتظار القبول', en:'Pending acceptance' },
     { k:'preparing', pip:'pip-preparing', st:'st-preparing', ar:'قيد التجهيز',    en:'Preparing' },
     { k:'ready',     pip:'pip-ready',     st:'st-ready',     ar:'جاهز',           en:'Ready' },
-    { k:'driver',    pip:'pip-driver',    st:'st-driver',    ar:'بانتظار السائق', en:'Waiting driver' },
+    /* the engine's `driver` group holds orders a driver has already taken */
+    { k:'driver',    pip:'pip-driver',    st:'st-driver',    ar:'مع السائق',     en:'With driver' },
     { k:'scheduled', pip:'pip-scheduled', st:'st-scheduled', ar:'مجدول',          en:'Scheduled' },
     { k:'done',      pip:'pip-done',      st:'st-done',      ar:'مكتمل',          en:'Completed' },
     { k:'cancelled', pip:'pip-cancelled', st:'st-cancelled', ar:'ملغي',           en:'Cancelled' }
@@ -1508,8 +1525,11 @@ body.is-offline .mw-off{display:flex;}
 
     if (E.merchantDone(o.id)){
       var doneLbl = m === 'rejected' ? T('تم رفض هذا الطلب','This order was rejected')
-                  : T('انتهت مسؤولية المتجر — الطلب بانتظار السائق',
-                      'Merchant work is complete — the order is waiting for a driver');
+                  : m === E.MSTATE.WAITING_DRIVER
+                    ? T('انتهت مسؤولية المتجر — الطلب مع السائق',
+                        'Merchant work is complete — a driver has the order')
+                    : T('انتهت مسؤولية المتجر — الطلب بانتظار سائق',
+                        'Merchant work is complete — the order is waiting for a driver');
       /* Once a driver pulls the order the store can see that it is on its way,
          by the driver's name and the time — never an account id, and never as
          an action: the merchant's responsibility ended at Ready and delivery
@@ -2097,15 +2117,14 @@ body.is-offline .mw-off{display:flex;}
     if (document.getElementById('focus').classList.contains('show')) renderFocus();
   };
   window.openNotif = function(nid, orderId){
-    var a = notifs();
-    a.forEach(function(n){ if (n.id === nid) n.read = true; });
-    writeNotifs(a);
+    if (window.RAFNotify && RAFNotify.markRead) RAFNotify.markRead(nid);   /* this account only */
     closePop();
     pick(orderId);                       /* deep-link into the order */
     renderNotifs();
   };
   window.markAllRead = function(){
-    var a = notifs(); a.forEach(function(n){ n.read = true; }); writeNotifs(a); renderNotifs();
+    if (window.RAFNotify && RAFNotify.markAllRead) RAFNotify.markAllRead({ audience:'merchant' });
+    renderNotifs();
   };
   window.closeDrawer = function(){
     document.getElementById('drawer').classList.remove('open');
