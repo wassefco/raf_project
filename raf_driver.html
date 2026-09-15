@@ -264,6 +264,10 @@ body{background:var(--bg2);margin:0;}
 <!-- the Logistics operations authority: the driver's exception actions and the
      delivery auto-close hook (it renders nothing; every call proves the session) -->
 <script src="raf_delivery_management.js"></script>
+<!-- Phase H: the Customer ↔ Driver conversation (authority + widget) -->
+<script src="raf_driver_communication.js"></script>
+<script src="raf_message_translation.js"></script>
+<script src="raf_driver_communication_ui.js"></script>
 <script>
 /* ============================================================
    DRIVER WORKSPACE
@@ -704,7 +708,13 @@ body{background:var(--bg2);margin:0;}
     h += '<div class="dv-note"><i class="ti ti-info-circle"></i><span>'
       + esc(T('حالة الطلب يديرها محرك الطلبات؛ هذه الشاشة تعرضها ولا تغيّرها.',
               'The order state is owned by the order engine; this screen shows it and never changes it.'))+'</span></div>';
-    return h + '</section>';
+    h += '</section>';
+    /* Phase H: the conversation with the customer — RAFDriverCommunication only
+       lets the CURRENT owner of an undelivered delivery in; the widget renders */
+    if (window.RAFCommUI && mine && (t.stage === 'claimed' || t.stage === 'out_for_delivery'))
+      h += '<section class="dv-card" id="commCard" hidden><div class="dv-card-h"><h2>'+esc(T('التواصل مع العميل','Contact the customer'))+'</h2></div>'
+        + '<div id="commRoot" data-order="'+esc(t.orderId)+'"></div></section>';
+    return h;
   }
 
   /* ════════════════ HISTORY ════════════════ */
@@ -782,6 +792,9 @@ body{background:var(--bg2);margin:0;}
                          : st.tab === 'profile' ? renderProfile()
                          :                        renderHome();
     el('view').scrollTop = 0;
+    var cr = el('commRoot');
+    if (cr && window.RAFCommUI) RAFCommUI.mount(cr, { orderId:cr.getAttribute('data-order'), mode:'participant',
+      onRender:function(x){ var c = el('commCard'); if (c) c.hidden = !x.innerHTML; } });
   }
   window.setTab = function(k){
     if (!TABS.some(function(t){ return t.k === k; })) return;

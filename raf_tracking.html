@@ -205,16 +205,6 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 .trk-driver .who{flex:1 1 160px;min-width:0;}
 .trk-driver .who b{display:block;font-size:15.5px;font-weight:800;color:var(--ink);overflow-wrap:anywhere;}
 .trk-driver .who span{display:block;font-size:12.5px;color:var(--text3);margin-top:2px;}
-.trk-acts{display:flex;gap:9px;flex-wrap:wrap;width:100%;margin-top:13px;padding-top:13px;border-top:1px solid var(--border);}
-.trk-call,.trk-msg{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:48px;padding:0 18px;
-  border-radius:14px;text-decoration:none;font-family:inherit;font-size:14px;font-weight:800;flex:1 1 130px;border:1px solid transparent;}
-.trk-call{background:var(--ink);color:#F5F0E4;}
-.trk-call:hover{filter:brightness(1.12);}
-/* messaging has no backend in RAF, so the control says so instead of
-   pretending a message was sent */
-.trk-msg{background:var(--card);border-color:var(--border2);color:var(--text3);cursor:not-allowed;}
-.trk-msg small{font-weight:700;font-size:11px;}
-.trk-call:focus-visible,.trk-msg:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 
 /* Phase G — rate the driver (once, final) */
 .trk-rate{width:100%;margin-top:13px;padding-top:13px;border-top:1px solid var(--border);}
@@ -257,7 +247,7 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 @media (max-width:420px){
   .trk-steps{padding:18px 12px 14px;}
   .trk-lbl{font-size:11.5px;max-width:9ch;}
-  .trk-call,.trk-help a{width:100%;}
+  .trk-help a{width:100%;}
 }
 /* motion is a flourish, never the message */
 @media (prefers-reduced-motion:reduce){
@@ -319,6 +309,10 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 <!-- read-only: the name and contact of whoever is carrying this order -->
 <script src="raf_driver.js"></script>
 <script src="raf_driver_rating.js"></script>
+<!-- Phase H: the Customer ↔ Driver conversation (authority + widget) -->
+<script src="raf_driver_communication.js"></script>
+<script src="raf_message_translation.js"></script>
+<script src="raf_driver_communication_ui.js"></script>
 <script src="raf_checkout.js"></script>
 <script>
 /* ============================================================
@@ -507,7 +501,7 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
      Only a real, named driver appears here. Before anybody takes the order
      there is no driver to show and the card stays away entirely — the
      customer is never told about assignment, queues or waiting. Nothing is
-     invented: no rating, no vehicle, no photo, no location, because RAF holds
+     invented: no vehicle, no photo, no location, because RAF holds
      none of them. */
   function driverHTML(o){
     var st=stageOf(o); if(st.cancelled) return '';
@@ -520,31 +514,30 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
                       : T('مسؤول عن توصيل طلبك.','Responsible for delivering your order.'));
     /* the avatar is RAF's own initial mark — no photo exists in the record and
        none is invented */
-    var acts = '';
-    if(!delivered){
-      acts = '<div class="trk-acts">'
-        /* the customer never receives the driver's phone number. Calling needs
-           a number-masking service RAF does not have yet, so Call is shown as
-           not configured instead of dialling the driver's real number */
-        + '<button class="trk-msg" type="button" disabled aria-disabled="true" data-future="masked-call">'
-          + '<i class="ti ti-phone-off" aria-hidden="true"></i>'+T('اتصال','Call')
-          + ' <small>('+T('غير مُهيّأ','not configured')+')</small></button>'
-        /* RAF has no customer↔driver messaging backend, so the control is
-           disabled and says why instead of faking a sent message */
-        + '<button class="trk-msg" type="button" disabled aria-disabled="true" data-future="chat">'
-          + '<i class="ti ti-message-off" aria-hidden="true"></i>'+T('مراسلة','Message')
-          + ' <small>('+T('غير مُهيّأ','not configured')+')</small></button>'
-        + '</div>';
-    }
+    /* Phase H: calling and messaging live in the "Contact your driver" panel
+       (RAFDriverCommunication) — not duplicated here */
     return '<div class="panel"><div class="panel-h" role="heading" aria-level="2"><i class="ti ti-motorbike"></i> '+T('معلومات مندوب التوصيل','Delivery driver')+'</div>'
       + '<div class="panel-b"><div class="trk-driver">'
         + '<span class="trk-av" aria-hidden="true">'+esc(String(a.driverName).trim().charAt(0))+'</span>'
         + '<span class="who"><b>'+esc(a.driverName)+'</b>'
           + '<span>'+T('مندوب توصيل رف','RAF delivery driver')+' · '+line+'</span>'
           +'</span>'
-        + acts
         + (delivered ? rateHTML(o) : '')
       + '</div></div></div>';
+  }
+
+  /* ---------- Phase H: the conversation with the driver ----------
+     RAFDriverCommunication decides who may see or write; the widget renders.
+     The panel stays hidden until a conversation exists for this customer. */
+  function commHTML(o){
+    if(!window.RAFCommUI) return '';
+    return '<div class="panel" id="commWrap" hidden><div class="panel-h" role="heading" aria-level="2"><i class="ti ti-messages"></i> '
+      + T('التواصل مع السائق','Contact your driver')+'</div><div class="panel-b" id="commRoot"></div></div>';
+  }
+  function mountComm(o){
+    var el = document.getElementById('commRoot'); if(!el || !window.RAFCommUI) return;
+    RAFCommUI.mount(el, { orderId:o.id, mode:'participant', onRender:function(x){
+      var w = document.getElementById('commWrap'); if(w) w.hidden = !x.innerHTML; } });
   }
 
   /* ---------- Phase G: rate the driver who completed the delivery ----------
@@ -906,8 +899,10 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     }
     /* progress first, then the delivery itself, then the order's own detail */
     root.innerHTML = confirmationHTML(o) + changeHTML(o) + timelineHTML(o) + liveHTML(o) + driverHTML(o)
+                   + commHTML(o)
                    + productsHTML(o) + orderDetailsHTML(o) + deliveryHTML(o)
                    + invoiceHTML(o) + supportHTML() + actionsHTML();
+    mountComm(o);
     RAFShop.Cart.badge();
   }
 

@@ -454,6 +454,10 @@ bdi{ unicode-bidi:isolate; }
 <script src="raf_driver.js"></script>
 <script src="raf_driver_management.js"></script>
 <script src="raf_delivery_management.js"></script>
+<!-- Phase H: the Customer ↔ Driver conversation (authority + widget) -->
+<script src="raf_driver_communication.js"></script>
+<script src="raf_message_translation.js"></script>
+<script src="raf_driver_communication_ui.js"></script>
 <script>
 /* ============================================================================
    LOGISTICS MANAGEMENT — presentation only.
@@ -549,7 +553,9 @@ bdi{ unicode-bidi:isolate; }
       { k:'assignment', ar:'الإسناد',           en:'Assignment',      view:'dispatch' },
       { k:'manual',     ar:'التدخل اليدوي',     en:'Manual Intervention' },
       { k:'exceptions', ar:'الاستثناءات',       en:'Exceptions',      view:'exlist' },
-      { k:'reassign',   ar:'إعادة الإسناد',     en:'Reassignment',    view:'reassign' } ]},
+      { k:'reassign',   ar:'إعادة الإسناد',     en:'Reassignment',    view:'reassign' },
+      /* Phase H: read-only Customer ↔ Driver conversation history (RAFDriverCommunication) */
+      { k:'conversations', ar:'محادثات التوصيل', en:'Delivery Conversations', view:'conversations' } ]},
     /* drivers are a separate system with their own app — they are managed
        here, but they are not members of the Logistics Operations team */
     { k:'drivers', ic:'ti-steering-wheel', ar:'السائقون', en:'Drivers', items:[
@@ -849,6 +855,37 @@ bdi{ unicode-bidi:isolate; }
     var X = EXO(); if(!X) return { ok:false, message:T('وحدة الاستثناءات غير محمّلة.','The exceptions module is not loaded.') };
     return X.list({ status:EXF.status === 'all' ? undefined : EXF.status });
   }
+  /* ───────── DISPATCH & OPERATIONS → DELIVERY CONVERSATIONS (Phase H) ─────────
+     Read-only history of the Customer ↔ Driver conversations. Access is decided
+     by RAFDriverCommunication: management (existing drivers.suspend) may review;
+     support only with an associated complaint (no complaint source exists yet,
+     so it is refused). Nothing here can send, call or change a message. */
+  var CONV = { open:null };
+  function viewConversations(){
+    var C = window.RAFDriverCommunication;
+    var head = pageHead(T('محادثات التوصيل','Delivery Conversations'),
+      T('سجل إداري للاطلاع فقط على المحادثات بين العميل والسائق. لا يمكن الإرسال أو التعديل أو الحذف.','Read-only administrative history of customer ↔ driver conversations. Nothing can be sent, edited or deleted.'), refreshBtn());
+    if(!C) return head + '<section class="card nc"><h2>'+T('خدمة المحادثات غير محمّلة.','The conversation service is not loaded.')+'</h2></section>';
+    var r = C.list();
+    if(!r.ok) return head + '<section class="card nc"><h2>'+esc(r.message)+'</h2></section>';
+    var rows = r.conversations.length ? '<ul class="list">'+r.conversations.map(function(x){
+        return '<li><span class="ic '+(x.closed ? 'done' : (x.active ? 'wait' : 'alert'))+'"><i class="ti ti-messages" aria-hidden="true"></i></span>'
+          + '<span class="bd"><b><bdi>'+esc(x.orderId)+'</bdi></b><span class="meta">'
+          + '<span class="chip '+(x.closed ? 'done' : (x.active ? 'claim' : 'muted'))+'">'+(x.closed ? T('مغلقة','Closed') : (x.active ? T('نشطة','Active') : T('بلا سائق','No driver')))+'</span>'
+          + '<span>'+esc(x.currentDriver || '—')+'</span><span>'+T('الرسائل: ','Messages: ')+'<bdi>'+x.messages+'</bdi></span>'
+          + (x.lastAt ? '<span>'+esc(kwTime(x.lastAt))+'</span>' : '')+'</span></span>'
+          + '<button class="btn" type="button" onclick="DM.convOpen(\''+esc(x.orderId)+'\')" aria-expanded="'+(CONV.open === x.orderId)+'"><i class="ti ti-eye" aria-hidden="true"></i>'+T('عرض','View')+'</button></li>';
+      }).join('')+'</ul>'
+      : '<div class="empty"><i class="ti ti-messages-off" aria-hidden="true"></i><b>'+T('لا توجد محادثات بعد','No conversations yet')+'</b></div>';
+    return head + '<section class="card" aria-labelledby="h-conv"><div class="card-h"><h2 id="h-conv"><i class="ti ti-messages" aria-hidden="true"></i>'
+      + T('المحادثات','Conversations')+'</h2><span class="count">'+r.conversations.length+'</span></div>'+rows+'</section>'
+      + (CONV.open ? '<section class="card" id="convCard"><div id="convRoot"></div></section>' : '');
+  }
+  function mountConversation(){
+    var root = el('convRoot');
+    if(root && CONV.open && window.RAFCommUI) RAFCommUI.mount(root, { orderId:CONV.open, mode:'admin' });
+  }
+
   function viewExceptionList(){
     var r = exList();
     if(!r.ok) return '<section class="card nc"><h2>'+esc(r.message||'')+'</h2></section>';
@@ -1747,9 +1784,11 @@ bdi{ unicode-bidi:isolate; }
     else if(it.view === 'dispatch') html = viewDispatch();
     else if(it.view === 'reassign') html = viewReassign();
     else if(it.view === 'exlist') html = viewExceptionList();
+    else if(it.view === 'conversations') html = viewConversations();
     else html = viewNotConfigured(G, it);
     scheduleDeadline();
     el('view').innerHTML = html;
+    if(it.view === 'conversations') mountConversation();
     if(openId) renderDrawer();
     else if(DS){
       /* the panel reads the board; outside the dispatch views refresh it here */
@@ -1894,6 +1933,8 @@ bdi{ unicode-bidi:isolate; }
   }
 
   window.DM = {
+    /* Phase H: open a conversation's read-only history */
+    convOpen: function(id){ CONV.open = CONV.open === id ? null : id; renderView(); var c = el('convCard'); if(c) c.scrollIntoView({ block:'nearest' }); },
     open: function(id, trigger){ if(DS) dispatchClose(false); drawerTrigger = trigger || document.activeElement; openId = id; renderDrawer(); },
     close: closeDrawer,
     /* manual dispatch */

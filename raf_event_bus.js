@@ -89,6 +89,16 @@
     'driver.auto_offline.reset':             { domain:'driver',    entityType:'user' },
     /* Phase G — a customer rated the driver of a delivered order (RAFDriverRating) */
     'driver.rating.submitted':               { domain:'driver',    entityType:'order' },
+    /* Phase H — Customer ↔ Driver communication (RAFDriverCommunication). Payloads
+       carry ids only; every page re-reads through the authority's access checks. */
+    'communication.conversation.opened':             { domain:'communication', entityType:'order' },
+    'communication.conversation.driver_transferred': { domain:'communication', entityType:'order' },
+    'communication.conversation.driver_released':    { domain:'communication', entityType:'order' },
+    'communication.conversation.driver_assigned':    { domain:'communication', entityType:'order' },
+    'communication.conversation.closed':             { domain:'communication', entityType:'order' },
+    'communication.message.sent':                    { domain:'communication', entityType:'order' },
+    'communication.message.delivered':               { domain:'communication', entityType:'order' },
+    'communication.message.read':                    { domain:'communication', entityType:'order' },
     /* notifications */
     'notification.created':          { domain:'notification', entityType:'notification' },
     'notification.read':             { domain:'notification', entityType:'notification' },

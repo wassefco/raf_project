@@ -147,6 +147,12 @@
        overtime.changed above are (active) in RAFDriverManagement.availability */
     'availability.self_unavailable':{ tl:false, ar:'جعل السائق نفسه غير متاح',       en:'Driver set themselves unavailable' },
     'communication.message':    { tl:false, ar:'رسالة بين العميل والسائق',         en:'Customer–driver message' },
+    /* Phase H — communication.message above and the lifecycle below are (active) in RAFDriverCommunication */
+    'communication.opened':             { tl:false, ar:'بدأت محادثة العميل والسائق',       en:'Customer–driver conversation opened' },
+    'communication.driver_transferred': { tl:false, ar:'انتقلت المحادثة إلى سائق آخر',     en:'Conversation moved to another driver' },
+    'communication.driver_released':    { tl:false, ar:'لا يوجد سائق في المحادثة (أُعيد الطلب للقائمة)', en:'No driver in the conversation (returned to pool)' },
+    'communication.driver_assigned':    { tl:false, ar:'انضم سائق جديد إلى المحادثة',      en:'A new driver joined the conversation' },
+    'communication.closed':             { tl:false, ar:'أُغلقت المحادثة — تم التسليم',      en:'Conversation closed — delivered' },
     'communication.call':       { tl:false, ar:'مكالمة بين العميل والسائق',        en:'Customer–driver call' },
     'rating.submitted':         { tl:false, ar:'قيّم العميل السائق',               en:'Customer rated the driver' },
     'compensation.issued':      { tl:false, ar:'صدر تعويض',                        en:'Compensation issued' },

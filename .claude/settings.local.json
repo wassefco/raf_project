@@ -40,7 +40,10 @@
       "Bash(grep -n \"addMovements\\(ids.map\\\\|emit\\(\\);\\\\s*$\\\\|return { ok:true, released:res.items\\\\|return { ok:true, committed:res.items\\\\|return { ok:true, reservation:res\" raf_inventory.js)",
       "Bash(sed -i 's/var move0 = combinationMove\\(orderId, item.productId, group, option, item.qty || 1\\);/var move0 = combinationMove\\(orderId, item.productId, group, option, item.qty || 1, ix\\);/' raf_order_changes.js)",
       "Bash(sed -i 's/var move = combinationMove\\(c.orderId, c.productId, group, option, c.qty || 1\\);/var move = combinationMove\\(c.orderId, c.productId, group, option, c.qty || 1, c.lineIndex\\);/' raf_order_changes.js)",
-      "Bash(awk 'NR<339||NR>440' raf_management.html)"
+      "Bash(awk 'NR<339||NR>440' raf_management.html)",
+      "Bash(sed -i 's/     invented: no rating, no vehicle, no photo, no location, because RAF holds/     invented: no vehicle, no photo, no location, because RAF holds/' raf_tracking.html)",
+      "Bash(sed -i 's#^<script src=\"raf_delivery_management.js\"></script>$#<script src=\"raf_delivery_management.js\"></script>\\\\n<!-- Phase H: the Customer ↔ Driver conversation \\(authority + widget\\) -->\\\\n<script src=\"raf_driver_communication.js\"></script>\\\\n<script src=\"raf_driver_communication_ui.js\"></script>#' raf_driver.html raf_delivery_management.html)",
+      "Bash(awk 'NR>650 && NR<780 && /return h|dv-note|Phase E|exception/ {print NR\": \"$0}' raf_driver.html)"
     ]
   }
 }

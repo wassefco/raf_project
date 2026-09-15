@@ -66,6 +66,13 @@
     /* Phase G — owned by RAFDriverRating */
     driver_ratings:     { key:'raf_driver_ratings',       owner:'RAFDriverRating',
                           purpose:'append-only customer ratings of the driver who completed the delivery (one per order, final)' },
+    /* Phase H — owned by RAFDriverCommunication */
+    communication_events:  { key:'raf_communication_events',   owner:'RAFDriverCommunication',
+                          purpose:'append-only conversation lifecycle (opened / driver transferred / released / assigned / closed), derived from ownership records' },
+    communication_messages:{ key:'raf_communication_messages', owner:'RAFDriverCommunication',
+                          purpose:'append-only customer ↔ driver messages (never edited or deleted)' },
+    communication_receipts:{ key:'raf_communication_receipts', owner:'RAFDriverCommunication',
+                          purpose:'append-only delivered / read receipts written by the recipient' },
     notifications:      { key:'raf_notifications',        owner:'RAFNotify',
                           purpose:'append-only per-recipient notifications' },
     notification_reads: { key:'raf_notification_reads',   owner:'RAFNotify',

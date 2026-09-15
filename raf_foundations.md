@@ -169,11 +169,12 @@ No timestamp is duplicated, no historical snapshot is back-filled, and no ETA is
 ## 8. Audit registry (RAFAudit) — IMPLEMENTED
 
 Active producers: `ownership.transferred` (reserved path), `logistics.lock.acquired|released|recovered`, `config.changed`; Phase C: `dispatch.assigned`, `driver.skipped`; Phase D: `dispatch.reassigned`, `dispatch.returned_to_pool`, `reassignment.requested|cancelled|decided`; Phase G: `rating.submitted` (RAFDriverRating — a customer's final
-rating of the driver who completed the delivery, §14).
+rating of the driver who completed the delivery, §14); Phase H: `communication.message`, `communication.opened|driver_transferred|driver_released|driver_assigned|closed`
+(RAFDriverCommunication, §15).
 Reserved (recorded only when a later phase performs them):
 `exception.*` (incl. SLA approaching/breached, escalated, taken, returned),
 `delivery.arrived`, `otp.*`, `eta.updated`, `availability.*`, `schedule.changed`,
-`overtime.changed`, `communication.*`, `compensation.*`.
+`overtime.changed`, `communication.call` (no call record is kept in Phase H), `compensation.*`.
 
 Actor attribution (new events): with RAFPerm loaded, the **session** account is the actor; a
 different caller-supplied id is kept only as `metadata.actorClaimedId`; caller-supplied names and
@@ -191,6 +192,9 @@ roles are ignored. Existing events are not rewritten.
 | `pool_returns` | `raf_logistics_pool_returns` | append-only | RAFDriver (Phase D) |
 | `reassignment_requests` | `raf_reassignment_requests` | append-only | RAFDriver (Phase D) |
 | `driver_ratings` | `raf_driver_ratings` | append-only | RAFDriverRating (Phase G) |
+| `communication_events` | `raf_communication_events` | append-only | RAFDriverCommunication (Phase H) |
+| `communication_messages` | `raf_communication_messages` | append-only | RAFDriverCommunication (Phase H) |
+| `communication_receipts` | `raf_communication_receipts` | append-only | RAFDriverCommunication (Phase H) |
 | `notifications` | `raf_notifications` | append-only | RAFNotify |
 | `notification_reads` | `raf_notification_reads` | append-only | RAFNotify |
 | `logistics_locks` | `raf_logistics_locks` | current state | RAFDeliveryOps |
@@ -506,7 +510,114 @@ localStorage transactional limitation (§13.5). Server-side storage, permissions
 
 ---
 
-## 15. Security & identity rules
+## 15. Phase H — Driver Communications
+
+### 15.1 Authority
+`RAFDriverCommunication` (`raf_driver_communication.js`) is the single authority for the Customer ↔ Driver
+conversation: lifecycle, participants, messages, message status, closure, historical access and the call
+abstraction. `RAFCommUI` (`raf_driver_communication_ui.js`) only renders it (tracking page, Driver App,
+Logistics Management history viewer). Delivery ownership stays with RAFDriver (snapshot fulfilment owner +
+ownership records), the order lifecycle with RAFOrderEngine, reassignment with RAFDeliveryOps/RAFDriver;
+the conversation reacts to their records and events and is never a source of truth for them.
+
+### 15.2 Lifecycle
+* One conversation per order (`conv|<orderId>`), Customer ↔ the CURRENT driver only; Logistics/Support are
+  never live participants.
+* Opens as soon as a driver owns the delivery (claim or dispatch) — pickup is not required.
+* Reassignment (before or after pickup): the new owner becomes the participant immediately and sees the earlier
+  messages as read-only history; the previous driver loses access immediately. Same conversation, nothing restarted.
+* Return to pool: no driver participant until the next owner (customer cannot send meanwhile).
+* Delivered: closed immediately — no message, media, receipt or call afterwards. The customer keeps a read-only view
+  of the closed conversation on tracking; the driver keeps no access. History is kept permanently.
+* Lifecycle records (`communication_events`, deterministic ids per ownership record, so concurrent tabs record each
+  transition once): `opened`, `driver_transferred`, `driver_released`, `driver_assigned`, `closed`.
+  A cancelled order simply has no active conversation (no rule beyond Delivered was approved).
+
+### 15.3 Messages
+* Types: `text` (technical limit 2000 chars), `image` (1…`communication.maxImagesPerMessage` images, each ≤
+  `communication.maxImageBytes`; jpeg/png/webp/gif), `voice` (≤ `communication.maxVoiceBytes` and
+  `communication.maxVoiceSeconds`; webm/ogg/mp4/mpeg/wav). Originals are stored exactly as sent — no
+  re-encoding or editing; oversize media is refused, never compressed.
+* Storage: a message and its original media are ONE record in `communication_messages`, written by a single append
+  (one localStorage write), so a failed write (e.g. `PERSIST_FAILED` when storage is full) leaves neither a message
+  nor an orphaned media payload, and nothing append-only is ever rolled back.
+* Immutable: append-only, no edit/delete API.
+* Each send carries a client-generated `clientId`; the message id is `msg|<order>|<sender>|<clientId>` so a
+  repeated or concurrent send of the same message is stored once.
+* Status Sent → Delivered → Read is derived from append-only receipts written only by the recipient's own client
+  (delivered when the conversation is loaded, read when it is shown on a visible page). No manual status API.
+
+### 15.4 Call abstraction
+UI → `call(orderId)` → `CALL_PROVIDER`. The only provider today is the **direct-number fallback**
+(`masked:false`): the customer gets the current driver's existing account phone, the driver gets the customer's
+delivery phone from the order snapshot, plus a `tel:` link. No phone is copied into communication storage, no call
+record is written, nothing claims a call happened. A masked/telephony provider replaces `CALL_PROVIDER` later.
+Calling and messaging are independent.
+
+### 15.5 Access
+| Who | Access |
+|---|---|
+| Customer (active, owns the order snapshot) | live while active; read-only closed history |
+| Driver (active, CURRENT owner, undelivered) | live |
+| Management — existing `drivers.suspend` (Operations Manager, Higher Management, Super Admin) | read-only history + list |
+| Customer Service / Support | read-only history ONLY with an associated support complaint — **no customer-support complaint record exists in RAF yet**, so this is refused (`SUPPORT_COMPLAINT_REQUIRED`); `complaintFor()` is the single place to connect one |
+| Previous drivers, other customers, merchants, merchant employees, Finance, suspended accounts, anonymous | refused |
+
+Identity comes from the session; caller-supplied `customerId`, `driverId`, `storeSlug`, `actor`, `roleId`,
+`conversationId`, sender/recipient/status fields are refused. No new roles or permission keys.
+
+### 15.6 Events · audit · notifications · config
+* Events (ids only): `communication.conversation.opened|driver_transferred|driver_released|driver_assigned|closed`,
+  `communication.message.sent|delivered|read`. Pages re-read through the authority, so a former driver's open page
+  receives nothing it may not see. No polling; the only timer is the voice-recording auto-stop deadline.
+* Audit: `communication.message` (no content), `communication.opened|driver_transferred|driver_released|driver_assigned|closed`.
+* RAFNotify: `communication.message.customer` (to the customer) and `communication.message.driver` (to the current
+  driver only), one per message; no merchant, staff or former-driver notification.
+* RAFConfig (TEMPORARY PROTOTYPE): `communication.maxImagesPerMessage` 3, `communication.maxImageBytes` 200000,
+  `communication.maxVoiceBytes` 300000, `communication.maxVoiceSeconds` 60.
+
+### 15.7 Message translation (presentation only)
+* `RAFMessageTranslation` (`raf_message_translation.js`) is the single translation authority:
+  `translate(orderId, messageId, { targetLanguage })` → Promise of `{ status, translatedText, sourceLanguage, targetLanguage }`.
+* **Access first:** it calls `RAFDriverCommunication.messageForView()`, which applies exactly the conversation's
+  access boundary (customer owner; current owner driver while undelivered — a non-owner driver gets
+  `NOT_CURRENT_DRIVER` before any closed-state disclosure; management via `drivers.suspend`; support only with a
+  complaint) and reads facts only — no reconciliation, receipt, audit, event or notification. A refused caller gets
+  the conversation's own refusal and nothing about the message, language or state.
+* **Text only:** images, voice, lifecycle entries and notifications are not translated.
+* **Immutable original:** translation never changes, replaces or re-sends the message, its status or the lifecycle;
+  it creates no communication record, receipt, audit, event or notification, and nothing is persisted. Results are
+  cached in memory per page (message id + text hash + target + provider id/version); identical in-flight requests
+  share one provider call; failures are not cached.
+* **Target language:** the page's existing RAF language (`htmlRoot` lang / `raf_lang`). If the provider reports the
+  source language equals the target → `SAME_LANGUAGE`, no translation.
+* **Provider seam:** an adapter `{ id, version, capabilities:{ maxChars?, languages? }, detectLanguage?(text),
+  translate(text, target) }` installed by integration code with `setProvider()` (like `RAFRecordStore.setAdapter`).
+  **No provider or provider setting is approved, so none is installed and no RAFConfig key exists** — every request
+  resolves to `NOT_CONFIGURED` ("Translation is not configured yet."). No fake, dictionary or generated translation.
+  Provider limits are honoured without truncating (`TOO_LONG`, `LANGUAGE_UNSUPPORTED`); provider errors →
+  `TRANSLATION_FAILED` ("Translation unavailable. Try again.").
+* UI (`RAFCommUI`, tracking / Driver App / Logistics history): Translate → translation under the original (labelled)
+  → Hide translation; loading, same-language, not-configured and failure states; the message's block is updated in
+  place, so translating never triggers read/delivered receipts.
+* PRODUCTION REQUIRED: a real translation provider/backend (server-side, with its own key management).
+
+### 15.8 PRODUCTION REQUIRED / prototype limits
+Media is stored inside message records as data URLs in localStorage (a full store refuses with `PERSIST_FAILED`);
+production needs a binary media store. The single-record write is all-or-nothing only because it is one localStorage
+write — there are no transactions across collections (lifecycle, receipts, audit, notifications are separate writes),
+and two tabs can still interleave a read-modify-write of the same list. No server push (cross-tab `storage` events
+only), no server-side authorisation, no real or masked telephony, no durable server history, and no
+support-complaint authority.
+
+Access order: session identity → authorisation from a read-only look at the delivery facts (customer owner / current
+owner driver / management / support-with-complaint) → only then closed/delivered disclosure and lifecycle
+reconciliation writes. Refused callers — and tabs of sessions not entitled to the conversation reacting to events —
+write nothing.
+
+---
+
+## 16. Security & identity rules
 
 * Every new authority resolves identity from the session (RAFPerm); none accepts a caller-supplied
   user id, driver id, employee id, store slug or actor name as authority.

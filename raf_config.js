@@ -126,6 +126,17 @@
         { key:'other',                    en:'Other', ar:null, requiresDescription:true }
       ], { note:'Initial categories approved; Arabic labels not approved yet.' }),
     k('exceptions.templates',             'exceptions', 'list', null),
+
+    /* Phase H — Customer ↔ Driver communication media limits. No business limit is
+       approved: TEMPORARY PROTOTYPE values sized for browser storage. */
+    k('communication.maxImagesPerMessage', 'communication', 'integer', null,
+      { prototype:3, note:'Maximum images in one message. TEMPORARY PROTOTYPE CONFIGURATION.' }),
+    k('communication.maxImageBytes',       'communication', 'integer', null,
+      { prototype:200000, note:'Maximum size of one image as sent (bytes). Originals are never re-compressed. TEMPORARY PROTOTYPE CONFIGURATION.' }),
+    k('communication.maxVoiceBytes',       'communication', 'integer', null,
+      { prototype:300000, note:'Maximum size of one voice message as recorded (bytes). TEMPORARY PROTOTYPE CONFIGURATION.' }),
+    k('communication.maxVoiceSeconds',     'communication', 'integer', null,
+      { prototype:60, note:'Maximum voice message length (seconds). TEMPORARY PROTOTYPE CONFIGURATION.' }),
     k('exceptions.customerUnreachableCallAttempts', 'exceptions', 'integer', null,
       { prototype:3, note:'Recorded CALL attempts (messages do not count) required before a driver can open Customer Unreachable. TEMPORARY PROTOTYPE CONFIGURATION.' }),
     /* selectable manual-escalation reasons: none approved, so escalation needs a description */

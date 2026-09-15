@@ -115,7 +115,10 @@
     'driver.availability.auto_offline':  { audience:'driver', title:{ ar:'أصبحت غير متاح تلقائيًا', en:'You were set Unavailable automatically' } },
     'driver.schedule.changed':           { audience:'driver', title:{ ar:'تم تحديث جدول عملك', en:'Your work schedule was updated' } },
     'logistics.driver.availability_changed':{ audience:'logistics', title:{ ar:'تغيّرت حالة توفر سائق', en:'A driver’s availability changed' } },
-    'logistics.driver.auto_offline':     { audience:'logistics', title:{ ar:'سائق أصبح غير متاح تلقائيًا', en:'A driver was set Unavailable automatically' } }
+    'logistics.driver.auto_offline':     { audience:'logistics', title:{ ar:'سائق أصبح غير متاح تلقائيًا', en:'A driver was set Unavailable automatically' } },
+    /* Phase H — a new message in the Customer ↔ Driver conversation (RAFDriverCommunication) */
+    'communication.message.customer':    { audience:'customer', title:{ ar:'رسالة جديدة من السائق', en:'New message from your driver' } },
+    'communication.message.driver':      { audience:'driver',   title:{ ar:'رسالة جديدة من العميل', en:'New message from the customer' } }
   };
   var LEGACY_MERCHANT_TYPE = {
     'new':'merchant.order.new', 'timeout':'merchant.order.acceptance_warning',
