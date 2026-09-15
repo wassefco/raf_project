@@ -87,6 +87,8 @@
     'driver.overtime.changed':               { domain:'driver',    entityType:'user' },
     'driver.auto_offline':                   { domain:'driver',    entityType:'user' },
     'driver.auto_offline.reset':             { domain:'driver',    entityType:'user' },
+    /* Phase G — a customer rated the driver of a delivered order (RAFDriverRating) */
+    'driver.rating.submitted':               { domain:'driver',    entityType:'order' },
     /* notifications */
     'notification.created':          { domain:'notification', entityType:'notification' },
     'notification.read':             { domain:'notification', entityType:'notification' },

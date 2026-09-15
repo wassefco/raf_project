@@ -168,11 +168,12 @@ No timestamp is duplicated, no historical snapshot is back-filled, and no ETA is
 
 ## 8. Audit registry (RAFAudit) — IMPLEMENTED
 
-Active producers: `ownership.transferred` (reserved path), `logistics.lock.acquired|released|recovered`, `config.changed`; Phase C: `dispatch.assigned`, `driver.skipped`; Phase D: `dispatch.reassigned`, `dispatch.returned_to_pool`, `reassignment.requested|cancelled|decided`.
+Active producers: `ownership.transferred` (reserved path), `logistics.lock.acquired|released|recovered`, `config.changed`; Phase C: `dispatch.assigned`, `driver.skipped`; Phase D: `dispatch.reassigned`, `dispatch.returned_to_pool`, `reassignment.requested|cancelled|decided`; Phase G: `rating.submitted` (RAFDriverRating — a customer's final
+rating of the driver who completed the delivery, §14).
 Reserved (recorded only when a later phase performs them):
 `exception.*` (incl. SLA approaching/breached, escalated, taken, returned),
 `delivery.arrived`, `otp.*`, `eta.updated`, `availability.*`, `schedule.changed`,
-`overtime.changed`, `communication.*`, `rating.submitted`, `compensation.*`.
+`overtime.changed`, `communication.*`, `compensation.*`.
 
 Actor attribution (new events): with RAFPerm loaded, the **session** account is the actor; a
 different caller-supplied id is kept only as `metadata.actorClaimedId`; caller-supplied names and
@@ -189,6 +190,7 @@ roles are ignored. Existing events are not rewritten.
 | `reassignments` | `raf_logistics_reassignments` | append-only | RAFDriver (Phase D) |
 | `pool_returns` | `raf_logistics_pool_returns` | append-only | RAFDriver (Phase D) |
 | `reassignment_requests` | `raf_reassignment_requests` | append-only | RAFDriver (Phase D) |
+| `driver_ratings` | `raf_driver_ratings` | append-only | RAFDriverRating (Phase G) |
 | `notifications` | `raf_notifications` | append-only | RAFNotify |
 | `notification_reads` | `raf_notification_reads` | append-only | RAFNotify |
 | `logistics_locks` | `raf_logistics_locks` | current state | RAFDeliveryOps |
@@ -453,7 +455,58 @@ evaluates while no authorised client is open), and reliable event / notification
 
 ---
 
-## 14. Security & identity rules
+## 14. Phase G — Driver Performance
+
+### 14.1 Authorities
+* **`RAFDriverPerformance`** (`raf_driver_performance.js`) — a READ-ONLY projection. It stores nothing and never
+  evaluates, audits, notifies or publishes. Every metric is derived at read time from the owning authority's records.
+* **`RAFDriverRating`** (`raf_driver_rating.js`) — NEW, the single authority for customer ratings of drivers
+  (approved during Phase G because no rating source existed). Append-only collection `driver_ratings`
+  (`raf_driver_ratings`), one record per order (`drt|<orderId>`), audit `rating.submitted`, event `driver.rating.submitted`.
+  No notification (the driver may not see individual ratings).
+
+### 14.2 Metric sources
+| Metric | Source |
+|---|---|
+| Successful Claims | ownership `claim` with `toDriverId` = driver and actor `{type:'driver', id:driver}` (failed claims, dispatch, reassignment and return-to-pool create no claim record) |
+| Completed Deliveries | delivered orders whose snapshot `fulfilment.driverId` is the driver, at `deliveredAt` (only the current owner can complete) |
+| Reassigned / Lost ownership | ownership `reassignment` / `returned_to_pool` with `fromDriverId` = driver |
+| Skips | `driver_skips` |
+| Reassignment Requests | `reassignment_requests` entries of type `submitted` by the driver; breakdown by each request's latest lifecycle entry (pending / cancelled / approved-reassigned / approved-returned / rejected) |
+| Exceptions | `exceptions.driverIdAtOpen` = driver, whoever opened it; breakdown by opener type |
+| Working hours | availability sessions from `availability_history` (session = availability session), clipped to the period; an open session counts up to now; time after a `driver.suspended` audit is excluded |
+| Basic / Overtime | per session, basic time ends at the `overtime_events` `entered` baseline when recorded, otherwise at start + `availability.basicWorkMinutes` |
+| Customer Rating | `RAFDriverRating` — average of ALL ratings (1 decimal), not period-filtered |
+
+No score, rate, percentage, weighting or ranking exists. Drivers are compared by name order only.
+
+### 14.3 Rating rules
+Customer (active, `customer` role, owner of the order snapshot) rates once after delivery, 1–5, optional comment
+(technical limit 1000 chars), final. Credited to the driver who completed the delivery. Driver sees total only;
+management (`drivers.suspend`) sees total, count, 1–5 distribution, comments and history. UI: `raf_tracking.html`.
+
+### 14.4 Periods
+Today / Week (calendar week from **Sunday** 00:00, approved) / Month / Custom (inclusive dates) in RAFConfig
+`availability.scheduleTimezone` (Asia/Kuwait), never the browser timezone.
+
+### 14.5 Access
+`mine({period})` — the active driver (RAFDriver.scope), own data only. `compare({period})` and
+`detail(driverId,{period})` — existing `drivers.suspend` (Operations Managers, Higher Management, Super Admin;
+approved). Customer Service, Finance, customers, merchants, merchant employees and suspended accounts have no
+access. Caller-supplied identity fields are refused. No new roles or permission keys.
+
+### 14.6 UI
+Driver App Home "My performance" card; Driver Management "Driver performance" (period filter, driver selection,
+comparison table, per-driver detail with rating details). Live refresh via RAFEventBus; no polling. No print/export (Phase J).
+
+### 14.7 Limitations / PRODUCTION REQUIRED
+Basic/overtime split of a session that never had an `entered` overtime record uses the current basic-time
+configuration. Open-session hours update on the next render/event (no ticking clock). Ratings share the
+localStorage transactional limitation (§13.5). Server-side storage, permissions and aggregation are required.
+
+---
+
+## 15. Security & identity rules
 
 * Every new authority resolves identity from the session (RAFPerm); none accepts a caller-supplied
   user id, driver id, employee id, store slug or actor name as authority.

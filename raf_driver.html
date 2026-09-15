@@ -43,6 +43,23 @@ body{background:var(--bg2);margin:0;}
 .dv-head .dv-ico:hover{background:rgba(255,255,255,.09);}
 .dv-head .dv-ico i{font-size:18px;}
 
+/* ---------- Phase G: my performance (read-only) ---------- */
+.pf-periods{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px;}
+/* two classes + element so the theme's button{min-height:40px} does not win */
+.dv-card .pf-periods button{min-height:44px;}
+.pf-periods button{min-height:44px;padding:0 13px;border-radius:12px;border:1px solid var(--border2);background:var(--card);
+  color:var(--text2);font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;}
+.pf-periods button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#F5F0E4;}
+.pf-periods button:focus-visible,.pf-range input:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.pf-range{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px;}
+.pf-range label{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:800;color:var(--text3);flex:1 1 130px;min-width:0;}
+.pf-range input{min-height:44px;border-radius:12px;border:1px solid var(--border2);background:var(--card);color:var(--ink);font-family:inherit;font-size:14px;padding:0 10px;width:100%;}
+.pf-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+.pf-m{border:1px solid var(--border);border-radius:14px;padding:10px 12px;min-width:0;}
+.pf-m span{display:block;font-size:12px;color:var(--text3);font-weight:700;line-height:1.5;}
+.pf-m b{display:block;font-size:19px;font-weight:800;color:var(--ink);margin-top:2px;overflow-wrap:anywhere;}
+.pf-m.wide{grid-column:1 / -1;}
+
 /* ---------- body ---------- */
 .dv-body{flex:1;padding:14px 14px calc(90px + env(safe-area-inset-bottom,0px));}
 .dv-h1{font-family:var(--font-display);font-size:19px;font-weight:800;color:var(--ink);margin:2px 0 10px;}
@@ -242,6 +259,8 @@ body{background:var(--bg2);margin:0;}
 <script src="raf_driver.js"></script>
 <!-- the driver availability authority (own state, self-unavailable, schedule) -->
 <script src="raf_driver_management.js"></script>
+<script src="raf_driver_rating.js"></script>
+<script src="raf_driver_performance.js"></script>
 <!-- the Logistics operations authority: the driver's exception actions and the
      delivery auto-close hook (it renders nothing; every call proves the session) -->
 <script src="raf_delivery_management.js"></script>
@@ -497,12 +516,57 @@ body{background:var(--bg2);margin:0;}
       + '<div class="dv-acts"><button class="dv-b" onclick="setTab(\'tasks\')"><i class="ti ti-list"></i>'
       + esc(T('عرض الطلبات المتاحة','View available orders'))+'</button></div></section>';
 
-    /* no invented driver statistics */
-    h += '<section class="dv-card"><div class="dv-card-h"><h2>'+esc(T('إحصائياتي','My statistics'))+'</h2></div>'
-      + unavailable(cap('metrics','الأرباح والمسافات والتقييم','Earnings, distance and rating'), 'ti-chart-bar')
-      + '</section>';
+    h += renderPerformance();
     return h;
   }
+
+  /* ---------- Phase G: my performance ----------
+     Read-only, from RAFDriverPerformance (own data only; identity from the
+     session). Total rating only — no count, no individual ratings, no comments.
+     No score, rate or ranking. Earnings/distance remain not recorded by RAF. */
+  var PF = { preset:'today', from:'', to:'' };
+  function hm(ms){
+    if (ms == null) return T('غير متاح','Not available');
+    var m = Math.floor(ms / 60000);
+    return T(Math.floor(m / 60) + ' س ' + (m % 60) + ' د', Math.floor(m / 60) + 'h ' + (m % 60) + 'm');
+  }
+  function renderPerformance(){
+    var h = '<section class="dv-card" id="pfCard"><div class="dv-card-h"><h2>'+esc(T('أدائي','My performance'))+'</h2></div>';
+    h += '<div class="pf-periods" role="group" aria-label="'+esc(T('الفترة','Period'))+'">'
+      + [['today','اليوم','Today'],['week','هذا الأسبوع','This week'],['month','هذا الشهر','This month'],['custom','فترة مخصصة','Custom']].map(function(x){
+          return '<button type="button" aria-pressed="'+(PF.preset === x[0])+'" onclick="pfPreset(\''+x[0]+'\')">'+esc(T(x[1], x[2]))+'</button>'; }).join('')
+      + '</div>';
+    if (PF.preset === 'custom')
+      h += '<div class="pf-range"><label>'+esc(T('من','From'))+'<input type="date" id="pfFrom" dir="ltr" value="'+esc(PF.from)+'" onchange="pfDate(\'from\',this.value)"></label>'
+        + '<label>'+esc(T('إلى','To'))+'<input type="date" id="pfTo" dir="ltr" value="'+esc(PF.to)+'" onchange="pfDate(\'to\',this.value)"></label></div>';
+    var P = window.RAFDriverPerformance;
+    if (!P) return h + '<div class="dv-empty">'+esc(T('خدمة الأداء غير محمّلة.','The performance service is not loaded.'))+'</div></section>';
+    if (PF.preset === 'custom' && (!PF.from || !PF.to))
+      return h + '<div class="dv-note"><i class="ti ti-calendar" aria-hidden="true"></i><span>'+esc(T('اختر تاريخ البداية والنهاية.','Choose a start and end date.'))+'</span></div></section>';
+    var spec = PF.preset === 'custom' ? { preset:'custom', from:PF.from, to:PF.to } : { preset:PF.preset };
+    var r = P.mine({ period:spec });
+    if (!r.ok) return h + '<div class="dv-msg">'+esc(r.message)+'</div></section>';
+    var m = r.metrics, tot = m.rating && m.rating.total;
+    function cell(ar, en, v, wide){ return '<div class="pf-m'+(wide ? ' wide' : '')+'"><span>'+esc(T(ar, en))+'</span><b>'+v+'</b></div>'; }
+    h += '<div class="pf-grid">'
+      + cell('السحب الناجح','Successful claims', '<bdi>'+m.claims+'</bdi>')
+      + cell('التوصيلات المكتملة','Completed deliveries', '<bdi>'+m.deliveries+'</bdi>')
+      + cell('نُقلت منك (إعادة إسناد أو إرجاع)','Moved from you (reassigned / returned)', '<bdi>'+m.lostOwnership+'</bdi>')
+      + cell('التخطي','Skips', '<bdi>'+m.skips+'</bdi>')
+      + cell('طلبات إعادة الإسناد','Reassignment requests', '<bdi>'+m.reassignmentRequests+'</bdi>')
+      + cell('الاستثناءات','Exceptions', '<bdi>'+m.exceptions+'</bdi>')
+      + cell('ساعات العمل','Working hours', '<bdi>'+esc(hm(m.workingMs))+'</bdi>')
+      + cell('العمل الإضافي','Overtime', '<bdi>'+esc(hm(m.overtimeMs))+'</bdi>')
+      + cell('تقييم العملاء (كل الفترات)','Customer rating (all time)', tot == null ? esc(T('لا يوجد تقييم بعد','No rating yet')) : '<bdi dir="ltr">'+esc(tot.toFixed(1))+' / 5</bdi>', true)
+      + '</div>';
+    h += '<div class="dv-note"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+      + esc(T('أرقام للاطلاع فقط من سجلات رف الفعلية، بتوقيت الكويت. لا توجد درجة أو ترتيب. التقييم يشمل كل التقييمات السابقة.',
+              'Read-only figures from RAF’s actual records, in Kuwait time. There is no score or ranking. The rating covers all past ratings.'))
+      + (m.openSession ? ' ' + esc(T('ساعات الجلسة الحالية محسوبة حتى وقت العرض.','The current session is counted up to the time shown.')) : '')+'</span></div>';
+    return h + '</section>';
+  }
+  window.pfPreset = function(k){ PF.preset = k; render(); var c = el('pfCard'); if (c) c.scrollIntoView({ block:'nearest' }); };
+  window.pfDate = function(k, v){ PF[k] = v; render(); var c = el('pfCard'); if (c) c.scrollIntoView({ block:'nearest' }); };
 
   /* ════════════════ AVAILABLE ════════════════
      Visible, not claimable: RAF has no approved assignment rule. */
@@ -652,8 +716,9 @@ body{background:var(--bg2);margin:0;}
     h += r.tasks.length ? r.tasks.map(function(t){ return taskCard(t, false); }).join('')
        : '<section class="dv-card"><div class="dv-empty"><i class="ti ti-history"></i>'
          + esc(T('لا يوجد سجل توصيل بعد.','No delivery history yet.'))+'</div></section>';
-    h += '<section class="dv-card">'
-      + unavailable(cap('metrics','ملخص الأداء','Performance summary'), 'ti-chart-bar')+'</section>';
+    h += '<section class="dv-card"><div class="dv-line"><i class="ti ti-chart-bar" aria-hidden="true"></i><span class="v">'
+      + esc(T('ملخص أدائك في بطاقة «أدائي» في الرئيسية.','Your performance summary is in the “My performance” card on Home.'))+'</span></div>'
+      + '<div class="dv-acts"><button class="dv-b" type="button" onclick="setTab(\'home\')"><i class="ti ti-home"></i>'+esc(T('الرئيسية','Home'))+'</button></div></section>';
     return h;
   }
 
@@ -949,6 +1014,14 @@ body{background:var(--bg2);margin:0;}
       /* live news on RAFEventBus — the screen re-reads RAFDriver, never the payload */
       ['order.*','ownership.*','logistics.delivery.*','driver.delivery.*'].forEach(function(p){
         RAFEventBus.subscribe(p, function(){ if (el('dlg').hidden) render(); });
+      });
+      /* Phase G: exceptions and ratings change "My performance" — re-read, never
+         under an open dialog or while a date is being typed */
+      ['logistics.exception.*','driver.rating.submitted'].forEach(function(p){
+        RAFEventBus.subscribe(p, function(){
+          var a = document.activeElement;
+          if (el('dlg').hidden && !(a && (a.id === 'pfFrom' || a.id === 'pfTo'))) render();
+        });
       });
       /* Phase F: availability / schedule / auto-offline / account changes for
          this driver re-read the authority and re-arm the one deadline timer */

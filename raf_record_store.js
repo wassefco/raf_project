@@ -63,6 +63,9 @@
                           purpose:'append-only structured schedule versions' },
     overtime_events:    { key:'raf_driver_overtime_events', owner:'RAFDriverManagement',
                           purpose:'append-only overtime transitions per availability session' },
+    /* Phase G — owned by RAFDriverRating */
+    driver_ratings:     { key:'raf_driver_ratings',       owner:'RAFDriverRating',
+                          purpose:'append-only customer ratings of the driver who completed the delivery (one per order, final)' },
     notifications:      { key:'raf_notifications',        owner:'RAFNotify',
                           purpose:'append-only per-recipient notifications' },
     notification_reads: { key:'raf_notification_reads',   owner:'RAFNotify',

@@ -216,6 +216,27 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 .trk-msg small{font-weight:700;font-size:11px;}
 .trk-call:focus-visible,.trk-msg:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 
+/* Phase G — rate the driver (once, final) */
+.trk-rate{width:100%;margin-top:13px;padding-top:13px;border-top:1px solid var(--border);}
+.trk-rate h3{margin:0 0 4px;font-size:14px;font-weight:800;color:var(--ink);}
+.trk-rate p{margin:0 0 10px;font-size:12.5px;color:var(--text3);line-height:1.7;}
+.trk-stars{display:flex;gap:6px;flex-wrap:wrap;border:0;margin:0 0 10px;padding:0;}
+.trk-stars label{position:relative;cursor:pointer;}
+.trk-stars input{position:absolute;opacity:0;width:1px;height:1px;}
+.trk-stars span{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:48px;min-height:48px;border-radius:14px;
+  border:1px solid var(--border2);background:var(--card);color:var(--text2);font-weight:800;font-size:15px;}
+.trk-stars input:checked + span{background:var(--gold);border-color:var(--gold2);color:#1C1606;}
+.trk-stars input:focus-visible + span{outline:2px solid var(--gold);outline-offset:2px;}
+.trk-rate textarea{width:100%;min-height:80px;border-radius:12px;border:1px solid var(--border2);background:var(--card);color:var(--ink);
+  font-family:inherit;font-size:14px;padding:10px 12px;resize:vertical;box-sizing:border-box;}
+.trk-rate textarea:focus{outline:2px solid var(--gold);outline-offset:1px;}
+.trk-rate .trk-err{color:#A63A36;font-size:12.5px;margin:8px 0 0;}
+.trk-rate .trk-send{margin-top:10px;min-height:48px;width:100%;border-radius:14px;border:1px solid var(--gold2);background:var(--gold);
+  color:#1C1606;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;}
+.trk-rate .trk-send:disabled{opacity:.5;cursor:not-allowed;}
+.trk-rate .trk-send:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
+.trk-rated{font-size:13.5px;color:var(--text2);line-height:1.7;}
+
 /* compact summary + support */
 .trk-kv{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-top:1px solid var(--border);
   font-size:13.5px;line-height:1.6;}
@@ -297,6 +318,7 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 <script src="raf_order_changes.js"></script>
 <!-- read-only: the name and contact of whoever is carrying this order -->
 <script src="raf_driver.js"></script>
+<script src="raf_driver_rating.js"></script>
 <script src="raf_checkout.js"></script>
 <script>
 /* ============================================================
@@ -521,8 +543,50 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
           + '<span>'+T('مندوب توصيل رف','RAF delivery driver')+' · '+line+'</span>'
           +'</span>'
         + acts
+        + (delivered ? rateHTML(o) : '')
       + '</div></div></div>';
   }
+
+  /* ---------- Phase G: rate the driver who completed the delivery ----------
+     RAFDriverRating is the authority: it proves the customer owns the order,
+     that it was delivered, and credits the driver who completed it. One
+     rating per order, final — after submitting the customer only sees it. */
+  var RATE = { value:0, comment:'', busy:false, err:'' };
+  function rateHTML(o){
+    if(!window.RAFDriverRating) return '';
+    var s = RAFDriverRating.statusFor(o.id);
+    if(!s.ok) return '';                                   /* not this customer's order, or not a customer */
+    if(s.myRating){
+      return '<div class="trk-rate"><h3>'+T('تقييمك للسائق','Your rating of the driver')+'</h3>'
+        + '<div class="trk-rated"><bdi dir="ltr">'+s.myRating.rating+' / 5 ★</bdi>'
+        + (s.myRating.comment ? ' · <bdi>'+esc(s.myRating.comment)+'</bdi>' : '')
+        + '<br>'+T('التقييم نهائي ولا يمكن تعديله. شكرًا لك.','Your rating is final and cannot be changed. Thank you.')+'</div></div>';
+    }
+    if(!s.canRate) return '';
+    var stars = [1,2,3,4,5].map(function(n){
+      return '<label><input type="radio" name="trkStar" value="'+n+'" '+(RATE.value===n?'checked':'')+' onchange="rateSet('+n+')">'
+        + '<span><bdi dir="ltr">'+n+'</bdi><i class="ti ti-star-filled" aria-hidden="true"></i></span></label>'; }).join('');
+    return '<div class="trk-rate"><h3>'+T('قيّم السائق','Rate the driver')+'</h3>'
+      + '<p>'+T('من 1 إلى 5 نجوم. التعليق اختياري. لا يمكن تعديل التقييم بعد إرساله.','From 1 to 5 stars. The comment is optional. The rating cannot be changed after you send it.')+'</p>'
+      + '<fieldset class="trk-stars"><legend class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">'+T('عدد النجوم','Number of stars')+'</legend>'+stars+'</fieldset>'
+      + '<label for="trkComment" style="display:block;font-size:12.5px;font-weight:800;color:var(--text3);margin-bottom:5px">'+T('تعليق (اختياري)','Comment (optional)')+'</label>'
+      + '<textarea id="trkComment" maxlength="1000" oninput="rateComment(this.value)">'+esc(RATE.comment)+'</textarea>'
+      + (RATE.err ? '<p class="trk-err" role="alert">'+esc(RATE.err)+'</p>' : '')
+      + '<button type="button" class="trk-send" onclick="rateSend()" '+(RATE.value && !RATE.busy ? '' : 'disabled')+'>'
+      + '<i class="ti ti-send" aria-hidden="true"></i> '+T('إرسال التقييم','Send rating')+'</button></div>';
+  }
+  window.rateSet = function(n){ RATE.value = n; RATE.err = ''; render(); var r = document.querySelector('input[name="trkStar"][value="'+n+'"]'); if(r) r.focus(); };
+  window.rateComment = function(v){ RATE.comment = v; };
+  window.rateSend = function(){
+    var o = getOrder(); if(!o || RATE.busy || !RATE.value) return;
+    RATE.busy = true;
+    var res = RAFDriverRating.submit(o.id, RATE.comment.trim() ? { rating:RATE.value, comment:RATE.comment } : { rating:RATE.value });
+    RATE.busy = false;
+    if(!res.ok){ RATE.err = res.message; render(); return; }
+    RATE = { value:0, comment:'', busy:false, err:'' };
+    RAFShop.toast(T('شكرًا، تم إرسال تقييمك.','Thank you, your rating was sent.'), { icon:'ti-check' });
+    render();
+  };
 
   /* ---------- 5 · the products, and only the products ----------
      No address, no payment, no order metadata: those belong to their own
@@ -861,6 +925,11 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
        so a second tab can produce no second inventory, refund or audit effect. */
     window.addEventListener('storage', function(e){
       if (e.key === 'raf_order_changes' || e.key === 'raf_orders') render();
+    });
+    /* Phase G: a rating sent from another tab of this customer — repaint, but
+       never while the comment is being typed */
+    if (window.RAFEventBus) RAFEventBus.subscribe('driver.rating.submitted', function(){
+      var a = document.activeElement; if (!(a && a.id === 'trkComment')) render();
     });
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();

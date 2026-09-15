@@ -385,10 +385,7 @@
      the screen: with nothing delivered the list is honestly empty. */
   function history(opts){
     var r = mine(opts); if (!r.ok) return r;
-    return { ok:true, driverId:r.driverId, tasks:r.closed,
-             /* RAF records no driver earnings, distance, rating or acceptance
-                rate anywhere, so none are reported */
-             metricsAvailable:false };
+    return { ok:true, driverId:r.driverId, tasks:r.closed };
   }
   function task(orderId, opts){
     opts = opts || {};
@@ -1313,9 +1310,8 @@
       skipDelivery:      { available:true,  via:'RAFDriver.skip — permanent record, no ownership' },
       /* the driver's own notifications (today: a Logistics assignment) */
       notifications:     { available:true,  via:'RAFNotify.forRecipient({ audience:"driver" })' },
-      metrics:           { available:false, reason:'no_driver_metric_source',
-                           ar:'لا توجد بيانات أرباح أو مسافات أو تقييم للسائق.',
-                           en:'No driver earnings, distance or rating data exists.' }
+      /* Phase G: own performance, read-only (earnings and distance are still not recorded) */
+      metrics:           { available:true,  via:'RAFDriverPerformance.mine + RAFDriverRating.mine (total only)' }
     };
   }
 
