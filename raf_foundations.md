@@ -44,19 +44,22 @@ Single source for business/system values that RAF Management will configure.
 States: `approved` (from the approved logistics model) · `prototype_temporary` (no approved value; a clearly marked **TEMPORARY PROTOTYPE** value so a workflow can be exercised; `temporary:true`) · `overridden` (set via `set`) · `not_configured` (no approved value; `value:null`).
 
 **TEMPORARY PROTOTYPE CONFIGURATION** (not approved business decisions; replace through `RAFConfig.set()` or an approved value — no code change):
-`logistics.lock.heartbeatMs` = **15000** (15 s) · `logistics.lock.staleMs` = **45000** (45 s, three missed heartbeats).
+`logistics.lock.heartbeatMs` = **15000** (15 s) · `logistics.lock.staleMs` = **45000** (45 s, three missed heartbeats) ·
+`availability.unavailableReasons` = three temporary driver reasons (§13.8).
 
 **Approved** values: `eta.base` = merchant accepted time, `eta.promisedDurationMinutes` = 90,
 `sla.escalationTargetRole` = ops_manager, `pool.priorityAfterMinutes` = 5,
 `pool.regularOrder` = oldest first, `pool.priorityOrder` = promised ETA closest first,
 `pool.priorityLabel` (English only), `availability.autoOfflineMinutes` = 240,
-`availability.basicWorkMinutes` = 480, `exceptions.categories` (8 categories, English labels),
+`availability.basicWorkMinutes` = 480, `availability.defaultState` = available,
+`availability.scheduleTimezone` = Asia/Kuwait, `availability.managementReasonRequired` = true,
+`overtime.enabled` = true, `overtime.limitEnabled` = true, `overtime.limitMinutes` = 120 (Phase F final, §13.8),
+`exceptions.categories` (8 categories, English labels),
 `compensation.excludedDelayMinutes` = 90, `compensation.stepMinutes` = 20,
 `compensation.amountPerStepFils` = 1000, `compensation.couponExpiryDays` = 7.
 
 **FUTURE CONFIGURATION** (value `null`): `sla.exceptionDurationMinutes`,
-`sla.approachingThresholdMinutes`, `availability.unavailableReasons`,
-`overtime.limitEnabled`, `overtime.limitMinutes`, `exceptions.templates`,
+`sla.approachingThresholdMinutes`, `exceptions.templates`,
 `exceptions.customerUnreachableCallAttempts`, `customerMessages.delayTemplates`,
 `otp.digits` (allowed 2 or 3), `otp.maxAttempts`, `compensation.enabled`,
 `notifications.soundDefault`.
@@ -357,7 +360,100 @@ Server persistence with atomic transactions; server-side authorisation; a schedu
 
 ---
 
-## 13. Security & identity rules
+## 13. Phase F — Driver Availability + Scheduling + Auto-Offline (FINAL)
+
+### 13.1 Ownership decision
+`RAFDriverManagement.availability` (`raf_driver_management.js`) is the **only** authority for availability,
+schedules, the availability (= work) session, overtime and Auto-Offline. `RAFDriver` only asks it
+(`eligibleForNewWork`) before a claim (checked before arbitration **and again right before commit**), a first
+assignment and a reassignment target (initial check and revalidation). No page or other module keeps an
+availability state machine; the storage keys are written only through this module.
+
+### 13.2 Two separate facts
+* **Account status** (Active / Suspended) — RAFPerm, changed by `suspend` / `reactivate`.
+* **Availability** (Available / Unavailable) — for NEW tasks only. Unavailable never removes, reassigns,
+  cancels or refunds a delivery already held; the owner completes it.
+* **Suspend:** Active + Available → Suspended + Unavailable (source `account_suspended`). Held deliveries stay with
+  the driver (the Driver App requires an Active account, so completing them needs reactivation or a Logistics
+  reassignment).
+* **Reactivate:** Suspended → Active + **Available** (source `account_reactivated`) in a **new session**, with
+  history, audit, driver notification and events. No second "Set Available" is needed. Held deliveries untouched.
+
+### 13.3 Operations
+| Operation | Who | Rules |
+|---|---|---|
+| `list` / `get` | `drivers.view` | view incl. working state, overtime, Auto-Offline evaluation time, history |
+| `setAvailability(driverId,{state,reason})` | `drivers.suspend` | management reason required; suspended → Available refused |
+| `setSchedule(driverId,{windows})` | `drivers.suspend` | `{day 0–6, start HH:MM, end HH:MM}`, end > start; history kept |
+| `mine()` | the driver | state, source, reason, schedule, configured reasons — **no overtime counter** |
+| `setSelfUnavailable({reasonKey, note})` | the driver | reason from RAFConfig; note required when the reason says so; the driver can never set themself Available |
+| `evaluate()` / `nextDeadline()` | driver (self) or `drivers.view` | idempotent; one page timer to the next threshold, no polling |
+| `eligibleForNewWork(id)` | driver (self) or `drivers.view` | others get `{eligible:false, reason:'forbidden'}` — no state leak |
+| `claimSucceeded(id)` | the claiming driver's own session, within 60 s of a real `claim` record | announces the reset event only |
+
+Caller-supplied `driverId` / `actorId` / `actorType` / `roleId` / `storeSlug` / `state` are refused
+(`FIELD_NOT_ACCEPTED` / `OTHER_ACTOR`). No new roles or permission keys.
+
+### 13.4 Final rules (approved)
+* **Session:** availability session = work session. Starts when the driver becomes Available (management or
+  reactivation); ends when Unavailable. Claims, skips, failed claims, dispatch and reassignment neither start nor end it.
+* **Basic working time** 8 h. Overtime ON → the driver stays Available (overtime entry recorded); overtime OFF →
+  Unavailable at the end of basic time (`work_duration_reached`).
+* **Maximum overtime** 2 h → Unavailable (`max_overtime_reached`); held deliveries continue.
+* **Auto-Offline** 4 h, evaluated **at the threshold**, counted from max(session start, the driver's last
+  successful claim):
+  * ≥1 eligible pool delivery at that instant → Unavailable (`auto_offline`), exactly one history entry, audit,
+    notification set and event.
+  * Pool empty at that instant → no Auto-Offline; the counter restarts from zero at that threshold. A delivery
+    appearing later never applies the missed threshold retroactively.
+  * Pool occupancy at the threshold is derived from existing durable records (engine `order.ready` milestone,
+    ownership `claim` / `dispatch` / `returned_to_pool`); an interval with an unknown end is not counted.
+  * **Only a successful driver Claim resets it.** Dispatch assignment, reassignment, return-to-pool, skips and failed
+    claims do not. Not disciplinary; the account stays Active.
+* **Schedule** is informational: working outside it is allowed; it never changes availability, blocks a claim or
+  an assignment, or ends a session. Drivers see it read-only; management edits it.
+* **Unavailable reasons** (driver): three temporary RAFConfig values; history stores the key, the label in force and
+  the note, so later configuration changes never rewrite history.
+
+### 13.5 Concurrency
+Every transition re-reads the state version, then appends its history entry in the **version slot**
+`avl|driver|v<n>`; the loser gets `STATE_CHANGED` and issues no audit / notification / event. The state write is
+refused if the version moved after the append and is verified after it lands. Automatic transitions also carry a
+deterministic idempotency key (`key`). **Known limitation:** localStorage is not transactional — a write landing
+*inside* another tab's read-modify-write of the same list can still overwrite one history entry (observed only under
+an injected storage hook). PRODUCTION REQUIRED: a transactional store.
+
+### 13.6 Storage (RAFRecordStore)
+`availability_history`, `schedule_history`, `overtime_events` (append-only); `driver_availability`,
+`driver_schedules` (state maps).
+
+### 13.7 Events · audit · notifications
+Events: `driver.availability.changed|available|unavailable`, `driver.schedule.changed`, `driver.overtime.changed`,
+`driver.auto_offline`, `driver.auto_offline.reset`, `driver.account.changed`.
+Audit: `availability.changed`, `availability.self_unavailable`, `availability.auto_offline`, `schedule.changed`, `overtime.changed`.
+Notifications (per-user sound preference): `driver.availability.changed`, `driver.availability.auto_offline`,
+`driver.schedule.changed`, `logistics.driver.availability_changed`, `logistics.driver.auto_offline`.
+
+### 13.8 Configuration (RAFConfig)
+| Key | Value | Status |
+|---|---|---|
+| `availability.defaultState` | available | approved |
+| `availability.basicWorkMinutes` | 480 | approved |
+| `availability.autoOfflineMinutes` | 240 | approved |
+| `overtime.enabled` | true | approved |
+| `overtime.limitEnabled` | true | approved |
+| `overtime.limitMinutes` | 120 | approved |
+| `availability.scheduleTimezone` | Asia/Kuwait | approved |
+| `availability.managementReasonRequired` | true | approved |
+| `availability.unavailableReasons` | Personal Reason · Break / Rest · Other (note required) — Arabic labels not approved | prototype_temporary |
+
+### 13.9 PRODUCTION REQUIRED
+Server-side transactional storage, server-side permission enforcement, a server scheduler for thresholds (nothing
+evaluates while no authorised client is open), and reliable event / notification delivery.
+
+---
+
+## 14. Security & identity rules
 
 * Every new authority resolves identity from the session (RAFPerm); none accepts a caller-supplied
   user id, driver id, employee id, store slug or actor name as authority.

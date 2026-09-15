@@ -431,14 +431,21 @@ body{background:var(--bg2);margin:0;}
   }
   window.doSelfUnavailable = function(){
     var m = AV() && AV().mine();
+    var reasons = m && m.ok && m.unavailableReasons && m.unavailableReasons.length ? m.unavailableReasons : null;
     openDialog('التحويل إلى غير متاح', 'Set yourself Unavailable',
       'لن تصلك مهام جديدة. التوصيلات التي لديك تبقى معك.' + (m && m.liveDeliveries ? ' لديك ' + m.liveDeliveries + ' توصيلة قائمة.' : ''),
       'You will not receive new tasks. Deliveries you hold stay with you.' + (m && m.liveDeliveries ? ' You hold ' + m.liveDeliveries + ' delivery(ies).' : ''),
-      'تأكيد', 'Confirm', function(reason){
-        var res = AV().setSelfUnavailable({ reason:reason });
+      'تأكيد', 'Confirm', function(text, key){
+        /* the reason list comes from RAFConfig through the authority; a free-text
+           reason is used only when no list is configured */
+        var res = reasons ? AV().setSelfUnavailable(text ? { reasonKey:key, note:text } : { reasonKey:key })
+                          : AV().setSelfUnavailable({ reason:text });
         if (!res.ok){ toast(res.message ? L(res.message) : res.code || res.reason); render(); return; }
         toast(T('أصبحت غير متاح لمهام جديدة','You are now unavailable for new tasks')); render();
-      }, true);
+      }, true,
+      reasons ? reasons.map(function(r){ return { key:r.key, label:L({ ar:r.ar, en:r.en }), requiresDescription:!!r.requiresDescription }; }) : null,
+      reasons ? { category:T('السبب (إلزامي)','Reason (required)'), text:T('ملاحظة (إلزامية لبعض الأسباب)','Note (required for some reasons)'),
+                  pickError:T('اختر السبب.','Choose the reason.'), textError:T('الملاحظة إلزامية لهذا السبب.','A note is required for this reason.') } : null);
   };
   /* one timer to the next availability threshold (work duration / overtime /
      auto-offline) — it asks the authority to evaluate, it does not poll */
@@ -744,14 +751,14 @@ body{background:var(--bg2);margin:0;}
   var dlgAction = null, dlgReturnFocus = null;
   /* withReason: the dialog collects a required free-text reason and hands it
      to fn; an empty reason keeps the dialog open (the authority checks again) */
-  var dlgWithReason = false, dlgCats = null;
+  var dlgWithReason = false, dlgCats = null, dlgLabels = null;
   /* categories (optional): [{ key, label, requiresDescription, disabled, hint }] — adds a category
      select; the text then is required only when the chosen category requires it */
-  function openDialog(titleAr, titleEn, bodyAr, bodyEn, yesAr, yesEn, fn, withReason, categories){
-    dlgAction = fn; dlgReturnFocus = document.activeElement; dlgWithReason = !!withReason; dlgCats = categories || null;
+  function openDialog(titleAr, titleEn, bodyAr, bodyEn, yesAr, yesEn, fn, withReason, categories, labels){
+    dlgAction = fn; dlgReturnFocus = document.activeElement; dlgWithReason = !!withReason; dlgCats = categories || null; dlgLabels = labels || null;
     el('dlgCatWrap').hidden = !dlgCats;
     if (dlgCats){
-      el('dlgCatL').textContent = T('الفئة','Category');
+      el('dlgCatL').textContent = labels && labels.category ? labels.category : T('الفئة','Category');
       el('dlgCat').innerHTML = '<option value="">—</option>' + dlgCats.map(function(c){
         return '<option value="'+esc(c.key)+'"'+(c.disabled ? ' disabled' : '')+'>'+esc(c.label + (c.hint ? ' — ' + c.hint : ''))+'</option>'; }).join('');
     }
@@ -760,7 +767,7 @@ body{background:var(--bg2);margin:0;}
     el('dlgYes').innerHTML = '<i class="ti ti-check"></i>' + esc(T(yesAr, yesEn));
     el('dlgNo').innerHTML  = '<i class="ti ti-x"></i>' + esc(T('إلغاء','Cancel'));
     el('dlgReasonWrap').hidden = !dlgWithReason; el('dlgReason').value = ''; el('dlgReasonErr').hidden = true;
-    el('dlgReasonL').textContent = dlgCats ? T('الوصف (إلزامي لفئة «أخرى»)','Description (required for “Other”)') : T('السبب (إلزامي)','Reason (required)');
+    el('dlgReasonL').textContent = labels && labels.text ? labels.text : dlgCats ? T('الوصف (إلزامي لفئة «أخرى»)','Description (required for “Other”)') : T('السبب (إلزامي)','Reason (required)');
     el('dlg').hidden = false;
     (dlgWithReason ? el('dlgReason') : el('dlgYes')).focus();
   }
@@ -776,8 +783,8 @@ body{background:var(--bg2);margin:0;}
       category = el('dlgCat').value;
       var cat = dlgCats.filter(function(c){ return c.key === category; })[0];
       reason = el('dlgReason').value.trim();
-      if (!cat || cat.disabled){ el('dlgReasonErr').textContent = T('اختر الفئة.','Choose the category.'); el('dlgReasonErr').hidden = false; el('dlgCat').focus(); return; }
-      if (cat.requiresDescription && !reason){ el('dlgReasonErr').textContent = T('الوصف إلزامي لهذه الفئة.','A description is required for this category.'); el('dlgReasonErr').hidden = false; el('dlgReason').focus(); return; }
+      if (!cat || cat.disabled){ el('dlgReasonErr').textContent = dlgLabels && dlgLabels.pickError ? dlgLabels.pickError : T('اختر الفئة.','Choose the category.'); el('dlgReasonErr').hidden = false; el('dlgCat').focus(); return; }
+      if (cat.requiresDescription && !reason){ el('dlgReasonErr').textContent = dlgLabels && dlgLabels.textError ? dlgLabels.textError : T('الوصف إلزامي لهذه الفئة.','A description is required for this category.'); el('dlgReasonErr').hidden = false; el('dlgReason').focus(); return; }
     } else if (dlgWithReason){
       reason = el('dlgReason').value.trim();
       if (!reason){ el('dlgReasonErr').textContent = T('اكتب السبب.','Enter the reason.'); el('dlgReasonErr').hidden = false; el('dlgReason').focus(); return; }

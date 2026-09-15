@@ -291,8 +291,9 @@
      active account for every read and every operation. What suspension does
      NOT do is touch a delivery the driver already holds: that ownership stays
      exactly where it is, and is reported back here so a human can deal with
-     it. Re-activating restores access and nothing else; claims and the pool
-     stay governed by the order's own fulfilment state. */
+     it. Re-activating restores access and (approved Phase F rule) makes the
+     driver Available in a new availability session; held deliveries and the
+     pool stay governed by the order's own fulfilment state. */
   function setStatus(driverId, status, opts){
     opts = opts || {};
     if (!onlyKeys(opts, ['actor'])) return fail('FIELD_NOT_ACCEPTED');
@@ -307,24 +308,35 @@
     if (!saved || saved.status !== status) return fail('PERSIST_FAILED', { detail:'readback_mismatch' });
     audit(status === 'suspended' ? 'driver.suspended' : 'driver.reactivated', sc, driverId,
           { heldDeliveries:held.map(function (h) { return h.orderId; }) });
-    /* Phase F: a suspended driver is operationally Unavailable too (never the
-       other way round — reactivation restores the account only; availability
-       is a separate management decision). Deliveries are still not touched. */
-    if (status === 'suspended' && global.RAFRecordStore) {
+    /* Phase F (approved): Active + Available → Suspended + Unavailable, and
+       Suspended → Reactivate → Active + Available with a NEW availability
+       session. Held deliveries are never touched in either direction. */
+    var availability = null;
+    if (global.RAFRecordStore) {
       var cur = materialize(driverId, Date.now());
-      if (cur.state === 'available') {
-        var tr = transition(driverId, 'unavailable', { source:'account_suspended', reason:null,
-          actor:{ type:'staff', id:sc.id, name:sc.name, roleId:sc.roleId } });
-        if (tr.ok) avAudit({ action:'availability.changed', actor:{ id:sc.id }, source:'admin', key:tr.entryId,
-          previousState:'available', newState:'unavailable', reason:'account_suspended', metadata:{ driverId:driverId, entryId:tr.entryId } });
-      }
+      var staff = { type:'staff', id:sc.id, name:sc.name, roleId:sc.roleId };
+      var toState = status === 'suspended' ? 'unavailable' : 'available';
+      if (cur.state !== toState) {
+        var src = status === 'suspended' ? 'account_suspended' : 'account_reactivated';
+        var tr = transition(driverId, toState, { source:src, reason:null, actor:staff });
+        if (tr.ok) {
+          avAudit({ action:'availability.changed', actor:{ id:sc.id }, source:'admin', key:tr.entryId,
+            previousState:tr.from, newState:tr.to, reason:src, metadata:{ driverId:driverId, entryId:tr.entryId, sessionId:tr.state.sessionId,
+              liveDeliveries:held.map(function (h) { return h.orderId; }) } });
+          var when = { ar:fmt(tr.at, 'ar'), en:fmt(tr.at, 'en') };
+          avNotify([driverId], 'driver.availability.changed', driverId, tr.entryId, status === 'suspended'
+            ? { ar:'حالتك الآن: غير متاح — إيقاف الحساب (' + when.ar + ')', en:'You are now Unavailable — account suspended (' + when.en + ')' }
+            : { ar:'حالتك الآن: متاح — إعادة تفعيل الحساب (' + when.ar + ')', en:'You are now Available — account reactivated (' + when.en + ')' });
+        }
+        availability = tr.ok ? { state:tr.to, source:src, entryId:tr.entryId } : { error:tr.code };
+      } else availability = { state:cur.state, source:cur.source, unchanged:true };
     }
     if (global.RAFEventBus) RAFEventBus.publish('driver.account.changed', { entityId:driverId, source:'admin', payload:{ status:status } });
     return { ok:true, driver:view(saved),
              /* deliveries left exactly as they were — suspension never
                 automatically re-pools, reassigns, cancels or refunds; moving a
-                held delivery is a separate Logistics decision (not yet built) */
-             heldDeliveries:held };
+                held delivery is a separate Logistics decision */
+             heldDeliveries:held, availability:availability };
   }
   function suspend(driverId, opts){ return setStatus(driverId, 'suspended', opts); }
   function reactivate(driverId, opts){ return setStatus(driverId, 'active', opts); }
@@ -347,20 +359,27 @@
      SCHEDULE — state map 'driver_schedules' + append-only 'schedule_history'.
               Structured weekly windows { day 0–6, start 'HH:MM', end 'HH:MM' }
               in RAFConfig 'availability.scheduleTimezone'. The schedule is
-              DISPLAYED and stored; no outside-schedule transition is applied
-              because none is defined.
+              INFORMATIONAL (approved): working outside it is allowed; it never
+              changes availability, blocks a claim or an assignment, or ends a
+              session.
+     SESSION — ONE session model (approved): the availability session IS the
+              work session. It starts when the driver becomes Available
+              (management, reactivation) and ends when they become Unavailable.
+              Claims, skips, failed claims, dispatch and reassignment neither
+              start nor end it.
      WORK / OVERTIME — measured from the start of the current availability
               session. At RAFConfig 'availability.basicWorkMinutes': overtime
               OFF → Unavailable for NEW tasks; overtime ON → continues; with a
               limit ('overtime.limitEnabled' + 'overtime.limitMinutes') →
               Unavailable when the limit is reached. Not configured → nothing
               is forced.
-     AUTO-OFFLINE — Available + at least one eligible pool delivery NOW + no
-              SUCCESSFUL claim (RAFDriver ownership record kind 'claim') since
-              max(session start, last successful claim) for
-              'availability.autoOfflineMinutes' → Unavailable (not disciplinary,
-              account untouched). Skip, failed claims, views and logins do not
-              reset it.
+     AUTO-OFFLINE — evaluated AT each threshold ('availability.autoOfflineMinutes')
+              counted from max(session start, the driver's last SUCCESSFUL
+              claim): ≥1 eligible pool delivery at that instant → Unavailable
+              (not disciplinary, account untouched); empty pool → counter back
+              to zero from that threshold, never applied retroactively. Only a
+              driver's own successful claim resets it — dispatch, reassignment,
+              return-to-pool, skips, failed claims, views and logins do not.
      EVERY automatic transition is deterministic (history ids keyed by session
      and reference) so two evaluators cannot record it twice. Evaluation runs
      whenever an authorised surface reads or acts, and at the page's next
@@ -375,7 +394,9 @@
     ACCOUNT_SUSPENDED:   { ar:'حساب السائق موقوف ولا يمكن جعله متاحًا.',         en:'The driver account is suspended and cannot be made available.' },
     REASON_REQUIRED:     { ar:'السبب إلزامي.',                                  en:'A reason is required.' },
     SCHEDULE_INVALID:    { ar:'الجدول غير صالح.',                               en:'The schedule is not valid.' },
-    STATE_CHANGED:       { ar:'تغيّرت حالة التوفر أثناء العملية. أعد المحاولة.',  en:'Availability changed during the operation. Try again.' }
+    STATE_CHANGED:       { ar:'تغيّرت حالة التوفر أثناء العملية. أعد المحاولة.',  en:'Availability changed during the operation. Try again.' },
+    REASON_INVALID:      { ar:'السبب المختار غير موجود في الإعدادات.',            en:'That reason is not in the configured list.' },
+    DESCRIPTION_REQUIRED:{ ar:'الوصف إلزامي لهذا السبب.',                        en:'A description is required for this reason.' }
   };
   Object.keys(AV_ERRORS).forEach(function (k) { ERRORS[k] = AV_ERRORS[k]; });
 
@@ -400,7 +421,8 @@
     auto_offline:         { ar:'تلقائي — لا سحب ناجح خلال المدة المحددة', en:'Automatic — no successful claim within the configured time' },
     work_duration_reached:{ ar:'تلقائي — انتهت مدة العمل الأساسية (العمل الإضافي غير مفعّل)', en:'Automatic — normal working duration reached (overtime off)' },
     max_overtime_reached: { ar:'تلقائي — بلغ الحد الأقصى للعمل الإضافي', en:'Automatic — maximum overtime reached' },
-    account_suspended:    { ar:'إيقاف الحساب', en:'Account suspended' }
+    account_suspended:    { ar:'إيقاف الحساب', en:'Account suspended' },
+    account_reactivated:  { ar:'إعادة تفعيل الحساب', en:'Account reactivated' }
   };
 
   /* recipients: the accounts that may manage driver availability (existing drivers.suspend) */
@@ -432,6 +454,42 @@
     try { return (RAFShop.Orders.all() || []).filter(function (o) { return o.snapshot && RAFDriver.stageOfOrder(o) === 'awaiting_driver'; }).length; }
     catch (e) { return 0; }
   }
+  /* WHEN was the pool non-empty? Read from the durable records the other
+     authorities already keep — nothing new is stored:
+       enters the pool: the engine's 'order.ready' milestone, or an ownership
+                        record 'returned_to_pool'
+       leaves the pool: an ownership record 'claim' or 'dispatch'
+     An interval that is still open counts only if the order is in the pool
+     NOW; an open interval on an order that is no longer waiting (a legacy
+     claim without a record, a cancellation) has an unknown end and is not
+     counted — when unsure, no driver is auto-offlined. */
+  function poolIntervals(){
+    if (!global.RAFShop || !global.RAFDriver || !RAFDriver.stageOfOrder) return [];
+    var eng = global.RAFOrderEngine, own = avColl('ownership'), byOrder = {}, out = [];
+    (own ? own.all() : []).forEach(function (r) { if (r && r.orderId) (byOrder[r.orderId] = byOrder[r.orderId] || []).push(r); });
+    var orders = []; try { orders = RAFShop.Orders.all() || []; } catch (e) {}
+    orders.forEach(function (o) {
+      if (!o || !o.snapshot) return;
+      var marks = [], ready = null;
+      try { ready = eng && eng.readyAt ? eng.readyAt(o.id) : null; } catch (e) {}
+      if (ready && typeof ready.at === 'number') marks.push({ at:ready.at, enter:true, seq:0 });
+      (byOrder[o.id] || []).forEach(function (r) {
+        if (r.kind === 'returned_to_pool') marks.push({ at:r.at, enter:true, seq:r.seq || 0 });
+        else if (r.kind === 'claim' || r.kind === 'dispatch') marks.push({ at:r.at, enter:false, seq:r.seq || 0 });
+      });
+      marks.sort(function (a, b) { return (a.at - b.at) || (a.seq - b.seq); });
+      var open = null;
+      marks.forEach(function (m) {
+        if (m.enter) { if (open == null) open = m.at; }
+        else if (open != null) { out.push([open, m.at]); open = null; }
+      });
+      if (open != null && RAFDriver.stageOfOrder(o) === 'awaiting_driver') out.push([open, null]);
+    });
+    return out;
+  }
+  function poolOccupiedAt(t, intervals){
+    return intervals.some(function (i) { return i[0] <= t && (i[1] == null || t < i[1]); });
+  }
 
   /* ---------- state ---------- */
   function rawState(driverId){ var m = avMap(); return m ? m.get(driverId) : null; }
@@ -440,12 +498,13 @@
     var cur = rawState(driverId); if (cur) return cur;
     var def = cfgV('availability.defaultState'); if (def !== 'available' && def !== 'unavailable') def = 'unavailable';
     /* a suspended account is never Available, whatever the default */
-    var acct = driverRecord(driverId); if (acct && acct.status !== 'active') def = 'unavailable';
-    var rec = { state:def, since:now, sessionId:def === 'available' ? newSessionId(driverId, now) : null, source:'initial_default',
+    var acct = driverRecord(driverId), src = 'initial_default';
+    if (acct && acct.status !== 'active') { def = 'unavailable'; src = 'account_suspended'; }
+    var rec = { state:def, since:now, sessionId:def === 'available' ? newSessionId(driverId, now) : null, source:src,
                 reason:null, changedBy:{ type:'system' }, version:1 };
     var h = avColl('availability_history');
     var a = h ? h.append('entryId', { entryId:'avl|' + driverId + '|initial', driverId:driverId, from:null, to:def, at:now,
-      source:'initial_default', reason:null, actor:{ type:'system' }, sessionId:rec.sessionId, version:1 }) : { ok:false };
+      source:src, reason:null, actor:{ type:'system' }, sessionId:rec.sessionId, version:1 }) : { ok:false };
     if (a.ok && a.duplicate) return rawState(driverId) || rec;      /* another evaluator materialised it */
     var m = avMap(); if (m) m.set(driverId, rec);
     return rec;
@@ -465,11 +524,13 @@
     if (!again || again.version !== cur.version || again.state !== cur.state) return fail('STATE_CHANGED');
     var h = avColl('availability_history');
     var a = h.append('entryId', { entryId:entryId, key:key, driverId:driverId, from:cur.state, to:to, at:now, source:ctx.source,
-      reason:ctx.reason || null, actor:ctx.actor, sessionId:sessionId, previousSessionId:cur.sessionId,
+      reason:ctx.reason || null, reasonKey:ctx.reasonKey || null, reasonLabel:ctx.reasonLabel || null, note:ctx.note || null,
+      actor:ctx.actor, sessionId:sessionId, previousSessionId:cur.sessionId,
       previousSince:cur.since, automatic:!!ctx.automatic, version:cur.version + 1 });
     if (!a.ok) return fail('PERSIST_FAILED');
     if (a.duplicate) return fail('STATE_CHANGED', { duplicate:true });
-    var next = { state:to, since:now, sessionId:sessionId, source:ctx.source, reason:ctx.reason || null, changedBy:ctx.actor, version:cur.version + 1, entryId:entryId };
+    var next = { state:to, since:now, sessionId:sessionId, source:ctx.source, reason:ctx.reason || null, reasonKey:ctx.reasonKey || null,
+                 reasonLabel:ctx.reasonLabel || null, note:ctx.note || null, changedBy:ctx.actor, version:cur.version + 1, entryId:entryId };
     /* a writer that lost the slot between our append and this set must not
        be overwritten: only write the state if it is still the one we read */
     var beforeSet = rawState(driverId);
@@ -496,6 +557,7 @@
     if (typeof base !== 'number') { out.state = 'not_configured'; return out; }
     var baseMs = base * 60000;
     out.baselineEndsAt = st.since + baseMs;
+    if (otOn === true && limOn === true && typeof lim === 'number') out.limitEndsAt = st.since + baseMs + lim * 60000;
     if (elapsed < baseMs) { out.state = 'normal'; return out; }
     if (otOn === false) { out.state = 'baseline_reached'; return out; }
     if (otOn !== true) { out.state = 'baseline_reached_not_configured'; return out; }
@@ -504,11 +566,29 @@
     else out.state = 'overtime';
     return out;
   }
-  function autoOfflineOf(driverId, st, now){
+  /* APPROVED RULE — evaluated AT each threshold of the availability session.
+     The counter starts at max(session start, last SUCCESSFUL claim by this
+     driver). At start + threshold:
+       ≥1 eligible pool delivery at that instant → Auto-Offline (triggered)
+       pool empty at that instant → no Auto-Offline; the counter is ZERO again
+                                    from that threshold (next = threshold × 2 …)
+     A delivery appearing later never applies a missed threshold retroactively.
+     Only a driver's own successful 'claim' moves the start; dispatch,
+     reassignment, return-to-pool, skips and failed claims do not. */
+  function autoOfflineOf(driverId, st, now, intervals){
     var thr = cfgV('availability.autoOfflineMinutes');
     if (typeof thr !== 'number' || !st || st.state !== 'available') return { configured:typeof thr === 'number', applies:false, thresholdMinutes:thr };
-    var claim = lastSuccessfulClaimAt(driverId), ref = Math.max(st.since || 0, claim || 0);
-    return { configured:true, applies:true, thresholdMinutes:thr, referenceAt:ref, lastSuccessfulClaimAt:claim, dueAt:ref + thr * 60000, poolEligible:eligiblePoolCount() };
+    var claim = lastSuccessfulClaimAt(driverId), start = Math.max(st.since || 0, claim || 0), ms = thr * 60000;
+    var ref = start, due = ref + ms, zeroedAt = null, guard = 0;
+    intervals = intervals || poolIntervals();
+    while (due <= now && guard++ < 10000) {
+      if (poolOccupiedAt(due, intervals))
+        return { configured:true, applies:true, thresholdMinutes:thr, sessionReferenceAt:start, referenceAt:ref, lastSuccessfulClaimAt:claim,
+                 dueAt:due, triggered:true, poolAtThreshold:true, zeroedAt:zeroedAt, poolEligible:eligiblePoolCount() };
+      zeroedAt = due; ref = due; due = ref + ms;
+    }
+    return { configured:true, applies:true, thresholdMinutes:thr, sessionReferenceAt:start, referenceAt:ref, lastSuccessfulClaimAt:claim,
+             dueAt:due, triggered:false, poolAtThreshold:zeroedAt ? false : null, zeroedAt:zeroedAt, poolEligible:eligiblePoolCount() };
   }
   var SYSTEM = { type:'system' };
   function evaluateDriver(driverId, now){
@@ -550,8 +630,8 @@
     if (autoSource) return automaticUnavailable(driverId, st, autoSource, 'avl|' + driverId + '|' + st.sessionId + '|' + autoSource, null);
     /* auto-offline */
     var ao = autoOfflineOf(driverId, st, now);
-    if (ao.applies && now >= ao.dueAt && ao.poolEligible > 0)
-      return automaticUnavailable(driverId, st, 'auto_offline', 'avl|' + driverId + '|' + st.sessionId + '|auto_offline|' + ao.referenceAt, ao);
+    if (ao.applies && ao.triggered)
+      return automaticUnavailable(driverId, st, 'auto_offline', 'avl|' + driverId + '|' + st.sessionId + '|auto_offline|' + ao.dueAt, ao);
     return st;
   }
   function automaticUnavailable(driverId, st, source, entryId, ao){
@@ -563,7 +643,8 @@
     avAudit({ action:source === 'auto_offline' ? 'availability.auto_offline' : 'availability.changed', systemGenerated:true, source:'automation',
       key:entryId, previousState:'available', newState:'unavailable', reason:reason.en,
       metadata:{ driverId:driverId, sessionId:st.sessionId, source:source, thresholdMinutes:source === 'auto_offline' ? thr : null,
-                 referenceAt:ao ? ao.referenceAt : null, eligiblePool:ao ? ao.poolEligible : null, accountStatus:u && u.status } });
+                 referenceAt:ao ? ao.referenceAt : null, thresholdAt:ao ? ao.dueAt : null, poolAtThreshold:ao ? ao.poolAtThreshold : null,
+                 eligiblePoolNow:ao ? ao.poolEligible : null, accountStatus:u && u.status } });
     var when = { ar:fmt(t.at, 'ar'), en:fmt(t.at, 'en') };
     if (source === 'auto_offline') {
       var msg = { ar:'لم يُسجَّل سحب ناجح خلال ' + thr + ' دقيقة مع وجود طلبات متاحة، فأصبحت غير متاح تلقائيًا (' + when.ar + '). هذا ليس إجراءً تأديبيًا.',
@@ -703,18 +784,44 @@
     return { ok:true, state:st ? st.state : null, since:st ? st.since : null, source:st ? st.source : null,
              sourceLabel:st && SOURCE_LABEL[st.source] ? SOURCE_LABEL[st.source] : null,
              reason:st && (st.source === 'driver' || st.source === 'management') ? st.reason : null,
+             reasonLabel:st && st.source === 'driver' ? st.reasonLabel || null : null, note:st && st.source === 'driver' ? st.note || null : null,
+             unavailableReasons:unavailableReasons(),
              schedule:sched ? { windows:sched.windows, timezone:sched.timezone } : null,
              withinSchedule:withinSchedule(sched, now), canSetUnavailable:!!st && st.state === 'available',
              liveDeliveries:liveDeliveryIds(sc.id).length, lastChangeAt:mineHist ? mineHist.at : null };
   }
+  /* the reasons a driver may choose — read from RAFConfig at call time, never
+     from the page. Each entry: { key, en, ar, requiresDescription } */
+  function unavailableReasons(){
+    var v = cfgV('availability.unavailableReasons');
+    return Array.isArray(v) ? v.filter(function (r) { return r && typeof r.key === 'string' && (r.en || r.ar); }) : null;
+  }
+  /* with configured reasons: { reasonKey, note } (note required when the
+     reason says so); the key AND the label in force at that moment are written
+     to history, so a later configuration change never rewrites the past.
+     Without configured reasons: { reason } free text, as before. */
   function setSelfUnavailable(data){
     data = data || {};
-    if (!onlyKeys(data, ['reason'])) return fail('FIELD_NOT_ACCEPTED');
+    if (!onlyKeys(data, ['reason', 'reasonKey', 'note'])) return fail('FIELD_NOT_ACCEPTED');
     var sc = driverScope(); if (!sc.ok) return sc;
-    var reason = String(data.reason == null ? '' : data.reason).trim();
-    if (!reason) return fail('REASON_REQUIRED');
+    var list = unavailableReasons(), reason, reasonKey = null, reasonLabel = null, note = null;
+    if (list && list.length) {
+      if (data.reason !== undefined) return fail('FIELD_NOT_ACCEPTED');
+      var pick = list.filter(function (r) { return r.key === data.reasonKey; })[0];
+      if (!data.reasonKey) return fail('REASON_REQUIRED');
+      if (!pick) return fail('REASON_INVALID');
+      note = String(data.note == null ? '' : data.note).trim() || null;
+      if (pick.requiresDescription && !note) return fail('DESCRIPTION_REQUIRED');
+      reasonKey = pick.key; reasonLabel = { en:pick.en || null, ar:pick.ar || null };
+      reason = (pick.en || pick.ar) + (note ? ' — ' + note : '');
+    } else {
+      if (data.reasonKey !== undefined || data.note !== undefined) return fail('FIELD_NOT_ACCEPTED');
+      reason = String(data.reason == null ? '' : data.reason).trim();
+      if (!reason) return fail('REASON_REQUIRED');
+    }
     evaluateDriver(sc.id);
-    var tr = transition(sc.id, 'unavailable', { source:'driver', reason:reason, actor:{ type:'driver', id:sc.id, name:sc.name, roleId:sc.roleId } });
+    var tr = transition(sc.id, 'unavailable', { source:'driver', reason:reason, reasonKey:reasonKey, reasonLabel:reasonLabel, note:note,
+      actor:{ type:'driver', id:sc.id, name:sc.name, roleId:sc.roleId } });
     if (!tr.ok) return tr;
     avAudit({ action:'availability.self_unavailable', actor:{ id:sc.id }, source:'driver', key:tr.entryId, previousState:tr.from, newState:tr.to,
       reason:reason, metadata:{ driverId:sc.id, entryId:tr.entryId, liveDeliveries:liveDeliveryIds(sc.id).map(function (x) { return x.orderId; }) } });

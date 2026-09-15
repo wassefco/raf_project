@@ -422,7 +422,7 @@
     try {
       return (RAFPerm.getUsers() || [])
         .filter(function (u) { return u.accountType === 'driver' && u.roleId === 'driver'; })
-        .map(function (u) { return { name:u.name, status:u.status }; });
+        .map(function (u) { return { id:u.id, name:u.name, status:u.status }; });
     } catch (e) { return []; }
   }
   /* the stores that actually have deliveries, by their own names */

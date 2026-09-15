@@ -1196,12 +1196,23 @@ bdi{ unicode-bidi:isolate; }
     var list = DATA.drivers.slice();
     if(it.filter === 'active')   list = list.filter(function(d){ return d.status === 'active'; });
     if(it.filter === 'inactive') list = list.filter(function(d){ return d.status !== 'active'; });
+    /* Phase F: availability is read from RAFDriverManagement.availability
+       (drivers.view) — view only here; changes happen in Driver Management */
+    var AVM = {}, avErr = null;
+    try {
+      var avr = window.RAFDriverManagement && RAFDriverManagement.availability ? RAFDriverManagement.availability.list() : null;
+      if(avr && avr.ok) avr.drivers.forEach(function(v){ AVM[v.driverId] = v; }); else avErr = avr ? avr.message : T('خدمة التوفر غير محمّلة.','The availability service is not loaded.');
+    } catch(e){ avErr = String(e && e.message || e); }
     var body = list.length
       ? '<ul class="list">'+list.map(function(d){
-          var on = d.status === 'active';
+          var on = d.status === 'active', v = AVM[d.id], a = v && v.availability, av = a && a.state === 'available';
+          var src = a && RAFDriverManagement.availability.SOURCE_LABEL[a.source];
           return '<li><span class="dm-av" aria-hidden="true" style="width:32px;height:32px;background:'+(on?'var(--nav)':'var(--line-2)')+'">'+esc(initials(d.name))+'</span>'
-            + '<span class="bd"><b>'+esc(d.name||'—')+'</b></span>'
-            + '<span class="chip '+(on?'done':'alert')+'">'+(on?T('نشط','Active'):T('موقوف','Suspended'))+'</span></li>';
+            + '<span class="bd"><b>'+esc(d.name||'—')+'</b>'
+            + (a ? '<span>'+esc(src ? L(src) : a.source)+(a.reason ? ' · <bdi>'+esc(a.reason)+'</bdi>' : '')
+                 + (v.liveDeliveries && v.liveDeliveries.length ? ' · '+esc(T(v.liveDeliveries.length+' توصيلة قائمة', v.liveDeliveries.length+' active delivery(ies)')) : '')+'</span>' : '')+'</span>'
+            + '<span class="chip '+(on?'done':'alert')+'">'+(on?T('نشط','Active'):T('موقوف','Suspended'))+'</span>'
+            + (a ? '<span class="chip '+(av?'done':'muted')+'" data-av-state="'+esc(a.state)+'">'+(av?T('متاح','Available'):T('غير متاح','Unavailable'))+'</span>' : '')+'</li>';
         }).join('')+'</ul>'
       : '<div class="empty"><i class="ti ti-user-off" aria-hidden="true"></i><b>'+T('لا يوجد سائقون في هذه القائمة','No drivers in this list')+'</b></div>';
     return pageHead(T(it.ar,it.en), T('حسابات السائقين المسجّلة في رف — للاطلاع فقط.','Driver accounts registered in RAF — view only.'),
@@ -1209,8 +1220,9 @@ bdi{ unicode-bidi:isolate; }
       + '<section class="card" aria-labelledby="h-drv"><div class="card-h"><h2 id="h-drv"><i class="ti ti-steering-wheel" aria-hidden="true"></i>'
       + T(it.ar,it.en)+'</h2><span class="count">'+list.length+'</span></div>' + body
       + '<div class="card-note"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
-      + T('إنشاء الحسابات وتعديلها وإيقافها يتم من إدارة السائقين. لا تتوفر في رف بيانات توفّر أو مركبات أو تقييمات للسائقين.',
-          'Accounts are created, edited and suspended in Driver Management. RAF holds no driver availability, vehicle or rating data.')+'</span></div></section>';
+      + T('إنشاء الحسابات وتعديلها وإيقافها وتغيير التوفر والجدول يتم من إدارة السائقين. لا تتوفر في رف بيانات مركبات أو تقييمات للسائقين.',
+          'Accounts, availability and schedules are managed in Driver Management. RAF holds no driver vehicle or rating data.')
+      + (avErr ? ' '+esc(T('التوفر: ','Availability: '))+esc(avErr) : '')+'</span></div></section>';
   }
 
   /* ───────── DISPATCH & OPERATIONS → ASSIGNMENT ─────────

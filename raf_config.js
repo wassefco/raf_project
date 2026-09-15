@@ -86,28 +86,33 @@
       { note:'Arabic wording not approved yet.' }),
 
     /* availability & schedules */
-    /* Phase F — Driver availability. Values are TEMPORARY PROTOTYPE CONFIGURATION. */
-    k('availability.autoOfflineMinutes',  'availability', 'minutes', null,
-      { prototype:240, note:'Available + eligible pool delivery + no SUCCESSFUL claim for this long → Unavailable. TEMPORARY PROTOTYPE CONFIGURATION.' }),
-    k('availability.basicWorkMinutes',    'availability', 'minutes', null,
-      { prototype:480, note:'Normal working duration of one availability session (8 h). TEMPORARY PROTOTYPE CONFIGURATION.' }),
+    /* Phase F — Driver availability. The values below were APPROVED by the owner
+       (final Phase F decisions) as prototype values; they stay RAFConfig-controlled. */
+    k('availability.autoOfflineMinutes',  'availability', 'minutes', 240,
+      { note:'Evaluated at the threshold of the availability session: no SUCCESSFUL claim for this long and ≥1 eligible pool delivery at that instant → Unavailable. Empty pool at the threshold → counter restarts from zero (never retroactive).' }),
+    k('availability.basicWorkMinutes',    'availability', 'minutes', 480,
+      { note:'Basic working time of one availability (= work) session (8 h).' }),
     k('availability.unavailableReasons',  'availability', 'list', null,
-      { note:'No reason list is approved; a free-text reason is required instead.' }),
-    k('availability.managementReasonRequired', 'availability', 'boolean', null,
-      { prototype:true, note:'A management availability change requires a reason. TEMPORARY PROTOTYPE CONFIGURATION.' }),
-    k('availability.defaultState',        'availability', 'enum', null,
-      { prototype:'available', allowed:['available', 'unavailable'],
-        note:'State of a driver with no availability record yet (keeps existing drivers working). TEMPORARY PROTOTYPE CONFIGURATION.' }),
-    k('availability.scheduleTimezone',    'availability', 'enum', null,
-      { prototype:'Asia/Kuwait', allowed:['Asia/Kuwait'], note:'Timezone of structured weekly schedule windows. TEMPORARY PROTOTYPE CONFIGURATION.' }),
+      { prototype:[
+          { key:'personal_reason', en:'Personal Reason', ar:null },
+          { key:'break_rest',      en:'Break / Rest',    ar:null },
+          { key:'other',           en:'Other',           ar:null, requiresDescription:true }
+        ],
+        note:'Reasons a driver chooses when setting themself Unavailable. THREE TEMPORARY PROTOTYPE VALUES — Arabic labels not approved. History keeps the key and label used at the time.' }),
+    k('availability.managementReasonRequired', 'availability', 'boolean', true,
+      { note:'A management availability change requires a reason.' }),
+    k('availability.defaultState',        'availability', 'enum', 'available',
+      { allowed:['available', 'unavailable'], note:'State of a driver with no availability record yet.' }),
+    k('availability.scheduleTimezone',    'availability', 'enum', 'Asia/Kuwait',
+      { allowed:['Asia/Kuwait'], note:'Timezone of structured weekly schedule windows. The schedule is informational — it never changes availability.' }),
 
-    /* overtime — continuation after the normal working duration */
-    k('overtime.enabled',                 'overtime', 'boolean', null,
-      { prototype:true, note:'Continuation beyond the normal working duration is allowed. OFF → Unavailable for NEW tasks at the baseline. TEMPORARY PROTOTYPE CONFIGURATION.' }),
-    k('overtime.limitEnabled',            'overtime', 'boolean', null,
-      { prototype:true, note:'A maximum overtime applies. TEMPORARY PROTOTYPE CONFIGURATION.' }),
-    k('overtime.limitMinutes',            'overtime', 'minutes', null,
-      { prototype:120, note:'Maximum overtime after the baseline → Unavailable for NEW tasks. TEMPORARY PROTOTYPE CONFIGURATION — not approved.' }),
+    /* overtime — continuation after the basic working time */
+    k('overtime.enabled',                 'overtime', 'boolean', true,
+      { note:'Continuation beyond the basic working time is allowed. OFF → Unavailable for NEW tasks at the end of basic working time.' }),
+    k('overtime.limitEnabled',            'overtime', 'boolean', true,
+      { note:'A maximum overtime applies.' }),
+    k('overtime.limitMinutes',            'overtime', 'minutes', 120,
+      { note:'Maximum overtime after the basic working time (2 h) → Unavailable for NEW tasks.' }),
 
     /* exceptions */
     k('exceptions.categories',            'exceptions', 'list', [
