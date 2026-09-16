@@ -163,6 +163,11 @@
             createdAt:ctx.scheduled.createdAt || null }
         : null,
       fulfilment: { driverId:null, assignedAt:null, pickedUpAt:null, deliveredAt:null },
+      /* THE PROMISE MADE TO THE CUSTOMER — written ONCE, by RAFOrderEngine, at
+         merchant acceptance, with the configuration as it stood at that instant.
+         It is historical fact: a later RAFConfig change never restates it, and
+         nothing overwrites a recorded value. Null until the merchant accepts. */
+      promise: { promisedEtaAt:null, acceptedAt:null, durationMinutes:null, base:null, recordedAt:null },
       returns: [],            /* Returns module */
       refunds: [],            /* Refunds module */
       audit: [],              /* Audit Log module */
@@ -265,6 +270,7 @@
     'items',                    /* merchant-approved customer modifications */
     'preparation',
     'fulfilment',
+    'promise',                  /* the Promised ETA recorded at merchant acceptance (write-once) */
     'returns', 'refunds', 'audit', 'invoice', 'analytics', 'scheduled',
     'commercial.paymentStatus'
   ];
@@ -296,6 +302,13 @@
     if (!reason)            return { ok:false, reason:'approval_reason_required' };
     var snap = of(orderId);
     if (!snap) return { ok:false, reason:'no_snapshot' };
+    /* THE PROMISE IS WRITE-ONCE. Once the Promised ETA has been recorded at
+       merchant acceptance it is historical fact: no caller, no surface and no
+       later configuration may restate it. Only the first write is accepted. */
+    if (path === 'promise' || path.indexOf('promise.') === 0) {
+      var cur = snap.promise;
+      if (cur && typeof cur.promisedEtaAt === 'number') return { ok:false, reason:'promise_immutable', path:path };
+    }
 
     var parts = path.split('.'), node = snap;
     for (var i = 0; i < parts.length - 1; i++){
@@ -364,6 +377,7 @@
       items: [],
       scheduled:null,
       fulfilment:{ driverId:null, assignedAt:null, pickedUpAt:null, deliveredAt:null },
+      promise:{ promisedEtaAt:null, acceptedAt:null, durationMinutes:null, base:null, recordedAt:null },
       returns:[], refunds:[], audit:[], invoice:{ number:null, issuedAt:null, printedAt:null }, analytics:{},
       migrated:false, legacyUnresolved:true, unresolved:missing
     };

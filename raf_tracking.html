@@ -313,6 +313,9 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 <script src="raf_driver_communication.js"></script>
 <script src="raf_message_translation.js"></script>
 <script src="raf_driver_communication_ui.js"></script>
+<!-- Phase I: delay compensation (authority + widget) -->
+<script src="raf_compensation.js"></script>
+<script src="raf_compensation_ui.js"></script>
 <script src="raf_checkout.js"></script>
 <script>
 /* ============================================================
@@ -538,6 +541,20 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     var el = document.getElementById('commRoot'); if(!el || !window.RAFCommUI) return;
     RAFCommUI.mount(el, { orderId:o.id, mode:'participant', onRender:function(x){
       var w = document.getElementById('commWrap'); if(w) w.hidden = !x.innerHTML; } });
+  }
+
+  /* ---------- Phase I: delay compensation ----------
+     RAFCompensation decides whether this customer has a compensation for the
+     order and what it is worth; the widget renders it. Hidden when there is none. */
+  function compHTML(o){
+    if(!window.RAFCompUI) return '';
+    return '<div class="panel" id="compWrap" hidden><div class="panel-h" role="heading" aria-level="2"><i class="ti ti-discount-2"></i> '
+      + T('تعويض التأخير','Delay compensation')+'</div><div class="panel-b" id="compRoot"></div></div>';
+  }
+  function mountComp(o){
+    var el = document.getElementById('compRoot'); if(!el || !window.RAFCompUI) return;
+    RAFCompUI.mount(el, { mode:'order', orderId:o.id, onRender:function(x){
+      var w = document.getElementById('compWrap'); if(w) w.hidden = !x.innerHTML; } });
   }
 
   /* ---------- Phase G: rate the driver who completed the delivery ----------
@@ -899,9 +916,10 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     }
     /* progress first, then the delivery itself, then the order's own detail */
     root.innerHTML = confirmationHTML(o) + changeHTML(o) + timelineHTML(o) + liveHTML(o) + driverHTML(o)
-                   + commHTML(o)
+                   + compHTML(o) + commHTML(o)
                    + productsHTML(o) + orderDetailsHTML(o) + deliveryHTML(o)
                    + invoiceHTML(o) + supportHTML() + actionsHTML();
+    mountComp(o);
     mountComm(o);
     RAFShop.Cart.badge();
   }

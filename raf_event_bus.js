@@ -41,7 +41,7 @@
   var VERSION = 1;
   var CHANNEL = 'raf_event_bus';            /* transient channel, not a store */
 
-  var DOMAINS = ['order', 'driver', 'logistics', 'notification', 'audit', 'ownership', 'config'];
+  var DOMAINS = ['order', 'driver', 'logistics', 'notification', 'audit', 'ownership', 'config', 'communication', 'compensation'];
 
   /* the registered event types — the only names that can be published */
   var TYPES = {
@@ -99,6 +99,11 @@
     'communication.message.sent':                    { domain:'communication', entityType:'order' },
     'communication.message.delivered':               { domain:'communication', entityType:'order' },
     'communication.message.read':                    { domain:'communication', entityType:'order' },
+    /* Phase I — delay compensation (RAFCompensation); payloads carry ids only */
+    'compensation.issued':           { domain:'compensation', entityType:'order' },
+    'compensation.added_to_wallet':  { domain:'compensation', entityType:'order' },
+    'compensation.voided':           { domain:'compensation', entityType:'order' },
+    'compensation.reversed':         { domain:'compensation', entityType:'order' },
     /* notifications */
     'notification.created':          { domain:'notification', entityType:'notification' },
     'notification.read':             { domain:'notification', entityType:'notification' },

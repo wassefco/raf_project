@@ -476,6 +476,9 @@
     openUndo(orderId, ACTION.ACCEPT, prev, actor);
     audit('order.accept', orderId, { actor:actor, source:'merchant', reversible:true,
       key:(mrecord(orderId) || {}).at, previousState:MSTATE.PENDING, newState:MSTATE.PREPARING });
+    /* the Promised ETA becomes historical fact here, with the configuration as
+       it stands now; later configuration changes affect later orders only */
+    recordPromise(orderId, actor);
     return { ok:true, undoMs:UNDO_MS };
   }
   /* ---------- GROUP B · rejection reasons ----------
@@ -1028,18 +1031,50 @@
   }
   function acceptedAt(orderId){ return milestoneOf(orderId, 'order.accept'); }
   function readyAt(orderId){ return milestoneOf(orderId, 'order.ready'); }
+  /* Phase I: the delivered milestone (the driver.delivered audit written by driverDelivered) */
+  function deliveredAt(orderId){ return milestoneOf(orderId, 'driver.delivered'); }
   /* THE PROMISED ETA — the one place it is computed. Approved rule:
      Merchant Accepted Time + RAFConfig 'eta.promisedDurationMinutes'. Read-only
      and used for Priority Pool ordering only; no surface displays or edits it
      in this phase. null when the accept milestone or the duration is missing. */
   function promisedEtaAt(orderId){
+    /* HISTORY FIRST — the promise recorded on the snapshot at merchant
+       acceptance is the historical fact and is returned exactly as recorded.
+       A later configuration change can never restate it. */
+    var rec = recordedPromise(orderId);
+    if (rec) return { at:rec.promisedEtaAt, acceptedAt:rec.acceptedAt, durationMinutes:rec.durationMinutes,
+                      recorded:true, recordedAt:rec.recordedAt, source:'RAFOrderSnapshot.promise (recorded at merchant acceptance)' };
     var acc = acceptedAt(orderId);
     var cfg = global.RAFConfig;
     var base = cfg ? cfg.value('eta.base') : null;
     var mins = cfg ? cfg.value('eta.promisedDurationMinutes') : null;
     if (!acc || base !== 'merchant_accepted_at' || typeof mins !== 'number') return null;
-    return { at:acc.at + mins * 60000, acceptedAt:acc.at, durationMinutes:mins,
+    /* nothing was recorded (an order accepted before this was persisted):
+       derived from the CURRENT configuration and marked as such */
+    return { at:acc.at + mins * 60000, acceptedAt:acc.at, durationMinutes:mins, recorded:false,
              source:acc.source + ' + RAFConfig:eta.promisedDurationMinutes' };
+  }
+  function recordedPromise(orderId){
+    try {
+      var s = global.RAFOrderSnapshot ? RAFOrderSnapshot.of(orderId) : null;
+      var p = s && s.promise;
+      return (p && typeof p.promisedEtaAt === 'number') ? p : null;
+    } catch (e) { return null; }
+  }
+  /* write-once, at the acceptance itself: the promise as the configuration
+     stood at that instant. An existing recorded value is never overwritten. */
+  function recordPromise(orderId, actor){
+    if (!global.RAFOrderSnapshot || !RAFOrderSnapshot.update) return null;
+    if (recordedPromise(orderId)) return null;
+    var acc = acceptedAt(orderId), cfg = global.RAFConfig;
+    var base = cfg ? cfg.value('eta.base') : null;
+    var mins = cfg ? cfg.value('eta.promisedDurationMinutes') : null;
+    if (!acc || base !== 'merchant_accepted_at' || typeof mins !== 'number') return null;
+    try {
+      return RAFOrderSnapshot.update(orderId, 'promise',
+        { promisedEtaAt:acc.at + mins * 60000, acceptedAt:acc.at, durationMinutes:mins, base:base, recordedAt:Date.now() },
+        'promised_eta_recorded', actor || null);
+    } catch (e) { return null; }
   }
 
   /* a surface without the engine loaded can still hand over an acceptance */
@@ -1056,7 +1091,7 @@
     mstate: mstate, mrecord: mrecord, merchantDone: merchantDone, queueOf: queueOf,
     merchantAccept: merchantAccept, merchantReject: merchantReject, merchantReady: merchantReady,
     undo: undo, undoOf: undoOf, undoMsLeft: undoMsLeft, commitUndo: commitUndo, sweepUndo: sweepUndo,
-    acceptedAt: acceptedAt, readyAt: readyAt, promisedEtaAt: promisedEtaAt,
+    acceptedAt: acceptedAt, readyAt: readyAt, deliveredAt: deliveredAt, promisedEtaAt: promisedEtaAt,
     driverPickedUp: driverPickedUp, driverAssigned: driverAssigned,
     driverUnassigned: driverUnassigned, driverDelivered: driverDelivered,
     /* locking */

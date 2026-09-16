@@ -71,6 +71,9 @@
 <script src="raf_data.js"></script>
 <script src="raf_permissions.js"></script>
 <script src="raf_wallet.js"></script>
+<!-- Phase I: compensation coupons to add, and expiring compensation credits -->
+<script src="raf_compensation.js"></script>
+<script src="raf_compensation_ui.js"></script>
 <script src="raf_account.js"></script>
 <script>
 /* ============================================================
@@ -120,9 +123,15 @@
     var html = '<div id="wBal">'
       + '<div class="wb-l">'+T('الرصيد المتاح','Available balance')+'</div>'
       + '<div class="wb-v">'+esc(bal.balance)+'<span class="wb-c">'+T('د.ك','KWD')+'</span></div>'
-      + '<div class="wb-n">'+T('يُستخدم رصيد المحفظة في عمليات الاسترداد المعتمدة من الطلبات.',
-                               'Your wallet balance comes from approved refunds on your orders.')+'</div>'
+      + (bal.compensationCreditMinor > 0
+          ? '<div class="wb-n">'+T('الرصيد العادي','Ordinary balance')+': <bdi dir="ltr">'+esc(bal.ordinaryBalance)+'</bdi> '+T('د.ك','KWD')
+            + ' · '+T('رصيد تعويض ينتهي','Expiring compensation credit')+': <bdi dir="ltr">'+esc(bal.compensationCredit)+'</bdi> '+T('د.ك','KWD')+'</div>'
+          : '')
+      + '<div class="wb-n">'+T('يأتي رصيد المحفظة من عمليات الاسترداد المعتمدة ومن قسائم تعويض التأخير التي تضيفها.',
+                               'Your wallet balance comes from approved refunds and from delay compensation coupons you add.')+'</div>'
       + '</div>';
+    /* Phase I: the widget is mounted below after the markup is in place */
+    html += '<div id="wComp"></div>';
 
     html += '<div class="section-h">'+T('آخر العمليات','Recent transactions')+'</div>';
     if (!txs.length){
@@ -142,6 +151,7 @@
       }).join('') + '</div>';
     }
     root.innerHTML = html;
+    if (window.RAFCompUI) RAFCompUI.mount(document.getElementById('wComp'), { mode:'wallet' });
   }
 
   function boot(){
@@ -151,6 +161,9 @@
     render();
     var root=document.getElementById('htmlRoot');
     if(root) new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
+    /* Phase I: a coupon added / reversed (this tab or another) changes the balance */
+    if (window.RAFEventBus) RAFEventBus.subscribe('compensation.*', render);
+    window.addEventListener('storage', function(e){ if (e.key === 'raf_wallet_ledger') render(); });
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();

@@ -458,6 +458,18 @@ bdi{ unicode-bidi:isolate; }
 <script src="raf_driver_communication.js"></script>
 <script src="raf_message_translation.js"></script>
 <script src="raf_driver_communication_ui.js"></script>
+<!-- Phase G: driver performance (read-only projection + rating authority + widget) -->
+<script src="raf_driver_rating.js"></script>
+<script src="raf_driver_performance.js"></script>
+<script src="raf_driver_performance_ui.js"></script>
+<!-- Phase I: delay compensation review (authority + widget; RAFWallet for Reverse) -->
+<script src="raf_wallet.js"></script>
+<script src="raf_compensation.js"></script>
+<script src="raf_compensation_ui.js"></script>
+<!-- Phase J: Reports Center (read-only projection + widget) -->
+<script src="raf_settlement.js"></script>
+<script src="raf_reports.js"></script>
+<script src="raf_reports_ui.js"></script>
 <script>
 /* ============================================================================
    LOGISTICS MANAGEMENT — presentation only.
@@ -555,7 +567,9 @@ bdi{ unicode-bidi:isolate; }
       { k:'exceptions', ar:'الاستثناءات',       en:'Exceptions',      view:'exlist' },
       { k:'reassign',   ar:'إعادة الإسناد',     en:'Reassignment',    view:'reassign' },
       /* Phase H: read-only Customer ↔ Driver conversation history (RAFDriverCommunication) */
-      { k:'conversations', ar:'محادثات التوصيل', en:'Delivery Conversations', view:'conversations' } ]},
+      { k:'conversations', ar:'محادثات التوصيل', en:'Delivery Conversations', view:'conversations' },
+      /* Phase I: delay compensation review — View / Void / Reverse (RAFCompensation) */
+      { k:'compensation', ar:'تعويضات التأخير', en:'Delivery Compensation', view:'compensation' } ]},
     /* drivers are a separate system with their own app — they are managed
        here, but they are not members of the Logistics Operations team */
     { k:'drivers', ic:'ti-steering-wheel', ar:'السائقون', en:'Drivers', items:[
@@ -575,14 +589,16 @@ bdi{ unicode-bidi:isolate; }
       { k:'effective', ar:'تواريخ السريان',  en:'Effective Dates' },
       { k:'history',   ar:'سجل العقود',      en:'Contract History' } ]},
     { k:'performance', ic:'ti-chart-line', ar:'الأداء', en:'Performance', items:[
+      /* Phase G: factual driver performance (RAFDriverPerformance) — no score, no ranking */
+      { k:'drivers',    ar:'أداء السائقين',          en:'Driver Performance', view:'driverperf' },
       { k:'sla',        ar:'مستوى الخدمة',          en:'SLA' },
       { k:'time',       ar:'زمن التوصيل',           en:'Delivery Time' },
       { k:'acceptance', ar:'معدل القبول',           en:'Acceptance Rate' },
       { k:'failure',    ar:'الإلغاء وتعذّر التسليم', en:'Cancellation / Failure' } ]},
+    /* Phase J: the Reports Center — one read-only projection (RAFReports) over
+       the existing authorities; every report lives inside this one workspace */
     { k:'reports', ic:'ti-report-analytics', ar:'التقارير', en:'Reports', items:[
-      { k:'delivery',  ar:'تقارير التوصيل',   en:'Delivery Reports' },
-      { k:'driver',    ar:'تقارير السائقين',  en:'Driver Reports' },
-      { k:'financial', ar:'التقارير المالية', en:'Financial Reports' } ]},
+      { k:'center',    ar:'مركز التقارير',    en:'Reports Center', view:'reports' } ]},
     { k:'settings', ic:'ti-settings', ar:'الإعدادات', en:'Settings', items:[
       { k:'config',        ar:'إعدادات التوصيل',     en:'Delivery Configuration' },
       { k:'status',        ar:'قواعد الحالات',        en:'Status Rules' },
@@ -884,6 +900,51 @@ bdi{ unicode-bidi:isolate; }
   function mountConversation(){
     var root = el('convRoot');
     if(root && CONV.open && window.RAFCommUI) RAFCommUI.mount(root, { orderId:CONV.open, mode:'admin' });
+  }
+
+  /* ───────── DISPATCH & OPERATIONS → DELIVERY COMPENSATION (Phase I) ─────────
+     RAFCompensation decides access (existing drivers.suspend: Operations
+     Manager, Higher Management, Super Admin) and every figure; the shared
+     widget renders the list, the detail and the Void / Reverse forms. */
+  function viewCompensation(){
+    return pageHead(T('تعويضات التأخير','Delivery Compensation'),
+      T('قسائم التعويض الصادرة تلقائيًا عن التأخير في التسليم. الإبطال قبل إضافتها إلى المحفظة، والعكس بعدها — مع سبب إلزامي.','Coupons issued automatically for late deliveries. Void before the coupon is added to the wallet, Reverse after — a reason is required.'), refreshBtn())
+      + '<section class="card" style="padding:14px"><div id="compAdminRoot"></div></section>';
+  }
+  function mountCompensation(){
+    var root = el('compAdminRoot');
+    if(root && window.RAFCompUI) RAFCompUI.mount(root, { mode:'admin' });
+    else if(root) root.textContent = T('خدمة التعويض غير محمّلة.','The compensation service is not loaded.');
+  }
+
+  /* ───────── PERFORMANCE → DRIVER PERFORMANCE (Phase G) ─────────
+     A read-only projection over the existing authorities. RAFDriverPerformance
+     decides access (existing drivers.suspend) and every figure; the shared
+     widget renders the comparison and the management drill-down. Nothing here
+     scores, rates or ranks a driver. */
+  function viewDriverPerformance(){
+    return pageHead(T('أداء السائقين','Driver Performance'),
+      T('أرقام تشغيلية فعلية لكل سائق مع اختيار الفترة، وتفاصيل التقييم للإدارة. لا توجد درجة ولا ترتيب.','Actual operational figures per driver with a period selector, plus management rating detail. No score and no ranking.'), refreshBtn())
+      + '<section class="card" style="padding:14px"><div id="perfRoot"></div></section>';
+  }
+  function mountDriverPerformance(){
+    var root = el('perfRoot');
+    if (root && window.RAFPerfUI) RAFPerfUI.mount(root);
+    else if (root) root.textContent = T('خدمة الأداء غير محمّلة.','The performance service is not loaded.');
+  }
+
+  /* ───────── REPORTS → REPORTS CENTER (Phase J) ─────────
+     RAFReports authorises and reads; the widget renders. Opening, filtering,
+     searching, sorting, exporting or printing writes nothing. */
+  function viewReports(){
+    return pageHead(T('مركز التقارير','Reports Center'),
+      T('تقارير للاطلاع فقط من سجلات رف الفعلية، بتوقيت الكويت، مع تصدير CSV وطباعة. لا يُنشئ فتح التقرير أي بيانات.','Read-only reports from RAF’s actual records in Kuwait time, with CSV export and print. Opening a report creates no data.'), refreshBtn())
+      + '<section class="card" style="padding:14px"><div id="reportsRoot"></div></section>';
+  }
+  function mountReports(){
+    var root = el('reportsRoot');
+    if (root && window.RAFReportsUI) RAFReportsUI.mount(root);
+    else if (root) root.textContent = T('خدمة التقارير غير محمّلة.','The reports service is not loaded.');
   }
 
   function viewExceptionList(){
@@ -1785,10 +1846,16 @@ bdi{ unicode-bidi:isolate; }
     else if(it.view === 'reassign') html = viewReassign();
     else if(it.view === 'exlist') html = viewExceptionList();
     else if(it.view === 'conversations') html = viewConversations();
+    else if(it.view === 'compensation') html = viewCompensation();
+    else if(it.view === 'driverperf') html = viewDriverPerformance();
+    else if(it.view === 'reports') html = viewReports();
     else html = viewNotConfigured(G, it);
     scheduleDeadline();
     el('view').innerHTML = html;
     if(it.view === 'conversations') mountConversation();
+    if(it.view === 'compensation') mountCompensation();
+    if(it.view === 'driverperf') mountDriverPerformance();
+    if(it.view === 'reports') mountReports();
     if(openId) renderDrawer();
     else if(DS){
       /* the panel reads the board; outside the dispatch views refresh it here */

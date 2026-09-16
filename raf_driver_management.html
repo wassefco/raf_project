@@ -164,20 +164,6 @@ body{background:var(--bg2);margin:0;}
 .dm-dlg-c label{display:block;font-size:12.5px;font-weight:800;color:var(--text3);margin-bottom:5px;}
 .dm-err{font-size:12.5px;color:#A63A36;margin:0 0 12px;}
 
-/* Phase G — performance comparison (read-only) */
-.pf-pick{border:0;margin:12px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px 14px;}
-.pf-pick legend{font-size:12.5px;font-weight:800;color:var(--text3);margin-bottom:6px;padding:0;}
-.pf-pick label{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:13.5px;color:var(--ink);cursor:pointer;}
-.pf-pick input{width:20px;height:20px;accent-color:var(--gold2);}
-.pf-wrap{overflow-x:auto;margin-top:12px;border:1px solid var(--border);border-radius:14px;}
-.pf-wrap:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
-.pf-table{border-collapse:collapse;width:100%;font-size:13px;}
-.pf-table th,.pf-table td{padding:9px 12px;border-bottom:1px solid var(--border);text-align:start;white-space:nowrap;vertical-align:middle;}
-.pf-table thead th{background:var(--bg);color:var(--ink);font-weight:800;}
-.pf-table tbody th{color:var(--text3);font-weight:800;}
-.pf-table tbody tr:last-child th,.pf-table tbody tr:last-child td{border-bottom:0;}
-.pf-muted{color:var(--text3);font-weight:600;font-size:12px;}
-
 @media (max-width:560px){
   .dm-sec{padding:16px;}
   .dm-kv{grid-template-columns:1fr;gap:1px 0;}
@@ -234,6 +220,7 @@ body{background:var(--bg2);margin:0;}
 <script src="raf_driver_management.js"></script>
 <script src="raf_driver_rating.js"></script>
 <script src="raf_driver_performance.js"></script>
+<script src="raf_driver_performance_ui.js"></script>
 <script>
 /* ============================================================
    DRIVER MANAGEMENT
@@ -444,106 +431,25 @@ body{background:var(--bg2);margin:0;}
     return h;
   }
 
-  /* ---------- Phase G: driver performance (RAFDriverPerformance) ----------
-     Data-based comparison of the approved metrics. Drivers are listed by name,
-     never ordered by a metric; there is no score, rate or rank. Rating details
-     (count, distribution, comments, history) are management-only. */
-  var PFM = { preset:'today', from:'', to:'', selected:null, open:null };
-  function hmM(ms){
-    if (ms == null) return T('غير متاح','Not available');
-    var m = Math.floor(ms / 60000);
-    return T(Math.floor(m / 60) + ' س ' + (m % 60) + ' د', Math.floor(m / 60) + 'h ' + (m % 60) + 'm');
-  }
-  function pfSpec(){ return PFM.preset === 'custom' ? { preset:'custom', from:PFM.from, to:PFM.to } : { preset:PFM.preset }; }
-  var PF_COLS = [
-    ['claims','السحب الناجح','Successful claims'], ['deliveries','التوصيلات المكتملة','Completed deliveries'],
-    ['lostOwnership','نُقلت منه','Reassigned / lost ownership'], ['skips','التخطي','Skips'],
-    ['reassignmentRequests','طلبات إعادة الإسناد','Reassignment requests'], ['exceptions','الاستثناءات','Exceptions'],
-    ['workingMs','ساعات العمل','Working hours'], ['basicMs','الساعات الأساسية','Basic hours'], ['overtimeMs','العمل الإضافي','Overtime'],
-    ['rating','التقييم الكلي','Total rating']
-  ];
-  function pfValue(m, k){
-    if (k === 'workingMs' || k === 'basicMs' || k === 'overtimeMs') return esc(hmM(m[k]));
-    if (k === 'rating') return m.rating && m.rating.total != null ? '<bdi dir="ltr">'+esc(m.rating.total.toFixed(1))+' / 5</bdi> <span class="pf-muted">(<bdi>'+m.rating.count+'</bdi>)</span>' : esc(T('لا يوجد','None'));
-    return '<bdi>'+esc(m[k])+'</bdi>';
-  }
+  /* ---------- Phase G: driver performance ----------
+     The section shell only: RAFDriverPerformance owns every figure and the
+     access decision (existing drivers.suspend), and the shared RAFPerfUI widget
+     renders the comparison and the management drill-down — the same widget used
+     by Logistics Management, so this page holds no second copy of it. */
   function performanceSection(){
-    var P = window.RAFDriverPerformance;
     var h = '<section class="dm-sec" id="pfSec"><div class="dm-sec-h"><h2>'+esc(T('أداء السائقين','Driver performance'))+'</h2></div>';
-    if (!P) return h + naRow('أداء السائقين','Driver performance','خدمة الأداء غير محمّلة.','The performance service is not loaded.') + '</section>';
+    if (!window.RAFDriverPerformance || !window.RAFPerfUI)
+      return h + naRow('أداء السائقين','Driver performance','خدمة الأداء غير محمّلة.','The performance service is not loaded.') + '</section>';
     /* the authority enforces access; the page only avoids offering controls
        to an account that cannot use them (same drivers.suspend gate) */
     if (!(AVL && AVL.canManage)) return h + naRow('أداء السائقين','Driver performance',
       'تحتاج صلاحية drivers.suspend.','Requires the drivers.suspend permission.') + '</section>';
-    h += '<div class="dm-sub">'+esc(T('أرقام للاطلاع فقط من سجلات رف الفعلية بتوقيت الكويت. لا توجد درجة أو ترتيب؛ السائقون مرتبون بالاسم.',
-                                     'Read-only figures from RAF’s actual records in Kuwait time. No score or ranking; drivers are listed by name.'))+'</div>';
-    h += '<div class="dm-tools"><div class="dm-filter" role="group" aria-label="'+esc(T('الفترة','Period'))+'">'
-      + [['today','اليوم','Today'],['week','الأسبوع','Week'],['month','الشهر','Month'],['custom','مخصصة','Custom']].map(function(x){
-          return '<button class="dm-fb" aria-pressed="'+(PFM.preset === x[0])+'" onclick="pfmPreset(\''+x[0]+'\')">'+esc(T(x[1], x[2]))+'</button>'; }).join('')
-      + '</div></div>';
-    if (PFM.preset === 'custom')
-      h += '<div class="dm-tools"><div class="dm-f" style="flex:1 1 150px"><label for="pfmFrom">'+esc(T('من','From'))+'</label><input type="date" id="pfmFrom" dir="ltr" value="'+esc(PFM.from)+'" onchange="pfmDate(\'from\',this.value)"></div>'
-        + '<div class="dm-f" style="flex:1 1 150px"><label for="pfmTo">'+esc(T('إلى','To'))+'</label><input type="date" id="pfmTo" dir="ltr" value="'+esc(PFM.to)+'" onchange="pfmDate(\'to\',this.value)"></div></div>';
-    if (PFM.preset === 'custom' && (!PFM.from || !PFM.to))
-      return h + '<div class="dm-note"><i class="ti ti-calendar" aria-hidden="true"></i><span>'+esc(T('اختر تاريخ البداية والنهاية.','Choose a start and end date.'))+'</span></div></section>';
-    var r = P.compare({ period:pfSpec() });
-    if (!r.ok) return h + naRow('أداء السائقين','Driver performance', r.message, r.message) + '</section>';
-    var all = r.drivers.slice().sort(function(a, b){ return String(a.name).localeCompare(String(b.name)); });
-    if (!PFM.selected){ PFM.selected = {}; all.forEach(function(d){ PFM.selected[d.driverId] = true; }); }
-    h += '<fieldset class="pf-pick"><legend>'+esc(T('السائقون في المقارنة','Drivers in the comparison'))+'</legend>'
-      + all.map(function(d){
-          return '<label><input type="checkbox" '+(PFM.selected[d.driverId] ? 'checked' : '')+' onchange="pfmPick(\''+esc(d.driverId)+'\',this.checked)"> '
-            + esc(d.name) + (d.accountStatus !== 'active' ? ' <span class="pf-muted">('+esc(T('موقوف','suspended'))+')</span>' : '')+'</label>'; }).join('')
-      + '</fieldset>';
-    var list = all.filter(function(d){ return PFM.selected[d.driverId]; });
-    if (!list.length) return h + '<div class="dm-empty">'+esc(T('اختر سائقًا واحدًا على الأقل.','Select at least one driver.'))+'</div></section>';
-    h += '<div class="pf-wrap" role="region" aria-label="'+esc(T('جدول المقارنة','Comparison table'))+'" tabindex="0"><table class="pf-table"><thead><tr><th scope="col">'+esc(T('المؤشر','Metric'))+'</th>'
-      + list.map(function(d){ return '<th scope="col">'+esc(d.name)+'</th>'; }).join('') + '</tr></thead><tbody>'
-      + PF_COLS.map(function(c){
-          return '<tr><th scope="row">'+esc(T(c[1], c[2]))+'</th>' + list.map(function(d){ return '<td>'+pfValue(d.metrics, c[0])+'</td>'; }).join('') + '</tr>'; }).join('')
-      + '<tr><th scope="row">'+esc(T('التفاصيل','Details'))+'</th>' + list.map(function(d){
-          return '<td><button class="dm-b" onclick="pfmOpen(\''+esc(d.driverId)+'\')" aria-expanded="'+(PFM.open === d.driverId)+'">'
-            + '<i class="ti ti-list-details"></i>'+esc(T('عرض','View'))+'</button></td>'; }).join('') + '</tr>'
-      + '</tbody></table></div>';
-    if (list.some(function(d){ return d.metrics.openSession; }))
-      h += '<div class="dm-sub">'+esc(T('الجلسات المفتوحة محسوبة حتى وقت العرض.','Open sessions are counted up to the time shown.'))+'</div>';
-    if (PFM.open && PFM.selected[PFM.open]) h += performanceDetail(PFM.open);
-    return h + '</section>';
+    return h + '<div id="pfRoot"></div></section>';
   }
-  function performanceDetail(id){
-    var r = window.RAFDriverPerformance.detail(id, { period:pfSpec() });
-    if (!r.ok) return '<div class="dm-msg" style="margin-top:12px">'+esc(r.message)+'</div>';
-    var m = r.metrics, b = m.breakdown, rt = m.rating;
-    var h = '<div class="dm-avp" id="pfDetail"><div class="dm-avp-h"><b>'+esc(r.name)+'</b>'
-      + '<button class="dm-b" onclick="pfmOpen(null)"><i class="ti ti-x"></i>'+esc(T('إغلاق','Close'))+'</button></div>'
-      + '<dl class="dm-kv">'
-      + '<dt>'+esc(T('نُقلت منه','Lost ownership'))+'</dt><dd>'+esc(T('إعادة إسناد: ','Reassigned: '))+'<bdi>'+b.lostOwnership.reassigned+'</bdi> · '+esc(T('إرجاع للقائمة: ','Returned to pool: '))+'<bdi>'+b.lostOwnership.returnedToPool+'</bdi></dd>'
-      + '<dt>'+esc(T('طلبات إعادة الإسناد','Reassignment requests'))+'</dt><dd>'
-        + esc(T('معلّقة ','Pending '))+'<bdi>'+b.reassignmentRequests.pending+'</bdi> · '+esc(T('ملغاة ','Cancelled '))+'<bdi>'+b.reassignmentRequests.cancelled+'</bdi> · '
-        + esc(T('مقبولة (إعادة إسناد) ','Approved (reassigned) '))+'<bdi>'+b.reassignmentRequests.approved_reassigned+'</bdi> · '
-        + esc(T('مقبولة (إرجاع) ','Approved (returned) '))+'<bdi>'+b.reassignmentRequests.approved_returned_to_pool+'</bdi> · '
-        + esc(T('مرفوضة ','Rejected '))+'<bdi>'+b.reassignmentRequests.rejected+'</bdi></dd>'
-      + '<dt>'+esc(T('الاستثناءات حسب من فتحها','Exceptions by opener'))+'</dt><dd>'+esc(T('السائق: ','Driver: '))+'<bdi>'+b.exceptionsOpenedBy.driver+'</bdi> · '+esc(T('الفريق: ','Staff: '))+'<bdi>'+b.exceptionsOpenedBy.staff+'</bdi></dd>'
-      + '<dt>'+esc(T('جلسات العمل في الفترة','Work sessions in period'))+'</dt><dd><bdi>'+b.sessionsInPeriod+'</bdi></dd>'
-      + '</dl>';
-    h += '<div class="dm-sub" style="margin-top:10px"><b>'+esc(T('تقييم العملاء (كل الفترات)','Customer rating (all time)'))+'</b></div>';
-    if (rt.unavailable) h += '<div class="dm-sub">'+esc(T('خدمة التقييم غير متاحة.','The rating service is not available.'))+'</div>';
-    else if (!rt.count) h += '<div class="dm-sub">'+esc(T('لا توجد تقييمات بعد.','No ratings yet.'))+'</div>';
-    else {
-      h += '<dl class="dm-kv"><dt>'+esc(T('التقييم الكلي','Total'))+'</dt><dd><bdi dir="ltr">'+esc(rt.total.toFixed(1))+' / 5</bdi></dd>'
-        + '<dt>'+esc(T('عدد التقييمات','Ratings'))+'</dt><dd><bdi>'+rt.count+'</bdi></dd>'
-        + '<dt>'+esc(T('التوزيع','Distribution'))+'</dt><dd>'+[5,4,3,2,1].map(function(s){ return '<bdi dir="ltr">'+s+'★ '+rt.distribution[s]+'</bdi>'; }).join(' · ')+'</dd></dl>'
-        + '<ul class="dm-hist" aria-label="'+esc(T('سجل التقييمات','Rating history'))+'">' + rt.history.map(function(x){
-            return '<li><bdi dir="ltr">'+x.rating+'★</bdi> · <bdi>'+esc(x.orderId)+'</bdi> · <bdi>'+esc(when(x.at))+'</bdi>'
-              + (x.comment ? ' · <bdi>'+esc(x.comment)+'</bdi>' : '')+'</li>'; }).join('') + '</ul>';
-    }
-    return h + '</div>';
+  function mountPerformance(){
+    var root = el('pfRoot');
+    if (root && window.RAFPerfUI) RAFPerfUI.mount(root);
   }
-  window.pfmPreset = function(k){ PFM.preset = k; render(); var s = el('pfSec'); if (s) s.scrollIntoView({ block:'nearest' }); };
-  window.pfmDate = function(k, v){ PFM[k] = v; render(); var s = el('pfSec'); if (s) s.scrollIntoView({ block:'nearest' }); };
-  window.pfmPick = function(id, on){ if (!PFM.selected) PFM.selected = {}; PFM.selected[id] = !!on; if (!on && PFM.open === id) PFM.open = null; render(); var s = el('pfSec'); if (s) s.scrollIntoView({ block:'nearest' }); };
-  window.pfmOpen = function(id){ PFM.open = id; render(); var d = el(id ? 'pfDetail' : 'pfSec'); if (d) d.scrollIntoView({ block:'nearest' }); };
-
   function driverRow(d){
     var editing = !!(edit && edit.id === d.id);
     var h = '<div class="dm-row'+(editing?' editing':'')+'"><div class="dm-av" aria-hidden="true">'
@@ -666,6 +572,7 @@ body{background:var(--bg2);margin:0;}
       + '</span></div></section>';
 
     el('view').innerHTML = h;
+    mountPerformance();
     if (edit && edit.focus){ var f = el('f-' + edit.focus); if (f){ f.focus();
       try { f.setSelectionRange(f.value.length, f.value.length); } catch(e){} } edit.focus = null; }
   }

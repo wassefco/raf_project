@@ -165,11 +165,17 @@
     k('otp.maxAttempts',                  'delivery_proof', 'integer', null),
 
     /* compensation */
-    k('compensation.enabled',             'compensation', 'boolean', null, { note:'Feature is ON/OFF configurable; its state is not approved.' }),
+    k('compensation.enabled',             'compensation', 'boolean', null, { note:'Feature is ON/OFF configurable. No approved value ⇒ OFF by default until a Super Admin enables it. OFF affects new issuance only (RAFCompensation).' }),
     k('compensation.excludedDelayMinutes','compensation', 'minutes', 90),
     k('compensation.stepMinutes',         'compensation', 'minutes', 20),
     k('compensation.amountPerStepFils',   'compensation', 'fils', 1000, { note:'1 KD per completed step.' }),
     k('compensation.couponExpiryDays',    'compensation', 'integer', 7),
+    /* Phase I — the customer-facing wording is configurable; no wording is approved */
+    k('compensation.customerMessage',     'compensation', 'text', null,
+      { prototype:{
+          ar:'تأخر تسليم طلبك {orderId}. الوقت الموعود كان {promisedEta}، ويبدأ احتساب التعويض بعد {excludedMinutes} دقيقة منه ({startAt}). لكل {stepMinutes} دقيقة مكتملة بعد ذلك {amountPerStep} د.ك. تعويضك قسيمة بقيمة {amount} د.ك صالحة لمدة {validityDays} أيام حتى {expiresAt}، وتُستخدم فقط بإضافتها إلى محفظة RAF.',
+          en:'Your order {orderId} was delivered late. The promised time was {promisedEta}; compensation starts {excludedMinutes} minutes after it ({startAt}). Each completed {stepMinutes} minutes after that earns {amountPerStep} KWD. Your compensation is a {amount} KWD coupon valid for {validityDays} days, until {expiresAt}, usable only by adding it to your RAF Wallet.' },
+        note:'TEMPORARY PROTOTYPE CONFIGURATION. Placeholders: {orderId} {promisedEta} {startAt} {excludedMinutes} {stepMinutes} {amountPerStep} {amount} {validityDays} {expiresAt}.' }),
 
     /* notifications */
     k('notifications.soundDefault',       'notifications', 'boolean', null,
@@ -207,6 +213,22 @@
 
   function store(){ return global.RAFRecordStore ? RAFRecordStore.stateMap('config') : null; }
   function overrideOf(key){ var s = store(); return s ? s.get(key) : null; }
+  function history(){ return global.RAFRecordStore ? RAFRecordStore.collection('config_history') : null; }
+  function defaultOf(def){ return def.approved !== null ? def.approved : (def.prototype != null ? def.prototype : null); }
+  /* the value as it stood at instant `at` (null = not configured then). Derived
+     from the append-only change history; an override older than the history
+     (set before Phase I) applies from its own `at`. Deterministic, read-only. */
+  function valueAt(key, at){
+    var def = BY_KEY[key]; if (!def || typeof at !== 'number') return null;
+    var h = history(), last = null;
+    (h ? h.filter(function (e) { return e.key === key && e.at <= at; }) : []).forEach(function (e) {
+      if (!last || e.at > last.at || (e.at === last.at && (e.seq || 0) > (last.seq || 0))) last = e; });
+    if (last) return last.value;
+    var o = overrideOf(key);
+    var anyHistory = h ? h.filter(function (e) { return e.key === key; }).length > 0 : false;
+    if (o && o.value != null && !anyHistory && typeof o.at === 'number' && o.at <= at) return o.value;
+    return defaultOf(def);
+  }
 
   /* ---------- reads ---------- */
   function get(key){
@@ -269,6 +291,10 @@
     var s = store(); if (!s) return fail('PERSIST_FAILED');
     var before = get(key);
     var at = Date.now();
+    /* the change history is appended FIRST: an override never exists without it */
+    var h = history(); if (!h) return fail('PERSIST_FAILED');
+    var ha = h.append('historyId', { historyId:key + '|' + at + '|' + u.id, key:key, value:v, at:at, by:u.id, previousStatus:before.status, version:1 });
+    if (!ha.ok) return fail('PERSIST_FAILED');
     if (!s.set(key, { value:v, at:at, by:u.id })) return fail('PERSIST_FAILED');
     if (global.RAFAudit) {
       try {
@@ -283,6 +309,6 @@
 
   global.RAFConfig = {
     VERSION:VERSION, CATEGORIES:CATEGORIES, ERRORS:ERRORS,
-    get:get, value:value, isConfigured:isConfigured, keys:keys, describe:describe, set:set
+    get:get, value:value, valueAt:valueAt, isConfigured:isConfigured, keys:keys, describe:describe, set:set
   };
 })(window);

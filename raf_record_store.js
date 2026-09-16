@@ -73,6 +73,14 @@
                           purpose:'append-only customer ↔ driver messages (never edited or deleted)' },
     communication_receipts:{ key:'raf_communication_receipts', owner:'RAFDriverCommunication',
                           purpose:'append-only delivered / read receipts written by the recipient' },
+    /* Phase I — owned by RAFCompensation */
+    compensations:      { key:'raf_compensations',        owner:'RAFCompensation',
+                          purpose:'append-only, immutable delay compensation records (one per order: calculation, promised ETA, delivered time, issuedAt, expiresAt)' },
+    compensation_events:{ key:'raf_compensation_events',  owner:'RAFCompensation',
+                          purpose:'append-only compensation lifecycle (added_to_wallet / voided / reversed), at most one of each per compensation' },
+    /* Phase I — owned by RAFConfig: lets a rule be applied as it stood at a past instant (RAFConfig.valueAt) */
+    config_history:     { key:'raf_config_history',       owner:'RAFConfig',
+                          purpose:'append-only configuration changes (key, value, at, by) — written before the override itself' },
     notifications:      { key:'raf_notifications',        owner:'RAFNotify',
                           purpose:'append-only per-recipient notifications' },
     notification_reads: { key:'raf_notification_reads',   owner:'RAFNotify',

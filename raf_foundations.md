@@ -39,7 +39,8 @@ Single source for business/system values that RAF Management will configure.
 | `get(key)` | `{ ok, key, category, type, configured, status, value, source }` |
 | `value(key)` | the value, or `null` when **not configured** (callers treat `null` as *capability unavailable*, never as a default) |
 | `isConfigured(key)`, `keys(category)`, `describe(key)` | |
-| `set(key, value)` | requires an active session with the existing `settings.edit` permission; validated by type; audited (`config.changed`); published (`config.changed`) |
+| `set(key, value)` | requires an active session with the existing `settings.edit` permission; validated by type; appends the change to `config_history` first (Phase I), then stores the override; audited (`config.changed`); published (`config.changed`) |
+| `valueAt(key, at)` | Phase I — the value as it stood at instant `at`, derived from the append-only `config_history` (an older override without history applies from its own `at`; otherwise the registry default). Read-only, deterministic |
 
 States: `approved` (from the approved logistics model) · `prototype_temporary` (no approved value; a clearly marked **TEMPORARY PROTOTYPE** value so a workflow can be exercised; `temporary:true`) · `overridden` (set via `set`) · `not_configured` (no approved value; `value:null`).
 
@@ -170,11 +171,12 @@ No timestamp is duplicated, no historical snapshot is back-filled, and no ETA is
 
 Active producers: `ownership.transferred` (reserved path), `logistics.lock.acquired|released|recovered`, `config.changed`; Phase C: `dispatch.assigned`, `driver.skipped`; Phase D: `dispatch.reassigned`, `dispatch.returned_to_pool`, `reassignment.requested|cancelled|decided`; Phase G: `rating.submitted` (RAFDriverRating — a customer's final
 rating of the driver who completed the delivery, §14); Phase H: `communication.message`, `communication.opened|driver_transferred|driver_released|driver_assigned|closed`
-(RAFDriverCommunication, §15).
+(RAFDriverCommunication, §15); Phase I: `compensation.issued|voided|reversed` (RAFCompensation, §17) and
+`wallet.credited|debited` for compensation credit, expiry and reversal (RAFWallet).
 Reserved (recorded only when a later phase performs them):
 `exception.*` (incl. SLA approaching/breached, escalated, taken, returned),
 `delivery.arrived`, `otp.*`, `eta.updated`, `availability.*`, `schedule.changed`,
-`overtime.changed`, `communication.call` (no call record is kept in Phase H), `compensation.*`.
+`overtime.changed`, `communication.call` (no call record is kept in Phase H).
 
 Actor attribution (new events): with RAFPerm loaded, the **session** account is the actor; a
 different caller-supplied id is kept only as `metadata.actorClaimedId`; caller-supplied names and
@@ -195,6 +197,9 @@ roles are ignored. Existing events are not rewritten.
 | `communication_events` | `raf_communication_events` | append-only | RAFDriverCommunication (Phase H) |
 | `communication_messages` | `raf_communication_messages` | append-only | RAFDriverCommunication (Phase H) |
 | `communication_receipts` | `raf_communication_receipts` | append-only | RAFDriverCommunication (Phase H) |
+| `compensations` | `raf_compensations` | append-only (immutable) | RAFCompensation (Phase I) |
+| `compensation_events` | `raf_compensation_events` | append-only | RAFCompensation (Phase I) |
+| `config_history` | `raf_config_history` | append-only | RAFConfig (Phase I) |
 | `notifications` | `raf_notifications` | append-only | RAFNotify |
 | `notification_reads` | `raf_notification_reads` | append-only | RAFNotify |
 | `logistics_locks` | `raf_logistics_locks` | current state | RAFDeliveryOps |
@@ -500,8 +505,15 @@ approved). Customer Service, Finance, customers, merchants, merchant employees a
 access. Caller-supplied identity fields are refused. No new roles or permission keys.
 
 ### 14.6 UI
-Driver App Home "My performance" card; Driver Management "Driver performance" (period filter, driver selection,
-comparison table, per-driver detail with rating details). Live refresh via RAFEventBus; no polling. No print/export (Phase J).
+Driver App Home "My performance" card (own metrics + Total Rating only — no count, no individual ratings, no
+comments, no other driver). Management surfaces share ONE widget, **RAFPerfUI** (`raf_driver_performance_ui.js`):
+period filter (Today / Week / Month / Custom), driver selection, the comparison table and the per-driver
+drill-down with the management-only rating detail (count, distribution, comments, history). It is mounted by
+**Logistics Management → Performance → Driver Performance** and by **Driver Management → Driver performance**, so
+neither page holds its own copy. Presentation only: every figure and every access decision stays in
+RAFDriverPerformance / RAFDriverRating. Drivers are listed alphabetically by name — no ranking, tier, leaderboard
+or score anywhere. Live refresh via RAFEventBus (ownership, order, driver, logistics delivery/exception, config);
+no polling, no timers. No print/export (Phase J).
 
 ### 14.7 Limitations / PRODUCTION REQUIRED
 Basic/overtime split of a session that never had an `entered` overtime record uses the current basic-time
@@ -625,3 +637,208 @@ write nothing.
 * Drivers are not Logistics Operations employees.
 * **PRODUCTION REQUIRED:** all browser-side checks are advisory; real enforcement needs server-side
   authentication, sessions and authorisation.
+
+---
+
+## 17. Phase I — Delay Compensation
+
+### 17.1 Authorities
+* **RAFCompensation** (`raf_compensation.js`) — the single owner of eligibility, the delay calculation, one-time
+  issuance, the coupon lifecycle, Void / Reverse and the compensation records.
+* It does **not** own wallet balances, consumption or expiry (RAFWallet), order state / Promised ETA / delivered time
+  (RAFOrderEngine), notification transport (RAFNotify), audit (RAFAudit), events (RAFEventBus), configuration
+  (RAFConfig) or storage (RAFRecordStore). It never writes a wallet key.
+* **RAFWallet** (`raf_wallet.js`) is extended — not duplicated — with **expiring credit lots** (§17.4).
+* **RAFCompUI** (`raf_compensation_ui.js`) — presentation only: tracking page card, RAF Wallet page section, Logistics
+  Management → Dispatch & Operations → Delivery Compensation.
+* RAFMarketing coupons (merchant percentage discounts) and RAFSettlement were inspected and are **not** used: a
+  compensation coupon is RAF's own, wallet-only value. **No merchant settlement liability is created.** `storeSlug` is
+  preserved on the record for reporting only.
+
+### 17.2 Final rules (approved)
+| Rule | Implementation |
+|---|---|
+| ON/OFF | `compensation.enabled` (boolean, `not_configured` ⇒ OFF). Only `true` is ON. |
+| Evaluate after Delivered | `RAFDriver.completeDelivery` → `RAFCompensation.processDelivered(orderId)` (like the Phase E exception auto-close); re-checks `status === 'delivered'` + the `driver.delivered` milestone |
+| ActualDelay | `RAFOrderEngine.deliveredAt` (audit `driver.delivered`) − `RAFOrderEngine.promisedEtaAt` (Merchant Accepted + `eta.promisedDurationMinutes`, the Phase E ETA) |
+| First 90 min excluded | `compensation.excludedDelayMinutes` = 90 |
+| 20 min = 1 KWD | `blocks = floor(max(0, delayMs − 90·60000) / (20·60000))`, `amount = blocks × 1000 fils` — integer ms/fils, no rounding up, no proration (109→0, 110→1, 129→1, 130→2, 150→3) |
+| Once, automatic | deterministic id `CMP-<orderId>`; append-only `append('compensationId')` refuses a second record; no reissue path exists |
+| Coupon, wallet only, 7 days | `expiresAt = issuedAt + couponExpiryDays·86400000`; stored once, never recomputed |
+| Adding never extends | the wallet lot copies the record's `expiresAt`; RAFWallet refuses any other value |
+| Management Void / Reverse | existing `drivers.suspend` (Ops Manager, Higher Management, Super Admin); reason required |
+| Customer notification | `compensation.issued` via RAFNotify, text from `compensation.customerMessage` (placeholders `{orderId} {promisedEta} {startAt} {excludedMinutes} {stepMinutes} {amountPerStep} {amount} {validityDays} {expiresAt}`) — **TEMPORARY PROTOTYPE wording** |
+| OFF (affects NEW issuance only — final decision) | Checked once, at Delivered, in `processDelivered`: OFF returns before any calculation or write (no record, coupon, credit, notification, audit or event; `evaluate` returns `{ enabled:false }`). A coupon issued while ON is untouched by OFF: still addable to RAF Wallet until its original `expiresAt`, never voided / reversed / altered by the switch, and expires normally. Switching back ON issues nothing retroactively. Default: `compensation.enabled` has no approved value ⇒ OFF until a Super Admin (`settings.edit`) enables it through RAFConfig. |
+
+Record (immutable): orderId, customerId, storeSlug, promisedEtaAt (+source), deliveredAt (+source), delayMs,
+actual / excluded / eligible minutes, stepMinutes, completedBlocks, amountPerStepFils, amountFils, issuedAt,
+validityDays, expiresAt, createdBy `system`, and a snapshot of each config value with its status.
+
+### 17.3 Lifecycle (derived, never a mutable status field)
+`issued` → (customer **Add to RAF Wallet** before expiry) `in_wallet` → `partially_consumed` / `consumed` / `expired` /
+`reversed`; `issued` → `expired` (never added: no value is ever created) or `voided` (management, before adding).
+Status = record + `compensation_events` + RAFWallet's own lot. Void is refused once the coupon is in the wallet;
+Reverse is refused before it.
+
+**The lifecycle decision (financial concurrency).** Add to RAF Wallet and Void are mutually exclusive outcomes of an
+issued coupon, so both must first win **one** record with the same deterministic id `cme|<compensationId>|decision`
+(type `added_to_wallet` by the owning customer, or `voided` by management with its reason). The winner is decided by
+the append-only store (`append` refuses a second record with that id) and then **read back**: a caller proceeds only
+when the stored decision is its own. Only then does Add ask RAFWallet for the credit, and RAFWallet independently
+re-checks that decision before creating value (§17.4) — so a coupon that is durably VOIDED can never be credited, by
+any caller. `reversed` stays a separate event (`cme|<id>|reversed`), because it follows a winning Add.
+
+Add, Void and Reverse run inside an exclusive **Web Lock** (`raf-compensation:<compensationId>`), which is shared by
+every same-origin tab, window and frame, so the three never interleave across the browser; they therefore return a
+**Promise** (`RAFCompensation.addToWallet / void / reverse`). Where the Web Locks API is missing, the operation runs
+directly — a single JS thread is already atomic for this synchronous code — and the decision record still decides.
+If a credit write fails after Add won the decision, the coupon reads `add_pending`: no value exists, the customer may
+retry, and Void stays refused (management uses Reverse once the credit exists).
+
+### 17.4 RAFWallet expiring credit lots
+* `creditLot` appends a `COMPENSATION_CREDIT` credit carrying `lot:{ lotId, sourceType, sourceId, issuedAt, expiresAt }`.
+  It verifies the **source record** through RAFRecordStore (exists, same customer, amount, issuedAt, expiresAt), that
+  the source's lifecycle decision is `added_to_wallet` **by that customer** (§17.3) — never `voided` and never absent —
+  requires the signed-in customer to be the wallet owner, allows one lot per source, and re-checks `expiresAt`
+  immediately before the ledger write, so a credit can never land after expiry.
+* Spending (generic `debit`) consumes **unexpired lots first, soonest expiry first, then ordinary balance**, recorded
+  on the debit as `consumes:[{ lotId, amountMinor }]`.
+* **Expiry**: a lot past `expiresAt` is excluded from the balance immediately (derived), and exactly one
+  `COMPENSATION_EXPIRY` debit for the **unused remainder only** is appended with key `wallet-lot-expiry|<lotId>` and
+  `lotEvent:{ kind:'expiry', effectiveAt:expiresAt }` whenever the wallet is read or debited (`balance`, `history`,
+  `lots`, `debit`, `reverseLot`, `expireDue`). The amount must equal the remainder or the write is refused. Consumed
+  value stays consumed; ordinary balance and other lots are untouched; repeated / concurrent evaluation writes nothing
+  twice (key re-checked in the list being written).
+* **Reverse**: `reverseLot` appends one `COMPENSATION_REVERSAL` debit of the lot's unused remainder only
+  (`LOT_NOTHING_REMAINING` when fully consumed; `LOT_EXPIRED` when expired). It requires the signed-in session to hold
+  the source's existing management permission (`drivers.suspend`).
+* `COMPENSATION_*` reasons are reserved: `credit` / `debit` refuse them (`REASON_RESERVED`).
+* Lot fields exposed: original, consumed, expired, reversed, remaining, status, issuedAt, expiresAt, addedAt,
+  credit / expiry / reversal transaction ids, wallet reference (lotId) and compensation reference (sourceId).
+* `balance()` also returns `ordinaryBalance` and `compensationCredit`.
+* RAF has **no wallet-spend caller yet** (checkout does not pay from the wallet); the spend order lives in the
+  authority's debit path and applies to any future caller.
+
+### 17.5 Access
+| Account | View own | View all | Add to wallet | Void | Reverse |
+|---|---|---|---|---|---|
+| Customer (owner) | ✓ | — | ✓ | — | — |
+| Other customer | — | — | — | — | — |
+| Ops Manager / Higher Management / Super Admin (`drivers.suspend`) | ✓ | ✓ | — | ✓ | ✓ |
+| Customer Service, Finance, Marketing, Logistics employee without `drivers.suspend` | — | — | — | — | — |
+| Merchant, Merchant employee, Driver, anonymous, inactive accounts | — | — | — | — | — |
+
+Forged fields (`actorId`, `customerId`, `amountFils`, …) are refused with `FIELD_NOT_ACCEPTED`.
+
+### 17.6 Events · audit · notifications · config
+* Events: `compensation.issued`, `compensation.added_to_wallet`, `compensation.voided`, `compensation.reversed`
+  (payload: ids only).
+* Audit: `compensation.issued` (system/automation), `compensation.voided`, `compensation.reversed` (session actor,
+  reason, amounts); `wallet.credited` / `wallet.debited` with `lotId` / `consumes`.
+* Notification type `compensation.issued` (audience customer), dedupe key `compensation.issued|<compensationId>`.
+* Config: `compensation.enabled` (not approved ⇒ default OFF; switched through RAFConfig by `settings.edit`; applied as it stood at Delivered via `RAFConfig.valueAt`),
+  approved 90 / 20 / 1000 fils / 7 days, `compensation.customerMessage` (prototype).
+
+### 17.7 PRODUCTION REQUIRED / prototype limits
+* Issuance runs in the delivering driver's browser inside `completeDelivery`; if that page lacks the module or the
+  call fails, nothing retries. Production: a server-side, idempotent post-delivery consumer.
+* Expiry is applied on access (no timer, no polling). Production: a server-side scheduled/queued expiry job writing
+  the same ledger transition at `expiresAt`, and server-side reads that exclude due lots.
+* No transactions across the compensation record, events, wallet ledger, audit and notification. The Add/Void race is
+  closed by the decision record + Web Lock above (a VOIDED coupon with a wallet credit is not reachable), but the
+  remaining localStorage weakness is unchanged: two processes writing the *same* list at the same instant can still
+  lose one append (for example a wallet expiry entry in another tab racing an unrelated ledger write). Production needs
+  one server-side transaction across the coupon decision and the wallet ledger.
+* RAFWallet's pre-existing `system` actor for refunds is trusted by parameter (unchanged); lot credit and reversal
+  are additionally session-checked. All browser checks are advisory.
+
+---
+
+## 18. Phase J — Reports Center
+
+### 18.1 Authority
+**RAFReports** (`raf_reports.js`) — a READ-ONLY projection. It owns no record and writes nothing: no storage, no
+audit, no notification, no event. It re-implements no business rule; where an authority already calculates
+something, RAFReports asks that authority. **RAFReportsUI** (`raf_reports_ui.js`) is the presentation widget
+(report selector, filter bar, summary tiles, table, empty / NOT_CONFIGURED / error states, CSV, print), mounted by
+**Logistics Management → Reports → Reports Center**. No second management shell, no new business-data authority.
+
+API: `run(reportId, filters)`, the ten per-report methods, `csv(result)`, `viewer()`, `REPORTS`, `FILTER_KEYS`.
+
+### 18.2 Reports and their sources
+| Report | Source of every figure |
+|---|---|
+| overview | each line labelled with its own source (orders, engine milestones, ownership, exceptions, availability, compensation) |
+| orders | `RAFShop.Orders` snapshots + `RAFOrderEngine` milestones (accepted / ready / delivered / promised ETA) |
+| deliveries | snapshot `fulfilment` + engine milestones + ownership history + `RAFDeliveryOps.exceptions` (count, penalty risk) |
+| drivers, performance | `RAFDriverPerformance.compare` — the only driver-performance maths in RAF |
+| exceptions | `RAFDeliveryOps.exceptions.list` (status, SLA state and deadline, escalation, resolution, penalty) |
+| reassignments | ownership `reassignment` / `returned_to_pool` + `reassignment_requests` lifecycle |
+| communication | `RAFDriverCommunication.list` + message/event **counts** — never message content |
+| compensation | `RAFCompensation.list` (amounts exactly as issued) + the wallet lot each record carries |
+| audit | `RAFAudit.query` — append-only, never rewritten or normalised here |
+
+### 18.3 Authorisation (existing keys only — no new role, no new permission)
+* Every report requires the existing **`reports.view`** (the key `RAFAudit.canViewAudit` already uses).
+* **Operational reports never follow from `reports.view` alone.** A caller must be either Logistics/management —
+  holding the SAME existing pair the Logistics surfaces already require, **`orders.view` + `drivers.view`** — or a
+  store-linked merchant account, which is limited to its own store AND to the reports already approved for merchant
+  visibility (overview, orders, deliveries, audit). Operations Manager, Higher Management and Super Admin hold the
+  pair; **Finance** (no `drivers.view`) and **Marketing** (neither) do not, so both are refused every report,
+  including audit, inside Reports Center. `RAFAudit.canViewAudit` keeps its existing meaning for every other
+  surface — no approved permission contract was changed, and no key or role was added.
+* Reports over guarded data delegate to the owning authority, which decides: drivers/performance →
+  RAFDriverPerformance (`drivers.suspend`), exceptions → RAFDeliveryOps staff scope, reassignments →
+  `RAFDeliveryOps.canAccess()`, communication → RAFDriverCommunication, compensation → RAFCompensation,
+  audit → `RAFAudit.canViewAudit`.
+* **Export** requires the existing `reports.export`; a viewer without it gets `canExport:false` and `csv()` refuses.
+* Identity is the session; caller-supplied identity/filter keys are refused (`FIELD_NOT_ACCEPTED`).
+
+### 18.4 Store scope
+An account whose `accountType` is `merchant` is bound to `RAFPerm.storeSlugOf(session)`: rows outside that store are
+removed, **driver identity is not disclosed** (the driver column is absent from the view and the CSV), and an
+unlinked merchant account receives `NO_STORE_LINK` instead of any rows. The link is never taken from a name and
+never guessed.
+
+### 18.5 Filters and date semantics
+Today / Week / Month / Custom come from `RAFDriverPerformance.periodOf`, so RAF keeps ONE period implementation in
+`availability.scheduleTimezone` (Asia/Kuwait). Custom requires a valid start and end; a reversed or malformed range
+is `PERIOD_INVALID`. Each report filters on its own timestamp and never substitutes another: orders → placed
+(snapshot `checkoutAt`), deliveries → delivered else assignment/claim, exceptions → opened, reassignments → the move
+itself, compensation → issued, audit → the event. Other filters (store, driver, order, status, category, SLA state,
+reassignment state, communication type, customer, employee, action) are offered only where real data backs them,
+plus a client-side search over the rows already returned.
+
+### 18.6 Export and print
+CSV contains exactly the filtered, searched and authorised rows and columns (UTF-8 BOM for spreadsheet software),
+named `raf-<report>-<date>.csv`; an empty report exports a header only. Print uses the page's own print stylesheet
+(selector, filter bar and action buttons hidden; the table expands instead of scrolling). No XLSX or PDF dependency
+was invented. Export and print write nothing.
+
+### 18.7 Live updates
+`RAFEventBus` only — `order.*`, `ownership.*`, `logistics.*`, `driver.*`, `communication.*`, `compensation.*`,
+`audit.appended`, `config.changed`. No polling, no `setInterval`, no refresh timer (the one `setTimeout(…, 0)` in
+the widget only revokes a CSV object URL after the download starts). An event-driven repaint never lands under a
+field being typed in; a repaint the user asked for always does.
+
+### 18.8 Known limitations
+* **Promised ETA is historical fact (approved).** `RAFOrderSnapshot` carries a write-once `promise` section
+  { promisedEtaAt, acceptedAt, durationMinutes, base, recordedAt }. `RAFOrderEngine.merchantAccept` records it at the
+  acceptance itself with the configuration as it stood then, and `RAFOrderSnapshot.update` refuses any later write to
+  it (`promise_immutable`), so no surface, caller or configuration change can restate it. `RAFOrderEngine.promisedEtaAt`
+  returns the recorded value (`recorded:true`) when one exists and only derives when none was recorded. Reports Center
+  reports ONLY recorded values — snapshot promise, else a compensation record, else an exception `promisedEtaAtOpen`;
+  an order with nothing recorded shows NOT_AVAILABLE and no ETA or delay is derived or backfilled for it. Existing
+  records are never modified; a later RAFConfig change affects later acceptances only.
+* **Cancellation detail.** Only `order.status === 'cancelled'` is reported; RAF has no separate cancellation-time or
+  reason record to read, so no cancellation timestamp is shown.
+* **Multi-store: PARTIAL.** Only `usr-010` → `casa-mode` is genuinely linked, so cross-store isolation is proven for
+  one store plus the unlinked-account case; no second store was fabricated.
+* Search is client-side over the rows already returned (no server-side or full-text search is claimed); all figures
+  are as accurate as the localStorage prototype beneath them, and every browser-side check is advisory.
+* **Reading can still trigger an owning authority's own evaluation.** RAFReports itself never writes, and eight of
+  the ten reports write nothing at all. Two delegate to read APIs that perform their own idempotent evaluation —
+  `RAFDeliveryOps.exceptions.list` (Phase E SLA / penalty-risk evaluation) and, through the overview,
+  `RAFDriverManagement.availability.list` (Phase F auto-offline) — exactly as the Logistics screens do when opened.
+  The writes belong to those authorities, are idempotent (a repeated report run writes nothing) and are unchanged by
+  Phase J.

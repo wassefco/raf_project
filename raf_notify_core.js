@@ -118,7 +118,9 @@
     'logistics.driver.auto_offline':     { audience:'logistics', title:{ ar:'سائق أصبح غير متاح تلقائيًا', en:'A driver was set Unavailable automatically' } },
     /* Phase H — a new message in the Customer ↔ Driver conversation (RAFDriverCommunication) */
     'communication.message.customer':    { audience:'customer', title:{ ar:'رسالة جديدة من السائق', en:'New message from your driver' } },
-    'communication.message.driver':      { audience:'driver',   title:{ ar:'رسالة جديدة من العميل', en:'New message from the customer' } }
+    'communication.message.driver':      { audience:'driver',   title:{ ar:'رسالة جديدة من العميل', en:'New message from the customer' } },
+    /* Phase I — a delay compensation coupon was issued (RAFCompensation) */
+    'compensation.issued':               { audience:'customer', title:{ ar:'حصلت على قسيمة تعويض', en:'You received a compensation coupon' } }
   };
   var LEGACY_MERCHANT_TYPE = {
     'new':'merchant.order.new', 'timeout':'merchant.order.acceptance_warning',

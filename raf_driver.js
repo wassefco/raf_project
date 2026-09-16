@@ -1256,6 +1256,9 @@
        Delivered") and a late delivery is checked for penalty risk — owned by
        RAFDeliveryOps.exceptions, which re-checks that the order is delivered */
     if (global.RAFDeliveryOps && RAFDeliveryOps.exceptions) { try { RAFDeliveryOps.exceptions.autoCloseOnDelivery(orderId); } catch (e) {} }
+    /* Phase I: delay compensation is evaluated once, after Delivered — owned by
+       RAFCompensation (OFF does nothing; a duplicate call issues nothing) */
+    if (global.RAFCompensation) { try { RAFCompensation.processDelivered(orderId); } catch (e) {} }
     return task(orderId, { actor:sc.id });
   }
 
