@@ -842,3 +842,75 @@ field being typed in; a repaint the user asked for always does.
   `RAFDriverManagement.availability.list` (Phase F auto-offline) — exactly as the Logistics screens do when opened.
   The writes belong to those authorities, are idempotent (a repeated report run writes nothing) and are unchanged by
   Phase J.
+
+---
+
+## 19. Phase K — RAF-wide Performance
+
+### 19.1 Authority
+**RAFPerformance** (`raf_performance.js`) — a READ-ONLY measurement layer. It owns no record, writes nothing, defines
+no business rule and re-implements no calculation an authority already performs. **RAFPerfCenterUI**
+(`raf_performance_ui.js`) renders it inside the existing Logistics Management shell at **Performance → RAF
+Performance**. Export reuses the Reports Center writer (`RAFReports.csv`); there is no second export architecture.
+
+API: `run(viewId, filters)`, the ten per-view methods, `csv(result)`, `viewer()`, `VIEWS`.
+
+### 19.2 Views and sources of truth
+| View | Every figure comes from |
+|---|---|
+| overview | RAFReports (orders, deliveries, exceptions, reassignments, communication, compensation, drivers) + RAFDriverManagement.availability |
+| orders | RAFReports.orders/deliveries — milestones from RAFOrderEngine, promise from the snapshot |
+| merchants | RAFReports.orders grouped by `storeSlug` (descriptive only) |
+| logistics | RAFReports.deliveries + reassignments + exceptions |
+| drivers | **RAFDriverPerformance** only — claims, deliveries, skips, requests, exceptions, working time, overtime, rating |
+| exceptions | RAFDeliveryOps.exceptions (status, SLA, escalation, resolution, penalty) |
+| reassignments | RAFDriver ownership history + reassignment requests |
+| communication | RAFDriverCommunication (metadata counts only, never content) |
+| customerExperience | RAFDriverRating + RAFReports.deliveries/communication |
+| compensation | RAFCompensation (amounts exactly as issued) + the wallet lot |
+
+### 19.3 Authorisation
+The existing management set only: **`reports.view` + `orders.view` + `drivers.view`** — Operations Manager, Higher
+Management and Super Admin. Finance, Marketing, Customer Service, merchants, merchant employees, drivers, customers
+and anonymous callers are refused **by the authority**, and a refused call returns no `rows` at all. Export needs the
+existing `reports.export`. **No new permission key and no new role.** Suspended accounts → `ACTOR_INACTIVE`.
+
+### 19.4 Store scope
+A store-bound (merchant) account cannot hold `drivers.view`, so it never reaches RAF-wide data; store isolation holds
+by construction, and any scoped caller is still filtered to its own store. Management may filter by store
+(`storeSlug`). **Multi-store remains PARTIAL**: only `usr-010` → `casa-mode` is genuinely linked, so cross-store
+separation between two real stores cannot be proven and no store was fabricated.
+
+### 19.5 Time and denominators
+Periods (Today / Week / Month / Custom) come from `RAFDriverPerformance.periodOf` — one implementation, Asia/Kuwait.
+Every duration is measured between its own two timestamps (placed → accepted → ready → assigned → picked up →
+delivered) and never substitutes another. **Every rate states its denominator in its own row**, e.g. acceptance rate
+= accepted ÷ orders placed in the period; on-time rate = on time ÷ delivered orders **with a recorded promise**.
+
+### 19.6 Historical integrity
+The Promised ETA is the immutable value recorded on the snapshot at merchant acceptance (§18.8). Orders with no
+recorded promise are counted separately as "delivered without a recorded promise (excluded)" and are excluded from
+every ETA rate — never derived from today's configuration and never backfilled. Verified: changing
+`eta.promisedDurationMinutes` left the orders, logistics, compensation and exception measurements byte-identical,
+while a new order recorded the new duration.
+
+### 19.7 Live updates and read-only behaviour
+RAFEventBus only (`order.*`, `ownership.*`, `logistics.*`, `driver.*`, `communication.*`, `compensation.*`,
+`audit.appended`, `config.changed`). No polling, no `setInterval`, no refresh timer; the one `setTimeout(…, 0)`
+only revokes a CSV object URL after the download starts. RAFPerformance writes nothing: a full sweep of all ten
+views plus filters and CSV left storage byte-identical. (As in Phase J, two of the underlying authorities may
+perform their own idempotent evaluation when read — RAFDeliveryOps SLA and RAFDriverManagement auto-offline.)
+
+### 19.8 No rankings, no scores
+There is no leaderboard, rank, score, composite index, tier, target, colour judgement or evaluative label anywhere.
+Drivers and stores are listed alphabetically; measurements are facts with a source and a denominator. A driver's
+total rating remains RAFDriverRating's all-time value.
+
+### 19.9 Known limitations
+* Merchant rejection reasons and out-of-stock events: **NOT_AVAILABLE** — no authoritative per-order record exists
+  to read, so no merchant-attributed rejection metric is calculated.
+* No approved expected-ready time exists, so no "ready on time" rate is produced.
+* Call duration, support complaints and any satisfaction index (NPS/CSAT): **NOT_AVAILABLE** — not recorded, never
+  inferred from message text.
+* Cancellation reasons are not reported; only `order.status === 'cancelled'` is counted.
+* Multi-store: PARTIAL (see §19.4). Everything remains browser-side and advisory until there is a server.

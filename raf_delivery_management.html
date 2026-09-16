@@ -470,6 +470,9 @@ bdi{ unicode-bidi:isolate; }
 <script src="raf_settlement.js"></script>
 <script src="raf_reports.js"></script>
 <script src="raf_reports_ui.js"></script>
+<!-- Phase K: RAF-wide performance (read-only measurement layer + widget) -->
+<script src="raf_performance.js"></script>
+<script src="raf_performance_ui.js"></script>
 <script>
 /* ============================================================================
    LOGISTICS MANAGEMENT — presentation only.
@@ -589,6 +592,8 @@ bdi{ unicode-bidi:isolate; }
       { k:'effective', ar:'تواريخ السريان',  en:'Effective Dates' },
       { k:'history',   ar:'سجل العقود',      en:'Contract History' } ]},
     { k:'performance', ic:'ti-chart-line', ar:'الأداء', en:'Performance', items:[
+      /* Phase K: RAF-wide performance measurements (RAFPerformance) — facts only */
+      { k:'raf',        ar:'أداء رف',                en:'RAF Performance',    view:'rafperf' },
       /* Phase G: factual driver performance (RAFDriverPerformance) — no score, no ranking */
       { k:'drivers',    ar:'أداء السائقين',          en:'Driver Performance', view:'driverperf' },
       { k:'sla',        ar:'مستوى الخدمة',          en:'SLA' },
@@ -945,6 +950,20 @@ bdi{ unicode-bidi:isolate; }
     var root = el('reportsRoot');
     if (root && window.RAFReportsUI) RAFReportsUI.mount(root);
     else if (root) root.textContent = T('خدمة التقارير غير محمّلة.','The reports service is not loaded.');
+  }
+
+  /* ───────── PERFORMANCE → RAF PERFORMANCE (Phase K) ─────────
+     RAFPerformance authorises and measures; the widget renders. Descriptive
+     measurements only — no score, rank, tier or target anywhere. */
+  function viewRafPerformance(){
+    return pageHead(T('أداء رف','RAF Performance'),
+      T('قياسات وصفية على مستوى رف من السجلات الفعلية، بتوقيت الكويت، مع مصدر ومقام لكل رقم. لا توجد درجات ولا ترتيب.','RAF-wide descriptive measurements from the actual records, in Kuwait time, each with its source and denominator. No scores and no ranking.'), refreshBtn())
+      + '<section class="card" style="padding:14px"><div id="rafPerfRoot"></div></section>';
+  }
+  function mountRafPerformance(){
+    var root = el('rafPerfRoot');
+    if (root && window.RAFPerfCenterUI) RAFPerfCenterUI.mount(root);
+    else if (root) root.textContent = T('خدمة الأداء غير محمّلة.','The performance service is not loaded.');
   }
 
   function viewExceptionList(){
@@ -1849,6 +1868,7 @@ bdi{ unicode-bidi:isolate; }
     else if(it.view === 'compensation') html = viewCompensation();
     else if(it.view === 'driverperf') html = viewDriverPerformance();
     else if(it.view === 'reports') html = viewReports();
+    else if(it.view === 'rafperf') html = viewRafPerformance();
     else html = viewNotConfigured(G, it);
     scheduleDeadline();
     el('view').innerHTML = html;
@@ -1856,6 +1876,7 @@ bdi{ unicode-bidi:isolate; }
     if(it.view === 'compensation') mountCompensation();
     if(it.view === 'driverperf') mountDriverPerformance();
     if(it.view === 'reports') mountReports();
+    if(it.view === 'rafperf') mountRafPerformance();
     if(openId) renderDrawer();
     else if(DS){
       /* the panel reads the board; outside the dispatch views refresh it here */
