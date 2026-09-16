@@ -233,7 +233,11 @@
   function ownershipOk(customerId, actor){
     if (!actor || !actor.id) return false;
     if (actor.type === ACTOR.SYSTEM) return true;      /* system-initiated refunds */
-    return actor.id === customerId;
+    if (actor.id !== customerId) return false;
+    /* a caller claiming to BE the customer must actually be signed in as them:
+       the actor object alone never proves identity (final hardening) */
+    var sid = sessionUserId();
+    return sid === null ? false : sid === customerId;
   }
 
   function audit(action, opts){

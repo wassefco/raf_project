@@ -18,7 +18,15 @@
   if (global.RAFRules) return;
 
   var LS_RESERVE = 'raf_reservations';
-  var RESERVE_MS = 15 * 60 * 1000;              /* a checkout hold lasts 15 minutes */
+  /* HOW LONG A CHECKOUT HOLD LASTS IS CONFIGURATION, NOT CODE.
+     RAFConfig 'checkout.reservationHoldMinutes' is the single source of truth
+     (TEMPORARY PROTOTYPE value: the same 15 minutes this module used before).
+     Read on every call, so a change applies without touching this file; null
+     means the capability is unavailable, never a substituted default. */
+  function reserveMs(){
+    var cfg = global.RAFConfig, mins = cfg ? cfg.value('checkout.reservationHoldMinutes') : null;
+    return typeof mins === 'number' ? mins * 60000 : null;
+  }
 
   function S(){ return global.RAFSource || null; }
   function root(){ return document.getElementById('htmlRoot') || document.documentElement; }
@@ -176,7 +184,9 @@
     return v;
   }
   var Reserve = {
-    RESERVE_MS: RESERVE_MS,
+    /* the configured hold, resolved at read time (kept for compatibility) */
+    get RESERVE_MS(){ return reserveMs(); },
+    holdMs: reserveMs,
     all: function(){ return readRes(); },
     /* units held by OTHER sessions (mine don't reduce what I can buy) */
     heldElsewhere: function (productId) {
@@ -197,8 +207,10 @@
     hold: function (lines) {
       var items = {};
       (lines || []).forEach(function (l) { items[l.id] = (items[l.id] || 0) + (l.qty || 1); });
+      var ms = reserveMs();
+      if (ms == null) return { ok:false, reason:'reservation_hold_not_configured' };
       var all = readRes(), id = sessionId();
-      all[id] = { session:id, items:items, created:Date.now(), expires:Date.now() + RESERVE_MS };
+      all[id] = { session:id, items:items, created:Date.now(), expires:Date.now() + ms };
       writeRes(all);
       return { id:id, expires:all[id].expires };
     },

@@ -49,7 +49,9 @@
     delivery_proof:{ ar:'إثبات التسليم',             en:'Delivery proof' },
     compensation:  { ar:'التعويض',                   en:'Compensation' },
     notifications: { ar:'الإشعارات',                 en:'Notifications' },
-    locks:         { ar:'أقفال العمليات',            en:'Operation locks' }
+    locks:         { ar:'أقفال العمليات',            en:'Operation locks' },
+    checkout:      { ar:'إتمام الشراء',              en:'Checkout' },
+    store_ops:     { ar:'تشغيل المتجر',              en:'Store operations' }
   };
 
   /* ---------- the registry ----------
@@ -159,6 +161,16 @@
     k('customerMessages.etaUpdateTemplate','customer_msg', 'text', null,
       { prototype:{ ar:'تم تحديث الوقت المتوقع لتسليم طلبك {orderId}: {eta}.', en:'The expected delivery time for your order {orderId} was updated: {eta}.' },
         note:'TEMPORARY PROTOTYPE CONFIGURATION.' }),
+
+    /* checkout — the stock hold a checkout session keeps (RAFRules.Reserve).
+       Moved here from a constant in raf_rules.js; the value is unchanged. */
+    k('checkout.reservationHoldMinutes',  'checkout', 'minutes', null,
+      { prototype:15, note:'A checkout session holds the cart’s units for this long. TEMPORARY PROTOTYPE CONFIGURATION — the 15 minutes RAFRules already applied, not an approved business value.' }),
+
+    /* store operations — how long before closing a store stops taking orders
+       (RAFStoreOps). Moved here from a constant in raf_store_ops.js; unchanged. */
+    k('storeOps.orderCutoffMinutes',      'store_ops', 'minutes', null,
+      { prototype:30, note:'Same-day ordering stops this long before the store’s closing time, and Instant Delivery stops this long before the end of the day’s final period. TEMPORARY PROTOTYPE CONFIGURATION — the 30 minutes RAFStoreOps already applied.' }),
 
     /* delivery proof */
     k('otp.digits',                       'delivery_proof', 'enum', null, { allowed:[2, 3] }),

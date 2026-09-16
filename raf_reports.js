@@ -399,7 +399,8 @@
                  beforeOrAfterPickup:o.pickedUpAt != null && r.at >= o.pickedUpAt ? 'after_pickup' : 'before_pickup',
                  reassignedAt:r.kind === 'reassignment' ? r.at : null,
                  returnedToPoolAt:r.kind === 'returned_to_pool' ? r.at : null,
-                 poolClass:r.poolClass || r.priority || null,
+                 /* the ownership record stores the classification as 'pool' (regular|priority) */
+                 poolClass:r.pool || r.poolClass || r.priority || null,
                  requestState:req ? req.type : null, decisionAt:req && req.type !== 'submitted' ? req.at : null,
                  at:r.at, driverIds:[r.fromDriverId, r.toDriverId] };
       });

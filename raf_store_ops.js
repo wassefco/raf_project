@@ -24,7 +24,15 @@
 
   var LS = 'raf_store_ops';
   var MAX_BUSY_MS = 8 * 60 * 60 * 1000;      /* temporary closure ceiling */
-  var CUTOFF_MS   = 30 * 60 * 1000;          /* last order before closing */
+  /* HOW LONG BEFORE CLOSING ORDERING STOPS IS CONFIGURATION, NOT CODE.
+     RAFConfig 'storeOps.orderCutoffMinutes' is the single source of truth
+     (TEMPORARY PROTOTYPE value: the same 30 minutes this module used before).
+     Read on every call; null means the cutoff cannot be decided and is
+     reported as unknown rather than guessed. */
+  function cutoffMs(){
+    var cfg = global.RAFConfig, mins = cfg ? cfg.value('storeOps.orderCutoffMinutes') : null;
+    return typeof mins === 'number' ? mins * 60000 : null;
+  }
 
   /* the only three workload states, with their customer-facing ranges */
   var STATE = { NORMAL:'normal', MODERATE:'moderate', HIGH:'high' };
@@ -340,13 +348,19 @@
       return { known:false, reason:'closing_time_unavailable',
                sameDay:null, msLeft:null, closesAt:null, closedToday:false, message:null };
     }
+    var cut = cutoffMs();
+    if (cut == null) {
+      /* the cutoff is not configured: reported as unknown, never guessed */
+      return { known:false, reason:'order_cutoff_not_configured',
+               sameDay:null, msLeft:left, closesAt:closingTimeOf(slug), closedToday:false, message:null };
+    }
     return {
       known: true,
       closedToday: false,
       closesAt: closingTimeOf(slug),
       msLeft: left,
-      sameDay: left > CUTOFF_MS,
-      message: left > CUTOFF_MS ? null : NEXT_DAY_MSG()
+      sameDay: left > cut,
+      message: left > cut ? null : NEXT_DAY_MSG()
     };
   }
 
@@ -396,13 +410,14 @@
   }
   function slotPolicy(){ return SLOT_POLICY ? { slotMinutes:SLOT_POLICY.slotMinutes, horizonDays:SLOT_POLICY.horizonDays } : null; }
 
-  /* Instant Delivery stops CUTOFF_MS before the END OF THE DAY'S FINAL
+  /* Instant Delivery stops the configured cutoff before the END OF THE DAY'S FINAL
      PERIOD — never the end of an earlier period. 'HH:MM' or null. */
   function instantCutoffOf(slug, at){
     var now = at instanceof Date ? at : kuwaitNow();
     var p = periodsOf(dayEntry(slug, now));
     if (!p || !p.length) return null;
-    var c = Math.max(0, p[p.length - 1].c - CUTOFF_MS / 60000);
+    var cut = cutoffMs(); if (cut == null) return null;      /* not configured → no cutoff time is stated */
+    var c = Math.max(0, p[p.length - 1].c - cut / 60000);
     return two(Math.floor(c / 60)) + ':' + two(c % 60);
   }
 
@@ -538,7 +553,9 @@
 
   global.RAFStoreOps = {
     STATE: STATE, MODE: MODE, RANGES: RANGES, BUSY_DURATIONS: BUSY_DURATIONS,
-    MAX_BUSY_MS: MAX_BUSY_MS, CUTOFF_MS: CUTOFF_MS,
+    MAX_BUSY_MS: MAX_BUSY_MS,
+    /* the configured cutoff, resolved at read time (kept for compatibility) */
+    get CUTOFF_MS(){ return cutoffMs(); }, cutoffMs: cutoffMs,
     /* workload */
     activeOrders: activeOrders, activeCount: activeCount, stateForCount: stateForCount,
     autoState: autoState, currentState: currentState, isManual: isManual,

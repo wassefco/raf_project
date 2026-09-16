@@ -914,3 +914,33 @@ total rating remains RAFDriverRating's all-time value.
   inferred from message text.
 * Cancellation reasons are not reported; only `order.status === 'cancelled'` is counted.
 * Multi-store: PARTIAL (see §19.4). Everything remains browser-side and advisory until there is a server.
+
+---
+
+## 20. Final integration & hardening pass (Phases B–K)
+
+A system-level audit of the completed phases. No feature was added, no authority rebuilt, no business rule,
+role, permission, status or threshold invented. Two genuine integration defects were found and fixed:
+
+### 20.1 Fixed — wallet reads were authorised by a caller-supplied actor
+`RAFWallet.ownershipOk` accepted any `{ id, type:'customer' }` object as proof of identity, so
+`balance / history / rawLedger / lots` could be read for ANY customer id by an anonymous or unrelated caller.
+A caller claiming to BE the customer must now also be signed in as them (session check); the `system` actor path
+(used internally by RAFCompensation and by refunds) is unchanged, so no authority behaviour moved. Verified:
+anonymous, another customer, a driver and management are refused; the customer's own wallet, the compensation
+views, refund credits and system refunds all still work.
+
+### 20.2 Fixed — pool classification never reached Reports / Performance
+The ownership record stores the Regular/Priority classification as `pool`, but the Phase J projection read
+`poolClass`/`priority`, so the Reports "Pool class" column was always empty and the Phase K "Returns classified
+Priority" measurement always counted 0. The projection now reads `pool` first (the written field). Verified end to
+end: a 2-minute return reads `regular`, a 9-minute return reads `priority`, and the Performance counts follow.
+
+### 20.3 Audit findings kept as-is (pre-existing, outside the phase scope)
+* `raf_orders` has several writers (RAFShop.Orders, RAFOrderEngine, RAFOrderSnapshot, RAFOrderChanges, RAFRules) —
+  a read-modify-write list and therefore a lost-update risk under true concurrency. Prototype limitation.
+* `raf_store_management.html` polls `OPS.isBusy` every 15 s (a pre-event-bus surface) and `raf_order_engine.js`
+  runs a 1 s ticker for the merchant acceptance countdown/sweep. Both predate the event bus; migrating them is a
+  product/architecture decision, not a defect fix.
+* `raf_rules.js` (`RESERVE_MS` 15 min) and `raf_store_ops.js` (`CUTOFF_MS` 30 min) hold pre-existing commerce
+  constants outside RAFConfig. Moving them needs approval, since they are approved Phase-A behaviour.
