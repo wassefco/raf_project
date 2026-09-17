@@ -130,7 +130,11 @@
       '</div>'+
 
       '<div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap;">'+action+
-        '<button class="btn btn-ghost btn-block"><i class="ti ti-headset"></i> '+T('الدعم والمساعدة','Help & Support')+'</button></div>';
+        /* support opens on THIS order: an order still in progress is the
+           "active order" context, anything else is a past order */
+        '<a class="btn btn-ghost btn-block" href="raf_support.html?order='+encodeURIComponent(o.id)
+          +'&ctx='+(o.status==='progress'?'active':'old')+'"><i class="ti ti-headset"></i> '
+          +T('الدعم لهذا الطلب','Support for this order')+'</a></div>';
   }
 
   window.onLangChange = render;

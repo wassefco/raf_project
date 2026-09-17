@@ -51,7 +51,8 @@
     notifications: { ar:'الإشعارات',                 en:'Notifications' },
     locks:         { ar:'أقفال العمليات',            en:'Operation locks' },
     checkout:      { ar:'إتمام الشراء',              en:'Checkout' },
-    store_ops:     { ar:'تشغيل المتجر',              en:'Store operations' }
+    store_ops:     { ar:'تشغيل المتجر',              en:'Store operations' },
+    support:       { ar:'خدمة العملاء',              en:'Customer Service' }
   };
 
   /* ---------- the registry ----------
@@ -188,6 +189,27 @@
           ar:'تأخر تسليم طلبك {orderId}. الوقت الموعود كان {promisedEta}، ويبدأ احتساب التعويض بعد {excludedMinutes} دقيقة منه ({startAt}). لكل {stepMinutes} دقيقة مكتملة بعد ذلك {amountPerStep} د.ك. تعويضك قسيمة بقيمة {amount} د.ك صالحة لمدة {validityDays} أيام حتى {expiresAt}، وتُستخدم فقط بإضافتها إلى محفظة RAF.',
           en:'Your order {orderId} was delivered late. The promised time was {promisedEta}; compensation starts {excludedMinutes} minutes after it ({startAt}). Each completed {stepMinutes} minutes after that earns {amountPerStep} KWD. Your compensation is a {amount} KWD coupon valid for {validityDays} days, until {expiresAt}, usable only by adding it to your RAF Wallet.' },
         note:'TEMPORARY PROTOTYPE CONFIGURATION. Placeholders: {orderId} {promisedEta} {startAt} {excludedMinutes} {stepMinutes} {amountPerStep} {amount} {validityDays} {expiresAt}.' }),
+
+    /* Customer Service (RAFCustomerService).
+       The two SLA durations are NOT CONFIGURED: no first-response or
+       resolution target is approved, so nothing may show a countdown, a
+       "near SLA" figure or a breach. A ticket records the SLA state that
+       applied when it was opened and that snapshot is never rewritten. */
+    k('support.firstResponseMinutes',     'support', 'minutes', null,
+      { note:'Minutes from ticket creation to the first customer-visible response. NOT CONFIGURED — no target is approved. No prototype value: Near SLA / Breached stay unavailable until RAF approves one.' }),
+    k('support.resolutionMinutes',        'support', 'minutes', null,
+      { note:'Minutes from ticket creation to resolution. NOT CONFIGURED — no target is approved. No prototype value.' }),
+    /* the ticket categories the Customer Service UI offers. Configurable from
+       here so no page carries its own list. */
+    k('support.categories',               'support', 'list', [
+        { key:'orders',    ar:'الطلبات',        en:'Orders' },
+        { key:'payments',  ar:'المدفوعات',      en:'Payments' },
+        { key:'wallet',    ar:'المحفظة',        en:'Wallet' },
+        { key:'delivery',  ar:'التوصيل',        en:'Delivery' },
+        { key:'account',   ar:'الحساب',         en:'Account' },
+        { key:'technical', ar:'مشكلة تقنية',    en:'Technical' },
+        { key:'general',   ar:'عام',            en:'General' }
+      ], { note:'Initial Customer Service categories approved; Arabic labels not approved yet.' }),
 
     /* notifications */
     k('notifications.soundDefault',       'notifications', 'boolean', null,

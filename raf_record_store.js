@@ -81,6 +81,22 @@
     /* Phase I — owned by RAFConfig: lets a rule be applied as it stood at a past instant (RAFConfig.valueAt) */
     config_history:     { key:'raf_config_history',       owner:'RAFConfig',
                           purpose:'append-only configuration changes (key, value, at, by) — written before the override itself' },
+    /* Customer Service — owned by RAFCustomerService. A ticket's CREATION
+       record is immutable; its current state (status, priority, department,
+       assignment, resolution) is DERIVED from the activity entries, the same
+       way an exception's state is derived from its events. */
+    support_tickets:    { key:'raf_support_tickets',      owner:'RAFCustomerService',
+                          purpose:'append-only customer service tickets — the immutable facts at open (customer, type, source, context, category, subject, description, SLA snapshot)' },
+    support_activities: { key:'raf_support_activities',   owner:'RAFCustomerService',
+                          purpose:'append-only ticket activity (claim, transfer, status, internal note, customer message, priority, link) — current ticket state is derived from these' },
+    support_tasks:      { key:'raf_support_tasks',        owner:'RAFCustomerService',
+                          purpose:'append-only child-task entries of a ticket (created / updated / completed); task state is derived' },
+    support_followups:  { key:'raf_support_followups',    owner:'RAFCustomerService',
+                          purpose:'append-only follow-up entries of a ticket (created / completed / cancelled); follow-up state is derived' },
+    support_relations:  { key:'raf_support_relations',    owner:'RAFCustomerService',
+                          purpose:'append-only links between a ticket and an existing RAF record (link / unlink); references only, never copies' },
+    support_escalations:{ key:'raf_support_escalations',  owner:'RAFCustomerService',
+                          purpose:'append-only ticket escalations raised for management attention (never a second ticket)' },
     notifications:      { key:'raf_notifications',        owner:'RAFNotify',
                           purpose:'append-only per-recipient notifications' },
     notification_reads: { key:'raf_notification_reads',   owner:'RAFNotify',

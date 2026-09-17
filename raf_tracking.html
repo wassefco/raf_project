@@ -660,14 +660,16 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
   }
 
   /* ---------- 6 · help ----------
-     Points at RAF's existing support centre. No ticket is opened from here
-     and no message is faked. */
-  function supportHTML(){
+     Points at RAF's existing support centre, carrying THIS order as the
+     support context (an active order). The ticket itself is created there, by
+     RAFCustomerService — nothing is opened or faked here. */
+  function supportHTML(o){
+    var href = 'raf_support.html' + (o && o.id ? '?order=' + encodeURIComponent(o.id) + '&ctx=active' : '');
     return '<div class="panel"><div class="panel-b"><div class="trk-help">'
       + '<span class="b"><b>'+T('تحتاج إلى مساعدة؟','Need help?')+'</b>'
       + '<span>'+T('فريق الدعم جاهز لمساعدتك في أي استفسار عن طلبك.',
                    'Our support team is ready to help with anything about your order.')+'</span></span>'
-      + '<a href="raf_support.html"><i class="ti ti-headset" aria-hidden="true"></i>'+T('مركز الدعم','Support centre')+'</a>'
+      + '<a href="'+href+'"><i class="ti ti-headset" aria-hidden="true"></i>'+T('الدعم لهذا الطلب','Support for this order')+'</a>'
       + '</div></div></div>';
   }
 
@@ -918,7 +920,7 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     root.innerHTML = confirmationHTML(o) + changeHTML(o) + timelineHTML(o) + liveHTML(o) + driverHTML(o)
                    + compHTML(o) + commHTML(o)
                    + productsHTML(o) + orderDetailsHTML(o) + deliveryHTML(o)
-                   + invoiceHTML(o) + supportHTML() + actionsHTML();
+                   + invoiceHTML(o) + supportHTML(o) + actionsHTML();
     mountComp(o);
     mountComm(o);
     RAFShop.Cart.badge();

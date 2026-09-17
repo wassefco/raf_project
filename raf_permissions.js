@@ -51,6 +51,13 @@
       actions: ['view', 'approve', 'suspend'] },
     { id: 'reports',     labelAr: 'التقارير',         labelEn: 'Reports',              icon: 'ti-chart-bar',
       actions: ['view', 'export'] },
+    /* Customer Service. No existing key expresses "may work a support case":
+       `orders.manage` is held by merchants, so reusing it would hand every
+       store global Customer Service access. These five keys are the smallest
+       set that separates reading a case, opening one, working it, ending it
+       and escalating it. */
+    { id: 'support',     labelAr: 'خدمة العملاء',     labelEn: 'Customer Service',     icon: 'ti-headset',
+      actions: ['view', 'create', 'manage', 'resolve', 'escalate'] },
     { id: 'settings',    labelAr: 'إعدادات النظام',   labelEn: 'System Settings',      icon: 'ti-settings',
       actions: ['view', 'edit'] },
     { id: 'permissions', labelAr: 'إدارة الصلاحيات',  labelEn: 'Permissions Mgmt',     icon: 'ti-shield-lock',
@@ -67,7 +74,9 @@
     manage:  { ar: 'إدارة',    en: 'Manage' },
     cancel:  { ar: 'إلغاء',    en: 'Cancel' },
     refund:  { ar: 'استرجاع',  en: 'Refund' },
-    export:  { ar: 'تصدير',    en: 'Export' }
+    export:  { ar: 'تصدير',    en: 'Export' },
+    resolve: { ar: 'إنهاء',    en: 'Resolve' },
+    escalate:{ ar: 'تصعيد',    en: 'Escalate' }
   };
 
   function buildCatalog() {
@@ -118,18 +127,28 @@
       descAr: 'إدارة الطلبات والمتاجر والسائقين والمنتجات', descEn: 'Runs orders, stores, drivers and products',
       permissions: keysFor(['orders', 'stores', 'drivers', 'products'])
         .concat(['users.view', 'reports.view', 'reports.export', 'auctions.view', 'offers.view'])
+        /* Logistics is a destination department for a support case: it reads and
+           works the case it receives. Ending the case and talking to the
+           customer stay with Customer Service. */
+        .concat(['support.view', 'support.manage'])
     },
     {
       id: 'customer_service', nameAr: 'خدمة العملاء', nameEn: 'Customer Service', system: true,
       descAr: 'متابعة الطلبات ودعم العملاء', descEn: 'Handles orders and customer support',
       permissions: ['users.view', 'orders.view', 'orders.manage', 'orders.cancel',
-                    'stores.view', 'products.view', 'drivers.view', 'auctions.view', 'offers.view']
+                    'stores.view', 'products.view', 'drivers.view', 'auctions.view', 'offers.view',
+                    /* the department that runs Customer Service */
+                    'support.view', 'support.create', 'support.manage', 'support.resolve', 'support.escalate']
     },
     {
       id: 'finance', nameAr: 'المالية', nameEn: 'Finance', system: true,
       descAr: 'المدفوعات والاستردادات والتقارير المالية', descEn: 'Payments, refunds and financial reporting',
       permissions: ['orders.view', 'orders.refund', 'reports.view', 'reports.export',
-                    'stores.view', 'users.view']
+                    'stores.view', 'users.view',
+                    /* Finance is a destination department for a payment case only:
+                       it reads and works the case it receives. It gains no
+                       Reports Center or Performance access from this. */
+                    'support.view', 'support.manage']
     },
     {
       id: 'marketing', nameAr: 'التسويق', nameEn: 'Marketing', system: true,
@@ -297,7 +316,18 @@
      role is never overridden. */
   var ROLE_MIGRATIONS = [
     /* merchants export their own store's reports */
-    { id:'merchant_reports_export_v1', roleId:'merchant', add:['reports.export'] }
+    { id:'merchant_reports_export_v1', roleId:'merchant', add:['reports.export'] },
+    /* Customer Service — the support module reaches roles that were already
+       seeded. Deliberately NOT applied to merchant, merchant_employee,
+       marketing, driver or customer: none of them works a RAF support case. */
+    { id:'support_customer_service_v1', roleId:'customer_service',
+      add:['support.view', 'support.create', 'support.manage', 'support.resolve', 'support.escalate'] },
+    { id:'support_ops_manager_v1',  roleId:'ops_manager',  add:['support.view', 'support.manage'] },
+    { id:'support_finance_v1',      roleId:'finance',      add:['support.view', 'support.manage'] },
+    { id:'support_higher_mgmt_v1',  roleId:'higher_mgmt',
+      add:['support.view', 'support.create', 'support.manage', 'support.resolve', 'support.escalate'] },
+    { id:'support_super_admin_v1',  roleId:'super_admin',
+      add:['support.view', 'support.create', 'support.manage', 'support.resolve', 'support.escalate'] }
   ];
   function migrateRoles() {
     try {

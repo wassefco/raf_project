@@ -944,3 +944,136 @@ end: a 2-minute return reads `regular`, a 9-minute return reads `priority`, and 
   product/architecture decision, not a defect fix.
 * `raf_rules.js` (`RESERVE_MS` 15 min) and `raf_store_ops.js` (`CUTOFF_MS` 30 min) hold pre-existing commerce
   constants outside RAFConfig. Moving them needs approval, since they are approved Phase-A behaviour.
+
+---
+
+## 21. Customer Service (tickets, tasks, follow-ups, escalation, Customer 360)
+
+### 21.1 Authority and naming
+`RAFCustomerService` (`raf_customer_service.js`) is the single authority for the Customer Service ticket domain:
+**customer ↔ RAF Customer Service ↔ the responsible department**.
+
+RAF already had two other support channels and neither is this one, so neither was renamed or reused:
+
+| Channel | Authority | Direction |
+|---|---|---|
+| Merchant Support | `RAFCustomerSupport` (`raf_customer_support.js`) | merchant ↔ RAF Management |
+| Customer Issues | `RAFCustomerExperience` | customer ↔ the store |
+| **Customer Service** | **`RAFCustomerService`** | **customer ↔ RAF** |
+
+The phase specification named the new global `RAFCustomerSupport`; that name was already taken by the merchant
+channel that `raf_merchant_support.html` consumes, so taking it would have broken a shipped surface. The authority
+is `RAFCustomerService`, its console is `raf_customer_service.html`, and the views live in that page (no widget
+module: nothing else mounts them).
+
+**It coordinates work; it does not own the business operation.** Orders stay with `RAFOrderEngine`, delivery with
+`RAFDeliveryOps`, drivers with `RAFDriver`/`RAFDriverManagement`, the driver conversation with
+`RAFDriverCommunication`, money with `RAFWallet`/`RAFCompensation`/`RAFSettlement`. Nothing here cancels an order,
+moves money, reassigns a driver or changes an address.
+
+### 21.2 Departments (existing roles, chosen by the employee)
+A department IS an existing RAF role, so no role was created and a department's members are that role's active
+accounts: `customer_service` → customer_service, `logistics` → ops_manager, `finance` → finance,
+`management` → higher_mgmt. super_admin belongs to no department and may act on any ticket.
+
+**No automatic routing, round robin, load balancing or automatic assignment.** The employee chooses the responsible
+department; any authorised employee of that department may work the ticket.
+
+### 21.3 State is derived, never a mutable field
+`support_tickets` holds the immutable facts at open. Status, priority, responsible department, assignment,
+resolution and every timestamp are DERIVED from the append-only `support_activities` entries — the same pattern as
+Phase E exceptions. Nothing is deleted; an unlink is an append, not a removal.
+
+Lifecycle (exactly these transitions): `new → open`, `open → pending`, `pending → open`, `open → resolved`,
+`resolved → closed`, `closed → reopened`, `reopened → open`. Resolve requires a description, close requires a
+resolved ticket, reopen requires a reason. **TRANSFERRED IS NOT A STATUS**: a transfer keeps the same ticketId,
+customer, conversation, activities, tasks, follow-ups, relations and history, and records from/to department,
+from/to employee, reason, actor and time.
+
+### 21.4 Visibility is enforced by the read layer
+Every activity carries `internal` or `customer_visible`. The customer read path returns customer-visible messages
+only, and strips employee identity, department, reasons, tasks, escalations and field changes. Verified: with an
+internal note, a Logistics note, a transfer reason, an escalation description and two tasks on a ticket, none of
+those strings appears anywhere in the customer's own view of it.
+
+### 21.5 Duplicate prevention (authority level)
+A duplicate is the same PROBLEM, not the same customer and department: the key is
+`customerId | responsibleDepartment | category | orderId`, and only an ACTIVE ticket blocks. Two different Finance
+problems are two tickets; the same Finance problem reuses the existing one and the result carries its ticketId.
+The race is closed by a deterministic guard entry `cs|new|<key>|<n>` appended before the ticket itself.
+
+### 21.6 Tasks, follow-ups, escalation
+Tasks are child records of one ticket (`support_tasks`), never a second ticket, and they perform no business
+operation of their own. Follow-ups (`support_followups`) never resolve or close a ticket; a due follow-up is
+noticed when the list is read and produces one idempotent notification — no timer, no polling. Escalation
+(`support_escalations`) records a management-attention request on the SAME ticket; RAF approves no escalation
+reason list, so the description carries the case, exactly as Phase E does for delivery exceptions.
+
+### 21.7 SLA — NOT CONFIGURED
+`support.firstResponseMinutes` and `support.resolutionMinutes` are registered with no approved and no prototype
+value, so both report `not_configured`. Nothing produces a countdown, a "Near SLA" count or a breach; the dashboard
+shows the NOT_CONFIGURED state instead of a number. Every ticket records the SLA state that applied at open, and a
+later configuration change never rewrites that snapshot. `support.categories` holds the seven approved categories
+(Arabic labels not approved yet).
+
+### 21.8 Permissions (one new module, five keys)
+No existing key expresses "may work a support case" — `orders.manage` is held by merchants, so reusing it would
+have handed every store global Customer Service access. The `support` module adds
+`support.view`, `support.create`, `support.manage`, `support.resolve`, `support.escalate` (35 → 40 catalogue keys).
+Seeded roles reach them through `ROLE_MIGRATIONS`, the existing once-only mechanism:
+
+| Role | Keys |
+|---|---|
+| customer_service | view · create · manage · resolve · escalate |
+| ops_manager (Logistics) | view · manage |
+| finance | view · manage |
+| higher_mgmt, super_admin | all five |
+| merchant, merchant_employee, marketing, driver, customer | none |
+
+Ending the case and talking to the customer stay with Customer Service, which owns the customer relationship; a
+destination department reads and works the case it receives. A customer needs no key at all: they reach their own
+tickets through the session, proven from the record.
+
+### 21.9 Storage, events, audit, notifications
+Six registered `RAFRecordStore` collections, all append-only: `support_tickets`, `support_activities`,
+`support_tasks`, `support_followups`, `support_relations`, `support_escalations`.
+Ten registered `RAFEventBus` types in the new `support` domain (payloads carry ids only, never a message body).
+Fourteen registered `RAFAudit` actions `ticket.*` (never on the merchant Timeline — a support case is RAF-internal,
+not store history). Nine `RAFNotify` types: seven for the `support` audience (the department's own employees) and
+two the customer sees, `support.ticket.message` and `support.ticket.resolved`.
+
+### 21.10 Concurrency
+Every racing transition is ONE append-only entry with a deterministic id (`cs|<ticketId>|claim|<n>`,
+`cs|<ticketId>|status|<n>`, `cs|<ticketId>|transfer|<n>`, `esc|<ticketId>|<n>`, `<taskId>|completed`,
+`<followUpId>|end`), so a second writer's append is refused as a duplicate. Each append is then READ BACK: a writer
+is never told it succeeded when its entry is not in the store. Per-ticket work is additionally serialised with an
+exclusive Web Lock (`raf-support:<id>`) where the browser has one, so the lifecycle writes return Promises.
+Measured with Web Locks disabled and one frame's view of the store frozen (84 forced races): exactly one
+authoritative outcome every time.
+
+### 21.11 Customer 360
+`customer360()` is a read-only projection. Each section names the authority it came from and stores nothing:
+profile from `RAFPerm`, orders from `RAFShop.Orders` + `RAFOrderSnapshot` (recorded Promised ETA only), tickets from
+this authority. A section RAF cannot read from the acting account says so rather than guessing — an employee sees
+`WALLET_FORBIDDEN` for the wallet and `FORBIDDEN` for compensation, because `RAFWallet` answers only its own
+signed-in customer and `RAFCompensation` requires its management permission. Proven read-only: every `raf_*` key is
+byte-identical after a 360 read, a list, a search, a dashboard and a follow-up read. Only genuine read functions of
+`RAFOrderEngine` are called (`deliveredAt`, `promisedEtaAt`); `driverPickedUp` RECORDS a milestone and is never
+called from here.
+
+### 21.12 Customer entry
+`raf_support.html` is the customer surface for the three approved contexts: the customer's own context (their open
+orders, order history and existing tickets), an ACTIVE order (`?order=<id>&ctx=active`) and an OLD order
+(`?order=<id>&ctx=old`, which also lists the tickets previously opened for that order). `raf_tracking.html` and
+`raf_order_details.html` carry the order into that page. The page's previously hardcoded sample ticket is gone.
+
+### 21.13 PRODUCTION REQUIRED / prototype limits
+* No transactions across the ticket, its activities, audit and notifications; the deterministic ids keep the
+  OUTCOME single-valued, but two processes writing the same list at the same instant can still lose an append.
+  Production needs a server store with conditional writes.
+* Follow-up due times are evaluated on access, not by a scheduler: nothing fires while no authorised client is open.
+* Knowledge is NOT_CONFIGURED — the navigation entry states that and shows no placeholder article.
+* No attachment support: RAF has no media store for support cases, and none was invented.
+* Customer 360 cannot show a wallet balance or compensation to an employee (§21.11). Opening either to Customer
+  Service is a business decision that would change an approved rule in RAFWallet / RAFCompensation.
+* Access is advisory, like every other RAF authority in this prototype: it is enforced in the browser.

@@ -41,7 +41,7 @@
   var VERSION = 1;
   var CHANNEL = 'raf_event_bus';            /* transient channel, not a store */
 
-  var DOMAINS = ['order', 'driver', 'logistics', 'notification', 'audit', 'ownership', 'config', 'communication', 'compensation'];
+  var DOMAINS = ['order', 'driver', 'logistics', 'notification', 'audit', 'ownership', 'config', 'communication', 'compensation', 'support'];
 
   /* the registered event types — the only names that can be published */
   var TYPES = {
@@ -104,6 +104,19 @@
     'compensation.added_to_wallet':  { domain:'compensation', entityType:'order' },
     'compensation.voided':           { domain:'compensation', entityType:'order' },
     'compensation.reversed':         { domain:'compensation', entityType:'order' },
+    /* Customer Service tickets (RAFCustomerService). Payloads carry ids only;
+       every surface re-reads through the authority's access checks, so an
+       internal note never travels on the bus. */
+    'support.ticket.created':        { domain:'support', entityType:'ticket' },
+    'support.ticket.claimed':        { domain:'support', entityType:'ticket' },
+    'support.ticket.updated':        { domain:'support', entityType:'ticket' },
+    'support.ticket.transferred':    { domain:'support', entityType:'ticket' },
+    'support.ticket.escalated':      { domain:'support', entityType:'ticket' },
+    'support.ticket.resolved':       { domain:'support', entityType:'ticket' },
+    'support.ticket.closed':         { domain:'support', entityType:'ticket' },
+    'support.ticket.reopened':       { domain:'support', entityType:'ticket' },
+    'support.followup.created':      { domain:'support', entityType:'ticket' },
+    'support.followup.completed':    { domain:'support', entityType:'ticket' },
     /* notifications */
     'notification.created':          { domain:'notification', entityType:'notification' },
     'notification.read':             { domain:'notification', entityType:'notification' },

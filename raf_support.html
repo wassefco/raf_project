@@ -37,11 +37,10 @@
     <div class="faq" onclick="this.classList.toggle('open')"><div class="faq-q"><span data-ar="كيف أضيف طريقة دفع؟" data-en="How do I add a payment method?">كيف أضيف طريقة دفع؟</span><i class="ti ti-chevron-down"></i></div><div class="faq-a" data-ar="من هوية رف اذهب إلى طرق الدفع ثم اضغط إضافة بطاقة جديدة." data-en="From RAF ID open Payment Methods then tap Add new card.">من هوية رف اذهب إلى طرق الدفع ثم اضغط إضافة بطاقة جديدة.</div></div>
   </div>
 
-  <div class="section-h" data-ar="تذاكر الدعم" data-en="Support tickets">تذاكر الدعم</div>
-  <div class="panel">
-    <div class="row"><div class="row-ic" style="background:var(--blue-bg);color:var(--blue)"><i class="ti ti-ticket"></i></div><div class="row-body"><div class="row-lbl" data-ar="استفسار عن طلب ‎#ORD-1284" data-en="Inquiry about #ORD-1284">استفسار عن طلب ‎#ORD-1284</div><div class="row-sub" data-ar="آخر رد منذ ساعة" data-en="Last reply 1h ago">آخر رد منذ ساعة</div></div><span class="badge b-progress" data-ar="مفتوحة" data-en="Open">مفتوحة</span></div>
-  </div>
-  <button class="btn btn-gold btn-block" style="margin-top:6px;"><i class="ti ti-plus"></i> <span data-ar="فتح تذكرة جديدة" data-en="Open new ticket">فتح تذكرة جديدة</span></button>
+  <!-- Customer Service entry. Everything below is rendered by RAFCustomerService
+       for the signed-in customer: their own orders, their own tickets and the
+       replies RAF has marked customer-visible. Nothing internal reaches here. -->
+  <div id="csEntry"></div>
 </div>
 
 <nav class="app-bnav">
@@ -53,5 +52,210 @@
 </nav>
 
 <script src="raf_account.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_customer_service.js"></script>
+<style>
+.cs-tk{ padding:14px 16px; border-bottom:1px solid var(--border); }
+.cs-tk:last-child{ border-bottom:none; }
+.cs-tk-h{ display:flex; align-items:center; gap:8px; justify-content:space-between; }
+.cs-tk-h b{ font-size:14px; color:var(--ink); }
+.cs-tk-s{ font-size:12px; color:var(--text3); margin-top:3px; }
+.cs-msgs{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+.cs-m{ padding:9px 11px; border-radius:12px; background:var(--bg2,#F6F6F4); font-size:13px; color:var(--ink); white-space:pre-wrap; word-break:break-word; }
+.cs-m.me{ background:#EAF2FB; }
+.cs-m small{ display:block; color:var(--text3); font-size:11px; margin-bottom:3px; }
+.cs-f{ margin-top:10px; }
+.cs-f label{ display:block; font-size:12px; font-weight:600; color:var(--text3); margin-bottom:4px; }
+.cs-f input,.cs-f select,.cs-f textarea{ width:100%; min-height:44px; padding:10px 12px; border:1px solid var(--border);
+  border-radius:12px; background:var(--card); color:var(--ink); font:inherit; }
+.cs-f textarea{ min-height:96px; resize:vertical; }
+.cs-note{ display:flex; gap:8px; padding:11px 13px; border-radius:12px; background:var(--bg2,#F6F6F4); color:var(--text3);
+  font-size:12.5px; margin:10px 0; }
+.cs-note i{ flex-shrink:0; }
+.cs-empty{ padding:22px 16px; text-align:center; color:var(--text3); font-size:13px; }
+</style>
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   CUSTOMER SUPPORT ENTRY — the three approved contexts:
+     · Contact Us / Need Support   → the customer's own context: their open
+       orders, their order history and their existing tickets;
+     · support from an ACTIVE order  (?order=<id>&ctx=active)
+     · support from an OLD order     (?order=<id>&ctx=old), which also shows
+       the tickets previously opened for that order.
+   The page holds no ticket state: it asks RAFCustomerService and renders the
+   answer, and a customer only ever sees their own customer-visible data.
+   ══════════════════════════════════════════════════════════════════════ */
+(function(){
+  'use strict';
+  var SVC = window.RAFCustomerService;
+  var host = document.getElementById('csEntry');
+  if (!host || !SVC) return;
+
+  function isEn(){ var r = document.getElementById('htmlRoot') || document.documentElement; return r.lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+  function when(ts){ if (!ts) return ''; return new Date(ts).toLocaleString(isEn() ? 'en-GB' : 'ar-KW',
+    { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' }); }
+  function q(name){ var m = new RegExp('[?&]' + name + '=([^&]*)').exec(location.search); return m ? decodeURIComponent(m[1]) : ''; }
+
+  var ORDER = q('order');
+  var CTX   = q('ctx');                     /* active | old — empty = customer context */
+  var OPEN  = q('ticket');
+  var busy  = false;
+
+  function badge(t){
+    var cls = t.status === 'resolved' || t.status === 'closed' ? 'b-done' : 'b-progress';
+    return '<span class="badge ' + cls + '">' + esc(t.statusText ? (isEn() ? t.statusText.en : t.statusText.ar) : t.status) + '</span>';
+  }
+  function render(){
+    var caps = SVC.capabilities();
+    if (!caps.ok || caps.audience !== 'customer') {
+      host.innerHTML = '<div class="section-h">' + esc(T('تذاكر الدعم','Support tickets')) + '</div>'
+        + '<div class="panel"><div class="cs-empty">'
+        + esc(caps.ok ? T('هذه الصفحة لحسابات العملاء.','This page is for customer accounts.')
+                      : T('سجّل الدخول لعرض تذاكر الدعم الخاصة بك.','Sign in to see your support tickets.'))
+        + '</div></div>';
+      return;
+    }
+    var r = SVC.listTickets(ORDER ? { orderId:ORDER } : {});
+    var tickets = r.ok ? r.items : [];
+    var html = '';
+
+    /* context header — what the customer opened support from */
+    if (ORDER) {
+      html += '<div class="section-h">' + esc(T('الدعم لهذا الطلب','Support for this order')) + '</div>'
+        + '<div class="panel"><div class="cs-tk"><div class="cs-tk-h"><b>' + esc(ORDER) + '</b>'
+        + '<span class="badge b-progress">' + esc(CTX === 'old' ? T('طلب سابق','Past order') : T('طلب جارٍ','Active order')) + '</span></div>'
+        + '<div class="cs-tk-s">' + esc(CTX === 'old'
+            ? T('يمكنك أيضاً مراجعة التذاكر السابقة لهذا الطلب أدناه.','Tickets previously opened for this order are listed below.')
+            : T('ستُفتح التذكرة مرتبطة بهذا الطلب مباشرة.','Your ticket will be opened on this order.')) + '</div></div></div>';
+    } else {
+      html += ordersPanel();
+    }
+
+    /* the customer's tickets */
+    html += '<div class="section-h">' + esc(ORDER ? T('تذاكر هذا الطلب','Tickets for this order') : T('تذاكر الدعم','Support tickets')) + '</div>'
+      + '<div class="panel">' + (tickets.length ? tickets.map(ticketBlock).join('')
+          : '<div class="cs-empty">' + esc(T('لا توجد تذاكر بعد.','No tickets yet.')) + '</div>') + '</div>';
+
+    /* open a new one */
+    html += '<div class="section-h">' + esc(T('فتح تذكرة جديدة','Open a new ticket')) + '</div><div class="panel"><div class="cs-tk">'
+      + '<div class="cs-f"><label for="csSubject">' + esc(T('الموضوع','Subject')) + '</label>'
+      + '<input id="csSubject" maxlength="150"></div>'
+      + '<div class="cs-f"><label for="csCat">' + esc(T('الفئة','Category')) + '</label><select id="csCat">'
+      + SVC.categories().map(function(c){ return '<option value="' + esc(c.key) + '">' + esc(isEn() ? c.en : c.ar) + '</option>'; }).join('')
+      + '</select></div>'
+      + (ORDER ? '' : orderSelect())
+      + '<div class="cs-f"><label for="csBody">' + esc(T('اشرح المشكلة','Describe the problem')) + '</label>'
+      + '<textarea id="csBody" maxlength="4000"></textarea></div>'
+      + '<div class="cs-note"><i class="ti ti-info-circle"></i><span>'
+      + esc(T('إذا كانت لديك تذكرة مفتوحة لنفس المشكلة سنفتحها لك بدلاً من إنشاء تذكرة مكررة.',
+              'If you already have an open ticket for the same problem we will show you that one instead of creating a duplicate.')) + '</span></div>'
+      + '<button class="btn btn-gold btn-block" id="csCreate"><i class="ti ti-plus"></i> '
+      + esc(T('إرسال التذكرة','Submit ticket')) + '</button></div></div>';
+
+    host.innerHTML = html;
+    var btn = document.getElementById('csCreate');
+    if (btn) btn.onclick = create;
+    host.querySelectorAll('[data-reply]').forEach(function(b){ b.onclick = function(){ reply(b.getAttribute('data-reply')); }; });
+  }
+
+  /* the customer's own orders, from their own 360 projection */
+  function ordersPanel(){
+    var c = SVC.customer360();
+    if (!c.ok) return '';
+    var open = c.activeDeliveries, past = c.orders.filter(function(o){ return !o.active; });
+    function rows(list, label, ctx){
+      if (!list.length) return '';
+      return '<div class="section-h">' + esc(label) + '</div><div class="panel">'
+        + list.slice(0, 6).map(function(o){
+          return '<div class="row" onclick="location.href=\'raf_support.html?order=' + esc(o.orderId) + '&amp;ctx=' + ctx + '\'" style="cursor:pointer">'
+            + '<div class="row-ic"><i class="ti ti-package"></i></div><div class="row-body">'
+            + '<div class="row-lbl">' + esc(o.orderId) + '</div>'
+            + '<div class="row-sub">' + esc((o.total ? o.total + ' ' + (o.currency || '') + ' · ' : '') + (o.storeSlug || '')) + '</div></div>'
+            + '<i class="ti ti-chevron-' + (isEn() ? 'right' : 'left') + '"></i></div>';
+        }).join('') + '</div>';
+    }
+    return rows(open, T('طلبات جارية','Open orders'), 'active') + rows(past, T('طلبات سابقة','Order history'), 'old');
+  }
+  function orderSelect(){
+    var c = SVC.customer360();
+    if (!c.ok || !c.orders.length) return '';
+    return '<div class="cs-f"><label for="csOrder">' + esc(T('اربطها بطلب (اختياري)','Link to an order (optional)')) + '</label>'
+      + '<select id="csOrder"><option value="">' + esc(T('بدون طلب','No order')) + '</option>'
+      + c.orders.map(function(o){ return '<option value="' + esc(o.orderId) + '">' + esc(o.orderId) + '</option>'; }).join('') + '</select></div>';
+  }
+
+  function ticketBlock(t){
+    var opened = OPEN === t.ticketId || (!OPEN && t.active);
+    return '<div class="cs-tk"><div class="cs-tk-h"><b>' + esc(t.subject) + '</b>' + badge(t) + '</div>'
+      + '<div class="cs-tk-s">' + esc(t.ticketId) + ' · ' + esc(when(t.createdAt))
+      + (t.context && t.context.orderId ? ' · ' + esc(T('طلب','Order')) + ' ' + esc(t.context.orderId) : '') + '</div>'
+      + (t.resolution && t.resolution.description
+          ? '<div class="cs-note"><i class="ti ti-circle-check"></i><span>' + esc(t.resolution.description) + '</span></div>' : '')
+      + (opened
+          ? '<div class="cs-msgs">' + (t.messages.length ? t.messages.map(function(m){
+              return '<div class="cs-m' + (m.fromCustomer ? ' me' : '') + '"><small>'
+                + esc(m.fromCustomer ? T('أنت','You') : T('خدمة عملاء رف','RAF Customer Service')) + ' · ' + esc(when(m.at))
+                + '</small>' + esc(m.body || '') + '</div>';
+            }).join('') : '<div class="cs-empty">' + esc(T('لا توجد رسائل بعد.','No messages yet.')) + '</div>') + '</div>'
+            + (t.status !== 'closed'
+              ? '<div class="cs-f"><label for="r_' + esc(t.ticketId) + '">' + esc(T('إضافة رد','Add a reply')) + '</label>'
+                + '<textarea id="r_' + esc(t.ticketId) + '" maxlength="4000"></textarea>'
+                + '<button class="btn btn-block" style="margin-top:8px" data-reply="' + esc(t.ticketId) + '">'
+                + '<i class="ti ti-send"></i> ' + esc(T('إرسال','Send')) + '</button></div>' : '')
+          : '');
+  }
+
+  function say(msg){ try { if (window.RAFShop && RAFShop.toast) return RAFShop.toast(msg); } catch (e) {} alert(msg); }
+
+  async function create(){
+    if (busy) return; busy = true;
+    try {
+      var subject = (document.getElementById('csSubject') || {}).value || '';
+      var body    = (document.getElementById('csBody') || {}).value || '';
+      var cat     = (document.getElementById('csCat') || {}).value || '';
+      var sel     = document.getElementById('csOrder');
+      var orderId = ORDER || (sel ? sel.value : '');
+      if (!subject.trim() || !body.trim()) return say(T('اكتب الموضوع ووصف المشكلة.','Enter a subject and describe the problem.'));
+      var r = await SVC.createTicket({
+        type: orderId ? 'order_linked' : 'general',
+        source: orderId ? (CTX === 'old' ? 'old_order' : (CTX === 'active' ? 'active_order' : 'order')) : 'customer',
+        orderId: orderId || undefined,
+        category: cat, subject: subject, description: body
+      });
+      if (r.ok) { OPEN = r.ticket.ticketId; say(T('تم إرسال تذكرتك.','Your ticket was submitted.')); render(); }
+      else if (r.code === 'DUPLICATE' && r.ticketId) { OPEN = r.ticketId;
+        say(T('لديك تذكرة مفتوحة لنفس المشكلة.','You already have an open ticket for this problem.')); render(); }
+      else say(r.message || T('تعذّر إرسال التذكرة.','The ticket could not be submitted.'));
+    } finally { busy = false; }
+  }
+  async function reply(id){
+    if (busy) return; busy = true;
+    try {
+      var box = document.getElementById('r_' + id);
+      if (!box || !box.value.trim()) return say(T('اكتب رداً أولاً.','Write a reply first.'));
+      var r = await SVC.addCustomerMessage(id, { body:box.value });
+      if (r.ok) { OPEN = id; render(); } else say(r.message || T('تعذّر الإرسال.','The reply could not be sent.'));
+    } finally { busy = false; }
+  }
+
+  render();
+  /* live: a reply from Customer Service appears without a refresh and without polling */
+  if (window.RAFEventBus) RAFEventBus.subscribe('support.*', function(){ render(); });
+  window.addEventListener('storage', function(e){ if (e.key && /^raf_support_/.test(e.key)) render(); });
+  document.addEventListener('raf:lang', render);
+})();
+</script>
 </body>
 </html>

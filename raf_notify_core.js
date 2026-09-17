@@ -120,7 +120,20 @@
     'communication.message.customer':    { audience:'customer', title:{ ar:'رسالة جديدة من السائق', en:'New message from your driver' } },
     'communication.message.driver':      { audience:'driver',   title:{ ar:'رسالة جديدة من العميل', en:'New message from the customer' } },
     /* Phase I — a delay compensation coupon was issued (RAFCompensation) */
-    'compensation.issued':               { audience:'customer', title:{ ar:'حصلت على قسيمة تعويض', en:'You received a compensation coupon' } }
+    'compensation.issued':               { audience:'customer', title:{ ar:'حصلت على قسيمة تعويض', en:'You received a compensation coupon' } },
+    /* Customer Service (RAFCustomerService). The 'support' audience is the
+       responsible department's own employees; nothing internal is ever sent to
+       a customer, and no notification carries an internal note's text. */
+    'support.ticket.created':            { audience:'support', title:{ ar:'تذكرة جديدة لقسمك', en:'New ticket for your department' } },
+    'support.ticket.claimed':            { audience:'support', title:{ ar:'تم استلام تذكرة', en:'A ticket was claimed' } },
+    'support.ticket.transferred':        { audience:'support', title:{ ar:'تم تحويل تذكرة إلى قسمك', en:'A ticket was transferred to your department' } },
+    'support.ticket.escalated':          { audience:'support', title:{ ar:'تصعيد تذكرة — يتطلب انتباه الإدارة', en:'Ticket escalated — requires management attention' } },
+    'support.ticket.reopened':           { audience:'support', title:{ ar:'أُعيد فتح تذكرة', en:'A ticket was reopened' } },
+    'support.followup.created':          { audience:'support', title:{ ar:'أُسندت إليك متابعة', en:'A follow-up was assigned to you' } },
+    'support.followup.due':              { audience:'support', title:{ ar:'حان موعد متابعة', en:'A follow-up is due' } },
+    /* the two the CUSTOMER sees — outcome and reply only */
+    'support.ticket.message':            { audience:'customer', title:{ ar:'رد جديد على تذكرة الدعم', en:'New reply on your support ticket' } },
+    'support.ticket.resolved':           { audience:'customer', title:{ ar:'تم حل تذكرة الدعم', en:'Your support ticket was resolved' } }
   };
   var LEGACY_MERCHANT_TYPE = {
     'new':'merchant.order.new', 'timeout':'merchant.order.acceptance_warning',

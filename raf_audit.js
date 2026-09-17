@@ -223,7 +223,23 @@
     'inventory.released':      { tl:false, ar:'تم تحرير المخزون',          en:'Inventory released' },
     'inventory.sale_committed':{ tl:false, ar:'تم اعتماد بيع المخزون',     en:'Inventory sale committed' },
     'inventory.adjusted':      { tl:false, ar:'تم تعديل المخزون يدويًا',   en:'Inventory adjusted' },
-    'order.migrated':       { tl:false, ar:'تمت ترقية سجل الطلب',         en:'Order record migrated' }
+    'order.migrated':       { tl:false, ar:'تمت ترقية سجل الطلب',         en:'Order record migrated' },
+    /* Customer Service tickets (RAFCustomerService). Never on the merchant
+       Timeline: a support case is RAF-internal, not store history. */
+    'ticket.created':           { tl:false, ar:'تم إنشاء تذكرة دعم',         en:'Support ticket created' },
+    'ticket.claimed':           { tl:false, ar:'تم استلام التذكرة',          en:'Support ticket claimed' },
+    'ticket.updated':           { tl:false, ar:'تم تحديث التذكرة',           en:'Support ticket updated' },
+    'ticket.transferred':       { tl:false, ar:'تم تحويل التذكرة إلى قسم آخر', en:'Support ticket transferred' },
+    'ticket.note_added':        { tl:false, ar:'ملاحظة داخلية على التذكرة',  en:'Internal note added to ticket' },
+    'ticket.message_added':     { tl:false, ar:'رسالة للعميل على التذكرة',   en:'Customer message added to ticket' },
+    'ticket.task_created':      { tl:false, ar:'تم إنشاء مهمة على التذكرة',  en:'Ticket task created' },
+    'ticket.task_completed':    { tl:false, ar:'تم إنجاز مهمة على التذكرة',  en:'Ticket task completed' },
+    'ticket.followup_created':  { tl:false, ar:'تم إنشاء متابعة',            en:'Ticket follow-up created' },
+    'ticket.followup_completed':{ tl:false, ar:'تم إنجاز متابعة',            en:'Ticket follow-up completed' },
+    'ticket.escalated':         { tl:false, ar:'تم تصعيد التذكرة',           en:'Support ticket escalated' },
+    'ticket.resolved':          { tl:false, ar:'تم حل التذكرة',              en:'Support ticket resolved' },
+    'ticket.closed':            { tl:false, ar:'تم إغلاق التذكرة',           en:'Support ticket closed' },
+    'ticket.reopened':          { tl:false, ar:'أُعيد فتح التذكرة',          en:'Support ticket reopened' }
   };
 
   function isEn(){ var r = document.getElementById('htmlRoot') || document.documentElement; return r.lang === 'en'; }

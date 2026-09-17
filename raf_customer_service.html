@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl" data-ui="admin">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — خدمة العملاء</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   RAF CUSTOMER SERVICE — a standalone case-handling interface.
+   It shares the Logistics console's design language (same tokens, same
+   shell, logical properties so Arabic and English use one layout) and
+   renders only what RAFCustomerService answers. It holds no ticket logic,
+   no counts of its own and no state that bypasses the authority.
+   ══════════════════════════════════════════════════════════════════════ */
+:root{
+  --bg:#F2F3F0; --surface:#FFFFFF; --surface-2:#F7F8F6; --line:#E1E4DF; --line-2:#CED3CC;
+  --ink:#141917; --text:#29302D; --muted:#5F6965; --faint:#88918D;
+  --nav:#141B26; --nav-2:#1D2634; --nav-3:#2A3647; --nav-text:#D6DCE4; --nav-muted:#8E99A8;
+  --accent:#2C5FA8; --accent-2:#22497F; --accent-soft:#E6EDF8;
+  --gold:#C9A84C;
+  --new:#2D5B97;   --new-bg:#E5EDF8;
+  --open:#1C7466;  --open-bg:#E2F0EC;
+  --pend:#9A6414;  --pend-bg:#FBF0DA;
+  --done:#2B7446;  --done-bg:#E3F1E7;
+  --shut:#5F6965;  --shut-bg:#EDEFEC;
+  --alert:#A8412D; --alert-bg:#FAE8E3;
+  --r-sm:8px; --r:10px; --r-lg:14px;
+  --shadow:0 1px 2px rgba(14,28,26,.05), 0 1px 1px rgba(14,28,26,.03);
+  --shadow-pop:0 12px 32px rgba(14,28,26,.16);
+  --head-h:64px; --nav-w:272px;
+  --font:'Tajawal',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+html[lang="en"]{ --font:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif; }
+*{ box-sizing:border-box; }
+html,body{ margin:0; }
+body{ background:var(--bg); color:var(--text); font-family:var(--font); font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden; }
+[hidden]{ display:none !important; }
+button,input,select,textarea{ font:inherit; color:inherit; }
+a{ color:inherit; }
+:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+bdi{ unicode-bidi:isolate; }
+.sr-only{ position:absolute !important; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+
+/* ───────── shell ───────── */
+.cs{ min-height:100vh; display:grid; grid-template-columns:var(--nav-w) minmax(0,1fr); }
+.cs-main{ min-width:0; display:flex; flex-direction:column; }
+.cs-nav{ background:var(--nav); color:var(--nav-text); display:flex; flex-direction:column; position:sticky; top:0; height:100vh; min-width:0; }
+.cs-brand{ display:flex; align-items:center; gap:12px; padding:0 18px; height:var(--head-h); border-block-end:1px solid rgba(255,255,255,.06); flex-shrink:0; }
+.cs-brand-mark{ width:36px; height:36px; border-radius:9px; background:var(--accent); color:#fff; display:grid; place-items:center; flex-shrink:0; position:relative; }
+.cs-brand-mark i{ font-size:20px; }
+.cs-brand-mark::after{ content:""; position:absolute; inset-inline-end:-3px; inset-block-end:-3px; width:10px; height:10px; border-radius:3px; background:var(--gold); border:2px solid var(--nav); }
+.cs-brand-t{ min-width:0; line-height:1.2; }
+.cs-brand-t b{ display:block; color:#fff; font-size:15px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cs-brand-t span{ display:block; color:var(--nav-muted); font-size:11.5px; font-weight:600; }
+.cs-nav-scroll{ flex:1; overflow-y:auto; padding:12px 10px 16px; overscroll-behavior:contain; }
+.cs-nav ul{ list-style:none; margin:0; padding:0; }
+.cs-nav a{ display:flex; align-items:center; gap:12px; min-height:46px; padding:0 12px; color:var(--nav-text); text-decoration:none;
+  border-radius:var(--r-sm); font-size:14px; font-weight:600; margin-block-end:2px; }
+.cs-nav a:hover{ background:var(--nav-2); color:#fff; }
+.cs-nav a[aria-current="page"]{ background:var(--nav-2); color:#fff; box-shadow:inset 3px 0 0 var(--gold); }
+[dir="rtl"] .cs-nav a[aria-current="page"]{ box-shadow:inset -3px 0 0 var(--gold); }
+.cs-nav a > i{ font-size:19px; color:var(--nav-muted); width:20px; text-align:center; flex-shrink:0; }
+.cs-nav a[aria-current="page"] > i{ color:var(--gold); }
+.cs-nav a .n{ margin-inline-start:auto; min-width:22px; padding:0 6px; height:20px; border-radius:10px; background:var(--nav-3);
+  color:#fff; font-size:11px; font-weight:700; display:inline-grid; place-items:center; font-family:'DM Sans',sans-serif; }
+.cs-nav a .soon{ margin-inline-start:auto; font-size:10.5px; color:var(--nav-muted); font-weight:600; }
+
+.cs-head{ position:sticky; top:0; z-index:40; height:var(--head-h); background:rgba(255,255,255,.93); backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px); border-block-end:1px solid var(--line); display:flex; align-items:center; gap:10px; padding:0 20px; }
+.ibtn{ width:44px; height:44px; min-height:44px; border-radius:var(--r); border:1px solid transparent; background:transparent; color:var(--muted);
+  display:inline-grid; place-items:center; cursor:pointer; padding:0; position:relative; flex-shrink:0; }
+.ibtn:hover{ background:var(--surface-2); border-color:var(--line); color:var(--ink); }
+.ibtn i{ font-size:20px; }
+.ibtn.lang{ width:auto; min-width:44px; padding:0 12px; font-weight:800; font-size:13px; color:var(--text); border-color:var(--line); }
+.ibtn.cs-burger,.ibtn.cs-nav-x{ display:none; }
+.cs-crumb{ min-width:0; flex:1; line-height:1.25; }
+.cs-crumb small{ display:block; color:var(--faint); font-size:11.5px; font-weight:600; }
+.cs-crumb b{ display:block; color:var(--ink); font-size:15px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cs-tools{ display:flex; align-items:center; gap:6px; }
+.cs-av{ width:32px; height:32px; border-radius:50%; background:var(--nav); color:#fff; display:grid; place-items:center; font-size:13px; font-weight:800; flex-shrink:0; }
+.cs-user{ display:flex; align-items:center; gap:10px; min-height:44px; padding:0 8px; border-radius:var(--r); border:1px solid transparent; background:transparent; max-width:230px; }
+.cs-user-t{ min-width:0; line-height:1.2; }
+.cs-user-t b{ display:block; font-size:13px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cs-user-t span{ display:block; font-size:11.5px; color:var(--faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.cs-content{ padding:24px; min-width:0; flex:1; }
+
+/* ───────── pieces ───────── */
+.card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow); padding:18px; margin-block-end:16px; }
+.card > h2{ margin:0 0 14px; font-size:15px; color:var(--ink); font-weight:800; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.card > h2 i{ color:var(--accent); font-size:18px; }
+.tiles{ display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px; margin-block-end:16px; }
+.tile{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:16px; box-shadow:var(--shadow); min-width:0; }
+.tile .k{ display:block; color:var(--faint); font-size:12px; font-weight:700; margin-block-end:6px; }
+.tile .v{ display:block; color:var(--ink); font-size:26px; font-weight:800; font-family:'DM Sans',sans-serif; line-height:1.1; }
+.tile .s{ display:block; color:var(--muted); font-size:11.5px; margin-block-start:4px; }
+.tile.na .v{ font-size:15px; color:var(--muted); font-family:var(--font); }
+.badge{ display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700; white-space:nowrap; }
+.b-new{ background:var(--new-bg); color:var(--new); } .b-open{ background:var(--open-bg); color:var(--open); }
+.b-pending{ background:var(--pend-bg); color:var(--pend); } .b-resolved{ background:var(--done-bg); color:var(--done); }
+.b-closed{ background:var(--shut-bg); color:var(--shut); } .b-reopened{ background:var(--pend-bg); color:var(--pend); }
+.b-esc{ background:var(--alert-bg); color:var(--alert); } .b-due{ background:var(--alert-bg); color:var(--alert); }
+.b-plain{ background:var(--surface-2); color:var(--muted); border:1px solid var(--line); }
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:42px; padding:0 16px; border-radius:var(--r);
+  border:1px solid var(--line-2); background:var(--surface); color:var(--ink); font-size:13.5px; font-weight:700; cursor:pointer; text-decoration:none; }
+.btn:hover{ background:var(--surface-2); }
+.btn.pri{ background:var(--accent); border-color:var(--accent); color:#fff; }
+.btn.pri:hover{ background:var(--accent-2); }
+.btn.danger{ color:var(--alert); border-color:var(--alert); }
+.btn[disabled]{ opacity:.5; cursor:not-allowed; }
+.btn.sm{ min-height:36px; padding:0 12px; font-size:12.5px; }
+.row-actions{ display:flex; flex-wrap:wrap; gap:8px; }
+.filters{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-block-end:14px; }
+.f label{ display:block; font-size:11.5px; font-weight:700; color:var(--faint); margin-block-end:4px; }
+.f input,.f select,.f textarea{ width:100%; min-height:42px; padding:0 12px; border:1px solid var(--line-2); border-radius:var(--r);
+  background:var(--surface); color:var(--ink); }
+.f textarea{ min-height:96px; padding:10px 12px; line-height:1.6; resize:vertical; }
+.tbl-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table{ width:100%; border-collapse:collapse; min-width:720px; }
+th,td{ text-align:start; padding:11px 12px; border-block-end:1px solid var(--line); font-size:13px; vertical-align:top; }
+th{ color:var(--faint); font-size:11.5px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; white-space:nowrap; }
+tbody tr:hover{ background:var(--surface-2); cursor:pointer; }
+td .sub{ display:block; color:var(--faint); font-size:11.5px; margin-block-start:2px; }
+.mono{ font-family:'DM Sans',ui-monospace,monospace; font-size:12px; }
+.empty{ text-align:center; padding:40px 20px; color:var(--muted); }
+.empty i{ display:block; font-size:34px; color:var(--line-2); margin-block-end:10px; }
+.notice{ display:flex; gap:10px; padding:12px 14px; border-radius:var(--r); background:var(--surface-2); border:1px solid var(--line);
+  color:var(--muted); font-size:12.5px; margin-block-end:14px; }
+.notice i{ color:var(--accent); font-size:18px; flex-shrink:0; }
+.notice.warn{ background:var(--alert-bg); border-color:transparent; color:var(--alert); }
+.notice.warn i{ color:var(--alert); }
+.kv{ display:flex; gap:10px; padding:7px 0; border-block-end:1px dashed var(--line); font-size:13px; }
+.kv:last-child{ border-block-end:0; }
+.kv .k{ color:var(--faint); min-width:130px; font-weight:600; flex-shrink:0; }
+.kv .v{ color:var(--ink); min-width:0; word-break:break-word; }
+.split{ display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:16px; align-items:start; }
+.thread{ display:flex; flex-direction:column; gap:10px; }
+.msg{ border:1px solid var(--line); border-radius:var(--r-lg); padding:12px 14px; background:var(--surface-2); }
+.msg.cust{ background:var(--accent-soft); border-color:transparent; }
+.msg.internal{ background:#FFFBEF; border-color:#F0E4C2; }
+.msg .meta{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; font-size:11.5px; color:var(--faint); margin-block-end:6px; }
+.msg .body{ color:var(--ink); font-size:13.5px; white-space:pre-wrap; word-break:break-word; }
+.tl{ list-style:none; margin:0; padding:0; }
+.tl li{ display:flex; gap:10px; padding:8px 0; border-block-end:1px dashed var(--line); font-size:12.5px; }
+.tl li:last-child{ border-block-end:0; }
+.tl .when{ color:var(--faint); white-space:nowrap; font-family:'DM Sans',sans-serif; font-size:11.5px; }
+.chip-list{ display:flex; flex-wrap:wrap; gap:8px; }
+.chip{ display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px; border:1px solid var(--line);
+  background:var(--surface-2); font-size:12px; color:var(--text); }
+.gate{ min-height:100vh; display:grid; place-items:center; padding:24px; background:var(--bg); }
+.gate-c{ width:min(440px,100%); background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow); padding:32px 28px; text-align:center; }
+.gate-c .ic{ width:52px; height:52px; border-radius:14px; margin-inline:auto; display:grid; place-items:center; background:var(--alert-bg); color:var(--alert); margin-block-end:14px; }
+.gate-c .ic i{ font-size:26px; }
+.gate-c h1{ margin:0 0 8px; font-size:19px; color:var(--ink); }
+.gate-c p{ margin:0 0 20px; color:var(--muted); }
+.scrim{ display:none; }
+.toast{ position:fixed; inset-block-end:20px; inset-inline-start:50%; transform:translateX(50%); background:var(--nav); color:#fff;
+  padding:12px 18px; border-radius:var(--r); font-size:13px; font-weight:600; z-index:90; max-width:min(440px,92vw); box-shadow:var(--shadow-pop); }
+[dir="ltr"] .toast{ transform:translateX(-50%); }
+.toast.bad{ background:var(--alert); }
+dialog.modal{ border:0; padding:0; border-radius:var(--r-lg); width:min(560px,94vw); box-shadow:var(--shadow-pop); background:var(--surface); color:var(--text); }
+dialog.modal::backdrop{ background:rgba(14,25,23,.45); }
+.modal-in{ padding:20px; }
+.modal-in h3{ margin:0 0 14px; font-size:16px; color:var(--ink); }
+.modal-actions{ display:flex; gap:8px; justify-content:flex-end; margin-block-start:16px; flex-wrap:wrap; }
+
+@media (max-width:1100px){ .split{ grid-template-columns:minmax(0,1fr); } }
+@media (max-width:900px){
+  .cs{ grid-template-columns:minmax(0,1fr); }
+  .cs-nav{ position:fixed; top:0; bottom:0; inset-inline-start:0; width:min(300px,86vw); height:100%; z-index:80;
+    transform:translateX(-105%); transition:transform .2s ease; visibility:hidden; }
+  [dir="rtl"] .cs-nav{ transform:translateX(105%); }
+  .cs.nav-open .cs-nav{ transform:none; visibility:visible; }
+  .cs.nav-open .scrim{ display:block; position:fixed; inset:0; background:rgba(14,25,23,.4); z-index:70; }
+  .ibtn.cs-burger,.ibtn.cs-nav-x{ display:inline-grid; }
+  .ibtn.cs-nav-x{ color:var(--nav-text); margin-inline-start:auto; }
+  .cs-content{ padding:16px; }
+  .cs-head{ padding:0 12px; }
+  .cs-user-t{ display:none; }
+}
+@media (max-width:520px){
+  .cs-content{ padding:12px 16px; }
+  .card{ padding:14px; }
+  .tiles{ grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); }
+  .kv{ flex-direction:column; gap:2px; }
+  .kv .k{ min-width:0; }
+  .btn{ width:100%; }
+  .row-actions .btn{ width:auto; flex:1 1 auto; }
+}
+@media (prefers-reduced-motion:reduce){ *{ transition:none !important; } }
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-c" role="alert">
+    <div class="ic"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
+    <h1 id="gateT"></h1>
+    <p id="gateP"></p>
+    <a class="btn" href="raf_login.html"><i class="ti ti-login" aria-hidden="true"></i><span data-ar="تسجيل الدخول" data-en="Sign in">تسجيل الدخول</span></a>
+  </div>
+</div>
+
+<div class="cs" id="shell" hidden>
+  <aside class="cs-nav" id="csNav">
+    <div class="cs-brand">
+      <span class="cs-brand-mark" aria-hidden="true"><i class="ti ti-headset"></i></span>
+      <span class="cs-brand-t"><b data-ar="خدمة العملاء" data-en="Customer Service">خدمة العملاء</b>
+        <span data-ar="منصة رف" data-en="RAF platform">منصة رف</span></span>
+      <button class="ibtn cs-nav-x" type="button" onclick="CS.closeNav()"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <nav class="cs-nav-scroll" id="navTree"></nav>
+  </aside>
+  <div class="scrim" onclick="CS.closeNav()" aria-hidden="true"></div>
+
+  <div class="cs-main">
+    <header class="cs-head">
+      <button class="ibtn cs-burger" type="button" aria-controls="csNav" onclick="CS.openNav()"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+      <div class="cs-crumb"><small id="crumbGroup"></small><b id="crumbPage"></b></div>
+      <div class="cs-tools">
+        <button class="ibtn lang" type="button" id="langBtn" onclick="CS.toggleLang()"></button>
+        <div class="cs-user"><span class="cs-av" id="userAv"></span>
+          <span class="cs-user-t"><b id="userName"></b><span id="userRole"></span></span></div>
+      </div>
+    </header>
+    <main class="cs-content" id="view" tabindex="-1"></main>
+  </div>
+</div>
+
+<dialog class="modal" id="modal"><div class="modal-in" id="modalIn"></div></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_wallet.js"></script>
+<script src="raf_compensation.js"></script>
+<script src="raf_customer_service.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════════════
+   The Customer Service console. It renders what RAFCustomerService
+   answers and nothing else: every count, list, action and permission
+   comes from the authority, there is no local ticket state, no fabricated
+   number and no action shown that the authority would refuse.
+   ══════════════════════════════════════════════════════════════════════ */
+var CS = (function(){
+  'use strict';
+  var SVC = window.RAFCustomerService;
+  var ME = null, CAPS = null, route = { p:'dashboard', id:null }, BUSY = false;
+
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function el(id){ return document.getElementById(id); }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]; }); }
+  function L(o){ return o ? T(o.ar || o.en || '', o.en || o.ar || '') : ''; }
+  function when(ts){
+    if (!ts) return '—';
+    var d = new Date(ts);
+    return d.toLocaleString(isEn() ? 'en-GB' : 'ar-KW', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+  }
+  function toast(msg, bad){
+    var t = el('toast'); t.textContent = msg; t.classList.toggle('bad', !!bad); t.hidden = false;
+    clearTimeout(t._h); t._h = setTimeout(function(){ t.hidden = true; }, 3600);
+  }
+  function initials(n){ return String(n || '?').trim().charAt(0).toUpperCase(); }
+
+  /* ───────── navigation ───────── */
+  var NAV = [
+    { k:'dashboard', ic:'ti-layout-dashboard', ar:'لوحة المتابعة', en:'Dashboard' },
+    { k:'customers', ic:'ti-users',            ar:'العملاء',        en:'Customers' },
+    { k:'tickets',   ic:'ti-ticket',           ar:'التذاكر',        en:'Tickets' },
+    { k:'mywork',    ic:'ti-user-check',       ar:'أعمالي',         en:'My Work' },
+    { k:'followups', ic:'ti-clock-hour-4',     ar:'المتابعات',      en:'Follow-ups' },
+    { k:'c360',      ic:'ti-id-badge-2',       ar:'ملف العميل 360', en:'Customer 360' },
+    { k:'knowledge', ic:'ti-book-2',           ar:'قاعدة المعرفة',  en:'Knowledge', soon:true }
+  ];
+  function pageOf(k){ for (var i=0;i<NAV.length;i++) if (NAV[i].k === k) return NAV[i]; return NAV[0]; }
+  function parseHash(){
+    var m = (location.hash || '').replace(/^#\/?/, '').split('?')[0].split('/');
+    var q = (location.hash.split('?')[1] || '');
+    var id = null;
+    q.split('&').forEach(function(p){ var kv = p.split('='); if (kv[0] === 't') id = decodeURIComponent(kv[1] || ''); });
+    return { p:pageOf(m[0] || 'dashboard').k, id:id };
+  }
+  function go(p, id){ location.hash = '#/' + p + (id ? '?t=' + encodeURIComponent(id) : ''); }
+  function renderNav(){
+    var counts = {};
+    try {
+      var d = SVC.dashboard();
+      if (d.ok) { counts.mywork = d.myOpen; counts.followups = d.followUpsOpen; }
+      var all = SVC.listTickets({ active:true });
+      if (all.ok) counts.tickets = all.items.length;
+    } catch (e) {}
+    el('navTree').innerHTML = '<ul>' + NAV.map(function(n){
+      var badge = n.soon ? '<span class="soon">' + esc(T('غير مُهيأة','Not configured')) + '</span>'
+                : (counts[n.k] ? '<span class="n">' + counts[n.k] + '</span>' : '');
+      return '<li><a href="#/' + n.k + '"' + (route.p === n.k ? ' aria-current="page"' : '') + '>'
+        + '<i class="ti ' + n.ic + '" aria-hidden="true"></i><span>' + esc(T(n.ar, n.en)) + '</span>' + badge + '</a></li>';
+    }).join('') + '</ul>';
+  }
+  function openNav(){ el('shell').classList.add('nav-open'); }
+  function closeNav(){ el('shell').classList.remove('nav-open'); }
+
+  /* ───────── shared renderers ───────── */
+  function statusBadge(t){ return '<span class="badge b-' + esc(t.status) + '">' + esc(L(t.statusText)) + '</span>'; }
+  function depName(k){ var d = SVC.departments()[k]; return d ? T(d.ar, d.en) : k; }
+  function catName(k){ var c = SVC.categoryOf(k); return c ? T(c.ar, c.en) : (k || '—'); }
+  function prio(t){ return '<span class="badge b-plain">' + esc(L(t.priorityText)) + '</span>'; }
+  function emptyBox(msgAr, msgEn, icon){
+    return '<div class="empty"><i class="ti ' + (icon || 'ti-inbox') + '" aria-hidden="true"></i>' + esc(T(msgAr, msgEn)) + '</div>';
+  }
+  function ticketRows(items){
+    if (!items.length) return emptyBox('لا توجد تذاكر مطابقة.', 'No tickets match.');
+    return '<div class="tbl-wrap"><table><thead><tr>'
+      + '<th>' + esc(T('التذكرة','Ticket')) + '</th><th>' + esc(T('العميل','Customer')) + '</th>'
+      + '<th>' + esc(T('الفئة','Category')) + '</th><th>' + esc(T('القسم','Department')) + '</th>'
+      + '<th>' + esc(T('الحالة','Status')) + '</th><th>' + esc(T('الأولوية','Priority')) + '</th>'
+      + '<th>' + esc(T('المسؤول','Assigned')) + '</th><th>' + esc(T('آخر تحديث','Updated')) + '</th>'
+      + '</tr></thead><tbody>' + items.map(function(t){
+      return '<tr onclick="CS.open(\'' + esc(t.ticketId) + '\')">'
+        + '<td><b>' + esc(t.subject) + '</b><span class="sub mono">' + esc(t.ticketId) + '</span>'
+        + (t.escalated ? ' <span class="badge b-esc">' + esc(T('مُصعّدة','Escalated')) + '</span>' : '')
+        + (t.context && t.context.orderId ? '<span class="sub">' + esc(T('طلب','Order')) + ' ' + esc(t.context.orderId) + '</span>' : '') + '</td>'
+        + '<td><bdi>' + esc(customerName(t.customerId)) + '</bdi><span class="sub mono">' + esc(t.customerId) + '</span></td>'
+        + '<td>' + esc(catName(t.category)) + '</td>'
+        + '<td>' + esc(depName(t.responsibleDepartment)) + '</td>'
+        + '<td>' + statusBadge(t) + '</td><td>' + prio(t) + '</td>'
+        + '<td>' + (t.assignedEmployeeId ? '<bdi>' + esc(t.assignedEmployeeName) + '</bdi>'
+                    : '<span class="badge b-plain">' + esc(T('غير مُستلمة','Unassigned')) + '</span>') + '</td>'
+        + '<td class="mono">' + esc(when(t.updatedAt)) + '</td></tr>';
+    }).join('') + '</tbody></table></div>';
+  }
+  function customerName(id){
+    try { var u = RAFPerm.getUser(id); return u ? (u.name || id) : id; } catch (e) { return id; }
+  }
+
+  /* ───────── views ───────── */
+  function vDashboard(){
+    var d = SVC.dashboard();
+    if (!d.ok) return notAllowed(d);
+    var slaTile = d.sla.configured.resolution
+      ? '<div class="tile"><span class="k">' + esc(T('قاربت المهلة','Near SLA')) + '</span><span class="v">' + d.sla.nearSla + '</span></div>'
+        + '<div class="tile"><span class="k">' + esc(T('تجاوزت المهلة','Breached')) + '</span><span class="v">' + d.sla.breached + '</span></div>'
+      : '<div class="tile na"><span class="k">' + esc(T('قاربت المهلة / تجاوزت','Near SLA / Breached')) + '</span>'
+        + '<span class="v">' + esc(T('غير مُهيأة','NOT_CONFIGURED')) + '</span>'
+        + '<span class="s">' + esc(T('لم تُعتمد مهلة استجابة أو حل في رف.','No first-response or resolution target is approved in RAF.')) + '</span></div>';
+    var unassigned = SVC.listTickets({ unassigned:true, active:true });
+    return '<div class="tiles">'
+      + tile(T('تذاكري المفتوحة','My Open Tickets'), d.myOpen)
+      + tile(T('غير مُستلمة','Unassigned'), d.unassigned)
+      + tile(T('معلّقة','Pending'), d.pending)
+      + tile(T('مُصعّدة','Escalated'), d.escalatedCount)
+      + tile(T('متابعات مفتوحة','Open Follow-ups'), d.followUpsOpen)
+      + tile(T('متابعات مستحقة','Follow-ups Due'), d.followUpsDue)
+      + slaTile + '</div>'
+      + '<div class="card"><h2><i class="ti ti-inbox"></i>' + esc(T('غير مُستلمة','Unassigned')) + '</h2>'
+      + ticketRows(unassigned.ok ? unassigned.items.slice(0, 10) : []) + '</div>'
+      + '<div class="card"><h2><i class="ti ti-history"></i>' + esc(T('آخر التحديثات','Recently Updated')) + '</h2>'
+      + ticketRows(d.recentlyUpdated) + '</div>';
+  }
+  function tile(k, v, s){
+    return '<div class="tile"><span class="k">' + esc(k) + '</span><span class="v">' + esc(String(v)) + '</span>'
+      + (s ? '<span class="s">' + esc(s) + '</span>' : '') + '</div>';
+  }
+  function notAllowed(r){
+    return '<div class="card"><div class="notice warn"><i class="ti ti-shield-lock"></i><span>'
+      + esc((r && r.message) || T('لا تملك صلاحية عرض هذا القسم.','You do not have access to this section.')) + '</span></div></div>';
+  }
+
+  var FILTERS = { q:'', status:'', department:'', category:'', priority:'', assignedEmployeeId:'', orderId:'', customerId:'', from:'', to:'' };
+  function vTickets(){
+    var f = {};
+    if (FILTERS.status) f.status = FILTERS.status;
+    if (FILTERS.department) f.department = FILTERS.department;
+    if (FILTERS.category) f.category = FILTERS.category;
+    if (FILTERS.priority) f.priority = FILTERS.priority;
+    if (FILTERS.assignedEmployeeId) f.assignedEmployeeId = FILTERS.assignedEmployeeId;
+    if (FILTERS.orderId) f.orderId = FILTERS.orderId;
+    if (FILTERS.customerId) f.customerId = FILTERS.customerId;
+    if (FILTERS.from) f.from = new Date(FILTERS.from).getTime();
+    if (FILTERS.to) f.to = new Date(FILTERS.to).getTime() + 86399999;
+    var r = FILTERS.q ? SVC.searchTickets(FILTERS.q, f) : SVC.listTickets(f);
+    if (!r.ok) return notAllowed(r);
+    var cats = SVC.categories(), deps = SVC.departments();
+    return '<div class="card"><h2><i class="ti ti-filter"></i>' + esc(T('بحث وتصفية','Search & filter')) + '</h2>'
+      + '<div class="notice"><i class="ti ti-shield-check"></i><span>'
+      + esc(T('البحث يعمل داخل صلاحياتك: لا تظهر تذكرة لا تملك الوصول إليها.',
+              'Search runs inside your access: a ticket you may not open never appears here.')) + '</span></div>'
+      + '<div class="filters">'
+      + fText('q', T('بحث (رقم التذكرة، العميل، الهاتف، البريد، الطلب)','Search (ticket, customer, phone, email, order)'))
+      + fSel('status', T('الحالة','Status'), [['','—']].concat(Object.keys(SVC.STATUS).map(function(k){
+          var v = SVC.STATUS[k]; return [v, L(SVC.STATUS_TXT[v])]; })))
+      + fSel('department', T('القسم','Department'), [['','—']].concat(Object.keys(deps).map(function(k){ return [k, depName(k)]; })))
+      + fSel('category', T('الفئة','Category'), [['','—']].concat(cats.map(function(c){ return [c.key, T(c.ar, c.en)]; })))
+      + fSel('priority', T('الأولوية','Priority'), [['','—']].concat(SVC.PRIORITIES.map(function(p){ return [p, L(SVC.PRIORITY_TXT[p])]; })))
+      + fText('orderId', T('رقم الطلب','Order ID'))
+      + fText('customerId', T('رقم العميل','Customer ID'))
+      + fDate('from', T('من تاريخ','From')) + fDate('to', T('إلى تاريخ','To'))
+      + '</div>'
+      + '<div class="row-actions"><button class="btn sm" onclick="CS.clearFilters()"><i class="ti ti-eraser"></i>' + esc(T('مسح','Clear')) + '</button>'
+      + (CAPS.create ? '<button class="btn sm pri" onclick="CS.newTicket()"><i class="ti ti-plus"></i>' + esc(T('تذكرة جديدة','New ticket')) + '</button>' : '')
+      + '</div></div>'
+      + '<div class="card"><h2><i class="ti ti-ticket"></i>' + esc(T('التذاكر','Tickets'))
+      + ' <span class="badge b-plain">' + r.items.length + '</span></h2>' + ticketRows(r.items) + '</div>';
+  }
+  function fText(k, label){
+    return '<div class="f"><label for="f_' + k + '">' + esc(label) + '</label>'
+      + '<input id="f_' + k + '" value="' + esc(FILTERS[k]) + '" oninput="CS.setFilter(\'' + k + '\', this.value)"></div>';
+  }
+  function fDate(k, label){
+    return '<div class="f"><label for="f_' + k + '">' + esc(label) + '</label>'
+      + '<input type="date" id="f_' + k + '" value="' + esc(FILTERS[k]) + '" onchange="CS.setFilter(\'' + k + '\', this.value)"></div>';
+  }
+  function fSel(k, label, opts){
+    return '<div class="f"><label for="f_' + k + '">' + esc(label) + '</label><select id="f_' + k + '" onchange="CS.setFilter(\'' + k + '\', this.value)">'
+      + opts.map(function(o){ return '<option value="' + esc(o[0]) + '"' + (FILTERS[k] === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('')
+      + '</select></div>';
+  }
+
+  function vMyWork(){
+    var mine = SVC.listTickets({ assignedEmployeeId:ME.id, active:true });
+    if (!mine.ok) return notAllowed(mine);
+    var fu = SVC.listFollowUps({ mine:true, status:'open' });
+    return '<div class="card"><h2><i class="ti ti-user-check"></i>' + esc(T('تذاكري','My tickets')) + '</h2>'
+      + ticketRows(mine.items) + '</div>'
+      + '<div class="card"><h2><i class="ti ti-clock-hour-4"></i>' + esc(T('متابعاتي','My follow-ups')) + '</h2>'
+      + followupRows(fu.ok ? fu.items : []) + '</div>';
+  }
+  function followupRows(items){
+    if (!items.length) return emptyBox('لا توجد متابعات.', 'No follow-ups.', 'ti-clock-hour-4');
+    return '<div class="tbl-wrap"><table><thead><tr><th>' + esc(T('الموعد','Due')) + '</th><th>' + esc(T('السبب','Reason')) + '</th>'
+      + '<th>' + esc(T('التذكرة','Ticket')) + '</th><th>' + esc(T('المسؤول','Assigned')) + '</th><th>' + esc(T('الحالة','Status')) + '</th></tr></thead><tbody>'
+      + items.map(function(f){
+        return '<tr onclick="CS.open(\'' + esc(f.ticketId) + '\')"><td class="mono">' + esc(when(f.dueAt))
+          + (f.due ? ' <span class="badge b-due">' + esc(T('مستحقة','Due')) + '</span>' : '') + '</td>'
+          + '<td>' + esc(f.reason) + '</td><td><b>' + esc(f.ticketSubject || '') + '</b><span class="sub mono">' + esc(f.ticketId) + '</span></td>'
+          + '<td><bdi>' + esc(f.assignedEmployeeName || '') + '</bdi></td>'
+          + '<td><span class="badge b-plain">' + esc(f.status) + '</span></td></tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+  function vFollowUps(){
+    var fu = SVC.listFollowUps({});
+    if (!fu.ok) return notAllowed(fu);
+    var open = fu.items.filter(function(f){ return f.status === 'open'; });
+    var done = fu.items.filter(function(f){ return f.status !== 'open'; });
+    return '<div class="tiles">' + tile(T('مفتوحة','Open'), open.length) + tile(T('مستحقة','Due'), open.filter(function(f){ return f.due; }).length)
+      + tile(T('منتهية','Finished'), done.length) + '</div>'
+      + '<div class="card"><h2><i class="ti ti-clock-hour-4"></i>' + esc(T('متابعات مفتوحة','Open follow-ups')) + '</h2>' + followupRows(open) + '</div>'
+      + '<div class="card"><h2><i class="ti ti-check"></i>' + esc(T('منتهية','Finished')) + '</h2>' + followupRows(done) + '</div>';
+  }
+
+  function vCustomers(){
+    var r = SVC.listTickets({});
+    if (!r.ok) return notAllowed(r);
+    var by = {};
+    r.items.forEach(function(t){
+      var b = by[t.customerId] = by[t.customerId] || { id:t.customerId, total:0, open:0, last:0 };
+      b.total++; if (t.active) b.open++; b.last = Math.max(b.last, t.updatedAt);
+    });
+    var list = Object.keys(by).map(function(k){ return by[k]; }).sort(function(a,b){ return b.last - a.last; });
+    if (!list.length) return '<div class="card">' + emptyBox('لا يوجد عملاء لديهم تذاكر في نطاقك.','No customers with tickets in your scope.','ti-users') + '</div>';
+    return '<div class="card"><h2><i class="ti ti-users"></i>' + esc(T('العملاء الذين لديهم تذاكر','Customers with tickets')) + '</h2>'
+      + '<div class="tbl-wrap"><table><thead><tr><th>' + esc(T('العميل','Customer')) + '</th><th>' + esc(T('الهاتف','Phone')) + '</th>'
+      + '<th>' + esc(T('تذاكر مفتوحة','Open')) + '</th><th>' + esc(T('الإجمالي','Total')) + '</th><th>' + esc(T('آخر نشاط','Last activity')) + '</th><th></th></tr></thead><tbody>'
+      + list.map(function(c){
+        var u = null; try { u = RAFPerm.getUser(c.id); } catch (e) {}
+        return '<tr onclick="CS.go360(\'' + esc(c.id) + '\')"><td><bdi>' + esc(u ? u.name : c.id) + '</bdi><span class="sub mono">' + esc(c.id) + '</span></td>'
+          + '<td class="mono"><bdi>' + esc(u ? u.phone : '—') + '</bdi></td>'
+          + '<td>' + c.open + '</td><td>' + c.total + '</td><td class="mono">' + esc(when(c.last)) + '</td>'
+          + '<td><span class="btn sm"><i class="ti ti-id-badge-2"></i>' + esc(T('ملف 360','360')) + '</span></td></tr>';
+      }).join('') + '</tbody></table></div></div>';
+  }
+
+  var C360 = '';
+  function vC360(){
+    var body = '<div class="card"><h2><i class="ti ti-id-badge-2"></i>' + esc(T('ملف العميل 360','Customer 360')) + '</h2>'
+      + '<div class="notice"><i class="ti ti-database"></i><span>'
+      + esc(T('عرض للقراءة فقط: كل قسم يأتي من الجهة المالكة له ولا يُخزَّن هنا.',
+              'A read-only view: every section comes from the authority that owns it and nothing is stored here.')) + '</span></div>'
+      + '<div class="filters"><div class="f"><label for="c360id">' + esc(T('رقم العميل','Customer ID')) + '</label>'
+      + '<input id="c360id" value="' + esc(C360) + '" placeholder="usr-016" oninput="CS.set360(this.value)"></div></div></div>';
+    if (!C360) return body + '<div class="card">' + emptyBox('أدخل رقم العميل لعرض ملفه.','Enter a customer id to load the profile.','ti-id-badge-2') + '</div>';
+    var r = SVC.customer360(C360);
+    if (!r.ok) return body + '<div class="card"><div class="notice warn"><i class="ti ti-alert-triangle"></i><span>' + esc(r.message) + '</span></div></div>';
+    var c = r.customer;
+    return body
+      + '<div class="split"><div>'
+      + '<div class="card"><h2><i class="ti ti-user"></i>' + esc(T('بيانات العميل','Customer profile')) + '</h2>'
+      + kv(T('الاسم','Name'), c.name) + kv(T('رقم الحساب','Account'), c.id) + kv(T('الهاتف','Phone'), c.phone)
+      + kv(T('البريد','Email'), c.email) + kv(T('الحالة','Status'), c.status) + kv(T('تاريخ التسجيل','Registered'), c.regDate)
+      + kv(T('المصدر','Source'), c.source) + '</div>'
+      + '<div class="card"><h2><i class="ti ti-shopping-bag"></i>' + esc(T('الطلبات','Orders'))
+      + ' <span class="badge b-plain">' + r.orders.length + '</span></h2>'
+      + (r.orders.length ? '<div class="tbl-wrap"><table><thead><tr><th>' + esc(T('الطلب','Order')) + '</th><th>' + esc(T('المتجر','Store')) + '</th>'
+          + '<th>' + esc(T('الإجمالي','Total')) + '</th><th>' + esc(T('الحالة','Status')) + '</th><th>' + esc(T('سُلّم','Delivered')) + '</th></tr></thead><tbody>'
+          + r.orders.map(function(o){
+            return '<tr><td class="mono">' + esc(o.orderId) + '</td><td>' + esc(o.storeSlug || '—') + '</td>'
+              + '<td class="mono">' + esc(o.total ? (o.total + ' ' + (o.currency || '')) : '—') + '</td>'
+              + '<td>' + esc(o.status || '—') + '</td><td class="mono">' + esc(o.deliveredAt ? when(o.deliveredAt) : T('قيد التنفيذ','In progress')) + '</td></tr>';
+          }).join('') + '</tbody></table></div>' : emptyBox('لا توجد طلبات.','No orders.','ti-shopping-bag'))
+      + '</div>'
+      + '<div class="card"><h2><i class="ti ti-ticket"></i>' + esc(T('سجل الدعم','Support history')) + '</h2>'
+      + '<div class="tiles">' + tile(T('الإجمالي','Total'), r.supportHistory.total) + tile(T('مفتوحة','Open'), r.supportHistory.open)
+      + tile(T('منتهية','Closed'), r.supportHistory.closed) + '</div>'
+      + ticketRows(r.tickets.slice(0, 15)) + '</div>'
+      + '</div><div>'
+      + '<div class="card"><h2><i class="ti ti-truck-delivery"></i>' + esc(T('توصيلات جارية','Active deliveries')) + '</h2>'
+      + (r.activeDeliveries.length ? r.activeDeliveries.map(function(o){
+          return '<div class="kv"><span class="k mono">' + esc(o.orderId) + '</span><span class="v">'
+            + esc(o.promisedEtaRecorded ? (T('الوقت الموعود','Promised') + ': ' + when(o.promisedEtaAt))
+                  : T('لا يوجد وقت موعود مُسجَّل','No recorded promised time')) + '</span></div>';
+        }).join('') : emptyBox('لا توجد توصيلات جارية.','No active deliveries.','ti-truck-delivery'))
+      + '</div>'
+      + '<div class="card"><h2><i class="ti ti-wallet"></i>' + esc(T('المحفظة','Wallet')) + '</h2>' + source(r.wallet, function(w){
+          return kv(T('الرصيد','Balance'), w.balance + ' ' + (w.currency || ''))
+            + kv(T('رصيد عادي','Ordinary'), w.ordinaryBalance) + kv(T('رصيد تعويضات','Compensation credit'), w.compensationCredit);
+        }) + '</div>'
+      + '<div class="card"><h2><i class="ti ti-gift"></i>' + esc(T('التعويضات','Compensation')) + '</h2>' + source(r.compensation, function(cc){
+          return cc.items.length ? cc.items.map(function(x){ return kv(x.orderId, (x.amount || '') + ' — ' + (x.status || '')); }).join('')
+            : emptyBox('لا توجد تعويضات.','No compensation records.','ti-gift');
+        }) + '</div>'
+      + '<div class="card"><h2><i class="ti ti-message-2"></i>' + esc(T('محادثات التوصيل','Delivery communication')) + '</h2>'
+      + source(r.communication, function(cm){
+          return '<div class="notice"><i class="ti ti-info-circle"></i><span>' + esc(cm.note) + '</span></div>'
+            + (cm.orders.length ? '<div class="chip-list">' + cm.orders.map(function(o){ return '<span class="chip mono">' + esc(o) + '</span>'; }).join('') + '</div>'
+               : emptyBox('لا توجد محادثات مرتبطة.','No linked conversations.','ti-message-2'));
+        }) + '</div>'
+      + '</div></div>';
+  }
+  /* a section that names its authority and says plainly when RAF cannot read it */
+  function source(sec, render){
+    if (sec && sec.available) return render(sec);
+    return '<div class="notice"><i class="ti ti-lock"></i><span>'
+      + esc(T('غير متاح لهذا الحساب — ', 'Not available to this account — ') + (sec ? (sec.reason + ' · ' + sec.source) : 'NOT_AVAILABLE')) + '</span></div>';
+  }
+  function kv(k, v){ return '<div class="kv"><span class="k">' + esc(k) + '</span><span class="v"><bdi>' + esc(v == null ? '—' : v) + '</bdi></span></div>'; }
+
+  function vKnowledge(){
+    return '<div class="card"><h2><i class="ti ti-book-2"></i>' + esc(T('قاعدة المعرفة','Knowledge')) + '</h2>'
+      + '<div class="notice warn"><i class="ti ti-alert-circle"></i><span>'
+      + esc(T('غير مُهيأة. لا توجد مقالات معرفة معتمدة في رف، ولا يعرض هذا القسم محتوى تجريبياً.',
+              'NOT_CONFIGURED. RAF has no approved knowledge content, and this section shows no placeholder articles.')) + '</span></div>'
+      + '<p style="color:var(--muted);font-size:13px;margin:0;">'
+      + esc(T('ستُبنى قاعدة المعرفة في مرحلة لاحقة بجهة مالكة خاصة بها.',
+              'Knowledge will be built in a later phase with its own authority.')) + '</p></div>';
+  }
+
+  /* ───────── ticket detail ───────── */
+  function vTicket(id){
+    var r = SVC.getTicket(id, { full:true });
+    if (!r.ok) return '<div class="card"><div class="notice warn"><i class="ti ti-alert-triangle"></i><span>' + esc(r.message) + '</span></div>'
+      + '<button class="btn" onclick="CS.go(\'tickets\')"><i class="ti ti-arrow-back-up"></i>' + esc(T('عودة للتذاكر','Back to tickets')) + '</button></div>';
+    var t = r.ticket, can = CAPS;
+    var mine = t.assignedEmployeeId === ME.id;
+    var acts = [];
+    if (can.manage && !t.assignedEmployeeId && t.active) acts.push(btn('claim', 'ti-hand-click', T('استلام','Claim'), 'pri'));
+    if (can.manage && t.status === 'new') acts.push(btn('open', 'ti-player-play', T('بدء المعالجة','Start work')));
+    if (can.manage && t.status === 'open') acts.push(btn('pending', 'ti-player-pause', T('تعليق','Set pending')));
+    if (can.manage && (t.status === 'pending' || t.status === 'reopened')) acts.push(btn('open', 'ti-player-play', T('استئناف','Resume')));
+    if (can.resolve && t.status === 'open') acts.push(btn('resolve', 'ti-circle-check', T('حل التذكرة','Resolve'), 'pri'));
+    if (can.resolve && t.status === 'resolved') acts.push(btn('close', 'ti-lock', T('إغلاق','Close')));
+    if (can.resolve && t.status === 'closed') acts.push(btn('reopen', 'ti-lock-open', T('إعادة فتح','Reopen')));
+    if (can.manage && t.active) acts.push(btn('transfer', 'ti-arrows-exchange', T('تحويل لقسم','Transfer')));
+    if (can.escalate && t.active) acts.push(btn('escalate', 'ti-arrow-big-up-lines', T('تصعيد','Escalate'), 'danger'));
+    if (can.manage && t.active) acts.push(btn('priority', 'ti-flag', T('الأولوية','Priority')));
+
+    return '<div class="card"><h2><i class="ti ti-ticket"></i><bdi>' + esc(t.subject) + '</bdi> ' + statusBadge(t) + ' ' + prio(t)
+      + (t.escalations.length ? ' <span class="badge b-esc">' + esc(T('مُصعّدة','Escalated')) + '</span>' : '') + '</h2>'
+      + '<div class="row-actions">'
+      + '<button class="btn sm" onclick="CS.go(\'tickets\')"><i class="ti ti-arrow-back-up"></i>' + esc(T('عودة','Back')) + '</button>'
+      + acts.join('') + '</div></div>'
+      + '<div class="split"><div>'
+      + '<div class="card"><h2><i class="ti ti-file-description"></i>' + esc(T('المشكلة','Problem')) + '</h2>'
+      + '<p style="white-space:pre-wrap;margin:0 0 12px;color:var(--ink);">' + esc(t.description) + '</p>'
+      + kv(T('الفئة','Category'), catName(t.category)) + kv(T('النوع','Type'), t.type) + kv(T('مصدر الفتح','Source'), t.source)
+      + (t.context.orderId ? kv(T('الطلب','Order'), t.context.orderId) : '')
+      + (t.context.previousTicketId ? kv(T('تذكرة سابقة','Previous ticket'), t.context.previousTicketId) : '') + '</div>'
+      + '<div class="card"><h2><i class="ti ti-messages"></i>' + esc(T('المحادثة مع العميل','Customer conversation')) + '</h2>'
+      + thread(t.activities.filter(function(a){ return a.kind === 'message'; }), true)
+      + (can.manage && t.status !== 'closed' ? composer('message', T('رد يراه العميل','Reply to the customer')) : '') + '</div>'
+      + '<div class="card"><h2><i class="ti ti-notes"></i>' + esc(T('نشاط داخلي','Internal activity')) + '</h2>'
+      + '<div class="notice"><i class="ti ti-eye-off"></i><span>' + esc(T('لا يظهر أي شيء في هذا القسم للعميل.','Nothing in this section is ever shown to the customer.')) + '</span></div>'
+      + thread(t.activities.filter(function(a){ return a.kind === 'note' || a.kind === 'escalate'; }), false)
+      + (can.manage ? composer('note', T('ملاحظة داخلية','Internal note')) : '') + '</div>'
+      + '<div class="card"><h2><i class="ti ti-timeline"></i>' + esc(T('السجل الزمني','Timeline')) + '</h2>' + timeline(t) + '</div>'
+      + '</div><div>'
+      + '<div class="card"><h2><i class="ti ti-user"></i>' + esc(T('العميل','Customer')) + '</h2>'
+      + kv(T('الاسم','Name'), customerName(t.customerId)) + kv(T('رقم الحساب','Account'), t.customerId)
+      + '<div class="row-actions" style="margin-block-start:10px;"><button class="btn sm" onclick="CS.go360(\'' + esc(t.customerId) + '\')">'
+      + '<i class="ti ti-id-badge-2"></i>' + esc(T('ملف 360','Customer 360')) + '</button></div></div>'
+      + '<div class="card"><h2><i class="ti ti-route"></i>' + esc(T('المسؤولية','Ownership')) + '</h2>'
+      + kv(T('القسم المسؤول','Responsible department'), depName(t.responsibleDepartment))
+      + kv(T('الموظف','Assigned employee'), t.assignedEmployeeName || T('غير مُستلمة','Unassigned'))
+      + kv(T('أُنشئت','Created'), when(t.createdAt)) + kv(T('استُلمت','Claimed'), t.claimedAt ? when(t.claimedAt) : '—')
+      + kv(T('حُلّت','Resolved'), t.resolvedAt ? when(t.resolvedAt) : '—')
+      + kv(T('أُغلقت','Closed'), t.closedAt ? when(t.closedAt) : '—')
+      + (t.resolution.description ? kv(T('الحل','Resolution'), t.resolution.description) : '') + '</div>'
+      + '<div class="card"><h2><i class="ti ti-clock-shield"></i>' + esc(T('مستوى الخدمة','SLA')) + '</h2>'
+      + '<div class="notice"><i class="ti ti-info-circle"></i><span>'
+      + esc(T('مهلة أول رد: ','First response: ') + slaTxt(t.sla.firstResponse) + ' · ' + T('مهلة الحل: ','Resolution: ') + slaTxt(t.sla.resolution)) + '</span></div>'
+      + '<p style="margin:0;color:var(--muted);font-size:12.5px;">'
+      + esc(T('هذه هي الحالة وقت فتح التذكرة، ولا يُعاد حسابها عند تغيير الإعدادات لاحقاً.',
+              'This is the state when the ticket was opened; a later configuration change never rewrites it.')) + '</p></div>'
+      + '<div class="card"><h2><i class="ti ti-subtask"></i>' + esc(T('المهام','Tasks')) + ' <span class="badge b-plain">' + t.tasks.length + '</span></h2>'
+      + (t.tasks.length ? t.tasks.map(function(x){
+          return '<div class="kv"><span class="k">' + esc(x.title) + '</span><span class="v">'
+            + esc(depName(x.department)) + ' · <span class="badge b-plain">' + esc(x.status) + '</span>'
+            + (x.status === 'open' && can.manage ? ' <button class="btn sm" onclick="CS.act(\'task\',\'' + esc(x.taskId) + '\')">'
+               + esc(T('إنجاز','Complete')) + '</button>' : '') + '</span></div>';
+        }).join('') : emptyBox('لا توجد مهام.','No tasks.','ti-subtask'))
+      + (can.manage && t.active ? '<div class="row-actions" style="margin-block-start:10px;"><button class="btn sm" onclick="CS.act(\'newtask\')">'
+        + '<i class="ti ti-plus"></i>' + esc(T('مهمة جديدة','New task')) + '</button></div>' : '') + '</div>'
+      + '<div class="card"><h2><i class="ti ti-clock-hour-4"></i>' + esc(T('المتابعات','Follow-ups')) + '</h2>'
+      + (t.followUps.length ? t.followUps.map(function(x){
+          return '<div class="kv"><span class="k mono">' + esc(when(x.dueAt)) + '</span><span class="v">' + esc(x.reason)
+            + ' <span class="badge b-plain">' + esc(x.status) + '</span>'
+            + (x.status === 'open' && can.manage ? ' <button class="btn sm" onclick="CS.act(\'fu\',\'' + esc(x.followUpId) + '\')">'
+               + esc(T('إنجاز','Complete')) + '</button>' : '') + '</span></div>';
+        }).join('') : emptyBox('لا توجد متابعات.','No follow-ups.','ti-clock-hour-4'))
+      + (can.manage ? '<div class="row-actions" style="margin-block-start:10px;"><button class="btn sm" onclick="CS.act(\'newfu\')">'
+        + '<i class="ti ti-plus"></i>' + esc(T('متابعة جديدة','New follow-up')) + '</button></div>' : '') + '</div>'
+      + '<div class="card"><h2><i class="ti ti-link"></i>' + esc(T('سجلات مرتبطة','Related records')) + '</h2>'
+      + (t.relations.length ? '<div class="chip-list">' + t.relations.map(function(x){
+          return '<span class="chip"><i class="ti ti-paperclip"></i>' + esc(x.recordType) + ' <span class="mono">' + esc(x.recordId) + '</span>'
+            + (x.verified ? '' : ' <span class="badge b-plain">' + esc(T('غير مُتحقَّق','unverified')) + '</span>') + '</span>';
+        }).join('') + '</div>' : emptyBox('لا توجد سجلات مرتبطة.','No related records.','ti-link'))
+      + (can.manage ? '<div class="row-actions" style="margin-block-start:10px;"><button class="btn sm" onclick="CS.act(\'link\')">'
+        + '<i class="ti ti-plus"></i>' + esc(T('ربط سجل','Link a record')) + '</button></div>' : '') + '</div>'
+      + '</div></div>';
+  }
+  function slaTxt(s){ return s && s.configured ? (s.minutes + ' ' + T('دقيقة','min')) : 'NOT_CONFIGURED'; }
+  function btn(a, ic, label, kind){
+    return '<button class="btn sm ' + (kind || '') + '" onclick="CS.act(\'' + a + '\')"><i class="ti ' + ic + '"></i>' + esc(label) + '</button>';
+  }
+  function thread(list, customerFacing){
+    if (!list.length) return emptyBox(customerFacing ? 'لا توجد رسائل.' : 'لا يوجد نشاط داخلي.',
+      customerFacing ? 'No messages yet.' : 'No internal activity yet.', 'ti-message-2');
+    return '<div class="thread">' + list.map(function(a){
+      var cls = a.kind === 'message' ? (a.direction === 'inbound' ? 'cust' : '') : 'internal';
+      var who = a.direction === 'inbound' ? T('العميل','Customer') : (a.actorName || a.actorId);
+      return '<div class="msg ' + cls + '"><div class="meta"><b><bdi>' + esc(who) + '</bdi></b><span class="mono">' + esc(when(a.at)) + '</span>'
+        + '<span class="badge b-plain">' + esc(a.kind === 'message' ? T('يراه العميل','Customer-visible') : T('داخلي','Internal')) + '</span></div>'
+        + '<div class="body">' + esc(a.body || '') + '</div></div>';
+    }).join('') + '</div>';
+  }
+  function composer(kind, label){
+    return '<div class="f" style="margin-block-start:12px;"><label for="c_' + kind + '">' + esc(label) + '</label>'
+      + '<textarea id="c_' + kind + '" maxlength="4000"></textarea>'
+      + '<div class="row-actions" style="margin-block-start:8px;"><button class="btn sm pri" onclick="CS.send(\'' + kind + '\')">'
+      + '<i class="ti ti-send"></i>' + esc(T('إرسال','Send')) + '</button></div></div>';
+  }
+  function timeline(t){
+    var items = t.activities.map(function(a){
+      var txt = '';
+      if (a.kind === 'status')   txt = T('تغيّرت الحالة: ','Status: ') + a.from + ' → ' + a.to + (a.reason ? ' — ' + a.reason : '');
+      if (a.kind === 'claim')    txt = T('استلمها ','Claimed by ') + (a.actorName || a.toEmployeeId);
+      if (a.kind === 'transfer') txt = T('حُوّلت من ','Transferred from ') + depName(a.fromDepartment) + T(' إلى ',' to ') + depName(a.toDepartment) + ' — ' + (a.reason || '');
+      if (a.kind === 'priority') txt = T('الأولوية: ','Priority: ') + a.from + ' → ' + a.to;
+      if (a.kind === 'note')     txt = T('ملاحظة داخلية','Internal note');
+      if (a.kind === 'message')  txt = a.direction === 'inbound' ? T('رسالة من العميل','Message from the customer') : T('رد للعميل','Reply to the customer');
+      if (a.kind === 'escalate') txt = T('تصعيد للإدارة','Escalated to management');
+      if (a.kind === 'update')   txt = T('تعديل بيانات التذكرة','Ticket fields updated');
+      if (a.kind === 'guard')    return '';
+      return '<li><span class="when mono">' + esc(when(a.at)) + '</span><span>' + esc(txt)
+        + ' <span style="color:var(--faint)">· <bdi>' + esc(a.actorName || a.actorId || '') + '</bdi></span></span></li>';
+    }).filter(Boolean);
+    return '<ul class="tl">' + (items.join('') || '<li>' + esc(T('لا يوجد سجل.','No history.')) + '</li>') + '</ul>';
+  }
+
+  /* ───────── modals & actions ───────── */
+  function modal(title, inner, onOk, okLabel){
+    el('modalIn').innerHTML = '<h3>' + esc(title) + '</h3>' + inner
+      + '<div class="modal-actions"><button class="btn" onclick="CS.closeModal()">' + esc(T('إلغاء','Cancel')) + '</button>'
+      + '<button class="btn pri" id="modalOk">' + esc(okLabel || T('تأكيد','Confirm')) + '</button></div>';
+    el('modalOk').onclick = onOk;
+    el('modal').showModal();
+  }
+  function closeModal(){ try { el('modal').close(); } catch (e) {} }
+  function val(id){ var e = el(id); return e ? e.value : ''; }
+
+  async function run(promise, okMsg){
+    if (BUSY) return;
+    BUSY = true;
+    try {
+      var r = await promise;
+      if (r && r.ok) { closeModal(); toast(okMsg || T('تم.','Done.')); render(); }
+      else { toast((r && r.message) || T('تعذّر تنفيذ الإجراء.','The action could not be completed.'), true); render(); }
+      return r;
+    } finally { BUSY = false; }
+  }
+
+  function act(a, arg){
+    var id = route.id;
+    if (a === 'claim')   return run(SVC.claimTicket(id), T('تم استلام التذكرة.','Ticket claimed.'));
+    if (a === 'open')    return run(SVC.updateTicket(id, { status:'open' }));
+    if (a === 'pending') return run(SVC.updateTicket(id, { status:'pending' }));
+    if (a === 'task')    return run(SVC.completeTask(arg), T('تم إنجاز المهمة.','Task completed.'));
+    if (a === 'fu')      return run(SVC.completeFollowUp(arg), T('تم إنجاز المتابعة.','Follow-up completed.'));
+    if (a === 'resolve') return modal(T('حل التذكرة','Resolve ticket'),
+      '<div class="f"><label for="m1">' + esc(T('وصف الحل (إلزامي)','Resolution description (required)')) + '</label><textarea id="m1"></textarea></div>'
+      + '<div class="f"><label for="m2">' + esc(T('رمز الحل (اختياري)','Resolution code (optional)')) + '</label><input id="m2"></div>',
+      function(){ run(SVC.resolveTicket(id, { description:val('m1'), code:val('m2') }), T('تم حل التذكرة.','Ticket resolved.')); });
+    if (a === 'close')   return run(SVC.closeTicket(id, {}), T('تم إغلاق التذكرة.','Ticket closed.'));
+    if (a === 'reopen')  return modal(T('إعادة فتح التذكرة','Reopen ticket'),
+      '<div class="f"><label for="m1">' + esc(T('السبب (إلزامي)','Reason (required)')) + '</label><textarea id="m1"></textarea></div>',
+      function(){ run(SVC.reopenTicket(id, { reason:val('m1') }), T('أُعيد فتح التذكرة.','Ticket reopened.')); });
+    if (a === 'transfer') {
+      var deps = SVC.departments();
+      return modal(T('تحويل إلى قسم','Transfer to a department'),
+        '<div class="notice"><i class="ti ti-info-circle"></i><span>'
+        + esc(T('التحويل لا ينشئ تذكرة جديدة: نفس التذكرة وكل سجلها تنتقل إلى القسم الجديد.',
+                'A transfer never creates a new ticket: the same ticket and its whole history move to the new department.')) + '</span></div>'
+        + '<div class="f"><label for="m1">' + esc(T('القسم','Department')) + '</label><select id="m1">'
+        + Object.keys(deps).map(function(k){ return '<option value="' + esc(k) + '">' + esc(depName(k)) + '</option>'; }).join('') + '</select></div>'
+        + '<div class="f"><label for="m2">' + esc(T('السبب (إلزامي)','Reason (required)')) + '</label><textarea id="m2"></textarea></div>',
+        function(){ run(SVC.transferTicket(id, { toDepartment:val('m1'), reason:val('m2') }), T('تم التحويل.','Transferred.')); });
+    }
+    if (a === 'escalate') return modal(T('تصعيد للإدارة','Escalate to management'),
+      '<div class="notice"><i class="ti ti-info-circle"></i><span>'
+      + esc(T('التصعيد لا ينشئ تذكرة أخرى؛ يسجّل طلب انتباه الإدارة على نفس التذكرة.',
+              'Escalation never creates another ticket; it records a management-attention request on this one.')) + '</span></div>'
+      + '<div class="f"><label for="m1">' + esc(T('الوصف (إلزامي)','Description (required)')) + '</label><textarea id="m1"></textarea></div>'
+      + '<p style="color:var(--muted);font-size:12px;margin:8px 0 0;">'
+      + esc(T('لا توجد قائمة أسباب تصعيد معتمدة في رف، لذلك الوصف إلزامي.',
+              'RAF has no approved escalation reason list, so the description is what carries the case.')) + '</p>',
+      function(){ run(SVC.escalateTicket(id, { description:val('m1') }), T('تم التصعيد.','Escalated.')); });
+    if (a === 'priority') return modal(T('تغيير الأولوية','Change priority'),
+      '<div class="f"><label for="m1">' + esc(T('الأولوية','Priority')) + '</label><select id="m1">'
+      + SVC.PRIORITIES.map(function(p){ return '<option value="' + esc(p) + '">' + esc(L(SVC.PRIORITY_TXT[p])) + '</option>'; }).join('') + '</select></div>',
+      function(){ run(SVC.updateTicket(id, { priority:val('m1') })); });
+    if (a === 'newtask') {
+      var deps2 = SVC.departments();
+      return modal(T('مهمة جديدة','New task'),
+        '<div class="notice"><i class="ti ti-info-circle"></i><span>'
+        + esc(T('المهمة سجل فرعي لهذه التذكرة، وليست تذكرة جديدة.','A task is a child record of this ticket, never a second ticket.')) + '</span></div>'
+        + '<div class="f"><label for="m1">' + esc(T('العنوان','Title')) + '</label><input id="m1"></div>'
+        + '<div class="f"><label for="m2">' + esc(T('الوصف','Description')) + '</label><textarea id="m2"></textarea></div>'
+        + '<div class="f"><label for="m3">' + esc(T('القسم','Department')) + '</label><select id="m3">'
+        + Object.keys(deps2).map(function(k){ return '<option value="' + esc(k) + '">' + esc(depName(k)) + '</option>'; }).join('') + '</select></div>',
+        function(){ run(SVC.createTask(id, { title:val('m1'), description:val('m2'), department:val('m3') }), T('أُنشئت المهمة.','Task created.')); });
+    }
+    if (a === 'newfu') return modal(T('متابعة جديدة','New follow-up'),
+      '<div class="f"><label for="m1">' + esc(T('الموعد','Due')) + '</label><input type="datetime-local" id="m1"></div>'
+      + '<div class="f"><label for="m2">' + esc(T('السبب','Reason')) + '</label><textarea id="m2"></textarea></div>',
+      function(){
+        var due = new Date(val('m1')).getTime();
+        if (!due) return toast(T('اختر موعداً صحيحاً.','Pick a valid date and time.'), true);
+        run(SVC.createFollowUp(id, { dueAt:due, reason:val('m2') }), T('أُنشئت المتابعة.','Follow-up created.'));
+      });
+    if (a === 'link') return modal(T('ربط سجل','Link a record'),
+      '<div class="f"><label for="m1">' + esc(T('النوع','Type')) + '</label><select id="m1">'
+      + SVC.RELATION_TYPES.map(function(x){ return '<option value="' + esc(x) + '">' + esc(x) + '</option>'; }).join('') + '</select></div>'
+      + '<div class="f"><label for="m2">' + esc(T('رقم السجل','Record id')) + '</label><input id="m2"></div>',
+      function(){ run(SVC.linkRecord(id, { recordType:val('m1'), recordId:val('m2') }), T('تم الربط.','Linked.')); });
+  }
+  function send(kind){
+    var box = el('c_' + kind), body = box ? box.value : '';
+    if (!body.trim()) return toast(T('اكتب نصاً أولاً.','Write something first.'), true);
+    if (kind === 'message') return run(SVC.addCustomerMessage(route.id, { body:body }), T('أُرسل الرد.','Reply sent.'));
+    return run(SVC.addInternalNote(route.id, { body:body }), T('أُضيفت الملاحظة.','Note added.'));
+  }
+  function newTicket(){
+    var cats = SVC.categories(), deps = SVC.departments();
+    modal(T('تذكرة جديدة','New ticket'),
+      '<div class="f"><label for="m0">' + esc(T('رقم العميل','Customer ID')) + '</label><input id="m0" placeholder="usr-016"></div>'
+      + '<div class="f"><label for="m1">' + esc(T('الموضوع','Subject')) + '</label><input id="m1"></div>'
+      + '<div class="f"><label for="m2">' + esc(T('الوصف','Description')) + '</label><textarea id="m2"></textarea></div>'
+      + '<div class="f"><label for="m3">' + esc(T('الفئة','Category')) + '</label><select id="m3">'
+      + cats.map(function(c){ return '<option value="' + esc(c.key) + '">' + esc(T(c.ar, c.en)) + '</option>'; }).join('') + '</select></div>'
+      + '<div class="f"><label for="m4">' + esc(T('القسم المسؤول','Responsible department')) + '</label><select id="m4">'
+      + Object.keys(deps).map(function(k){ return '<option value="' + esc(k) + '">' + esc(depName(k)) + '</option>'; }).join('') + '</select></div>'
+      + '<div class="f"><label for="m5">' + esc(T('رقم الطلب (اختياري)','Order ID (optional)')) + '</label><input id="m5"></div>',
+      async function(){
+        var orderId = val('m5').trim();
+        var r = await run(SVC.createTicket({
+          customerId:val('m0').trim(), type:orderId ? 'order_linked' : 'general',
+          source:'customer_service', orderId:orderId || undefined,
+          category:val('m3'), subject:val('m1'), description:val('m2'), department:val('m4')
+        }), T('أُنشئت التذكرة.','Ticket created.'));
+        if (r && !r.ok && r.code === 'DUPLICATE' && r.ticketId) {
+          toast(T('توجد تذكرة مفتوحة لنفس المشكلة — تم فتحها.','An active ticket already exists for this problem — opening it.'), true);
+          go('tickets', r.ticketId);
+        }
+      }, T('إنشاء','Create'));
+  }
+
+  /* ───────── routing & render ───────── */
+  function render(){
+    route = parseHash();
+    var p = pageOf(route.p);
+    el('crumbGroup').textContent = T('خدمة العملاء','Customer Service');
+    el('crumbPage').textContent = route.id ? T('تفاصيل التذكرة','Ticket details') : T(p.ar, p.en);
+    var html;
+    if (route.id) html = vTicket(route.id);
+    else if (route.p === 'dashboard') html = vDashboard();
+    else if (route.p === 'tickets')   html = vTickets();
+    else if (route.p === 'mywork')    html = vMyWork();
+    else if (route.p === 'followups') html = vFollowUps();
+    else if (route.p === 'customers') html = vCustomers();
+    else if (route.p === 'c360')      html = vC360();
+    else html = vKnowledge();
+    el('view').innerHTML = html;
+    renderNav();
+  }
+  function applyLang(){
+    var en = isEn();
+    el('langBtn').textContent = en ? 'ع' : 'EN';
+    document.querySelectorAll('[data-ar]').forEach(function(n){ n.textContent = en ? n.getAttribute('data-en') : n.getAttribute('data-ar'); });
+    document.title = en ? 'RAF — Customer Service' : 'رف — خدمة العملاء';
+  }
+  function toggleLang(){
+    var en = isEn();
+    root().lang = en ? 'ar' : 'en'; root().dir = en ? 'rtl' : 'ltr';
+    try { localStorage.setItem('raf_lang', en ? 'ar' : 'en'); } catch (e) {}
+    applyLang(); render();
+  }
+  function gate(ar, en, msg){
+    el('shell').hidden = true; el('gate').hidden = false;
+    el('gateT').textContent = T(ar, en); el('gateP').textContent = msg || '';
+    applyLang();
+  }
+
+  function boot(){
+    try { if (localStorage.getItem('raf_lang') === 'en') { root().lang = 'en'; root().dir = 'ltr'; } } catch (e) {}
+    applyLang();
+    if (!SVC || !window.RAFPerm) return gate('تعذّر التحميل','Could not load', T('لم يتم تحميل وحدات رف المطلوبة.','The required RAF modules did not load.'));
+    CAPS = SVC.capabilities();
+    if (!CAPS.ok) return gate('لا تملك صلاحية الوصول','You do not have access', (SVC.ERRORS[CAPS.code] ? T(SVC.ERRORS[CAPS.code].ar, SVC.ERRORS[CAPS.code].en) : ''));
+    if (CAPS.audience !== 'employee' || !CAPS.view) {
+      return gate('لا تملك صلاحية الوصول إلى خدمة العملاء','You do not have access to Customer Service',
+        T('هذه الواجهة لموظفي رف المصرّح لهم فقط.','This console is for authorised RAF employees only.'));
+    }
+    ME = CAPS.me;
+    el('gate').hidden = true; el('shell').hidden = false;
+    el('userAv').textContent = initials(ME.name);
+    el('userName').textContent = ME.name;
+    el('userRole').textContent = (CAPS.department ? depName(CAPS.department) : ME.roleId);
+    render();
+    window.addEventListener('hashchange', function(){ closeNav(); render(); });
+    /* live updates — the event only says something changed; every view re-reads
+       through the authority. No polling, no setInterval. */
+    if (window.RAFEventBus) {
+      RAFEventBus.subscribe('support.*', function(){ render(); });
+      RAFEventBus.subscribe('notification.created', function(){ renderNav(); });
+    }
+    window.addEventListener('storage', function(e){
+      if (e.key && /^raf_(support_|users|current_user)/.test(e.key)) render();
+    });
+  }
+
+  return { boot:boot, render:render, act:act, send:send, newTicket:newTicket, toggleLang:toggleLang,
+           openNav:openNav, closeNav:closeNav, closeModal:closeModal,
+           open:function(id){ go('tickets', id); },
+           go:function(p){ go(p); },
+           go360:function(id){ C360 = id; go('c360'); },
+           set360:function(v){ C360 = v.trim(); clearTimeout(window.__c); window.__c = setTimeout(render, 350); },
+           setFilter:function(k, v){ FILTERS[k] = v; clearTimeout(window.__f); window.__f = setTimeout(render, 300); },
+           clearFilters:function(){ Object.keys(FILTERS).forEach(function(k){ FILTERS[k] = ''; }); render(); } };
+})();
+document.addEventListener('DOMContentLoaded', CS.boot);
+</script>
+</body>
+</html>
