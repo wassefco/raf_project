@@ -1223,7 +1223,7 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
     return '<section class="sm-sec"><div class="sm-sec-h"><h3>'+esc(T('الأمان','Security'))+'</h3></div>'
       + '<div class="sm-row"><div class="rb"><b>'+esc(T('الجلسة الحالية','Current session'))+'</b>'
         + '<span>'+esc(T('مسجّل الدخول باسم','Signed in as'))+' '+esc((u && u.name) || ME.name || '—')+'</span></div>'
-        + '<a class="sm-link" href="raf_login.html"><i class="ti ti-logout"></i>'+esc(T('تسجيل الخروج','Sign out'))+'</a></div>'
+        + '<button type="button" class="sm-link" onclick="RAFSignOut()"><i class="ti ti-logout"></i>'+esc(T('تسجيل الخروج','Sign Out'))+'</button></div>'
       + notAvailableRow('تغيير كلمة المرور','Change password',
                         'لا يوجد نظام كلمات مرور في هذه النسخة، ولا تُحفظ أي كلمة مرور.','The prototype has no password system, and no password is stored anywhere.')
       + notAvailableRow('الجلسات النشطة وسجل الدخول','Active sessions and login activity',

@@ -53,6 +53,9 @@ body{background:var(--bg2);margin:0;}
   align-items:center;justify-content:center;font-family:inherit;font-weight:800;transition:all .18s;}
 .mw-hact .mw-ico-b{min-height:44px;}
 .mw-ico-b:hover{border-color:var(--gold);color:var(--gold2);}
+.mw-ico-b.signout{color:var(--red,#C0503C);}
+.mw-ico-b.signout .so-t{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+.mw-ico-b.signout:hover{border-color:var(--red,#C0503C);color:var(--red,#C0503C);}
 .mw-ico-b.lang{width:auto;padding:0 14px;font-size:12.5px;}
 .mk-add{min-height:44px;padding:0 17px;border-radius:13px;border:1px solid var(--gold2);background:var(--gold);
   color:#1C1606;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;display:inline-flex;
@@ -296,6 +299,8 @@ html[dir="rtl"] .mk-sel select{padding:0 13px 0 34px;}
           <i class="ti ti-plus"></i> <span data-ar="إضافة جديد" data-en="Add New">إضافة جديد</span></button>
         <button class="mw-ico-b" onclick="refreshAll()" aria-label="refresh"><i class="ti ti-refresh"></i></button>
         <button class="mw-ico-b lang" onclick="toggleLang()"><span id="langLabel">EN</span></button>
+        <!-- sign out: the shared RAFSignOut action -->
+        <button class="mw-ico-b signout" onclick="RAFSignOut()"><i class="ti ti-logout" aria-hidden="true"></i><span class="so-t" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span></button>
       </div>
     </header>
 

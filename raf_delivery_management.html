@@ -126,6 +126,11 @@ bdi{ unicode-bidi:isolate; }
 .pop-id .dm-av{ width:40px; height:40px; font-size:15px; }
 .pop-id b{ display:block; color:var(--ink); }
 .pop-id span{ display:block; color:var(--faint); font-size:12px; }
+.pop-signout{ width:100%; min-height:48px; display:flex; align-items:center; gap:10px; padding:0 16px; border:0;
+  border-block-start:1px solid var(--line); background:transparent; color:var(--alert); font-size:13.5px; font-weight:700;
+  cursor:pointer; text-align:start; }
+.pop-signout:hover{ background:var(--alert-bg); }
+.pop-signout i{ font-size:19px; }
 
 /* ───────── CONTENT ───────── */
 .dm-content{ padding:28px 28px 48px; width:100%; max-width:1440px; margin-inline:auto; }
@@ -429,6 +434,11 @@ bdi{ unicode-bidi:isolate; }
           </button>
           <div class="pop" id="userPop" hidden>
             <div class="pop-id"><span class="dm-av" id="userAv2" aria-hidden="true"></span><div><b id="userName2"></b><span id="userRole2"></span></div></div>
+            <!-- the account menu's sign-out: the shared RAFSignOut action -->
+            <button type="button" class="pop-signout" onclick="RAFSignOut()">
+              <i class="ti ti-logout" aria-hidden="true"></i>
+              <span data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span>
+            </button>
           </div>
         </div>
       </div>

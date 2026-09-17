@@ -411,6 +411,20 @@
     write(LS.templates, tpls);
   }
   function setCurrentUser(userId) { write(LS.session, userId); }
+  /* ---- sign out ----
+     THE one way to end a session, so no page implements session clearing of
+     its own. Being signed in is a single fact — the stored session id — and
+     signing out removes exactly that, through this module, which already owns
+     it. Nothing else is touched: orders, carts, audit events, notifications,
+     configuration, records and preferences all survive a sign-out, because
+     none of them is session state. Authentication and authorisation are
+     unchanged; with no session every surface simply treats the visitor as
+     anonymous, exactly as it already does before a first sign-in. */
+  function signOut() {
+    var was = read(LS.session, null);
+    try { localStorage.removeItem(LS.session); } catch (e) { return { ok:false, reason:'persist_failed' }; }
+    return { ok:true, signedOutId:(typeof was === 'string' ? was : null) };
+  }
 
   /* -------------------------------------------------------------------------
    * 6b) NARROW ACCOUNT MUTATIONS
@@ -627,6 +641,7 @@
     getUser: getUser,
     currentUser: currentUser,
     setCurrentUser: setCurrentUser,
+    signOut: signOut,
     /* mutators */
     saveRole: saveRole,
     saveUser: saveUser,
@@ -651,4 +666,15 @@
   seed(false);
 
   global.RAFPerm = RAFPerm;
+
+  /* ---- the one Sign Out action every surface calls ----
+     One definition, so no page repeats the steps or drifts: end the session
+     through the authority above, then REPLACE the current history entry with
+     the login page, so Back cannot return to the signed-in page it came from.
+     Nothing else is cleared. */
+  global.RAFSignOut = function () {
+    var r = signOut();
+    try { location.replace('raf_login.html'); } catch (e) { location.href = 'raf_login.html'; }
+    return r;
+  };
 })(window);

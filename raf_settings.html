@@ -39,7 +39,7 @@
 
   <div class="section-h" data-ar="الحساب" data-en="Account">الحساب</div>
   <div class="panel">
-    <div class="row" onclick="location='raf_login.html'" style="cursor:pointer;"><div class="row-ic" style="background:var(--bg2);color:var(--text2)"><i class="ti ti-logout"></i></div><div class="row-body"><div class="row-lbl" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</div></div><i class="ti ti-chevron-left sec-arrow"></i></div>
+    <div class="row" onclick="RAFSignOut()" style="cursor:pointer;"><div class="row-ic" style="background:var(--bg2);color:var(--text2)"><i class="ti ti-logout"></i></div><div class="row-body"><div class="row-lbl" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</div></div><i class="ti ti-chevron-left sec-arrow"></i></div>
     <div class="row" style="cursor:pointer;"><div class="row-ic" style="background:var(--red-bg);color:var(--red)"><i class="ti ti-trash"></i></div><div class="row-body"><div class="row-lbl" style="color:var(--red)" data-ar="حذف الحساب" data-en="Delete Account">حذف الحساب</div><div class="row-sub" data-ar="سيتم حذف جميع بياناتك نهائياً" data-en="All your data will be permanently deleted">سيتم حذف جميع بياناتك نهائياً</div></div></div>
   </div>
 
@@ -54,6 +54,8 @@
   <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
 </nav>
 
+<!-- the session authority, for the canonical RAFSignOut() used by the row above -->
+<script src="raf_permissions.js"></script>
 <script src="raf_account.js"></script>
 </body>
 </html>

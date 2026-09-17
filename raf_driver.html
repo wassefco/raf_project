@@ -769,8 +769,8 @@ body{background:var(--bg2);margin:0;}
     h += '<section class="dv-card"><div class="dv-card-h"><h2>'+esc(T('اللغة','Language'))+'</h2></div>'
       + '<div class="dv-acts"><button class="dv-b" onclick="toggleLang()"><i class="ti ti-language"></i>'
       + esc(isEn() ? 'العربية' : 'English')+'</button>'
-      + '<button class="dv-b" onclick="location.href=\'raf_login.html\'"><i class="ti ti-logout"></i>'
-      + esc(T('تسجيل الخروج','Sign out'))+'</button></div></section>';
+      + '<button class="dv-b" onclick="RAFSignOut()"><i class="ti ti-logout"></i>'
+      + esc(T('تسجيل الخروج','Sign Out'))+'</button></div></section>';
     return h;
   }
 

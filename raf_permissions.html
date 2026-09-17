@@ -33,6 +33,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:1
 .sb-avatar{width:36px;height:36px;border-radius:50%;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.25);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--gold);flex-shrink:0;}
 .sb-admin-name{font-size:13px;font-weight:700;}
 .sb-admin-role{font-size:11px;color:var(--purple);}
+.sb-signout{width:100%;min-height:40px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 12px;
+  border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--red,#C0503C);
+  font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;}
+.sb-signout:hover{border-color:var(--red,#C0503C);background:rgba(192,80,60,.08);}
+.sb-signout i{font-size:16px;}
 /* MAIN */
 .content{flex:1;overflow-y:auto;min-height:100vh;display:flex;flex-direction:column;max-width:100%;}
 .top-bar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 32px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
@@ -212,6 +217,9 @@ select.field-inp{cursor:pointer;appearance:auto;}
       <button class="lang-btn" onclick="toggleLang()" data-ar="EN" data-en="ع" style="flex:1;">EN</button>
       <button class="lang-btn" onclick="resetData()" data-ar="إعادة تعيين" data-en="Reset" style="flex:1;">إعادة تعيين</button>
     </div>
+    <!-- the account area's sign-out: the shared RAFSignOut action -->
+    <button class="sb-signout" onclick="RAFSignOut()"><i class="ti ti-logout"></i>
+      <span data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span></button>
   </div>
 </div>
 

@@ -40,6 +40,12 @@ body{background:var(--bg2);margin:0;}
   background:var(--card);color:var(--text2);font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;
   display:inline-flex;align-items:center;justify-content:center;gap:6px;}
 .dm-head .dm-ico:hover{border-color:var(--gold);color:var(--gold2);}
+.dm-head .dm-ico.signout{color:var(--red,#C0503C);}
+.dm-head .dm-ico.signout:hover{border-color:var(--red,#C0503C);color:var(--red,#C0503C);}
+/* narrow screens: icon only, label kept for assistive technology */
+@media (max-width:640px){
+  .dm-head .dm-ico.signout .so-t{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+}
 
 .dm-sec{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px 20px;margin-top:14px;min-width:0;}
 .dm-sec-h{display:flex;align-items:center;gap:10px;min-height:44px;flex-wrap:wrap;}
@@ -188,6 +194,9 @@ body{background:var(--bg2);margin:0;}
       <span data-ar="حسابات موظفي التوصيل" data-en="Delivery employee accounts">حسابات موظفي التوصيل</span></div>
     <button class="dm-ico" onclick="refreshAll()" id="btnRefresh"><i class="ti ti-refresh"></i></button>
     <button class="dm-ico" onclick="toggleLang()"><span id="langLabel">EN</span></button>
+    <!-- sign out: the shared RAFSignOut action -->
+    <button class="dm-ico signout" onclick="RAFSignOut()"><i class="ti ti-logout"></i>
+      <span class="so-t" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span></button>
   </header>
   <main id="view" aria-live="polite"></main>
 </div>
