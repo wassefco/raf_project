@@ -26,7 +26,9 @@
  *       amount    = blocks × 'compensation.amountPerStepFils' (1000 fils = 1 KWD)
  *     Integer milliseconds and fils only — no rounding up, no proration.
  *   · Issued automatically ONCE per order (compensationId 'CMP-<orderId>');
- *     no automatic reissue. Triggered by RAFDriver.completeDelivery.
+ *     no automatic reissue. processDelivered(orderId) is the entry point; the
+ *     delivery implementation that called it was decommissioned, so nothing
+ *     triggers an issuance today.
  *   · The benefit is a Compensation Coupon, valid 'compensation.couponExpiryDays'
  *     (7) from issuance: expiresAt = issuedAt + 7 days, never extended.
  *   · The coupon can ONLY be added to RAF Wallet, by its customer, before
@@ -45,8 +47,8 @@
  *                            customer service, finance, anonymous)
  *
  * PROTOTYPE LIMITS — browser + localStorage: not a trusted financial boundary,
- * not transactional across records/wallet/audit/notification, issuance depends
- * on the delivering driver's browser running RAFDriver.completeDelivery.
+ * not transactional across records/wallet/audit/notification, and issuance
+ * depended on a client calling processDelivered after a delivery completed.
  * Production needs a server-side, transactional, idempotent post-delivery
  * consumer and server-side authorisation.
  * ==========================================================================*/

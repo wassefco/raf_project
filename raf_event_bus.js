@@ -41,7 +41,7 @@
   var VERSION = 1;
   var CHANNEL = 'raf_event_bus';            /* transient channel, not a store */
 
-  var DOMAINS = ['order', 'driver', 'logistics', 'notification', 'audit', 'ownership', 'config', 'communication', 'compensation', 'support'];
+  var DOMAINS = ['order', 'notification', 'audit', 'config', 'compensation', 'support'];
 
   /* the registered event types — the only names that can be published */
   var TYPES = {
@@ -50,55 +50,6 @@
     'order.snapshot.updated':        { domain:'order',        entityType:'order' },
     /* audit (bridged) */
     'audit.appended':                { domain:'audit',        entityType:'audit_event' },
-    /* ownership */
-    'ownership.claimed':             { domain:'ownership',    entityType:'delivery' },
-    'ownership.transferred':         { domain:'ownership',    entityType:'delivery' },
-    /* logistics operation locks */
-    'logistics.lock.acquired':       { domain:'logistics',    entityType:'delivery' },
-    'logistics.lock.released':       { domain:'logistics',    entityType:'delivery' },
-    'logistics.lock.recovered':      { domain:'logistics',    entityType:'delivery' },
-    /* dispatch (Phase C) — a Logistics employee assigned a pool delivery to a driver */
-    'logistics.delivery.assigned':   { domain:'logistics',    entityType:'delivery' },
-    /* a driver skipped an available pool delivery (no ownership, no state change) */
-    'driver.delivery.skipped':       { domain:'driver',       entityType:'delivery' },
-    /* reassignment & return to pool (Phase D) */
-    'logistics.delivery.reassigned':                 { domain:'logistics', entityType:'delivery' },
-    'logistics.delivery.returned_to_pool':           { domain:'logistics', entityType:'delivery' },
-    'logistics.delivery.reassignment_request_decided':{ domain:'logistics', entityType:'delivery' },
-    'driver.delivery.reassignment_requested':        { domain:'driver',    entityType:'delivery' },
-    'driver.delivery.reassignment_request_cancelled':{ domain:'driver',    entityType:'delivery' },
-    /* exceptions, SLA, escalation, ETA, penalty risk (Phase E) */
-    'logistics.exception.opened':            { domain:'logistics', entityType:'exception' },
-    'logistics.exception.updated':           { domain:'logistics', entityType:'exception' },
-    'logistics.exception.closed':            { domain:'logistics', entityType:'exception' },
-    'logistics.exception.reopened':          { domain:'logistics', entityType:'exception' },
-    'logistics.exception.escalated':         { domain:'logistics', entityType:'exception' },
-    'logistics.exception.management_action': { domain:'logistics', entityType:'exception' },
-    'logistics.exception.sla_approaching':   { domain:'logistics', entityType:'exception' },
-    'logistics.exception.sla_breached':      { domain:'logistics', entityType:'exception' },
-    'logistics.delivery.penalty_risk':       { domain:'logistics', entityType:'delivery' },
-    'logistics.delivery.eta_updated':        { domain:'logistics', entityType:'delivery' },
-    'driver.customer_unreachable_attempt':   { domain:'driver',    entityType:'delivery' },
-    /* driver availability, schedule, overtime, auto-offline (Phase F) */
-    'driver.availability.changed':           { domain:'driver',    entityType:'user' },
-    'driver.availability.available':         { domain:'driver',    entityType:'user' },
-    'driver.availability.unavailable':       { domain:'driver',    entityType:'user' },
-    'driver.schedule.changed':               { domain:'driver',    entityType:'user' },
-    'driver.overtime.changed':               { domain:'driver',    entityType:'user' },
-    'driver.auto_offline':                   { domain:'driver',    entityType:'user' },
-    'driver.auto_offline.reset':             { domain:'driver',    entityType:'user' },
-    /* Phase G — a customer rated the driver of a delivered order (RAFDriverRating) */
-    'driver.rating.submitted':               { domain:'driver',    entityType:'order' },
-    /* Phase H — Customer ↔ Driver communication (RAFDriverCommunication). Payloads
-       carry ids only; every page re-reads through the authority's access checks. */
-    'communication.conversation.opened':             { domain:'communication', entityType:'order' },
-    'communication.conversation.driver_transferred': { domain:'communication', entityType:'order' },
-    'communication.conversation.driver_released':    { domain:'communication', entityType:'order' },
-    'communication.conversation.driver_assigned':    { domain:'communication', entityType:'order' },
-    'communication.conversation.closed':             { domain:'communication', entityType:'order' },
-    'communication.message.sent':                    { domain:'communication', entityType:'order' },
-    'communication.message.delivered':               { domain:'communication', entityType:'order' },
-    'communication.message.read':                    { domain:'communication', entityType:'order' },
     /* Phase I — delay compensation (RAFCompensation); payloads carry ids only */
     'compensation.issued':           { domain:'compensation', entityType:'order' },
     'compensation.added_to_wallet':  { domain:'compensation', entityType:'order' },
@@ -121,8 +72,6 @@
     'notification.created':          { domain:'notification', entityType:'notification' },
     'notification.read':             { domain:'notification', entityType:'notification' },
     'notification.preference.changed':{ domain:'notification', entityType:'user' },
-    /* driver accounts (published by RAFDriverManagement on suspend/reactivate — Phase F) */
-    'driver.account.changed':        { domain:'driver',       entityType:'user' },
     /* configuration */
     'config.changed':                { domain:'config',       entityType:'config_key' }
   };

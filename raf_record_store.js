@@ -34,45 +34,6 @@
 
   /* the registered boundaries — the only names that exist */
   var COLLECTIONS = {
-    ownership:          { key:'raf_logistics_ownership',  owner:'RAFDriver',
-                          purpose:'append-only delivery ownership history (claims, dispatch assignments, transfers)' },
-    driver_skips:       { key:'raf_driver_skips',         owner:'RAFDriver',
-                          purpose:'append-only record of drivers skipping an available pool delivery' },
-    /* Phase D */
-    reassignments:      { key:'raf_logistics_reassignments', owner:'RAFDriver',
-                          purpose:'append-only history of Logistics reassignments (driver to driver)' },
-    pool_returns:       { key:'raf_logistics_pool_returns',  owner:'RAFDriver',
-                          purpose:'append-only history of deliveries returned to the pool, with pool classification' },
-    reassignment_requests:{ key:'raf_reassignment_requests', owner:'RAFDriver',
-                          purpose:'append-only lifecycle entries of driver reassignment requests (submitted, cancelled, approved, rejected)' },
-    /* Phase E — owned by RAFDeliveryOps.exceptions */
-    exceptions:         { key:'raf_logistics_exceptions',  owner:'RAFDeliveryOps',
-                          purpose:'append-only exception creation records (immutable facts at open, incl. category snapshot)' },
-    exception_events:   { key:'raf_logistics_exception_events', owner:'RAFDeliveryOps',
-                          purpose:'append-only exception lifecycle entries (action, escalation, management, SLA, close, reopen); state is derived' },
-    eta_updates:        { key:'raf_logistics_eta_updates', owner:'RAFDeliveryOps',
-                          purpose:'append-only current-ETA updates per order (the Promised ETA is never changed)' },
-    call_attempts:      { key:'raf_logistics_call_attempts', owner:'RAFDeliveryOps',
-                          purpose:'append-only customer CALL attempts recorded by the delivering driver' },
-    penalty_risks:      { key:'raf_logistics_penalty_risks', owner:'RAFDeliveryOps',
-                          purpose:'append-only delay penalty-RISK detections (no amount, no charge)' },
-    /* Phase F — owned by RAFDriverManagement.availability */
-    availability_history:{ key:'raf_driver_availability_history', owner:'RAFDriverManagement',
-                          purpose:'append-only driver availability transitions (who, when, why, session)' },
-    schedule_history:   { key:'raf_driver_schedule_history', owner:'RAFDriverManagement',
-                          purpose:'append-only structured schedule versions' },
-    overtime_events:    { key:'raf_driver_overtime_events', owner:'RAFDriverManagement',
-                          purpose:'append-only overtime transitions per availability session' },
-    /* Phase G — owned by RAFDriverRating */
-    driver_ratings:     { key:'raf_driver_ratings',       owner:'RAFDriverRating',
-                          purpose:'append-only customer ratings of the driver who completed the delivery (one per order, final)' },
-    /* Phase H — owned by RAFDriverCommunication */
-    communication_events:  { key:'raf_communication_events',   owner:'RAFDriverCommunication',
-                          purpose:'append-only conversation lifecycle (opened / driver transferred / released / assigned / closed), derived from ownership records' },
-    communication_messages:{ key:'raf_communication_messages', owner:'RAFDriverCommunication',
-                          purpose:'append-only customer ↔ driver messages (never edited or deleted)' },
-    communication_receipts:{ key:'raf_communication_receipts', owner:'RAFDriverCommunication',
-                          purpose:'append-only delivered / read receipts written by the recipient' },
     /* Phase I — owned by RAFCompensation */
     compensations:      { key:'raf_compensations',        owner:'RAFCompensation',
                           purpose:'append-only, immutable delay compensation records (one per order: calculation, promised ETA, delivered time, issuedAt, expiresAt)' },
@@ -83,8 +44,7 @@
                           purpose:'append-only configuration changes (key, value, at, by) — written before the override itself' },
     /* Customer Service — owned by RAFCustomerService. A ticket's CREATION
        record is immutable; its current state (status, priority, department,
-       assignment, resolution) is DERIVED from the activity entries, the same
-       way an exception's state is derived from its events. */
+       assignment, resolution) is DERIVED from the activity entries. */
     support_tickets:    { key:'raf_support_tickets',      owner:'RAFCustomerService',
                           purpose:'append-only customer service tickets — the immutable facts at open (customer, type, source, context, category, subject, description, SLA snapshot)' },
     support_activities: { key:'raf_support_activities',   owner:'RAFCustomerService',
@@ -103,14 +63,10 @@
                           purpose:'append-only per-recipient read receipts' }
   };
   var STATE_MAPS = {
-    logistics_locks:    { key:'raf_logistics_locks',      owner:'RAFDeliveryOps',
-                          purpose:'current Logistics operation locks (history lives in RAFAudit)' },
+
     notification_prefs: { key:'raf_notification_prefs',   owner:'RAFNotify',
                           purpose:'per-user notification sound preference (non-merchant accounts)' },
-    driver_availability:{ key:'raf_driver_availability',  owner:'RAFDriverManagement',
-                          purpose:'current operational availability per driver (history in availability_history)' },
-    driver_schedules:   { key:'raf_driver_schedules',     owner:'RAFDriverManagement',
-                          purpose:'current structured weekly schedule per driver (history in schedule_history)' },
+
     config:             { key:'raf_config',               owner:'RAFConfig',
                           purpose:'configured values that override the registry (history in RAFAudit)' }
   };

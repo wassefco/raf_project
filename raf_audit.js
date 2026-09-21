@@ -100,68 +100,9 @@
        timeline beside the assignment it reverses. */
     'driver.returned':      { tl:true,  ar:'أعاد السائق الطلب إلى قائمة الطلبات المتاحة',
                                         en:'Driver returned the order to the available pool' },
-    /* driver EMPLOYEE ACCOUNT administration — recorded against the account,
-       never against an order. Separate from the delivery events above. */
-    /* ---- Logistics foundations (Phase B) ----
-       REGISTRY ONLY. An action listed here is recorded ONLY when the owning
-       authority actually performs it; registering a name never creates
-       history. Actions marked (active) have a live producer today; the rest
-       are reserved for the phases that implement them. */
-    'ownership.transferred':    { tl:true,  ar:'نُقلت مسؤولية التوصيل إلى سائق آخر', en:'Delivery ownership transferred' },   /* historical (Phase B primitive); Phase D records reassignments as dispatch.reassigned */
-    'logistics.lock.acquired':  { tl:false, ar:'بدأ العمل على التوصيل',          en:'Delivery operation lock acquired' },   /* (active) RAFDeliveryOps */
-    'logistics.lock.released':  { tl:false, ar:'انتهى العمل على التوصيل',         en:'Delivery operation lock released' },   /* (active) RAFDeliveryOps */
-    'logistics.lock.recovered': { tl:false, ar:'استُعيد قفل عملية متوقف',         en:'Stale operation lock recovered' },     /* (active) RAFDeliveryOps */
-    'config.changed':           { tl:false, ar:'تم تعديل إعداد',                 en:'Configuration changed' },              /* (active) RAFConfig.set */
-    'dispatch.assigned':        { tl:true,  ar:'أُسند التوصيل إلى سائق',          en:'Delivery assigned to a driver' },      /* (active) RAFOrderEngine.driverAssigned via RAFDriver first assignment */
-    'dispatch.reassigned':      { tl:false,  ar:'أُعيد إسناد التوصيل',             en:'Delivery reassigned' },               /* (active) RAFDriver reassignment */
-    'dispatch.returned_to_pool':{ tl:false,  ar:'أُعيد التوصيل إلى القائمة',        en:'Delivery returned to the pool' },     /* (active) RAFOrderEngine.driverUnassigned via RAFDriver return to pool */
-    'reassignment.requested':   { tl:false,  ar:'طلب السائق إعادة الإسناد',        en:'Driver requested reassignment' },     /* (active) RAFDriver.requestReassignment */
-    'reassignment.cancelled':   { tl:false,  ar:'ألغى السائق طلب إعادة الإسناد',   en:'Driver cancelled the reassignment request' }, /* (active) RAFDriver.cancelReassignmentRequest */
-    'reassignment.decided':     { tl:false,  ar:'تم البت في طلب إعادة الإسناد',    en:'Reassignment request decided' },     /* (active) RAFDriver.decideReassignmentRequest */
-    'driver.skipped':           { tl:false, ar:'تخطى السائق توصيلاً متاحاً',       en:'Driver skipped an available delivery' },   /* (active) RAFDriver.skip */
-    'exception.opened':         { tl:false, ar:'فُتح استثناء',                    en:'Exception opened' },
-    'exception.action':         { tl:false, ar:'إجراء على استثناء',               en:'Exception action' },
-    'exception.resolved':       { tl:false, ar:'تمت معالجة استثناء',              en:'Exception resolved' },
-    'exception.closed':         { tl:false, ar:'أُغلق استثناء',                   en:'Exception closed' },
-    'exception.reopened':       { tl:false, ar:'أُعيد فتح استثناء',               en:'Exception reopened' },
-    'exception.escalated':      { tl:false, ar:'صُعّد استثناء',                   en:'Exception escalated' },
-    'exception.taken':          { tl:false, ar:'تولّت الإدارة استثناءً',           en:'Exception taken by management' },
-    'exception.returned':       { tl:false, ar:'أُعيد استثناء إلى الموظف',         en:'Exception returned to the employee' },
-    'exception.sla_approaching':{ tl:false, ar:'اقتراب انتهاء مهلة استثناء',       en:'Exception SLA approaching' },
-    'exception.sla_breached':   { tl:false, ar:'تجاوز مهلة استثناء',              en:'Exception SLA breached' },
-    /* Phase E — every exception.* action above is (active) in RAFDeliveryOps.exceptions */
-    'exception.auto_closed':    { tl:false, ar:'أُغلق استثناء تلقائيًا — تم تسليم الطلب', en:'Exception auto-closed — order delivered' },
-    'exception.call_attempt':   { tl:false, ar:'سجّل السائق محاولة اتصال بالعميل',   en:'Driver recorded a customer call attempt' },
-    'delivery.penalty_risk':    { tl:false, ar:'خطر غرامة التأخير — يلزم تدخل فوري', en:'Penalty risk — immediate intervention required' },
-    'delivery.arrived':         { tl:true,  ar:'وصل السائق',                      en:'Driver arrived' },
-    'otp.issued':               { tl:false, ar:'تم إصدار رمز التسليم',            en:'Delivery code issued' },
-    'otp.attempt_failed':       { tl:false, ar:'رمز تسليم غير صحيح',              en:'Incorrect delivery code' },
-    'otp.blocked':              { tl:false, ar:'تم إيقاف رمز التسليم',             en:'Delivery code blocked' },
-    'otp.reopened':             { tl:false, ar:'أُعيد فتح محاولات رمز التسليم',     en:'Delivery code attempts reopened' },
-    'eta.updated':              { tl:false, ar:'تم تحديث الوقت المتوقع',           en:'ETA updated' },   /* (active) RAFDeliveryOps.exceptions.updateEta */
-    'availability.changed':     { tl:false, ar:'تغيّر توفر السائق',               en:'Driver availability changed' },
-    'availability.auto_offline':{ tl:false, ar:'تحوّل السائق إلى غير متاح تلقائياً', en:'Driver set unavailable automatically' },
-    'schedule.changed':         { tl:false, ar:'تغيّر جدول عمل السائق',           en:'Driver schedule changed' },
-    'overtime.changed':         { tl:false, ar:'تغيّر العمل الإضافي',              en:'Overtime changed' },
-    /* Phase F — availability.changed / auto_offline, schedule.changed and
-       overtime.changed above are (active) in RAFDriverManagement.availability */
-    'availability.self_unavailable':{ tl:false, ar:'جعل السائق نفسه غير متاح',       en:'Driver set themselves unavailable' },
-    'communication.message':    { tl:false, ar:'رسالة بين العميل والسائق',         en:'Customer–driver message' },
-    /* Phase H — communication.message above and the lifecycle below are (active) in RAFDriverCommunication */
-    'communication.opened':             { tl:false, ar:'بدأت محادثة العميل والسائق',       en:'Customer–driver conversation opened' },
-    'communication.driver_transferred': { tl:false, ar:'انتقلت المحادثة إلى سائق آخر',     en:'Conversation moved to another driver' },
-    'communication.driver_released':    { tl:false, ar:'لا يوجد سائق في المحادثة (أُعيد الطلب للقائمة)', en:'No driver in the conversation (returned to pool)' },
-    'communication.driver_assigned':    { tl:false, ar:'انضم سائق جديد إلى المحادثة',      en:'A new driver joined the conversation' },
-    'communication.closed':             { tl:false, ar:'أُغلقت المحادثة — تم التسليم',      en:'Conversation closed — delivered' },
-    'communication.call':       { tl:false, ar:'مكالمة بين العميل والسائق',        en:'Customer–driver call' },
-    'rating.submitted':         { tl:false, ar:'قيّم العميل السائق',               en:'Customer rated the driver' },
     'compensation.issued':      { tl:false, ar:'صدر تعويض',                        en:'Compensation issued' },
     'compensation.voided':      { tl:false, ar:'أُلغي تعويض',                      en:'Compensation voided' },
     'compensation.reversed':    { tl:false, ar:'عُكس تعويض',                       en:'Compensation reversed' },
-    'driver.created':       { tl:false, ar:'تم إنشاء حساب سائق',          en:'Driver account created' },
-    'driver.updated':       { tl:false, ar:'تم تعديل بيانات سائق',        en:'Driver account updated' },
-    'driver.suspended':     { tl:false, ar:'تم إيقاف حساب سائق',          en:'Driver account suspended' },
-    'driver.reactivated':   { tl:false, ar:'تمت إعادة تفعيل حساب سائق',   en:'Driver account reactivated' },
     /* system */
     'system.timeout':       { tl:true,  ar:'انتهت مهلة القبول تلقائيًا',   en:'Acceptance window timed out' },
     'system.cancelled':     { tl:true,  ar:'أُلغي الطلب تلقائيًا',         en:'Order cancelled automatically' },

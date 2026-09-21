@@ -65,7 +65,7 @@
   var LANDING = {
     super_admin: null, higher_mgmt: null,
     merchant: 'raf_merchant.html', merchant_employee: 'raf_merchant.html',
-    driver: 'raf_driver.html', customer: 'raf_account.html'
+    driver: null, customer: 'raf_account.html'
   };
 
   function toUser(a) {

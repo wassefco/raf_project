@@ -636,8 +636,8 @@
   <div class="form-panel" id="view-staff-pending" role="status" aria-live="polite">
     <div class="activated-wrap">
       <div class="activated-icon"><i class="ti ti-tools" aria-hidden="true"></i></div>
-      <div class="activated-title" data-ar="واجهة إدارة رف غير متاحة بعد" data-en="RAF Management is not available yet">واجهة إدارة رف غير متاحة بعد</div>
-      <div class="activated-sub" data-ar="تم تسجيل دخولك بحسابك الإداري، لكن واجهة إدارة رف لم تُبنَ بعد، لذلك لا توجد صفحة يتم توجيهك إليها." data-en="You are signed in with your staff account, but the RAF Management interface has not been built yet, so there is no page to send you to.">تم تسجيل دخولك بحسابك الإداري، لكن واجهة إدارة رف لم تُبنَ بعد، لذلك لا توجد صفحة يتم توجيهك إليها.</div>
+      <div class="activated-title" data-ar="لا توجد واجهة متاحة لحسابك بعد" data-en="No interface is available for your account yet">لا توجد واجهة متاحة لحسابك بعد</div>
+      <div class="activated-sub" data-ar="تم تسجيل دخولك، لكن الواجهة الخاصة بدورك لم تُبنَ بعد، لذلك لا توجد صفحة يتم توجيهك إليها." data-en="You are signed in, but the interface for your role has not been built yet, so there is no page to send you to.">تم تسجيل دخولك، لكن الواجهة الخاصة بدورك لم تُبنَ بعد، لذلك لا توجد صفحة يتم توجيهك إليها.</div>
       <button class="btn-main" type="button" onclick="showView('view-signin')">
         <i class="ti ti-arrow-right"></i>
         <span data-ar="العودة إلى تسجيل الدخول" data-en="Back to sign in">العودة إلى تسجيل الدخول</span>
@@ -648,7 +648,7 @@
   <!-- ────────── STAFF ACCESS ────────── -->
   <div class="staff-section" id="staffSection">
     <div class="staff-label" data-ar="طاقم العمل والشركاء" data-en="STAFF & PARTNERS">طاقم العمل والشركاء</div>
-    <p class="staff-note" data-ar="سجّل الدخول بحسابك المعتاد — سيتم توجيهك تلقائياً إلى لوحة التحكم المناسبة لصلاحياتك (تاجر أو سائق)." data-en="Sign in with your usual account — you'll be routed automatically to the dashboard that matches your role (Merchant or Driver).">سجّل الدخول بحسابك المعتاد — سيتم توجيهك تلقائياً إلى لوحة التحكم المناسبة لصلاحياتك (تاجر أو سائق).</p>
+    <p class="staff-note" data-ar="سجّل الدخول بحسابك المعتاد — سيتم توجيهك تلقائياً إلى لوحة التحكم المناسبة لصلاحياتك (تاجر)." data-en="Sign in with your usual account — you'll be routed automatically to the dashboard that matches your role (Merchant).">سجّل الدخول بحسابك المعتاد — سيتم توجيهك تلقائياً إلى لوحة التحكم المناسبة لصلاحياتك (تاجر).</p>
   </div>
 
 </div><!-- /login-card -->
@@ -810,16 +810,17 @@
         const norm = s => (s || '').toString().toLowerCase().replace(/[\s+]/g,'');
         const u = RAFPerm.getUsers().find(x => (x.email||'').toLowerCase() === id || norm(x.phone) === norm(id));
         if (u){
-          /* RAF staff roles whose interface is not built yet: RAF Management does
-             not exist. They are signed in as before — so any surface their
+          /* Roles whose interface is not built: RAF Management does not exist,
+             and the Driver App was decommissioned with the old Logistics
+             system. They are signed in as before — every surface their
              permissions already open keeps working — but they are told so
              plainly instead of being sent to a page that does not exist, or
-             silently dropped into the customer account. The Ops Manager's
-             interface is built: Logistics Management. Routing only picks the
-             destination; that page's own authority still decides access. */
-          const STAFF = ['super_admin','higher_mgmt','customer_service','finance','marketing'];
-          const map = { ops_manager:'raf_delivery_management.html',
-            merchant:'raf_merchant.html', merchant_employee:'raf_merchant.html', driver:'raf_driver.html', customer:'raf_account.html' };
+             silently dropped into the customer account. The Operations
+             Manager's first rebuilt page is the Logistics Command Center;
+             that page's own check still decides access. */
+          const STAFF = ['super_admin','higher_mgmt','customer_service','finance','marketing','driver'];
+          const map = { ops_manager:'raf_logistics.html',
+            merchant:'raf_merchant.html', merchant_employee:'raf_merchant.html', customer:'raf_account.html' };
           RAFPerm.setCurrentUser(u.id);
           if (STAFF.indexOf(u.roleId) > -1) { showView('view-staff-pending'); return; }
           dest = map[u.roleId] || 'raf_account.html';

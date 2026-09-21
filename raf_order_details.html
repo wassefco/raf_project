@@ -41,28 +41,12 @@
 <script src="raf_data.js"></script>
 <script src="raf_order_snapshot.js"></script>
 <script src="raf_account.js"></script>
-<!-- read-only: who took the delivery, from the driver authority (RAFDriver.assignmentOf) -->
 <script src="raf_permissions.js"></script>
-<script src="raf_driver.js"></script>
 <script>
   function T(ar,en){ return curLang()==='en' ? en : ar; }
   function getId(){ return new URLSearchParams(location.search).get('id') || (RAF_ORDERS[0] && RAF_ORDERS[0].id); }
 
   function escH(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
-  /* The courier comes only from the driver authority. The order record's own
-     `driver` text is a placeholder, never shown. No name, ETA or location is
-     invented: before a driver takes the order an open order says so plainly,
-     and a closed order with no driver shows no row. */
-  function courierRow(o){
-    var a = { claimed:false };
-    try { if (window.RAFDriver && RAFDriver.assignmentOf) a = RAFDriver.assignmentOf(o.id) || a; } catch(e){}
-    var txt;
-    if (a.claimed) txt = a.driverName ? escH(a.driverName) : '—';
-    else if (o.status === 'progress') txt = T('لم يستلم أي سائق الطلب بعد','No driver has taken this order yet');
-    else return '';
-    return '<div class="row"><div class="row-ic"><i class="ti ti-user"></i></div><div class="row-body"><div class="row-lbl">'+T('المندوب','Courier')+'</div><div class="row-sub">'+txt+'</div></div></div>';
-  }
-
   function tlIcon(k){ return {placed:'ti-receipt',prep:'ti-package',ship:'ti-truck-delivery',done:'ti-home-check',cancel:'ti-circle-x'}[k] || 'ti-point'; }
 
   function render(){
@@ -121,7 +105,6 @@
       '<div class="section-h">'+T('معلومات التوصيل','Delivery Information')+'</div>'+
       '<div class="panel">'+
         '<div class="row"><div class="row-ic"><i class="ti ti-map-pin"></i></div><div class="row-body"><div class="row-lbl">'+T('عنوان التوصيل','Delivery address')+'</div><div class="row-sub">'+o.addr[en?'en':'ar']+'</div></div></div>'+
-        courierRow(o)+
       '</div>'+
 
       '<div class="section-h">'+T('معلومات الدفع','Payment Information')+'</div>'+

@@ -1,9 +1,11 @@
 # API Design — منصة رف
 # NOTE: the client-side foundations the server API must eventually back
-# (RAFConfig, RAFEventBus, RAFNotify per-recipient model, ownership history,
-# Logistics operation locks, audit registry, storage boundaries) are documented
-# in raf_foundations.md, including what is prototype-only and what requires
-# production server support.
+# (RAFConfig, RAFEventBus, RAFNotify per-recipient model, audit registry,
+# storage boundaries) are documented in raf_foundations.md, including what is
+# prototype-only and what requires production server support.
+# NOTE (2026-09-20): the client-side Logistics/Delivery implementation was
+# decommissioned and will be rebuilt. The LOGISTICS section below is a PLANNED
+# server API sketch, not documentation of that deleted code, so it is kept.
 # RESTful API — Node.js + Express
 # Base URL: https://api.ruph.com/v1
 # Authentication: Bearer JWT Token
@@ -244,7 +246,9 @@ GET    /admin/reports/users              # نشاط المستخدمين
 # Auth: Bearer Token (Logistics staff | driver)
 # ============================================================
 # [PLANNED — NOT FINAL] This section is an early sketch. The Logistics
-# Management API has not been designed yet and will follow the approved model:
+# Management API has not been designed yet, and the client-side implementation
+# that once existed was deleted (see raf_foundations.md). It will follow the
+# approved model:
 # a RAF-wide driver pool with first-come-first-served claims (Ready → Waiting for
 # Driver → Claimed → Picked Up → Out for Delivery → Arrived → Delivered), plus
 # Logistics dispatch (direct assignment, reassignment with reason), driver

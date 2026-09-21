@@ -56,14 +56,13 @@
       { href: 'raf_plans.html',       icon: 'ti-tag',              ar: 'الباقات والأسعار', en: 'Pricing & Plans' },
       { href: 'raf_merchant.html',    icon: 'ti-layout-dashboard', ar: 'لوحة التاجر',     en: 'Merchant Dashboard' },
       { href: 'raf_join_driver.html', icon: 'ti-motorbike',        ar: 'انضم كسائق',      en: 'Join as Driver' },
-      /* Logistics Management — RAF's own separate top-level interface.
-         `perms` lists the EXISTING permissions its authority already
-         requires, and BOTH must be held: the entry is drawn for nobody else.
-         It is a convenience only — the page itself still refuses anyone
-         RAFDeliveryOps does not authorise. */
-      { href: 'raf_delivery_management.html', icon: 'ti-truck-delivery',
-        ar: 'إدارة اللوجستيات', en: 'Logistics Management',
-        perms: ['orders.view', 'drivers.view'] }
+      /* RAF Logistics — the Command Center. `perms` lists the EXISTING keys the
+         page itself requires, and ALL must be held: the entry is drawn for
+         nobody else. It is a convenience only — the page refuses anyone its
+         own check does not authorise. */
+      { href: 'raf_logistics.html', icon: 'ti-route',
+        ar: 'مركز العمليات', en: 'Command Center',
+        perms: ['orders.view', 'drivers.view', 'drivers.suspend'] }
     ]}
   ];
 

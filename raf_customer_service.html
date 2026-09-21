@@ -19,8 +19,8 @@
 <style>
 /* ══════════════════════════════════════════════════════════════════════
    RAF CUSTOMER SERVICE — a standalone case-handling interface.
-   It shares the Logistics console's design language (same tokens, same
-   shell, logical properties so Arabic and English use one layout) and
+   It uses RAF's admin design language (same tokens, same shell, logical
+   properties so Arabic and English use one layout) and
    renders only what RAFCustomerService answers. It holds no ticket logic,
    no counts of its own and no state that bypasses the authority.
    ══════════════════════════════════════════════════════════════════════ */
@@ -547,12 +547,6 @@ var CS = (function(){
       + '<div class="card"><h2><i class="ti ti-gift"></i>' + esc(T('التعويضات','Compensation')) + '</h2>' + source(r.compensation, function(cc){
           return cc.items.length ? cc.items.map(function(x){ return kv(x.orderId, (x.amount || '') + ' — ' + (x.status || '')); }).join('')
             : emptyBox('لا توجد تعويضات.','No compensation records.','ti-gift');
-        }) + '</div>'
-      + '<div class="card"><h2><i class="ti ti-message-2"></i>' + esc(T('محادثات التوصيل','Delivery communication')) + '</h2>'
-      + source(r.communication, function(cm){
-          return '<div class="notice"><i class="ti ti-info-circle"></i><span>' + esc(cm.note) + '</span></div>'
-            + (cm.orders.length ? '<div class="chip-list">' + cm.orders.map(function(o){ return '<span class="chip mono">' + esc(o) + '</span>'; }).join('') + '</div>'
-               : emptyBox('لا توجد محادثات مرتبطة.','No linked conversations.','ti-message-2'));
         }) + '</div>'
       + '</div></div>';
   }

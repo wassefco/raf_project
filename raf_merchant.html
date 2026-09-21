@@ -820,8 +820,7 @@ body.is-offline .mw-off{display:flex;}
 <script src="raf_order_engine.js"></script>
 <script src="raf_order_changes.js"></script>
 <script src="raf_permissions.js"></script>
-<!-- read-only: who took the delivery, by name and time (RAFDriver.assignmentOf) -->
-<script src="raf_driver.js"></script>
+
 <script src="raf_merchant_prefs.js"></script>
 <script src="raf_merchant_nav.js"></script>
 <script>
@@ -1501,21 +1500,6 @@ body.is-offline .mw-off{display:flex;}
       : '';
     return '<div class="mw-actbar">' + actionsInner(o) + focus + '</div>';
   }
-  /* who is carrying the order, read from the driver authority. The merchant
-     sees the driver's name and the timestamps only; the delivery lifecycle
-     itself stays entirely on the driver side. */
-  function driverLine(orderId){
-    if (!window.RAFDriver) return '';
-    var a; try { a = RAFDriver.assignmentOf(orderId); } catch(e){ return ''; }
-    if (!a || !a.claimed) return '';
-    var who = a.driverName ? ' — ' + esc(a.driverName) : '';
-    var when = a.deliveredAt || a.pickedUpAt || a.assignedAt;
-    var head = a.stage === 'delivered' ? T('تم تسليم الطلب للعميل','The order was delivered to the customer')
-             : a.pickedUpAt ? T('استلم السائق الطلب وهو في الطريق','The driver collected the order and is on the way')
-             : T('تم سحب الطلب بواسطة السائق','The order was taken by a driver');
-    return '<div class="mw-readonly"><i class="ti ti-truck-delivery"></i> ' + head + who
-      + (when ? '<br><span style="opacity:.75">' + esc(relTime(when)) + '</span>' : '') + '</div>';
-  }
   function actionsInner(o){
     var html = undoHTML(o);
     if (E.undoOf(o.id)) return html;                 /* the undo bar is the state */
@@ -1530,13 +1514,8 @@ body.is-offline .mw-off{display:flex;}
                         'Merchant work is complete — a driver has the order')
                     : T('انتهت مسؤولية المتجر — الطلب بانتظار سائق',
                         'Merchant work is complete — the order is waiting for a driver');
-      /* Once a driver pulls the order the store can see that it is on its way,
-         by the driver's name and the time — never an account id, and never as
-         an action: the merchant's responsibility ended at Ready and delivery
-         is not theirs to steer. */
-      var dl = driverLine(o.id);
-      if (m !== 'rejected' && dl) return html + dl;
       return html + '<div class="mw-readonly">'+doneLbl+'</div>';
+
     }
     if (!mayProcess) return html + '<div class="mw-readonly">'+T('للقراءة فقط','Read only')+'</div>';
 

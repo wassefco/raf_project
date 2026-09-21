@@ -71,54 +71,6 @@
                                            title:{ ar:'رفض العميل التعديل', en:'Customer declined the change' } },
     'merchant.change.failed':            { audience:'merchant', legacyType:'change_failed',
                                            title:{ ar:'تعذّر تطبيق التعديل', en:'The change could not be applied' } },
-    /* driver, produced by RAFDriver when Logistics assigns a pool delivery (Phase C) */
-    'driver.delivery.assigned':          { audience:'driver',
-                                           title:{ ar:'أُسند إليك توصيل جديد', en:'A delivery was assigned to you' } },
-    /* driver, produced by RAFDriver reassignment / return to pool (Phase D).
-       Operational wording only: nothing implies the order was cancelled and no
-       internal reason or staff identity is included. */
-    'driver.delivery.reassigned':        { audience:'driver',
-                                           title:{ ar:'أصبحت مسؤولاً عن توصيل', en:'You are now responsible for a delivery' } },
-    'driver.delivery.removed':           { audience:'driver',
-                                           title:{ ar:'لم تعد مسؤولاً عن هذا التوصيل', en:'You are no longer responsible for this delivery' } },
-    'driver.reassignment_request.approved':{ audience:'driver',
-                                           title:{ ar:'تمت الموافقة على طلب إعادة الإسناد', en:'Your reassignment request was approved' } },
-    'driver.reassignment_request.rejected':{ audience:'driver',
-                                           title:{ ar:'لم تتم الموافقة على طلب إعادة الإسناد — تابع التوصيل', en:'Reassignment request not approved — continue the delivery' } },
-    /* Logistics staff (the temporary Logistics scope), produced by RAFDriver */
-    'logistics.reassignment_request.submitted':{ audience:'logistics',
-                                           title:{ ar:'طلب إعادة إسناد جديد من سائق', en:'New driver reassignment request' } },
-    'logistics.reassignment_request.cancelled':{ audience:'logistics',
-                                           title:{ ar:'ألغى السائق طلب إعادة الإسناد', en:'A driver cancelled a reassignment request' } },
-    /* Phase E — produced by RAFDeliveryOps.exceptions. Titles are operational
-       labels; customer wording comes from RAFConfig templates. */
-    'order.delay':                       { audience:'customer' },
-    'order.eta_updated':                 { audience:'customer' },
-    'logistics.exception.opened':        { audience:'logistics', title:{ ar:'استثناء جديد', en:'New exception' } },
-    'logistics.exception.updated':       { audience:'logistics', title:{ ar:'تحديث على استثناء', en:'Exception updated' } },
-    'logistics.exception.closed':        { audience:'logistics', title:{ ar:'أُغلق استثناء', en:'Exception closed' } },
-    'logistics.exception.reopened':      { audience:'logistics', title:{ ar:'أُعيد فتح استثناء', en:'Exception reopened' } },
-    'logistics.exception.escalated':     { audience:'logistics', title:{ ar:'تصعيد — يتطلب إجراء الإدارة', en:'Escalation — requires management action' } },
-    'logistics.exception.management_action':{ audience:'logistics', title:{ ar:'إجراء من الإدارة على استثناء', en:'Management action on an exception' } },
-    'logistics.exception.sla_approaching':{ audience:'logistics', title:{ ar:'اقتراب انتهاء مهلة الاستثناء', en:'Exception SLA approaching' } },
-    'logistics.exception.sla_breached':  { audience:'logistics', title:{ ar:'تجاوز مهلة الاستثناء — صُعّد للإدارة', en:'Exception SLA breached — escalated to management' } },
-    'logistics.delivery.penalty_risk':   { audience:'logistics', title:{ ar:'خطر غرامة التأخير — يلزم تدخل فوري', en:'Penalty Risk — Immediate Intervention Required' } },
-    'logistics.delivery.eta_updated':    { audience:'logistics', title:{ ar:'تم تحديث الوقت المتوقع', en:'ETA updated' } },
-    'logistics.customer_unreachable_attempt':{ audience:'logistics', title:{ ar:'محاولة اتصال بعميل لم يُرد', en:'Customer call attempt recorded' } },
-    'driver.exception.opened':           { audience:'driver', title:{ ar:'فُتح استثناء على توصيلك', en:'An exception was opened on your delivery' } },
-    'driver.exception.closed':           { audience:'driver', title:{ ar:'أُغلق الاستثناء على توصيلك', en:'The exception on your delivery was closed' } },
-    'driver.exception.reopened':         { audience:'driver', title:{ ar:'أُعيد فتح الاستثناء على توصيلك', en:'The exception on your delivery was reopened' } },
-    'driver.exception.instruction':      { audience:'driver', title:{ ar:'تعليمات من الإدارة', en:'Instruction from management' } },
-    'driver.delivery.eta_updated':       { audience:'driver', title:{ ar:'تم تحديث الوقت المتوقع للتوصيل', en:'The delivery ETA was updated' } },
-    /* Phase F — produced by RAFDriverManagement.availability */
-    'driver.availability.changed':       { audience:'driver', title:{ ar:'تغيّرت حالة توفرك', en:'Your availability changed' } },
-    'driver.availability.auto_offline':  { audience:'driver', title:{ ar:'أصبحت غير متاح تلقائيًا', en:'You were set Unavailable automatically' } },
-    'driver.schedule.changed':           { audience:'driver', title:{ ar:'تم تحديث جدول عملك', en:'Your work schedule was updated' } },
-    'logistics.driver.availability_changed':{ audience:'logistics', title:{ ar:'تغيّرت حالة توفر سائق', en:'A driver’s availability changed' } },
-    'logistics.driver.auto_offline':     { audience:'logistics', title:{ ar:'سائق أصبح غير متاح تلقائيًا', en:'A driver was set Unavailable automatically' } },
-    /* Phase H — a new message in the Customer ↔ Driver conversation (RAFDriverCommunication) */
-    'communication.message.customer':    { audience:'customer', title:{ ar:'رسالة جديدة من السائق', en:'New message from your driver' } },
-    'communication.message.driver':      { audience:'driver',   title:{ ar:'رسالة جديدة من العميل', en:'New message from the customer' } },
     /* Phase I — a delay compensation coupon was issued (RAFCompensation) */
     'compensation.issued':               { audience:'customer', title:{ ar:'حصلت على قسيمة تعويض', en:'You received a compensation coupon' } },
     /* Customer Service (RAFCustomerService). The 'support' audience is the

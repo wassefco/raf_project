@@ -12,8 +12,7 @@
  * Three separate channels, three separate authorities, no duplication.
  *
  * IT COORDINATES WORK; IT DOES NOT OWN THE BUSINESS OPERATION
- *   orders → RAFOrderEngine · delivery → RAFDeliveryOps · drivers → RAFDriver /
- *   RAFDriverManagement · driver conversation → RAFDriverCommunication ·
+ *   orders → RAFOrderEngine ·
  *   wallet → RAFWallet · compensation → RAFCompensation · audit → RAFAudit ·
  *   notifications → RAFNotify · live updates → RAFEventBus · permissions →
  *   RAFPerm · configuration → RAFConfig.
@@ -1225,9 +1224,8 @@
     if (!pre.ok) return Promise.resolve(pre);
     var reason = text(input.reason);
     var description = text(input.description);
-    /* RAF approves no escalation reason list (RAFConfig: exceptions.escalationReasons
-       is not_configured), so a description is what carries the case — the same
-       rule Phase E applies to delivery exceptions. */
+    /* RAF approves no escalation reason list, so a description is what carries
+       the case. */
     if (!within(description, LIMITS.resolution)) return Promise.resolve(fail('REASON_REQUIRED'));
 
     return serialized(ticketId, function () {
@@ -1461,16 +1459,6 @@
     var tickets = scopeTickets(a).filter(function (t) { return t.customerId === target; })
                                  .sort(function (x, y) { return y.updatedAt - x.updatedAt; });
 
-    var communication = { available:false, reason:'NOT_AVAILABLE', source:'RAFDriverCommunication' };
-    if (global.RAFDriverCommunication) {
-      /* the conversation authority authorises from the delivery's own facts;
-         Customer Service is not one of its parties, so 360 links to it rather
-         than reproducing any message here */
-      communication = { available:true, source:'RAFDriverCommunication', readable:false,
-                        note:'Conversations are read in Logistics Management; RAFDriverCommunication authorises each read from the delivery.',
-                        orders:orders.filter(function (o) { return !!o.pickedUpAt; }).map(function (o) { return o.orderId; }) };
-    }
-
     return { ok:true, readOnly:true, generatedAt:Date.now(),
       customer:{ id:u.id, name:u.name, email:u.email, phone:u.phone, status:u.status,
                  regDate:u.regDate, source:'RAFPerm' },
@@ -1480,7 +1468,7 @@
       supportHistory:{ total:tickets.length,
                        open:tickets.filter(function (t) { return isActive(t.status); }).length,
                        closed:tickets.filter(function (t) { return !isActive(t.status); }).length },
-      wallet:wallet, compensation:compensation, communication:communication };
+      wallet:wallet, compensation:compensation };
   }
 
   /* ══════════════════════ DASHBOARD (real counts only) ══════════════════════ */

@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl" data-ui="admin">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — مركز العمليات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_logistics.css">
+</head>
+<body>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-c" role="alert">
+    <div class="ic"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
+    <h1 id="gateT"></h1>
+    <p id="gateP"></p>
+    <a class="btn" href="raf_login.html"><i class="ti ti-login" aria-hidden="true"></i><span data-ar="تسجيل الدخول" data-en="Sign in">تسجيل الدخول</span></a>
+  </div>
+</div>
+
+<div class="ops" id="shell" hidden>
+  <aside class="ops-nav" id="opsNav">
+    <div class="ops-brand">
+      <span class="ops-brand-mark" aria-hidden="true"><i class="ti ti-route"></i></span>
+      <span class="ops-brand-t"><b data-ar="اللوجستيات" data-en="Logistics">اللوجستيات</b>
+        <span data-ar="منصة رف" data-en="RAF platform">منصة رف</span></span>
+      <button class="ibtn ops-nav-x" type="button" onclick="OPS.closeNav()" aria-label="إغلاق"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <nav class="ops-nav-scroll" id="navTree" aria-label="التنقل"></nav>
+  </aside>
+  <div class="scrim" onclick="OPS.closeNav()" aria-hidden="true"></div>
+
+  <div class="ops-main">
+    <header class="ops-head">
+      <button class="ibtn ops-burger" type="button" aria-controls="opsNav" onclick="OPS.openNav()" aria-label="القائمة"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+      <div class="ops-crumb"><small id="crumbGroup"></small><b id="crumbPage"></b></div>
+      <div class="ops-tools">
+        <button class="ibtn" type="button" id="refreshBtn" onclick="OPS.refresh()" aria-label="تحديث"><i class="ti ti-refresh" aria-hidden="true"></i></button>
+        <button class="ibtn lang" type="button" id="langBtn" onclick="OPS.toggleLang()"></button>
+        <span class="ops-sep" aria-hidden="true"></span>
+        <div class="ops-user"><span class="ops-av" id="userAv"></span>
+          <span class="ops-user-t"><b id="userName"></b><span id="userRole"></span></span></div>
+        <!-- the shared RAF sign-out action; this page adds no session logic -->
+        <button class="ibtn signout" type="button" id="signOutBtn" onclick="RAFSignOut()">
+          <i class="ti ti-logout" aria-hidden="true"></i>
+          <span class="signout-t" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span>
+        </button>
+      </div>
+    </header>
+    <main class="ops-content" id="view" tabindex="-1"></main>
+  </div>
+</div>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_store_ops.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_customer_service.js"></script>
+<script>
+/* ============================================================================
+   COMMAND CENTER — مركز العمليات
+   A read-only operational view. Three questions, in order: what needs
+   attention, what is running now, what just happened.
+
+   IT IS NOT AN AUTHORITY. It never writes an order, a ticket, an audit event
+   or a permission, and it keeps no storage of its own. Where the rebuilt
+   delivery system does not exist yet (driver assignment, pickup, delivery,
+   driver availability, follow-up thresholds), the page says so instead of
+   inventing a value or an action.
+   ==========================================================================*/
+(function(){
+  'use strict';
+
+  var E = window.RAFOrderEngine, P = window.RAFPerm, CS = window.RAFCustomerService;
+  var ME = null, CAN = { tickets:false, audit:false };
+
+  /* access: existing keys only. This combination is exactly Super Admin,
+     Higher Management and Operations Manager today — Customer Service,
+     Finance, Marketing, merchants, drivers and customers hold no such set.
+     RAF has NO dedicated logistics permission module; that remains
+     NOT CONFIGURED and is reported on the page itself. */
+  var PERM = { orders:'orders.view', drivers:'drivers.view', ops:'drivers.suspend' };
+
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function L(o){ return (o && typeof o === 'object') ? (isEn() ? (o.en||o.ar) : (o.ar||o.en)) : (o||''); }
+  function el(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function locale(){ return isEn() ? 'en-GB' : 'ar-KW-u-nu-latn'; }
+
+  /* ───────── time, in Kuwait time, never estimated ───────── */
+  function clockOf(ms){
+    if(!ms) return null;
+    try { return new Date(ms).toLocaleString(locale(), { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kuwait' }); }
+    catch(e){ return new Date(ms).toISOString().slice(0,16).replace('T',' '); }
+  }
+  function mins(ms){
+    var m = Math.max(0, Math.round(ms/60000));
+    if(m < 60) return T(m + ' د', m + 'm');
+    var h = Math.floor(m/60), r = m%60;
+    return T(h + ' س ' + r + ' د', h + 'h ' + r + 'm');
+  }
+
+  /* ───────── reads, once per render, from the owning authorities ───────── */
+  var DATA = null;
+  function readAll(){
+    var orders = [];
+    try { orders = (window.RAFShop && RAFShop.Orders ? RAFShop.Orders.all() : []) || []; } catch(e){ orders = []; }
+    var rows = orders.map(function(o){
+      var snap = null;
+      try { snap = window.RAFOrderSnapshot ? RAFOrderSnapshot.of(o.id) : null; } catch(e){ snap = null; }
+      var f = (snap && snap.fulfilment) || {};
+      var m = null; try { m = E ? E.mstate(o.id) : null; } catch(e){ m = null; }
+      var promise = null;
+      try { var pe = E ? E.promisedEtaAt(o.id) : null; if(pe && pe.recorded) promise = pe.at; } catch(e){ promise = null; }
+      /* the engine returns a milestone record { at, eventId, source } */
+      var accepted = null, ready = null;
+      try {
+        var ma = E ? E.acceptedAt(o.id) : null, mr = E ? E.readyAt(o.id) : null;
+        accepted = ma && ma.at ? ma.at : null; ready = mr && mr.at ? mr.at : null;
+      } catch(e){}
+      return {
+        id:o.id, status:o.status,
+        store:snap ? { ar:snap.storeNameAr, en:snap.storeNameEn } : (o.store || null),
+        storeSlug:snap ? snap.storeSlug : null,
+        placedAt:snap ? snap.checkoutAt : null, dateText:o.date || null,
+        mstate:m, driverId:f.driverId || null, pickedUpAt:f.pickedUpAt || null,
+        assignedAt:f.assignedAt || null, deliveredAt:f.deliveredAt || null,
+        promisedAt:promise, acceptedAt:accepted, readyAt:ready,
+        pendingLeftMs:(function(){ try { return E && E.isPending(E.get(o.id)) ? E.msLeft(o.id) : null; } catch(e){ return null; } })()
+      };
+    });
+    var tickets = null, ticketsErr = null;
+    if(CAN.tickets && CS){
+      try {
+        /* RAFCustomerService answers { ok, audience, items } and scopes the
+           list to the employee's own department — its rule, not this page's */
+        var r = CS.listTickets({ active:true });
+        if(r && r.ok) tickets = r.items || []; else ticketsErr = (r && r.message) || null;
+      } catch(e){ ticketsErr = null; }
+    }
+    return { rows:rows, tickets:tickets, ticketsErr:ticketsErr, at:Date.now() };
+  }
+
+  /* ───────── the operational state of one order ─────────
+     DERIVED for display only from facts the authorities already hold: the
+     order status, the merchant state (RAFOrderEngine) and the snapshot's
+     fulfilment record. This page defines no state of its own and stores
+     nothing; the rebuilt delivery authority will own the real lifecycle. */
+  function stateOf(r){
+    if(r.status === 'cancelled') return { k:'cancelled', ar:'ملغى', en:'Cancelled', cls:'b-off' };
+    if(r.status === 'delivered' || r.deliveredAt) return { k:'delivered', ar:'تم التسليم', en:'Delivered', cls:'b-done' };
+    if(r.pickedUpAt) return { k:'on_the_way', ar:'في الطريق', en:'On the way', cls:'b-go' };
+    if(r.driverId)   return { k:'assigned', ar:'تم تعيين السائق', en:'Assigned', cls:'b-go' };
+    if(r.mstate === 'ready' || r.mstate === 'waiting_driver')
+      return { k:'unassigned', ar:'بانتظار تعيين سائق', en:'Waiting for Driver Assignment', cls:'b-wait' };
+    if(r.mstate === 'preparing' || r.mstate === 'accepted')
+      return { k:'preparing', ar:'قيد التجهيز في المتجر', en:'Preparing at the store', cls:'b-prep' };
+    if(r.mstate === 'pending')
+      return { k:'pending', ar:'بانتظار قبول المتجر', en:'Awaiting merchant acceptance', cls:'b-prep' };
+    if(r.mstate === 'rejected') return { k:'rejected', ar:'رفضه المتجر', en:'Rejected by the store', cls:'b-off' };
+    return { k:'none', ar:'—', en:'—', cls:'b-plain' };
+  }
+
+  /* ───────── what counts as CURRENT ─────────
+     Not "every order that is not delivered". An order is operationally current
+     only while it is inside the merchant processing lifecycle RAFOrderEngine
+     actually tracks (pending → accepted/preparing → ready), or once a delivery
+     record exists for it. An order that never entered that lifecycle — no
+     merchant state and no fulfilment record — is order history, not operations,
+     and is left out.
+
+     NOT CONFIGURED: RAF approves no staleness threshold, so nothing is excluded
+     for being old. An order that is genuinely READY and unassigned stays in the
+     list however long it waits — that is the operational truth, not a defect. */
+  var LIVE_MSTATE = { pending:1, accepted:1, preparing:1, ready:1, waiting_driver:1 };
+  function isCurrent(r){
+    if(r.status !== 'progress') return false;          /* delivered / cancelled are closed */
+    if(r.driverId || r.pickedUpAt) return true;        /* a delivery record exists */
+    return !!LIVE_MSTATE[r.mstate];
+  }
+  /* the moment the CURRENT state began — the basis of the Duration column */
+  function stateSince(r){
+    var k = stateOf(r).k;
+    if(k === 'unassigned')  return r.readyAt || null;        /* waiting since READY */
+    if(k === 'preparing')   return r.acceptedAt || null;
+    if(k === 'on_the_way')  return r.pickedUpAt || null;
+    if(k === 'assigned')    return r.assignedAt || null;
+    if(k === 'pending')     return r.placedAt || null;
+    return null;
+  }
+
+  /* ───────── A · ALERTS (تنبيه) ─────────
+     Only conditions the current data can prove. No SLA, no follow-up timeout
+     and no driver condition is invented: those need the rebuilt delivery
+     authority and are named as unavailable at the end of the section. */
+  function buildAlerts(){
+    var out = [], now = Date.now();
+    DATA.rows.forEach(function(r){
+      /* an alert is raised only about work that is operationally current */
+      if(!isCurrent(r)) return;
+      var st = stateOf(r);
+      /* past the Promised ETA recorded at merchant acceptance (a historical
+         fact from RAFOrderEngine — not a threshold invented here) */
+      if(r.promisedAt && now > r.promisedAt && st.k !== 'delivered')
+        out.push({ kind:'late', rank:1, orderId:r.id, store:r.store,
+          ar:'تجاوز الوقت الموعود', en:'Past the promised time',
+          meta:T('تأخر ' + mins(now - r.promisedAt), mins(now - r.promisedAt) + ' late') + ' · ' + T('الموعود: ','Promised: ') + clockOf(r.promisedAt),
+          state:st });
+      if(st.k === 'unassigned')
+        out.push({ kind:'unassigned', rank:2, orderId:r.id, store:r.store,
+          ar:'بانتظار تعيين سائق', en:'Waiting for driver assignment',
+          meta:(r.readyAt ? T('في الانتظار منذ الجاهزية: ','Waiting since ready: ') + mins(Date.now() - r.readyAt) : T('جاهز في المتجر','Ready at the store')),
+          state:st, at:r.readyAt });
+      if(st.k === 'pending' && r.pendingLeftMs != null)
+        out.push({ kind:'pending', rank:3, orderId:r.id, store:r.store,
+          ar:'بانتظار قبول المتجر', en:'Awaiting merchant acceptance',
+          meta:T('تبقّى ' + mins(r.pendingLeftMs) + ' من مهلة القبول', mins(r.pendingLeftMs) + ' left in the acceptance window'),
+          state:st });
+    });
+    out.sort(function(a,b){ return (a.rank - b.rank) || ((a.at||0) - (b.at||0)); });
+    return out;
+  }
+
+  function alertRow(a){
+    var ic = a.kind === 'late' ? { c:'hot', i:'ti-clock-exclamation' }
+           : a.kind === 'unassigned' ? { c:'warn', i:'ti-user-question' }
+           : { c:'info', i:'ti-hourglass-high' };
+    /* the action is shown only when this build can actually perform it.
+       Assignment belongs to the delivery authority, which is not rebuilt yet. */
+    var action = a.kind === 'unassigned'
+      ? '<span class="al-na"><span class="nc"><i class="ti ti-tool" aria-hidden="true"></i>'
+        + T('التوزيع والتعيين غير متاح بعد','Dispatch not available yet') + '</span></span>'
+      : '';
+    return '<li class="sev-' + (a.kind === 'late' ? 'hot' : a.kind === 'unassigned' ? 'warn' : 'info') + '">'
+      + '<span class="al-ic ' + ic.c + '" aria-hidden="true"><i class="ti ' + ic.i + '"></i></span>'
+      + '<span class="al-b"><b>' + T(a.ar, a.en) + '</b>'
+      + '<span class="meta"><bdi class="mono">' + esc(a.orderId) + '</bdi>'
+      + (a.store ? '<span><bdi>' + esc(L(a.store)) + '</bdi></span>' : '')
+      + (a.meta ? '<span>' + esc(a.meta) + '</span>' : '') + '</span></span>'
+      + (action ? '<span class="al-act">' + action + '</span>' : '')
+      + '</li>';
+  }
+
+  /* ───────── tickets ─────────
+     RAF has ONE central ticket record. This page only surfaces the tickets the
+     signed-in employee's department is currently responsible for, read through
+     the existing central ticket authority — it opens no ticket, owns no ticket
+     store and never hands Logistics tickets to another department's console.
+     The Logistics ticket view itself is a later page. */
+  function ticketsCard(){
+    var head = '<div class="card-h"><h2><i class="ti ti-ticket" aria-hidden="true"></i>' + T('التذاكر','Tickets') + '</h2>'
+      + '<span class="count">' + (DATA.tickets ? T(DATA.tickets.length + ' مفتوحة', DATA.tickets.length + ' open') : '') + '</span></div>';
+    function wrap(inner){ return '<section class="card" aria-label="' + esc(T('التذاكر','Tickets')) + '">' + head + inner + '</section>'; }
+
+    if(!CAN.tickets)
+      return wrap('<div class="card-b"><div class="notice"><i class="ti ti-lock" aria-hidden="true"></i><span>'
+        + T('لا تملك صلاحية قراءة التذاكر (support.view).','You do not have the ticket read permission (support.view).') + '</span></div></div>');
+    if(DATA.tickets == null)
+      return wrap('<div class="card-b"><div class="notice warn"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>'
+        + esc(DATA.ticketsErr || T('تعذّرت قراءة التذاكر.','Tickets could not be read.')) + '</span></div></div>');
+    if(!DATA.tickets.length)
+      return wrap('<div class="card-b flush"><div class="empty ok"><i class="ti ti-ticket-off" aria-hidden="true"></i>'
+        + '<b>' + T('لا توجد تذاكر مفتوحة','No open tickets') + '</b></div></div>');
+
+    /* only fields the central ticket record actually holds today */
+    var rows = DATA.tickets.slice(0, 5).map(function(t){
+      var pr = t.priorityText ? L(t.priorityText) : null;
+      var meta = [];
+      if(t.departmentText) meta.push(T('المسؤول: ','Responsible: ') + L(t.departmentText));
+      if(t.source) meta.push(T('المصدر: ','Source: ') + t.source);
+      if(t.context && t.context.orderId) meta.push(t.context.orderId);
+      return '<li><span class="al-ic info" aria-hidden="true"><i class="ti ti-ticket"></i></span>'
+        + '<span class="al-b"><b><bdi>' + esc(t.subject || t.ticketId) + '</bdi></b>'
+        + '<span class="meta"><bdi class="mono">' + esc(t.ticketId) + '</bdi>'
+        + meta.map(function(m){ return '<span><bdi>' + esc(m) + '</bdi></span>'; }).join('') + '</span></span>'
+        + '<span class="al-act">' + (t.statusText ? '<span class="badge b-plain">' + esc(L(t.statusText)) + '</span>' : '')
+        + (pr ? '<span class="badge b-plain">' + esc(pr) + '</span>' : '')
+        + (t.escalated ? '<span class="badge b-hot">' + T('مُصعّدة','Escalated') + '</span>' : '') + '</span></li>';
+    }).join('');
+    var more = DATA.tickets.length > 5
+      ? '<div class="empty"><span>' + T('و' + (DATA.tickets.length - 5) + ' تذكرة أخرى', (DATA.tickets.length - 5) + ' more') + '</span></div>'
+      : '';
+    return wrap('<ul class="alerts">' + rows + '</ul>' + more);
+  }
+
+  function viewAlerts(){
+    var list = buildAlerts();
+    var body = list.length
+      ? '<ul class="alerts">' + list.map(alertRow).join('') + '</ul>'
+      : '<div class="empty ok"><i class="ti ti-circle-check" aria-hidden="true"></i>'
+        + '<b>' + T('لا توجد تنبيهات حالية','No current alerts') + '</b></div>';
+    return '<section class="card" aria-labelledby="h-alerts">'
+      + '<div class="card-h"><h2 id="h-alerts"><i class="ti ti-bell-exclamation" aria-hidden="true"></i>' + T('تنبيه','Alerts') + '</h2>'
+      + '<span class="count">' + T(list.length + ' تنبيه', list.length + ' alert(s)') + '</span></div>'
+      + '<div class="card-b flush">' + body + '</div></section>';
+  }
+
+  /* ───────── B · CURRENT OPERATIONS (العمليات الحالية) ───────── */
+  function driverCell(r){
+    /* no driver is simply no driver — the Status column already carries
+       "waiting for driver assignment"; repeating it here is noise */
+    if(!r.driverId) return '<span class="dash">—</span>';
+    var u = null; try { u = P.getUser(r.driverId); } catch(e){ u = null; }
+    /* name only — no contact details, no account fields */
+    return '<bdi>' + esc((u && u.name) || r.driverId) + '</bdi>';
+  }
+  function durationCell(r){
+    var st = stateOf(r);
+    if(st.k === 'pending' && r.pendingLeftMs != null)
+      return '<span class="nowrap">' + T('تبقّى ' + mins(r.pendingLeftMs), mins(r.pendingLeftMs) + ' left') + '</span>';
+    /* the time spent in the CURRENT state — for a READY order that is the wait
+       since it became ready, never the order's age */
+    var at = stateSince(r);
+    if(!at) return '<span class="dash">—</span>';
+    return '<span class="nowrap">' + esc(mins(Date.now() - at)) + '</span>'
+      + '<span class="sub">' + T('منذ ','since ') + esc(clockOf(at) || '') + '</span>';
+  }
+  function viewOps(){
+    var rows = DATA.rows.filter(isCurrent).sort(function(a,b){ return (stateSince(b)||0) - (stateSince(a)||0); });
+    var H = [T('الطلب','Order'), T('المتجر','Store'), T('الحالة','Status'), T('السائق','Driver'), T('المدة','Duration'), T('الإجراء','Action')];
+    var body = rows.length
+      ? '<div class="tbl-wrap"><table><caption class="sr-only">' + T('العمليات الحالية','Current operations') + '</caption><thead><tr>'
+        + H.map(function(h){ return '<th scope="col">' + h + '</th>'; }).join('') + '</tr></thead><tbody>'
+        + rows.map(function(r){
+            var st = stateOf(r);
+            return '<tr>'
+              + '<td data-l="' + esc(H[0]) + '"><bdi class="mono">' + esc(r.id) + '</bdi>'
+                + (r.placedAt || r.dateText ? '<span class="sub">' + esc(r.placedAt ? clockOf(r.placedAt) : L(r.dateText)) + '</span>' : '') + '</td>'
+              + '<td data-l="' + esc(H[1]) + '">' + (r.store ? '<bdi>' + esc(L(r.store)) + '</bdi>' : '<span class="dash">—</span>') + '</td>'
+              + '<td data-l="' + esc(H[2]) + '"><span class="badge ' + st.cls + '">' + T(st.ar, st.en) + '</span></td>'
+              + '<td data-l="' + esc(H[3]) + '">' + driverCell(r) + '</td>'
+              + '<td data-l="' + esc(H[4]) + '">' + durationCell(r) + '</td>'
+              /* no button that looks usable and does nothing: assignment
+                 arrives with the delivery system */
+              + '<td data-l="' + esc(H[5]) + '">' + (st.k === 'unassigned'
+                  ? '<span class="nc"><i class="ti ti-tool" aria-hidden="true"></i>' + T('التعيين غير متاح بعد','Assignment not available yet') + '</span>'
+                  : '<span class="dash">—</span>') + '</td>'
+              + '</tr>';
+          }).join('') + '</tbody></table></div>'
+      : '<div class="empty"><i class="ti ti-package-off" aria-hidden="true"></i>'
+        + '<b>' + T('لا توجد عمليات حالية','No current operations') + '</b></div>';
+    return '<section class="card" aria-labelledby="h-ops">'
+      + '<div class="card-h"><h2 id="h-ops"><i class="ti ti-list-check" aria-hidden="true"></i>' + T('العمليات الحالية','Current Operations') + '</h2>'
+      + '<span class="count">' + T(rows.length + ' طلب', rows.length + ' order(s)') + '</span></div>'
+      + '<div class="card-b flush">' + body + '</div></section>';
+  }
+
+  /* ───────── C · RECENT OPERATIONAL ACTIVITY (آخر النشاطات التشغيلية) ─────────
+     RAFAudit is the authority and its own permission (reports.view) decides.
+     Nothing is stored or re-derived here. */
+  /* WHICH ACTIONS THIS SECTION SHOWS — an ALLOW-LIST, taken from the action
+     identifiers RAFAudit actually registers.
+
+     It is an allow-list on purpose. The audit history still holds events from
+     the decommissioned Delivery/Driver implementation (driver.*, dispatch.*,
+     reassignment.*, ownership.transferred, logistics.lock.*, exception.*,
+     availability.*, communication.*, rating.submitted, otp.*, eta.updated …),
+     and some of those strings no longer even have a label. Showing them beside
+     "0 current operations" would claim a delivery system that does not exist.
+     A deny-list would leak every identifier we failed to think of; this way an
+     unknown action is simply not shown. RAFAudit keeps all of it — this is a
+     read filter, nothing is deleted or rewritten. */
+  var ACT_ALLOW = {
+    /* the order lifecycle Logistics watches today */
+    'order.created':'ti-receipt', 'order.accept':'ti-check', 'order.ready':'ti-package',
+    'order.reject':'ti-x', 'order.cancelled':'ti-circle-x', 'order.opened':'ti-folder-open',
+    'order.undo':'ti-arrow-back-up', 'order.oos_preference':'ti-adjustments-alt',
+    'order.migrated':'ti-file-import', 'snapshot.updated':'ti-file-text',
+    /* merchant processing of an order */
+    'lock.acquired':'ti-lock', 'lock.released':'ti-lock-open', 'lock.expired':'ti-lock-off',
+    'lock.overridden':'ti-lock-access', 'note.order':'ti-note', 'note.preparation':'ti-note',
+    /* changes to a live order */
+    'modify.requested':'ti-edit', 'modify.approved':'ti-check', 'modify.rejected':'ti-x',
+    'modify.applied':'ti-check', 'modify.failed':'ti-alert-triangle',
+    'product_removal.requested':'ti-edit', 'product_removal.approved':'ti-check',
+    'product_removal.rejected':'ti-x', 'product_removal.applied':'ti-package-off',
+    'product_replacement.requested':'ti-edit', 'product_replacement.approved':'ti-check',
+    'product_replacement.rejected':'ti-x', 'product_replacement.applied':'ti-package',
+    'product.removed':'ti-package-off', 'customer.approved':'ti-check', 'customer.response':'ti-message',
+    'payment.result':'ti-credit-card', 'refund.created':'ti-receipt-refund',
+    /* automatic outcomes on an order */
+    'system.timeout':'ti-clock-off', 'system.cancelled':'ti-circle-x', 'system.ready_recovery':'ti-package',
+    'system.stock_restored':'ti-rotate', 'system.refunded':'ti-receipt-refund', 'system.lock_expired':'ti-lock-off',
+    /* store availability, which decides whether orders can arrive at all */
+    'ops.busy_on':'ti-player-pause', 'ops.busy_off':'ti-player-play', 'ops.busy_expired':'ti-player-play',
+    'ops.workload_manual':'ti-adjustments', 'ops.workload_auto':'ti-adjustments',
+    'store.schedule_updated':'ti-calendar-time',
+    /* the central RAF ticket record */
+    'ticket.created':'ti-ticket', 'ticket.claimed':'ti-user-check', 'ticket.updated':'ti-edit',
+    'ticket.transferred':'ti-arrows-exchange', 'ticket.note_added':'ti-note',
+    'ticket.message_added':'ti-message', 'ticket.task_created':'ti-checkbox',
+    'ticket.task_completed':'ti-checkbox', 'ticket.followup_created':'ti-clock',
+    'ticket.followup_completed':'ti-clock-check', 'ticket.escalated':'ti-arrow-up-circle',
+    'ticket.resolved':'ti-circle-check', 'ticket.closed':'ti-archive', 'ticket.reopened':'ti-rotate',
+    /* configuration that changes how operations behave */
+    'config.changed':'ti-adjustments'
+  };
+  function viewActivity(){
+    var A = window.RAFAudit;
+    if(!A || !CAN.audit)
+      return '<section class="card" aria-labelledby="h-act">'
+        + '<div class="card-h"><h2 id="h-act"><i class="ti ti-history" aria-hidden="true"></i>' + T('آخر النشاطات التشغيلية','Recent Operational Activity') + '</h2></div>'
+        + '<div class="card-b"><div class="notice"><i class="ti ti-lock" aria-hidden="true"></i><span>'
+        + T('سجل النشاط يتطلب صلاحية reports.view، وهي غير متوفرة لحسابك.','The activity log requires the reports.view permission, which your account does not hold.')
+        + '</span></div></div></section>';
+    var list = [];
+    try { list = A.auditLog({ since:Date.now() - 7*24*60*60*1000 }) || []; } catch(e){ list = []; }
+    /* only the currently supported operational surface; legacy Delivery/Driver
+       events stay in RAFAudit but are never shown here */
+    list = list.filter(function(e){ return !!ACT_ALLOW[e.action]; }).slice(0, 12);
+    var body = list.length
+      ? '<ul class="acts">' + list.map(function(e){
+          return '<li><span class="ai" aria-hidden="true"><i class="ti ' + (ACT_ALLOW[e.action] || 'ti-point') + '"></i></span>'
+            + '<span class="ab"><b>' + esc(e.label || e.action) + '</b><span>'
+            + (e.orderId ? '<bdi class="mono">' + esc(e.orderId) + '</bdi> · ' : '')
+            + '<bdi>' + esc(e.actorName || (e.actorType === 'system' ? T('النظام','System') : '—')) + '</bdi></span></span>'
+            + '<span class="aw">' + esc(clockOf(e.timestamp) || '') + '</span></li>';
+        }).join('') + '</ul>'
+      : '<div class="empty"><i class="ti ti-history-off" aria-hidden="true"></i>'
+        + '<b>' + T('لا توجد نشاطات تشغيلية حديثة','No recent operational activity') + '</b></div>';
+    return '<section class="card" aria-labelledby="h-act">'
+      + '<div class="card-h"><h2 id="h-act"><i class="ti ti-history" aria-hidden="true"></i>' + T('آخر النشاطات التشغيلية','Recent Operational Activity') + '</h2>'
+      + '<span class="count">' + T('آخر ٧ أيام','last 7 days') + '</span></div>'
+      + '<div class="card-b flush">' + body + '</div></section>';
+  }
+
+  /* ───────── navigation ─────────
+     The sidebar lists the pages that EXIST. Orders, Dispatch, Tickets and
+     Drivers join it as each page is built — a navigation full of "soon"
+     entries makes a real product look unfinished, and a link to a page that
+     does not exist is worse. Tickets in particular must never route to another
+     department's console: RAF's ticket record is central, and Logistics gets
+     its own authorised view when that page is built. */
+  function renderNav(){
+    el('navTree').innerHTML =
+      '<span class="grp">' + T('العمليات','Operations') + '</span><ul>'
+      + '<li><a href="raf_logistics.html" aria-current="page"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>'
+      + '<span>' + T('مركز العمليات','Command Center') + '</span></a></li>'
+      + '<li><a href="raf_logistics_orders.html"><i class="ti ti-shopping-bag" aria-hidden="true"></i>'
+      + '<span>' + T('الطلبات','Orders') + '</span></a></li>'
+      + '</ul>'
+      + '<div class="ops-nav-foot"><b>' + T('العمليات واللوجستيات','Operations & Logistics') + '</b>'
+      + T('منصة رف','RAF platform') + '</div>';
+  }
+
+  function renderHeader(){
+    el('crumbGroup').textContent = T('اللوجستيات · العمليات','Logistics · Operations');
+    el('crumbPage').textContent = T('مركز العمليات','Command Center');
+    el('langBtn').textContent = isEn() ? 'ع' : 'EN';
+    el('langBtn').setAttribute('aria-label', T('التبديل إلى الإنجليزية','Switch to Arabic'));
+    if(ME){
+      el('userAv').textContent = String(ME.name || '?').trim().charAt(0);
+      el('userName').textContent = ME.name || '';
+      var role = null; try { role = P.getRole(ME.roleId); } catch(e){}
+      el('userRole').textContent = role ? T(role.nameAr, role.nameEn) : '';
+    }
+    document.title = T('رف — مركز العمليات','RAF — Command Center');
+  }
+
+  /* one slim line of counts, each the length of a list already on this page —
+     no metric that is not also visible as real rows below */
+  function strip(){
+    var cur = DATA.rows.filter(isCurrent), alerts = buildAlerts();
+    function n(k){ return cur.filter(function(r){ return stateOf(r).k === k; }).length; }
+    var cells = [
+      { k:T('تنبيه','Alerts'), v:alerts.length, cls:alerts.length ? 'hot' : '' },
+      { k:T('بانتظار تعيين سائق','Waiting for Driver Assignment'), v:n('unassigned'), cls:n('unassigned') ? 'wait' : '' },
+      { k:T('العمليات الحالية','Current Operations'), v:cur.length, cls:'' }
+    ];
+    if(CAN.tickets && DATA.tickets) cells.push({ k:T('التذاكر','Tickets'), v:DATA.tickets.length, cls:'' });
+    return '<div class="strip">' + cells.map(function(c){
+      return '<span class="s ' + c.cls + '"><b class="v">' + c.v + '</b><span class="k">' + c.k + '</span></span>'; }).join('') + '</div>';
+  }
+
+  function render(){
+    if(!DATA) return;
+    renderHeader(); renderNav();
+    var sub = T('نظرة مباشرة على عمليات التوصيل التي تحتاج إلى متابعة.','Live view of delivery operations that require attention.');
+    el('view').innerHTML =
+      /* the one page title lives in the header bar; it stays here for
+         assistive technology only, so the heading is never shown twice */
+      '<h1 class="sr-only">' + T('مركز العمليات','Command Center') + '</h1>'
+      + '<div class="pg"><p class="pg-t">' + sub + '</p>'
+      + '<div class="pg-meta"><i class="ti ti-clock" aria-hidden="true"></i><span>' + T('محدَّث ','Updated ') + esc(clockOf(DATA.at) || '') + '</span></div></div>'
+      + strip() + viewAlerts() + viewOps()
+      + '<div class="pair">' + ticketsCard() + viewActivity() + '</div>';
+  }
+
+  function refresh(){ DATA = readAll(); render(); }
+
+  /* ───────── access ───────── */
+  function gate(titleAr, titleEn, msg){
+    el('shell').hidden = true;
+    var g = el('gate'); g.hidden = false;
+    el('gateT').textContent = T(titleAr, titleEn);
+    el('gateP').textContent = msg;
+    document.title = T('رف — مركز العمليات','RAF — Command Center');
+  }
+  function boot(){
+    var l = null; try { l = localStorage.getItem('raf_lang'); } catch(e){}
+    if(l === 'en'){ root().lang = 'en'; root().dir = 'ltr'; }
+    applyLang();
+
+    if(!P || !E || !window.RAFShop){
+      gate('تعذّر التحميل','Could not load', T('لم يتم تحميل وحدات رف المطلوبة.','The required RAF modules did not load.'));
+      return;
+    }
+    /* identity from the stored session only — never from the URL, a query
+       string or a caller-supplied id. RAFPerm.currentUser() falls back to the
+       first administrator when nothing is signed in, so the session key is
+       checked first and an empty session is refused. */
+    var sid = null;
+    try {
+      var key = (P.LS && P.LS.session) || 'raf_current_user';
+      var raw = localStorage.getItem(key);
+      if(raw != null && raw !== ''){ try { sid = JSON.parse(raw); } catch(e){ sid = raw; } }
+      if(typeof sid !== 'string' || !sid) sid = null;
+    } catch(e){ sid = null; }
+    if(!sid){
+      gate('يلزم تسجيل الدخول','Sign-in required', T('مركز العمليات متاح لفريق عمليات رف بعد تسجيل الدخول.','The Command Center is available to RAF operations staff after signing in.'));
+      return;
+    }
+    var u = null; try { u = P.getUser(sid); } catch(e){ u = null; }
+    if(!u){
+      gate('يلزم تسجيل الدخول','Sign-in required', T('تعذّر التعرف على الحساب.','That account could not be identified.'));
+      return;
+    }
+    if(u.status !== 'active'){
+      gate('حسابك موقوف','Your account is suspended', T('لا يمكن فتح مركز العمليات بحساب موقوف.','A suspended account cannot open the Command Center.'));
+      return;
+    }
+    var ok = true;
+    try { ok = P.can(u.id, PERM.orders) && P.can(u.id, PERM.drivers) && P.can(u.id, PERM.ops); } catch(e){ ok = false; }
+    if(!ok){
+      gate('لا تملك صلاحية الوصول','You do not have access', T('مركز العمليات متاح لفريق عمليات رف فقط.','The Command Center is available to RAF operations staff only.'));
+      return;
+    }
+    ME = { id:u.id, name:u.name, roleId:u.roleId };
+    CAN.tickets = (function(){ try { return !!(CS && P.can(u.id, 'support.view')); } catch(e){ return false; } })();
+    CAN.audit   = (function(){ try { return !!(window.RAFAudit && RAFAudit.canViewAudit(u.id)); } catch(e){ return false; } })();
+
+    el('gate').hidden = true; el('shell').hidden = false;
+    refresh();
+
+    /* live updates through the mechanisms that already exist — no polling,
+       no timer, no new synchronisation layer */
+    if(window.RAFEventBus){
+      ['order.*','support.*','audit.*'].forEach(function(p){
+        try { RAFEventBus.subscribe(p, function(){ refresh(); }); } catch(e){}
+      });
+    }
+    window.addEventListener('storage', function(e){
+      if(e.key && /^raf_(orders|order_mstate|order_undo|pending|support_tickets|support_activities|audit_events|users)$/.test(e.key)) refresh();
+    });
+    document.addEventListener('raf:order', refresh);
+    document.addEventListener('raf:audit', refresh);
+  }
+
+  function applyLang(){
+    var en = isEn();
+    document.querySelectorAll('[data-ar][data-en]').forEach(function(e){
+      var t = e.getAttribute('data-' + (en ? 'en' : 'ar')); if(t !== null) e.textContent = t;
+    });
+  }
+
+  window.OPS = {
+    refresh: refresh,
+    toggleLang: function(){
+      var r = root(), en = r.lang === 'en';
+      r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+      try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+      applyLang(); render(); el('langBtn').focus();
+    },
+    openNav: function(){ el('shell').classList.add('nav-open'); var x = document.querySelector('.ops-nav-x'); if(x) x.focus(); },
+    closeNav: function(){ el('shell').classList.remove('nav-open'); var b = document.querySelector('.ops-burger'); if(b) b.focus(); }
+  };
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && el('shell') && el('shell').classList.contains('nav-open')) OPS.closeNav();
+  });
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

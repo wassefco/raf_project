@@ -7,7 +7,7 @@
  *
  *   RAFCompUI.mount(el, { mode:'order', orderId })   customer order page
  *   RAFCompUI.mount(el, { mode:'wallet' })           customer RAF Wallet page
- *   RAFCompUI.mount(el, { mode:'admin' })            Logistics Management review
+ *   RAFCompUI.mount(el, { mode:'admin' })            management review (no page mounts this today)
  *   opts.onRender(el) — called after each paint (e.g. to hide an empty panel)
  *
  * Live refresh: RAFEventBus 'compensation.*' (same tab and other tabs) and the
