@@ -45,7 +45,10 @@
       "Bash(sed -i 's#^<script src=\"raf_delivery_management.js\"></script>$#<script src=\"raf_delivery_management.js\"></script>\\\\n<!-- Phase H: the Customer ↔ Driver conversation \\(authority + widget\\) -->\\\\n<script src=\"raf_driver_communication.js\"></script>\\\\n<script src=\"raf_driver_communication_ui.js\"></script>#' raf_driver.html raf_delivery_management.html)",
       "Bash(awk 'NR>650 && NR<780 && /return h|dv-note|Phase E|exception/ {print NR\": \"$0}' raf_driver.html)",
       "Bash(grep -v \":0$\")",
-      "Bash(sort -t: -k2 -rn)"
+      "Bash(sort -t: -k2 -rn)",
+      "mcp__claude-in-chrome__list_connected_browsers",
+      "Bash(git status *)",
+      "Bash(git rev-list *)"
     ]
   }
 }

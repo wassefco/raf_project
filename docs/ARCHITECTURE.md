@@ -59,7 +59,6 @@ Primary authority layers include:
 
 - `RAFSource`
 - `RAFShop`
-- `RAFCatalog`
 - `RAFRules`
 - `RAFPerm`
 - `RAFOrderEngine`
@@ -81,9 +80,8 @@ Primary authority layers include:
 - `RAFCustomerExperience`
 - `RAFCustomerService`
 - `RAFCustomerSupport`
-- `RAFDashboard`
+- `RAFCO`
 - `RAFMerchantPrefs`
-- `RAFMerchantNav`
 
 Logistics/Delivery authorities are currently being rebuilt and must not be assumed to exist unless explicitly implemented and verified in the current codebase.
 
@@ -542,8 +540,6 @@ Current prototype values must not automatically be treated as production policy.
 
 ## 18. Event and State Updates
 
-## 18. Event and State Updates
-
 RAF currently uses browser-based storage/event mechanisms for cross-page updates.
 
 Use existing event/storage infrastructure when available.
@@ -557,6 +553,8 @@ Production realtime behavior will require a server-side/event-driven architectur
 ## 19. Storage Rules
 
 Browser storage is part of the current prototype architecture.
+
+RAFRecordStore is a storage boundary, not a business authority. It must not become a source of business rules.
 
 Do not globally reset localStorage during QA or feature development.
 
@@ -680,7 +678,7 @@ Permissions belong to the authorization layer.
 
 Audit history belongs to `RAFAudit`.
 
-Tickets belong to the central ticket architecture.
+Administrative tickets belong to `RAFCustomerService`.
 
 Orders belong to the order architecture.
 
