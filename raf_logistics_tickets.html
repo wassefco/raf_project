@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl" data-ui="admin">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — التذاكر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_logistics.css">
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   TICKETS — the Logistics view of RAF's ONE central ticket record. Shares
+   the Logistics shell and components; what follows is only what this page
+   adds: the toolbar, the scope tabs, the ticket grid and the ticket sheet.
+   The shared stylesheet is untouched — every rule here is scoped to this
+   page's own classes.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.wk{ display:flex; flex-direction:column; gap:12px; }
+.wk-head{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.wk-head p{ margin:0; color:var(--muted); font-size:13px; flex:1 1 240px; min-width:0; }
+.wk-count{ color:var(--faint); font-size:12px; font-weight:700; font-family:'DM Sans',sans-serif; white-space:nowrap; }
+.wk-head .btn{ flex:0 0 auto; }
+
+/* create form — the same sheet family as the applet and the ticket sheet */
+.create{ width:min(520px,100%); }
+.create .sheet-b{ padding:4px 16px 16px; }
+.fld textarea{ resize:vertical; }
+.fld.bad select,.fld.bad input,.fld.bad textarea{ border-color:var(--alert); }
+.fld .req{ color:var(--alert); font-weight:800; }
+.fld .hint{ display:block; margin-block-start:5px; font-size:11.5px; color:var(--faint); line-height:1.6; }
+.form-msg{ display:flex; gap:9px; padding:11px 12px; border-radius:var(--r); font-size:12.5px; margin-block-start:12px; }
+.form-msg i{ font-size:17px; flex-shrink:0; }
+.form-msg.err{ background:var(--alert-bg); color:var(--alert); }
+.form-msg.busy{ background:var(--surface-2); color:var(--muted); }
+.form-msg .btn{ min-height:32px; margin-block-start:6px; }
+
+.scopes{ display:flex; gap:2px; padding:3px; background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r); overflow-x:auto; }
+.scope{ display:inline-flex; align-items:center; gap:7px; min-height:36px; padding:0 14px; border:0; background:transparent; cursor:pointer;
+  border-radius:var(--r-sm); color:var(--muted); font-size:13px; font-weight:700; white-space:nowrap; }
+.scope:hover{ color:var(--ink); }
+.scope[aria-pressed="true"]{ background:var(--surface); color:var(--ink); box-shadow:var(--shadow); }
+.scope .n{ font-family:'DM Sans',sans-serif; font-size:11.5px; color:var(--faint); }
+.scope[aria-pressed="true"] .n{ color:var(--accent); }
+
+/* toolbar — the fixed Logistics pattern: search, then one Filter button */
+.tools{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r); padding:10px; box-shadow:var(--shadow); }
+.srch{ position:relative; flex:1 1 280px; min-width:0; }
+.srch > i{ position:absolute; inset-inline-start:11px; top:50%; transform:translateY(-50%); color:var(--faint); font-size:18px; pointer-events:none; }
+.srch input{ width:100%; min-height:42px; padding:0 12px; padding-inline-start:38px; padding-inline-end:36px; border:1px solid var(--line-2);
+  border-radius:var(--r-sm); background:var(--surface); color:var(--ink); font-size:13.5px; }
+.srch input:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+.srch .clr{ position:absolute; inset-inline-end:4px; top:50%; transform:translateY(-50%); width:32px; height:32px; border:0; border-radius:var(--r-sm);
+  background:transparent; color:var(--faint); cursor:pointer; display:grid; place-items:center; }
+.srch .clr:hover{ background:var(--surface-2); color:var(--ink); }
+.tools .btn{ min-height:42px; }
+.filter-btn{ flex:0 0 auto; gap:8px; }
+.filter-btn.on{ border-color:var(--accent); color:var(--accent-2); background:var(--accent-soft); }
+.filter-btn .fcount{ min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:var(--accent); color:#fff;
+  font-size:11.5px; font-weight:800; display:inline-grid; place-items:center; font-family:'DM Sans',sans-serif; }
+
+/* filter applet — the same sheet family as the ticket sheet */
+.applet{ width:min(440px,100%); }
+.applet .sheet-b{ padding:4px 16px 16px; }
+.fld{ padding:12px 0; border-block-end:1px solid var(--line); }
+.fld:last-child{ border-block-end:0; }
+.fld > label,.fld > .lg{ display:block; font-size:12px; font-weight:800; color:var(--muted); margin-block-end:6px; }
+.fld select,.fld input[type="date"],.fld textarea{ width:100%; min-height:44px; padding:8px 10px; border:1px solid var(--line-2);
+  border-radius:var(--r-sm); background:var(--surface); color:var(--ink); font-size:13.5px; font-family:inherit; }
+.fld select:focus,.fld input:focus,.fld textarea:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+.fld .two{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.sub-f{ display:block; font-size:11.5px; font-weight:700; color:var(--faint); }
+.sub-f input{ margin-block-start:5px; }
+.chk{ display:flex; align-items:center; gap:9px; font-size:13.5px; color:var(--ink); font-weight:600; }
+.chk input{ width:18px; height:18px; accent-color:var(--accent); flex-shrink:0; }
+.sheet-f{ display:flex; gap:10px; padding:12px 16px; border-block-start:1px solid var(--line); background:var(--surface-2); }
+.sheet-f .btn{ flex:1 1 auto; min-height:44px; }
+
+.fchips{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.fchip{ display:inline-flex; align-items:center; gap:6px; min-height:30px; padding:0 6px 0 11px; border-radius:999px;
+  border:1px solid var(--line-2); background:var(--surface); color:var(--text); font-size:12.5px; font-weight:600; }
+[dir="rtl"] .fchip{ padding:0 11px 0 6px; }
+.fchip b{ color:var(--ink); font-weight:800; }
+.fchip button{ width:22px; height:22px; border:0; border-radius:50%; background:var(--surface-2); color:var(--muted); cursor:pointer;
+  display:grid; place-items:center; flex-shrink:0; }
+.fchip button:hover{ background:var(--alert-bg); color:var(--alert); }
+.fchip button i{ font-size:13px; }
+
+/* the ticket list */
+.tbl-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow); overflow:hidden; }
+.tbl-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+/* ───────── the tickets grid ─────────
+   A deliberate, fixed grid: every column keeps its width whatever the content
+   is, so headers never drift from their data. Scoped to .tkt — the shared
+   Logistics stylesheet is untouched. */
+table.tkt{ width:100%; border-collapse:collapse; table-layout:fixed; min-width:760px; }
+table.tkt th,table.tkt td{ padding:10px 10px; vertical-align:middle; }
+/* the authority's ticket id is long (tkt-<base36>-<base36>), so this column is
+   weighted to hold it on two lines at most, never three */
+table.tkt col.t-id   { width:14%; }
+table.tkt col.t-subj { width:17%; }   /* the subject carries the most text */
+table.tkt col.t-order{ width:10%; }
+table.tkt col.t-cust { width:9%; }
+table.tkt col.t-dept { width:11%; }
+table.tkt col.t-state{ width:9%; }
+table.tkt col.t-prio { width:8%; }
+table.tkt col.t-who  { width:10%; }
+table.tkt col.t-time { width:12%; }
+table.tkt th{ position:sticky; top:0; z-index:1; }
+
+table.tkt .t-id,table.tkt .t-subj,table.tkt .t-order,table.tkt .t-cust{ text-align:start; }
+table.tkt .t-dept,table.tkt .t-state,table.tkt .t-prio,table.tkt .t-who,table.tkt .t-time{ text-align:center; }
+table.tkt .t-subj,table.tkt .t-cust,table.tkt .t-dept,table.tkt .t-who{ overflow-wrap:anywhere; }
+table.tkt .badge{ max-width:100%; white-space:normal; overflow-wrap:anywhere; }
+table.tkt .t-time .nowrap{ display:block; }
+table.tkt .t-time .sub{ display:block; margin-block-start:1px; }
+table.tkt tbody tr{ cursor:pointer; }
+table.tkt tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+.tkt-id{ display:inline-flex; align-items:baseline; gap:7px; font-family:'DM Sans',ui-monospace,monospace; font-size:12px; font-weight:700; color:var(--ink); }
+.tkt-id bdi{ overflow-wrap:anywhere; }
+.tkt-id .live{ align-self:center; }
+.tkt-id .live{ width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+.subj{ display:block; color:var(--ink); font-weight:600; }
+.flag{ display:inline-flex; align-items:center; gap:4px; font-size:11.5px; font-weight:700; margin-block-start:2px; }
+.flag.esc{ color:var(--alert); }
+.flag.mine{ color:var(--accent); }
+
+/* ticket sheet */
+.sheet{ position:fixed; inset:0; z-index:90; background:rgba(12,20,17,.42); display:flex; justify-content:flex-end; }
+.sheet-c{ width:min(600px,100%); height:100%; background:var(--surface); display:flex; flex-direction:column; box-shadow:var(--shadow-pop); }
+.sheet-h{ display:flex; align-items:center; gap:10px; padding:12px 16px; border-block-end:1px solid var(--line); background:var(--surface-2); }
+.sheet-h .t{ flex:1; min-width:0; }
+.sheet-h .t b{ display:block; color:var(--ink); font-size:14.5px; font-family:'DM Sans',sans-serif; }
+.sheet-h .t span{ display:block; color:var(--muted); font-size:12px; overflow-wrap:anywhere; }
+.sheet-b{ flex:1; overflow-y:auto; padding:0 0 20px; }
+.sec{ padding:14px 16px; border-block-end:1px solid var(--line); }
+.sec:last-child{ border-block-end:0; }
+.sec > h3{ margin:0 0 10px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--faint);
+  display:flex; align-items:center; gap:7px; }
+.sec > h3 i{ font-size:15px; color:var(--accent); letter-spacing:0; }
+.kv{ display:flex; gap:12px; padding:5px 0; font-size:13px; align-items:baseline; }
+.kv .k{ color:var(--muted); flex:0 0 40%; max-width:40%; }
+.kv .v{ color:var(--ink); font-weight:600; min-width:0; overflow-wrap:anywhere; }
+.desc{ margin:0; color:var(--text); font-size:13px; line-height:1.75; white-space:pre-wrap; overflow-wrap:anywhere; }
+
+/* the ticket's own append-only history, from the ticket authority */
+.hist{ list-style:none; margin:0; padding:0; }
+.hist li{ display:flex; gap:10px; align-items:flex-start; padding:9px 0; border-block-end:1px solid var(--line); }
+.hist li:last-child{ border-block-end:0; }
+.hist .hi{ width:26px; height:26px; border-radius:var(--r-sm); background:var(--surface-2); color:var(--muted);
+  display:grid; place-items:center; flex-shrink:0; }
+.hist .hi i{ font-size:14px; }
+.hist .hb{ flex:1; min-width:0; }
+.hist .hb b{ display:block; font-size:13px; color:var(--ink); font-weight:700; }
+.hist .hb .who{ display:block; font-size:11.5px; color:var(--muted); margin-block-start:2px; overflow-wrap:anywhere; }
+.hist .hb .body{ display:block; font-size:12.5px; color:var(--text); margin-block-start:4px; white-space:pre-wrap; overflow-wrap:anywhere; }
+.hist .hw{ font-size:11px; color:var(--faint); font-family:'DM Sans',sans-serif; white-space:nowrap; flex-shrink:0; }
+
+/* actions the acting account is actually authorised to perform */
+.acts-box{ display:flex; flex-direction:column; gap:10px; }
+.acts-row{ display:flex; gap:8px; flex-wrap:wrap; }
+.acts-row .btn{ flex:0 1 auto; }
+.inline-f{ display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; }
+.inline-f label{ flex:1 1 150px; min-width:0; font-size:11.5px; font-weight:700; color:var(--faint); }
+.inline-f select{ width:100%; min-height:40px; margin-block-start:4px; padding:0 10px; border:1px solid var(--line-2);
+  border-radius:var(--r-sm); background:var(--surface); color:var(--ink); font-size:13px; }
+.inline-f .btn{ min-height:40px; }
+.note-f textarea{ width:100%; min-height:76px; padding:9px 10px; border:1px solid var(--line-2); border-radius:var(--r-sm);
+  background:var(--surface); color:var(--ink); font-size:13px; font-family:inherit; resize:vertical; }
+.note-f textarea:focus,.inline-f select:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+.act-msg{ display:flex; gap:9px; padding:10px 12px; border-radius:var(--r); font-size:12.5px; }
+.act-msg i{ font-size:17px; flex-shrink:0; }
+.act-msg.err{ background:var(--alert-bg); color:var(--alert); }
+.act-msg.ok{ background:var(--done-bg); color:var(--done); }
+.act-msg.busy{ background:var(--surface-2); color:var(--muted); }
+
+/* audit layer — a dense technical record, visibly not the operational view */
+.audit{ list-style:none; margin:0; padding:0; }
+.audit li{ display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-block-end:1px solid var(--line); }
+.audit li:last-child{ border-block-end:0; }
+.audit .ai{ width:26px; height:26px; border-radius:var(--r-sm); background:var(--surface-2); color:var(--muted);
+  display:grid; place-items:center; flex-shrink:0; }
+.audit .ai i{ font-size:14px; }
+.audit .ab{ flex:1; min-width:0; }
+.audit .ab b{ display:block; font-size:13px; color:var(--ink); font-weight:700; }
+.audit .act{ display:block; margin-block-start:2px; }
+.audit .act code{ font-family:'DM Sans',ui-monospace,monospace; font-size:11px; color:var(--accent-2);
+  background:var(--accent-soft); border-radius:4px; padding:1px 6px; overflow-wrap:anywhere; }
+.audit .who{ display:block; font-size:11.5px; color:var(--muted); margin-block-start:3px; overflow-wrap:anywhere; }
+.audit .md{ display:block; font-size:11px; color:var(--faint); margin-block-start:3px; line-height:1.7; overflow-wrap:anywhere; }
+.audit .md .sep{ margin-inline:5px; opacity:.6; }
+.audit .aw{ font-size:11px; color:var(--faint); font-family:'DM Sans',sans-serif; white-space:nowrap; flex-shrink:0; }
+.sheet-extra{ padding:14px 16px 4px; display:flex; flex-direction:column; gap:7px; align-items:flex-start; border-block-start:1px solid var(--line); }
+.audit-btn{ min-height:40px; color:var(--muted); }
+.audit-btn:hover{ color:var(--ink); border-color:var(--line-2); }
+.sheet-extra .hint{ font-size:11.5px; color:var(--faint); line-height:1.6; }
+
+@media (max-width:1400px){
+  table.tkt th,table.tkt td{ padding:9px 8px; }
+  table.tkt th{ white-space:normal; }
+  table.tkt .tkt-id{ font-size:12px; }
+}
+@media (max-width:1100px){
+  table.tkt th,table.tkt td{ padding:9px 6px; }
+  table.tkt .tkt-id{ font-size:11px; gap:5px; }
+  table.tkt .badge{ font-size:11px; padding:3px 7px; }
+  html[lang="en"] table.tkt th{ font-size:10px; letter-spacing:.02em; }
+}
+@media (max-width:900px){ .tools{ padding:8px; } }
+/* the list becomes one card per ticket */
+@media (max-width:860px){
+  table.tkt{ min-width:0; table-layout:auto; }
+  table.tkt colgroup{ display:none; }
+  table.tkt td[class*="t-"]{ text-align:start; }
+  table.tkt .t-time .nowrap,table.tkt .t-time .sub{ display:inline; }
+  table.tkt, table.tkt tbody, table.tkt tr, table.tkt td{ display:block; width:100%; }
+  table.tkt thead{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+  table.tkt tbody tr{ border-block-end:1px solid var(--line); padding:8px 0; }
+  table.tkt tbody tr:last-child{ border-block-end:0; }
+  table.tkt td{ border:0; display:flex; align-items:center; gap:12px; padding:5px 14px; }
+  table.tkt td::before{ content:attr(data-l); flex:0 0 38%; max-width:38%; color:var(--faint); font-size:11.5px; font-weight:700; }
+  table.tkt td > *{ min-width:0; }
+  table.tkt td .badge{ white-space:normal; }
+  .sheet-c{ width:100%; }
+  .kv .k{ flex-basis:44%; max-width:44%; }
+  .kv .badge{ white-space:normal; }
+}
+@media (max-width:520px){
+  .scope{ padding:0 10px; font-size:12.5px; }
+  .tools .btn{ flex:1 1 auto; }
+  .acts-row .btn{ flex:1 1 auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-c" role="alert">
+    <div class="ic"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
+    <h1 id="gateT"></h1>
+    <p id="gateP"></p>
+    <a class="btn" href="raf_login.html"><i class="ti ti-login" aria-hidden="true"></i><span data-ar="تسجيل الدخول" data-en="Sign in">تسجيل الدخول</span></a>
+  </div>
+</div>
+
+<div class="ops" id="shell" hidden>
+  <aside class="ops-nav" id="opsNav">
+    <div class="ops-brand">
+      <span class="ops-brand-mark" aria-hidden="true"><i class="ti ti-route"></i></span>
+      <span class="ops-brand-t"><b data-ar="اللوجستيات" data-en="Logistics">اللوجستيات</b>
+        <span data-ar="منصة رف" data-en="RAF platform">منصة رف</span></span>
+      <button class="ibtn ops-nav-x" type="button" onclick="OPS.closeNav()" aria-label="إغلاق"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <nav class="ops-nav-scroll" id="navTree" aria-label="التنقل"></nav>
+  </aside>
+  <div class="scrim" onclick="OPS.closeNav()" aria-hidden="true"></div>
+
+  <div class="ops-main">
+    <header class="ops-head">
+      <button class="ibtn ops-burger" type="button" aria-controls="opsNav" onclick="OPS.openNav()" aria-label="القائمة"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+      <div class="ops-crumb"><small id="crumbGroup"></small><b id="crumbPage"></b></div>
+      <div class="ops-tools">
+        <button class="ibtn" type="button" id="refreshBtn" onclick="OPS.refresh()" aria-label="تحديث"><i class="ti ti-refresh" aria-hidden="true"></i></button>
+        <button class="ibtn lang" type="button" id="langBtn" onclick="OPS.toggleLang()"></button>
+        <span class="ops-sep" aria-hidden="true"></span>
+        <div class="ops-user"><span class="ops-av" id="userAv"></span>
+          <span class="ops-user-t"><b id="userName"></b><span id="userRole"></span></span></div>
+        <!-- the shared RAF sign-out action; this page adds no session logic -->
+        <button class="ibtn signout" type="button" id="signOutBtn" onclick="RAFSignOut()">
+          <i class="ti ti-logout" aria-hidden="true"></i>
+          <span class="signout-t" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span>
+        </button>
+      </div>
+    </header>
+    <main class="ops-content" id="view" tabindex="-1"></main>
+  </div>
+</div>
+<div id="sheetHost"></div>
+<div id="auditHost"></div>
+<div id="appletHost"></div>
+<div id="createHost"></div>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_store_ops.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_customer_service.js"></script>
+<script>
+/* ============================================================================
+   TICKETS — التذاكر
+   The Logistics view of RAF's ONE central ticket record.
+
+   RAFCustomerService IS the authority. This page keeps no ticket store, no
+   ticket state engine and no second copy of a ticket: every read goes through
+   listTickets / searchTickets / getTicket, and every write goes through the
+   authority's own operations (claim, transfer, update, internal note), each of
+   which proves the session, the permission and the department for itself.
+
+   WHAT THIS PAGE MAY SEE is not decided here either. scopeTickets() inside the
+   authority limits an employee to their own department's tickets and lets
+   management see across departments — so a Logistics account sees Logistics
+   tickets because the authority says so, not because this page filtered.
+
+   WHAT THIS PAGE MAY DO is read from capabilities(). An action the account
+   does not hold is not rendered; the information stays readable. Today an
+   Operations account holds support.view + support.manage, so it works the case
+   it receives — ending the case and talking to the customer remain with
+   Customer Service, exactly as the permission model states.
+   ==========================================================================*/
+(function(){
+  'use strict';
+
+  var P = window.RAFPerm, CS = window.RAFCustomerService;
+  var ME = null, CAP = null, CAN = { audit:false, customer:false };
+
+  /* the Command Center's access boundary, unchanged, plus the ticket read
+     permission this page cannot work without. Existing keys only. */
+  var PERM = { orders:'orders.view', drivers:'drivers.view', ops:'drivers.suspend', tickets:'support.view' };
+
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function L(o){ return (o && typeof o === 'object') ? (isEn() ? (o.en||o.ar) : (o.ar||o.en)) : (o||''); }
+  function el(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function locale(){ return isEn() ? 'en-GB' : 'ar-KW-u-nu-latn'; }
+  var DASH = '<span class="dash">—</span>';
+  function bidi(v){ return (v == null || v === '') ? DASH : '<bdi>' + esc(v) + '</bdi>'; }
+
+  function clockOf(ms){
+    if(!ms && ms !== 0) return null;
+    var d = new Date(ms); if(isNaN(d.getTime())) return null;
+    try { return d.toLocaleString(locale(), { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kuwait' }); }
+    catch(e){ return d.toISOString().slice(0,16).replace('T',' '); }
+  }
+  function shortClock(ms){
+    if(!ms && ms !== 0) return null;
+    var d = new Date(ms); if(isNaN(d.getTime())) return null;
+    try { return d.toLocaleString(locale(), { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kuwait' }); }
+    catch(e){ return d.toISOString().slice(0,16).replace('T',' '); }
+  }
+  function mins(ms){
+    var m = Math.max(0, Math.round(ms/60000));
+    if(m < 60) return T(m + ' د', m + 'm');
+    var h = Math.floor(m/60), r = m%60;
+    if(h < 48) return T(h + ' س ' + r + ' د', h + 'h ' + r + 'm');
+    return T(Math.floor(h/24) + ' ي', Math.floor(h/24) + 'd');
+  }
+  function ago(ms){ return ms ? T('منذ ' + mins(Date.now()-ms), mins(Date.now()-ms) + ' ago') : null; }
+
+  /* ───────── the authority's own vocabulary, never re-declared here ───────── */
+  function STATUS(){ return (CS && CS.STATUS) || {}; }
+  function PRIORITIES(){ return (CS && CS.PRIORITIES) || []; }
+  function STATUS_TXT(k){ var m = (CS && CS.STATUS_TXT) || {}; return m[k] || null; }
+  function PRIORITY_TXT(k){ var m = (CS && CS.PRIORITY_TXT) || {}; return m[k] || null; }
+  function DEPARTMENTS(){ try { return CS.departments() || {}; } catch(e){ return {}; } }
+  function CATEGORIES(){ try { return CS.categories() || []; } catch(e){ return []; } }
+  /* the badge colour follows the status's meaning, not a new status list */
+  var STATE_CLS = { 'new':'b-prep', 'open':'b-go', 'pending':'b-wait',
+                    'resolved':'b-done', 'closed':'b-off', 'reopened':'b-wait' };
+  var PRIO_CLS  = { low:'b-plain', normal:'b-plain', high:'b-wait', critical:'b-hot' };
+
+  /* ───────── reads ─────────
+     Nothing is stored. Every render asks the ticket authority again. */
+  var ITEMS = [], READ_ERR = null, COUNTS = {};
+  var SCOPES = [
+    { k:'active',     ar:'النشطة',        en:'Active',
+      emptyAr:'لا توجد تذاكر نشطة',            emptyEn:'No active tickets',
+      filters:function(){ return { active:true }; } },
+    { k:'unassigned', ar:'غير مستلَمة',   en:'Unclaimed',
+      emptyAr:'لا توجد تذاكر غير مستلَمة',     emptyEn:'No unclaimed tickets',
+      filters:function(){ return { active:true, unassigned:true }; } },
+    { k:'mine',       ar:'المعيَّنة لي',  en:'Assigned to me',
+      emptyAr:'لا توجد تذاكر معيَّنة لك',      emptyEn:'No tickets are assigned to you',
+      filters:function(){ return { active:true, assignedEmployeeId:ME ? ME.id : '' }; } },
+    { k:'closed',     ar:'المنتهية',      en:'Closed',
+      emptyAr:'لا توجد تذاكر منتهية',          emptyEn:'No closed tickets',
+      filters:function(){ return { active:false }; } },
+    { k:'all',        ar:'الكل',          en:'All',
+      emptyAr:'لا توجد تذاكر',                 emptyEn:'No tickets',
+      filters:function(){ return {}; } }
+  ];
+  var F = { scope:'active', q:'', status:'', priority:'', department:'', category:'', type:'', escalated:false, from:'', to:'' };
+
+  function scopeOf(k){ for(var i=0;i<SCOPES.length;i++) if(SCOPES[i].k === k) return SCOPES[i]; return SCOPES[0]; }
+
+  /* every filter below is a key listTickets() itself accepts — the page adds
+     no filtering of its own, so a ticket can never be hidden by this page in a
+     way the authority would not also hide it */
+  function filtersFor(scopeKey){
+    var f = scopeOf(scopeKey).filters();
+    if(F.status)     f.status = F.status;
+    if(F.priority)   f.priority = F.priority;
+    if(F.department) f.department = F.department;
+    if(F.category)   f.category = F.category;
+    if(F.type)       f.type = F.type;
+    if(F.escalated)  f.escalated = true;
+    if(F.from){ var a = Date.parse(F.from + 'T00:00:00'); if(!isNaN(a)) f.from = a; }
+    if(F.to){ var b = Date.parse(F.to + 'T23:59:59'); if(!isNaN(b)) f.to = b; }
+    return f;
+  }
+  function askAuthority(scopeKey){
+    if(!CS) return { ok:false, message:T('نظام التذاكر غير متاح.','The ticket system is unavailable.') };
+    var f = filtersFor(scopeKey);
+    try {
+      /* the authority's own search — it filters the SAME scoped list, so it can
+         never surface a ticket this account could not open */
+      var q = F.q.trim();
+      return q ? CS.searchTickets(q, f) : CS.listTickets(f);
+    } catch(e){ return { ok:false, message:T('تعذّرت قراءة التذاكر.','Tickets could not be read.') }; }
+  }
+  function readAll(){
+    var r = askAuthority(F.scope);
+    if(r && r.ok){ ITEMS = r.items || []; READ_ERR = null; }
+    else { ITEMS = []; READ_ERR = (r && r.message) || T('تعذّرت قراءة التذاكر.','Tickets could not be read.'); }
+    /* the scope tab counts are the authority's answers too */
+    COUNTS = {};
+    SCOPES.forEach(function(s){
+      var x = askAuthority(s.k);
+      COUNTS[s.k] = (x && x.ok && x.items) ? x.items.length : null;
+    });
+    return ITEMS;
+  }
+
+  function activeFilterCount(){
+    var n = 0;
+    if(F.status) n++; if(F.priority) n++; if(F.department) n++;
+    if(F.category) n++; if(F.type) n++; if(F.escalated) n++;
+    if(F.from) n++; if(F.to) n++;
+    return n;
+  }
+  function filtersActive(){ return !!(F.q || activeFilterCount()); }
+
+  /* ───────── toolbar: THE LOGISTICS FILTER PATTERN ─────────
+     Search + one Filter button that opens one applet. Every field in the
+     applet is a filter listTickets() accepts; nothing about drivers, zones,
+     distance, proximity, SLA or delivery ETA is offered, because the ticket
+     record holds none of it. */
+  function toolbar(){
+    var n = activeFilterCount();
+    return '<div class="tools" role="search">'
+      + '<div class="srch"><i class="ti ti-search" aria-hidden="true"></i>'
+      + '<input id="q" type="search" value="' + esc(F.q) + '" autocomplete="off" spellcheck="false"'
+      + ' placeholder="' + esc(T('ابحث عن رقم التذكرة أو الموضوع أو الطلب...','Search ticket ID, subject or order...')) + '"'
+      + ' aria-label="' + esc(T('بحث في التذاكر','Search tickets')) + '" oninput="OPS.setQ(this.value)">'
+      + (F.q ? '<button class="clr" type="button" onclick="OPS.setQ(\'\')" aria-label="' + esc(T('مسح البحث','Clear search')) + '"><i class="ti ti-x" aria-hidden="true"></i></button>' : '')
+      + '</div>'
+      + '<button class="btn filter-btn' + (n ? ' on' : '') + '" type="button" id="filterBtn" onclick="OPS.openFilters()"'
+      + ' aria-haspopup="dialog" aria-label="' + esc(T('تصفية التذاكر','Filter tickets')) + '">'
+      + '<i class="ti ti-filter" aria-hidden="true"></i>' + T('فلتر','Filter')
+      + (n ? '<span class="fcount">' + n + '</span>' : '') + '</button>'
+      + '</div>';
+  }
+
+  var DRAFT = null;
+  function openFilters(){
+    if(!ME) return;
+    DRAFT = { status:F.status, priority:F.priority, department:F.department, category:F.category,
+              type:F.type, escalated:F.escalated, from:F.from, to:F.to };
+    renderApplet();
+  }
+  function closeFilters(){
+    DRAFT = null; el('appletHost').innerHTML = '';
+    var b = el('filterBtn'); if(b) b.focus();
+  }
+  function renderApplet(){
+    if(!DRAFT) return;
+    var S = STATUS();
+    var stOpts = Object.keys(S).map(function(k){
+      var v = S[k], txt = STATUS_TXT(v);
+      return '<option value="' + esc(v) + '"' + (DRAFT.status === v ? ' selected' : '') + '>'
+        + esc(txt ? L(txt) : v) + '</option>'; }).join('');
+    var prOpts = PRIORITIES().map(function(v){
+      var txt = PRIORITY_TXT(v);
+      return '<option value="' + esc(v) + '"' + (DRAFT.priority === v ? ' selected' : '') + '>'
+        + esc(txt ? L(txt) : v) + '</option>'; }).join('');
+    var D = DEPARTMENTS();
+    var dpOpts = Object.keys(D).map(function(k){
+      return '<option value="' + esc(k) + '"' + (DRAFT.department === k ? ' selected' : '') + '>'
+        + esc(L({ ar:D[k].ar, en:D[k].en })) + '</option>'; }).join('');
+    var ctOpts = CATEGORIES().map(function(c){
+      return '<option value="' + esc(c.key) + '"' + (DRAFT.category === c.key ? ' selected' : '') + '>'
+        + esc(L({ ar:c.ar, en:c.en }) || c.key) + '</option>'; }).join('');
+    var TY = (CS && CS.TYPE) || {};
+    var tyOpts = Object.keys(TY).map(function(k){
+      var v = TY[k];
+      return '<option value="' + esc(v) + '"' + (DRAFT.type === v ? ' selected' : '') + '>'
+        + esc(v === TY.ORDER_LINKED ? T('مرتبطة بطلب','Order-linked') : T('عامة','General')) + '</option>'; }).join('');
+
+    el('appletHost').innerHTML =
+      '<div class="sheet" id="applet" onclick="if(event.target===this)OPS.closeFilters()">'
+      + '<div class="sheet-c applet" role="dialog" aria-modal="true" aria-labelledby="flT">'
+      + '<div class="sheet-h"><div class="t"><b id="flT">' + T('تصفية التذاكر','Filter Tickets') + '</b>'
+        + '<span>' + T('تُطبَّق على النطاق المحدد','Applied within the selected scope') + '</span></div>'
+        + '<button class="ibtn" type="button" onclick="OPS.closeFilters()" aria-label="' + esc(T('إغلاق','Close')) + '"><i class="ti ti-x" aria-hidden="true"></i></button></div>'
+      + '<div class="sheet-b">'
+        + '<div class="fld"><label for="f-status">' + T('الحالة','Status') + '</label>'
+          + '<select id="f-status" onchange="OPS.draft(\'status\',this.value)"><option value="">' + T('كل الحالات','All statuses') + '</option>' + stOpts + '</select></div>'
+        + '<div class="fld"><label for="f-prio">' + T('الأولوية','Priority') + '</label>'
+          + '<select id="f-prio" onchange="OPS.draft(\'priority\',this.value)"><option value="">' + T('كل الأولويات','All priorities') + '</option>' + prOpts + '</select></div>'
+        /* the responsible-department filter is only meaningful for an account
+           the authority lets read across departments */
+        + (CAP && CAP.isManagement
+            ? '<div class="fld"><label for="f-dept">' + T('القسم المسؤول','Responsible department') + '</label>'
+              + '<select id="f-dept" onchange="OPS.draft(\'department\',this.value)"><option value="">' + T('كل الأقسام','All departments') + '</option>' + dpOpts + '</select></div>'
+            : '')
+        + (ctOpts ? '<div class="fld"><label for="f-cat">' + T('التصنيف','Category') + '</label>'
+          + '<select id="f-cat" onchange="OPS.draft(\'category\',this.value)"><option value="">' + T('كل التصنيفات','All categories') + '</option>' + ctOpts + '</select></div>' : '')
+        + (tyOpts ? '<div class="fld"><label for="f-type">' + T('النوع','Type') + '</label>'
+          + '<select id="f-type" onchange="OPS.draft(\'type\',this.value)"><option value="">' + T('كل الأنواع','All types') + '</option>' + tyOpts + '</select></div>' : '')
+        + '<div class="fld"><label class="chk" for="f-esc"><input id="f-esc" type="checkbox"' + (DRAFT.escalated ? ' checked' : '')
+          + ' onchange="OPS.draft(\'escalated\',this.checked)"><span>' + T('المُصعَّدة فقط','Escalated only') + '</span></label></div>'
+        + '<div class="fld"><span class="lg">' + T('تاريخ الإنشاء','Created') + '</span><div class="two">'
+          + '<label class="sub-f" for="f-from">' + T('من تاريخ','From date')
+            + '<input id="f-from" type="date" dir="ltr" value="' + esc(DRAFT.from) + '" onchange="OPS.draft(\'from\',this.value)"></label>'
+          + '<label class="sub-f" for="f-to">' + T('إلى تاريخ','To date')
+            + '<input id="f-to" type="date" dir="ltr" value="' + esc(DRAFT.to) + '" onchange="OPS.draft(\'to\',this.value)"></label>'
+          + '</div></div>'
+      + '</div>'
+      + '<div class="sheet-f">'
+        + '<button class="btn" type="button" onclick="OPS.clearFilters()"><i class="ti ti-filter-off" aria-hidden="true"></i>' + T('مسح الفلاتر','Clear Filters') + '</button>'
+        + '<button class="btn pri" type="button" onclick="OPS.applyFilters()"><i class="ti ti-check" aria-hidden="true"></i>' + T('تطبيق','Apply') + '</button>'
+      + '</div></div></div>';
+    var first = el('f-status'); if(first) first.focus();
+  }
+
+  function chips(){
+    if(!filtersActive()) return '';
+    var out = [];
+    function chip(key, label, value){
+      out.push('<span class="fchip">' + esc(label) + ': <b><bdi>' + esc(value) + '</bdi></b>'
+        + '<button type="button" onclick="OPS.setF(\'' + key + '\',\'\')" aria-label="' + esc(T('إزالة الفلتر','Remove filter')) + '">'
+        + '<i class="ti ti-x" aria-hidden="true"></i></button></span>');
+    }
+    if(F.q) chip('q', T('بحث','Search'), F.q);
+    if(F.status){ var s = STATUS_TXT(F.status); chip('status', T('الحالة','Status'), s ? L(s) : F.status); }
+    if(F.priority){ var p = PRIORITY_TXT(F.priority); chip('priority', T('الأولوية','Priority'), p ? L(p) : F.priority); }
+    if(F.department){ var D = DEPARTMENTS(), d = D[F.department];
+      chip('department', T('القسم','Department'), d ? L({ ar:d.ar, en:d.en }) : F.department); }
+    if(F.category){ var c = CATEGORIES().filter(function(x){ return x.key === F.category; })[0];
+      chip('category', T('التصنيف','Category'), c ? (L({ ar:c.ar, en:c.en }) || c.key) : F.category); }
+    if(F.type){ var TY = (CS && CS.TYPE) || {};
+      chip('type', T('النوع','Type'), F.type === TY.ORDER_LINKED ? T('مرتبطة بطلب','Order-linked') : T('عامة','General')); }
+    if(F.escalated) chip('escalated', T('التصعيد','Escalation'), T('المُصعَّدة فقط','Escalated only'));
+    if(F.from) chip('from', T('من','From'), F.from);
+    if(F.to) chip('to', T('إلى','To'), F.to);
+    return '<div class="fchips">' + out.join('') + '</div>';
+  }
+
+  /* ═════════════════════ CREATE A TICKET ═════════════════════
+     RAF's rule: an administrative department RAF has built may OPEN a case
+     through the central ticket authority, not only work one it receives.
+
+     This form is a form and nothing more. It writes no record: every field
+     below is a key RAFCustomerService.createTicket() itself accepts, the
+     authority validates them, the authority assigns the ticket id, and the
+     authority refuses what it will not allow. Nothing is stored locally, and
+     the created ticket is never injected into this page's list — the list is
+     re-read from the authority afterwards.
+
+     `source` is deliberately NOT offered: the authority's SOURCE vocabulary has
+     no value meaning "opened by Logistics", so the page lets createTicket apply
+     its own default rather than inventing one. */
+  var NEW = null, NEW_MSG = null, NEW_BAD = {}, NEW_BUSY = false, NEW_DUP = null;
+
+  function customerOptions(){
+    var us = []; try { us = P.getUsers() || []; } catch(e){ us = []; }
+    return us.filter(function(u){ return u && u.roleId === 'customer' && u.status === 'active'; })
+             .sort(function(a,b){ return String(a.name||a.id).localeCompare(String(b.name||b.id)); });
+  }
+  function openCreate(){
+    if(!ME || !CAP || !CAP.create) return;
+    var TY = (CS && CS.TYPE) || {}, PR = (CS && CS.PRIORITY) || {};
+    NEW = {
+      customerId:'', type:TY.GENERAL || 'general', orderId:'', category:'',
+      priority:PR.NORMAL || 'normal',
+      /* the acting employee's own department, as the authority resolved it from
+         the session — never a value written into this page */
+      department:(CAP && CAP.department) || '',
+      subject:'', description:''
+    };
+    NEW_MSG = null; NEW_BAD = {}; NEW_BUSY = false; NEW_DUP = null;
+    renderCreate();
+  }
+  function closeCreate(){
+    NEW = null; NEW_MSG = null; NEW_BAD = {}; NEW_BUSY = false; NEW_DUP = null;
+    el('createHost').innerHTML = '';
+    var b = el('createBtn'); if(b) b.focus();
+  }
+  /* keep what the operator typed when the form re-renders after a refusal */
+  function syncCreate(){
+    if(!NEW) return;
+    ['customerId','type','orderId','category','priority','department','subject','description']
+      .forEach(function(k){ var e = el('n-' + k); if(e) NEW[k] = String(e.value || ''); });
+  }
+  function renderCreate(){
+    if(!NEW) return;
+    var TY = (CS && CS.TYPE) || {}, D = DEPARTMENTS(), LIM = (CS && CS.LIMITS) || {};
+    function badCls(f){ return NEW_BAD[f] ? ' bad' : ''; }
+    var custField;
+    if(CAN.customer){
+      custField = '<select id="n-customerId" onchange="OPS.newDraft()"><option value="">'
+        + T('اختر العميل','Select the customer') + '</option>'
+        + customerOptions().map(function(u){
+            return '<option value="' + esc(u.id) + '"' + (NEW.customerId === u.id ? ' selected' : '') + '>'
+              + esc((u.name || u.id)) + '</option>'; }).join('') + '</select>';
+    } else {
+      /* without the account-directory permission the id is typed, not browsed */
+      custField = '<input id="n-customerId" type="text" dir="ltr" value="' + esc(NEW.customerId) + '" oninput="OPS.newDraft()">';
+    }
+    var isOrder = NEW.type === (TY.ORDER_LINKED || 'order_linked');
+
+    el('createHost').innerHTML =
+      '<div class="sheet" id="createSheet" onclick="if(event.target===this)OPS.closeCreate()">'
+      + '<div class="sheet-c create" role="dialog" aria-modal="true" aria-labelledby="crT">'
+      + '<div class="sheet-h"><div class="t"><b id="crT">' + T('تذكرة جديدة','New Ticket') + '</b>'
+        + '<span>' + T('تُفتح في نظام تذاكر رف المركزي','Opened in RAF’s central ticket system') + '</span></div>'
+        + '<button class="ibtn" type="button" onclick="OPS.closeCreate()" aria-label="' + esc(T('إغلاق','Close')) + '"><i class="ti ti-x" aria-hidden="true"></i></button></div>'
+      + '<div class="sheet-b">'
+        + '<div class="fld' + badCls('customerId') + '"><label for="n-customerId">' + T('العميل','Customer')
+          + ' <span class="req">*</span></label>' + custField
+          + '<span class="hint">' + T('كل تذكرة في رف تخص حساب عميل.','Every RAF ticket belongs to a customer account.') + '</span></div>'
+        + '<div class="fld' + badCls('type') + '"><label for="n-type">' + T('النوع','Type') + '</label>'
+          + '<select id="n-type" onchange="OPS.newDraft()">'
+          + '<option value="' + esc(TY.GENERAL || 'general') + '"' + (!isOrder ? ' selected' : '') + '>' + T('عامة','General') + '</option>'
+          + '<option value="' + esc(TY.ORDER_LINKED || 'order_linked') + '"' + (isOrder ? ' selected' : '') + '>' + T('مرتبطة بطلب','Order-linked') + '</option>'
+          + '</select></div>'
+        + '<div class="fld' + badCls('orderId') + '"><label for="n-orderId">' + T('رقم الطلب','Order ID')
+          + (isOrder ? ' <span class="req">*</span>' : '') + '</label>'
+          + '<input id="n-orderId" type="text" dir="ltr" value="' + esc(NEW.orderId) + '" oninput="OPS.newDraft()"'
+          + (isOrder ? '' : ' placeholder="' + esc(T('اختياري','Optional')) + '"') + '>'
+          + '<span class="hint">' + (isOrder
+              ? T('التذكرة المرتبطة بطلب تتطلب رقم طلب يخص العميل نفسه.','An order-linked ticket needs an order that belongs to the same customer.')
+              : T('اتركه فارغاً للتذكرة العامة.','Leave empty for a general ticket.')) + '</span></div>'
+        + '<div class="fld' + badCls('category') + '"><label for="n-category">' + T('التصنيف','Category')
+          + ' <span class="req">*</span></label>'
+          + '<select id="n-category" onchange="OPS.newDraft()"><option value="">' + T('اختر التصنيف','Select a category') + '</option>'
+          + CATEGORIES().map(function(c){
+              return '<option value="' + esc(c.key) + '"' + (NEW.category === c.key ? ' selected' : '') + '>'
+                + esc(L({ ar:c.ar, en:c.en }) || c.key) + '</option>'; }).join('') + '</select></div>'
+        + '<div class="fld' + badCls('priority') + '"><label for="n-priority">' + T('الأولوية','Priority') + '</label>'
+          + '<select id="n-priority" onchange="OPS.newDraft()">' + PRIORITIES().map(function(p){
+              var x = PRIORITY_TXT(p);
+              return '<option value="' + esc(p) + '"' + (NEW.priority === p ? ' selected' : '') + '>' + esc(x ? L(x) : p) + '</option>'; }).join('')
+          + '</select></div>'
+        + '<div class="fld' + badCls('department') + '"><label for="n-department">' + T('القسم المسؤول','Responsible department') + '</label>'
+          + '<select id="n-department" onchange="OPS.newDraft()">'
+          + Object.keys(D).map(function(k){
+              return '<option value="' + esc(k) + '"' + (NEW.department === k ? ' selected' : '') + '>'
+                + esc(L({ ar:D[k].ar, en:D[k].en })) + '</option>'; }).join('') + '</select>'
+          + '<span class="hint">' + T('القسم الذي سيعمل على التذكرة. يبدأ بقسمك، ويمكن فتحها لقسم آخر.','The department that will work the ticket. It starts with yours and may be opened for another.') + '</span></div>'
+        + '<div class="fld' + badCls('subject') + '"><label for="n-subject">' + T('الموضوع','Subject')
+          + ' <span class="req">*</span></label>'
+          + '<input id="n-subject" type="text" maxlength="' + (LIM.subject || 150) + '" value="' + esc(NEW.subject) + '" oninput="OPS.newDraft()"></div>'
+        + '<div class="fld' + badCls('description') + '"><label for="n-description">' + T('الوصف','Description')
+          + ' <span class="req">*</span></label>'
+          + '<textarea id="n-description" rows="4" maxlength="' + (LIM.description || 4000) + '" oninput="OPS.newDraft()">' + esc(NEW.description) + '</textarea></div>'
+        + (NEW_MSG ? '<div class="form-msg ' + NEW_MSG.kind + '"><i class="ti ' + (NEW_MSG.kind === 'err' ? 'ti-alert-circle' : 'ti-loader') + '" aria-hidden="true"></i>'
+            + '<span>' + esc(NEW_MSG.text)
+            + (NEW_DUP ? '<br><button class="btn sm" type="button" onclick="OPS.openExisting(\'' + esc(NEW_DUP) + '\')">'
+                + T('فتح التذكرة الحالية','Open the existing ticket') + '</button>' : '')
+            + '</span></div>' : '')
+      + '</div>'
+      + '<div class="sheet-f">'
+        + '<button class="btn" type="button" onclick="OPS.closeCreate()">' + T('إلغاء','Cancel') + '</button>'
+        + '<button class="btn pri" type="button"' + (NEW_BUSY ? ' disabled' : '') + ' onclick="OPS.submitCreate()">'
+        + '<i class="ti ti-plus" aria-hidden="true"></i>' + T('إنشاء التذكرة','Create ticket') + '</button>'
+      + '</div></div></div>';
+    var first = el('n-customerId'); if(first) first.focus();
+  }
+  /* map the authority's own field errors onto the form */
+  function markBad(res){
+    NEW_BAD = {};
+    var errs = (res && res.errors) || [];
+    errs.forEach(function(e){ if(e && e.field) NEW_BAD[e.field] = true; });
+    if(res && res.code === 'INVALID_CUSTOMER') NEW_BAD.customerId = true;
+    if(res && (res.code === 'ORDER_REQUIRED' || res.code === 'INVALID_ORDER' || res.code === 'ORDER_NOT_CUSTOMER')) NEW_BAD.orderId = true;
+    if(res && res.code === 'UNKNOWN_DEPARTMENT') NEW_BAD.department = true;
+  }
+
+  /* ───────── the list ───────── */
+  function customerCell(t){
+    if(!CAN.customer) return '<span class="dash" title="' + esc(T('غير مصرّح','Not authorised')) + '">—</span>';
+    if(!t.customerId) return DASH;
+    var u = null; try { u = P.getUser(t.customerId); } catch(e){ u = null; }
+    /* the display name only; no phone, no email, no account fields */
+    return (u && u.name) ? '<bdi>' + esc(u.name) + '</bdi>' : '<bdi>' + esc(t.customerId) + '</bdi>';
+  }
+  function statusBadge(t){
+    var s = STATUS_TXT(t.status);
+    if(!s) return DASH;
+    return '<span class="badge ' + (STATE_CLS[t.status] || 'b-plain') + '">' + esc(L(s)) + '</span>';
+  }
+  function prioBadge(t){
+    var p = PRIORITY_TXT(t.priority);
+    if(!p) return DASH;
+    return '<span class="badge ' + (PRIO_CLS[t.priority] || 'b-plain') + '">' + esc(L(p)) + '</span>';
+  }
+  function rows(list){
+    var H = [T('التذكرة','Ticket'), T('الموضوع','Subject'), T('الطلب','Order'), T('العميل','Customer'),
+             T('القسم المسؤول','Responsible'), T('الحالة','Status'), T('الأولوية','Priority'),
+             T('المعيَّن','Assigned'), T('آخر تحديث','Updated')];
+    var COLS = ['t-id','t-subj','t-order','t-cust','t-dept','t-state','t-prio','t-who','t-time'];
+    return '<div class="tbl-scroll"><table class="tkt"><caption class="sr-only">' + T('التذاكر','Tickets') + '</caption>'
+      + '<colgroup>' + COLS.map(function(c){ return '<col class="' + c + '">'; }).join('') + '</colgroup>'
+      + '<thead><tr>'
+      + H.map(function(h,i){ return '<th scope="col" class="' + COLS[i] + '">' + h + '</th>'; }).join('') + '</tr></thead><tbody>'
+      + list.map(function(t){
+          var oid = t.context && t.context.orderId;
+          return '<tr tabindex="0" onclick="OPS.open(\'' + esc(t.ticketId) + '\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();OPS.open(\'' + esc(t.ticketId) + '\');}">'
+            + '<td class="t-id" data-l="' + esc(H[0]) + '"><span class="tkt-id">' + (t.active ? '<span class="live" aria-hidden="true"></span>' : '')
+              + '<bdi>' + esc(t.ticketId) + '</bdi></span>'
+              + (t.escalated ? '<span class="flag esc"><i class="ti ti-arrow-up-circle" aria-hidden="true"></i>'
+                  + T('مُصعَّدة','Escalated') + '</span>' : '')
+              + (ME && t.assignedEmployeeId === ME.id ? '<span class="flag mine"><i class="ti ti-user-check" aria-hidden="true"></i>'
+                  + T('معيَّنة لك','Yours') + '</span>' : '') + '</td>'
+            + '<td class="t-subj" data-l="' + esc(H[1]) + '"><span class="subj"><bdi>' + esc(t.subject || t.ticketId) + '</bdi></span></td>'
+            + '<td class="t-order" data-l="' + esc(H[2]) + '">' + (oid ? '<bdi class="mono">' + esc(oid) + '</bdi>' : DASH) + '</td>'
+            + '<td class="t-cust" data-l="' + esc(H[3]) + '">' + customerCell(t) + '</td>'
+            + '<td class="t-dept" data-l="' + esc(H[4]) + '">' + (t.departmentText ? bidi(L(t.departmentText)) : DASH) + '</td>'
+            + '<td class="t-state" data-l="' + esc(H[5]) + '">' + statusBadge(t) + '</td>'
+            + '<td class="t-prio" data-l="' + esc(H[6]) + '">' + prioBadge(t) + '</td>'
+            + '<td class="t-who" data-l="' + esc(H[7]) + '">' + (t.assignedEmployeeName ? bidi(t.assignedEmployeeName) : DASH) + '</td>'
+            + '<td class="t-time" data-l="' + esc(H[8]) + '">' + (t.updatedAt
+                ? '<span class="nowrap">' + esc(ago(t.updatedAt)) + '</span><span class="sub">' + esc(shortClock(t.updatedAt)) + '</span>'
+                : DASH) + '</td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table></div>';
+  }
+
+  /* one slim line of real counts — each is a list on this page, nothing else */
+  function strip(){
+    var cells = [
+      { k:T('النشطة','Active'),       v:COUNTS.active,     cls:'' },
+      { k:T('غير مستلَمة','Unclaimed'), v:COUNTS.unassigned, cls:COUNTS.unassigned ? 'wait' : '' },
+      { k:T('المعيَّنة لي','Assigned to me'), v:COUNTS.mine, cls:'' }
+    ];
+    return '<div class="strip">' + cells.map(function(c){
+      return '<span class="s ' + c.cls + '"><b class="v">' + (c.v == null ? '—' : c.v) + '</b><span class="k">' + c.k + '</span></span>'; }).join('') + '</div>';
+  }
+
+  function render(){
+    renderHeader(); renderNav();
+    var sc = scopeOf(F.scope);
+    var body;
+    if(READ_ERR){
+      body = '<div class="empty"><i class="ti ti-alert-circle" aria-hidden="true"></i><b>'
+        + esc(READ_ERR) + '</b></div>';
+    } else if(!ITEMS.length){
+      body = '<div class="empty"><i class="ti ti-ticket-off" aria-hidden="true"></i><b>'
+        /* a filtered-out list and an empty scope are different facts */
+        + (filtersActive()
+            ? T('لا توجد تذاكر مطابقة للفلاتر الحالية','No tickets match the current filters')
+            : T(sc.emptyAr, sc.emptyEn))
+        + '</b>' + (filtersActive() ? '<button class="btn sm" type="button" onclick="OPS.clearFilters()">'
+            + T('مسح الفلاتر','Clear Filters') + '</button>' : '') + '</div>';
+    } else body = rows(ITEMS);
+
+    el('view').innerHTML =
+      '<h1 class="sr-only">' + T('التذاكر','Tickets') + '</h1>'
+      + '<div class="wk">'
+      + '<div class="wk-head"><p>' + T('تذاكر رف المركزية التي يعمل عليها قسم العمليات واللوجستيات.','RAF central tickets the Operations & Logistics department is working.') + '</p>'
+      + '<span class="wk-count">' + T(ITEMS.length + ' تذكرة', ITEMS.length + ' ticket(s)') + '</span>'
+      /* shown only when the ticket authority says this account may open a case */
+      + (CAP && CAP.create
+          ? '<button class="btn pri" type="button" id="createBtn" onclick="OPS.openCreate()">'
+            + '<i class="ti ti-plus" aria-hidden="true"></i>' + T('تذكرة جديدة','New Ticket') + '</button>'
+          : '') + '</div>'
+      + strip()
+      + '<div class="scopes" role="group" aria-label="' + esc(T('نطاق التذاكر','Ticket scope')) + '">'
+      + SCOPES.map(function(s){
+          var n = COUNTS[s.k];
+          return '<button class="scope" type="button" aria-pressed="' + (F.scope === s.k) + '" onclick="OPS.setScope(\'' + s.k + '\')">'
+            + T(s.ar,s.en) + '<span class="n">' + (n == null ? '—' : n) + '</span></button>'; }).join('')
+      + '</div>'
+      + toolbar() + chips()
+      + '<div class="tbl-card">' + body + '</div>'
+      + '</div>';
+    if(OPEN) renderSheet();
+  }
+
+  /* ───────── ticket sheet ─────────
+     Read straight from the authority with getTicket(..., {full:true}); the
+     ticket is never copied into this page's own state. */
+  var OPEN = null, openTrigger = null, AUDIT = null, MSG = null, BUSY = false;
+  function sec(title, icon, inner){
+    return '<section class="sec"><h3><i class="ti ' + icon + '" aria-hidden="true"></i>' + esc(title) + '</h3>' + inner + '</section>';
+  }
+  function kv(k, v){ return '<div class="kv"><span class="k">' + esc(k) + '</span><span class="v">' + v + '</span></div>'; }
+
+  function fetchTicket(id){
+    if(!CS) return null;
+    try {
+      var r = CS.getTicket(id, { full:true });
+      if(r && r.ok) return { ok:true, t:r.ticket };
+      return { ok:false, message:(r && r.message) || T('تعذّر فتح التذكرة.','The ticket could not be opened.') };
+    } catch(e){ return { ok:false, message:T('تعذّر فتح التذكرة.','The ticket could not be opened.') }; }
+  }
+
+  var HIST_IC = {
+    claim:'ti-user-check', transfer:'ti-arrows-exchange', status:'ti-flag', priority:'ti-alert-triangle',
+    note:'ti-note', message:'ti-message', update:'ti-edit', guard:'ti-shield', escalate:'ti-arrow-up-circle'
+  };
+  function histTitle(a){
+    var D = DEPARTMENTS();
+    function dep(k){ var d = D[k]; return d ? L({ ar:d.ar, en:d.en }) : (k || '—'); }
+    switch(a.kind){
+      case 'claim':    return T('تم استلام التذكرة','Ticket claimed');
+      case 'transfer': return T('تم تحويل التذكرة إلى قسم آخر','Ticket transferred') + ': ' + dep(a.fromDepartment) + ' → ' + dep(a.toDepartment);
+      case 'status':   return T('تغيّرت الحالة','Status changed') + ': '
+                         + (STATUS_TXT(a.from) ? L(STATUS_TXT(a.from)) : (a.from || '—')) + ' → '
+                         + (STATUS_TXT(a.to) ? L(STATUS_TXT(a.to)) : (a.to || '—'));
+      case 'priority': return T('تغيّرت الأولوية','Priority changed') + ': '
+                         + (PRIORITY_TXT(a.from) ? L(PRIORITY_TXT(a.from)) : (a.from || '—')) + ' → '
+                         + (PRIORITY_TXT(a.to) ? L(PRIORITY_TXT(a.to)) : (a.to || '—'));
+      case 'note':     return T('ملاحظة داخلية','Internal note');
+      case 'message':  return a.direction === 'inbound' ? T('رسالة من العميل','Message from the customer')
+                                                        : T('رسالة إلى العميل','Message to the customer');
+      case 'update':   return T('تم تحديث بيانات التذكرة','Ticket details updated');
+      default:         return a.kind;
+    }
+  }
+  function historySection(t){
+    var list = (t.activities || []).slice().sort(function(a,b){ return (b.at||0) - (a.at||0); });
+    if(!list.length)
+      return '<div class="empty"><span>' + T('لا يوجد نشاط مسجّل على هذه التذكرة.','No activity is recorded on this ticket.') + '</span></div>';
+    return '<ul class="hist">' + list.map(function(a){
+        return '<li><span class="hi" aria-hidden="true"><i class="ti ' + (HIST_IC[a.kind] || 'ti-point') + '"></i></span>'
+          + '<span class="hb"><b>' + esc(histTitle(a)) + '</b>'
+          + '<span class="who"><bdi>' + esc(a.actorName || T('النظام','System')) + '</bdi>'
+          + (a.reason ? ' · ' + T('السبب: ','Reason: ') + '<bdi>' + esc(a.reason) + '</bdi>' : '') + '</span>'
+          + (a.body ? '<span class="body"><bdi>' + esc(a.body) + '</bdi></span>' : '')
+          + '</span>'
+          + '<span class="hw"><bdi>' + esc(shortClock(a.at) || '') + '</bdi></span></li>'; }).join('')
+      + '</ul>';
+  }
+
+  /* the operations this ACCOUNT holds, from the authority's own capabilities().
+     Nothing is rendered that the account could not actually perform, and a
+     missing capability leaves the ticket readable rather than hiding it. */
+  function actionsSection(t){
+    if(!CAP || !CAP.manage)
+      return '<div class="notice"><i class="ti ti-eye" aria-hidden="true"></i><span>'
+        + T('لديك صلاحية القراءة فقط على التذاكر.','You have read-only access to tickets.') + '</span></div>';
+    if(!t.active)
+      return '<div class="notice"><i class="ti ti-lock" aria-hidden="true"></i><span>'
+        + T('هذه التذكرة منتهية ولا تقبل إجراءات.','This ticket is closed and takes no further action.') + '</span></div>';
+
+    var h = '<div class="acts-box">';
+    if(MSG) h += '<div class="act-msg ' + MSG.kind + '"><i class="ti ' + (MSG.kind === 'err' ? 'ti-alert-circle' : MSG.kind === 'ok' ? 'ti-check' : 'ti-loader') + '" aria-hidden="true"></i><span>' + esc(MSG.text) + '</span></div>';
+
+    /* claim — the authority refuses a second claim itself */
+    var mine = ME && t.assignedEmployeeId === ME.id;
+    h += '<div class="acts-row">';
+    if(!t.assignedEmployeeId)
+      h += '<button class="btn pri" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.claim()">'
+        + '<i class="ti ti-user-check" aria-hidden="true"></i>' + T('استلام التذكرة','Claim ticket') + '</button>';
+    else if(mine)
+      h += '<span class="nc"><i class="ti ti-user-check" aria-hidden="true"></i>' + T('التذكرة معيَّنة لك','Assigned to you') + '</span>';
+    else
+      h += '<span class="nc"><i class="ti ti-user" aria-hidden="true"></i>' + T('معيَّنة إلى: ','Assigned to: ') + esc(t.assignedEmployeeName || t.assignedEmployeeId) + '</span>';
+    h += '</div>';
+
+    /* non-terminal status moves only — the terminal ones have their own
+       authorised operations and their own permission */
+    var TR = (CS && CS.TRANSITIONS) || {}, S = STATUS();
+    var term = {}; term[S.RESOLVED] = 1; term[S.CLOSED] = 1; term[S.REOPENED] = 1;
+    var moves = (TR[t.status] || []).filter(function(x){ return !term[x]; });
+    if(moves.length){
+      h += '<div class="inline-f"><label for="a-status">' + T('نقل الحالة إلى','Move status to')
+        + '<select id="a-status">' + moves.map(function(m){
+            var x = STATUS_TXT(m); return '<option value="' + esc(m) + '">' + esc(x ? L(x) : m) + '</option>'; }).join('')
+        + '</select></label>'
+        + '<button class="btn" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.setStatus()">'
+        + '<i class="ti ti-flag" aria-hidden="true"></i>' + T('تطبيق','Apply') + '</button></div>';
+    }
+
+    /* priority */
+    h += '<div class="inline-f"><label for="a-prio">' + T('الأولوية','Priority')
+      + '<select id="a-prio">' + PRIORITIES().map(function(p){
+          var x = PRIORITY_TXT(p);
+          return '<option value="' + esc(p) + '"' + (t.priority === p ? ' selected' : '') + '>' + esc(x ? L(x) : p) + '</option>'; }).join('')
+      + '</select></label>'
+      + '<button class="btn" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.setPriority()">'
+      + '<i class="ti ti-alert-triangle" aria-hidden="true"></i>' + T('تطبيق','Apply') + '</button></div>';
+
+    /* transfer — the SAME ticket moves to another department, with its history */
+    var D = DEPARTMENTS();
+    var others = Object.keys(D).filter(function(k){ return k !== t.responsibleDepartment; });
+    if(others.length){
+      h += '<div class="inline-f"><label for="a-dept">' + T('تحويل إلى قسم آخر','Transfer to another department')
+        + '<select id="a-dept">' + others.map(function(k){
+            return '<option value="' + esc(k) + '">' + esc(L({ ar:D[k].ar, en:D[k].en })) + '</option>'; }).join('')
+        + '</select></label></div>'
+        + '<div class="note-f"><label class="sub-f" for="a-reason">' + T('سبب التحويل (مطلوب)','Transfer reason (required)')
+        + '<textarea id="a-reason" rows="2" maxlength="' + ((CS.LIMITS && CS.LIMITS.reason) || 500) + '"></textarea></label>'
+        + '<div class="acts-row" style="margin-block-start:8px"><button class="btn" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.transfer()">'
+        + '<i class="ti ti-arrows-exchange" aria-hidden="true"></i>' + T('تحويل التذكرة','Transfer ticket') + '</button></div></div>';
+    }
+
+    /* internal note — never shown to the customer by the authority */
+    h += '<div class="note-f"><label class="sub-f" for="a-note">' + T('ملاحظة داخلية','Internal note')
+      + '<textarea id="a-note" rows="3" maxlength="' + ((CS.LIMITS && CS.LIMITS.body) || 4000) + '"></textarea></label>'
+      + '<div class="acts-row" style="margin-block-start:8px"><button class="btn" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.addNote()">'
+      + '<i class="ti ti-note" aria-hidden="true"></i>' + T('إضافة ملاحظة','Add note') + '</button></div></div>';
+
+    h += '</div>';
+    return h;
+  }
+
+  function sheetBody(t){
+    var oid = t.context && t.context.orderId;
+    var cat = CATEGORIES().filter(function(c){ return c.key === t.category; })[0];
+    var TY = (CS && CS.TYPE) || {};
+    var h = '';
+
+    h += sec(T('التذكرة','Ticket'), 'ti-ticket',
+        kv(T('رقم التذكرة','Ticket ID'), '<bdi class="mono">' + esc(t.ticketId) + '</bdi>')
+      + kv(T('الحالة','Status'), statusBadge(t))
+      + kv(T('الأولوية','Priority'), prioBadge(t))
+      + kv(T('التصنيف','Category'), cat ? bidi(L({ ar:cat.ar, en:cat.en }) || cat.key) : (t.category ? bidi(t.category) : DASH))
+      + kv(T('النوع','Type'), t.type ? (t.type === TY.ORDER_LINKED ? T('مرتبطة بطلب','Order-linked') : T('عامة','General')) : DASH)
+      + kv(T('المصدر','Source'), t.source ? '<bdi>' + esc(t.source) + '</bdi>' : DASH)
+      + (t.escalated ? kv(T('التصعيد','Escalation'), '<span class="badge b-hot">' + T('مُصعَّدة','Escalated') + '</span>') : ''));
+
+    h += sec(T('المسؤولية','Responsibility'), 'ti-users-group',
+        kv(T('القسم المسؤول','Responsible department'), t.departmentText ? bidi(L(t.departmentText)) : DASH)
+      + kv(T('الموظف المعيَّن','Assigned employee'), t.assignedEmployeeName ? bidi(t.assignedEmployeeName) : DASH)
+      + kv(T('وقت الاستلام','Claimed at'), t.claimedAt ? '<bdi>' + esc(clockOf(t.claimedAt)) + '</bdi>' : DASH));
+
+    h += sec(T('العميل والطلب','Customer & order'), 'ti-user',
+        kv(T('العميل','Customer'), customerCell(t))
+      + kv(T('الطلب المرتبط','Related order'), oid ? '<bdi class="mono">' + esc(oid) + '</bdi>' : DASH));
+
+    h += sec(T('الموضوع','Subject'), 'ti-file-description',
+        kv(T('الموضوع','Subject'), t.subject ? bidi(t.subject) : DASH)
+      + (t.description ? '<p class="desc"><bdi>' + esc(t.description) + '</bdi></p>' : ''));
+
+    /* tasks and follow-ups exist on the central record; shown read-only when
+       the ticket actually carries any */
+    if(t.tasks && t.tasks.length)
+      h += sec(T('المهام','Tasks'), 'ti-checkbox', '<ul class="hist">' + t.tasks.map(function(k){
+          return '<li><span class="hi" aria-hidden="true"><i class="ti ti-checkbox"></i></span>'
+            + '<span class="hb"><b><bdi>' + esc(k.title || k.taskId) + '</bdi></b>'
+            + '<span class="who">' + esc(k.status === 'completed' ? T('مكتملة','Completed') : T('مفتوحة','Open')) + '</span></span>'
+            + '<span class="hw"><bdi>' + esc(shortClock(k.createdAt) || '') + '</bdi></span></li>'; }).join('') + '</ul>');
+    if(t.followUps && t.followUps.length)
+      h += sec(T('المتابعات','Follow-ups'), 'ti-clock', '<ul class="hist">' + t.followUps.map(function(k){
+          return '<li><span class="hi" aria-hidden="true"><i class="ti ti-clock"></i></span>'
+            + '<span class="hb"><b><bdi>' + esc(k.title || k.followUpId) + '</bdi></b>'
+            + '<span class="who">' + esc(k.status || '') + '</span></span>'
+            + '<span class="hw"><bdi>' + esc(shortClock(k.dueAt || k.createdAt) || '') + '</bdi></span></li>'; }).join('') + '</ul>');
+
+    h += sec(T('التوقيت','Timeline'), 'ti-clock', '<ul class="hist">'
+      + [[T('الإنشاء','Created'), t.createdAt], [T('آخر تحديث','Last updated'), t.updatedAt],
+         [T('تم الحل','Resolved'), t.resolvedAt], [T('الإغلاق','Closed'), t.closedAt]]
+        .filter(function(m){ return m[1]; })
+        .map(function(m){
+          return '<li><span class="hi" aria-hidden="true"><i class="ti ti-point"></i></span>'
+            + '<span class="hb"><b>' + esc(m[0]) + '</b></span>'
+            + '<span class="hw"><bdi>' + esc(clockOf(m[1]) || '') + '</bdi></span></li>'; }).join('')
+      + '</ul>');
+
+    h += sec(T('الإجراءات','Actions'), 'ti-settings-automation', actionsSection(t));
+    h += sec(T('النشاط','Activity'), 'ti-history', historySection(t));
+
+    if(CAN.audit)
+      h += '<div class="sheet-extra"><button class="btn audit-btn" type="button" onclick="OPS.openAudit(\'' + esc(t.ticketId) + '\')">'
+        + '<i class="ti ti-file-search" aria-hidden="true"></i>' + T('التدقيق','Audit') + '</button>'
+        + '<span class="hint">' + T('كل ما سجّله النظام لهذه التذكرة — للاطلاع فقط.','Everything the system recorded for this ticket — read only.') + '</span></div>';
+    return h;
+  }
+
+  /* ───────── التدقيق · Audit ─────────
+     A separate read-only layer over RAFAudit. The ticket authority stamps every
+     one of its audit records with metadata.ticketId, so the layer is scoped by
+     that recorded field — never by anything from the URL. Nothing is written,
+     edited or removed here. */
+  function auditMeta(e){
+    var bits = [];
+    if(e.previousState || e.newState)
+      bits.push(T('الحالة: ','State: ') + (e.previousState || '—') + ' → ' + (e.newState || '—'));
+    if(e.reason) bits.push(T('السبب: ','Reason: ') + e.reason);
+    if(e.source) bits.push(T('المصدر: ','Source: ') + e.source);
+    if(e.automatic) bits.push(T('تلقائي','Automatic'));
+    if(e.systemGenerated) bits.push(T('من النظام','System generated'));
+    var md = e.metadata;
+    if(md && typeof md === 'object') Object.keys(md).forEach(function(k){
+      var v = md[k];
+      if(v == null || typeof v === 'object') return;
+      bits.push(k + ': ' + v);
+    });
+    return bits;
+  }
+  function auditBody(ticketId){
+    var A = window.RAFAudit;
+    if(!A || !CAN.audit)
+      return '<div class="sec"><div class="notice"><i class="ti ti-lock" aria-hidden="true"></i><span>'
+        + T('التدقيق يتطلب صلاحية reports.view.','Audit requires the reports.view permission.') + '</span></div></div>';
+    var list = [];
+    try {
+      list = (A.auditLog({}) || []).filter(function(e){
+        return e && e.metadata && e.metadata.ticketId === ticketId; });
+    } catch(e){ list = []; }
+    if(!list.length)
+      return '<div class="sec"><div class="empty"><i class="ti ti-file-off" aria-hidden="true"></i>'
+        + '<b>' + T('لا توجد سجلات تدقيق لهذه التذكرة','No audit records for this ticket') + '</b></div></div>';
+    list.sort(function(a,b){ return b.timestamp - a.timestamp; });
+    return '<div class="sec"><ul class="audit">' + list.map(function(e){
+        var lbl = ''; try { lbl = A.label(e.action); } catch(err){ lbl = e.action; }
+        var meta = auditMeta(e);
+        return '<li><span class="ai" aria-hidden="true"><i class="ti ti-point"></i></span>'
+          + '<span class="ab"><b>' + esc(lbl || e.action) + '</b>'
+          + '<span class="act"><code>' + esc(e.action) + '</code></span>'
+          + '<span class="who"><bdi>' + esc(e.actorName || (e.actorType === 'system' ? T('النظام','System') : '—')) + '</bdi></span>'
+          + (meta.length ? '<span class="md">' + meta.map(function(m){ return '<bdi>' + esc(m) + '</bdi>'; }).join('<span class="sep">·</span>') + '</span>' : '')
+          + '</span>'
+          + '<span class="aw"><bdi>' + esc(shortClock(e.timestamp) || '') + '</bdi></span></li>'; }).join('')
+      + '</ul></div>';
+  }
+  function renderAudit(){
+    if(!AUDIT) return;
+    el('auditHost').innerHTML =
+      '<div class="sheet" id="auditSheet" onclick="if(event.target===this)OPS.closeAudit()">'
+      + '<div class="sheet-c" role="dialog" aria-modal="true" aria-labelledby="auT">'
+      + '<div class="sheet-h"><button class="ibtn" type="button" onclick="OPS.closeAudit()" aria-label="' + esc(T('رجوع','Back')) + '">'
+        + '<i class="ti ti-arrow-' + (isEn() ? 'left' : 'right') + '" aria-hidden="true"></i></button>'
+      + '<div class="t"><b id="auT">' + T('التدقيق','Audit') + '</b>'
+        + '<span><bdi>' + esc(AUDIT) + '</bdi> · ' + T('سجل تقني للقراءة فقط','Technical record, read only') + '</span></div></div>'
+      + '<div class="sheet-b">' + auditBody(AUDIT) + '</div></div></div>';
+    var b = el('auditSheet').querySelector('.ibtn'); if(b) b.focus();
+  }
+  function closeAudit(){
+    AUDIT = null; el('auditHost').innerHTML = '';
+    var b = document.querySelector('.audit-btn'); if(b) b.focus();
+  }
+
+  function renderSheet(){
+    var res = fetchTicket(OPEN);
+    if(!res){ closeSheet(); return; }
+    if(!res.ok){
+      el('sheetHost').innerHTML =
+        '<div class="sheet" id="sheet" onclick="if(event.target===this)OPS.close()">'
+        + '<div class="sheet-c" role="dialog" aria-modal="true" aria-labelledby="shT">'
+        + '<div class="sheet-h"><div class="t"><b id="shT"><bdi>' + esc(OPEN) + '</bdi></b></div>'
+        + '<button class="ibtn" type="button" onclick="OPS.close()" aria-label="' + esc(T('إغلاق','Close')) + '"><i class="ti ti-x" aria-hidden="true"></i></button></div>'
+        + '<div class="sheet-b"><div class="sec"><div class="notice warn"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>'
+        + esc(res.message) + '</span></div></div></div></div></div>';
+      return;
+    }
+    var t = res.t;
+    el('sheetHost').innerHTML =
+      '<div class="sheet" id="sheet" onclick="if(event.target===this)OPS.close()">'
+      + '<div class="sheet-c" role="dialog" aria-modal="true" aria-labelledby="shT">'
+      + '<div class="sheet-h"><div class="t"><b id="shT"><bdi>' + esc(t.ticketId) + '</bdi></b>'
+        + '<span><bdi>' + esc(t.subject || '') + '</bdi></span></div>'
+        + statusBadge(t)
+        + '<button class="ibtn" type="button" onclick="OPS.close()" aria-label="' + esc(T('إغلاق','Close')) + '"><i class="ti ti-x" aria-hidden="true"></i></button></div>'
+      + '<div class="sheet-b">' + sheetBody(t) + '</div></div></div>';
+    var x = el('sheet').querySelector('.ibtn'); if(x) x.focus();
+  }
+  function closeSheet(){
+    if(AUDIT) closeAudit();
+    OPEN = null; MSG = null; BUSY = false; el('sheetHost').innerHTML = '';
+    if(openTrigger && document.contains(openTrigger)) openTrigger.focus();
+    openTrigger = null;
+  }
+
+  /* ───────── writes ─────────
+     Every one of these is an operation of RAFCustomerService. This page holds
+     no ticket state, so after the authority answers it simply re-reads. The
+     authority's own message is shown when it refuses — never overridden. */
+  function runOp(promiseLike, okAr, okEn){
+    BUSY = true; MSG = { kind:'busy', text:T('جارٍ التنفيذ...','Working...') };
+    renderSheet();
+    var p = promiseLike && promiseLike.then ? promiseLike : { then:function(f){ f(promiseLike); return this; } };
+    p.then(function(res){
+      BUSY = false;
+      if(res && res.ok) MSG = { kind:'ok', text:T(okAr, okEn) };
+      else MSG = { kind:'err', text:(res && res.message) || T('تعذّر تنفيذ الإجراء.','The action could not be completed.') };
+      refresh();
+    }, function(){
+      BUSY = false;
+      MSG = { kind:'err', text:T('تعذّر تنفيذ الإجراء.','The action could not be completed.') };
+      refresh();
+    });
+  }
+  function valOf(id){ var e = el(id); return e ? String(e.value || '') : ''; }
+
+  /* ───────── shell ───────── */
+  function renderNav(){
+    function item(href, icon, ar, en, current){
+      return '<li><a href="' + href + '"' + (current ? ' aria-current="page"' : '') + '>'
+        + '<i class="ti ' + icon + '" aria-hidden="true"></i><span>' + T(ar,en) + '</span></a></li>';
+    }
+    el('navTree').innerHTML =
+      '<span class="grp">' + T('العمليات','Operations') + '</span><ul>'
+      + item('raf_logistics.html', 'ti-layout-dashboard', 'مركز العمليات', 'Command Center', false)
+      + item('raf_logistics_orders.html', 'ti-shopping-bag', 'الطلبات', 'Orders', false)
+      + item('raf_logistics_dispatch.html', 'ti-route', 'التوزيع والتعيين', 'Dispatch & Assignment', false)
+      + item('raf_logistics_tickets.html', 'ti-ticket', 'التذاكر', 'Tickets', true)
+      + item('raf_logistics_drivers.html', 'ti-motorbike', 'السائقون', 'Drivers', false)
+      + '</ul>'
+      + '<div class="ops-nav-foot"><b>' + T('العمليات واللوجستيات','Operations & Logistics') + '</b>'
+      + T('منصة رف','RAF platform') + '</div>';
+  }
+  function renderHeader(){
+    el('crumbGroup').textContent = T('اللوجستيات · العمليات','Logistics · Operations');
+    el('crumbPage').textContent = T('التذاكر','Tickets');
+    el('langBtn').textContent = isEn() ? 'ع' : 'EN';
+    el('langBtn').setAttribute('aria-label', T('التبديل إلى الإنجليزية','Switch to Arabic'));
+    if(ME){
+      el('userAv').textContent = String(ME.name || '?').trim().charAt(0);
+      el('userName').textContent = ME.name || '';
+      var role = null; try { role = P.getRole(ME.roleId); } catch(e){}
+      el('userRole').textContent = role ? T(role.nameAr, role.nameEn) : '';
+    }
+    document.title = T('رف — التذاكر','RAF — Tickets');
+  }
+
+  function refresh(){ readAll(); render(); }
+
+  function gate(titleAr, titleEn, msg){
+    ME = null; CAP = null; OPEN = null; AUDIT = null; DRAFT = null; MSG = null; NEW = null;
+    el('shell').hidden = true; el('sheetHost').innerHTML = '';
+    el('auditHost').innerHTML = ''; el('appletHost').innerHTML = ''; el('createHost').innerHTML = '';
+    var g = el('gate'); g.hidden = false;
+    el('gateT').textContent = T(titleAr, titleEn);
+    el('gateP').textContent = msg;
+    document.title = T('رف — التذاكر','RAF — Tickets');
+  }
+  function applyLang(){
+    var en = isEn();
+    document.querySelectorAll('[data-ar][data-en]').forEach(function(e){
+      var t = e.getAttribute('data-' + (en ? 'en' : 'ar')); if(t !== null) e.textContent = t;
+    });
+  }
+  function boot(){
+    var l = null; try { l = localStorage.getItem('raf_lang'); } catch(e){}
+    if(l === 'en'){ root().lang = 'en'; root().dir = 'ltr'; }
+    applyLang();
+
+    if(!P || !CS){
+      gate('تعذّر التحميل','Could not load', T('لم يتم تحميل وحدات رف المطلوبة.','The required RAF modules did not load.'));
+      return;
+    }
+    /* identity from the stored session only — never from the URL, a query
+       string or a caller-supplied id. RAFPerm.currentUser() falls back to the
+       first administrator when nothing is signed in, so the session key is
+       read first and an empty session is refused. */
+    var sid = null;
+    try {
+      var key = (P.LS && P.LS.session) || 'raf_current_user';
+      var raw = localStorage.getItem(key);
+      if(raw != null && raw !== ''){ try { sid = JSON.parse(raw); } catch(e){ sid = raw; } }
+      if(typeof sid !== 'string' || !sid) sid = null;
+    } catch(e){ sid = null; }
+    if(!sid){ gate('يلزم تسجيل الدخول','Sign-in required', T('التذاكر متاحة لفريق عمليات رف بعد تسجيل الدخول.','Tickets are available to RAF operations staff after signing in.')); return; }
+    var u = null; try { u = P.getUser(sid); } catch(e){ u = null; }
+    if(!u){ gate('يلزم تسجيل الدخول','Sign-in required', T('تعذّر التعرف على الحساب.','That account could not be identified.')); return; }
+    if(u.status !== 'active'){ gate('حسابك موقوف','Your account is suspended', T('لا يمكن فتح التذاكر بحساب موقوف.','A suspended account cannot open Tickets.')); return; }
+    var ok = true;
+    try { ok = P.can(u.id, PERM.orders) && P.can(u.id, PERM.drivers) && P.can(u.id, PERM.ops); } catch(e){ ok = false; }
+    if(!ok){ gate('لا تملك صلاحية الوصول','You do not have access', T('التذاكر متاحة لفريق عمليات رف فقط.','Tickets are available to RAF operations staff only.')); return; }
+    /* reading tickets is the ticket authority's own permission, not this page's */
+    var canTickets = false; try { canTickets = !!P.can(u.id, PERM.tickets); } catch(e){ canTickets = false; }
+    if(!canTickets){ gate('لا تملك صلاحية قراءة التذاكر','You cannot read tickets', T('قراءة التذاكر تتطلب صلاحية support.view.','Reading tickets requires the support.view permission.')); return; }
+
+    ME = { id:u.id, name:u.name, roleId:u.roleId };
+    try { var c = CS.capabilities(); CAP = (c && c.ok) ? c : null; } catch(e){ CAP = null; }
+    CAN.audit    = (function(){ try { return !!(window.RAFAudit && RAFAudit.canViewAudit(u.id)); } catch(e){ return false; } })();
+    /* the customer's display name comes from the account directory this
+       account may already read; nothing else of the customer is shown */
+    CAN.customer = (function(){ try { return !!P.can(u.id, 'users.view'); } catch(e){ return false; } })();
+
+    el('gate').hidden = true; el('shell').hidden = false;
+    refresh();
+
+    /* live updates through the mechanisms that already exist — no polling, no timer */
+    if(window.RAFEventBus){
+      ['support.*','audit.*'].forEach(function(p){
+        try { RAFEventBus.subscribe(p, function(){ refresh(); }); } catch(e){}
+      });
+    }
+    window.addEventListener('storage', function(e){
+      if(e.key && /^raf_(support_tickets|support_activities|support_escalations|support_tasks|support_followups|audit_events|users)$/.test(e.key)) refresh();
+    });
+    document.addEventListener('raf:audit', refresh);
+  }
+
+  window.OPS = {
+    refresh: refresh,
+    setScope: function(k){ F.scope = k; refresh(); },
+    setQ: function(v){
+      F.q = v; refresh();
+      var i = el('q'); if(i){ i.focus(); try { i.setSelectionRange(i.value.length, i.value.length); } catch(e){} }
+    },
+    setF: function(k, v){ F[k] = (k === 'escalated') ? false : v; refresh(); },
+    /* applet: edit a draft, commit on Apply */
+    openFilters: openFilters,
+    closeFilters: closeFilters,
+    draft: function(k, v){ if(DRAFT) DRAFT[k] = v; },
+    applyFilters: function(){
+      if(!DRAFT) return;
+      F.status = DRAFT.status; F.priority = DRAFT.priority; F.department = DRAFT.department;
+      F.category = DRAFT.category; F.type = DRAFT.type; F.escalated = !!DRAFT.escalated;
+      F.from = DRAFT.from; F.to = DRAFT.to;
+      closeFilters(); refresh();
+      var b = el('filterBtn'); if(b) b.focus();
+    },
+    clearFilters: function(){
+      F.status = ''; F.priority = ''; F.department = ''; F.category = ''; F.type = '';
+      F.escalated = false; F.from = ''; F.to = '';
+      if(DRAFT){ closeFilters(); }
+      refresh();
+      var b = el('filterBtn'); if(b) b.focus();
+    },
+    /* ---- create a ticket, performed entirely by RAFCustomerService ---- */
+    openCreate: openCreate,
+    closeCreate: closeCreate,
+    newDraft: syncCreate,
+    openExisting: function(id){ closeCreate(); OPEN = id; MSG = null; renderSheet(); },
+    submitCreate: function(){
+      if(!NEW || NEW_BUSY || !CS) return;
+      syncCreate();
+      var TY = (CS.TYPE) || {};
+      /* ONLY the keys createTicket() accepts — an unknown key is refused by the
+         authority, and nothing here is defaulted on the authority's behalf */
+      var input = {
+        customerId:NEW.customerId, type:NEW.type, category:NEW.category,
+        subject:NEW.subject, description:NEW.description, priority:NEW.priority
+      };
+      if(NEW.department) input.department = NEW.department;
+      if(NEW.type === (TY.ORDER_LINKED || 'order_linked') || NEW.orderId) input.orderId = NEW.orderId;
+
+      NEW_BUSY = true; NEW_DUP = null;
+      NEW_MSG = { kind:'busy', text:T('جارٍ الإنشاء...','Creating...') };
+      renderCreate();
+      CS.createTicket(input).then(function(res){
+        NEW_BUSY = false;
+        if(res && res.ok && res.ticket){
+          var id = res.ticket.ticketId;
+          closeCreate();
+          /* the new ticket is NEW and therefore active; show it where it lives */
+          F.scope = 'active'; F.q = '';
+          refresh();
+          /* opened through the ordinary details flow — never injected locally */
+          OPS.open(id);
+          return;
+        }
+        markBad(res);
+        NEW_DUP = (res && res.code === 'DUPLICATE' && res.ticketId) ? res.ticketId : null;
+        NEW_MSG = { kind:'err', text:(res && res.message) || T('تعذّر إنشاء التذكرة.','The ticket could not be created.') };
+        renderCreate();
+      }, function(){
+        NEW_BUSY = false;
+        NEW_MSG = { kind:'err', text:T('تعذّر إنشاء التذكرة.','The ticket could not be created.') };
+        renderCreate();
+      });
+    },
+
+    /* nothing opens over the access gate */
+    open: function(id){ if(!ME) return; openTrigger = document.activeElement; OPEN = id; MSG = null; renderSheet(); },
+    close: closeSheet,
+    openAudit: function(id){ if(!ME) return; AUDIT = id; renderAudit(); },
+    closeAudit: closeAudit,
+
+    /* ---- operations, each performed by RAFCustomerService ---- */
+    claim: function(){
+      if(!OPEN || BUSY || !CS) return;
+      runOp(CS.claimTicket(OPEN), 'تم استلام التذكرة.', 'Ticket claimed.');
+    },
+    setStatus: function(){
+      if(!OPEN || BUSY || !CS) return;
+      var to = valOf('a-status'); if(!to) return;
+      runOp(CS.updateTicket(OPEN, { status:to }), 'تم تحديث الحالة.', 'Status updated.');
+    },
+    setPriority: function(){
+      if(!OPEN || BUSY || !CS) return;
+      var p = valOf('a-prio'); if(!p) return;
+      runOp(CS.updateTicket(OPEN, { priority:p }), 'تم تحديث الأولوية.', 'Priority updated.');
+    },
+    transfer: function(){
+      if(!OPEN || BUSY || !CS) return;
+      var to = valOf('a-dept'), reason = valOf('a-reason').trim();
+      if(!to) return;
+      if(!reason){
+        MSG = { kind:'err', text:T('سبب التحويل مطلوب.','A transfer reason is required.') };
+        renderSheet(); return;
+      }
+      runOp(CS.transferTicket(OPEN, { toDepartment:to, reason:reason }),
+            'تم تحويل التذكرة مع سجلها الكامل.', 'Ticket transferred with its full history.');
+    },
+    addNote: function(){
+      if(!OPEN || BUSY || !CS) return;
+      var body = valOf('a-note').trim();
+      if(!body){
+        MSG = { kind:'err', text:T('اكتب نص الملاحظة.','Write the note first.') };
+        renderSheet(); return;
+      }
+      runOp(CS.addInternalNote(OPEN, { body:body }), 'تمت إضافة الملاحظة.', 'Note added.');
+    },
+
+    toggleLang: function(){
+      var r = root(), en = r.lang === 'en';
+      if(NEW) syncCreate();                      /* keep what was typed */
+      r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+      try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+      applyLang(); refresh();
+      if(NEW) renderCreate();
+      el('langBtn').focus();
+    },
+    openNav: function(){ el('shell').classList.add('nav-open'); var x = document.querySelector('.ops-nav-x'); if(x) x.focus(); },
+    closeNav: function(){ el('shell').classList.remove('nav-open'); var b = document.querySelector('.ops-burger'); if(b) b.focus(); }
+  };
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Escape') return;
+    if(NEW){ e.preventDefault(); closeCreate(); return; }
+    if(AUDIT){ e.preventDefault(); closeAudit(); return; }
+    if(DRAFT){ e.preventDefault(); closeFilters(); return; }
+    if(OPEN){ e.preventDefault(); closeSheet(); return; }
+    if(el('shell') && el('shell').classList.contains('nav-open')) OPS.closeNav();
+  });
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

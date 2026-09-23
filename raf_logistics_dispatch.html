@@ -71,6 +71,18 @@
 .sub-f input{ margin-block-start:5px; }
 .sheet-f{ display:flex; gap:10px; padding:12px 16px; border-block-start:1px solid var(--line); background:var(--surface-2); }
 .sheet-f .btn{ flex:1 1 auto; min-height:44px; }
+/* the assignment form — the same sheet family as the filter applet */
+.fld textarea{ width:100%; min-height:72px; padding:8px 10px; border:1px solid var(--line-2); border-radius:var(--r-sm);
+  background:var(--surface); color:var(--ink); font-size:13.5px; font-family:inherit; resize:vertical; }
+.fld textarea:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+.fld .req{ color:var(--alert); font-weight:800; }
+.fld .hint{ display:block; margin-block-start:5px; font-size:11.5px; color:var(--faint); line-height:1.6; }
+.acts-row{ display:flex; gap:8px; flex-wrap:wrap; margin-block-start:10px; }
+.acts-row .btn{ flex:0 1 auto; }
+.form-msg{ display:flex; gap:9px; padding:11px 12px; border-radius:var(--r); font-size:12.5px; margin-block-start:12px; }
+.form-msg i{ font-size:17px; flex-shrink:0; }
+.form-msg.err{ background:var(--alert-bg); color:var(--alert); }
+.form-msg.busy{ background:var(--surface-2); color:var(--muted); }
 
 /* active filter chips */
 .fchips{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
@@ -232,6 +244,7 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
 </div>
 <div id="sheetHost"></div>
 <div id="appletHost"></div>
+<div id="formHost"></div>
 
 <script src="raf_source.js"></script>
 <script src="raf_audit.js"></script>
@@ -241,6 +254,7 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
 <script src="raf_order_engine.js"></script>
 <script src="raf_permissions.js"></script>
 <script src="raf_customer_service.js"></script>
+<script src="raf_logistics_authority.js"></script>
 <script>
 /* ============================================================================
    DISPATCH & ASSIGNMENT — التوزيع والتعيين
@@ -265,7 +279,11 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
   'use strict';
 
   var E = window.RAFOrderEngine, P = window.RAFPerm, CS = window.RAFCustomerService;
-  var ME = null, CAN = { tickets:false, customer:false };
+  /* assignment belongs to the Logistics authority. Dispatch performs no
+     assignment of its own: it calls the same RAFLogistics.assignOrder the
+     Drivers page calls, so the rule lives in exactly one place. */
+  var LG = window.RAFLogistics;
+  var ME = null, CAP = null, CAN = { tickets:false, customer:false };
 
   /* the Command Center's access boundary, unchanged: existing keys only, which
      today is exactly Super Admin, Higher Management and Operations Manager.
@@ -575,14 +593,17 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
     return '<span class="nowrap">' + esc(mins(Date.now() - at)) + '</span>'
       + '<span class="sub">' + T('منذ ','since ') + esc(shortClock(at) || '') + '</span>';
   }
-  /* the one action this page would perform. RAF has no authority that can
-     carry out a تعيين, so the cell says so plainly instead of offering a
-     control that does nothing or, worse, records an assignment that has no
-     driver behind it. */
+  /* تعيين — performed by RAFLogistics, never here. The control is rendered
+     only when the authority says this account holds drivers.assign; the
+     authority re-proves that when the call runs, so the button is presentation
+     and not the security boundary. */
   function actionCell(r){
     var k = stateOf(r).k;
     if(k !== 'unassigned') return DASH;
-    return '<span class="nc"><i class="ti ti-tool" aria-hidden="true"></i>' + T('التعيين غير متاح بعد','Assignment not available yet') + '</span>';
+    if(!(CAP && CAP.assign))
+      return '<span class="nc"><i class="ti ti-lock" aria-hidden="true"></i>' + T('لا تملك صلاحية التعيين','No assignment permission') + '</span>';
+    return '<button class="btn sm pri" type="button" onclick="event.stopPropagation();OPS.openAssign(\'' + esc(r.id) + '\')">'
+      + '<i class="ti ti-user-check" aria-hidden="true"></i>' + T('تعيين','Assign') + '</button>';
   }
   function areaCell(r){
     if(!CAN.customer) return '<span class="dash" title="' + esc(T('غير مصرّح','Not authorised')) + '">—</span>';
@@ -699,8 +720,16 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
       + kv(T('وقت التعيين','Assigned at'), r.assignedAt ? '<bdi>' + esc(clockOf(r.assignedAt)) + '</bdi>' : DASH)
       + kv(T('مدة الانتظار','Waiting'), stateSince(r) ? esc(mins(Date.now() - stateSince(r))) : DASH)
       + (st.k === 'unassigned'
-          ? '<div class="notice"><i class="ti ti-tool" aria-hidden="true"></i><span>'
-            + T('التعيين غير متاح بعد.','Assignment is not available yet.') + '</span></div>' : ''));
+          ? (CAP && CAP.assign
+              ? '<div class="acts-row"><button class="btn pri" type="button" onclick="OPS.openAssign(\'' + esc(r.id) + '\')">'
+                + '<i class="ti ti-user-check" aria-hidden="true"></i>' + T('تعيين سائق','Assign a driver') + '</button></div>'
+              : '<div class="notice"><i class="ti ti-lock" aria-hidden="true"></i><span>'
+                + T('التعيين يتطلب صلاحية drivers.assign.','Assignment requires the drivers.assign permission.') + '</span></div>')
+          : '')
+      + (st.k !== 'unassigned' && r.driverId && !r.pickedUpAt && CAP && CAP.assign
+          ? '<div class="acts-row"><button class="btn" type="button" onclick="OPS.openReturn(\'' + esc(r.id) + '\')">'
+            + '<i class="ti ti-arrow-back-up" aria-hidden="true"></i>' + T('إعادة إلى القائمة','Return to pool') + '</button></div>'
+          : ''));
 
     /* التسليم — where this order is going */
     h += sec(T('التسليم','Delivery'), 'ti-map-pin',
@@ -792,6 +821,8 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
       + item('raf_logistics.html', 'ti-layout-dashboard', 'مركز العمليات', 'Command Center', false)
       + item('raf_logistics_orders.html', 'ti-shopping-bag', 'الطلبات', 'Orders', false)
       + item('raf_logistics_dispatch.html', 'ti-route', 'التوزيع والتعيين', 'Dispatch & Assignment', true)
+      + item('raf_logistics_tickets.html', 'ti-ticket', 'التذاكر', 'Tickets', false)
+      + item('raf_logistics_drivers.html', 'ti-motorbike', 'السائقون', 'Drivers', false)
       + '</ul>'
       + '<div class="ops-nav-foot"><b>' + T('العمليات واللوجستيات','Operations & Logistics') + '</b>'
       + T('منصة رف','RAF platform') + '</div>';
@@ -810,11 +841,50 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
     document.title = T('رف — التوزيع والتعيين','RAF — Dispatch & Assignment');
   }
 
+  /* ═════════════════ ASSIGNMENT FORM ═════════════════
+     A driver picker and a reason box. Both submits call RAFLogistics — this
+     page performs no assignment and knows no assignment rule. The driver list
+     is the authority's own answer (assignable drivers only). */
+  var FORM = null, FMSG = null, FBUSY = false;
+  function fclose(){
+    FORM = null; FMSG = null; FBUSY = false; el('formHost').innerHTML = '';
+    if(OPEN) renderSheet();
+  }
+  function fsync(){ var e = el('x-val'); if(e && FORM) FORM.val = String(e.value || ''); }
+  function renderForm(){
+    if(!FORM) return;
+    el('formHost').innerHTML =
+      '<div class="sheet" id="formSheet" onclick="if(event.target===this)OPS.fclose()">'
+      + '<div class="sheet-c applet" role="dialog" aria-modal="true" aria-labelledby="fmT">'
+      + '<div class="sheet-h"><div class="t"><b id="fmT">' + esc(FORM.title) + '</b>'
+        + '<span><bdi>' + esc(FORM.orderId) + '</bdi></span></div>'
+        + '<button class="ibtn" type="button" onclick="OPS.fclose()" aria-label="' + esc(T('إغلاق','Close')) + '"><i class="ti ti-x" aria-hidden="true"></i></button></div>'
+      + '<div class="sheet-b">' + FORM.body()
+        + (FMSG ? '<div class="form-msg ' + FMSG.kind + '"><i class="ti ' + (FMSG.kind === 'err' ? 'ti-alert-circle' : 'ti-loader') + '" aria-hidden="true"></i><span>' + esc(FMSG.text) + '</span></div>' : '')
+      + '</div>'
+      + '<div class="sheet-f">'
+        + '<button class="btn" type="button" onclick="OPS.fclose()">' + T('إلغاء','Cancel') + '</button>'
+        + '<button class="btn pri" type="button"' + (FBUSY ? ' disabled' : '') + ' onclick="OPS.fsubmit()">'
+        + '<i class="ti ' + FORM.icon + '" aria-hidden="true"></i>' + esc(FORM.cta) + '</button>'
+      + '</div></div></div>';
+    var f = el('x-val'); if(f) f.focus();
+  }
+  function runOp(call, okAr, okEn){
+    FBUSY = true; FMSG = { kind:'busy', text:T('جارٍ التنفيذ...','Working...') };
+    renderForm();
+    var res = call();
+    FBUSY = false;
+    if(res && res.ok){ FORM = null; FMSG = null; el('formHost').innerHTML = ''; refresh(); return; }
+    FMSG = { kind:'err', text:(res && res.message) || T('تعذّر تنفيذ الإجراء.','The action could not be completed.') };
+    renderForm();
+  }
+
   function refresh(){ readAll(); readTickets(); render(); }
 
   function gate(titleAr, titleEn, msg){
-    ME = null; OPEN = null; DRAFT = null;
+    ME = null; CAP = null; OPEN = null; DRAFT = null; FORM = null;
     el('shell').hidden = true; el('sheetHost').innerHTML = ''; el('appletHost').innerHTML = '';
+    el('formHost').innerHTML = '';
     var g = el('gate'); g.hidden = false;
     el('gateT').textContent = T(titleAr, titleEn);
     el('gateP').textContent = msg;
@@ -855,6 +925,8 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
     if(!ok){ gate('لا تملك صلاحية الوصول','You do not have access', T('التوزيع والتعيين متاح لفريق عمليات رف فقط.','Dispatch is available to RAF operations staff only.')); return; }
 
     ME = { id:u.id, name:u.name, roleId:u.roleId };
+    /* what this account may do in Logistics is the authority's answer */
+    try { var c = LG ? LG.capabilities() : null; CAP = (c && c.ok) ? c : null; } catch(e){ CAP = null; }
     CAN.tickets  = (function(){ try { return !!(CS && P.can(u.id, 'support.view')); } catch(e){ return false; } })();
     /* the delivery address rides on the order record this account may already
        read (orders.view); nothing else of the customer is read */
@@ -901,6 +973,54 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
       render();
       var b = el('filterBtn'); if(b) b.focus();
     },
+    /* ---- assignment, performed by RAFLogistics ---- */
+    fclose: fclose,
+    fdraft: fsync,
+    fsubmit: function(){ if(FORM && !FBUSY){ fsync(); FORM.submit(); } },
+    openAssign: function(orderId){
+      if(!ME || !CAP || !CAP.assign || !LG) return;
+      var avail = { items:[] };
+      try { avail = LG.listDrivers({ assignableOnly:true }) || { items:[] }; } catch(e){ avail = { items:[] }; }
+      var opts = (avail.items || []).map(function(d){
+        return { v:d.driverId, t:d.name + ' · ' + T(d.activeOrders + ' طلب جارٍ', d.activeOrders + ' in progress') };
+      });
+      FORM = {
+        title:T('تعيين سائق','Assign a driver'), orderId:orderId, cta:T('تعيين','Assign'), icon:'ti-user-check',
+        val:'',
+        body:function(){
+          if(!opts.length)
+            return '<div class="empty"><i class="ti ti-user-off" aria-hidden="true"></i><b>'
+              + T('لا يوجد سائقون نشطون للتعيين.','No active drivers are available to assign.') + '</b></div>';
+          return '<div class="fld"><label for="x-val">' + T('السائق','Driver') + ' <span class="req">*</span></label>'
+            + '<select id="x-val" onchange="OPS.fdraft()"><option value="">' + T('اختر السائق','Select a driver') + '</option>'
+            + opts.map(function(o){ return '<option value="' + esc(o.v) + '">' + esc(o.t) + '</option>'; }).join('')
+            + '</select><span class="hint">' + T('تعرض القائمة الحسابات النشطة فقط.','The list shows active accounts only.') + '</span></div>';
+        },
+        submit:function(){
+          if(!opts.length) return;
+          runOp(function(){ return LG.assignOrder(orderId, FORM.val); },
+                'تم تعيين الطلب.', 'The order was assigned.');
+        }
+      };
+      FMSG = null; renderForm();
+    },
+    openReturn: function(orderId){
+      if(!ME || !CAP || !CAP.assign || !LG) return;
+      FORM = {
+        title:T('إعادة الطلب إلى القائمة','Return the order to the pool'), orderId:orderId,
+        cta:T('إعادة','Return'), icon:'ti-arrow-back-up', val:'',
+        body:function(){
+          return '<div class="fld"><label for="x-val">' + T('السبب','Reason') + ' <span class="req">*</span></label>'
+            + '<textarea id="x-val" rows="3" oninput="OPS.fdraft()"></textarea></div>';
+        },
+        submit:function(){
+          runOp(function(){ return LG.returnToPool(orderId, { reason:FORM.val }); },
+                'أُعيد الطلب إلى القائمة.', 'The order was returned to the pool.');
+        }
+      };
+      FMSG = null; renderForm();
+    },
+
     /* nothing opens over the access gate: with no authorised session there is
        no sheet and no applet */
     open: function(id){ if(!ME) return; openTrigger = document.activeElement; OPEN = id; renderSheet(); },
@@ -916,6 +1036,7 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
   };
   document.addEventListener('keydown', function(e){
     if(e.key !== 'Escape') return;
+    if(FORM){ e.preventDefault(); fclose(); return; }
     if(DRAFT){ e.preventDefault(); closeFilters(); return; }
     if(OPEN){ e.preventDefault(); closeSheet(); return; }
     if(el('shell') && el('shell').classList.contains('nav-open')) OPS.closeNav();

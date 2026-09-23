@@ -68,6 +68,8 @@ select.field-inp{cursor:pointer;}
 .upload-sub{font-size:12px;color:var(--text3);}
 .upload-done{display:none;align-items:center;gap:8px;padding:10px 14px;background:var(--green-bg);border:1px solid rgba(46,125,50,.2);border-radius:var(--r);margin-top:10px;font-size:13px;color:var(--green);}
 .upload-done.show{display:flex;}
+/* the authority's refusal, shown where the applicant is looking */
+.sub-err{display:none;margin-top:14px;padding:12px 14px;border-radius:var(--r);background:#FBEAEA;border:1px solid rgba(198,40,40,.25);color:var(--red);font-size:13px;line-height:1.7;}
 /* AGREEMENT */
 .agree-wrap{display:flex;align-items:flex-start;gap:12px;padding:16px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border);cursor:pointer;}
 .agree-chk{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
@@ -102,6 +104,12 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <script src="raf_features.js"></script>
+<!-- the public application is created by the one Logistics authority; this
+     page writes no record of its own -->
+<script src="raf_record_store.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_logistics_authority.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
 </head>
 <body>
@@ -164,32 +172,32 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
   <div class="form-body">
     <div class="row2">
       <div class="field">
-        <label class="field-lbl">الاسم الأول <span class="req">*</span></label>
-        <input type="text" class="field-inp" placeholder="محمد">
+        <label class="field-lbl" for="f-firstName">الاسم الأول <span class="req">*</span></label>
+        <input id="f-firstName" type="text" class="field-inp" placeholder="محمد">
       </div>
       <div class="field">
-        <label class="field-lbl">الاسم الأخير <span class="req">*</span></label>
-        <input type="text" class="field-inp" placeholder="الكندري">
-      </div>
-    </div>
-    <div class="row2">
-      <div class="field">
-        <label class="field-lbl">رقم الهاتف <span class="req">*</span></label>
-        <input type="tel" class="field-inp" placeholder="5X XXX XXXX" dir="ltr">
-      </div>
-      <div class="field">
-        <label class="field-lbl">البريد الإلكتروني <span class="req">*</span></label>
-        <input type="email" class="field-inp" placeholder="example@email.com" dir="ltr">
+        <label class="field-lbl" for="f-lastName">الاسم الأخير <span class="req">*</span></label>
+        <input id="f-lastName" type="text" class="field-inp" placeholder="الكندري">
       </div>
     </div>
     <div class="row2">
       <div class="field">
-        <label class="field-lbl">الرقم المدني <span class="req">*</span></label>
-        <input type="text" class="field-inp" placeholder="XXXXXXXXXXX" dir="ltr" maxlength="12">
+        <label class="field-lbl" for="f-phone">رقم الهاتف <span class="req">*</span></label>
+        <input id="f-phone" type="tel" class="field-inp" placeholder="5X XXX XXXX" dir="ltr">
       </div>
       <div class="field">
-        <label class="field-lbl">الجنسية <span class="req">*</span></label>
-        <select class="field-inp">
+        <label class="field-lbl" for="f-email">البريد الإلكتروني <span class="req">*</span></label>
+        <input id="f-email" type="email" class="field-inp" placeholder="example@email.com" dir="ltr">
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label class="field-lbl" for="f-civilId">الرقم المدني <span class="req">*</span></label>
+        <input id="f-civilId" type="text" class="field-inp" placeholder="XXXXXXXXXXX" dir="ltr" maxlength="12">
+      </div>
+      <div class="field">
+        <label class="field-lbl" for="f-nationality">الجنسية <span class="req">*</span></label>
+        <select id="f-nationality" class="field-inp">
           <option value="">— اختر —</option>
           <option>كويتي</option>
           <option>سعودي</option>
@@ -201,8 +209,8 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
       </div>
     </div>
     <div class="field">
-      <label class="field-lbl">منطقة السكن <span class="req">*</span></label>
-      <select class="field-inp">
+      <label class="field-lbl" for="f-area">منطقة السكن <span class="req">*</span></label>
+      <select id="f-area" class="field-inp">
         <option value="">— اختر المنطقة —</option>
         <option>حولي</option><option>الفروانية</option><option>العاصمة</option>
         <option>الأحمدي</option><option>الجهراء</option><option>مبارك الكبير</option>
@@ -226,8 +234,8 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
   <div class="form-body">
     <div class="row2">
       <div class="field">
-        <label class="field-lbl">نوع المركبة <span class="req">*</span></label>
-        <select class="field-inp">
+        <label class="field-lbl" for="f-vType">نوع المركبة <span class="req">*</span></label>
+        <select id="f-vType" class="field-inp">
           <option value="">— اختر —</option>
           <option>سيارة</option>
           <option>دراجة نارية</option>
@@ -236,18 +244,18 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
         </select>
       </div>
       <div class="field">
-        <label class="field-lbl">الماركة <span class="req">*</span></label>
-        <input type="text" class="field-inp" placeholder="Toyota, Honda...">
+        <label class="field-lbl" for="f-vMake">الماركة <span class="req">*</span></label>
+        <input id="f-vMake" type="text" class="field-inp" placeholder="Toyota, Honda...">
       </div>
     </div>
     <div class="row2">
       <div class="field">
-        <label class="field-lbl">الموديل <span class="req">*</span></label>
-        <input type="text" class="field-inp" placeholder="Camry, Civic...">
+        <label class="field-lbl" for="f-vModel">الموديل <span class="req">*</span></label>
+        <input id="f-vModel" type="text" class="field-inp" placeholder="Camry, Civic...">
       </div>
       <div class="field">
-        <label class="field-lbl">سنة الصنع <span class="req">*</span></label>
-        <select class="field-inp">
+        <label class="field-lbl" for="f-vYear">سنة الصنع <span class="req">*</span></label>
+        <select id="f-vYear" class="field-inp">
           <option value="">— السنة —</option>
           <option>2024</option><option>2023</option><option>2022</option><option>2021</option>
           <option>2020</option><option>2019</option><option>2018</option><option>2017</option>
@@ -256,12 +264,12 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
     </div>
     <div class="row2">
       <div class="field">
-        <label class="field-lbl">رقم اللوحة <span class="req">*</span></label>
-        <input type="text" class="field-inp" placeholder="X X X X X" dir="ltr">
+        <label class="field-lbl" for="f-vPlate">رقم اللوحة <span class="req">*</span></label>
+        <input id="f-vPlate" type="text" class="field-inp" placeholder="X X X X X" dir="ltr">
       </div>
       <div class="field">
-        <label class="field-lbl">لون السيارة</label>
-        <input type="text" class="field-inp" placeholder="أبيض، أسود...">
+        <label class="field-lbl" for="f-vColor">لون السيارة</label>
+        <input id="f-vColor" type="text" class="field-inp" placeholder="أبيض، أسود...">
       </div>
     </div>
     <div class="btn-row">
@@ -285,7 +293,7 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
       <div class="field">
         <label class="field-lbl">البطاقة المدنية <span class="req">*</span></label>
         <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
-          <input type="file" accept="image/*,application/pdf" onchange="markUpload(this,'id-done')">
+          <input id="f-docCivilId" type="file" accept="image/*,application/pdf" onchange="markUpload(this,'id-done')">
           <div class="upload-ico"><i class="ti ti-id-badge-2"></i></div>
           <div class="upload-title">رفع البطاقة المدنية</div>
           <div class="upload-sub">JPG أو PNG أو PDF — حد 5 ميغا</div>
@@ -295,7 +303,7 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
       <div class="field">
         <label class="field-lbl">رخصة القيادة <span class="req">*</span></label>
         <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
-          <input type="file" accept="image/*,application/pdf" onchange="markUpload(this,'lic-done')">
+          <input id="f-docLicense" type="file" accept="image/*,application/pdf" onchange="markUpload(this,'lic-done')">
           <div class="upload-ico"><i class="ti ti-license"></i></div>
           <div class="upload-title">رفع رخصة القيادة</div>
           <div class="upload-sub">JPG أو PNG أو PDF — حد 5 ميغا</div>
@@ -307,7 +315,7 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
       <div class="field">
         <label class="field-lbl">استمارة السيارة <span class="req">*</span></label>
         <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
-          <input type="file" accept="image/*,application/pdf" onchange="markUpload(this,'reg-done')">
+          <input id="f-docRegistration" type="file" accept="image/*,application/pdf" onchange="markUpload(this,'reg-done')">
           <div class="upload-ico"><i class="ti ti-file-certificate"></i></div>
           <div class="upload-title">رفع الاستمارة</div>
           <div class="upload-sub">JPG أو PNG أو PDF — حد 5 ميغا</div>
@@ -317,7 +325,7 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
       <div class="field">
         <label class="field-lbl">صورة شخصية <span class="req">*</span></label>
         <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
-          <input type="file" accept="image/*" onchange="markUpload(this,'photo-done')">
+          <input id="f-docPhoto" type="file" accept="image/*" onchange="markUpload(this,'photo-done')">
           <div class="upload-ico"><i class="ti ti-user-circle"></i></div>
           <div class="upload-title">رفع صورة شخصية</div>
           <div class="upload-sub">JPG أو PNG — حد 3 ميغا</div>
@@ -333,6 +341,7 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
         </div>
       </div>
     </div>
+    <div id="subErr" class="sub-err"></div>
     <div class="btn-row">
       <button class="btn-prev" onclick="goStep(2)"><i class="ti ti-arrow-right"></i> السابق</button>
       <button class="btn-next" onclick="submitApp()"><i class="ti ti-send"></i> إرسال الطلب</button>
@@ -398,14 +407,87 @@ function toggleAgree(wrap) {
   wrap.classList.toggle('on', agreed);
 }
 
+/* ============================================================================
+   SUBMISSION — the application is created by RAFLogistics, the one Logistics
+   authority. This page creates no account, writes no user, invents no
+   reference number and fabricates no approval: it collects the form, hands it
+   over, and shows whatever the authority answers.
+
+   DOCUMENTS — this prototype has no file-storage service, so only each file's
+   own metadata (name, type, size) is passed on and recorded. No file content
+   is read or stored. Production needs real durable, access-controlled document
+   storage; the page says so rather than implying the files were kept.
+   ==========================================================================*/
+function val(id){ var e = document.getElementById(id); return e ? String(e.value || '').trim() : ''; }
+function fileMeta(id){
+  var e = document.getElementById(id);
+  var f = e && e.files && e.files[0];
+  return f ? { name:f.name, type:f.type, size:f.size } : null;
+}
+function showFormError(msg){
+  var box = document.getElementById('subErr');
+  if (!box) return;
+  box.textContent = msg;
+  box.style.display = 'block';
+  box.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+/* the authority names the field; this maps it to what the applicant sees */
+var FIELD_AR = {
+  firstName:'الاسم الأول', lastName:'الاسم الأخير', phone:'رقم الهاتف', email:'البريد الإلكتروني',
+  civilId:'الرقم المدني', nationality:'الجنسية', area:'منطقة السكن',
+  vehicleType:'نوع المركبة', vehicleMake:'الماركة', vehicleModel:'الموديل',
+  vehicleYear:'سنة الصنع', vehiclePlate:'رقم اللوحة'
+};
+
 function submitApp() {
-  if (!agreed) {
-    alert('الرجاء الموافقة على الشروط والأحكام');
+  var box = document.getElementById('subErr');
+  if (box) box.style.display = 'none';
+
+  if (!window.RAFLogistics) {
+    showFormError('تعذّر الاتصال بنظام رف. حدّث الصفحة وحاول مرة أخرى.');
     return;
   }
+  /* consent is required HERE because this is the public application. The
+     administrator-created driver path never asks for it. */
+  if (!agreed) {
+    showFormError('الرجاء الموافقة على الشروط والأحكام');
+    return;
+  }
+
+  var res = RAFLogistics.createApplication({
+    source: RAFLogistics.APP_SOURCE.PUBLIC,
+    applicant:{
+      firstName:val('f-firstName'), lastName:val('f-lastName'),
+      phone:val('f-phone'), email:val('f-email'), civilId:val('f-civilId'),
+      nationality:val('f-nationality'), area:val('f-area')
+    },
+    vehicle:{
+      type:val('f-vType'), make:val('f-vMake'), model:val('f-vModel'),
+      year:val('f-vYear'), color:val('f-vColor'), plate:val('f-vPlate')
+    },
+    documents:{
+      civilId:fileMeta('f-docCivilId'), license:fileMeta('f-docLicense'),
+      registration:fileMeta('f-docRegistration'), photo:fileMeta('f-docPhoto')
+    },
+    consent:{ accepted:true, terms:'raf_terms.html' }
+  });
+
+  if (!res || !res.ok) {
+    var msg = (res && res.message) || 'تعذّر إرسال الطلب.';
+    if (res && res.code === 'INVALID' && res.errors && res.errors.length) {
+      var names = res.errors.map(function(e){ return FIELD_AR[e.field] || e.field; });
+      msg = 'أكمل الحقول المطلوبة: ' + names.join('، ');
+    }
+    if (res && res.code === 'DUPLICATE_APPLICATION' && res.ref) {
+      msg = msg + ' (رقم الطلب: ' + res.ref + ')';
+    }
+    showFormError(msg);
+    return;
+  }
+
+  /* the reference the applicant is shown is the authority's own */
   document.getElementById('step3').style.display = 'none';
-  const refNum = 'DR-2026-' + String(Math.floor(Math.random() * 90000) + 10000);
-  document.getElementById('refNum').textContent = refNum;
+  document.getElementById('refNum').textContent = res.ref;
   document.getElementById('successWrap').style.display = 'block';
   updateProgress(4);
   document.getElementById('successWrap').scrollIntoView({behavior:'smooth'});

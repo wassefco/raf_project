@@ -100,6 +100,26 @@
        timeline beside the assignment it reverses. */
     'driver.returned':      { tl:true,  ar:'أعاد السائق الطلب إلى قائمة الطلبات المتاحة',
                                         en:'Driver returned the order to the available pool' },
+    /* ---- Logistics Management (RAFLogistics) ----
+       RAFOrderEngine has always emitted these two when a Logistics employee
+       moves an order rather than a driver claiming it, but they were never
+       registered here, so every one of them was refused and lost. Registering
+       them is what makes an assignment auditable. */
+    'dispatch.assigned':    { tl:true,  ar:'عيّنت اللوجستيات الطلب إلى سائق',
+                                        en:'Logistics assigned the order to a driver' },
+    'dispatch.returned_to_pool':{ tl:true, ar:'أعادت اللوجستيات الطلب إلى قائمة الطلبات المتاحة',
+                                        en:'Logistics returned the order to the available pool' },
+    /* driver account administration, performed by the Logistics authority */
+    'logistics.driver_created':    { tl:false, ar:'أنشأت اللوجستيات حساب سائق',   en:'Logistics created a driver account' },
+    'logistics.driver_updated':    { tl:false, ar:'حدّثت اللوجستيات بيانات سائق', en:'Logistics updated a driver profile' },
+    'logistics.driver_suspended':  { tl:false, ar:'أوقفت اللوجستيات حساب سائق',   en:'Logistics suspended a driver account' },
+    'logistics.driver_reactivated':{ tl:false, ar:'أعادت اللوجستيات تفعيل حساب سائق', en:'Logistics reactivated a driver account' },
+    'logistics.driver_profile_updated':{ tl:false, ar:'حدّثت اللوجستيات ملف السائق', en:'Logistics updated a driver profile' },
+    /* the driver join application, from public submission to decision */
+    'logistics.application_submitted':{ tl:false, ar:'تم إرسال طلب انضمام سائق',  en:'Driver join application submitted' },
+    'logistics.application_reviewed': { tl:false, ar:'تمت مراجعة طلب انضمام',     en:'Driver application reviewed' },
+    'logistics.application_approved': { tl:false, ar:'تم قبول طلب انضمام سائق',   en:'Driver application approved' },
+    'logistics.application_rejected': { tl:false, ar:'تم رفض طلب انضمام سائق',    en:'Driver application rejected' },
     'compensation.issued':      { tl:false, ar:'صدر تعويض',                        en:'Compensation issued' },
     'compensation.voided':      { tl:false, ar:'أُلغي تعويض',                      en:'Compensation voided' },
     'compensation.reversed':    { tl:false, ar:'عُكس تعويض',                       en:'Compensation reversed' },

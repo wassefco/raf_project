@@ -47,8 +47,18 @@
       actions: ['view', 'create', 'edit', 'delete', 'approve'] },
     { id: 'offers',      labelAr: 'العروض',           labelEn: 'Offers',               icon: 'ti-discount',
       actions: ['view', 'create', 'edit', 'delete'] },
+    /* Logistics Management is one domain, and driver administration is part of
+       it. `create`, `edit` and `assign` are the smallest additions that let the
+       Logistics authority own those operations with real keys instead of
+       borrowing an unrelated one:
+         · drivers.create — open a driver account
+         · drivers.edit   — correct a driver's own profile fields (name, email,
+                            phone); it can never reach a role or a permission
+         · drivers.assign — hand an order to a driver, and return it to the pool
+       `approve` stays as it was; the account model has no approval state for it
+       to act on, so nothing performs it today. */
     { id: 'drivers',     labelAr: 'السائقون',         labelEn: 'Drivers',              icon: 'ti-motorbike',
-      actions: ['view', 'approve', 'suspend'] },
+      actions: ['view', 'create', 'edit', 'approve', 'suspend', 'assign'] },
     { id: 'reports',     labelAr: 'التقارير',         labelEn: 'Reports',              icon: 'ti-chart-bar',
       actions: ['view', 'export'] },
     /* Customer Service. No existing key expresses "may work a support case":
@@ -128,9 +138,11 @@
       permissions: keysFor(['orders', 'stores', 'drivers', 'products'])
         .concat(['users.view', 'reports.view', 'reports.export', 'auctions.view', 'offers.view'])
         /* Logistics is a destination department for a support case: it reads and
-           works the case it receives. Ending the case and talking to the
-           customer stay with Customer Service. */
-        .concat(['support.view', 'support.manage'])
+           works the case it receives, and — like every administrative department
+           RAF builds — it may OPEN a case of its own through the central ticket
+           authority. Ending the case and talking to the customer stay with
+           Customer Service, so support.resolve and support.escalate are not held. */
+        .concat(['support.view', 'support.create', 'support.manage'])
     },
     {
       id: 'customer_service', nameAr: 'خدمة العملاء', nameEn: 'Customer Service', system: true,
@@ -323,6 +335,27 @@
     { id:'support_customer_service_v1', roleId:'customer_service',
       add:['support.view', 'support.create', 'support.manage', 'support.resolve', 'support.escalate'] },
     { id:'support_ops_manager_v1',  roleId:'ops_manager',  add:['support.view', 'support.manage'] },
+    /* An administrative department that RAF has built may OPEN a case through
+       the central ticket authority, not only work one it receives. Recorded as
+       its own migration because support_ops_manager_v1 has already run in
+       browsers that were seeded before this rule existed, and a migration that
+       has run is never re-applied. Logistics is the department this covers
+       today; another department gains the same key by adding one entry here,
+       never by a page granting itself the capability. */
+    { id:'support_create_ops_manager_v1', roleId:'ops_manager', add:['support.create'] },
+    /* Logistics Management owns driver administration and order assignment, so
+       the drivers module gained create / edit / assign. A browser seeded before
+       those keys existed holds the old role record, and the seed alone never
+       reaches it — hence a migration. Operations runs the domain; Super Admin
+       and Higher Management already hold every key by definition and are
+       brought level here for the same reason. Customer Service is deliberately
+       NOT included: it reads driver names on a case, it does not run drivers. */
+    { id:'drivers_logistics_ops_manager_v1', roleId:'ops_manager',
+      add:['drivers.create', 'drivers.edit', 'drivers.assign'] },
+    { id:'drivers_logistics_super_admin_v1', roleId:'super_admin',
+      add:['drivers.create', 'drivers.edit', 'drivers.assign'] },
+    { id:'drivers_logistics_higher_mgmt_v1', roleId:'higher_mgmt',
+      add:['drivers.create', 'drivers.edit', 'drivers.assign'] },
     { id:'support_finance_v1',      roleId:'finance',      add:['support.view', 'support.manage'] },
     { id:'support_higher_mgmt_v1',  roleId:'higher_mgmt',
       add:['support.view', 'support.create', 'support.manage', 'support.resolve', 'support.escalate'] },

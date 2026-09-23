@@ -57,6 +57,15 @@
                           purpose:'append-only links between a ticket and an existing RAF record (link / unlink); references only, never copies' },
     support_escalations:{ key:'raf_support_escalations',  owner:'RAFCustomerService',
                           purpose:'append-only ticket escalations raised for management attention (never a second ticket)' },
+    /* Logistics Management — owned by RAFLogistics. A driver APPLICATION is
+       not an account: applicants live here until Logistics approves them, and
+       an approved or rejected application is kept forever. The submission is
+       immutable; the decisions are separate events, so the status is derived
+       and no record is ever rewritten. */
+    logistics_applications:      { key:'raf_logistics_applications',       owner:'RAFLogistics',
+                          purpose:'append-only driver join applications — the immutable facts at submission (applicant, vehicle, document metadata, consent, source)' },
+    logistics_application_events:{ key:'raf_logistics_application_events', owner:'RAFLogistics',
+                          purpose:'append-only application lifecycle (submitted / review note / approved / rejected); the application status is derived from these' },
     notifications:      { key:'raf_notifications',        owner:'RAFNotify',
                           purpose:'append-only per-recipient notifications' },
     notification_reads: { key:'raf_notification_reads',   owner:'RAFNotify',
@@ -66,6 +75,13 @@
 
     notification_prefs: { key:'raf_notification_prefs',   owner:'RAFNotify',
                           purpose:'per-user notification sound preference (non-merchant accounts)' },
+
+    /* the editable Logistics profile of a driver ACCOUNT: what the application
+       carries that the RAF account model has no field for (civil id,
+       nationality, area, vehicle, document metadata, application link). The
+       identity itself is never copied here — it stays on the account. */
+    logistics_driver_profiles:{ key:'raf_logistics_driver_profiles', owner:'RAFLogistics',
+                          purpose:'current Logistics profile per driver account; identity stays in RAFPerm and is not duplicated' },
 
     config:             { key:'raf_config',               owner:'RAFConfig',
                           purpose:'configured values that override the registry (history in RAFAudit)' }

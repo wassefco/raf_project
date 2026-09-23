@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl" data-ui="admin">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — السائقون</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_logistics.css">
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   DRIVERS — the Logistics Management surface for drivers. Shares the
+   Logistics shell and components; every rule here is scoped to this page.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.wk{ display:flex; flex-direction:column; gap:12px; }
+.wk-head{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.wk-head p{ margin:0; color:var(--muted); font-size:13px; flex:1 1 240px; min-width:0; }
+.wk-count{ color:var(--faint); font-size:12px; font-weight:700; font-family:'DM Sans',sans-serif; white-space:nowrap; }
+.wk-head .btn{ flex:0 0 auto; }
+
+.scopes{ display:flex; gap:2px; padding:3px; background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r); overflow-x:auto; }
+.scope{ display:inline-flex; align-items:center; gap:7px; min-height:36px; padding:0 14px; border:0; background:transparent; cursor:pointer;
+  border-radius:var(--r-sm); color:var(--muted); font-size:13px; font-weight:700; white-space:nowrap; }
+.scope:hover{ color:var(--ink); }
+.scope[aria-pressed="true"]{ background:var(--surface); color:var(--ink); box-shadow:var(--shadow); }
+.scope .n{ font-family:'DM Sans',sans-serif; font-size:11.5px; color:var(--faint); }
+.scope[aria-pressed="true"] .n{ color:var(--accent); }
+
+.tools{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r); padding:10px; box-shadow:var(--shadow); }
+.srch{ position:relative; flex:1 1 280px; min-width:0; }
+.srch > i{ position:absolute; inset-inline-start:11px; top:50%; transform:translateY(-50%); color:var(--faint); font-size:18px; pointer-events:none; }
+.srch input{ width:100%; min-height:42px; padding:0 12px; padding-inline-start:38px; padding-inline-end:36px; border:1px solid var(--line-2);
+  border-radius:var(--r-sm); background:var(--surface); color:var(--ink); font-size:13.5px; }
+.srch input:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+.srch .clr{ position:absolute; inset-inline-end:4px; top:50%; transform:translateY(-50%); width:32px; height:32px; border:0; border-radius:var(--r-sm);
+  background:transparent; color:var(--faint); cursor:pointer; display:grid; place-items:center; }
+.srch .clr:hover{ background:var(--surface-2); color:var(--ink); }
+.tools .btn{ min-height:42px; }
+.filter-btn{ flex:0 0 auto; gap:8px; }
+.filter-btn.on{ border-color:var(--accent); color:var(--accent-2); background:var(--accent-soft); }
+.filter-btn .fcount{ min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:var(--accent); color:#fff;
+  font-size:11.5px; font-weight:800; display:inline-grid; place-items:center; font-family:'DM Sans',sans-serif; }
+
+/* sheets: filter applet, forms, details — one family */
+.applet{ width:min(460px,100%); }
+.applet .sheet-b{ padding:4px 16px 16px; }
+.fld{ padding:12px 0; border-block-end:1px solid var(--line); }
+.fld:last-child{ border-block-end:0; }
+.fld > label,.fld > .lg{ display:block; font-size:12px; font-weight:800; color:var(--muted); margin-block-end:6px; }
+.fld input,.fld select,.fld textarea{ width:100%; min-height:44px; padding:8px 10px; border:1px solid var(--line-2);
+  border-radius:var(--r-sm); background:var(--surface); color:var(--ink); font-size:13.5px; font-family:inherit; }
+.fld textarea{ resize:vertical; min-height:72px; }
+.fld input:focus,.fld select:focus,.fld textarea:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+.fld.bad input,.fld.bad select,.fld.bad textarea{ border-color:var(--alert); }
+.fld .req{ color:var(--alert); font-weight:800; }
+.fld .hint{ display:block; margin-block-start:5px; font-size:11.5px; color:var(--faint); line-height:1.6; }
+.fld .two{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.sub-f{ display:block; font-size:11.5px; font-weight:700; color:var(--faint); }
+.sub-f input{ margin-block-start:5px; }
+.sheet-f{ display:flex; gap:10px; padding:12px 16px; border-block-start:1px solid var(--line); background:var(--surface-2); }
+.sheet-f .btn{ flex:1 1 auto; min-height:44px; }
+.form-msg{ display:flex; gap:9px; padding:11px 12px; border-radius:var(--r); font-size:12.5px; margin-block-start:12px; }
+.form-msg i{ font-size:17px; flex-shrink:0; }
+.form-msg.err{ background:var(--alert-bg); color:var(--alert); }
+.form-msg.ok{ background:var(--done-bg); color:var(--done); }
+.form-msg.busy{ background:var(--surface-2); color:var(--muted); }
+
+/* a long form reads as sections, not one column of inputs */
+.applet.wide{ width:min(620px,100%); }
+.fgrp{ padding:4px 0 12px; border-block-end:1px solid var(--line); }
+.fgrp:last-child{ border-block-end:0; }
+.fgrp > h4{ margin:14px 0 2px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--faint); display:flex; align-items:center; gap:7px; }
+.fgrp > h4 i{ font-size:15px; color:var(--accent); letter-spacing:0; }
+.fgrp .fld{ border-block-end:0; padding:10px 0 0; }
+.frow{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.fgrp .notice{ margin-block-start:12px; }
+
+/* a document field: metadata only, and the control says so */
+.fld.fdoc .drop{ position:relative; display:flex; align-items:center; gap:9px; min-height:46px; padding:0 12px;
+  border:1px dashed var(--line-2); border-radius:var(--r-sm); background:var(--surface-2); color:var(--muted);
+  font-size:13px; cursor:pointer; overflow:hidden; }
+.fld.fdoc .drop:hover{ border-color:var(--accent); color:var(--ink); }
+.fld.fdoc .drop i{ font-size:18px; color:var(--accent); flex-shrink:0; }
+.fld.fdoc .drop span{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.fld.fdoc .drop input{ position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; min-height:0; }
+.fld .ok-hint{ color:var(--done); }
+
+.fchips{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.fchip{ display:inline-flex; align-items:center; gap:6px; min-height:30px; padding:0 6px 0 11px; border-radius:999px;
+  border:1px solid var(--line-2); background:var(--surface); color:var(--text); font-size:12.5px; font-weight:600; }
+[dir="rtl"] .fchip{ padding:0 11px 0 6px; }
+.fchip b{ color:var(--ink); font-weight:800; }
+.fchip button{ width:22px; height:22px; border:0; border-radius:50%; background:var(--surface-2); color:var(--muted); cursor:pointer;
+  display:grid; place-items:center; flex-shrink:0; }
+.fchip button:hover{ background:var(--alert-bg); color:var(--alert); }
+.fchip button i{ font-size:13px; }
+
+.tbl-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow); overflow:hidden; }
+.tbl-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+table.drv{ width:100%; border-collapse:collapse; table-layout:fixed; min-width:660px; }
+table.drv th,table.drv td{ padding:11px 12px; vertical-align:middle; }
+table.drv col.v-name{ width:32%; }
+table.drv col.v-state{ width:18%; }
+table.drv col.v-ord  { width:22%; }
+table.drv col.v-reg  { width:18%; }
+table.drv col.v-act  { width:10%; }
+table.drv .v-name{ text-align:start; }
+table.drv .v-state,table.drv .v-ord,table.drv .v-reg,table.drv .v-act{ text-align:center; }
+table.drv .v-name{ overflow-wrap:anywhere; }
+table.drv th{ position:sticky; top:0; z-index:1; }
+table.drv tbody tr{ cursor:pointer; }
+table.drv tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+.who{ display:flex; align-items:center; gap:10px; min-width:0; }
+.who .av{ width:32px; height:32px; border-radius:50%; background:var(--nav); color:#fff; display:grid; place-items:center;
+  font-size:13px; font-weight:800; flex-shrink:0; }
+.who .nm{ min-width:0; color:var(--ink); font-weight:700; overflow-wrap:anywhere; }
+
+.sheet{ position:fixed; inset:0; z-index:90; background:rgba(12,20,17,.42); display:flex; justify-content:flex-end; }
+.sheet-c{ width:min(540px,100%); height:100%; background:var(--surface); display:flex; flex-direction:column; box-shadow:var(--shadow-pop); }
+.sheet-h{ display:flex; align-items:center; gap:10px; padding:12px 16px; border-block-end:1px solid var(--line); background:var(--surface-2); }
+.sheet-h .t{ flex:1; min-width:0; }
+.sheet-h .t b{ display:block; color:var(--ink); font-size:14.5px; }
+.sheet-h .t span{ display:block; color:var(--muted); font-size:12px; }
+.sheet-b{ flex:1; overflow-y:auto; padding:0 0 20px; }
+.sec{ padding:14px 16px; border-block-end:1px solid var(--line); }
+.sec:last-child{ border-block-end:0; }
+.sec > h3{ margin:0 0 10px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--faint);
+  display:flex; align-items:center; gap:7px; }
+.sec > h3 i{ font-size:15px; color:var(--accent); letter-spacing:0; }
+.kv{ display:flex; gap:12px; padding:5px 0; font-size:13px; align-items:baseline; }
+.kv .k{ color:var(--muted); flex:0 0 44%; max-width:44%; }
+.kv .v{ color:var(--ink); font-weight:600; min-width:0; overflow-wrap:anywhere; }
+.lines{ list-style:none; margin:0; padding:0; }
+.lines li{ display:flex; gap:10px; align-items:center; padding:8px 0; border-block-end:1px dashed var(--line); font-size:13px; }
+.lines li:last-child{ border-block-end:0; }
+.lines .nm{ flex:1; min-width:0; color:var(--ink); overflow-wrap:anywhere; }
+.lines .sub{ display:block; color:var(--faint); font-size:11.5px; margin-block-start:2px; }
+.acts-row{ display:flex; gap:8px; flex-wrap:wrap; }
+.acts-row .btn{ flex:0 1 auto; }
+.btn.danger{ border-color:var(--alert); color:var(--alert); }
+.btn.danger:hover{ background:var(--alert-bg); }
+
+/* the two halves of one domain: join applications and the drivers themselves */
+.modes{ display:flex; gap:8px; flex-wrap:wrap; }
+.mode{ display:inline-flex; align-items:center; gap:8px; min-height:42px; padding:0 16px; cursor:pointer;
+  border:1px solid var(--line); border-radius:var(--r); background:var(--surface); color:var(--muted);
+  font-size:13.5px; font-weight:700; box-shadow:var(--shadow); }
+.mode:hover{ color:var(--ink); }
+.mode[aria-pressed="true"]{ background:var(--nav); border-color:var(--nav); color:#fff; }
+.mode i{ font-size:18px; }
+.mode .n{ min-width:22px; height:20px; padding:0 6px; border-radius:10px; background:var(--surface-2); color:var(--muted);
+  font-size:11.5px; font-weight:800; display:inline-grid; place-items:center; font-family:'DM Sans',sans-serif; }
+.mode[aria-pressed="true"] .n{ background:rgba(255,255,255,.16); color:#fff; }
+
+/* the applications grid */
+table.app{ width:100%; border-collapse:collapse; table-layout:fixed; min-width:720px; }
+table.app th,table.app td{ padding:11px 12px; vertical-align:middle; }
+table.app col.a-ref  { width:14%; }
+table.app col.a-name { width:24%; }
+table.app col.a-veh  { width:20%; }
+table.app col.a-area { width:14%; }
+table.app col.a-state{ width:16%; }
+table.app col.a-date { width:12%; }
+table.app .a-ref,table.app .a-name,table.app .a-veh,table.app .a-area{ text-align:start; }
+table.app .a-state,table.app .a-date{ text-align:center; }
+table.app .a-name,table.app .a-veh,table.app .a-area{ overflow-wrap:anywhere; }
+table.app th{ position:sticky; top:0; z-index:1; }
+table.app tbody tr{ cursor:pointer; }
+table.app tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+.app-ref{ font-family:'DM Sans',ui-monospace,monospace; font-size:12.5px; font-weight:700; color:var(--ink); }
+
+/* documents — metadata only in this prototype, and the page says so */
+.docs{ list-style:none; margin:0; padding:0; }
+.docs li{ display:flex; gap:10px; align-items:center; padding:8px 0; border-block-end:1px dashed var(--line); font-size:13px; }
+.docs li:last-child{ border-block-end:0; }
+.docs .di{ width:30px; height:30px; border-radius:var(--r-sm); background:var(--surface-2); color:var(--muted);
+  display:grid; place-items:center; flex-shrink:0; }
+.docs .dn{ flex:1; min-width:0; color:var(--ink); overflow-wrap:anywhere; }
+.docs .dn .sub{ display:block; color:var(--faint); font-size:11.5px; margin-block-start:2px; }
+.docs .miss{ color:var(--faint); }
+
+/* the application's own history */
+.hist{ list-style:none; margin:0; padding:0; }
+.hist li{ display:flex; gap:10px; align-items:flex-start; padding:9px 0; border-block-end:1px solid var(--line); }
+.hist li:last-child{ border-block-end:0; }
+.hist .hi{ width:26px; height:26px; border-radius:var(--r-sm); background:var(--surface-2); color:var(--muted);
+  display:grid; place-items:center; flex-shrink:0; }
+.hist .hb{ flex:1; min-width:0; }
+.hist .hb b{ display:block; font-size:13px; color:var(--ink); font-weight:700; }
+.hist .hb .who{ display:block; font-size:11.5px; color:var(--muted); margin-block-start:2px; overflow-wrap:anywhere; }
+.hist .hb .body{ display:block; font-size:12.5px; color:var(--text); margin-block-start:4px; white-space:pre-wrap; overflow-wrap:anywhere; }
+.hist .hw{ font-size:11px; color:var(--faint); font-family:'DM Sans',sans-serif; white-space:nowrap; flex-shrink:0; }
+
+@media (max-width:760px){
+  table.app{ min-width:0; table-layout:auto; }
+  table.app colgroup{ display:none; }
+  table.app td[class*="a-"]{ text-align:start; }
+  table.app, table.app tbody, table.app tr, table.app td{ display:block; width:100%; }
+  table.app thead{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+  table.app tbody tr{ border-block-end:1px solid var(--line); padding:8px 0; }
+  table.app tbody tr:last-child{ border-block-end:0; }
+  table.app td{ border:0; display:flex; align-items:center; gap:12px; padding:5px 14px; }
+  table.app td::before{ content:attr(data-l); flex:0 0 38%; max-width:38%; color:var(--faint); font-size:11.5px; font-weight:700; }
+  table.app td > *{ min-width:0; }
+  table.app td .badge{ white-space:normal; }
+  .mode{ flex:1 1 auto; justify-content:center; }
+}
+
+@media (max-width:1100px){
+  table.drv th,table.drv td{ padding:10px 8px; }
+  table.drv .badge{ font-size:11px; padding:3px 7px; }
+}
+@media (max-width:900px){ .tools{ padding:8px; } }
+@media (max-width:760px){
+  table.drv{ min-width:0; table-layout:auto; }
+  table.drv colgroup{ display:none; }
+  table.drv td[class*="v-"]{ text-align:start; }
+  table.drv, table.drv tbody, table.drv tr, table.drv td{ display:block; width:100%; }
+  table.drv thead{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+  table.drv tbody tr{ border-block-end:1px solid var(--line); padding:8px 0; }
+  table.drv tbody tr:last-child{ border-block-end:0; }
+  table.drv td{ border:0; display:flex; align-items:center; gap:12px; padding:5px 14px; }
+  table.drv td::before{ content:attr(data-l); flex:0 0 38%; max-width:38%; color:var(--faint); font-size:11.5px; font-weight:700; }
+  table.drv td > *{ min-width:0; }
+  table.drv td .badge{ white-space:normal; }
+  .sheet-c{ width:100%; }
+}
+@media (max-width:520px){
+  .scope{ padding:0 10px; font-size:12.5px; }
+  .tools .btn{ flex:1 1 auto; }
+  .acts-row .btn{ flex:1 1 auto; }
+  /* the long create form becomes one column on a phone */
+  .frow{ grid-template-columns:minmax(0,1fr); gap:0; }
+}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-c" role="alert">
+    <div class="ic"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
+    <h1 id="gateT"></h1>
+    <p id="gateP"></p>
+    <a class="btn" href="raf_login.html"><i class="ti ti-login" aria-hidden="true"></i><span data-ar="تسجيل الدخول" data-en="Sign in">تسجيل الدخول</span></a>
+  </div>
+</div>
+
+<div class="ops" id="shell" hidden>
+  <aside class="ops-nav" id="opsNav">
+    <div class="ops-brand">
+      <span class="ops-brand-mark" aria-hidden="true"><i class="ti ti-route"></i></span>
+      <span class="ops-brand-t"><b data-ar="اللوجستيات" data-en="Logistics">اللوجستيات</b>
+        <span data-ar="منصة رف" data-en="RAF platform">منصة رف</span></span>
+      <button class="ibtn ops-nav-x" type="button" onclick="OPS.closeNav()" aria-label="إغلاق"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <nav class="ops-nav-scroll" id="navTree" aria-label="التنقل"></nav>
+  </aside>
+  <div class="scrim" onclick="OPS.closeNav()" aria-hidden="true"></div>
+
+  <div class="ops-main">
+    <header class="ops-head">
+      <button class="ibtn ops-burger" type="button" aria-controls="opsNav" onclick="OPS.openNav()" aria-label="القائمة"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+      <div class="ops-crumb"><small id="crumbGroup"></small><b id="crumbPage"></b></div>
+      <div class="ops-tools">
+        <button class="ibtn" type="button" id="refreshBtn" onclick="OPS.refresh()" aria-label="تحديث"><i class="ti ti-refresh" aria-hidden="true"></i></button>
+        <button class="ibtn lang" type="button" id="langBtn" onclick="OPS.toggleLang()"></button>
+        <span class="ops-sep" aria-hidden="true"></span>
+        <div class="ops-user"><span class="ops-av" id="userAv"></span>
+          <span class="ops-user-t"><b id="userName"></b><span id="userRole"></span></span></div>
+        <!-- the shared RAF sign-out action; this page adds no session logic -->
+        <button class="ibtn signout" type="button" id="signOutBtn" onclick="RAFSignOut()">
+          <i class="ti ti-logout" aria-hidden="true"></i>
+          <span class="signout-t" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span>
+        </button>
+      </div>
+    </header>
+    <main class="ops-content" id="view" tabindex="-1"></main>
+  </div>
+</div>
+<div id="sheetHost"></div>
+<div id="appletHost"></div>
+<div id="formHost"></div>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_store_ops.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_logistics_authority.js"></script>
+<script>
+/* ============================================================================
+   DRIVERS — السائقون
+   The Logistics Management surface for drivers.
+
+   RAFLogistics IS the authority. This page lists, searches and presents; every
+   decision — who may create, edit, suspend, reactivate or assign, whether a
+   driver may be suspended while carrying orders, whether an order may go to a
+   given driver — belongs to RAFLogistics and is re-proved there when the
+   operation runs. The page renders a control only when capabilities() says the
+   account holds it, but that is presentation: the authority refuses the call
+   regardless of what this page drew.
+
+   It keeps no storage. Drivers are RAF accounts (RAFPerm); assignments live on
+   the order's own record (RAFOrderSnapshot.fulfilment), read back through the
+   authority. There is no driver database and no Logistics order list here.
+   ==========================================================================*/
+(function(){
+  'use strict';
+
+  var P = window.RAFPerm, LG = window.RAFLogistics;
+  var ME = null, CAP = null;
+
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  /* the authority answers with { ar, en } objects (statuses, labels) */
+  function L(o){ return (o && typeof o === 'object') ? (isEn() ? (o.en||o.ar) : (o.ar||o.en)) : (o||''); }
+  function el(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function locale(){ return isEn() ? 'en-GB' : 'ar-KW-u-nu-latn'; }
+  var DASH = '<span class="dash">—</span>';
+
+  function dayOf(v){
+    if(!v) return null;
+    var d = new Date(v); if(isNaN(d.getTime())) return null;
+    try { return d.toLocaleDateString(locale(), { day:'2-digit', month:'short', year:'numeric', timeZone:'Asia/Kuwait' }); }
+    catch(e){ return String(v).slice(0,10); }
+  }
+  function clockOf(ms){
+    if(!ms) return null;
+    var d = new Date(ms); if(isNaN(d.getTime())) return null;
+    try { return d.toLocaleString(locale(), { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kuwait' }); }
+    catch(e){ return null; }
+  }
+
+  /* ═══════════ THE TWO HALVES OF ONE DOMAIN ═══════════
+     Join applications and the drivers themselves are one Logistics surface,
+     not two pages. MODE selects which half is on screen; both read and write
+     through the same RAFLogistics authority. */
+  /* Drivers is the primary section and the one the page opens on: driver
+     management is the daily work. Join applications are the secondary intake
+     queue beside it, on the same surface and the same authority. */
+  var MODE = 'drivers';
+  var MODES = [
+    { k:'drivers',      ar:'السائقون',       en:'Drivers',           icon:'ti-motorbike' },
+    { k:'applications', ar:'طلبات الانضمام', en:'Join Applications', icon:'ti-user-plus' }
+  ];
+
+  /* ───────── reads — always through the authority ───────── */
+  var ROWS = [], READ_ERR = null;
+  var F = { scope:'all', q:'', from:'', to:'' };
+  /* applications keep their own scope, search and filters */
+  var APPS = [], APP_ERR = null, APP_COUNTS = {}, FACETS = { nationalities:[], areas:[], vehicleTypes:[] };
+  var AF = { scope:'pending', q:'', from:'', to:'', nationality:'', area:'', vehicleType:'' };
+  var APP_SCOPES = [
+    { k:'pending',  ar:'قيد المراجعة', en:'Pending',  emptyAr:'لا توجد طلبات قيد المراجعة', emptyEn:'No applications are pending',
+      filters:function(){ return { status:'pending' }; } },
+    { k:'approved', ar:'المقبولة',     en:'Approved', emptyAr:'لا توجد طلبات مقبولة',       emptyEn:'No approved applications',
+      filters:function(){ return { status:'approved' }; } },
+    { k:'rejected', ar:'المرفوضة',     en:'Rejected', emptyAr:'لا توجد طلبات مرفوضة',       emptyEn:'No rejected applications',
+      filters:function(){ return { status:'rejected' }; } },
+    { k:'all',      ar:'الكل',         en:'All',      emptyAr:'لا توجد طلبات انضمام',       emptyEn:'No join applications',
+      filters:function(){ return {}; } }
+  ];
+  function appScopeOf(k){ for(var i=0;i<APP_SCOPES.length;i++) if(APP_SCOPES[i].k === k) return APP_SCOPES[i]; return APP_SCOPES[0]; }
+  function askApps(scopeKey){
+    if(!LG) return { ok:false, message:T('وحدة اللوجستيات غير متاحة.','The Logistics module is unavailable.') };
+    var f = appScopeOf(scopeKey).filters();
+    if(AF.q) f.q = AF.q;
+    if(AF.from) f.from = AF.from;
+    if(AF.to) f.to = AF.to;
+    if(AF.nationality) f.nationality = AF.nationality;
+    if(AF.area) f.area = AF.area;
+    if(AF.vehicleType) f.vehicleType = AF.vehicleType;
+    try { return LG.listApplications(f); }
+    catch(e){ return { ok:false, message:T('تعذّرت قراءة الطلبات.','Applications could not be read.') }; }
+  }
+  function readApps(){
+    var r = askApps(AF.scope);
+    if(r && r.ok){ APPS = r.items || []; APP_ERR = null; }
+    else { APPS = []; APP_ERR = (r && r.message) || T('تعذّرت قراءة الطلبات.','Applications could not be read.'); }
+    APP_COUNTS = {};
+    APP_SCOPES.forEach(function(s){
+      var x = askApps(s.k);
+      APP_COUNTS[s.k] = (x && x.ok && x.items) ? x.items.length : null;
+    });
+    try { var fc = LG.applicationFacets(); if(fc && fc.ok) FACETS = fc; } catch(e){}
+    return APPS;
+  }
+  function appStatusCell(a){
+    var S = { pending:'b-wait', approved:'b-done', rejected:'b-off' };
+    var t = a.statusText;
+    return t ? '<span class="badge ' + (S[a.status] || 'b-plain') + '">' + esc(L(t)) + '</span>' : DASH;
+  }
+  function appActiveFilterCount(){
+    var n = 0;
+    if(AF.from) n++; if(AF.to) n++; if(AF.nationality) n++; if(AF.area) n++; if(AF.vehicleType) n++;
+    return n;
+  }
+  var SCOPES = [
+    { k:'all',       ar:'الكل',      en:'All',       emptyAr:'لا توجد حسابات سائقين', emptyEn:'No driver accounts', filters:function(){ return {}; } },
+    { k:'active',    ar:'النشطون',   en:'Active',    emptyAr:'لا يوجد سائقون نشطون',  emptyEn:'No active drivers',  filters:function(){ return { status:'active' }; } },
+    { k:'suspended', ar:'الموقوفون', en:'Suspended', emptyAr:'لا يوجد سائقون موقوفون', emptyEn:'No suspended drivers', filters:function(){ return { status:'suspended' }; } }
+  ];
+  function scopeOf(k){ for(var i=0;i<SCOPES.length;i++) if(SCOPES[i].k === k) return SCOPES[i]; return SCOPES[0]; }
+  function ask(scopeKey){
+    if(!LG) return { ok:false, message:T('وحدة اللوجستيات غير متاحة.','The Logistics module is unavailable.') };
+    var f = scopeOf(scopeKey).filters();
+    if(F.q) f.q = F.q;
+    if(F.from) f.from = F.from;
+    if(F.to) f.to = F.to;
+    try { return LG.listDrivers(f); }
+    catch(e){ return { ok:false, message:T('تعذّرت قراءة السائقين.','Drivers could not be read.') }; }
+  }
+  var COUNTS = {};
+  function readAll(){
+    var r = ask(F.scope);
+    if(r && r.ok){ ROWS = r.items || []; READ_ERR = null; }
+    else { ROWS = []; READ_ERR = (r && r.message) || T('تعذّرت قراءة السائقين.','Drivers could not be read.'); }
+    COUNTS = {};
+    SCOPES.forEach(function(s){
+      var x = ask(s.k);
+      COUNTS[s.k] = (x && x.ok && x.items) ? x.items.length : null;
+    });
+    return ROWS;
+  }
+
+  /* RAFPerm's own account statuses, presented — this page defines none */
+  var STATE = {
+    active:    { ar:'نشط',   en:'Active',    cls:'b-go' },
+    suspended: { ar:'موقوف', en:'Suspended', cls:'b-off' }
+  };
+  function stateCell(d){
+    var s = STATE[d.status];
+    return s ? '<span class="badge ' + s.cls + '">' + T(s.ar, s.en) + '</span>' : DASH;
+  }
+
+  function activeFilterCount(){ var n=0; if(F.from) n++; if(F.to) n++; return n; }
+  function filtersActive(){ return !!(F.q || activeFilterCount()); }
+
+  /* ───────── toolbar: THE LOGISTICS FILTER PATTERN ─────────
+     The applet holds the only filter RAF can answer for a driver account —
+     when it was registered. Status is the scope tabs. There is no availability,
+     zone, distance, proximity, workload, SLA or ETA filter, because the
+     Logistics authority owns none of those concepts. */
+  function toolbar(){
+    var isApps = MODE === 'applications';
+    var n = isApps ? appActiveFilterCount() : activeFilterCount();
+    var q = isApps ? AF.q : F.q;
+    var ph = isApps ? T('ابحث برقم الطلب أو اسم المتقدم أو المنطقة...','Search reference, applicant or area...')
+                    : T('ابحث باسم السائق...','Search by driver name...');
+    var al = isApps ? T('بحث في طلبات الانضمام','Search applications') : T('بحث في السائقين','Search drivers');
+    return '<div class="tools" role="search">'
+      + '<div class="srch"><i class="ti ti-search" aria-hidden="true"></i>'
+      + '<input id="q" type="search" value="' + esc(q) + '" autocomplete="off" spellcheck="false"'
+      + ' placeholder="' + esc(ph) + '"'
+      + ' aria-label="' + esc(al) + '" oninput="OPS.setQ(this.value)">'
+      + (q ? '<button class="clr" type="button" onclick="OPS.setQ(\'\')" aria-label="' + esc(T('مسح البحث','Clear search')) + '"><i class="ti ti-x" aria-hidden="true"></i></button>' : '')
+      + '</div>'
+      + '<button class="btn filter-btn' + (n ? ' on' : '') + '" type="button" id="filterBtn" onclick="OPS.openFilters()"'
+      + ' aria-haspopup="dialog" aria-label="' + esc(T('تصفية السائقين','Filter drivers')) + '">'
+      + '<i class="ti ti-filter" aria-hidden="true"></i>' + T('فلتر','Filter')
+      + (n ? '<span class="fcount">' + n + '</span>' : '') + '</button>'
+      + '</div>';
+  }
+  var DRAFT = null;
+  function openFilters(){
+    if(!ME) return;
+    DRAFT = (MODE === 'applications')
+      ? { from:AF.from, to:AF.to, nationality:AF.nationality, area:AF.area, vehicleType:AF.vehicleType }
+      : { from:F.from, to:F.to };
+    renderApplet();
+  }
+  function closeFilters(){ DRAFT = null; el('appletHost').innerHTML = ''; var b = el('filterBtn'); if(b) b.focus(); }
+  /* every field below is one the authority actually stores and accepts as a
+     filter. There is no availability, zone, distance, SLA, ETA, workload or
+     performance filter, because RAFLogistics owns none of those concepts. */
+  function appletFields(){
+    if(MODE !== 'applications'){
+      return '<div class="fld"><span class="lg">' + T('تاريخ التسجيل','Registered') + '</span><div class="two">'
+        + '<label class="sub-f" for="f-from">' + T('من تاريخ','From date')
+          + '<input id="f-from" type="date" dir="ltr" value="' + esc(DRAFT.from) + '" onchange="OPS.draft(\'from\',this.value)"></label>'
+        + '<label class="sub-f" for="f-to">' + T('إلى تاريخ','To date')
+          + '<input id="f-to" type="date" dir="ltr" value="' + esc(DRAFT.to) + '" onchange="OPS.draft(\'to\',this.value)"></label>'
+        + '</div></div>';
+    }
+    function sel(id, key, label, list){
+      if(!list || !list.length) return '';
+      return '<div class="fld"><label for="' + id + '">' + esc(label) + '</label>'
+        + '<select id="' + id + '" onchange="OPS.draft(\'' + key + '\',this.value)">'
+        + '<option value="">' + T('الكل','All') + '</option>'
+        + list.map(function(v){
+            return '<option value="' + esc(v) + '"' + (DRAFT[key] === v ? ' selected' : '') + '>' + esc(v) + '</option>'; }).join('')
+        + '</select></div>';
+    }
+    return sel('f-nat', 'nationality', T('الجنسية','Nationality'), FACETS.nationalities)
+      + sel('f-area', 'area', T('منطقة السكن','Residential area'), FACETS.areas)
+      + sel('f-veh', 'vehicleType', T('نوع المركبة','Vehicle type'), FACETS.vehicleTypes)
+      + '<div class="fld"><span class="lg">' + T('تاريخ التقديم','Submitted') + '</span><div class="two">'
+        + '<label class="sub-f" for="f-from">' + T('من تاريخ','From date')
+          + '<input id="f-from" type="date" dir="ltr" value="' + esc(DRAFT.from) + '" onchange="OPS.draft(\'from\',this.value)"></label>'
+        + '<label class="sub-f" for="f-to">' + T('إلى تاريخ','To date')
+          + '<input id="f-to" type="date" dir="ltr" value="' + esc(DRAFT.to) + '" onchange="OPS.draft(\'to\',this.value)"></label>'
+        + '</div></div>';
+  }
+  function renderApplet(){
+    if(!DRAFT) return;
+    var isApps = MODE === 'applications';
+    el('appletHost').innerHTML =
+      '<div class="sheet" id="applet" onclick="if(event.target===this)OPS.closeFilters()">'
+      + '<div class="sheet-c applet" role="dialog" aria-modal="true" aria-labelledby="flT">'
+      + '<div class="sheet-h"><div class="t"><b id="flT">'
+        + (isApps ? T('تصفية طلبات الانضمام','Filter Applications') : T('تصفية السائقين','Filter Drivers')) + '</b>'
+        + '<span>' + T('تُطبَّق على النطاق المحدد','Applied within the selected scope') + '</span></div>'
+        + '<button class="ibtn" type="button" onclick="OPS.closeFilters()" aria-label="' + esc(T('إغلاق','Close')) + '"><i class="ti ti-x" aria-hidden="true"></i></button></div>'
+      + '<div class="sheet-b">' + appletFields()
+      + '</div>'
+      + '<div class="sheet-f">'
+        + '<button class="btn" type="button" onclick="OPS.clearFilters()"><i class="ti ti-filter-off" aria-hidden="true"></i>' + T('مسح الفلاتر','Clear Filters') + '</button>'
+        + '<button class="btn pri" type="button" onclick="OPS.applyFilters()"><i class="ti ti-check" aria-hidden="true"></i>' + T('تطبيق','Apply') + '</button>'
+      + '</div></div></div>';
+    var f = el('f-from'); if(f) f.focus();
+  }
+  function chips(){
+    var out = [];
+    function chip(key, label, value){
+      out.push('<span class="fchip">' + esc(label) + ': <b><bdi>' + esc(value) + '</bdi></b>'
+        + '<button type="button" onclick="OPS.setF(\'' + key + '\',\'\')" aria-label="' + esc(T('إزالة الفلتر','Remove filter')) + '">'
+        + '<i class="ti ti-x" aria-hidden="true"></i></button></span>');
+    }
+    if(MODE === 'applications'){
+      if(!(AF.q || appActiveFilterCount())) return '';
+      if(AF.q) chip('q', T('بحث','Search'), AF.q);
+      if(AF.nationality) chip('nationality', T('الجنسية','Nationality'), AF.nationality);
+      if(AF.area) chip('area', T('المنطقة','Area'), AF.area);
+      if(AF.vehicleType) chip('vehicleType', T('نوع المركبة','Vehicle type'), AF.vehicleType);
+      if(AF.from) chip('from', T('من','From'), AF.from);
+      if(AF.to) chip('to', T('إلى','To'), AF.to);
+      return '<div class="fchips">' + out.join('') + '</div>';
+    }
+    if(!filtersActive()) return '';
+    if(F.q) chip('q', T('بحث','Search'), F.q);
+    if(F.from) chip('from', T('من','From'), F.from);
+    if(F.to) chip('to', T('إلى','To'), F.to);
+    return '<div class="fchips">' + out.join('') + '</div>';
+  }
+
+  /* ───────── the list ───────── */
+  function whoCell(d){
+    var initial = String(d.name || '?').trim().charAt(0) || '?';
+    return '<span class="who"><span class="av" aria-hidden="true">' + esc(initial) + '</span>'
+      + '<span class="nm"><bdi>' + esc(d.name || '') + '</bdi></span></span>';
+  }
+  function rows(list){
+    var H = [T('السائق','Driver'), T('الحالة','Status'),
+             T('الطلبات الجارية','Orders in progress'), T('تاريخ التسجيل','Registered'), T('الإجراء','Action')];
+    var COLS = ['v-name','v-state','v-ord','v-reg','v-act'];
+    return '<div class="tbl-scroll"><table class="drv"><caption class="sr-only">' + T('السائقون','Drivers') + '</caption>'
+      + '<colgroup>' + COLS.map(function(c){ return '<col class="' + c + '">'; }).join('') + '</colgroup>'
+      + '<thead><tr>'
+      + H.map(function(h,i){ return '<th scope="col" class="' + COLS[i] + '">' + h + '</th>'; }).join('') + '</tr></thead><tbody>'
+      + list.map(function(d,i){
+          return '<tr tabindex="0" onclick="OPS.open(' + i + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();OPS.open(' + i + ');}">'
+            + '<td class="v-name" data-l="' + esc(H[0]) + '">' + whoCell(d) + '</td>'
+            + '<td class="v-state" data-l="' + esc(H[1]) + '">' + stateCell(d) + '</td>'
+            + '<td class="v-ord" data-l="' + esc(H[2]) + '"><span class="nowrap">' + d.activeOrders + '</span></td>'
+            + '<td class="v-reg" data-l="' + esc(H[3]) + '">' + (d.regDate ? '<bdi>' + esc(dayOf(d.regDate)) + '</bdi>' : DASH) + '</td>'
+            + '<td class="v-act" data-l="' + esc(H[4]) + '"><button class="btn sm" type="button" onclick="event.stopPropagation();OPS.open(' + i + ')">'
+              + T('عرض','View') + '</button></td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table></div>';
+  }
+  /* ───────── the applications list ─────────
+     Summary only: a reference, who applied, what they drive, where they live
+     and the decision state. Civil id, contact details and documents are not in
+     the row — they belong to the review sheet. */
+  function appRowsHtml(list){
+    var H = [T('رقم الطلب','Reference'), T('المتقدم','Applicant'), T('المركبة','Vehicle'),
+             T('المنطقة','Area'), T('الحالة','Status'), T('تاريخ التقديم','Submitted')];
+    var COLS = ['a-ref','a-name','a-veh','a-area','a-state','a-date'];
+    return '<div class="tbl-scroll"><table class="app"><caption class="sr-only">' + T('طلبات الانضمام','Join applications') + '</caption>'
+      + '<colgroup>' + COLS.map(function(c){ return '<col class="' + c + '">'; }).join('') + '</colgroup>'
+      + '<thead><tr>'
+      + H.map(function(h,i){ return '<th scope="col" class="' + COLS[i] + '">' + h + '</th>'; }).join('') + '</tr></thead><tbody>'
+      + list.map(function(a,i){
+          var v = a.vehicle || {};
+          var veh = [v.type, v.make, v.model].filter(Boolean).join(' · ');
+          return '<tr tabindex="0" onclick="OPS.openApp(' + i + ')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();OPS.openApp(' + i + ');}">'
+            + '<td class="a-ref" data-l="' + esc(H[0]) + '"><span class="app-ref"><bdi>' + esc(a.ref || '') + '</bdi></span></td>'
+            + '<td class="a-name" data-l="' + esc(H[1]) + '">' + whoCell({ name:a.applicant ? a.applicant.name : '' }) + '</td>'
+            + '<td class="a-veh" data-l="' + esc(H[2]) + '">' + (veh ? '<bdi>' + esc(veh) + '</bdi>' : DASH) + '</td>'
+            + '<td class="a-area" data-l="' + esc(H[3]) + '">' + (a.applicant && a.applicant.area ? '<bdi>' + esc(a.applicant.area) + '</bdi>' : DASH) + '</td>'
+            + '<td class="a-state" data-l="' + esc(H[4]) + '">' + appStatusCell(a) + '</td>'
+            + '<td class="a-date" data-l="' + esc(H[5]) + '">' + (a.submittedAt ? '<bdi>' + esc(dayOf(a.submittedAt)) + '</bdi>' : DASH) + '</td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table></div>';
+  }
+  function strip(){
+    var cells = (MODE === 'applications')
+      ? [ { k:T('قيد المراجعة','Pending'), v:APP_COUNTS.pending, cls:APP_COUNTS.pending ? 'wait' : '' },
+          { k:T('المقبولة','Approved'),    v:APP_COUNTS.approved, cls:'' },
+          { k:T('المرفوضة','Rejected'),    v:APP_COUNTS.rejected, cls:'' } ]
+      : [ { k:T('إجمالي السائقين','Drivers'), v:COUNTS.all, cls:'' },
+          { k:T('النشطون','Active'),          v:COUNTS.active, cls:'' },
+          { k:T('الموقوفون','Suspended'),     v:COUNTS.suspended, cls:COUNTS.suspended ? 'wait' : '' } ];
+    return '<div class="strip">' + cells.map(function(c){
+      return '<span class="s ' + c.cls + '"><b class="v">' + (c.v == null ? '—' : c.v) + '</b><span class="k">' + c.k + '</span></span>'; }).join('') + '</div>';
+  }
+  function modeBar(){
+    return '<div class="modes" role="group" aria-label="' + esc(T('أقسام السائقين','Driver sections')) + '">'
+      + MODES.map(function(m){
+          var n = (m.k === 'applications') ? APP_COUNTS.pending : COUNTS.all;
+          return '<button class="mode" type="button" aria-pressed="' + (MODE === m.k) + '" onclick="OPS.setMode(\'' + m.k + '\')">'
+            + '<i class="ti ' + m.icon + '" aria-hidden="true"></i>' + T(m.ar, m.en)
+            + '<span class="n">' + (n == null ? '—' : n) + '</span></button>'; }).join('')
+      + '</div>';
+  }
+
+  function render(){
+    renderHeader(); renderNav();
+    var isApps = MODE === 'applications';
+    var body, scopeList, scopeKey, count, intro;
+
+    if(isApps){
+      scopeList = APP_SCOPES; scopeKey = AF.scope;
+      count = T(APPS.length + ' طلب', APPS.length + ' application(s)');
+      intro = T('طلبات الانضمام المقدَّمة عبر موقع رف، ومراجعتها واعتمادها.','Join applications submitted through the RAF site — review and decide.');
+      var anyF = !!(AF.q || appActiveFilterCount());
+      if(APP_ERR){
+        body = '<div class="empty"><i class="ti ti-alert-circle" aria-hidden="true"></i><b>' + esc(APP_ERR) + '</b></div>';
+      } else if(!APPS.length){
+        body = '<div class="empty"><i class="ti ti-user-off" aria-hidden="true"></i><b>'
+          + (anyF ? T('لا توجد طلبات مطابقة للبحث الحالي','No applications match the current search')
+                  : T(appScopeOf(AF.scope).emptyAr, appScopeOf(AF.scope).emptyEn))
+          + '</b>' + (anyF ? '<button class="btn sm" type="button" onclick="OPS.clearFilters()">'
+              + T('مسح الفلاتر','Clear Filters') + '</button>' : '') + '</div>';
+      } else body = appRowsHtml(APPS);
+    } else {
+      scopeList = SCOPES; scopeKey = F.scope;
+      count = T(ROWS.length + ' سائق', ROWS.length + ' driver(s)');
+      intro = T('حسابات السائقين وتعيين الطلبات ضمن إدارة اللوجستيات.','Driver accounts and order assignment, within Logistics Management.');
+      if(READ_ERR){
+        body = '<div class="empty"><i class="ti ti-alert-circle" aria-hidden="true"></i><b>' + esc(READ_ERR) + '</b></div>';
+      } else if(!ROWS.length){
+        body = '<div class="empty"><i class="ti ti-user-off" aria-hidden="true"></i><b>'
+          + (filtersActive()
+              ? T('لا يوجد سائقون مطابقون للبحث الحالي','No drivers match the current search')
+              : T(scopeOf(F.scope).emptyAr, scopeOf(F.scope).emptyEn))
+          + '</b>' + (filtersActive() ? '<button class="btn sm" type="button" onclick="OPS.clearFilters()">'
+              + T('مسح الفلاتر','Clear Filters') + '</button>' : '') + '</div>';
+      } else body = rows(ROWS);
+    }
+
+    el('view').innerHTML =
+      '<h1 class="sr-only">' + T('السائقون','Drivers') + '</h1>'
+      + '<div class="wk">'
+      + '<div class="wk-head"><p>' + intro + '</p>'
+      + '<span class="wk-count">' + count + '</span>'
+      /* direct administrative creation stays available in the Drivers half —
+         it is a different path from the public application, and asks for no
+         terms consent */
+      + (!isApps && CAP && CAP.create
+          ? '<button class="btn pri" type="button" id="createBtn" onclick="OPS.openCreate()">'
+            + '<i class="ti ti-plus" aria-hidden="true"></i>' + T('سائق جديد','New Driver') + '</button>'
+          : '') + '</div>'
+      + modeBar()
+      + strip()
+      + '<div class="scopes" role="group" aria-label="' + esc(T('النطاق','Scope')) + '">'
+      + scopeList.map(function(s){
+          var n = isApps ? APP_COUNTS[s.k] : COUNTS[s.k];
+          return '<button class="scope" type="button" aria-pressed="' + (scopeKey === s.k) + '" onclick="OPS.setScope(\'' + s.k + '\')">'
+            + T(s.ar,s.en) + '<span class="n">' + (n == null ? '—' : n) + '</span></button>'; }).join('')
+      + '</div>'
+      + toolbar() + chips()
+      + '<div class="tbl-card">' + body + '</div>'
+      + '</div>';
+    if(OPEN != null) renderSheet();
+  }
+
+  /* ───────── details sheet ───────── */
+  var OPEN = null, openTrigger = null, MSG = null, BUSY = false;
+  function sec(title, icon, inner){
+    return '<section class="sec"><h3><i class="ti ' + icon + '" aria-hidden="true"></i>' + esc(title) + '</h3>' + inner + '</section>';
+  }
+  function kv(k, v){ return '<div class="kv"><span class="k">' + esc(k) + '</span><span class="v">' + v + '</span></div>'; }
+  function current(){ return (OPEN != null) ? ROWS[OPEN] : null; }
+
+  function sheetBody(d){
+    var h = '';
+    h += sec(T('السائق','Driver'), 'ti-user',
+        kv(T('الاسم','Name'), d.name ? '<bdi>' + esc(d.name) + '</bdi>' : DASH)
+      + kv(T('الحالة','Status'), stateCell(d))
+      + kv(T('تاريخ التسجيل','Registered'), d.regDate ? '<bdi>' + esc(dayOf(d.regDate)) + '</bdi>' : DASH)
+      /* contact details travel from the authority only to an account that may
+         edit them, and are shown only there */
+      + (CAP && CAP.edit
+          ? kv(T('البريد','Email'), d.email ? '<bdi>' + esc(d.email) + '</bdi>' : DASH)
+            + kv(T('الهاتف','Phone'), d.phone ? '<bdi dir="ltr">' + esc(d.phone) + '</bdi>' : DASH)
+          : ''));
+
+    /* the Logistics profile — what the application carried that the RAF
+       account model has no field for. Absent for a driver who predates the
+       application workflow, and shown as such rather than invented. */
+    var pr = d.profile, pv = (pr && pr.vehicle) || {};
+    h += sec(T('ملف اللوجستيات','Logistics profile'), 'ti-id-badge-2', pr
+      ? kv(T('الرقم المدني','Civil ID'), pr.civilId ? '<bdi dir="ltr">' + esc(pr.civilId) + '</bdi>' : DASH)
+        + kv(T('الجنسية','Nationality'), pr.nationality ? '<bdi>' + esc(pr.nationality) + '</bdi>' : DASH)
+        + kv(T('منطقة السكن','Residential area'), pr.area ? '<bdi>' + esc(pr.area) + '</bdi>' : DASH)
+        + kv(T('المركبة','Vehicle'), [pv.type, pv.make, pv.model, pv.year].filter(Boolean).length
+              ? '<bdi>' + esc([pv.type, pv.make, pv.model, pv.year].filter(Boolean).join(' · ')) + '</bdi>' : DASH)
+        + kv(T('اللون','Colour'), pv.color ? '<bdi>' + esc(pv.color) + '</bdi>' : DASH)
+        + kv(T('رقم اللوحة','Plate'), pv.plate ? '<bdi dir="ltr">' + esc(pv.plate) + '</bdi>' : DASH)
+        + kv(T('المصدر','Origin'), pr.source === 'public' ? T('طلب انضمام عام','Public join application')
+                                                          : T('إنشاء مباشر من اللوجستيات','Created directly by Logistics'))
+        + (pr.applicationRef ? kv(T('رقم الطلب','Application'), '<bdi class="mono">' + esc(pr.applicationRef) + '</bdi>') : '')
+      : '<div class="empty"><span>' + T('لا يوجد ملف لوجستيات لهذا السائق.','No Logistics profile exists for this driver.') + '</span></div>');
+
+    /* the orders this driver is responsible for, from the order's own record */
+    h += sec(T('الطلبات الجارية','Orders in progress'), 'ti-package', d.orders && d.orders.length
+      ? '<ul class="lines">' + d.orders.map(function(o){
+          return '<li><span class="nm"><bdi class="mono">' + esc(o.orderId) + '</bdi>'
+            + (o.assignedAt ? '<span class="sub">' + T('تم التعيين: ','Assigned: ') + esc(clockOf(o.assignedAt) || '') + '</span>' : '')
+            + '</span>'
+            + (CAP && CAP.assign && !o.pickedUpAt
+                ? '<button class="btn sm" type="button" onclick="OPS.openReturn(\'' + esc(o.orderId) + '\')">'
+                  + T('إعادة إلى القائمة','Return to pool') + '</button>' : '')
+            + '</li>'; }).join('') + '</ul>'
+      : '<div class="empty"><span>' + T('لا توجد طلبات معيَّنة لهذا السائق.','No orders are currently assigned to this driver.') + '</span></div>');
+
+    /* the operations this ACCOUNT holds, from the authority's capabilities() */
+    var acts = '';
+    if(MSG) acts += '<div class="form-msg ' + MSG.kind + '"><i class="ti ' + (MSG.kind === 'err' ? 'ti-alert-circle' : MSG.kind === 'ok' ? 'ti-check' : 'ti-loader') + '" aria-hidden="true"></i><span>' + esc(MSG.text) + '</span></div>';
+    var btns = [];
+    if(CAP && CAP.edit)
+      btns.push('<button class="btn" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.openEdit()">'
+        + '<i class="ti ti-edit" aria-hidden="true"></i>' + T('تعديل البيانات','Edit details') + '</button>');
+    if(CAP && CAP.assign && d.status === 'active')
+      btns.push('<button class="btn" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.openAssign()">'
+        + '<i class="ti ti-package" aria-hidden="true"></i>' + T('تعيين طلب','Assign an order') + '</button>');
+    if(CAP && CAP.suspend)
+      btns.push(d.status === 'active'
+        ? '<button class="btn danger" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.openSuspend()">'
+          + '<i class="ti ti-player-pause" aria-hidden="true"></i>' + T('إيقاف الحساب','Suspend account') + '</button>'
+        : '<button class="btn" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.reactivate()">'
+          + '<i class="ti ti-player-play" aria-hidden="true"></i>' + T('إعادة التفعيل','Reactivate') + '</button>');
+    acts += btns.length ? '<div class="acts-row">' + btns.join('') + '</div>'
+      : '<div class="notice"><i class="ti ti-eye" aria-hidden="true"></i><span>'
+        + T('لديك صلاحية القراءة فقط على السائقين.','You have read-only access to drivers.') + '</span></div>';
+    /* approval is named once, honestly, where an operator would look for it */
+    if(CAP && CAP.approve && CAP.approval && !CAP.approval.supported)
+      acts += '<div class="notice" style="margin-block-start:10px"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+        + esc(CAP.approval.reason) + '</span></div>';
+    h += sec(T('الإجراءات','Actions'), 'ti-settings-automation', acts);
+    return h;
+  }
+  /* ───────── the application review sheet ─────────
+     Everything the applicant submitted, read straight from the authority.
+     Documents are metadata only — this prototype stores no file content, and
+     the sheet says so rather than offering a link that cannot exist. */
+  var DOC_LABEL = {
+    civilId:      { ar:'البطاقة المدنية', en:'Civil ID',            icon:'ti-id-badge-2' },
+    license:      { ar:'رخصة القيادة',    en:'Driving licence',     icon:'ti-license' },
+    registration: { ar:'استمارة السيارة', en:'Vehicle registration',icon:'ti-file-certificate' },
+    photo:        { ar:'صورة شخصية',      en:'Personal photo',      icon:'ti-user-circle' }
+  };
+  function bytes(n){
+    if(typeof n !== 'number' || !isFinite(n)) return null;
+    if(n < 1024) return n + ' B';
+    if(n < 1024*1024) return (n/1024).toFixed(0) + ' KB';
+    return (n/(1024*1024)).toFixed(1) + ' MB';
+  }
+  var HIST_IC = { submitted:'ti-send', review:'ti-eye', approved:'ti-circle-check', rejected:'ti-circle-x' };
+  function histTitle(h){
+    if(h.kind === 'submitted') return T('تم إرسال الطلب','Application submitted');
+    if(h.kind === 'review')    return T('مراجعة','Reviewed');
+    if(h.kind === 'approved')  return T('تم القبول','Approved');
+    if(h.kind === 'rejected')  return T('تم الرفض','Rejected');
+    return h.kind;
+  }
+  function appSheetBody(a){
+    var p = a.applicant || {}, v = a.vehicle || {}, h = '';
+    var keys = (LG && LG.DOC_KEYS) || ['civilId','license','registration','photo'];
+
+    h += sec(T('الطلب','Application'), 'ti-file-description',
+        kv(T('رقم الطلب','Reference'), '<bdi class="mono">' + esc(a.ref || '') + '</bdi>')
+      + kv(T('الحالة','Status'), appStatusCell(a))
+      + kv(T('تاريخ التقديم','Submitted'), a.submittedAt ? '<bdi>' + esc(dayOf(a.submittedAt)) + '</bdi>' : DASH)
+      + kv(T('المصدر','Source'), a.source === 'public' ? T('طلب عام عبر الموقع','Public website application')
+                                                       : T('إنشاء مباشر من اللوجستيات','Created directly by Logistics'))
+      + (a.driverId ? kv(T('حساب السائق','Driver account'), '<bdi>' + esc(a.driverId) + '</bdi>') : '')
+      + (a.rejectionReason ? kv(T('سبب الرفض','Rejection reason'), '<bdi>' + esc(a.rejectionReason) + '</bdi>') : ''));
+
+    h += sec(T('البيانات الشخصية','Personal information'), 'ti-user',
+        kv(T('الاسم','Name'), p.name ? '<bdi>' + esc(p.name) + '</bdi>' : DASH)
+      + kv(T('رقم الهاتف','Phone'), p.phone ? '<bdi dir="ltr">' + esc(p.phone) + '</bdi>' : DASH)
+      + kv(T('البريد الإلكتروني','Email'), p.email ? '<bdi dir="ltr">' + esc(p.email) + '</bdi>' : DASH)
+      + kv(T('الرقم المدني','Civil ID'), p.civilId ? '<bdi dir="ltr">' + esc(p.civilId) + '</bdi>' : DASH)
+      + kv(T('الجنسية','Nationality'), p.nationality ? '<bdi>' + esc(p.nationality) + '</bdi>' : DASH)
+      + kv(T('منطقة السكن','Residential area'), p.area ? '<bdi>' + esc(p.area) + '</bdi>' : DASH));
+
+    h += sec(T('بيانات المركبة','Vehicle'), 'ti-car',
+        kv(T('النوع','Type'), v.type ? '<bdi>' + esc(v.type) + '</bdi>' : DASH)
+      + kv(T('الماركة','Make'), v.make ? '<bdi>' + esc(v.make) + '</bdi>' : DASH)
+      + kv(T('الموديل','Model'), v.model ? '<bdi>' + esc(v.model) + '</bdi>' : DASH)
+      + kv(T('سنة الصنع','Year'), v.year ? '<bdi dir="ltr">' + esc(v.year) + '</bdi>' : DASH)
+      + kv(T('اللون','Colour'), v.color ? '<bdi>' + esc(v.color) + '</bdi>' : DASH)
+      + kv(T('رقم اللوحة','Plate'), v.plate ? '<bdi dir="ltr">' + esc(v.plate) + '</bdi>' : DASH));
+
+    var docs = a.documents || {};
+    h += sec(T('المستندات','Documents'), 'ti-files',
+      '<ul class="docs">' + keys.map(function(k){
+        var d = docs[k], lbl = DOC_LABEL[k] || { ar:k, en:k, icon:'ti-file' };
+        return '<li><span class="di" aria-hidden="true"><i class="ti ' + lbl.icon + '"></i></span>'
+          + '<span class="dn">' + T(lbl.ar, lbl.en)
+          + (d ? '<span class="sub"><bdi>' + esc(d.name) + '</bdi>'
+                 + (bytes(d.size) ? ' · ' + esc(bytes(d.size)) : '') + '</span>'
+               : '<span class="sub miss">' + T('لم يُرفق','Not attached') + '</span>')
+          + '</span>'
+          + (d ? '<span class="badge b-plain">' + T('مُسجّل','Recorded') + '</span>' : '') + '</li>';
+      }).join('') + '</ul>'
+      + '<div class="notice" style="margin-block-start:10px"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+      + T('هذه النسخة التجريبية تحفظ بيانات الملف فقط (الاسم والنوع والحجم) ولا تحفظ محتواه. تخزين المستندات الفعلي يتطلب خدمة تخزين في الإصدار الإنتاجي.',
+          'This prototype records only each file’s name, type and size — not its contents. Real document storage requires a production storage service.')
+      + '</span></div>');
+
+    /* consent belongs to the public application only */
+    h += sec(T('الموافقة','Consent'), 'ti-checkbox', a.consent
+      ? kv(T('شروط وأحكام رف','RAF terms'), '<span class="badge b-done">' + T('وافق المتقدم','Accepted by the applicant') + '</span>')
+        + kv(T('وقت الموافقة','Accepted at'), a.consent.at ? '<bdi>' + esc(clockOf(a.consent.at) || '') + '</bdi>' : DASH)
+      : '<div class="notice"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+        + T('لا تنطبق الموافقة: أُنشئ هذا السائق مباشرة من اللوجستيات ولم يُقدَّم عبر الموقع العام.',
+            'Consent does not apply: this driver was created directly by Logistics, not submitted through the public site.')
+        + '</span></div>');
+
+    /* decisions and review notes, in the order they happened */
+    h += sec(T('سجل الطلب','Application history'), 'ti-history',
+      (a.history && a.history.length)
+        ? '<ul class="hist">' + a.history.slice().reverse().map(function(x){
+            return '<li><span class="hi" aria-hidden="true"><i class="ti ' + (HIST_IC[x.kind] || 'ti-point') + '"></i></span>'
+              + '<span class="hb"><b>' + esc(histTitle(x)) + '</b>'
+              + '<span class="who"><bdi>' + esc(x.actorName || T('المتقدم','Applicant')) + '</bdi></span>'
+              + (x.note ? '<span class="body"><bdi>' + esc(x.note) + '</bdi></span>' : '')
+              + (x.reason ? '<span class="body"><bdi>' + esc(x.reason) + '</bdi></span>' : '')
+              + '</span>'
+              + '<span class="hw"><bdi>' + esc(clockOf(x.at) || '') + '</bdi></span></li>'; }).join('') + '</ul>'
+        : '<div class="empty"><span>' + T('لا يوجد سجل.','No history.') + '</span></div>');
+
+    /* the decision, offered only to an account the authority says may decide */
+    var acts = '';
+    if(MSG) acts += '<div class="form-msg ' + MSG.kind + '"><i class="ti ' + (MSG.kind === 'err' ? 'ti-alert-circle' : MSG.kind === 'ok' ? 'ti-check' : 'ti-loader') + '" aria-hidden="true"></i><span>' + esc(MSG.text) + '</span></div>';
+    if(!(CAP && CAP.approve)){
+      acts += '<div class="notice"><i class="ti ti-eye" aria-hidden="true"></i><span>'
+        + T('مراجعة الطلبات واعتمادها تتطلب صلاحية drivers.approve.','Reviewing and deciding applications requires the drivers.approve permission.') + '</span></div>';
+    } else if(a.status !== 'pending'){
+      acts += '<div class="notice"><i class="ti ti-lock" aria-hidden="true"></i><span>'
+        + T('تم البت في هذا الطلب ولا يقبل إجراءً جديداً.','This application has been decided and takes no further action.') + '</span></div>';
+    } else {
+      acts += '<div class="acts-row">'
+        + '<button class="btn pri" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.openApprove()">'
+          + '<i class="ti ti-circle-check" aria-hidden="true"></i>' + T('قبول وإنشاء الحساب','Approve & create account') + '</button>'
+        + '<button class="btn danger" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.openReject()">'
+          + '<i class="ti ti-circle-x" aria-hidden="true"></i>' + T('رفض','Reject') + '</button>'
+        + '<button class="btn" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.openReview()">'
+          + '<i class="ti ti-note" aria-hidden="true"></i>' + T('إضافة ملاحظة مراجعة','Add review note') + '</button>'
+        + '</div>';
+    }
+    h += sec(T('الإجراءات','Actions'), 'ti-settings-automation', acts);
+    return h;
+  }
+  function renderAppSheet(){
+    var a = APPS[OPEN];
+    if(!a){ closeSheet(); return; }
+    el('sheetHost').innerHTML =
+      '<div class="sheet" id="sheet" onclick="if(event.target===this)OPS.close()">'
+      + '<div class="sheet-c" role="dialog" aria-modal="true" aria-labelledby="shT">'
+      + '<div class="sheet-h"><div class="t"><b id="shT"><bdi>' + esc((a.applicant && a.applicant.name) || a.ref) + '</bdi></b>'
+        + '<span><bdi>' + esc(a.ref || '') + '</bdi> · ' + T('طلب انضمام','Join application') + '</span></div>'
+        + appStatusCell(a)
+        + '<button class="ibtn" type="button" onclick="OPS.close()" aria-label="' + esc(T('إغلاق','Close')) + '"><i class="ti ti-x" aria-hidden="true"></i></button></div>'
+      + '<div class="sheet-b">' + appSheetBody(a) + '</div></div></div>';
+    var x = el('sheet').querySelector('.ibtn'); if(x) x.focus();
+  }
+
+  function renderSheet(){
+    if(MODE === 'applications'){ renderAppSheet(); return; }
+    var d = current();
+    if(!d){ closeSheet(); return; }
+    el('sheetHost').innerHTML =
+      '<div class="sheet" id="sheet" onclick="if(event.target===this)OPS.close()">'
+      + '<div class="sheet-c" role="dialog" aria-modal="true" aria-labelledby="shT">'
+      + '<div class="sheet-h"><div class="t"><b id="shT"><bdi>' + esc(d.name || '') + '</bdi></b>'
+        + '<span>' + T('حساب سائق','Driver account') + '</span></div>'
+        + stateCell(d)
+        + '<button class="ibtn" type="button" onclick="OPS.close()" aria-label="' + esc(T('إغلاق','Close')) + '"><i class="ti ti-x" aria-hidden="true"></i></button></div>'
+      + '<div class="sheet-b">' + sheetBody(d) + '</div></div></div>';
+    var x = el('sheet').querySelector('.ibtn'); if(x) x.focus();
+  }
+  function closeSheet(){
+    OPEN = null; MSG = null; BUSY = false; el('sheetHost').innerHTML = '';
+    if(openTrigger && document.contains(openTrigger)) openTrigger.focus();
+    openTrigger = null;
+  }
+
+  /* ═════════════════ FORMS ═════════════════
+     One host, four modes. Every field below exists on the RAF account model;
+     no vehicle, licence, availability, shift, zone or rating field is invented
+     to make the form look fuller. */
+  var FORM = null, FBAD = {}, FMSG = null, FBUSY = false;
+  function fclose(){
+    FORM = null; FBAD = {}; FMSG = null; FBUSY = false; el('formHost').innerHTML = '';
+    if(OPEN != null) renderSheet(); else { var b = el('createBtn'); if(b) b.focus(); }
+  }
+  function fsync(){
+    if(!FORM) return;
+    /* file inputs keep their value in FORM.files, captured on change */
+    (FORM.fields || []).forEach(function(k){
+      if(FORM.fileFields && FORM.fileFields.indexOf(k) >= 0) return;
+      var e = el('x-' + k); if(e) FORM.val[k] = String(e.value || '');
+    });
+  }
+  function captureFile(k){
+    if(!FORM) return;
+    fsync();
+    var e = el('x-' + k), f = e && e.files && e.files[0];
+    FORM.files = FORM.files || {};
+    FORM.files[k] = f ? { name:f.name, type:f.type, size:f.size } : null;
+    renderForm();
+  }
+  /* the authority names the field it refused; the create form splits the
+     account's single `name` into first and last, so that one is remapped */
+  var FIELD_ALIAS = { name:'firstName' };
+  function fmark(res){
+    FBAD = {};
+    function mark(f){ FBAD[f] = true; if(FORM && FORM.fields && FORM.fields.indexOf(f) < 0 && FIELD_ALIAS[f]) FBAD[FIELD_ALIAS[f]] = true; }
+    ((res && res.errors) || []).forEach(function(e){ if(e && e.field) mark(e.field); });
+    if(res && res.code === 'NAME_REQUIRED') mark('name');
+    if(res && res.code === 'EMAIL_TAKEN') mark('email');
+    if(res && res.code === 'REASON_REQUIRED') mark('reason');
+  }
+  /* a titled group inside a form — the same small-caps heading the detail
+     sheet already uses, so a long form reads as sections rather than a list */
+  function fgroup(title, icon, inner){
+    return '<div class="fgrp"><h4><i class="ti ' + icon + '" aria-hidden="true"></i>' + esc(title) + '</h4>' + inner + '</div>';
+  }
+  /* two fields side by side on a wide drawer, stacked on a narrow one */
+  function frow(a, b){ return '<div class="frow">' + a + b + '</div>'; }
+  /* a document field. The browser will not let a script read a file's contents
+     here and RAF has no file storage, so only the file's own metadata travels
+     on — exactly what the public application does. */
+  function ffile(k, label, icon){
+    var m = FORM.files && FORM.files[k];
+    return '<div class="fld fdoc"><label for="x-' + k + '">' + esc(label) + '</label>'
+      + '<div class="drop"><input id="x-' + k + '" type="file" accept="image/*,application/pdf" onchange="OPS.ffile(\'' + k + '\')">'
+      + '<i class="ti ' + icon + '" aria-hidden="true"></i>'
+      + '<span>' + (m ? esc(m.name) : T('اختر ملفاً','Choose a file')) + '</span></div>'
+      + (m ? '<span class="hint ok-hint"><i class="ti ti-check" aria-hidden="true"></i> '
+             + T('سيُسجَّل اسم الملف ونوعه وحجمه فقط.','Only the file name, type and size will be recorded.') + '</span>' : '')
+      + '</div>';
+  }
+  function field(k, label, type, opts){
+    opts = opts || {};
+    var v = FORM.val[k] || '';
+    var body;
+    if(type === 'select'){
+      body = '<select id="x-' + k + '" onchange="OPS.fdraft()">'
+        + (opts.placeholder ? '<option value="">' + esc(opts.placeholder) + '</option>' : '')
+        + (opts.options || []).map(function(o){
+            return '<option value="' + esc(o.v) + '"' + (v === o.v ? ' selected' : '') + '>' + esc(o.t) + '</option>'; }).join('')
+        + '</select>';
+    } else if(type === 'textarea'){
+      body = '<textarea id="x-' + k + '" rows="3" oninput="OPS.fdraft()">' + esc(v) + '</textarea>';
+    } else {
+      body = '<input id="x-' + k + '" type="text"' + (opts.dir ? ' dir="' + opts.dir + '"' : '')
+        + ' value="' + esc(v) + '" oninput="OPS.fdraft()">';
+    }
+    return '<div class="fld' + (FBAD[k] ? ' bad' : '') + '"><label for="x-' + k + '">' + esc(label)
+      + (opts.required ? ' <span class="req">*</span>' : '') + '</label>' + body
+      + (opts.hint ? '<span class="hint">' + esc(opts.hint) + '</span>' : '') + '</div>';
+  }
+  function renderForm(){
+    if(!FORM) return;
+    var inner = FORM.render();
+    el('formHost').innerHTML =
+      '<div class="sheet" id="formSheet" onclick="if(event.target===this)OPS.fclose()">'
+      + '<div class="sheet-c applet' + (FORM.wide ? ' wide' : '') + '" role="dialog" aria-modal="true" aria-labelledby="fmT">'
+      + '<div class="sheet-h"><div class="t"><b id="fmT">' + esc(FORM.title) + '</b>'
+        + (FORM.sub ? '<span>' + esc(FORM.sub) + '</span>' : '') + '</div>'
+        + '<button class="ibtn" type="button" onclick="OPS.fclose()" aria-label="' + esc(T('إغلاق','Close')) + '"><i class="ti ti-x" aria-hidden="true"></i></button></div>'
+      + '<div class="sheet-b">' + inner
+        + (FMSG ? '<div class="form-msg ' + FMSG.kind + '"><i class="ti ' + (FMSG.kind === 'err' ? 'ti-alert-circle' : 'ti-loader') + '" aria-hidden="true"></i><span>' + esc(FMSG.text) + '</span></div>' : '')
+      + '</div>'
+      + '<div class="sheet-f">'
+        + '<button class="btn" type="button" onclick="OPS.fclose()">' + T('إلغاء','Cancel') + '</button>'
+        + '<button class="btn ' + (FORM.danger ? 'danger' : 'pri') + '" type="button"' + (FBUSY ? ' disabled' : '') + ' onclick="OPS.fsubmit()">'
+        + '<i class="ti ' + FORM.icon + '" aria-hidden="true"></i>' + esc(FORM.cta) + '</button>'
+      + '</div></div></div>';
+    var first = el('x-' + FORM.fields[0]); if(first) first.focus();
+  }
+  /* an application decision, performed by RAFLogistics. The page re-reads
+     afterwards and stays on the same application. */
+  function runApp(call, okAr, okEn){
+    var a = APPS[OPEN], id = a && a.applicationId;
+    FBUSY = true; FMSG = { kind:'busy', text:T('جارٍ التنفيذ...','Working...') };
+    renderForm();
+    var res = call();
+    FBUSY = false;
+    if(res && res.ok){
+      FORM = null; FBAD = {}; FMSG = null; el('formHost').innerHTML = '';
+      refresh();
+      OPEN = null;
+      for(var i=0;i<APPS.length;i++) if(APPS[i].applicationId === id){ OPEN = i; break; }
+      MSG = { kind:'ok', text:T(okAr, okEn) };
+      if(OPEN != null) renderAppSheet(); else render();
+      return;
+    }
+    fmark(res);
+    var txt = (res && res.message) || T('تعذّر تنفيذ الإجراء.','The action could not be completed.');
+    if(res && res.code === 'INVALID' && res.errors && res.errors.length)
+      txt += ' (' + res.errors.map(function(e){ return e.field; }).join(', ') + ')';
+    if(res && res.code === 'ACCOUNT_CONFLICT' && res.accountRole)
+      txt += ' (' + res.accountRole + ')';
+    FMSG = { kind:'err', text:txt };
+    renderForm();
+  }
+
+  /* every submit is a call into RAFLogistics; the page performs no mutation */
+  function run(promiseless, okAr, okEn, closeForm){
+    FBUSY = true; FMSG = { kind:'busy', text:T('جارٍ التنفيذ...','Working...') };
+    if(FORM) renderForm(); else { BUSY = true; MSG = { kind:'busy', text:T('جارٍ التنفيذ...','Working...') }; renderSheet(); }
+    var res = promiseless();
+    FBUSY = false; BUSY = false;
+    if(res && res.ok){
+      var keepName = res.driver ? res.driver.name : null;
+      if(closeForm) { FORM = null; FBAD = {}; FMSG = null; el('formHost').innerHTML = ''; }
+      refresh();
+      /* keep the operator on the driver they were working on */
+      if(keepName){
+        for(var i=0;i<ROWS.length;i++) if(ROWS[i].name === keepName){ OPEN = i; break; }
+      }
+      MSG = { kind:'ok', text:T(okAr, okEn) };
+      if(OPEN != null) renderSheet();
+      return true;
+    }
+    fmark(res);
+    var text = (res && res.message) || T('تعذّر تنفيذ الإجراء.','The action could not be completed.');
+    if(res && res.code === 'HAS_ACTIVE_ORDERS' && res.orders)
+      text += ' (' + res.orders.join(', ') + ')';
+    if(FORM){ FMSG = { kind:'err', text:text }; renderForm(); }
+    else { MSG = { kind:'err', text:text }; renderSheet(); }
+    return false;
+  }
+
+  /* ───────── shell ───────── */
+  function renderNav(){
+    function item(href, icon, ar, en, current){
+      return '<li><a href="' + href + '"' + (current ? ' aria-current="page"' : '') + '>'
+        + '<i class="ti ' + icon + '" aria-hidden="true"></i><span>' + T(ar,en) + '</span></a></li>';
+    }
+    el('navTree').innerHTML =
+      '<span class="grp">' + T('العمليات','Operations') + '</span><ul>'
+      + item('raf_logistics.html', 'ti-layout-dashboard', 'مركز العمليات', 'Command Center', false)
+      + item('raf_logistics_orders.html', 'ti-shopping-bag', 'الطلبات', 'Orders', false)
+      + item('raf_logistics_dispatch.html', 'ti-route', 'التوزيع والتعيين', 'Dispatch & Assignment', false)
+      + item('raf_logistics_tickets.html', 'ti-ticket', 'التذاكر', 'Tickets', false)
+      + item('raf_logistics_drivers.html', 'ti-motorbike', 'السائقون', 'Drivers', true)
+      + '</ul>'
+      + '<div class="ops-nav-foot"><b>' + T('العمليات واللوجستيات','Operations & Logistics') + '</b>'
+      + T('منصة رف','RAF platform') + '</div>';
+  }
+  function renderHeader(){
+    el('crumbGroup').textContent = T('اللوجستيات · العمليات','Logistics · Operations');
+    el('crumbPage').textContent = T('السائقون','Drivers');
+    el('langBtn').textContent = isEn() ? 'ع' : 'EN';
+    el('langBtn').setAttribute('aria-label', T('التبديل إلى الإنجليزية','Switch to Arabic'));
+    if(ME){
+      el('userAv').textContent = String(ME.name || '?').trim().charAt(0);
+      el('userName').textContent = ME.name || '';
+      var role = null; try { role = P.getRole(ME.roleId); } catch(e){}
+      el('userRole').textContent = role ? T(role.nameAr, role.nameEn) : '';
+    }
+    document.title = T('رف — السائقون','RAF — Drivers');
+  }
+  function refresh(){
+    try { var c = LG ? LG.capabilities() : null; CAP = (c && c.ok) ? c : null; } catch(e){ CAP = null; }
+    readAll(); readApps(); render();
+  }
+
+  function gate(titleAr, titleEn, msg){
+    ME = null; CAP = null; OPEN = null; DRAFT = null; FORM = null;
+    el('shell').hidden = true; el('sheetHost').innerHTML = '';
+    el('appletHost').innerHTML = ''; el('formHost').innerHTML = '';
+    var g = el('gate'); g.hidden = false;
+    el('gateT').textContent = T(titleAr, titleEn);
+    el('gateP').textContent = msg;
+    document.title = T('رف — السائقون','RAF — Drivers');
+  }
+  function applyLang(){
+    var en = isEn();
+    document.querySelectorAll('[data-ar][data-en]').forEach(function(e){
+      var t = e.getAttribute('data-' + (en ? 'en' : 'ar')); if(t !== null) e.textContent = t;
+    });
+  }
+  function boot(){
+    var l = null; try { l = localStorage.getItem('raf_lang'); } catch(e){}
+    if(l === 'en'){ root().lang = 'en'; root().dir = 'ltr'; }
+    applyLang();
+
+    if(!P || !LG){
+      gate('تعذّر التحميل','Could not load', T('لم يتم تحميل وحدات رف المطلوبة.','The required RAF modules did not load.'));
+      return;
+    }
+    /* identity from the stored session only — never from the URL or a
+       caller-supplied id. RAFPerm.currentUser() falls back to the first
+       administrator when nothing is signed in, so the session key is read
+       first and an empty session is refused. */
+    var sid = null;
+    try {
+      var key = (P.LS && P.LS.session) || 'raf_current_user';
+      var raw = localStorage.getItem(key);
+      if(raw != null && raw !== ''){ try { sid = JSON.parse(raw); } catch(e){ sid = raw; } }
+      if(typeof sid !== 'string' || !sid) sid = null;
+    } catch(e){ sid = null; }
+    if(!sid){ gate('يلزم تسجيل الدخول','Sign-in required', T('السائقون متاح لفريق عمليات رف بعد تسجيل الدخول.','Drivers is available to RAF operations staff after signing in.')); return; }
+    var u = null; try { u = P.getUser(sid); } catch(e){ u = null; }
+    if(!u){ gate('يلزم تسجيل الدخول','Sign-in required', T('تعذّر التعرف على الحساب.','That account could not be identified.')); return; }
+
+    /* THE BOUNDARY IS THE AUTHORITY'S, NOT THIS PAGE'S. capabilities() answers
+       from the session and the central permission model; a suspended account
+       and an account without drivers.view are both refused there. */
+    var c = null; try { c = LG.capabilities(); } catch(e){ c = null; }
+    if(!c || !c.ok){
+      gate('يلزم تسجيل الدخول','Sign-in required', (c && c.message) || T('تعذّر التحقق من الحساب.','The account could not be verified.'));
+      return;
+    }
+    if(!c.view){
+      gate('لا تملك صلاحية الوصول','You do not have access', T('عرض السائقين يتطلب صلاحية drivers.view.','Viewing drivers requires the drivers.view permission.'));
+      return;
+    }
+
+    ME = { id:u.id, name:u.name, roleId:u.roleId }; CAP = c;
+    el('gate').hidden = true; el('shell').hidden = false;
+    refresh();
+
+    if(window.RAFEventBus){
+      ['order.*'].forEach(function(p){
+        try { RAFEventBus.subscribe(p, function(){ refresh(); }); } catch(e){}
+      });
+    }
+    window.addEventListener('storage', function(e){
+      if(e.key && /^raf_(users|orders|order_mstate)$/.test(e.key)) refresh();
+    });
+    document.addEventListener('raf:order', refresh);
+  }
+
+  window.OPS = {
+    refresh: refresh,
+    setMode: function(k){ MODE = k; OPEN = null; MSG = null; refresh(); },
+    setScope: function(k){
+      if(MODE === 'applications') AF.scope = k; else F.scope = k;
+      OPEN = null; refresh();
+    },
+    setQ: function(v){
+      if(MODE === 'applications') AF.q = v; else F.q = v;
+      OPEN = null; refresh();
+      var i = el('q'); if(i){ i.focus(); try { i.setSelectionRange(i.value.length, i.value.length); } catch(e){} }
+    },
+    setF: function(k, v){
+      if(MODE === 'applications') AF[k] = v; else F[k] = v;
+      OPEN = null; refresh();
+    },
+    openFilters: openFilters,
+    closeFilters: closeFilters,
+    draft: function(k, v){ if(DRAFT) DRAFT[k] = v; },
+    applyFilters: function(){
+      if(!DRAFT) return;
+      if(MODE === 'applications'){
+        AF.from = DRAFT.from; AF.to = DRAFT.to;
+        AF.nationality = DRAFT.nationality || ''; AF.area = DRAFT.area || ''; AF.vehicleType = DRAFT.vehicleType || '';
+      } else { F.from = DRAFT.from; F.to = DRAFT.to; }
+      closeFilters(); OPEN = null; refresh();
+      var b = el('filterBtn'); if(b) b.focus();
+    },
+    clearFilters: function(){
+      if(MODE === 'applications'){
+        AF.q = ''; AF.from = ''; AF.to = ''; AF.nationality = ''; AF.area = ''; AF.vehicleType = '';
+      } else { F.from = ''; F.to = ''; }
+      if(DRAFT){ closeFilters(); }
+      OPEN = null; refresh();
+      var b = el('filterBtn'); if(b) b.focus();
+    },
+
+    /* ---- join applications: review, approve, reject ---- */
+    openApp: function(i){ if(!ME) return; openTrigger = document.activeElement; OPEN = i; MSG = null; renderAppSheet(); },
+    openReview: function(){
+      var a = APPS[OPEN]; if(!a || !CAP || !CAP.approve) return;
+      FORM = {
+        title:T('ملاحظة مراجعة','Review note'), sub:a.ref,
+        cta:T('حفظ الملاحظة','Save note'), icon:'ti-note',
+        fields:['note'], val:{ note:'' },
+        render:function(){ return field('note', T('الملاحظة','Note'), 'textarea', { required:true,
+          hint:T('تُسجَّل الملاحظة في سجل الطلب ولا تُغيّر حالته.','The note is recorded in the application history and does not change its status.') }); },
+        submit:function(){
+          var id = a.applicationId;
+          runApp(function(){ return LG.reviewApplication(id, { note:FORM.val.note }); },
+                 'تم حفظ ملاحظة المراجعة.', 'Review note saved.');
+        }
+      };
+      FBAD = {}; FMSG = null; renderForm();
+    },
+    openApprove: function(){
+      var a = APPS[OPEN]; if(!a || !CAP || !CAP.approve) return;
+      FORM = {
+        title:T('قبول الطلب وإنشاء الحساب','Approve and create the account'), sub:a.ref,
+        cta:T('قبول','Approve'), icon:'ti-circle-check',
+        fields:['note'], val:{ note:'' },
+        render:function(){
+          return '<div class="notice"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+            + T('سيُنشأ حساب سائق في رف باسم وبريد وهاتف المتقدم، وتُحفظ بيانات المركبة والهوية في ملف السائق.',
+                'A RAF driver account will be created from the applicant’s name, email and phone; the vehicle and identity details are kept in the driver profile.')
+            + '</span></div>'
+            + field('note', T('ملاحظة (اختياري)','Note (optional)'), 'textarea', {});
+        },
+        submit:function(){
+          var id = a.applicationId;
+          runApp(function(){ return LG.approveApplication(id, { note:FORM.val.note }); },
+                 'تم قبول الطلب وإنشاء حساب السائق.', 'Approved — the driver account was created.');
+        }
+      };
+      FBAD = {}; FMSG = null; renderForm();
+    },
+    openReject: function(){
+      var a = APPS[OPEN]; if(!a || !CAP || !CAP.approve) return;
+      FORM = {
+        title:T('رفض الطلب','Reject the application'), sub:a.ref,
+        cta:T('رفض','Reject'), icon:'ti-circle-x', danger:true,
+        fields:['reason'], val:{ reason:'' },
+        render:function(){ return field('reason', T('سبب الرفض','Rejection reason'), 'textarea', { required:true,
+          hint:T('يُحفظ الطلب كاملاً مع السبب، ولا يُحذف.','The full application is kept together with the reason; nothing is deleted.') }); },
+        submit:function(){
+          var id = a.applicationId;
+          runApp(function(){ return LG.rejectApplication(id, { reason:FORM.val.reason }); },
+                 'تم رفض الطلب.', 'Application rejected.');
+        }
+      };
+      FBAD = {}; FMSG = null; renderForm();
+    },
+    /* nothing opens over the access gate */
+    open: function(i){ if(!ME) return; openTrigger = document.activeElement; OPEN = i; MSG = null; renderSheet(); },
+    close: closeSheet,
+
+    /* ---- forms ---- */
+    fdraft: fsync,
+    fclose: fclose,
+    fsubmit: function(){ if(FORM && !FBUSY){ fsync(); FORM.submit(); } },
+
+    /* DIRECT LOGISTICS CREATION — the full driver profile, not a bare account.
+       It is not the public application: no terms consent is asked for, and no
+       application record is created. Only the name is required, because that is
+       the only field the account model has ever required; everything else is
+       recorded when given. Every value is validated by RAFLogistics. */
+    openCreate: function(){
+      if(!ME || !CAP || !CAP.create) return;
+      var DOCF = ['docCivilId','docLicense','docRegistration','docPhoto'];
+      FORM = {
+        title:T('سائق جديد','New Driver'),
+        sub:T('إنشاء مباشر من اللوجستيات — بدون طلب انضمام','Created directly by Logistics — no join application'),
+        cta:T('إنشاء السائق','Create driver'), icon:'ti-plus', wide:true,
+        fields:['firstName','lastName','phone','email','civilId','nationality','area',
+                'vType','vMake','vModel','vYear','vColor','vPlate'].concat(DOCF),
+        fileFields:DOCF, files:{},
+        val:{ firstName:'', lastName:'', phone:'', email:'', civilId:'', nationality:'', area:'',
+              vType:'', vMake:'', vModel:'', vYear:'', vColor:'', vPlate:'' },
+        render:function(){
+          var years = [];
+          for(var y = new Date().getFullYear(); y >= 2010; y--) years.push({ v:String(y), t:String(y) });
+          return fgroup(T('البيانات الشخصية','Personal information'), 'ti-user-circle',
+              frow(field('firstName', T('الاسم الأول','First name'), 'text', { required:true }),
+                   field('lastName',  T('الاسم الأخير','Last name'),  'text', {}))
+            + frow(field('phone', T('رقم الهاتف','Phone'), 'text', { dir:'ltr' }),
+                   field('email', T('البريد الإلكتروني','Email'), 'text', { dir:'ltr' }))
+            + frow(field('civilId', T('الرقم المدني','Civil ID'), 'text', { dir:'ltr' }),
+                   field('nationality', T('الجنسية','Nationality'), 'select', {
+                     placeholder:T('— اختر —','— Select —'),
+                     options:['كويتي','سعودي','مصري','هندي','باكستاني','أخرى'].map(function(n){ return { v:n, t:n }; }) }))
+            + field('area', T('منطقة السكن','Residential area'), 'select', {
+                placeholder:T('— اختر المنطقة —','— Select an area —'),
+                options:['حولي','الفروانية','العاصمة','الأحمدي','الجهراء','مبارك الكبير'].map(function(n){ return { v:n, t:n }; }) }))
+
+            + fgroup(T('بيانات المركبة','Vehicle'), 'ti-car',
+              frow(field('vType', T('نوع المركبة','Vehicle type'), 'select', {
+                     placeholder:T('— اختر —','— Select —'),
+                     options:['سيارة','دراجة نارية','بيك أب','فان'].map(function(n){ return { v:n, t:n }; }) }),
+                   field('vMake', T('الماركة','Make'), 'text', {}))
+            + frow(field('vModel', T('الموديل','Model'), 'text', {}),
+                   field('vYear', T('سنة الصنع','Year'), 'select', { placeholder:T('— السنة —','— Year —'), options:years }))
+            + frow(field('vPlate', T('رقم اللوحة','Plate number'), 'text', { dir:'ltr' }),
+                   field('vColor', T('اللون','Colour'), 'text', {})))
+
+            + fgroup(T('المستندات','Documents'), 'ti-files',
+              frow(ffile('docCivilId', T('البطاقة المدنية','Civil ID document'), 'ti-id-badge-2'),
+                   ffile('docLicense', T('رخصة القيادة','Driving licence'), 'ti-license'))
+            + frow(ffile('docRegistration', T('استمارة السيارة','Vehicle registration'), 'ti-file-certificate'),
+                   ffile('docPhoto', T('صورة شخصية','Driver photo'), 'ti-user-circle'))
+            + '<div class="notice"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+              + T('تُسجَّل بيانات الملف فقط (الاسم والنوع والحجم) ولا يُحفظ محتواه في هذه النسخة.',
+                  'Only each file’s name, type and size are recorded — its contents are not stored in this version.')
+              + '</span></div>');
+        },
+        submit:function(){
+          var v = FORM.val, f = FORM.files || {};
+          run(function(){
+            return LG.createDriver({
+              firstName:v.firstName, lastName:v.lastName,
+              phone:v.phone, email:v.email,
+              civilId:v.civilId, nationality:v.nationality, area:v.area,
+              vehicle:{ type:v.vType, make:v.vMake, model:v.vModel,
+                        year:v.vYear, color:v.vColor, plate:v.vPlate },
+              documents:{ civilId:f.docCivilId, license:f.docLicense,
+                          registration:f.docRegistration, photo:f.docPhoto }
+            });
+          }, 'تم إنشاء حساب السائق.', 'Driver account created.', true);
+        }
+      };
+      FBAD = {}; FMSG = null; renderForm();
+    },
+    ffile: captureFile,
+    openEdit: function(){
+      var d = current(); if(!d || !CAP || !CAP.edit) return;
+      FORM = {
+        title:T('تعديل بيانات السائق','Edit driver details'), sub:d.name,
+        cta:T('حفظ','Save'), icon:'ti-check',
+        fields:['name','email','phone'], val:{ name:d.name || '', email:d.email || '', phone:d.phone || '' },
+        render:function(){
+          return field('name', T('الاسم','Name'), 'text', { required:true })
+            + field('email', T('البريد الإلكتروني','Email'), 'text', { dir:'ltr' })
+            + field('phone', T('الهاتف','Phone'), 'text', { dir:'ltr',
+                hint:T('لا يمكن تغيير الدور أو الصلاحيات من هنا.','The role and permissions cannot be changed here.') });
+        },
+        submit:function(){
+          var id = d.driverId;
+          run(function(){ return LG.updateDriver(id, { name:FORM.val.name, email:FORM.val.email, phone:FORM.val.phone }); },
+              'تم حفظ البيانات.', 'Details saved.', true);
+        }
+      };
+      FBAD = {}; FMSG = null; renderForm();
+    },
+    openSuspend: function(){
+      var d = current(); if(!d || !CAP || !CAP.suspend) return;
+      FORM = {
+        title:T('إيقاف حساب السائق','Suspend driver account'), sub:d.name,
+        cta:T('إيقاف الحساب','Suspend'), icon:'ti-player-pause', danger:true,
+        fields:['reason'], val:{ reason:'' },
+        render:function(){
+          return field('reason', T('السبب','Reason'), 'textarea', {
+            hint:T('لا يمكن إيقاف سائق مسؤول عن طلبات جارية.','A driver responsible for orders in progress cannot be suspended.') });
+        },
+        submit:function(){
+          var id = d.driverId;
+          run(function(){ return LG.suspendDriver(id, { reason:FORM.val.reason }); },
+              'تم إيقاف الحساب.', 'Account suspended.', true);
+        }
+      };
+      FBAD = {}; FMSG = null; renderForm();
+    },
+    reactivate: function(){
+      var d = current(); if(!d || !CAP || !CAP.suspend || BUSY) return;
+      var id = d.driverId;
+      run(function(){ return LG.reactivateDriver(id); }, 'تمت إعادة تفعيل الحساب.', 'Account reactivated.', false);
+    },
+    openAssign: function(){
+      var d = current(); if(!d || !CAP || !CAP.assign) return;
+      var avail = { ok:false, items:[] };
+      try { avail = LG.assignableOrders(); } catch(e){ avail = { ok:false, items:[] }; }
+      var opts = ((avail && avail.items) || []).map(function(o){
+        return { v:o.orderId, t:o.orderId + (o.storeSlug ? ' · ' + o.storeSlug : '') };
+      });
+      FORM = {
+        title:T('تعيين طلب','Assign an order'), sub:d.name,
+        cta:T('تعيين','Assign'), icon:'ti-user-check',
+        fields:['orderId'], val:{ orderId:'' },
+        render:function(){
+          if(!opts.length)
+            return '<div class="empty"><i class="ti ti-package-off" aria-hidden="true"></i><b>'
+              + T('لا توجد طلبات جاهزة للتعيين حالياً.','No orders are ready for assignment right now.') + '</b></div>';
+          return field('orderId', T('الطلب','Order'), 'select', {
+            required:true, placeholder:T('اختر الطلب','Select an order'), options:opts,
+            hint:T('تعرض القائمة الطلبات الجاهزة في المتجر وغير المعيَّنة.','The list shows orders that are ready at the store and not yet assigned.') });
+        },
+        submit:function(){
+          if(!opts.length) return;
+          var id = d.driverId;
+          run(function(){ return LG.assignOrder(FORM.val.orderId, id); },
+              'تم تعيين الطلب إلى السائق.', 'The order was assigned to the driver.', true);
+        }
+      };
+      FBAD = {}; FMSG = null; renderForm();
+    },
+    openReturn: function(orderId){
+      var d = current(); if(!d || !CAP || !CAP.assign) return;
+      FORM = {
+        title:T('إعادة الطلب إلى القائمة','Return the order to the pool'), sub:orderId,
+        cta:T('إعادة','Return'), icon:'ti-arrow-back-up',
+        fields:['reason'], val:{ reason:'' },
+        render:function(){ return field('reason', T('السبب','Reason'), 'textarea', { required:true }); },
+        submit:function(){
+          run(function(){ return LG.returnToPool(orderId, { reason:FORM.val.reason }); },
+              'أُعيد الطلب إلى القائمة.', 'The order was returned to the pool.', true);
+        }
+      };
+      FBAD = {}; FMSG = null; renderForm();
+    },
+
+    toggleLang: function(){
+      var r = root(), en = r.lang === 'en';
+      if(FORM) fsync();
+      r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+      try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+      applyLang(); refresh();
+      if(FORM) renderForm();
+      el('langBtn').focus();
+    },
+    openNav: function(){ el('shell').classList.add('nav-open'); var x = document.querySelector('.ops-nav-x'); if(x) x.focus(); },
+    closeNav: function(){ el('shell').classList.remove('nav-open'); var b = document.querySelector('.ops-burger'); if(b) b.focus(); }
+  };
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Escape') return;
+    if(FORM){ e.preventDefault(); fclose(); return; }
+    if(DRAFT){ e.preventDefault(); closeFilters(); return; }
+    if(OPEN != null){ e.preventDefault(); closeSheet(); return; }
+    if(el('shell') && el('shell').classList.contains('nav-open')) OPS.closeNav();
+  });
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>
