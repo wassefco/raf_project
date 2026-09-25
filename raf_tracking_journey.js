@@ -173,6 +173,8 @@
     '@keyframes jrBlink{0%,100%{opacity:1;}50%{opacity:.25;}}',
     '.jr-clock{display:block;width:8.4ch;font-family:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;',
     '  font-size:21px;font-weight:700;letter-spacing:.5px;color:var(--jr-ink);line-height:1.2;margin-top:1px;white-space:nowrap;}',
+    /* a finished delivery reads as a calm, static duration — not a running clock */
+    '.jr-clock.done{width:auto;font-family:inherit;font-size:18px;font-weight:800;letter-spacing:0;}',
     '.jr-timer small{display:block;font-size:11px;line-height:1.45;color:var(--jr-mute);margin-top:1px;}',
     /* icon-only Call / Message */
     '.jr .jr-ic{width:48px;height:48px;min-width:48px;padding:0;border-radius:50%;border:1px solid var(--jr-line);background:#F4F1EA;color:var(--jr-ink);',
@@ -245,11 +247,19 @@
     '@media (max-width:560px){.jr{border-radius:22px;}.jr-h{flex-direction:column;gap:12px;}.jr-sep{display:none;}',
     '  .jr-idrow{width:100%;justify-content:space-between;}.jr-logo{width:48px;height:48px;border-radius:14px;}',
     '  .jr-store b{font-size:16px;}.jr-no b{font-size:15px;}.jr-badge{font-size:14px;min-height:36px;padding:0 14px;}',
-    '  .jr-j{padding:4px 8px 0;}.jr-sc{height:108px;}.jr-raster .jr-sc{min-height:0;}.jr-road{height:58px;margin-top:-12px;}',
-    '  .jr-node{width:36px;height:36px;margin-block-start:-18px;margin-inline-start:-18px;font-size:18px;border-width:2.5px;}.jr-node svg{width:18px;height:18px;}',
-    '  .jr-node.final{width:44px;height:44px;margin-block-start:-22px;margin-inline-start:-22px;}',
-    /* phone: the scenes overlap into one street instead of shrinking into three thumbnails */
-    '  .jr-raster .jr-img{width:150%;max-width:none;}.jr-raster .jr-img-ride{width:122%;margin-bottom:-4px;}.jr-raster .jr-road{margin-top:-16px;}',
+    '  .jr-j{padding:6px 12px 0;}.jr-sc{height:108px;}',
+    /* phone: each scene keeps its OWN column at a controlled height (whole image,
+       aspect kept, nothing cropped), and the road runs BELOW the art in normal
+       flow — no widened, overlapping scenes and no negative pull-up */
+    '  .jr-raster .jr-sc{height:clamp(78px,26vw,112px);min-height:0;padding-top:6px;column-gap:4px;}',
+    '  .jr-raster .jr-art{height:100%;min-width:0;justify-content:center !important;}',
+    '  .jr-raster .jr-img{width:auto;height:auto;max-width:100%;max-height:100%;}',
+    '  .jr-raster .jr-img-ride{max-height:94%;margin-bottom:0;}',
+    '  .jr-road{height:46px;margin-top:2px;}.jr-raster .jr-road{margin-top:2px;}',
+    '  .jr-node{width:32px;height:32px;margin-block-start:-16px;margin-inline-start:-16px;font-size:16px;border-width:2.5px;}.jr-node svg{width:16px;height:16px;}',
+    '  .jr-node.final{width:38px;height:38px;margin-block-start:-19px;margin-inline-start:-19px;}',
+    '  .jr-node.cur::before,.jr-node.final::before{inset:-6px;}',
+    '  .jr-msg{display:block;}.jr-msg .ti{display:inline-block;vertical-align:-2px;margin-inline-start:4px;}',
     '  .jr-f{padding:16px;}.jr-info{flex-direction:column;align-items:stretch;gap:16px;}.jr-drv{flex:0 0 auto;}.jr-vr{display:none;}',
     '  .jr-acts{flex-basis:100%;margin-inline-start:0;}.jr .jr-btn{flex:1 1 0;min-width:0;}.jr-drv .jr-acts{flex-basis:auto;margin-inline-start:auto;}.jr .jr-rate,.jr-rated{margin-inline-start:0;}',
     '  .jr-comp{flex-wrap:wrap;padding:14px;}.jr-comp::before,.jr-comp::after{display:none;}.jr-comp-stub{width:52px;height:52px;font-size:26px;}',
@@ -495,6 +505,10 @@
     var s = Math.max(0, Math.floor(ms / 1000));
     return pad2(Math.floor(s / 3600)) + ':' + pad2(Math.floor(s / 60) % 60) + ':' + pad2(s % 60);
   }
+  function durText(ms){
+    var s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, sec = s % 60;
+    return h > 0 ? T(h + ' س ' + m + ' د', h + ' h ' + m + ' min') : T(m + ' د ' + sec + ' ث', m + ' min ' + sec + ' sec');
+  }
   function dateOf(ms){
     try { return new Date(ms).toLocaleDateString(isEn() ? 'en-GB' : 'ar-KW-u-nu-latn', { timeZone:'Asia/Kuwait', day:'numeric', month:'long', year:'numeric' }); }
     catch (e) { return null; }
@@ -506,7 +520,8 @@
     var start = typeof m.acceptedAt === 'number' ? m.acceptedAt : null;
     var end = delivered && typeof m.deliveredAt === 'number' ? m.deliveredAt : null;
     var running = !!start && !end && !cancelled && !delivered;
-    var shown = start ? hms((end || Date.now()) - start) : '--:--:--';
+    /* delivered: a finished duration, written out ("3 h 45 min") — static, not a clock */
+    var shown = !start ? '--:--:--' : end ? durText(end - start) : hms(Date.now() - start);
     var label = delivered ? T('مدة التوصيل', 'Delivery time') : T('مؤقت التوصيل', 'Delivery timer');
     var sub = !start ? T('يبدأ عند قبول المتجر لطلبك', 'Starts when the store accepts your order')
             : delivered ? T('من قبول المتجر حتى التسليم', 'From store acceptance to delivery')
@@ -514,7 +529,7 @@
     return '<div class="jr-timer' + (running ? ' on' : '') + '"' + (start ? ' data-jr-timer data-start="' + start + '"' + (end ? ' data-end="' + end + '"' : '') : '') + '>'
       + '<span class="ic" aria-hidden="true"><i class="ti ti-clock-hour-4"></i></span>'
       + '<div><span>' + label + (running ? '<i class="jr-live" aria-hidden="true"></i>' : '') + '</span>'
-      + '<b class="jr-clock" dir="ltr" role="timer" aria-label="' + esc(label + ': ' + shown) + '">' + shown + '</b>'
+      + '<b class="jr-clock' + (end ? ' done' : '') + '" dir="' + (end ? 'auto' : 'ltr') + '"' + (end ? '' : ' role="timer"') + ' aria-label="' + esc(label + ': ' + shown) + '">' + shown + '</b>'
       + '<small>' + sub + '</small></div></div>';
   }
   /* the driver — only while a live conversation exists (RAFDriverCommunication);
