@@ -65,39 +65,45 @@
       --font-ar:'Tajawal',sans-serif;--font-en:'DM Sans',sans-serif;
       --sh:0 12px 30px -14px rgba(20,16,8,.28);--sh-sm:0 2px 8px rgba(20,16,8,.12);
     }
-    .rc-card{width:100%;height:100%;background:var(--card,#fff);border:1px solid var(--border,#E2DBCC);border-radius:var(--rl,16px);overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:transform .22s,box-shadow .22s;font-family:var(--font-ar,'Tajawal',sans-serif);}
-    .rc-card:hover{transform:translateY(-5px);box-shadow:var(--sh,0 12px 30px -14px rgba(20,16,8,.28));}
-    .rc-img{aspect-ratio:1/1;background:linear-gradient(150deg,var(--bg2,#EDE8DC),var(--bg3,#E7E1D4));display:flex;align-items:center;justify-content:center;font-size:58px;color:var(--gold2,#A07828);position:relative;background-size:cover;background-position:center;}
+    /* RAF product card — white surface, the photo first, then name, rating,
+       and one row with the price and the cart control */
+    .rc-card{position:relative;width:100%;height:100%;background:var(--card,#fff);border:1px solid #ECE6DA;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:box-shadow .22s,border-color .22s,transform .22s;font-family:var(--font-ar,'Tajawal',sans-serif);}
+    .rc-card:hover{border-color:#E0D6C2;box-shadow:0 16px 34px -20px rgba(20,16,8,.32);transform:translateY(-2px);}
+    .rc-img{aspect-ratio:1/1;margin:8px 8px 0;border-radius:12px;background:#F6F3EC;display:flex;align-items:center;justify-content:center;font-size:54px;color:var(--gold2,#A07828);position:relative;background-size:cover;background-position:center;overflow:hidden;}
     .rc-img>i{line-height:1;}
-    .rc-disc{position:absolute;top:12px;inset-inline-end:12px;background:var(--red,#D9534F);color:#fff;font-family:var(--font-en,'DM Sans',sans-serif);font-size:12px;font-weight:700;padding:4px 9px;border-radius:8px;}
-    .rc-wish{position:absolute;top:10px;inset-inline-start:10px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.92);border:none;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text2,#5A5650);cursor:pointer;transition:all .2s;box-shadow:var(--sh-sm,0 2px 8px rgba(20,16,8,.12));}
+    .rc-disc{position:absolute;top:10px;inset-inline-end:10px;background:var(--red,#D9534F);color:#fff;font-family:var(--font-ar,'Tajawal',sans-serif);font-size:11.5px;font-weight:800;padding:4px 10px;border-radius:999px;line-height:1.3;box-shadow:0 4px 10px -4px rgba(217,83,79,.6);}
+    .rc-disc b{font-family:var(--font-en,'DM Sans',sans-serif);font-weight:800;}
+    .rc-wish{position:absolute;top:8px;inset-inline-start:8px;width:36px;height:36px;min-height:36px;border-radius:50%;background:rgba(255,255,255,.95);border:none;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--ink,#15130F);cursor:pointer;transition:color .2s,transform .15s;box-shadow:0 2px 8px rgba(20,16,8,.14);}
     .rc-wish:hover,.rc-wish.on{color:var(--red,#D9534F);}
-    .rc-body{padding:13px;display:flex;flex-direction:column;gap:6px;flex:1;}
+    .rc-wish:active{transform:scale(.9);}
+    .rc-body{padding:12px 13px 13px;display:flex;flex-direction:column;gap:6px;flex:1;}
     /* fixed row heights so cards stay identical whatever the content length */
     .rc-store{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text3,#8A857C);height:17px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
     .rc-store i{color:var(--gold2,#A07828);font-size:13px;flex-shrink:0;}
     .rc-name{font-size:14px;font-weight:700;color:var(--ink,#15130F);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:39px;}
-    .rc-rate{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text2,#5A5650);height:18px;}
+    .rc-rate{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--ink,#15130F);height:18px;font-family:var(--font-en,'DM Sans',sans-serif);}
     .rc-rate i{color:var(--gold,#C9A84C);font-size:14px;}
-    .rc-rate span{color:var(--text3,#8A857C);}
-    .rc-foot{display:flex;align-items:baseline;gap:8px;margin-top:auto;height:26px;flex-wrap:nowrap;overflow:hidden;}
-    .rc-price{font-family:var(--font-en,'DM Sans',sans-serif);font-size:18px;font-weight:700;color:var(--ink,#15130F);}
-    .rc-price small{font-size:11px;font-weight:600;color:var(--text3,#8A857C);}
-    .rc-old{font-family:var(--font-en,'DM Sans',sans-serif);font-size:13px;color:var(--text3,#8A857C);text-decoration:line-through;}
-    .rc-disc.rc-promo{background:var(--gold2,#A07828);}
+    .rc-rate span{color:var(--text3,#8A857C);font-weight:500;}
+    .rc-foot{display:flex;align-items:center;gap:8px;margin-top:auto;min-height:40px;}
+    .rc-prices{display:flex;flex-direction:column;justify-content:center;min-width:0;flex:1;line-height:1.15;}
+    .rc-price{font-family:var(--font-en,'DM Sans',sans-serif);font-size:17px;font-weight:800;color:var(--ink,#15130F);white-space:nowrap;}
+    .rc-price small{font-family:var(--font-ar,'Tajawal',sans-serif);font-size:11px;font-weight:700;color:var(--text3,#8A857C);}
+    .rc-old{font-family:var(--font-en,'DM Sans',sans-serif);font-size:12px;color:var(--text3,#8A857C);text-decoration:line-through;white-space:nowrap;}
+    .rc-disc.rc-promo{background:var(--gold2,#A07828);box-shadow:none;}
     .rc-price-promo{color:var(--gold2,#A07828);}
-    .rc-cartwrap{margin-top:11px;}
-    .rc-cart{width:100%;height:38px;border:1px solid var(--border,#E2DBCC);background:var(--bg2,#EDE8DC);color:var(--ink,#15130F);border-radius:30px;font-family:var(--font-ar,'Tajawal',sans-serif);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
-    .rc-cart:hover{background:var(--gold,#C9A84C);color:#1C1606;border-color:var(--gold,#C9A84C);}
-    .rc-cart:active{transform:scale(.97);}
-    .rc-cart i{font-size:16px;}
-    .rc-cart.rc-oos{background:var(--bg3,#E7E1D4);color:var(--text3,#8A857C);border-color:var(--border,#E2DBCC);cursor:not-allowed;}
-    .rc-cart.rc-oos:hover{background:var(--bg3,#E7E1D4);color:var(--text3,#8A857C);border-color:var(--border,#E2DBCC);}
+    .rc-cartwrap{flex-shrink:0;}
+    .rc-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+    .rc-cart{width:40px;height:40px;min-height:40px;border:none;background:var(--gold,#C9A84C);color:#1C1606;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s,transform .12s;}
+    .rc-cart:hover{background:var(--ink,#15130F);color:#fff;}
+    .rc-cart:active{transform:scale(.92);}
+    .rc-cart i{font-size:19px;}
+    .rc-cart.rc-oos{background:#EFEBE3;color:var(--text3,#8A857C);cursor:not-allowed;}
+    .rc-cart.rc-oos:hover{background:#EFEBE3;color:var(--text3,#8A857C);}
     .rc-card.is-oos .rc-img{filter:grayscale(1);opacity:.62;}
-    .rc-oos-tag{position:absolute;top:12px;inset-inline-end:12px;display:inline-flex;align-items:center;gap:5px;background:var(--ink,#15130F);color:#F3EFE5;font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:20px;box-shadow:0 4px 12px -4px rgba(20,16,8,.5);}
+    .rc-oos-tag{position:absolute;top:10px;inset-inline-end:10px;display:inline-flex;align-items:center;gap:5px;background:var(--ink,#15130F);color:#F3EFE5;font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:20px;box-shadow:0 4px 12px -4px rgba(20,16,8,.5);}
     .rc-oos-tag i{font-size:13px;}
-    .rc-qty{width:100%;height:38px;border:1px solid var(--gold,#C9A84C);background:var(--gold-soft,rgba(201,168,76,.12));border-radius:30px;display:flex;align-items:center;justify-content:space-between;padding:0 4px;gap:4px;}
-    .rc-qty .qb{width:30px;height:30px;flex:0 0 30px;border:none;border-radius:50%;background:var(--gold,#C9A84C);color:#1C1606;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
+    .rc-qty{height:40px;border:1px solid var(--gold,#C9A84C);background:var(--gold-soft,rgba(201,168,76,.12));border-radius:12px;display:flex;align-items:center;justify-content:space-between;padding:0 3px;gap:2px;}
+    .rc-qty .qb{width:32px;height:32px;min-height:32px;flex:0 0 32px;border:none;border-radius:9px;background:var(--gold,#C9A84C);color:#1C1606;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
     .rc-qty .qb:hover{background:var(--gold2,#A07828);color:#fff;}
     .rc-qty .qb:active{transform:scale(.88);}
     .rc-qty .qb i{font-size:15px;}
@@ -105,10 +111,10 @@
     .rc-qty .qb.trash i{color:var(--red,#D9534F);}
     .rc-qty .qb.trash:hover{background:var(--red,#D9534F);border-color:var(--red,#D9534F);}
     .rc-qty .qb.trash:hover i{color:#fff;}
-    .rc-qn{font-family:var(--font-en,'DM Sans',sans-serif);font-size:15px;font-weight:800;color:var(--ink,#15130F);flex:1;text-align:center;}
+    .rc-qn{font-family:var(--font-en,'DM Sans',sans-serif);font-size:14px;font-weight:800;color:var(--ink,#15130F);min-width:20px;text-align:center;}
     /* grid helper for listing pages */
     .rc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
-    @media(max-width:560px){.rc-grid{grid-template-columns:1fr 1fr;gap:12px;}.rc-img{font-size:46px;}.rc-name{font-size:13px;}}
+    @media(max-width:560px){.rc-grid{grid-template-columns:1fr 1fr;gap:10px;}.rc-img{font-size:44px;margin:6px 6px 0;}.rc-body{padding:10px 10px 11px;}.rc-name{font-size:13px;height:36px;}.rc-price{font-size:15.5px;}.rc-cart{width:38px;height:38px;min-height:38px;}.rc-qty .qb{width:28px;height:28px;min-height:28px;flex-basis:28px;}.rc-qty{height:38px;}}
 
     /* ===== VARIANT SELECTOR (modal / bottom sheet) ===== */
     .rcv-back{position:fixed;inset:0;background:rgba(20,16,8,.5);backdrop-filter:blur(2px);z-index:3000;display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;transition:opacity .2s;}
@@ -155,12 +161,12 @@
         '<button class="qb qplus" onclick="RAFCard.inc(event,this)" aria-label="increase"><i class="ti ti-plus"></i></button></div>';
     }
     if (isOOS(p)) {
-      return '<button class="rc-cart rc-oos" disabled aria-disabled="true"><i class="ti ti-ban"></i> ' +
-        '<span>' + T('نفدت الكمية', 'Sold Out') + '</span></button>';
+      return '<button class="rc-cart rc-oos" disabled aria-disabled="true" title="' + T('نفدت الكمية', 'Sold Out') + '"><i class="ti ti-ban"></i>' +
+        '<span class="rc-sr">' + T('نفدت الكمية', 'Sold Out') + '</span></button>';
     }
     var hasV = p.variants && p.variants.length;
-    return '<button class="rc-cart" onclick="RAFCard.addClick(event,this)"><i class="ti ' + (hasV ? 'ti-adjustments-horizontal' : 'ti-shopping-cart-plus') + '"></i> ' +
-      '<span>' + T('أضف للسلة', 'Add to Cart') + '</span></button>';
+    return '<button class="rc-cart" onclick="RAFCard.addClick(event,this)" title="' + T('أضف للسلة', 'Add to Cart') + '"><i class="ti ' + (hasV ? 'ti-adjustments-horizontal' : 'ti-shopping-cart-plus') + '"></i>' +
+      '<span class="rc-sr">' + T('أضف للسلة', 'Add to Cart') + '</span></button>';
   }
 
   /* Availability comes from the shared resolver so a stale wishlist/search
@@ -199,15 +205,16 @@
     return '<article class="rc-card' + (isOOS(p) ? ' is-oos' : '') + '" data-id="' + p.id + '" data-href="' + o.href + '" onclick="RAFCard.go(this)">' +
       '<div class="rc-img"' + imgStyle + '>' + imgInner +
         (isOOS(p) ? '<span class="rc-oos-tag"><i class="ti ti-ban"></i> ' + T('نفدت الكمية', 'Sold Out') + '</span>' : '') +
-        (badgePct && !isOOS(p) ? '<span class="rc-disc' + (showPromo ? ' rc-promo' : '') + '">-' + badgePct + '%</span>' : '') +
-        (o.wish ? (function(){ var w = (window.RAFShop && RAFShop.Wish.has(p.id)); return '<button class="rc-wish' + (w ? ' on' : '') + '" onclick="RAFCard.wish(event,this)" aria-label="wishlist"><i class="ti ' + (w ? 'ti-heart-filled' : 'ti-heart') + '"></i></button>'; })() : '') +
+        (badgePct && !isOOS(p) ? '<span class="rc-disc' + (showPromo ? ' rc-promo' : '') + '">' + T('خصم ', '') + '<b>' + badgePct + '%</b>' + T('', ' off') + '</span>' : '') +
+        (o.wish ? (function(){ var w = (window.RAFShop && RAFShop.Wish.has(p.id)); return '<button class="rc-wish' + (w ? ' on' : '') + '" onclick="RAFCard.wish(event,this)" aria-label="' + T('المفضلة', 'Wishlist') + '" aria-pressed="' + (w ? 'true' : 'false') + '"><i class="ti ' + (w ? 'ti-heart-filled' : 'ti-heart') + '"></i></button>'; })() : '') +
       '</div>' +
       '<div class="rc-body">' +
         (o.store && p.store ? '<div class="rc-store"><i class="ti ti-building-store"></i> ' + L(p.store) + '</div>' : '') +
         '<div class="rc-name">' + L(p) + '</div>' +
         (o.rating && p.rate ? '<div class="rc-rate"><i class="ti ti-star-filled"></i> ' + p.rate + (p.rev ? ' <span>(' + p.rev + ')</span>' : '') + '</div>' : '') +
-        '<div class="rc-foot"><span class="rc-price' + (showPromo ? ' rc-price-promo' : '') + '">' + priceNow + ' <small>' + kwd() + '</small></span>' + (priceWas ? '<span class="rc-old">' + priceWas + '</span>' : '') + '</div>' +
-        (o.cart ? '<div class="rc-cartwrap" onclick="event.stopPropagation()">' + cartCtrlHTML(p) + '</div>' : '') +
+        '<div class="rc-foot"><div class="rc-prices"><span class="rc-price' + (showPromo ? ' rc-price-promo' : '') + '">' + priceNow + ' <small>' + kwd() + '</small></span>' + (priceWas ? '<span class="rc-old">' + priceWas + '</span>' : '') + '</div>' +
+          (o.cart ? '<div class="rc-cartwrap" onclick="event.stopPropagation()">' + cartCtrlHTML(p) + '</div>' : '') +
+        '</div>' +
       '</div></article>';
   }
 
@@ -272,6 +279,7 @@
     if (window.RAFShop && p) { on = RAFShop.Wish.toggle(p); }
     else { on = !btn.classList.contains('on'); }
     btn.classList.toggle('on', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
     btn.querySelector('i').className = 'ti ' + (on ? 'ti-heart-filled' : 'ti-heart');
   }
 

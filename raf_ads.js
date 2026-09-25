@@ -100,13 +100,18 @@
     '.adb-cta:hover{background:#C9A84C;color:#0A0A0A;}' +
     '.adb-visual{position:relative;z-index:2;flex:0 0 40%;display:flex;align-items:center;justify-content:center;}' +
     '.adb-product{width:148px;height:148px;border-radius:22px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);display:flex;align-items:center;justify-content:center;font-size:70px;color:rgba(201,168,76,.95);box-shadow:0 16px 40px rgba(0,0,0,.4);}' +
-    '.adb-promo{position:absolute;top:18px;left:18px;z-index:3;background:#D9534F;color:#fff;font-family:"DM Sans",sans-serif;font-weight:800;font-size:15px;width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(217,83,79,.5);transform:rotate(-8deg);}' +
-    '.adb-brand{position:absolute;bottom:16px;left:18px;z-index:3;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:6px 13px 6px 7px;border-radius:30px;}' +
+    '.adb-promo{position:absolute;top:18px;inset-inline-end:18px;z-index:3;background:#D9534F;color:#fff;font-family:"DM Sans",sans-serif;font-weight:800;font-size:15px;width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(217,83,79,.5);transform:rotate(-8deg);}' +
+    '.adb-brand{position:absolute;bottom:16px;inset-inline-end:18px;z-index:3;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding-block:6px;padding-inline:7px 13px;border-radius:30px;}' +
     '.adb-brand .bl{width:30px;height:30px;border-radius:50%;background:#C9A84C;color:#0A0A0A;display:flex;align-items:center;justify-content:center;font-size:16px;}' +
     '.adb-brand b{font-size:12.5px;font-weight:700;}' +
     '@media(max-width:1024px){.ad-banner{height:185px;}.ad-banner.ad-tall{height:218px;}.adb-product{width:120px;height:120px;font-size:58px;}.adb-content{padding:0 30px;}}' +
-    '@media(max-width:860px){.ad-banner,.ad-banner.ad-tall{height:170px;}.adb-visual{display:none;}.adb-content{max-width:100%;padding:0 24px;}.ad-banner .adb-ov,html[dir="ltr"] .ad-banner .adb-ov{background:linear-gradient(0deg,rgba(10,10,10,.82) 0%,rgba(10,10,10,.34) 100%);}.adb-promo{top:14px;left:14px;width:46px;height:46px;font-size:13px;}.adb-brand{bottom:14px;left:14px;}}' +
-    '@media(max-width:560px){.ad-banner,.ad-banner.ad-tall{height:156px;}.adb-title{font-size:19px;}.adb-sub{font-size:12.5px;margin-bottom:10px;}.adb-chips{margin-bottom:12px;}.adb-content{padding:0 18px;}}';
+    /* the badge and the store chip follow the reading direction (inline-end,
+       the visual side). On narrow banners the visual is gone, so both join the
+       layout — badge beside the text, chip on its own row — instead of
+       floating over it. */
+    'html[dir="ltr"] .adb-cta i{transform:scaleX(-1);}' +
+    '@media(max-width:860px){.ad-banner,.ad-banner.ad-tall{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto auto;height:auto;min-height:170px;}.adb-visual{display:none;}.adb-content{grid-column:1;grid-row:1;max-width:100%;padding:20px 0 12px;padding-inline:24px 12px;}.ad-banner .adb-ov,html[dir="ltr"] .ad-banner .adb-ov{background:linear-gradient(0deg,rgba(10,10,10,.82) 0%,rgba(10,10,10,.34) 100%);}.adb-promo{position:relative;top:auto;inset:auto;grid-column:2;grid-row:1;align-self:start;margin:14px;margin-inline-start:0;width:46px;height:46px;font-size:13px;}.adb-brand{position:relative;inset:auto;grid-column:1/-1;grid-row:2;justify-self:start;margin:0 24px 16px;}}' +
+    '@media(max-width:560px){.ad-banner,.ad-banner.ad-tall{min-height:156px;}.adb-title{font-size:19px;}.adb-sub{font-size:12.5px;margin-bottom:10px;}.adb-chips{margin-bottom:12px;}.adb-content{padding:18px 0 10px;padding-inline:18px 10px;}.adb-brand{margin:0 18px 14px;}}';
     var s = document.createElement('style');
     s.id = 'raf-ads-css';
     s.textContent = css;

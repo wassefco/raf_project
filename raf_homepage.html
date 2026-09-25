@@ -47,32 +47,6 @@ html[dir="ltr"] .sec-link i{transform:scaleX(-1);}
 
 /* ============ HEADER ============ */
 .nav-logo{display:inline-flex;align-items:center;flex-shrink:0;}
-/* filter sheet */
-.fs-backdrop{position:fixed;inset:0;z-index:3500;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(20,16,8,.5);backdrop-filter:blur(3px);opacity:0;transition:opacity .2s;}
-.fs-backdrop.show{display:flex;opacity:1;}
-.fs-card{width:100%;max-width:480px;max-height:88vh;overflow:auto;background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 30px 70px -22px rgba(20,16,8,.55);transform:translateY(14px);transition:transform .24s;}
-.fs-backdrop.show .fs-card{transform:none;}
-.fs-head{position:sticky;top:0;background:var(--card);display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border);z-index:1;}
-.fs-head h3{font-family:var(--font-display);font-size:18px;font-weight:800;color:var(--ink);}
-.fs-x{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--text2);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.fs-x:hover{border-color:var(--red);color:var(--red);}
-.fs-body{padding:16px 20px 4px;}
-.fs-group{margin-bottom:18px;}
-.fs-label{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:9px;display:flex;align-items:center;gap:6px;}
-.fs-label i{color:var(--gold2);font-size:15px;}
-.fs-chips{display:flex;flex-wrap:wrap;gap:8px;}
-.fs-chip{padding:8px 14px;border:1px solid var(--border2);border-radius:30px;background:var(--card);color:var(--text2);font-family:var(--font-ar);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
-.fs-chip:hover{border-color:var(--gold);}
-.fs-chip.on{background:var(--ink);color:#F5F0E4;border-color:var(--ink);}
-.fs-price{display:flex;align-items:center;gap:10px;}
-.fs-price input{flex:1;height:42px;border:1px solid var(--border2);border-radius:10px;background:#FCFBF8;padding:0 12px;font-family:var(--font-en);font-size:14px;color:var(--text);outline:none;}
-.fs-price input:focus{border-color:var(--gold);}
-.fs-price span{color:var(--text3);font-size:13px;}
-.fs-foot{position:sticky;bottom:0;background:var(--card);display:flex;gap:10px;padding:14px 20px;border-top:1px solid var(--border);}
-.fs-reset{flex:0 0 auto;height:46px;padding:0 18px;border:1px solid var(--border2);border-radius:30px;background:var(--card);color:var(--text2);font-family:var(--font-ar);font-size:14px;font-weight:600;cursor:pointer;}
-.fs-reset:hover{border-color:var(--gold);color:var(--gold2);}
-.fs-apply{flex:1;height:46px;border:none;border-radius:30px;background:var(--gold);color:#1C1606;font-family:var(--font-ar);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
-.fs-apply:hover{background:var(--gold2);color:#fff;}
 .cart-badge{position:absolute;top:3px;right:3px;min-width:16px;height:16px;padding:0 4px;background:var(--gold);color:var(--black);border-radius:10px;font-size:10px;font-weight:700;font-family:var(--font-en);display:flex;align-items:center;justify-content:center;}
 /* SEARCH OVERLAY */
 /* quick actions row */
@@ -349,6 +323,176 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 .pp-dismiss{margin-top:12px;background:none;border:none;color:var(--text3);font-family:var(--font-ar);font-size:13px;cursor:pointer;transition:color .2s;}
 .pp-dismiss:hover{color:var(--text);}
 @media(max-width:480px){.pp-card{padding:28px 20px 22px;border-radius:18px;}.pp-title{font-size:21px;}}
+/* ═══════════ CUSTOMER HOMEPAGE — 2026 layout ═══════════
+   One light surface, white cards, controlled gold. Sections follow:
+   hero → categories → special offers → featured stores → featured products. */
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+body{background:#FAF8F4;}
+.cx-sec{padding:26px 0;}
+.cx-sec .sec-head{align-items:center;margin-bottom:16px;}
+.cx-sec .sec-title{font-family:var(--font-ar);font-size:24px;font-weight:800;letter-spacing:0;}
+html[lang="en"] .cx-sec .sec-title{font-family:var(--font-display);font-weight:800;}
+.cx-sec .sec-link{font-size:13.5px;}
+
+/* hero */
+.cx-hero .wrap{padding-top:22px;padding-bottom:4px;}
+.cx-hero .adc{border-radius:22px;box-shadow:0 22px 50px -30px rgba(20,16,8,.45);}
+.cx-hero .adc-viewport{border-radius:22px;}
+.cx-hero .adc-slide{height:340px;}
+.cx-hero .adc-title{font-family:var(--font-ar);font-size:clamp(28px,3vw,42px);font-weight:900;line-height:1.2;}
+html[lang="en"] .cx-hero .adc-title{font-family:var(--font-display);}
+.cx-hero .adc-sub{font-weight:400;font-size:16px;opacity:.9;}
+.cx-hero .adc-cta{background:var(--gold);color:#1C1606;height:48px;padding:0 26px;}
+.cx-hero .adc-cta:hover{background:#fff;color:var(--ink);}
+html[dir="ltr"] .cx-hero .adc-cta i{transform:scaleX(-1);}
+.cx-hero .adc-product{border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(201,168,76,.28),rgba(255,255,255,.05) 62%);border:1px solid rgba(201,168,76,.35);color:var(--gold);}
+/* on a pointer device the arrows are always there, quietly */
+@media(hover:hover) and (min-width:861px){.cx-hero .adc-arrow{opacity:.9;pointer-events:auto;}}
+
+/* categories */
+.cx-cats{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:12px;}
+.cx-cat{display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 4px;border-radius:16px;text-align:center;transition:background .2s;}
+.cx-cat:hover{background:#fff;}
+.cx-cat-ic{width:84px;height:84px;border-radius:50%;background:var(--cbg);color:var(--cfg);display:flex;align-items:center;justify-content:center;font-size:34px;background-size:cover;background-position:center;transition:transform .2s;}
+.cx-cat:hover .cx-cat-ic{transform:translateY(-3px);}
+.cx-cat-l{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.3;}
+
+/* special offers */
+.cx-otiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}
+.cx-otiles[hidden]{display:none;}
+.cx-otile{position:relative;height:210px;border-radius:18px;overflow:hidden;background:#15130F center/cover no-repeat;color:#fff;display:flex;align-items:flex-end;isolation:isolate;box-shadow:0 18px 36px -26px rgba(20,16,8,.6);}
+.cx-otile::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(12,10,6,.86) 0%,rgba(12,10,6,.35) 55%,rgba(12,10,6,.05) 100%);}
+.cx-otile-ic{position:absolute;top:50%;left:50%;transform:translate(-50%,-62%);font-size:74px;color:rgba(201,168,76,.55);z-index:-1;}
+.cx-otile-badge{position:absolute;top:14px;inset-inline-start:14px;background:var(--red);color:#fff;font-size:12.5px;font-weight:800;padding:5px 12px;border-radius:999px;}
+.cx-otile-badge b{font-family:var(--font-en);}
+.cx-otile-b{display:flex;flex-direction:column;gap:4px;padding:18px 20px;}
+.cx-otile-t{font-size:22px;font-weight:800;line-height:1.2;}
+.cx-otile-s{font-size:13px;opacity:.86;}
+.cx-otile-cta{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;font-weight:800;color:var(--gold);}
+html[dir="ltr"] .cx-otile-cta i{transform:scaleX(-1);}
+.cx-otile:hover .cx-otile-cta{gap:9px;}
+.cx-orow{margin-top:20px;}
+.cx-sec .car-item.pwrap{width:220px;}
+
+/* featured stores */
+.cx-stores{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;}
+.cx-store{background:#fff;border:1px solid #ECE6DA;border-radius:16px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;transition:box-shadow .22s,border-color .22s;}
+.cx-store:hover{border-color:#E0D6C2;box-shadow:0 16px 34px -22px rgba(20,16,8,.35);}
+.cx-store-cover{position:relative;height:70px;background:linear-gradient(120deg,#15130F,#2a2419) center/cover no-repeat;}
+.cx-store-promo{position:absolute;top:8px;inset-inline-start:8px;display:inline-flex;align-items:center;gap:4px;background:var(--gold);color:#1C1606;font-family:var(--font-en);font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;}
+.cx-store-logo{width:64px;height:64px;margin:-32px auto 0;border-radius:16px;background:#fff;border:3px solid #fff;box-shadow:0 6px 16px -8px rgba(20,16,8,.4);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:28px;color:var(--gold2);position:relative;}
+.cx-store-logo img{width:100%;height:100%;object-fit:cover;border-radius:12px;}
+.cx-store-b{padding:10px 12px 12px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;flex:1;}
+.cx-store-name{font-size:15px;font-weight:800;color:var(--ink);line-height:1.3;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cx-store-name:hover{color:var(--gold2);}
+.cx-store-cat{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.cx-store-meta{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2);}
+.cx-store-meta b{font-family:var(--font-en);color:var(--ink);}
+.cx-store-meta i{color:var(--gold);}
+.cx-store-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--border2);}
+.cx-store-act{display:flex;gap:8px;width:100%;margin-top:auto;padding-top:8px;}
+.cx-follow{flex:1;min-width:0;height:38px;min-height:38px;border:1px solid var(--ink);border-radius:10px;background:#fff;color:var(--ink);font-family:var(--font-ar);font-size:13px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:all .2s;}
+.cx-follow:hover{background:var(--ink);color:#fff;}
+.cx-follow.on{background:var(--gold-soft);border-color:var(--gold);color:var(--gold2);}
+.cx-visit{flex:0 0 38px;height:38px;border-radius:10px;background:var(--gold);color:#1C1606;display:flex;align-items:center;justify-content:center;font-size:18px;transition:background .2s;}
+.cx-visit:hover{background:var(--ink);color:#fff;}
+html[dir="ltr"] .cx-visit i{transform:scaleX(-1);}
+
+/* featured products */
+.cx-pgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;}
+
+@media(max-width:1180px){.cx-stores{grid-template-columns:repeat(3,minmax(0,1fr));}.cx-pgrid{grid-template-columns:repeat(4,minmax(0,1fr));}}
+@media(max-width:900px){.cx-cats{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;}.cx-pgrid{grid-template-columns:repeat(3,minmax(0,1fr));}}
+@media(max-width:860px){.cx-hero .wrap{padding-top:14px;}.cx-hero .adc-slide{height:290px;}}
+@media(max-width:700px){
+  /* offer tiles and stores become one swipeable row each */
+  .cx-otiles,.cx-stores{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;gap:12px;margin-inline:-16px;padding:2px 16px 6px;}
+  .cx-otiles::-webkit-scrollbar,.cx-stores::-webkit-scrollbar{display:none;}
+  .cx-otile{flex:0 0 82%;height:180px;scroll-snap-align:start;}
+  .cx-store{flex:0 0 190px;scroll-snap-align:start;}
+}
+@media(max-width:560px){
+  .cx-sec{padding:20px 0;}
+  .cx-sec .sec-title{font-size:20px;}
+  .cx-hero .adc-slide{height:250px;}
+  .cx-hero .adc-title{font-size:23px;}
+  .cx-cat{padding:6px 2px;gap:7px;}
+  .cx-cat-ic{width:62px;height:62px;font-size:26px;}
+  .cx-cat-l{font-size:12px;}
+  .cx-pgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+  .cx-pgrid>*:nth-child(n+7){display:none;}
+  .cx-sec .car-item.pwrap{width:164px;}
+  .cx-otile-t{font-size:19px;}
+}
+@media(max-width:380px){.cx-cat-ic{width:56px;height:56px;font-size:24px;}.cx-cat-l{font-size:11.5px;}}
+/* hero text keeps clear of the arrows; arrows follow the reading direction */
+@media(min-width:861px){.cx-hero .adc-content{padding-inline:76px 40px;}}
+html[dir="ltr"] .adc-arrow.prev{right:auto;left:16px;} html[dir="ltr"] .adc-arrow.next{left:auto;right:16px;}
+html[dir="ltr"] .adc-arrow i,html[dir="ltr"] .car-arrow i{transform:scaleX(-1);}
+html[dir="ltr"] .car-arrow.prev{right:auto;left:-8px;} html[dir="ltr"] .car-arrow.next{left:auto;right:-8px;}
+/* ── hero built from RAF data: photo background, everything in the text flow
+   (badge beside the type, store chip beside the call to action) so nothing
+   is absolutely placed over the text in either direction ── */
+.cx-hero .adc-bg{position:absolute;inset:0;z-index:0;background:#15130F center/cover no-repeat;}
+.cx-hero .adc-slide .glow{background:radial-gradient(ellipse 60% 80% at 80% 20%,rgba(201,168,76,.28),transparent 65%),linear-gradient(120deg,#15130F,#2a2419);}
+.cx-hero .adc-slide.has-img .ov{background:linear-gradient(270deg,rgba(10,10,10,.88) 0%,rgba(10,10,10,.55) 45%,rgba(10,10,10,.08) 100%);}
+html[dir="ltr"] .cx-hero .adc-slide.has-img .ov{background:linear-gradient(90deg,rgba(10,10,10,.88) 0%,rgba(10,10,10,.55) 45%,rgba(10,10,10,.08) 100%);}
+.cx-hero .adc-content{max-width:min(620px,58%);}
+.cx-hero .adc-top{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.cx-hero .adc-top .adc-type{margin-bottom:0;}
+.cx-hero .adc-badge{display:inline-flex;align-items:center;background:var(--red);color:#fff;font-size:12.5px;font-weight:800;padding:6px 13px;border-radius:999px;}
+.cx-hero .adc-sub{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:520px;}
+.cx-hero .adc-chip i{color:var(--gold);}
+.cx-hero .adc-foot{display:flex;align-items:center;flex-wrap:wrap;gap:12px;}
+.cx-hero .adc-brand{position:static;display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);padding:5px 14px 5px 6px;border-radius:30px;}
+html[dir="rtl"] .cx-hero .adc-brand{padding:5px 6px 5px 14px;}
+.cx-hero .adc-brand .bl{width:34px;height:34px;border-radius:50%;background:#fff;color:var(--gold2);display:flex;align-items:center;justify-content:center;font-size:17px;overflow:hidden;}
+.cx-hero .adc-brand .bl img{width:100%;height:100%;object-fit:cover;}
+.cx-hero .adc-brand b{font-size:13px;font-weight:700;}
+@media(max-width:860px){
+  .cx-hero .adc-content{max-width:100%;justify-content:flex-end;}
+  .cx-hero .adc-slide.has-img .ov,html[dir="ltr"] .cx-hero .adc-slide.has-img .ov{background:linear-gradient(0deg,rgba(10,10,10,.9) 0%,rgba(10,10,10,.5) 55%,rgba(10,10,10,.1) 100%);}
+}
+@media(max-width:560px){
+  .cx-hero .adc-slide{height:auto;min-height:300px;}
+  .cx-hero .adc-content{padding:22px 18px 48px;}
+  .cx-hero .adc-top{margin-bottom:10px;}
+  .cx-hero .adc-sub{font-size:13.5px;margin-bottom:12px;}
+  .cx-hero .adc-chips{margin-bottom:14px;gap:6px;}
+  .cx-hero .adc-chip{font-size:11.5px;padding:5px 10px;}
+  .cx-hero .adc-cta{height:42px;padding:0 18px;font-size:13px;}
+}
+
+/* ── wide screens: the content area grows with the viewport (to 1760px),
+   and each section adds columns instead of leaving empty margins ── */
+:root{--cx-max:1760px;--cx-gut:clamp(16px,2.6vw,48px);--rtb-inner-max:calc(1760px - 2 * var(--cx-gut));--rtb-sub-max:1760px;}
+.wrap{max-width:var(--cx-max);padding-inline:var(--cx-gut);}
+.cx-hero .adc-slide{height:clamp(300px,24vw,420px);}
+@media(max-width:860px){.cx-hero .adc-slide{height:290px;}}
+@media(max-width:560px){.cx-hero .adc-slide{height:auto;}}
+.cx-otile{height:clamp(190px,14vw,260px);}
+.cx-otiles>.cx-otile:nth-child(n+4){display:none;}
+.cx-stores>.cx-store:nth-child(n+7){display:none;}
+.cx-pgrid>*:nth-child(n+11){display:none;}
+@media(min-width:1600px){
+  .cx-otiles{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .cx-otiles>.cx-otile:nth-child(4){display:flex;}
+  .cx-stores{grid-template-columns:repeat(7,minmax(0,1fr));}
+  .cx-stores>.cx-store:nth-child(7){display:flex;}
+  .cx-pgrid{grid-template-columns:repeat(6,minmax(0,1fr));}
+  .cx-pgrid>*:nth-child(9),.cx-pgrid>*:nth-child(10),.cx-pgrid>*:nth-child(11),.cx-pgrid>*:nth-child(12){display:flex;}
+}
+@media(min-width:1880px){
+  .cx-pgrid{grid-template-columns:repeat(7,minmax(0,1fr));}
+  .cx-pgrid>*:nth-child(13),.cx-pgrid>*:nth-child(14){display:flex;}
+  .cx-cat-ic{width:96px;height:96px;font-size:38px;}
+}
+/* on phones the offer tiles and stores scroll, so none is held back */
+@media(max-width:700px){.cx-otiles>.cx-otile:nth-child(4){display:flex;}.cx-stores>.cx-store:nth-child(7){display:flex;}}
+/* two full rows at every width: 5 cols → 10, 4 → 8, 3 → 9, 2 (phone) → 6 */
+@media(max-width:1180px){.cx-pgrid>*:nth-child(n+9){display:none;}}
+@media(max-width:900px){.cx-pgrid>*:nth-child(9){display:flex;}}
+@media(max-width:560px){.cx-pgrid>*:nth-child(n+7){display:none;}}
 </style>
 <link rel="stylesheet" href="raf_header.css">
 <script src="raf_features.js"></script>
@@ -365,18 +509,9 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
      bar and category subnav, exactly as on every other page. -->
 <nav></nav>
 
-<!-- ============ CATEGORIES ============ -->
-<!-- No heading: the icons speak for themselves. One horizontal scroller that
-     takes any number of categories (swipe on touch, drag or arrows on mouse). -->
-<section class="sec" id="categories"><div class="wrap">
-  <div class="car"><div class="car-track" id="catTrack" data-hscroll></div>
-    <button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button>
-    <button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button>
-  </div>
-</div></section>
-
-<!-- ============ HERO BANNER · AD CAROUSEL (moved up; unchanged) ============ -->
-<section class="hero-banner"><div class="wrap">
+<!-- ============ HERO · AD CAROUSEL ============
+     The existing admin-managed slides (ADS), first under the header. -->
+<section class="hero-banner cx-hero"><div class="wrap">
   <div class="adc" id="adc" onmouseenter="adcPause()" onmouseleave="adcPlay()">
     <div class="adc-viewport"><div class="adc-track" id="adcTrack"></div></div>
     <button class="adc-arrow prev" onclick="adcGo(-1)" aria-label="prev"><i class="ti ti-chevron-right"></i></button>
@@ -385,52 +520,53 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   </div>
 </div></section>
 
+<!-- ============ CATEGORIES ============
+     RAF's own categories (RAFCatalog); each opens the Products page filtered
+     to it. A grid, so every category is visible without scrolling. -->
+<section class="sec cx-sec" id="categories"><div class="wrap">
+  <h2 class="sr-only" data-ar="الأقسام" data-en="Categories">الأقسام</h2>
+  <div class="cx-cats" id="catTrack"></div>
+</div></section>
+
 <div class="ad-slot wrap" data-ad-slot="after-categories"></div>
 
-<!-- ============ SECTION 1 · FEATURED STORES ============ -->
-<section class="sec"><div class="wrap">
-  <div class="sec-head"><div><div class="sec-kicker">ON SALE NOW</div><h2 class="sec-title" data-ar="محلات لديها عروض" data-en="Stores with Offers">محلات لديها عروض</h2></div>
+<!-- ============ SPECIAL OFFERS ============
+     Built from real catalogue discounts only: the categories with the most
+     discounted products, then the discounted products themselves. -->
+<section class="sec cx-sec" id="specialOffers"><div class="wrap">
+  <div class="sec-head"><h2 class="sec-title" data-ar="عروض خاصة" data-en="Special Offers">عروض خاصة</h2>
     <a class="sec-link" href="raf_offers.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
-  <div class="car"><div class="car-track" id="dealStoresTrack"></div>
-    <button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button>
-    <button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button>
-  </div>
-</div></section>
-
-<!-- ============ SECTION 2 · RECOMMENDED FOR YOU (moved up for visibility) ============ -->
-<section class="sec" style="background:var(--bg2);"><div class="wrap">
-  <div class="sec-head"><div><div class="sec-kicker">RECOMMENDED</div><h2 class="sec-title" data-ar="محلات مختارة لك" data-en="Recommended for You">محلات مختارة لك</h2></div>
-    <a class="sec-link" href="raf_storespage.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
-  <div class="car"><div class="car-track" id="storesTrack"></div>
-    <button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button>
-    <button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button>
-  </div>
-</div></section>
-
-<!-- ============ SECTION 3 · FEATURED OFFERS ============ -->
-<section class="sec" style="background:var(--bg2);"><div class="wrap">
-  <div class="sec-head"><div><div class="sec-kicker">HOT DEALS</div><h2 class="sec-title" data-ar="العروض المميزة" data-en="Featured Offers">العروض المميزة</h2></div>
-    <a class="sec-link" href="raf_offers.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
-  <div class="car"><div class="car-track" id="offersTrack"></div>
-    <button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button>
-    <button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button>
+  <div class="cx-otiles" id="offerTiles"></div>
+  <div class="car cx-orow"><div class="car-track" id="offersTrack"></div>
+    <button class="car-arrow prev" onclick="carScroll(this,-1)" aria-label="prev"><i class="ti ti-chevron-right"></i></button>
+    <button class="car-arrow next" onclick="carScroll(this,1)" aria-label="next"><i class="ti ti-chevron-left"></i></button>
   </div>
 </div></section>
 
 <div class="ad-slot wrap" data-ad-slot="after-offers"></div>
 
-<!-- ============ SECTION 4 · TRENDING PRODUCTS ============ -->
-<section class="sec"><div class="wrap">
-  <div class="sec-head"><div><div class="sec-kicker">TRENDING</div><h2 class="sec-title" data-ar="الأكثر رواجاً" data-en="What's Trending">الأكثر رواجاً</h2></div>
-    <a class="sec-link" href="raf_trending.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
-  <div class="tabs">
-    <button class="tab on" onclick="swTab('viewed',this)"><i class="ti ti-eye"></i> <span data-ar="الأكثر مشاهدة" data-en="Most Viewed">الأكثر مشاهدة</span></button>
-    <button class="tab" onclick="swTab('sold',this)"><i class="ti ti-shopping-cart"></i> <span data-ar="الأكثر مبيعاً" data-en="Best Selling">الأكثر مبيعاً</span></button>
-    <button class="tab" onclick="swTab('liked',this)"><i class="ti ti-heart"></i> <span data-ar="الأكثر إعجاباً" data-en="Most Liked">الأكثر إعجاباً</span></button>
-  </div>
-  <div class="tab-pane on" id="tab-viewed"><div class="car"><div class="car-track"></div><button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button><button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button></div></div>
-  <div class="tab-pane" id="tab-sold"><div class="car"><div class="car-track"></div><button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button><button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button></div></div>
-  <div class="tab-pane" id="tab-liked"><div class="car"><div class="car-track"></div><button class="car-arrow prev" onclick="carScroll(this,-1)"><i class="ti ti-chevron-right"></i></button><button class="car-arrow next" onclick="carScroll(this,1)"><i class="ti ti-chevron-left"></i></button></div></div>
+<!-- ============ FEATURED STORES ============ -->
+<section class="sec cx-sec" id="featuredStores"><div class="wrap">
+  <div class="sec-head"><h2 class="sec-title" data-ar="متاجر مميزة" data-en="Featured Stores">متاجر مميزة</h2>
+    <a class="sec-link" href="raf_storespage.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
+  <div class="cx-stores" id="storesTrack"></div>
+</div></section>
+
+<!-- ============ STORES WITH A LIVE PROMOTION ============
+     Only stores the marketing authority reports a live promotion for; with
+     none, the whole section stays hidden. -->
+<section class="sec cx-sec" id="dealStoresSec" hidden><div class="wrap">
+  <div class="sec-head"><h2 class="sec-title" data-ar="محلات لديها عروض" data-en="Stores with Offers">محلات لديها عروض</h2>
+    <a class="sec-link" href="raf_offers.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
+  <div class="cx-stores" id="dealStoresTrack"></div>
+</div></section>
+
+<!-- ============ FEATURED PRODUCTS ============
+     Ranked by rating and review count (offerQuality), across all stores. -->
+<section class="sec cx-sec" id="featuredProducts"><div class="wrap">
+  <div class="sec-head"><h2 class="sec-title" data-ar="منتجات مميزة" data-en="Featured Products">منتجات مميزة</h2>
+    <a class="sec-link" href="raf_offers.html?all=1"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
+  <div class="cx-pgrid" id="featuredGrid"></div>
 </div></section>
 
 <div class="ad-slot wrap" data-ad-slot="after-trending"></div>
@@ -484,54 +620,6 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
   </div>
 </div>
 
-<!-- ===== SEARCH FILTER SHEET ===== -->
-<div class="fs-backdrop" id="filterSheet" onclick="if(event.target===this)closeFilters()">
-  <div class="fs-card" role="dialog" aria-modal="true">
-    <div class="fs-head"><h3 data-ar="تصفية البحث" data-en="Filter Search">تصفية البحث</h3><button class="fs-x" onclick="closeFilters()" aria-label="close"><i class="ti ti-x"></i></button></div>
-    <div class="fs-body">
-      <div class="fs-group"><div class="fs-label"><i class="ti ti-category"></i> <span data-ar="الفئة" data-en="Category">الفئة</span></div>
-        <div class="fs-chips" data-filter="cat">
-          <button class="fs-chip" onclick="pickChip(this)" data-v="electronics" data-ar="إلكترونيات" data-en="Electronics">إلكترونيات</button>
-          <button class="fs-chip" onclick="pickChip(this)" data-v="fashion" data-ar="أزياء" data-en="Fashion">أزياء</button>
-          <button class="fs-chip" onclick="pickChip(this)" data-v="perfume" data-ar="عطور" data-en="Perfume">عطور</button>
-          <button class="fs-chip" onclick="pickChip(this)" data-v="watches" data-ar="ساعات" data-en="Watches">ساعات</button>
-          <button class="fs-chip" onclick="pickChip(this)" data-v="jewelry" data-ar="مجوهرات" data-en="Jewelry">مجوهرات</button>
-        </div></div>
-      <div class="fs-group"><div class="fs-label"><i class="ti ti-building-store"></i> <span data-ar="المتجر" data-en="Store">المتجر</span></div>
-        <div class="fs-chips" data-filter="store">
-          <button class="fs-chip" onclick="pickChip(this)" data-ar="تك هاوس" data-en="Tech House">تك هاوس</button>
-          <button class="fs-chip" onclick="pickChip(this)" data-ar="دار العود" data-en="Dar Aloud">دار العود</button>
-          <button class="fs-chip" onclick="pickChip(this)" data-ar="كازا مود" data-en="Casa Mode">كازا مود</button>
-          <button class="fs-chip" onclick="pickChip(this)" data-ar="لمسة ذهب" data-en="Lamsa Gold">لمسة ذهب</button>
-        </div></div>
-      <div class="fs-group"><div class="fs-label"><i class="ti ti-coin"></i> <span data-ar="نطاق السعر (د.ك)" data-en="Price Range (KWD)">نطاق السعر (د.ك)</span></div>
-        <div class="fs-price"><input id="fPriceMin" type="number" min="0" placeholder="0"><span>—</span><input id="fPriceMax" type="number" min="0" placeholder="500"></div></div>
-      <div class="fs-group"><div class="fs-label"><i class="ti ti-star"></i> <span data-ar="التقييم" data-en="Rating">التقييم</span></div>
-        <div class="fs-chips" data-filter="rating">
-          <button class="fs-chip" onclick="pickChip(this)" data-v="4.5">4.5★+</button>
-          <button class="fs-chip" onclick="pickChip(this)" data-v="4">4.0★+</button>
-          <button class="fs-chip" onclick="pickChip(this)" data-v="3.5">3.5★+</button>
-        </div></div>
-      <div class="fs-group"><div class="fs-label"><i class="ti ti-package"></i> <span data-ar="التوفّر" data-en="Availability">التوفّر</span></div>
-        <div class="fs-chips" data-filter="avail">
-          <button class="fs-chip" onclick="pickChip(this)" data-v="instock" data-ar="متوفّر الآن" data-en="In stock">متوفّر الآن</button>
-          <button class="fs-chip" onclick="pickChip(this)" data-v="fast" data-ar="توصيل سريع" data-en="Fast delivery">توصيل سريع</button>
-        </div></div>
-      <div class="fs-group"><div class="fs-label"><i class="ti ti-discount"></i> <span data-ar="العروض" data-en="Offers">العروض</span></div>
-        <div class="fs-chips" data-filter="offers">
-          <button class="fs-chip" onclick="pickChip(this)" data-v="sale" data-ar="عليها خصم" data-en="On sale">عليها خصم</button>
-          <button class="fs-chip" onclick="pickChip(this)" data-v="new" data-ar="وصل حديثاً" data-en="New arrivals">وصل حديثاً</button>
-        </div></div>
-      <div class="fs-group"><div class="fs-label"><i class="ti ti-tag"></i> <span data-ar="الماركة" data-en="Brand">الماركة</span></div>
-        <div class="fs-chips" data-filter="brand">
-          <button class="fs-chip" onclick="pickChip(this)" data-v="apple">Apple</button>
-          <button class="fs-chip" onclick="pickChip(this)" data-v="sony">Sony</button>
-          <button class="fs-chip" onclick="pickChip(this)" data-v="ray">Ray Luxe</button>
-        </div></div>
-    </div>
-    <div class="fs-foot"><button class="fs-reset" onclick="resetFilters()" data-ar="إعادة تعيين" data-en="Reset">إعادة تعيين</button><button class="fs-apply" onclick="applyFilters()" data-ar="عرض النتائج" data-en="Show Results">عرض النتائج</button></div>
-  </div>
-</div>
 
 <!-- shared header — must run before raf_nav.js injects its hamburger -->
 <script src="raf_topbar.js"></script>
@@ -548,16 +636,13 @@ footer{background:var(--ink);color:#b5ad9c;padding:50px 0 28px;}
 <script src="raf_card.js"></script>
 <script src="raf_hscroll.js"></script>
 <script src="raf_quick.js"></script>
+<script src="raf_search_filters.js"></script>
 <script>
-/* ===== ADMIN-READY DATA (replace with API later) ===== */
-/* Advertising slides — structured for admin-managed ad data */
-const ADS=[
-  {type:{ar:'متجر مميّز',en:'Featured Store'},pic:'ti-device-mobile',title:{ar:'تك هاوس — وجهتك للإلكترونيات',en:'Tech House — Your Electronics Hub'},sub:{ar:'أحدث الأجهزة بأفضل الأسعار وضمان رسمي.',en:'Latest devices at the best prices, official warranty.'},chips:[{ar:'توصيل مجاني',en:'Free delivery'},{ar:'+320 منتج',en:'320+ products'}],promo:'',brand:{ar:'تك هاوس',en:'Tech House',ic:'ti-building-store'},cta:{ar:'زيارة المتجر',en:'Visit Store'},href:'raf_store.html',g:'radial-gradient(circle at 78% 35%,#1e3a5f,#0a0a0a)'},
-  {type:{ar:'عرض خاص',en:'Special Offer'},pic:'ti-spray',title:{ar:'خصم يصل إلى 50% على العطور',en:'Up to 50% Off Perfumes'},sub:{ar:'تشكيلة فاخرة من العطور الشرقية لفترة محدودة.',en:'A luxury collection of oriental perfumes, limited time.'},chips:[{ar:'لفترة محدودة',en:'Limited time'},{ar:'أصلي 100%',en:'100% authentic'}],promo:'-50%',brand:{ar:'دار العود',en:'Dar Aloud',ic:'ti-spray'},cta:{ar:'تسوّق العرض',en:'Shop Offer'},href:'raf_offers.html',g:'radial-gradient(circle at 78% 35%,#5f1e4a,#0a0a0a)'},
-  {type:{ar:'مزاد حي',en:'Live Auction'},pic:'ti-clock-hour-4',title:{ar:'ساعات فاخرة في المزاد الآن',en:'Luxury Watches Live Now'},sub:{ar:'زايد على قطع نادرة قبل انتهاء الوقت.',en:'Bid on rare pieces before time runs out.'},chips:[{ar:'23 مزايد',en:'23 bidders'},{ar:'مباشر',en:'Live'}],promo:'',brand:{ar:'تايم بوكس',en:'Time Box',ic:'ti-clock-hour-4'},cta:{ar:'شارك في المزاد',en:'Join Auction'},href:'raf_auctions.html',g:'radial-gradient(circle at 78% 35%,#5f4a1e,#0a0a0a)'},
-  {type:{ar:'منتج مميّز',en:'Featured Product'},pic:'ti-diamond',title:{ar:'مجوهرات ذهبية بتصاميم حصرية',en:'Exclusive Gold Jewelry'},sub:{ar:'تصاميم فاخرة من أرقى المحلات المحلية.',en:'Premium designs from the finest local stores.'},chips:[{ar:'عيار 21',en:'21K gold'},{ar:'ضمان',en:'Warranty'}],promo:'',brand:{ar:'لمسة ذهب',en:'Lamsa Gold',ic:'ti-diamond'},cta:{ar:'اكتشف الآن',en:'Discover Now'},href:'raf_storespage.html?cat=jewelry',g:'radial-gradient(circle at 78% 35%,#1e5f3a,#0a0a0a)'},
-  {type:{ar:'حملة موسمية',en:'Seasonal Campaign'},pic:'ti-confetti',title:{ar:'تخفيضات الموسم الكبرى',en:'The Big Seasonal Sale'},sub:{ar:'أفضل العروض من كل المحلات في مكان واحد.',en:'The best deals across all stores in one place.'},chips:[{ar:'كل الفئات',en:'All categories'},{ar:'حتى 70%',en:'Up to 70%'}],promo:'-70%',brand:{ar:'رف',en:'RAF',ic:'ti-discount'},cta:{ar:'تصفّح الحملة',en:'Browse Campaign'},href:'raf_offers.html',g:'radial-gradient(circle at 78% 35%,#3a1e5f,#0a0a0a)'}
-];
+/* ===== HERO SLIDES =====
+   Built from RAF data only (buildHeroSlides): real stores with their own
+   cover, description, category, rating and live product count, and the
+   category with the most real discounts. No hand-written claims. */
+let ADS=[];
 /* Categories — full admin model: name/icon/image/cover/sort/active */
 /* Categories map 1:1 onto the category keys the Products page filters by
    (raf_offers.html?cat=<id>), so every category opens a real, populated list. */
@@ -565,18 +650,14 @@ const CATEGORIES=RAFCatalog.categories().map(function(c,i){return {id:c.k,ar:c.a
 const OFFERS=RAFCatalog.list({onSale:true}).slice(0,10);
 /* each store carries the slug its Store page is registered under, so the
    carousel opens the right storefront instead of always the default one */
-const STORES=RAFCatalog.stores().slice(0,6).map(function(s){return {slug:s.slug,ic:s.ic,ar:s.name.ar,en:s.name.en,rate:s.rating,prod:String(s.productCount),cat:s.cat,sponsored:!!s.sponsored};});
+/* the product count is the store's live list, the same one its Store page shows */
+const STORES=RAFCatalog.stores().map(function(s){var n=RAFCatalog.list({store:s.slug,visibleOnly:false,publicOnly:true}).length;return {slug:s.slug,ic:s.ic,ar:s.name.ar,en:s.name.en,rate:s.rating,prod:String(n),prodN:n,cat:s.cat,desc:s.desc,sponsored:!!s.sponsored};});
 const AUCS=[
   {ic:'ti-clock-hour-4',ar:'ساعة فاخرة محدودة',en:'Limited Luxury Watch',bid:'145.000',bidders:23,sec:8130},
   {ic:'ti-diamond',ar:'سوار ذهب عيار 21',en:'21K Gold Bracelet',bid:'320.000',bidders:41,sec:5460},
   {ic:'ti-device-laptop',ar:'حاسب محمول احترافي',en:'Pro Laptop',bid:'210.000',bidders:17,sec:11280},
   {ic:'ti-camera',ar:'كاميرا احترافية',en:'Professional Camera',bid:'88.000',bidders:12,sec:14700}
 ];
-const TREND={
-  viewed:OFFERS.slice(0,5),
-  sold:[OFFERS[1],OFFERS[4],OFFERS[0],OFFERS[3],OFFERS[2]],
-  liked:[STORES[3]&&OFFERS[2],OFFERS[1],OFFERS[0],OFFERS[3],OFFERS[4]].filter(Boolean)
-};
 const POPULAR=[{ar:'آيفون',en:'iPhone'},{ar:'عطر',en:'Perfume'},{ar:'ساعة ذكية',en:'Smart Watch'},{ar:'حذاء رياضي',en:'Sneakers'},{ar:'حقيبة',en:'Bag'},{ar:'سماعات',en:'Earbuds'}];
 
 /* ===== HELPERS ===== */
@@ -588,22 +669,51 @@ function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 
 /* ===== AD CAROUSEL ===== */
 let adI=0,adTimer=null;
+/* every value on a slide comes from the store record (RAFSource) or is
+   counted from the catalogue; a missing value is left out, never filled in */
+function buildHeroSlides(){
+  var slides=[];
+  var stores=STORES.slice(0,3);   /* RAFSource order: sponsored stores first */
+  stores.forEach(function(s){
+    var src=(window.RAFSource&&RAFSource.store(s.slug))||{};
+    var facts=[];
+    if(s.cat) facts.push({ic:'ti-category-2',t:s.cat});
+    if(s.rate) facts.push({ic:'ti-star-filled',t:{ar:String(s.rate),en:String(s.rate)}});
+    facts.push({ic:'ti-box',t:{ar:s.prodN+' منتج',en:s.prodN+' product'+(s.prodN===1?'':'s')}});
+    slides.push({href:'raf_store.html?store='+encodeURIComponent(s.slug),image:src.cover||'',
+      type:s.sponsored?{ar:'بريميوم',en:'Premium'}:{ar:'متجر',en:'Store'},typeIc:'ti-building-store',
+      badge:null,title:{ar:s.ar,en:s.en},sub:s.desc||null,facts:facts,
+      cta:{ar:'زيارة المتجر',en:'Visit store'},brand:{name:{ar:s.ar,en:s.en},logo:src.logo||'',ic:s.ic}});
+  });
+  /* the category with the most real discounts: its best real discount and counts */
+  var t=offerTiles()[0];
+  if(t){
+    var m=t.stores;
+    slides.splice(Math.min(1,slides.length),0,{href:'raf_offers.html?cat='+encodeURIComponent(t.cat.id)+'&sale=1',image:t.img||'',
+      type:{ar:'عروض',en:'Offers'},typeIc:'ti-discount',
+      badge:{ar:'خصم حتى '+t.max+'%',en:'Up to '+t.max+'% off'},
+      title:{ar:'عروض '+t.cat.ar,en:t.cat.en+' offers'},
+      sub:{ar:t.n+' منتج بخصم من '+m+(m===1?' متجر':' متاجر'),en:t.n+' discounted product'+(t.n===1?'':'s')+' from '+m+' store'+(m===1?'':'s')},
+      facts:[],cta:{ar:'تسوّق العروض',en:'Shop the offers'},brand:null});
+  }
+  return slides;
+}
 function adcRender(){
   const t=document.getElementById('adcTrack'), d=document.getElementById('adcDots');
-  t.innerHTML=ADS.map(a=>`<a class="adc-slide" href="${a.href}">
-    <div class="glow" style="background:${a.g}"></div><div class="ov"></div>
+  if(adI>=ADS.length) adI=0;
+  t.innerHTML=ADS.map(a=>`<a class="adc-slide${a.image?' has-img':''}" href="${a.href}">
+    ${a.image?`<div class="adc-bg" style="background-image:url('${a.image}')"></div>`:'<div class="glow"></div>'}<div class="ov"></div>
     <div class="adc-content">
-      <span class="adc-type"><i class="ti ${a.brand.ic}" style="font-size:13px"></i> ${L(a.type)}</span>
-      <div class="adc-title">${L(a.title)}</div>
-      <div class="adc-sub">${L(a.sub)}</div>
-      <div class="adc-chips">${(a.chips||[]).map(c=>`<span class="adc-chip"><i class="ti ti-check"></i> ${L(c)}</span>`).join('')}</div>
-      <span class="adc-cta">${L(a.cta)} <i class="ti ti-arrow-left"></i></span>
+      <div class="adc-top"><span class="adc-type"><i class="ti ${a.typeIc}" style="font-size:13px"></i> ${L(a.type)}</span>${a.badge?`<span class="adc-badge">${L(a.badge)}</span>`:''}</div>
+      <div class="adc-title">${esc(L(a.title))}</div>
+      ${a.sub?`<div class="adc-sub">${esc(L(a.sub))}</div>`:''}
+      ${a.facts.length?`<div class="adc-chips">${a.facts.map(c=>`<span class="adc-chip"><i class="ti ${c.ic}"></i> ${esc(L(c.t))}</span>`).join('')}</div>`:''}
+      <div class="adc-foot"><span class="adc-cta">${L(a.cta)} <i class="ti ti-arrow-left"></i></span>
+        ${a.brand?`<span class="adc-brand"><span class="bl">${a.brand.logo?`<img src="${a.brand.logo}" alt="">`:`<i class="ti ${a.brand.ic}"></i>`}</span><b>${esc(L(a.brand.name))}</b></span>`:''}</div>
     </div>
-    <div class="adc-visual"><div class="adc-product"><i class="ti ${a.pic}"></i></div></div>
-    ${a.promo?`<span class="adc-promo">${a.promo}</span>`:''}
-    <div class="adc-brand"><span class="bl"><i class="ti ${a.brand.ic}"></i></span><b>${L(a.brand)}</b></div>
   </a>`).join('');
   d.innerHTML=ADS.map((a,i)=>`<button class="adc-dot${i===adI?' on':''}" onclick="adcSet(${i})" aria-label="slide ${i+1}"></button>`).join('');
+  document.getElementById('adc').hidden=!ADS.length;
   adcApply();
 }
 function adcApply(){
@@ -622,71 +732,121 @@ function adcPause(){if(adTimer){clearInterval(adTimer);adTimer=null;}}
     if(Math.abs(dx)>40){const f=isRTL()?-1:1;adcGo(dx<0?f:-f);}x0=null;adcPlay();},{passive:true});
 })();
 
-/* ===== CONTENT CAROUSELS ===== */
+/* ===== CONTENT SECTIONS ===== */
+function T2(ar,en){return curLang()==='en'?en:ar;}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function viewAllCard(href,extraClass){return `<a class="view-all-card ${extraClass||''}" href="${href}"><div class="circ"><i class="ti ti-arrow-left"></i></div><span>${curLang()==='en'?'View All':'عرض الكل'}</span></a>`;}
-function catCard(c){
-  const bg=c.image?`background-image:url('${c.image}')`:'';
+/* one tint per category tile — presentation only, cycles in category order */
+const CAT_TINTS=['#E8F3EC:#2E7D52','#E9EEF8:#3558A8','#F7ECEF:#B0445E','#F3EEE3:#8A6A2A','#EEF0F2:#44505C','#FBEFE6:#B45A1F','#F1EAF7:#7244A8','#E8F4F4:#2A7C7C'];
+function catCard(c,i){
+  const tint=CAT_TINTS[i%CAT_TINTS.length].split(':');
   const inner=c.image?'':`<i class="ti ${c.icon}"></i>`;
+  const bg=c.image?`background-image:url('${c.image}');`:'';
   /* categories open the Products page filtered to that category */
-  return `<div class="car-item cat-item"><a class="cat" href="raf_offers.html?cat=${c.id}"><div class="cat-circle" style="${bg}">${inner}</div><span>${L(c)}</span></a></div>`;
+  return `<a class="cx-cat" href="raf_offers.html?cat=${encodeURIComponent(c.id)}"><span class="cx-cat-ic" style="${bg}--cbg:${tint[0]};--cfg:${tint[1]}">${inner}</span><span class="cx-cat-l">${L(c)}</span></a>`;
 }
 /* Uses the single global RAF Product Card component (raf_card.js).
    The homepage is a multi-store listing → products open the Quick Order page. */
 function offerCard(o){return `<div class="car-item pwrap">${RAFCard.product(o)}</div>`;}
-function storeCard(s){return `<article class="car-item store-card" onclick="window.location='raf_store.html?store=${s.slug}'">
-  <div class="store-cover"></div><div class="store-body"><div class="store-logo"><i class="ti ${s.ic}"></i></div>
-  <div class="store-name">${L(s)} <i class="ti ti-rosette-discount-check verify"></i></div>
-  <div class="store-meta"><span><i class="ti ti-star-filled"></i> ${s.rate}</span><span class="dot"></span><span>${s.prod} ${curLang()==='en'?'products':'منتج'}</span><span class="dot"></span><span>${L(s.cat)}</span></div>
-  <a href="raf_store.html" class="btn-visit" onclick="event.stopPropagation()"><i class="ti ti-arrow-left"></i> ${curLang()==='en'?'Visit Store':'زيارة المتجر'}</a></div></article>`;}
-function aucCard(a){return `<article class="car-item auc-card">
-  <div class="auc-img"><i class="ti ${a.ic}"></i><span class="auc-live"><span class="pulse"></span> ${curLang()==='en'?'LIVE':'مباشر'}</span></div>
-  <div class="auc-body"><div class="auc-name">${L(a)}</div>
-  <div class="auc-row"><div class="auc-bid"><small>${curLang()==='en'?'Current bid':'المزايدة الحالية'}</small><b class="dm">${a.bid} <span style="font-size:11px">KWD</span></b></div>
-    <div class="auc-timer"><small>${curLang()==='en'?'Ends in':'ينتهي خلال'}</small><b class="dm" data-sec="${a.sec}">--:--:--</b></div></div>
-  <div class="auc-foot"><span class="auc-bidders"><i class="ti ti-users"></i> ${a.bidders} ${curLang()==='en'?'bidders':'مزايد'}</span>
-    <a href="raf_auctions.html" class="btn-join"><i class="ti ti-gavel"></i> ${curLang()==='en'?'Join':'شارك'}</a></div></div></article>`;}
 
-/* store card variant for the "Stores with active offers" section */
-function dealStoreCard(s){var promo=s.promo||30;return `<article class="car-item store-card" onclick="window.location='raf_store.html?store=${s.slug||'casa-mode'}'">
-  <div class="store-cover"><span class="store-deal-badge"><i class="ti ti-discount-check"></i> ${curLang()==='en'?('Up to '+promo+'% off'):('خصم حتى '+promo+'%')}</span></div>
-  <div class="store-body"><div class="store-logo"><i class="ti ${s.ic}"></i></div>
-  <div class="store-name">${L(s)} <i class="ti ti-rosette-discount-check verify"></i></div>
-  <div class="store-meta"><span><i class="ti ti-star-filled"></i> ${s.rate}</span><span class="dot"></span><span>${s.prod} ${curLang()==='en'?'products':'منتج'}</span><span class="dot"></span><span>${L(s.cat)}</span></div>
-  <a href="raf_store.html" class="btn-visit" onclick="event.stopPropagation()"><i class="ti ti-discount"></i> ${curLang()==='en'?'Shop offers':'تسوّق العروض'}</a></div></article>`;}
-
-/* ─── Homepage recommendation flow (comparators are algorithm/admin-ready) ─── */
-function offerQuality(o){ return parseFloat(o.rate||0)*10 + Math.min(parseInt(o.rev||0),500)/120; }  /* quality = rating + review weight, NOT discount% */
-function recommendedStores(){ return STORES.slice().sort((a,b)=> parseFloat(b.rate)-parseFloat(a.rate) || parseInt(b.prod)-parseInt(a.prod)); }
-function featuredOffers(){ return OFFERS.slice().sort((a,b)=> offerQuality(b)-offerQuality(a)); }        /* ranked by quality, not discount */
-function dealStores(){ return STORES.map(function(s,i){ return Object.assign({promo:[30,25,40,20][i]||25}, s); }).sort((a,b)=> b.promo-a.promo); }
-/* trending = discovery mix: combine trending / newest / top-rated across categories, minimise repetition */
-function trendingMix(){
-  var byRate=OFFERS.slice().sort((a,b)=>parseFloat(b.rate)-parseFloat(a.rate));
-  var newest=OFFERS.slice().reverse();
-  return {
-    viewed: OFFERS.slice(0,5),                                   /* most viewed */
-    sold:   [OFFERS[4],OFFERS[1],OFFERS[3],OFFERS[0],OFFERS[2]], /* best selling — different order */
-    liked:  byRate                                              /* highly rated / most liked */
-  };
+/* the discount a shopper actually sees on the card: a live marketing
+   promotion when there is one, otherwise the catalogue discount */
+function shownPct(p){
+  var d=(window.RAFMarketing&&RAFMarketing.displayPrice)?RAFMarketing.displayPrice(p):null;
+  return (d&&d.promoted)?(parseInt(d.pct,10)||0):(parseInt(p.disc,10)||0);
 }
+function productOOS(p){return !!(window.RAFCard&&RAFCard.isOOS&&RAFCard.isOOS(p));}
+
+/* Special-offer tiles: the three categories with the most discounted,
+   available products. Every figure is counted from the catalogue. */
+function offerTiles(){
+  /* the same set the results page shows for "category + on sale" (the price
+     shown on the card carries a discount); the headline % and the photo come
+     from a product that is still available */
+  var by={};
+  RAFCatalog.list({}).forEach(function(p){
+    var pct=shownPct(p); if(!pct) return;
+    (by[p.cat]=by[p.cat]||[]).push({p:p,pct:pct,oos:productOOS(p)});
+  });
+  return CATEGORIES.filter(function(c){return by[c.id]&&by[c.id].some(function(x){return !x.oos;});})
+    .map(function(c){var l=by[c.id].filter(function(x){return !x.oos;}).sort(function(a,b){return b.pct-a.pct;});
+      var st={};by[c.id].forEach(function(x){st[x.p.slug]=1;});
+      return {cat:c,max:l[0].pct,img:l[0].p.img||'',ic:c.icon,n:by[c.id].length,stores:Object.keys(st).length};})
+    .sort(function(a,b){return b.n-a.n||b.max-a.max;}).slice(0,4);
+}
+function offerTile(t){
+  var bg=t.img?` style="background-image:url('${t.img}')"`:'';
+  return `<a class="cx-otile" href="raf_offers.html?cat=${encodeURIComponent(t.cat.id)}&sale=1"${bg}>${t.img?'':`<i class="ti ${t.ic} cx-otile-ic"></i>`}
+    <span class="cx-otile-badge">${T2('خصم حتى ','Up to ')}<b>${t.max}%</b>${T2('',' off')}</span>
+    <span class="cx-otile-b"><span class="cx-otile-t">${L(t.cat)}</span>
+      <span class="cx-otile-s">${T2(t.n+' منتج بخصم',t.n+' discounted product'+(t.n===1?'':'s'))}</span>
+      <span class="cx-otile-cta">${T2('تسوّق الآن','Shop now')} <i class="ti ti-arrow-left"></i></span></span></a>`;
+}
+
+/* Store card — identity from the store record (RAFSource logo/cover),
+   the live product count, and the shared Follow list (RAFShop.Follow). */
+function storeFollowing(slug){return !!(window.RAFShop&&RAFShop.Follow&&RAFShop.Follow.has(slug));}
+function storeCard(s){
+  var src=(window.RAFSource&&RAFSource.store(s.slug))||{}, on=storeFollowing(s.slug);
+  var cover=src.cover?` style="background-image:url('${src.cover}')"`:'';
+  var logo=src.logo?`<img src="${src.logo}" alt="">`:`<i class="ti ${s.ic}"></i>`;
+  var promo=s.promo?`<span class="cx-store-promo"><i class="ti ti-discount"></i> -${s.promo}%</span>`:'';
+  return `<article class="cx-store" data-slug="${esc(s.slug)}" onclick="window.location='raf_store.html?store=${encodeURIComponent(s.slug)}'">
+    <div class="cx-store-cover"${cover}>${promo}</div>
+    <div class="cx-store-logo">${logo}</div>
+    <div class="cx-store-b">
+      <a class="cx-store-name" href="raf_store.html?store=${encodeURIComponent(s.slug)}" onclick="event.stopPropagation()">${esc(L(s))}</a>
+      <div class="cx-store-cat">${esc(L(s.cat))}</div>
+      <div class="cx-store-meta">${s.rate?`<span><i class="ti ti-star-filled"></i> <b>${esc(s.rate)}</b></span><span class="dot"></span>`:''}<span><b>${s.prod}</b> ${T2('منتج','products')}</span></div>
+      <div class="cx-store-act">
+        <button type="button" class="cx-follow${on?' on':''}" aria-pressed="${on?'true':'false'}" onclick="homeFollow(event,'${esc(s.slug)}')"><i class="ti ${on?'ti-check':'ti-plus'}"></i> <span>${on?T2('تتابعه','Following'):T2('متابعة','Follow')}</span></button>
+        <a class="cx-visit" href="raf_store.html?store=${encodeURIComponent(s.slug)}" onclick="event.stopPropagation()" aria-label="${T2('زيارة المتجر','Visit store')}"><i class="ti ti-arrow-left"></i></a>
+      </div>
+    </div></article>`;
+}
+/* the same record the Store page writes, so Favorites shows one shape */
+function homeFollow(e,slug){
+  e.preventDefault();e.stopPropagation();
+  if(!window.RAFShop||!RAFShop.Follow) return;
+  var s=STORES.find(function(x){return x.slug===slug;}); if(!s) return;
+  var on=RAFShop.Follow.toggle({slug:s.slug,name:L(s),cat:s.cat,ic:s.ic,products:s.prodN,rating:s.rate});
+  document.querySelectorAll('.cx-store[data-slug="'+slug+'"] .cx-follow').forEach(function(b){
+    b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false');
+    b.querySelector('i').className='ti '+(on?'ti-check':'ti-plus');
+    b.querySelector('span').textContent=on?T2('تتابعه','Following'):T2('متابعة','Follow');
+  });
+  if(RAFShop.toast) RAFShop.toast(on?T2('تتابع '+L(s)+' الآن','Now following '+L(s)):T2('تم إلغاء المتابعة','Unfollowed'),{icon:on?'ti-heart-filled':'ti-heart-off'});
+}
+
+/* ─── Homepage ranking (comparators are algorithm/admin-ready) ─── */
+function offerQuality(o){ return parseFloat(o.rate||0)*10 + Math.min(parseInt(o.rev||0),500)/120; }  /* quality = rating + review weight, NOT discount% */
+function recommendedStores(){ return STORES.slice().sort((a,b)=> parseFloat(b.rate)-parseFloat(a.rate) || b.prodN-a.prodN); }
+function featuredOffers(){ return OFFERS.slice().sort((a,b)=> offerQuality(b)-offerQuality(a)); }        /* ranked by quality, not discount */
+/* only stores with a live promotion from the marketing authority — its own value */
+function dealStores(){
+  if(!window.RAFMarketing||!RAFMarketing.activePromotion) return [];
+  return STORES.map(function(s){var p=RAFMarketing.activePromotion(s.slug);return p&&p.value?Object.assign({},s,{promo:p.value}):null;})
+    .filter(Boolean).sort(function(a,b){return b.promo-a.promo;});
+}
+function featuredProducts(){ return RAFCatalog.list({}).slice().sort((a,b)=> offerQuality(b)-offerQuality(a)).slice(0,14); }
 
 function renderCarousels(){
   document.getElementById('catTrack').innerHTML=CATEGORIES.filter(c=>c.active).sort((a,b)=>a.sort-b.sort).map(catCard).join('');
-  /* 1 · Recommended stores  2 · Featured offers  3 · Stores with offers  4 · Trending */
-  document.getElementById('storesTrack').innerHTML=recommendedStores().map(storeCard).join('')+viewAllCard('raf_storespage.html');
+  var tiles=offerTiles();
+  document.getElementById('offerTiles').innerHTML=tiles.map(offerTile).join('');
+  document.getElementById('offerTiles').hidden=!tiles.length;
   document.getElementById('offersTrack').innerHTML=featuredOffers().map(offerCard).join('')+viewAllCard('raf_offers.html');
-  document.getElementById('dealStoresTrack').innerHTML=dealStores().map(dealStoreCard).join('')+viewAllCard('raf_offers.html');
-  var T=trendingMix();
-  document.querySelector('#tab-viewed .car-track').innerHTML=T.viewed.map(offerCard).join('')+viewAllCard('raf_trending.html');
-  document.querySelector('#tab-sold .car-track').innerHTML=T.sold.map(offerCard).join('')+viewAllCard('raf_trending.html');
-  document.querySelector('#tab-liked .car-track').innerHTML=T.liked.map(offerCard).join('')+viewAllCard('raf_trending.html');
+  document.getElementById('storesTrack').innerHTML=recommendedStores().map(storeCard).join('');
+  var deals=dealStores();
+  document.getElementById('dealStoresTrack').innerHTML=deals.map(storeCard).join('');
+  document.getElementById('dealStoresSec').hidden=!deals.length;
+  document.getElementById('featuredGrid').innerHTML=featuredProducts().map(function(p){return RAFCard.product(p);}).join('');
 }
 function carScroll(btn,dir){
   const track=btn.parentElement.querySelector('.car-track');
   const amt=track.clientWidth*0.8*(isRTL()?-dir:dir);
   track.scrollBy({left:amt,behavior:'smooth'});
 }
-function swTab(id,btn){document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('on'));document.getElementById('tab-'+id).classList.add('on');}
 function toggleWish(btn,e){e.preventDefault();e.stopPropagation();btn.classList.toggle('on');btn.querySelector('i').className='ti '+(btn.classList.contains('on')?'ti-heart-filled':'ti-heart');}
 /* ===== CART QUANTITY CONTROLS (direct from product card; never navigates) ===== */
 function readCart(){try{var c=JSON.parse(localStorage.getItem('raf_cart')||'[]');return Array.isArray(c)?c:[];}catch(_){return [];}}
@@ -738,9 +898,7 @@ function applyLang(){const en=curLang()==='en';document.getElementById('langLabe
 /* ===== INIT ===== */
 function featureOn(k){ if(window.RAFFeatures) return RAFFeatures.on(k); try{ return (JSON.parse(localStorage.getItem('raf_features')||'{}'))[k]===true; }catch(e){ return false; } }
 (function(){const l=localStorage.getItem('raf_lang');if(l==='en'){const r=document.getElementById('htmlRoot');r.lang='en';r.dir='ltr';}
-  /* drop promotional ad banners for disabled features (auctions/used) */
-  for(var i=ADS.length-1;i>=0;i--){ var h=ADS[i].href||''; if((/raf_auctions\.html/.test(h)&&!featureOn('auctions'))||(/raf_used\.html/.test(h)&&!featureOn('used'))) ADS.splice(i,1); }
-  applyLang();adcRender();adcPlay();renderCarousels();updateCartBadge();tick();setInterval(tick,1000);
+  ADS=buildHeroSlides();applyLang();adcRender();adcPlay();renderCarousels();updateCartBadge();tick();setInterval(tick,1000);
   if(window.RAFAds)RAFAds.mountAll(curLang());
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(window.RAFSearch&&RAFSearch.close)RAFSearch.close();closePromoPopup();}});
   setTimeout(function(){ try{ showPromoPopup(); }catch(e){} }, 600);  /* deferred: runs after all defs are initialised */
@@ -775,29 +933,8 @@ function showPromoPopup(){
 }
 function closePromoPopup(){ var el=document.getElementById('promoPopup'); if(!el||!el.classList.contains('show'))return; el.classList.remove('show'); try{localStorage.setItem('raf_promo_seen',PROMO_POPUP.id);}catch(e){} }
 
-/* ===== SEARCH FILTERS (integrates with the search results page) ===== */
-function openFilters(e){ if(e){e.preventDefault();e.stopPropagation();} if(window.RAFSearch&&RAFSearch.close)RAFSearch.close();
-  var s=document.getElementById('filterSheet'); if(!s) return;
-  /* rAF alone never fires in a backgrounded tab — the timeout guarantees it opens */
-  requestAnimationFrame(function(){ s.classList.add('show'); });
-  setTimeout(function(){ s.classList.add('show'); },30); }
-function closeFilters(){ document.getElementById('filterSheet').classList.remove('show'); }
-function pickChip(btn){ var on=btn.classList.contains('on'); btn.parentElement.querySelectorAll('.fs-chip').forEach(function(c){c.classList.remove('on');}); if(!on)btn.classList.add('on'); }
-function resetFilters(){ document.querySelectorAll('#filterSheet .fs-chip').forEach(function(c){c.classList.remove('on');}); ['fPriceMin','fPriceMax'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';}); }
-function applyFilters(){
-  var params=new URLSearchParams();
-  document.querySelectorAll('#filterSheet .fs-chips').forEach(function(g){ var on=g.querySelector('.fs-chip.on'); if(on) params.set(g.dataset.filter, on.getAttribute('data-v')||on.textContent.trim()); });
-  var mn=(document.getElementById('fPriceMin')||{}).value, mx=(document.getElementById('fPriceMax')||{}).value;
-  if(mn)params.set('pmin',mn); if(mx)params.set('pmax',mx);
-  /* seed the results query with the most specific text selection so results filter immediately */
-  var brandEl=document.querySelector('#filterSheet [data-filter="brand"] .fs-chip.on');
-  var storeEl=document.querySelector('#filterSheet [data-filter="store"] .fs-chip.on');
-  var catEl=document.querySelector('#filterSheet [data-filter="cat"] .fs-chip.on');
-  var q=(brandEl&&brandEl.textContent.trim())||(storeEl&&(curLang()==='en'?storeEl.getAttribute('data-en'):storeEl.textContent.trim()))||(catEl&&(curLang()==='en'?catEl.getAttribute('data-en'):catEl.textContent.trim()))||((document.getElementById('navSearch')||{}).value||'').trim();
-  if(q)params.set('q',q);
-  closeFilters();
-  window.location='raf_offers.html?'+params.toString();
-}
+/* ===== SEARCH FILTERS — the shared sheet (raf_search_filters.js); Apply opens the results page with the same state ===== */
+if(window.RAFSearchFilters) RAFSearchFilters.mount({});
 </script>
 <script src="raf_permissions.js"></script>
 <!-- the active-order bar: reopens the signed-in customer's order in progress -->

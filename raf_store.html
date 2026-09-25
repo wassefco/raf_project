@@ -73,132 +73,6 @@
   .breadcrumb .bc-cur { color: var(--text); font-weight: 700; }
   .breadcrumb i { font-size: 14px; opacity: .6; }
 
-  /* ══════════ STORE HERO — premium branded storefront ══════════ */
-  .shero { position: relative; background: var(--ink); overflow: hidden; }
-  /* cover photo sits under the existing mesh + glow so the hero keeps its look */
-  .shero.has-cover{background-size:cover;background-position:center;}
-  .shero.has-cover .shero-mesh{background-color:rgba(21,19,15,.78);}
-  .crest.has-logo{background-size:cover;background-position:center;}
-  .crest.has-logo i{display:none;}
-  .shero-mesh {
-    position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(201,168,76,.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(201,168,76,.05) 1px, transparent 1px);
-    background-size: 46px 46px;
-    mask-image: radial-gradient(ellipse 90% 100% at 50% 0%, #000 20%, transparent 78%);
-    -webkit-mask-image: radial-gradient(ellipse 90% 100% at 50% 0%, #000 20%, transparent 78%);
-  }
-  .shero-glow {
-    position: absolute; inset: 0;
-    background:
-      radial-gradient(ellipse 46% 62% at 78% 12%, rgba(201,168,76,.20) 0%, transparent 66%),
-      radial-gradient(ellipse 40% 56% at 14% 88%, rgba(201,168,76,.10) 0%, transparent 68%);
-  }
-  .shero-inner { position: relative; z-index: 2; max-width: var(--wrap); margin: 0 auto; padding: 40px var(--pad) 44px; }
-  .shero-grid { display: flex; align-items: flex-start; gap: 26px; }
-
-  /* crest */
-  .crest-wrap { position: relative; flex-shrink: 0; }
-  .crest {
-    width: 108px; height: 108px; border-radius: 24px;
-    background: linear-gradient(150deg, #FBF7EC, #E3D9BF);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 46px; color: var(--gold2);
-    box-shadow: 0 0 0 1px rgba(201,168,76,.55), 0 20px 44px -18px rgba(0,0,0,.7);
-  }
-  .crest-verify {
-    position: absolute; bottom: -7px; inset-inline-end: -7px;
-    width: 30px; height: 30px; border-radius: 50%;
-    background: var(--gold); color: #1C1606;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; border: 3px solid var(--ink);
-  }
-
-  /* identity */
-  .shero-id { flex: 1; min-width: 0; }
-  .shero-eyebrow { display: inline-flex; align-items: center; gap: 6px; font-family: var(--fen); font-size: 10.5px; font-weight: 700; letter-spacing: 2.4px; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
-  .shero-eyebrow i { font-size: 13px; letter-spacing: 0; }
-  .shero-name { font-family: var(--fdisplay); font-size: 40px; font-weight: 800; line-height: 1.12; color: #F7F3E9; letter-spacing: -.4px; }
-  .shero-num { font-family: var(--fen); font-size: 14px; font-weight: 500; color: var(--gold); letter-spacing: 1px; }
-  .shero-tags { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-  .stag {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 13px; border-radius: 30px;
-    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
-    font-size: 12.5px; font-weight: 600; color: #CFC9BC;
-  }
-  .stag i { font-size: 14px; color: var(--gold); }
-  .stag.cat { background: var(--gold-soft); border-color: rgba(201,168,76,.36); color: var(--gold); }
-  .stag b { font-family: var(--fen); font-weight: 700; color: #F2EEE4; }
-  .stag.open { background: rgba(46,158,91,.14); border-color: rgba(46,158,91,.36); color: #7FD3A2; }
-  .stag.closed { background: rgba(217,83,79,.14); border-color: rgba(217,83,79,.36); color: #F0A6A4; }
-  .stag.open i, .stag.closed i { font-size: 8px; }
-  .shero-desc { margin-top: 16px; font-size: 14px; line-height: 1.8; color: #A9A296; max-width: 640px; }
-  .shero-hours { margin-top: 10px; display: flex; align-items: flex-start; gap: 8px; font-size: 13.5px; line-height: 1.7; color: #CFC8BA; max-width: 640px; }
-  .shero-hours[hidden] { display: none; }
-  .shero-hours i { color: var(--gold); margin-top: 3px; flex-shrink: 0; }
-
-  /* actions */
-  .shero-act { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-  .btn-follow {
-    height: 44px; padding: 0 22px; border-radius: 30px; border: 1px solid var(--gold);
-    background: var(--gold); color: #1C1606;
-    font-family: var(--font); font-size: 13.5px; font-weight: 700; cursor: pointer;
-    display: inline-flex; align-items: center; gap: 7px; transition: all .2s;
-    box-shadow: 0 12px 26px -14px rgba(201,168,76,.9);
-  }
-  .btn-follow:hover { background: var(--gold2); border-color: var(--gold2); color: #fff; }
-  .btn-follow.on { background: transparent; color: var(--gold); }
-  .btn-follow.on:hover { background: rgba(201,168,76,.12); color: var(--gold); }
-  .btn-share {
-    width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18);
-    background: rgba(255,255,255,.05); color: #CFC9BC; font-size: 18px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; transition: all .2s;
-  }
-  .btn-share:hover { border-color: var(--gold); color: var(--gold); }
-
-  /* social */
-  .shero-social { display: flex; gap: 8px; margin-top: 18px; }
-  .social-btn {
-    width: 36px; height: 36px; border-radius: 50%;
-    border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.04);
-    display: flex; align-items: center; justify-content: center;
-    color: #A9A296; font-size: 16px; cursor: pointer; transition: all .2s; text-decoration: none;
-  }
-  .social-btn:hover { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
-
-  /* ══════════ TRUST STRIP ══════════ */
-  .trust {
-    max-width: var(--wrap); margin: -26px auto 0; padding: 0 var(--pad);
-    position: relative; z-index: 5;
-  }
-  .trust-card {
-    background: var(--card); border: 1px solid var(--border); border-radius: var(--rxl);
-    box-shadow: var(--sh); display: grid; grid-template-columns: repeat(2, 1fr); overflow: hidden;
-  }
-  .trust-item { padding: 18px 20px; display: flex; align-items: center; gap: 12px; border-inline-end: 1px solid var(--border); }
-  .trust-item:last-child { border-inline-end: none; }
-  .trust-ico {
-    width: 42px; height: 42px; flex-shrink: 0; border-radius: 13px;
-    background: var(--gold-soft); color: var(--gold2);
-    display: flex; align-items: center; justify-content: center; font-size: 21px;
-  }
-  .trust-v { font-family: var(--fen); font-size: 17px; font-weight: 800; color: var(--ink); line-height: 1.2; }
-  .trust-l { font-size: 11.5px; color: var(--text3); margin-top: 2px; }
-
-  /* ══════════ TABS ══════════ */
-  .stabs { background: var(--card); border-bottom: 1px solid var(--border); position: sticky; top: 64px; z-index: 50; margin-top: 30px; }
-  .stabs-inner { max-width: var(--wrap); margin: 0 auto; padding: 0 var(--pad); display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
-  .stabs-inner::-webkit-scrollbar { display: none; }
-  .stab {
-    padding: 15px 18px; font-size: 14px; font-weight: 600; color: var(--text3);
-    cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
-    transition: all .2s; white-space: nowrap; background: none; border-top: 0; border-inline: 0; font-family: var(--font);
-  }
-  .stab.on { color: var(--ink); border-bottom-color: var(--gold); }
-  .stab:hover { color: var(--ink); }
-
   /* ══════════ FILTER SYSTEM ══════════ */
   .fbar { max-width: var(--wrap); margin: 26px auto 0; padding: 0 var(--pad); }
   .fbar-row { display: flex; align-items: center; gap: 10px; }
@@ -386,7 +260,7 @@
     .crest-verify { width: 26px; height: 26px; font-size: 14px; }
     .shero-name { font-size: 30px; }
     .shero-desc { font-size: 13.5px; margin-top: 14px; }
-    .shero-act { width: 100%; }
+    .shero-act { grid-column: 1 / -1; width: 100%; }
     .btn-follow { flex: 1; justify-content: center; }
     .stabs { top: 56px; }
     .stab { padding: 13px 15px; font-size: 13.5px; }
@@ -423,6 +297,130 @@
     .bnav-cart.on .bnav-cart-ring{background:#A07828;}
     nav a.btn-ghost,nav a.btn-gold,nav .btn-ghost,nav .btn-gold{display:none!important;}
   }
+  /* fluid content width: grows with the viewport up to 1760px, gutters scale too */
+  :root { --cx-max: 1760px; --cx-gut: clamp(16px, 2.6vw, 48px);
+    /* the shared header lines up with this wider content */
+    --rtb-inner-max: calc(1760px - 2 * var(--cx-gut)); --rtb-sub-max: 1760px; }
+  /* ══════════ STOREFRONT — 2026 layout ══════════
+     banner & identity → tabs → (sidebar filters | count · sort · grid) */
+  body { background: #FAF8F4; }
+  .st-wrap { max-width: var(--cx-max); margin: 0 auto; padding: 0 var(--cx-gut); }
+  .breadcrumb { background: transparent; border-bottom: 0; max-width: var(--cx-max); margin: 0 auto; padding: 14px var(--cx-gut) 10px; }
+
+  /* banner: the store's cover photo, its logo and identity on top */
+  .shero { position: relative; border-radius: 22px; overflow: hidden; background: #15130F center/cover no-repeat; min-height: 250px;
+    display: flex; align-items: flex-end; isolation: isolate; box-shadow: 0 22px 50px -32px rgba(20,16,8,.55); }
+  .shero::before { content: ""; position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(0deg, rgba(12,10,6,.9) 0%, rgba(12,10,6,.55) 45%, rgba(12,10,6,.12) 100%); }
+  .shero:not(.has-cover)::after { content: ""; position: absolute; inset: 0; z-index: -2;
+    background: radial-gradient(ellipse 50% 70% at 80% 10%, rgba(201,168,76,.24), transparent 65%), linear-gradient(120deg, #15130F, #2a2419); }
+  .shero-inner { width: 100%; padding: 26px 28px; display: flex; align-items: flex-end; gap: 20px; }
+  .crest { width: 96px; height: 96px; flex-shrink: 0; border-radius: 22px; background: #fff center/cover no-repeat;
+    display: flex; align-items: center; justify-content: center; font-size: 42px; color: var(--gold2);
+    border: 3px solid #fff; box-shadow: 0 14px 30px -14px rgba(0,0,0,.7); }
+  .crest.has-logo i { display: none; }
+  .shero-id { flex: 1; min-width: 0; color: #fff; }
+  .shero-name { font-family: var(--font); font-size: 32px; font-weight: 800; line-height: 1.2; color: #fff; overflow-wrap: anywhere; }
+  html[lang="en"] .shero-name { font-family: var(--fdisplay); }
+  .shero-num { font-family: var(--fen); font-size: 13px; font-weight: 600; color: var(--gold); letter-spacing: 1px; vertical-align: middle; }
+  .shero-tags { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; margin-top: 10px; }
+  .stag { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #E6E0D2; }
+  .stag i { font-size: 15px; color: var(--gold); }
+  .stag b { font-family: var(--fen); font-weight: 800; color: #fff; }
+  .stag.cat { padding: 4px 11px; border-radius: 999px; background: rgba(201,168,76,.18); border: 1px solid rgba(201,168,76,.4); color: #F1DFA9; }
+  .stag.open, .stag.closed { padding: 4px 11px; border-radius: 999px; }
+  .stag.open { background: rgba(46,158,91,.2); color: #8FDDB0; }
+  .stag.closed { background: rgba(217,83,79,.22); color: #F4B1AF; }
+  .stag.open i, .stag.closed i { font-size: 8px; color: currentColor; }
+  .shero-act { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .btn-follow { height: 46px; padding: 0 24px; border-radius: 12px; border: 0; background: #fff; color: var(--ink);
+    font-family: var(--font); font-size: 14px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; transition: all .2s; }
+  .btn-follow:hover { background: var(--gold); }
+  .btn-follow.on { background: rgba(201,168,76,.2); color: #F1DFA9; box-shadow: inset 0 0 0 1px rgba(201,168,76,.6); }
+  .btn-share { width: 46px; height: 46px; border-radius: 12px; border: 1px solid rgba(255,255,255,.28); background: rgba(255,255,255,.08);
+    color: #fff; font-size: 19px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .2s; }
+  .btn-share:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* tabs */
+  .stabs { position: sticky; top: 126px; z-index: 50; background: rgba(250,248,244,.96); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid #E8E1D3; margin-top: 16px; }
+  .stabs-inner { max-width: var(--cx-max); margin: 0 auto; padding: 0 var(--cx-gut); display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .stabs-inner::-webkit-scrollbar { display: none; }
+  .stab { position: relative; padding: 15px 16px; font-size: 14.5px; font-weight: 700; color: var(--text2); cursor: pointer; white-space: nowrap;
+    background: none; border: 0; font-family: var(--font); transition: color .2s; }
+  .stab::after { content: ""; position: absolute; inset-inline: 10px; bottom: -1px; height: 2px; border-radius: 2px 2px 0 0; background: transparent; }
+  .stab.on { color: var(--gold2); }
+  .stab.on::after { background: var(--gold); }
+  .stab:hover { color: var(--ink); }
+
+  /* about */
+  .absec { max-width: var(--cx-max); margin: 22px auto 60px; padding: 0 var(--cx-gut); display: none; }
+  .abcard { background: #fff; border: 1px solid #ECE6DA; border-radius: 18px; padding: 24px; display: grid; gap: 16px; max-width: 820px; }
+  .abrow { display: flex; gap: 12px; align-items: flex-start; }
+  .abrow > i { width: 40px; height: 40px; flex-shrink: 0; border-radius: 12px; background: var(--gold-soft); color: var(--gold2);
+    display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .abrow-l { font-size: 12.5px; font-weight: 800; color: var(--text3); margin-bottom: 3px; }
+  .abrow-v { font-size: 14.5px; line-height: 1.8; color: var(--ink); }
+
+  /* products: sidebar + main */
+  .stlay { max-width: var(--cx-max); margin: 22px auto 60px; padding: 0 var(--cx-gut); display: grid; grid-template-columns: clamp(248px, 16vw, 300px) minmax(0, 1fr); gap: 24px; align-items: start; }
+  .sside { position: sticky; top: 190px; background: #fff; border: 1px solid #ECE6DA; border-radius: 18px; padding: 6px 16px 14px;
+    max-height: calc(100vh - 210px); overflow: auto; scrollbar-width: thin; }
+  .sgrp { padding: 14px 0; border-bottom: 1px solid #EFEAE0; }
+  .sgrp:last-child { border-bottom: 0; }
+  .sgrp-t { font-size: 14.5px; font-weight: 800; color: var(--ink); margin-bottom: 8px; }
+  .sopt { width: 100%; min-height: 38px; display: flex; align-items: center; gap: 10px; padding: 6px 10px; border: 0; border-radius: 10px;
+    background: transparent; color: var(--text2); font-family: var(--font); font-size: 13.5px; font-weight: 600; cursor: pointer; text-align: start; transition: background .15s, color .15s; }
+  .sopt:hover { background: #F6F2E9; color: var(--ink); }
+  .sopt.on { background: var(--gold-soft); color: var(--gold2); font-weight: 800; }
+  .sopt .n { margin-inline-start: auto; font-family: var(--fen); font-size: 12px; color: var(--text3); }
+  .sopt .box { width: 18px; height: 18px; flex-shrink: 0; border-radius: 5px; border: 1.5px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 12px; color: transparent; }
+  .sopt.on .box { background: var(--gold); border-color: var(--gold); color: #1C1606; }
+  .sopt .dotr { width: 16px; height: 16px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid var(--border2); }
+  .sopt.on .dotr { border: 5px solid var(--gold); }
+  .sclear { width: 100%; margin-top: 10px; height: 40px; border: 1px solid var(--border2); border-radius: 10px; background: #fff; color: var(--text2);
+    font-family: var(--font); font-size: 13px; font-weight: 700; cursor: pointer; }
+  .sclear:hover { border-color: var(--gold); color: var(--gold2); }
+  .smain { min-width: 0; }
+  .stool { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .stool .fresults { font-size: 15px; font-weight: 700; color: var(--ink); margin-inline-end: auto; }
+  .stool .fresults b { font-size: 17px; }
+  .ssort { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); font-weight: 600; }
+  .ssort select { height: 40px; min-width: 170px; padding: 0 12px; border: 1px solid var(--border2); border-radius: 10px; background: #fff; color: var(--ink);
+    font-family: var(--font); font-size: 13.5px; font-weight: 700; cursor: pointer; outline: none; }
+  .ssort select:focus-visible { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft); }
+  /* the chip row + Filter button are the tablet/mobile route to the same filters */
+  .fbar { max-width: none; margin: 0 0 12px; padding: 0; display: none; }
+  .smain .factive { margin: 0 0 14px; }
+  /* the grid gains columns as the viewport widens (≈200px per card minimum) */
+  .smain .pgrid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+  .smain .psec, .smain #tab-products { margin: 0; padding: 0; max-width: none; }
+  #storeOffers, #storeAdSlot { max-width: var(--cx-max); margin: 22px auto 0; padding: 0 var(--cx-gut); }
+  .rsec, .polsec { max-width: var(--cx-max); padding: 0 var(--cx-gut); }
+  .closed-banner { max-width: calc(var(--cx-max) - 2 * var(--cx-gut)); margin: 16px auto 0; }
+  .polbox { max-width: 760px; } .polempty .polico { background: #F1EDE4; color: var(--text3); }
+  .pollink { display: inline-flex; align-items: center; gap: 6px; margin-top: 14px; font-size: 13.5px; font-weight: 800; color: var(--gold2); text-decoration: none; }
+  .pollink:hover { color: var(--ink); } html[dir="ltr"] .pollink i { transform: scaleX(-1); }
+  @media (max-width: 1023px) {
+    .stlay { grid-template-columns: minmax(0, 1fr); }
+    .sside { display: none; }
+    .fbar { display: block; }
+  }
+  @media (max-width: 860px) {
+    .st-wrap, .breadcrumb, .stabs-inner, .stlay, .absec, .rsec, .polsec, #storeOffers, #storeAdSlot { padding-inline: 16px; }
+    .stabs { top: 62px; }
+    .shero { min-height: 220px; border-radius: 18px; }
+    .shero-inner { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; padding: 18px; gap: 14px; }
+    .crest { width: 72px; height: 72px; border-radius: 18px; font-size: 32px; }
+    .shero-name { font-size: 24px; }
+    .shero-act { grid-column: 1 / -1; width: 100%; }
+    .btn-follow { flex: 1; justify-content: center; }
+    .smain .pgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .stool { gap: 8px; }
+    .ssort .l { display: none; }
+    .ssort select { min-width: 0; max-width: 190px; }
+  }
+  @media (max-width: 380px) { .shero-inner { padding: 14px; } .crest { width: 62px; height: 62px; } .shero-name { font-size: 21px; } .stab { padding: 13px 12px; font-size: 13.5px; } }
 </style>
 <link rel="stylesheet" href="raf_header.css">
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
@@ -465,61 +463,30 @@
   <span class="bc-cur">Casa Mode</span>
 </div>
 
-<!-- ══════════ STORE HERO ══════════ -->
+<!-- ══════════ STORE BANNER & IDENTITY ══════════
+     Cover photo and logo come from the store record (RAFSource). Only the
+     store's own figures are shown: category, rating, followers, the live
+     product count and open/closed status. -->
+<div class="st-wrap">
 <header class="shero">
-  <div class="shero-mesh"></div>
-  <div class="shero-glow"></div>
   <div class="shero-inner">
-    <div class="shero-grid">
-      <div class="crest-wrap">
-        <div class="crest"><i class="ti ti-hanger" id="crestIcon"></i></div>
-        <div class="crest-verify" title="متجر موثّق"><i class="ti ti-check"></i></div>
+    <div class="crest"><i class="ti ti-hanger" id="crestIcon"></i></div>
+    <div class="shero-id">
+      <h1 class="shero-name store-hero-name">Casa Mode <span class="shero-num" id="storeNum">#001</span></h1>
+      <div class="shero-tags">
+        <span class="stag cat" id="tagCat"><i class="ti ti-category-2"></i> <span></span></span>
+        <span class="stag"><i class="ti ti-star-filled"></i> <b id="tagRate">—</b></span>
+        <span class="stag"><i class="ti ti-box"></i> <b id="tagProducts">—</b> <span data-ar="منتج" data-en="products">منتج</span></span>
+        <span class="stag open" id="tagStatus"><i class="ti ti-circle-filled"></i> <span></span></span>
       </div>
-
-      <div class="shero-id">
-        <div class="shero-eyebrow"><i class="ti ti-rosette-discount-check"></i> <span data-ar="متجر موثّق في رف" data-en="Verified RAF Store">متجر موثّق في رف</span></div>
-        <h1 class="shero-name store-hero-name">Casa Mode <span class="shero-num" id="storeNum">#001</span></h1>
-
-        <div class="shero-tags">
-          <span class="stag cat" id="tagCat"><i class="ti ti-category-2"></i> <span></span></span>
-          <span class="stag"><i class="ti ti-star-filled"></i> <b id="tagRate">4.9</b></span>
-          <span class="stag"><i class="ti ti-shopping-bag"></i> <b id="tagOrders">1,284</b> <span data-ar="طلب" data-en="orders">طلب</span></span>
-          <span class="stag"><i class="ti ti-users"></i> <b id="tagFollowers">3.2K</b> <span data-ar="متابع" data-en="followers">متابع</span></span>
-          <span class="stag open" id="tagStatus"><i class="ti ti-circle-filled"></i> <span></span></span>
-        </div>
-
-        <p class="shero-desc" id="storeDesc"></p>
-        <p class="shero-hours" id="storeHours" hidden><i class="ti ti-clock"></i><span></span></p>
-
-        <div class="shero-social">
-          <a class="social-btn" title="Instagram"><i class="ti ti-brand-instagram"></i></a>
-          <a class="social-btn" title="TikTok"><i class="ti ti-brand-tiktok"></i></a>
-          <a class="social-btn" title="WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>
-          <a class="social-btn" title="X"><i class="ti ti-brand-x"></i></a>
-        </div>
-      </div>
-
-      <div class="shero-act">
-        <button class="btn-follow" id="followBtn" onclick="toggleFollow()"><i class="ti ti-heart"></i> <span data-ar="تابع المحل" data-en="Follow store">تابع المحل</span></button>
-        <button class="btn-share" onclick="shareStore()" title="مشاركة"><i class="ti ti-share"></i></button>
-      </div>
+    </div>
+    <div class="shero-act">
+      <button class="btn-follow" id="followBtn" onclick="toggleFollow()"><i class="ti ti-plus"></i> <span data-ar="تابع المحل" data-en="Follow store">تابع المحل</span></button>
+      <button class="btn-share" onclick="shareStore()" title="مشاركة" aria-label="مشاركة"><i class="ti ti-share"></i></button>
     </div>
   </div>
 </header>
-
-<!-- ══════════ TRUST STRIP ══════════ -->
-<section class="trust">
-  <div class="trust-card">
-    <div class="trust-item">
-      <div class="trust-ico"><i class="ti ti-box"></i></div>
-      <div><div class="trust-v" id="trProducts">284</div><div class="trust-l" data-ar="منتج متوفر" data-en="Products">منتج متوفر</div></div>
-    </div>
-    <div class="trust-item">
-      <div class="trust-ico"><i class="ti ti-mood-happy"></i></div>
-      <div><div class="trust-v" id="trSat">98%</div><div class="trust-l" data-ar="رضا العملاء" data-en="Satisfaction">رضا العملاء</div></div>
-    </div>
-  </div>
-</section>
+</div>
 
 <!-- CLOSED BANNER -->
 <div class="closed-banner" id="closedBanner">
@@ -532,26 +499,11 @@
 
 <!-- ══════════ TABS ══════════ -->
 <div class="stabs">
-  <div class="stabs-inner">
-    <button class="stab on" onclick="switchTab('products', this)" data-ar="المنتجات" data-en="Products">المنتجات</button>
-    <button class="stab" onclick="switchTab('reviews', this)" id="tabReviewsBtn">التقييمات (128)</button>
+  <div class="stabs-inner" role="tablist">
+    <button class="stab on" onclick="switchTab('products', this)" data-ar="جميع المنتجات" data-en="All products">جميع المنتجات</button>
+    <button class="stab" onclick="switchTab('about', this)" data-ar="نبذة عن المتجر" data-en="About the store">نبذة عن المتجر</button>
     <button class="stab" onclick="switchTab('policy', this)" data-ar="سياسة الإرجاع" data-en="Return policy">سياسة الإرجاع</button>
-  </div>
-</div>
-
-<!-- ══════════ FILTER BAR ══════════ -->
-<div class="fbar" id="filter-bar">
-  <div class="fbar-row">
-    <div class="fchips" id="catChips"></div>
-    <button class="btn-filter" id="filterBtn" onclick="openFilters()">
-      <i class="ti ti-adjustments-horizontal"></i>
-      <span data-ar="تصفية" data-en="Filters">تصفية</span>
-      <span class="fcount" id="filterCount">0</span>
-    </button>
-  </div>
-  <div class="factive" id="activePills"></div>
-  <div class="fmeta">
-    <div class="fresults" id="resultCount"></div>
+    <button class="stab" onclick="switchTab('reviews', this)" id="tabReviewsBtn">التقييمات</button>
   </div>
 </div>
 
@@ -566,44 +518,60 @@
      has no active advertisement, so there is never an empty gap. -->
 <div class="psec" id="storeAdSlot" style="display:none;"></div>
 
-<!-- ══════════ PRODUCTS ══════════ -->
-<section class="psec" id="tab-products">
-  <div class="pgrid" id="products-grid"></div>
-  <div id="emptyState"></div>
-  <button class="btn-more" id="loadMore" onclick="loadMore()" style="display:none;"></button>
+<!-- ══════════ PRODUCTS: FILTERS + GRID ══════════ -->
+<div class="stlay" id="stLayout">
+  <!-- desktop: the filters live in this sidebar and apply at once -->
+  <aside class="sside" id="storeSide" aria-label="تصفية المنتجات"></aside>
+
+  <div class="smain">
+    <div class="stool">
+      <div class="fresults" id="resultCount"></div>
+      <label class="ssort"><span class="l" data-ar="ترتيب حسب" data-en="Sort by">ترتيب حسب</span>
+        <select id="sortSel" onchange="pickSort(this.value)"></select></label>
+    </div>
+    <!-- tablet / mobile: category chips + the Filter button (opens the sheet) -->
+    <div class="fbar" id="filter-bar">
+      <div class="fbar-row">
+        <div class="fchips" id="catChips"></div>
+        <button class="btn-filter" id="filterBtn" onclick="openFilters()">
+          <i class="ti ti-adjustments-horizontal"></i>
+          <span data-ar="تصفية" data-en="Filters">تصفية</span>
+          <span class="fcount" id="filterCount">0</span>
+        </button>
+      </div>
+    </div>
+    <div class="factive" id="activePills"></div>
+    <section class="psec" id="tab-products">
+      <div class="pgrid" id="products-grid"></div>
+      <div id="emptyState"></div>
+      <button class="btn-more" id="loadMore" onclick="loadMore()" style="display:none;"></button>
+    </section>
+  </div>
+</div>
+
+<!-- ══════════ ABOUT ══════════ -->
+<section class="absec" id="tab-about">
+  <div class="abcard">
+    <div class="abrow"><i class="ti ti-info-circle"></i><div><div class="abrow-l" data-ar="عن المتجر" data-en="About">عن المتجر</div><div class="abrow-v" id="storeDesc"></div></div></div>
+    <div class="abrow" id="storeHoursRow" hidden><i class="ti ti-clock"></i><div><div class="abrow-l" data-ar="ساعات العمل" data-en="Opening hours">ساعات العمل</div><div class="abrow-v" id="storeHours"><span></span></div></div></div>
+  </div>
 </section>
 
 <!-- ══════════ REVIEWS ══════════ -->
 <section class="rsec" id="tab-reviews">
   <div class="rscore">
     <div class="rscore-big">
-      <div class="rscore-n" id="rvScore">4.9</div>
-      <div class="rscore-stars" id="rvStars">★★★★★</div>
+      <div class="rscore-n" id="rvScore">—</div>
+      <div class="rscore-stars" id="rvStars"></div>
       <div class="rscore-c" id="rvCount"></div>
     </div>
-    <div class="rbars" id="rvBars"></div>
   </div>
 </section>
 
 <!-- ══════════ POLICY ══════════ -->
 <section class="polsec" id="tab-policy">
-  <div class="polgrid">
-    <div class="polcard">
-      <div class="polico"><i class="ti ti-refresh"></i></div>
-      <div class="poltitle" data-ar="سياسة الإرجاع" data-en="Return policy">سياسة الإرجاع</div>
-      <div class="poltext" data-ar="يمكن إرجاع المنتج خلال 7 أيام من تاريخ الاستلام بشرط أن يكون بحالته الأصلية وغير مستخدم مع الكرت والتاغ." data-en="Products may be returned within 7 days of delivery, provided they are unused and in their original condition with tags attached.">يمكن إرجاع المنتج خلال 7 أيام من تاريخ الاستلام بشرط أن يكون بحالته الأصلية وغير مستخدم مع الكرت والتاغ.</div>
-    </div>
-    <div class="polcard">
-      <div class="polico"><i class="ti ti-exchange"></i></div>
-      <div class="poltitle" data-ar="الاستبدال" data-en="Exchanges">الاستبدال</div>
-      <div class="poltext" data-ar="استبدال مجاني في حال وجود عيب مصنعي أو خطأ في الطلب. يتم التواصل مع دعم رف لتنسيق عملية الاستبدال." data-en="Free exchange for manufacturing defects or incorrect orders. Contact RAF support to arrange the exchange.">استبدال مجاني في حال وجود عيب مصنعي أو خطأ في الطلب. يتم التواصل مع دعم رف لتنسيق عملية الاستبدال.</div>
-    </div>
-    <div class="polcard">
-      <div class="polico"><i class="ti ti-headset"></i></div>
-      <div class="poltitle" data-ar="الدعم والمساعدة" data-en="Support">الدعم والمساعدة</div>
-      <div class="poltext" data-ar="لأي استفسار أو شكوى تواصل مع دعم رف مباشرة وسيتم الرد خلال 24 ساعة من أيام العمل." data-en="For any question or complaint, contact RAF support directly — we reply within 24 working hours.">لأي استفسار أو شكوى تواصل مع دعم رف مباشرة وسيتم الرد خلال 24 ساعة من أيام العمل.</div>
-    </div>
-  </div>
+  <!-- the store's own return policy (store record); RAF shows no generic text in its name -->
+  <div class="polcard polbox" id="policyBox"></div>
 </section>
 
 <!-- ══════════ FILTER SHEET ══════════ -->
@@ -709,19 +677,23 @@ window.toggleLang = function(){
 var STORE_DATA = (function(){
   var map = {};
   RAFCatalog.stores({ visibleOnly:false }).forEach(function(s){
+    /* the store's listing = its public products (RAFSource.isPublic) — the
+       one rule behind the grid, the counts and the category filters */
+    var items = RAFCatalog.list({ store:s.slug, visibleOnly:false, publicOnly:true }).map(function(p){
+      return { id:p.id, ar:p.ar, en:p.en, price:p.price, old:p.old, disc:p.disc,
+               rate:p.rate, rev:p.rev, ic:p.ic, cat:p.cat, stock:p.stock, variants:p.variants };
+    });
+    var used = {}; items.forEach(function(p){ used[p.cat] = 1; });
     map[s.slug] = {
       name: RAFCatalog.lang()==="en" ? s.name.en : s.name.ar,
       slug: s.slug, icon: s.ic, num: s.num, cat: s.cat,
-      rating: s.rating, orders: s.orders, followers: s.followers,
-      desc: s.desc, status: s.status === "open" ? "open" : "closed",
-      products: s.productCount, satisfaction: s.satisfaction,
+      rating: s.rating, desc: s.desc, status: s.status === "open" ? "open" : "closed",
       reviewCount: s.reviewCount, reviewScore: s.reviewScore,
-      cats: RAFCatalog.categories().filter(function(c){ return (s.cats||[]).indexOf(c.k) > -1; })
+      /* a store-specific return policy, only if the store record carries one */
+      returnPolicy: (s.returnPolicy && (s.returnPolicy.ar || s.returnPolicy.en)) ? s.returnPolicy : null,
+      cats: RAFCatalog.categories({ populatedOnly:false }).filter(function(c){ return used[c.k]; })
                      .map(function(c){ return { k:c.k, ar:c.ar, en:c.en }; }),
-      items: RAFCatalog.list({ store:s.slug, visibleOnly:false }).map(function(p){
-        return { id:p.id, ar:p.ar, en:p.en, price:p.price, old:p.old, disc:p.disc,
-                 rate:p.rate, rev:p.rev, ic:p.ic, cat:p.cat, stock:p.stock, variants:p.variants };
-      })
+      items: items
     };
   });
   return map;
@@ -765,7 +737,25 @@ function applyStorePolicy(){
   return false;
 }
 var PAGE_SIZE = 8;
-var shown = PAGE_SIZE;
+/* one "page" = two full rows of the grid at the current width (never fewer
+   than 8), so a wide screen is not left with a half-empty last row */
+function pageStep(){
+  var g = document.getElementById("products-grid"), c = 4;
+  try { c = getComputedStyle(g).gridTemplateColumns.split(" ").filter(Boolean).length || 4; } catch(e){}
+  return Math.max(PAGE_SIZE, c * 2);
+}
+var shown = pageStep();
+
+/* sorting — only on data every product carries; 'default' keeps the
+   store's own order */
+var SORTS = [
+  { k:'default',    ar:'الترتيب الافتراضي', en:'Default order' },
+  { k:'price-asc',  ar:'السعر: من الأقل',   en:'Price: low to high' },
+  { k:'price-desc', ar:'السعر: من الأعلى',  en:'Price: high to low' },
+  { k:'rating',     ar:'الأعلى تقييماً',    en:'Highest rated' },
+  { k:'discount',   ar:'أكبر خصم',          en:'Biggest discount' }
+];
+var SORT = 'default';
 
 /* committed filters (what the grid is showing) */
 var F = { cat: 'all', price: 'any', rating: 'any', inStock: false, onSale: false };
@@ -810,42 +800,51 @@ function renderStore(){
   /* keep the store name node intact — other components read it */
   var nameEl = document.querySelector('.shero-name');
   if (nameEl) nameEl.innerHTML = s.name + ' <span class="shero-num" id="storeNum">' + s.num + '</span>';
-
   document.querySelector('#tagCat span').textContent = L(s.cat);
-  document.getElementById('tagRate').textContent = s.rating;
-  document.getElementById('tagOrders').textContent = s.orders;
-  document.getElementById('tagFollowers').textContent = s.followers;
+  document.getElementById('tagRate').textContent = s.rating || '—';
+  /* the live count — the products this page actually lists */
+  document.getElementById('tagProducts').textContent = STORE.items.length;
 
   var st = document.getElementById('tagStatus'), open = s.status !== 'closed';
   st.className = 'stag ' + (open ? 'open' : 'closed');
   st.querySelector('span').textContent = open ? T('مفتوح الآن', 'Open now') : T('مغلق حالياً', 'Closed now');
   document.getElementById('closedBanner').classList.toggle('show', !open);
 
-  document.getElementById('storeDesc').textContent = L(s.desc);
+  document.getElementById('storeDesc').textContent = L(s.desc) || '—';
   /* opening hours — generated from the structured schedule only; a store
      without one shows none rather than a guessed or free-text value */
-  var hrs = document.getElementById('storeHours');
+  var hrs = document.getElementById('storeHoursRow');
   var ph = window.RAFStoreSchedule ? RAFStoreSchedule.publicHours(SLUG, isEn() ? 'en' : 'ar') : null;
   hrs.hidden = !(ph && ph.configured);
-  hrs.querySelector('span').textContent = (ph && ph.configured) ? ph.text : '';
-  document.getElementById('trProducts').textContent = s.products;
-  document.getElementById('trSat').textContent = s.satisfaction;
+  document.querySelector('#storeHours span').textContent = (ph && ph.configured) ? ph.text : '';
 
   document.getElementById('tabReviewsBtn').textContent =
     T('التقييمات (' + s.reviewCount + ')', 'Reviews (' + s.reviewCount + ')');
 
-  /* reviews summary */
-  document.getElementById('rvScore').textContent = s.reviewScore;
-  var full = Math.round(parseFloat(s.reviewScore));
-  document.getElementById('rvStars').textContent = '★★★★★'.slice(0, full) + '☆☆☆☆☆'.slice(0, 5 - full);
+  /* reviews summary — the store record's score and count only */
+  document.getElementById('rvScore').textContent = s.reviewScore || '—';
+  var full = Math.round(parseFloat(s.reviewScore) || 0);
+  document.getElementById('rvStars').textContent = full ? '★★★★★'.slice(0, full) + '☆☆☆☆☆'.slice(0, 5 - full) : '';
   document.getElementById('rvCount').textContent =
     T('بناءً على ' + s.reviewCount + ' تقييم', 'Based on ' + s.reviewCount + ' reviews');
-  var dist = [78, 15, 4, 2, 1];
-  document.getElementById('rvBars').innerHTML = dist.map(function(p, i){
-    return '<div class="rbar"><span class="rbar-k">' + (5 - i) + ' ★</span>' +
-      '<span class="rbar-t"><span class="rbar-f" style="width:' + p + '%"></span></span>' +
-      '<span class="rbar-p">' + p + '%</span></div>';
-  }).join('');
+
+  /* return policy — the store's own text when its record has one; otherwise
+     say plainly that it is not available (RAF's general policy is linked,
+     clearly labelled as RAF's, never presented as the store's) */
+  var pol = document.getElementById('policyBox');
+  if (s.returnPolicy){
+    pol.className = 'polcard polbox';
+    pol.innerHTML = '<div class="polico"><i class="ti ti-refresh"></i></div>' +
+      '<div class="poltitle">' + T('سياسة الإرجاع', 'Return policy') + '</div>' +
+      '<div class="poltext"></div>';
+    pol.querySelector('.poltext').textContent = L(s.returnPolicy) || s.returnPolicy.ar || s.returnPolicy.en;
+  } else {
+    pol.className = 'polcard polbox polempty';
+    pol.innerHTML = '<div class="polico"><i class="ti ti-file-off"></i></div>' +
+      '<div class="poltitle">' + T('معلومات سياسة الإرجاع غير متاحة', 'Return policy information is not available') + '</div>' +
+      '<div class="poltext">' + T('لم يُضِف هذا المتجر سياسة إرجاع خاصة به بعد.', 'This store has not added its own return policy yet.') + '</div>' +
+      '<a class="pollink" href="raf_returns.html">' + T('سياسة الإرجاع العامة في رف', 'RAF’s general return policy') + ' <i class="ti ti-arrow-left"></i></a>';
+  }
 
   syncFollowBtn();
 }
@@ -860,7 +859,7 @@ function renderCatChips(){
     return '<button class="fchip' + (F.cat === c.k ? ' on' : '') + '" data-k="' + c.k + '" onclick="pickCat(\'' + c.k + '\')">' + L(c) + '</button>';
   }).join('');
 }
-function pickCat(k){ F.cat = k; D.cat = k; shown = PAGE_SIZE; renderCatChips(); render(); }
+function pickCat(k){ F.cat = k; D.cat = k; shown = pageStep(); renderCatChips(); render(); }
 
 function renderFilterSheet(){
   var body = document.getElementById('fsheetBody');
@@ -911,9 +910,9 @@ function closeFilters(){
   document.removeEventListener('keydown', onSheetKey);
 }
 function onSheetKey(e){ if (e.key === 'Escape') closeFilters(); }
-function applyFilters(){ F = Object.assign({}, D); shown = PAGE_SIZE; renderCatChips(); render(); closeFilters(); }
+function applyFilters(){ F = Object.assign({}, D); shown = pageStep(); renderCatChips(); render(); closeFilters(); }
 function resetFilters(){ D = { cat:'all', price:'any', rating:'any', inStock:false, onSale:false }; renderFilterSheet(); }
-function clearAll(){ F = { cat:'all', price:'any', rating:'any', inStock:false, onSale:false }; shown = PAGE_SIZE; renderCatChips(); render(); }
+function clearAll(){ F = { cat:'all', price:'any', rating:'any', inStock:false, onSale:false }; shown = pageStep(); renderCatChips(); render(); }
 
 /* how many filters differ from the default */
 function activeCount(f){
@@ -989,7 +988,7 @@ function renderPills(){
 }
 function clearOne(k){
   if (k === 'inStock' || k === 'onSale') F[k] = false; else F[k] = 'any';
-  shown = PAGE_SIZE; render();
+  shown = pageStep(); render();
 }
 
 /* -----------------------------------------------
@@ -998,8 +997,90 @@ function clearOne(k){
    variants, Sold Out and the one-store rule all behave
    exactly as they do on every other listing.
 ----------------------------------------------- */
+/* the price and discount the shopper sees on the card (live promotion first) */
+function shownOf(p){
+  var d = (window.RAFMarketing && RAFMarketing.displayPrice) ? RAFMarketing.displayPrice(Object.assign({}, p, { slug: SLUG })) : null;
+  return (d && d.promoted) ? { price: parseFloat(d.final) || 0, pct: parseInt(d.pct, 10) || 0 }
+                           : { price: parseFloat(p.price) || 0, pct: parseInt(p.disc, 10) || 0 };
+}
+function sorted(list){
+  if (SORT === 'default') return list;
+  var keyed = list.map(function(p, i){ return { p:p, i:i, s:shownOf(p), r:parseFloat(p.rate) || 0 }; });
+  keyed.sort(function(a, b){
+    var d = 0;
+    if (SORT === 'price-asc')  d = a.s.price - b.s.price;
+    if (SORT === 'price-desc') d = b.s.price - a.s.price;
+    if (SORT === 'rating')     d = b.r - a.r;
+    if (SORT === 'discount')   d = b.s.pct - a.s.pct;
+    return d || a.i - b.i;   /* stable: ties keep the store's order */
+  });
+  return keyed.map(function(x){ return x.p; });
+}
+function renderSort(){
+  var sel = document.getElementById('sortSel'); if (!sel) return;
+  sel.innerHTML = SORTS.map(function(o){ return '<option value="' + o.k + '"' + (o.k === SORT ? ' selected' : '') + '>' + L(o) + '</option>'; }).join('');
+  sel.setAttribute('aria-label', T('ترتيب حسب', 'Sort by'));
+}
+function pickSort(k){ if (SORTS.some(function(o){ return o.k === k; })) { SORT = k; shown = pageStep(); render(); } }
+
+/* desktop sidebar — the same committed filters (F) as the chips and the
+   sheet, applied as soon as an option is chosen */
+function renderSidebar(){
+  var el = document.getElementById('storeSide'); if (!el) return;
+  function opt(on, label, fn, kind, n){
+    return '<button type="button" class="sopt' + (on ? ' on' : '') + '" aria-pressed="' + (on ? 'true' : 'false') + '" onclick="' + fn + '">' +
+      '<span class="' + (kind === 'box' ? 'box' : 'dotr') + '">' + (kind === 'box' ? '<i class="ti ti-check"></i>' : '') + '</span>' +
+      '<span>' + label + '</span>' + (n != null ? '<span class="n">' + n + '</span>' : '') + '</button>';
+  }
+  var cats = allCats().map(function(c){
+    var n = c.k === 'all' ? STORE.items.length : STORE.items.filter(function(p){ return p.cat === c.k; }).length;
+    return opt(F.cat === c.k, L(c), "sidePick('cat','" + c.k + "')", 'dot', n);
+  }).join('');
+  var prices = PRICE_BANDS.map(function(b){ return opt(F.price === b.k, L(b), "sidePick('price','" + b.k + "')", 'dot'); }).join('');
+  var rates = RATINGS.map(function(r){ return opt(F.rating === r.k, (r.min ? '★ ' : '') + L(r), "sidePick('rating','" + r.k + "')", 'dot'); }).join('');
+  el.innerHTML =
+    '<div class="sgrp"><div class="sgrp-t">' + T('الأقسام', 'Categories') + '</div>' + cats + '</div>' +
+    '<div class="sgrp"><div class="sgrp-t">' + T('السعر (د.ك)', 'Price (KWD)') + '</div>' + prices + '</div>' +
+    '<div class="sgrp"><div class="sgrp-t">' + T('التقييم', 'Rating') + '</div>' + rates + '</div>' +
+    '<div class="sgrp"><div class="sgrp-t">' + T('التوفر والعروض', 'Availability & offers') + '</div>' +
+      opt(F.inStock, T('المتوفر فقط', 'In stock only'), "sideToggle('inStock')", 'box') +
+      opt(F.onSale, T('عليها خصم', 'On sale'), "sideToggle('onSale')", 'box') +
+      (activeCount(F) ? '<button type="button" class="sclear" onclick="clearAll()">' + T('مسح عوامل التصفية', 'Clear filters') + '</button>' : '') +
+    '</div>';
+  el.setAttribute('aria-label', T('تصفية المنتجات', 'Filter products'));
+}
+function sidePick(k, v){ F[k] = v; D[k] = v; shown = pageStep(); renderCatChips(); render(); }
+function sideToggle(k){ F[k] = !F[k]; D[k] = F[k]; shown = pageStep(); render(); }
+
+/* the view (filters, sort, how many shown, scroll) is kept per store for
+   this tab, so Store → Product → Back returns to exactly the same list */
+var VIEW_KEY = 'raf_store_view', pendingY = null;
+function readViews(){ try { var v = JSON.parse(sessionStorage.getItem(VIEW_KEY) || '{}'); return (v && typeof v === 'object') ? v : {}; } catch(e){ return {}; } }
+function saveView(y){
+  try {
+    var all = readViews(), cur = all[SLUG] || {};
+    all[SLUG] = { F: F, sort: SORT, shown: shown, y: (y != null ? y : (cur.y || 0)) };
+    sessionStorage.setItem(VIEW_KEY, JSON.stringify(all));
+  } catch(e){}
+}
+function restoreView(){
+  var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || null;
+  var type = nav ? nav.type : '';
+  var v = readViews()[SLUG];
+  if (!v || (type !== 'back_forward' && type !== 'reload')) return;
+  var f = v.F || {};
+  if (allCats().some(function(c){ return c.k === f.cat; })) F.cat = f.cat;
+  if (PRICE_BANDS.some(function(b){ return b.k === f.price; })) F.price = f.price;
+  if (RATINGS.some(function(r){ return r.k === f.rating; })) F.rating = f.rating;
+  F.inStock = f.inStock === true; F.onSale = f.onSale === true;
+  D = Object.assign({}, F);
+  if (SORTS.some(function(o){ return o.k === v.sort; })) SORT = v.sort;
+  if (typeof v.shown === 'number' && v.shown >= pageStep()) shown = v.shown;
+  if (typeof v.y === 'number' && v.y > 0) pendingY = v.y;
+}
+
 function render(){
-  var list = matches(F);
+  var list = sorted(matches(F));
   var grid = document.getElementById('products-grid');
   var slice = list.slice(0, shown);
 
@@ -1052,20 +1133,24 @@ function render(){
   document.getElementById('filterCount').textContent = n;
 
   renderPills();
+  renderSidebar();
+  renderSort();
+  saveView();
   if (window.RAFCard) RAFCard.badge();
 }
-function loadMore(){ shown += PAGE_SIZE; render(); }
+function loadMore(){ shown += pageStep(); render(); }
 
 /* -----------------------------------------------
    TABS
 ----------------------------------------------- */
 function switchTab(id, btn){
-  document.querySelectorAll('.stab').forEach(function(t){ t.classList.remove('on'); });
-  btn.classList.add('on');
-  document.getElementById('tab-products').style.display = id === 'products' ? 'block' : 'none';
-  document.getElementById('tab-reviews').style.display  = id === 'reviews'  ? 'block' : 'none';
-  document.getElementById('tab-policy').style.display   = id === 'policy'   ? 'block' : 'none';
-  document.getElementById('filter-bar').style.display   = id === 'products' ? 'block' : 'none';
+  document.querySelectorAll('.stab').forEach(function(t){ t.classList.remove('on'); t.setAttribute('aria-selected', 'false'); });
+  btn.classList.add('on'); btn.setAttribute('aria-selected', 'true');
+  /* the products tab is the whole filters + grid layout */
+  document.getElementById('stLayout').style.display   = id === 'products' ? '' : 'none';
+  document.getElementById('tab-about').style.display  = id === 'about'    ? 'block' : 'none';
+  document.getElementById('tab-reviews').style.display = id === 'reviews' ? 'block' : 'none';
+  document.getElementById('tab-policy').style.display = id === 'policy'   ? 'block' : 'none';
 }
 
 /* -----------------------------------------------
@@ -1075,7 +1160,7 @@ function switchTab(id, btn){
    Favorites page — this button only reads and writes that one source. */
 function followRecord(){
   return { slug: SLUG, name: STORE.name, cat: STORE.cat, ic: STORE.icon,
-           products: STORE.products, rating: STORE.rating };
+           products: STORE.items.length, rating: STORE.rating };
 }
 function isFollowing(){ return !!(window.RAFShop && RAFShop.Follow.has(SLUG)); }
 function syncFollowBtn(){
@@ -1084,7 +1169,7 @@ function syncFollowBtn(){
   if (!btn) return;
   btn.classList.toggle('on', on);
   btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-  btn.querySelector('i').className = 'ti ' + (on ? 'ti-heart-filled' : 'ti-heart');
+  btn.querySelector('i').className = 'ti ' + (on ? 'ti-check' : 'ti-plus');
   btn.querySelector('span').textContent = on ? T('تتابعه', 'Following') : T('تابع المحل', 'Follow store');
 }
 function toggleFollow(){
@@ -1162,7 +1247,11 @@ function shareStore(){
   window.mountStoreSections = function(){ mountStoreOffers(); mountStoreAd(); };
   function boot(){
     if (!applyStorePolicy()) return;   /* suspended/deleted stores never render */
+    restoreView();                     /* coming back (Back / reload): same filters, sort, count */
     applyLang();                       /* store, chips, sheet, grid, offers, ad */
+    if (pendingY != null){ var y = pendingY; pendingY = null; setTimeout(function(){ window.scrollTo(0, y); }, 60); }
+    /* remember where the shopper was in the list when leaving for a product */
+    window.addEventListener('pagehide', function(){ saveView(window.scrollY || 0); });
     if (window.RAFShop) RAFShop.Cart.badge();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);

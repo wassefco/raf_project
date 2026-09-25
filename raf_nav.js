@@ -20,6 +20,18 @@
   if (window.__rafNavInit) return;
   window.__rafNavInit = true;
 
+  /* ---- where sign-in was opened from ------------------------------------
+     Any link to the sign-in page (header, drawer, gates) remembers the page
+     it was clicked on, in this tab only, so raf_login.html can bring the
+     customer back there after signing in / creating an account. The login
+     page validates it (same site, a raf_*.html page) and reads it once. */
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest && e.target.closest('a[href]');
+    if (!a || !/(^|\/)raf_login\.html([?#]|$)/i.test(a.getAttribute('href') || '')) return;
+    if (/(^|\/)raf_login\.html$/i.test(location.pathname)) return;
+    try { sessionStorage.setItem('raf_auth_return', location.href); } catch (x) {}
+  }, true);
+
   /* ---- admin feature flags (auctions/used hidden until re-enabled) ------- */
   function rafFeatureOn(k){ if(window.RAFFeatures) return RAFFeatures.on(k); try{ return (JSON.parse(localStorage.getItem('raf_features')||'{}'))[k] === true; }catch(e){ return false; } }
 

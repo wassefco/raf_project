@@ -117,6 +117,11 @@ footer{background:var(--black);color:#888;padding:48px 40px 24px;margin-top:80px
 /* category chip rail (homepage categories land here via ?cat=) */
 #rc-cats{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 0 4px;margin:0 0 16px;}
 #rc-cats::-webkit-scrollbar{display:none;}
+#rc-pills{display:none;flex-wrap:wrap;align-items:center;gap:8px;margin:-6px 0 16px;}
+.rc-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;padding-inline-start:12px;border-radius:30px;background:#EDE8DC;border:1px solid #E2DBCC;font-size:12.5px;font-weight:700;color:#5A5650;}
+.rc-pill button{width:22px;height:22px;min-height:22px;border:none;border-radius:50%;background:#D8D0BE;color:#15130F;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.rc-pill button:hover{background:#D9534F;color:#fff;}
+.rc-clear{border:none;background:none;color:#A07828;font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer;text-decoration:underline;}
 .rc-cat{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border:1px solid #D8D0BE;
   border-radius:30px;background:#fff;color:#5A5650;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:600;
   cursor:pointer;transition:all .18s;white-space:nowrap;}
@@ -362,62 +367,87 @@ setInterval(tick,1000);
 <script src="raf_marketing.js"></script>
 <script src="raf_card.js"></script>
 <script src="raf_quick.js"></script>
+<script src="raf_search_filters.js"></script>
 <script>
 (function(){
-  /* Offers listing now reads the central authority — no local product copy.
-     Discounted, in-catalogue products only; categories come from the same source. */
-  var P = RAFCatalog.list({ onSale:true });
+  /* Results page. One filter state — RAFSearchFilters, read from the URL —
+     is applied to RAF's listable products. Opened with no parameters at all
+     it is the Offers page (discounted products), exactly as before. */
+  var SF = window.RAFSearchFilters;
   var CATS = RAFCatalog.categories().map(function(c){ return { k:c.k, ar:c.ar, en:c.en, ic:c.ic }; });
-  /* active category comes from ?cat= (homepage carousel) and can be changed
-     with the chips below the heading */
-  var activeCat = (new URLSearchParams(location.search).get('cat') || '').trim();
-  if (activeCat && !CATS.some(function(c){ return c.k === activeCat; })) activeCat = '';
-  window.rafPickCat = function(k){
-    activeCat = k;
-    try { var u = new URL(location.href);
-      if (k) u.searchParams.set('cat', k); else u.searchParams.delete('cat');
-      history.replaceState({}, '', u.pathname + (u.search || '') + u.hash);
+  function state(){
+    var st = SF.parse(location.search);
+    if (!location.search || location.search === '?') st.onSale = true;   /* the Offers page */
+    return st;
+  }
+  function setState(st){
+    try {
+      var qs = SF.toQuery(st) || 'all=1';
+      history.replaceState({}, '', location.pathname + '?' + qs + location.hash);
     } catch(e){}
     render();
+  }
+  /* the header's Filter button edits this same state in place */
+  SF.mount({ state: state, onApply: setState });
+  window.rafPickCat = function(k){ var st = state(); st.cat = k; setState(st); };
+  window.rafClearFilter = function(k){
+    var st = state();
+    if (k === 'price'){ st.pmin = null; st.pmax = null; }
+    else if (k === 'inStock' || k === 'onSale') st[k] = false;
+    else st[k] = '';
+    setState(st);
   };
+  window.rafClearAll = function(){ var st = state(); setState({ q: st.q, cat:'', store:'', pmin:null, pmax:null, rating:'', inStock:false, onSale:false }); };
 
-  function chipsHTML(en){
-    var all = '<button class="rc-cat'+(activeCat?'':' on')+'" onclick="rafPickCat(\'\')">'+(en?'All':'الكل')+'</button>';
+  function chipsHTML(en, st){
+    var all = '<button class="rc-cat'+(st.cat?'':' on')+'" onclick="rafPickCat(\'\')">'+(en?'All':'الكل')+'</button>';
     return all + CATS.map(function(c){
-      return '<button class="rc-cat'+(activeCat===c.k?' on':'')+'" onclick="rafPickCat(\''+c.k+'\')">'+
+      return '<button class="rc-cat'+(st.cat===c.k?' on':'')+'" onclick="rafPickCat(\''+c.k+'\')">'+
         '<i class="ti '+c.ic+'"></i> '+(en?c.en:c.ar)+'</button>';
     }).join('');
+  }
+  function pillsHTML(en, st){
+    var out = [];
+    function pill(label, k){ return '<span class="rc-pill">'+label+'<button type="button" onclick="rafClearFilter(\''+k+'\')" aria-label="'+(en?'Remove':'إزالة')+'"><i class="ti ti-x"></i></button></span>'; }
+    if (st.store){ var s = RAFCatalog.stores().filter(function(x){ return x.slug === st.store; })[0]; if (s) out.push(pill('<i class="ti ti-building-store"></i> '+(en?s.name.en:s.name.ar), 'store')); }
+    if (st.pmin != null || st.pmax != null) out.push(pill((st.pmin != null ? st.pmin : 0)+' – '+(st.pmax != null ? st.pmax : '∞')+' '+(en?'KWD':'د.ك'), 'price'));
+    if (st.rating) out.push(pill('★ '+st.rating+(en?' & up':' فأعلى'), 'rating'));
+    if (st.inStock) out.push(pill(en?'In stock':'متوفّر الآن', 'inStock'));
+    if (st.onSale) out.push(pill(en?'On sale':'عليها خصم', 'onSale'));
+    if (out.length > 1) out.push('<button type="button" class="rc-clear" onclick="rafClearAll()">'+(en?'Clear all':'مسح الكل')+'</button>');
+    return out.join('');
   }
 
   function render(){
     var g=document.getElementById('prodGrid'); if(!g) return;
     var en=document.getElementById('htmlRoot').lang==='en';
-    var q=(new URLSearchParams(location.search).get('q')||'').trim().toLowerCase();
-    var list=P;
-    if(activeCat){ list=list.filter(function(p){ return p.cat===activeCat; }); }
-    if(q){ list=list.filter(function(p){ return (p.ar+' '+p.en+' '+(p.store?p.store.ar+' '+p.store.en:'')+' '+p.id).toLowerCase().indexOf(q)>-1; }); }
+    var st=state();
+    var list=SF.results(st);
 
     /* category chip rail, kept directly above the grid */
     var chips=document.getElementById('rc-cats');
     if(!chips){ chips=document.createElement('div'); chips.id='rc-cats'; g.parentNode.insertBefore(chips,g); }
-    chips.innerHTML=chipsHTML(en);
+    chips.innerHTML=chipsHTML(en, st);
+    /* the other active filters, each removable */
+    var pills=document.getElementById('rc-pills');
+    if(!pills){ pills=document.createElement('div'); pills.id='rc-pills'; g.parentNode.insertBefore(pills,g); }
+    pills.innerHTML=pillsHTML(en, st);
+    pills.style.display=pills.innerHTML?'flex':'none';
 
     var rc=document.getElementById('rc-results');
-    var label='';
-    if(q) label=(en?'Search results for ':'نتائج البحث عن ')+'“'+q+'” — '+list.length;
-    else if(activeCat){
-      var c=CATS.filter(function(x){return x.k===activeCat;})[0];
-      label=(en?c.en:c.ar)+' — '+list.length+' '+(en?(list.length===1?'product':'products'):'منتج');
-    }
-    if(label){ if(!rc){ rc=document.createElement('div'); rc.id='rc-results'; rc.style.cssText='margin:0 0 16px;font-size:14px;font-weight:700;color:#15130F;'; chips.parentNode.insertBefore(rc,g); }
-      rc.textContent=label; }
-    else if(rc){ rc.remove(); }
+    if(!rc){ rc=document.createElement('div'); rc.id='rc-results'; rc.style.cssText='margin:0 0 16px;font-size:14px;font-weight:700;color:#15130F;'; g.parentNode.insertBefore(rc,g); }
+    var n=list.length+' '+(en?(list.length===1?'product':'products'):'منتج');
+    var c=st.cat?CATS.filter(function(x){return x.k===st.cat;})[0]:null;
+    rc.textContent = st.q ? ((en?'Search results for ':'نتائج البحث عن ')+'“'+st.q+'” — '+n)
+                          : ((c?(en?c.en:c.ar)+' — ':'')+n);
 
-    var emptyMsg = q ? ((en?'No results for':'لا توجد نتائج لـ')+' “'+q+'”')
-                     : (en?'No products in this category yet':'لا توجد منتجات في هذه الفئة بعد');
+    var emptyMsg = st.q ? ((en?'No results for':'لا توجد نتائج لـ')+' “'+st.q+'”')
+                        : (en?'No products match these filters':'لا توجد منتجات مطابقة لهذه الخيارات');
     g.innerHTML = list.length ? list.map(function(p){ return RAFCard.product(p); }).join('')
       : '<div style="grid-column:1/-1;text-align:center;padding:52px 20px;color:#8A857C;"><i class="ti ti-search-off" style="font-size:46px;color:#C9A84C;display:block;margin-bottom:12px;"></i><div style="font-size:15px;font-weight:700;color:#15130F;">'+emptyMsg+'</div></div>';
+    var inp=document.getElementById('navSearch'); if(inp && document.activeElement!==inp) inp.value=st.q;
   }
+  window.rafRenderResults = render;
   render();
   new MutationObserver(render).observe(document.getElementById('htmlRoot'),{attributes:true,attributeFilter:['lang']});
 })();

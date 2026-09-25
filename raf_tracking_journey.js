@@ -173,8 +173,6 @@
     '@keyframes jrBlink{0%,100%{opacity:1;}50%{opacity:.25;}}',
     '.jr-clock{display:block;width:8.4ch;font-family:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;',
     '  font-size:21px;font-weight:700;letter-spacing:.5px;color:var(--jr-ink);line-height:1.2;margin-top:1px;white-space:nowrap;}',
-    /* a finished delivery reads as a calm, static duration — not a running clock */
-    '.jr-clock.done{width:auto;font-family:inherit;font-size:18px;font-weight:800;letter-spacing:0;}',
     '.jr-timer small{display:block;font-size:11px;line-height:1.45;color:var(--jr-mute);margin-top:1px;}',
     /* icon-only Call / Message */
     '.jr .jr-ic{width:48px;height:48px;min-width:48px;padding:0;border-radius:50%;border:1px solid var(--jr-line);background:#F4F1EA;color:var(--jr-ink);',
@@ -508,10 +506,6 @@
     var s = Math.max(0, Math.floor(ms / 1000));
     return pad2(Math.floor(s / 3600)) + ':' + pad2(Math.floor(s / 60) % 60) + ':' + pad2(s % 60);
   }
-  function durText(ms){
-    var s = Math.max(0, Math.floor(ms / 1000)), h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, sec = s % 60;
-    return h > 0 ? T(h + ' س ' + m + ' د', h + ' h ' + m + ' min') : T(m + ' د ' + sec + ' ث', m + ' min ' + sec + ' sec');
-  }
   function dateOf(ms){
     try { return new Date(ms).toLocaleDateString(isEn() ? 'en-GB' : 'ar-KW-u-nu-latn', { timeZone:'Asia/Kuwait', day:'numeric', month:'long', year:'numeric' }); }
     catch (e) { return null; }
@@ -523,8 +517,7 @@
     var start = typeof m.acceptedAt === 'number' ? m.acceptedAt : null;
     var end = delivered && typeof m.deliveredAt === 'number' ? m.deliveredAt : null;
     var running = !!start && !end && !cancelled && !delivered;
-    /* delivered: a finished duration, written out ("3 h 45 min") — static, not a clock */
-    var shown = !start ? '--:--:--' : end ? durText(end - start) : hms(Date.now() - start);
+    var shown = start ? hms((end || Date.now()) - start) : '--:--:--';
     var label = delivered ? T('مدة التوصيل', 'Delivery time') : T('مؤقت التوصيل', 'Delivery timer');
     var sub = !start ? T('يبدأ عند قبول المتجر لطلبك', 'Starts when the store accepts your order')
             : delivered ? T('من قبول المتجر حتى التسليم', 'From store acceptance to delivery')
@@ -532,7 +525,7 @@
     return '<div class="jr-timer' + (running ? ' on' : '') + '"' + (start ? ' data-jr-timer data-start="' + start + '"' + (end ? ' data-end="' + end + '"' : '') : '') + '>'
       + '<span class="ic" aria-hidden="true"><i class="ti ti-clock-hour-4"></i></span>'
       + '<div><span>' + label + (running ? '<i class="jr-live" aria-hidden="true"></i>' : '') + '</span>'
-      + '<b class="jr-clock' + (end ? ' done' : '') + '" dir="' + (end ? 'auto' : 'ltr') + '"' + (end ? '' : ' role="timer"') + ' aria-label="' + esc(label + ': ' + shown) + '">' + shown + '</b>'
+      + '<b class="jr-clock" dir="ltr" role="timer" aria-label="' + esc(label + ': ' + shown) + '">' + shown + '</b>'
       + '<small>' + sub + '</small></div></div>';
   }
   /* the driver — only while a live conversation exists (RAFDriverCommunication);

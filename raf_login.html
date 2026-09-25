@@ -8,356 +8,188 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
+  /* ═════════════ RAF ID — sign in / create account ═════════════
+     One authentication screen: SIGN IN | CREATE ACCOUNT. Presentation only —
+     every field, handler, validation and route below is the page's existing
+     logic (RAFPerm owns the session). */
   :root {
-    --bg: #F5F2EC;
-    --bg2: #EDE8DC;
-    --bg3: #E7E1D4;
-    --card: #FFFFFF;
-    --gold: #C9A84C;
-    --gold2: #A07828;
-    --gold-soft: rgba(201,168,76,0.12);
-    --ink: #15130F;
-    --text: #0A0A0A;
-    --text2: #5A5650;
-    --text3: #8A857C;
-    --border: #E2DBCC;
-    --border2: #D8D0BE;
-    --green: #2E9E5B;
-    --red: #C0392B;
-    --r: 10px;
-    --rl: 16px;
-    --font: 'Tajawal', sans-serif;
-    --fdisplay: 'Playfair Display', serif;
-    --fen: 'DM Sans', sans-serif;
+    --bg: #F5F2EC; --bg2: #EDE8DC; --card: #FFFFFF;
+    --gold: #C9A84C; --gold2: #A07828; --gold-soft: rgba(201,168,76,0.12);
+    --ink: #15130F; --text: #0A0A0A; --text2: #5A5650; --text3: #8A857C;
+    --border: #E2DBCC; --border2: #D8D0BE; --line: #DDD5C4;
+    --green: #2E9E5B; --red: #C0392B;
+    --font: 'Tajawal', sans-serif; --fdisplay: 'Playfair Display', serif; --fen: 'DM Sans', sans-serif;
   }
+  html[lang="en"] { --font: 'DM Sans', sans-serif; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   html { overflow-x: hidden; }
-  body {
-    background: var(--bg);
-    min-height: 100vh;
-    display: flex; flex-direction: column;
-    font-family: var(--font);
-    color: var(--text);
-    position: relative;
-    overflow-x: hidden;
-    max-width: 100%;
-  }
-  /* soft ambient backdrop */
-  body::before {
-    content: '';
-    position: fixed; inset: 0; z-index: 0;
-    background:
-      radial-gradient(620px 420px at 85% -5%, rgba(201,168,76,0.10), transparent 60%),
-      radial-gradient(560px 420px at 0% 100%, rgba(201,168,76,0.07), transparent 60%);
-    pointer-events: none;
-  }
+  body { background: #FCFAF6; min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
+    font-family: var(--font); color: var(--text); overflow-x: hidden; max-width: 100%; }
+  .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+  button { font-family: inherit; }
+  a { color: inherit; }
 
-  /* ─────────── TOP NAV ─────────── */
-  .auth-nav {
-    position: sticky; top: 0; z-index: 50;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 16px;
-    padding: 12px clamp(16px, 4vw, 40px);
-    padding-top: max(12px, env(safe-area-inset-top));
-    background: rgba(245,242,236,0.85);
-    backdrop-filter: saturate(180%) blur(12px);
-    border-bottom: 1px solid var(--border);
-  }
-  .nav-logo { display: inline-flex; align-items: center; }
-  .nav-logo img { height: 50px; width: auto; display: block; }
-  .nav-right { display: flex; align-items: center; gap: 10px; }
+  /* the RAF mark as a very faint watermark — behind everything, never under the form's contrast */
+  .au-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .au-bg img { position: absolute; width: 150vw; max-width: 1300px; top: 6vh; inset-inline-end: -52vw;
+    opacity: .045; filter: grayscale(1) contrast(1.2); user-select: none; }
 
-  .lang-btn {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 8px 14px;
-    border: 1px solid var(--border2);
-    border-radius: 30px;
-    background: var(--card);
-    color: var(--text2); font-family: var(--fen);
-    font-size: 12px; font-weight: 500; cursor: pointer;
-    transition: all .2s; letter-spacing: .5px;
-  }
-  .lang-btn:hover { border-color: var(--gold); color: var(--gold2); }
-  .lang-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+  /* top bar: back + language */
+  .au-top { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 16px 0; }
+  .au-ic { width: 44px; height: 44px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+    background: transparent; border: 0; color: var(--ink); font-size: 24px; text-decoration: none; cursor: pointer; }
+  .au-ic:hover { background: rgba(21,19,15,.05); }
+  .au-ic:focus-visible, .lang-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  html[dir="ltr"] .au-back .ti { transform: scaleX(-1); }
+  .lang-btn { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 0 14px; border-radius: 999px;
+    border: 1px solid var(--border2); background: rgba(255,255,255,.7); color: var(--ink); font-size: 13px; font-weight: 700; cursor: pointer; }
+  .lang-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
 
-  .nav-back {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 8px 16px; border-radius: 30px;
-    background: var(--ink); color: #F3EFE5;
-    font-size: 13px; font-weight: 500; text-decoration: none;
-    transition: all .2s;
-  }
-  .nav-back:hover { background: #000; transform: translateY(-1px); }
-  .nav-back i { font-size: 16px; }
+  /* the composition */
+  .au-main { position: relative; z-index: 1; flex: 1 0 auto; display: flex; justify-content: center; padding: 4px 20px 32px; }
 
-  /* ─────────── MAIN / CARD ─────────── */
-  .auth-main {
-    flex: 1; position: relative; z-index: 1;
-    display: flex; align-items: center; justify-content: center;
-    padding: 36px 20px 56px;
-  }
-  .login-card {
-    position: relative;
-    width: 100%; max-width: 440px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 22px;
-    padding: 38px 38px 30px;
-    box-shadow: 0 1px 0 rgba(255,255,255,0.6) inset, 0 30px 70px -30px rgba(20,16,8,0.30), 0 8px 24px -12px rgba(20,16,8,0.12);
-  }
+  .login-card { width: 100%; max-width: 440px; }
+  .au-logo { display: flex; justify-content: center; margin: 4px 0 22px; }
+  .au-logo img { height: 58px; width: auto; }
 
-  /* LOGO inside card (subtle, brand reinforcement) */
-  .card-head { text-align: center; margin-bottom: 22px; }
-  .card-head .kicker {
-    font-family: var(--fen); font-size: 10px; font-weight: 600;
-    letter-spacing: 3px; text-transform: uppercase; color: var(--gold2);
-  }
+  /* SIGN IN | CREATE ACCOUNT */
+  .auth-toggle { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); margin-bottom: 26px; }
+  .auth-seg { position: relative; min-height: 52px; background: none; border: 0; cursor: pointer; font-size: 16px; font-weight: 700; color: var(--ink); }
+  .auth-seg::after { content: ""; position: absolute; inset-inline: 0; bottom: -1px; height: 3px; border-radius: 3px 3px 0 0; background: transparent; transition: background .2s; }
+  .auth-seg.on { color: var(--gold2); }
+  .auth-seg.on::after { background: var(--gold); }
+  .auth-seg:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; border-radius: 8px; }
 
-  /* SEGMENTED TOGGLE */
-  .auth-toggle {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
-    background: var(--bg2); border: 1px solid var(--border);
-    border-radius: 14px; padding: 5px; margin-bottom: 26px;
-  }
-  .auth-seg {
-    padding: 12px 8px; border: none; background: transparent;
-    color: var(--text2); font-family: var(--font);
-    font-size: 14px; font-weight: 700; cursor: pointer;
-    border-radius: 10px; transition: all .22s; letter-spacing: .2px;
-  }
-  .auth-seg:hover { color: var(--ink); }
-  .auth-seg.on {
-    background: var(--ink); color: #F5F0E4;
-    box-shadow: 0 4px 14px -4px rgba(20,16,8,0.5);
-  }
-
-  /* FORM HEADER */
-  .form-header { margin-bottom: 22px; }
-  .form-title {
-    font-family: var(--fdisplay);
-    font-size: 24px; font-weight: 700;
-    color: var(--ink); margin-bottom: 6px;
-  }
-  .form-sub { font-size: 13.5px; color: var(--text3); line-height: 1.6; }
-
-  /* METHOD TABS */
-  .method-tabs {
-    display: grid; grid-template-columns: repeat(2,1fr);
-    gap: 8px; margin-bottom: 22px;
-  }
-  .method-tab {
-    padding: 11px 8px; border-radius: var(--r);
-    border: 1px solid var(--border); background: var(--bg);
-    color: var(--text2); font-family: var(--font);
-    font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .method-tab i { font-size: 17px; color: var(--text3); transition: color .2s; }
-  .method-tab:hover { border-color: var(--border2); }
-  .method-tab.on {
-    background: var(--gold-soft); border-color: var(--gold);
-    color: var(--ink); font-weight: 700;
-  }
-  .method-tab.on i { color: var(--gold2); }
-
-  /* FORM FIELDS */
-  .field { margin-bottom: 16px; }
-  .field-label {
-    font-size: 12.5px; font-weight: 600;
-    color: var(--text2); margin-bottom: 8px;
-    display: block; letter-spacing: .2px;
-  }
-  .field-input {
-    width: 100%; padding: 13px 16px;
-    border: 1px solid var(--border2);
-    border-radius: var(--r);
-    background: #FCFBF8;
-    color: var(--text); font-family: var(--font);
-    font-size: 14.5px; outline: none;
-    transition: border-color .2s, box-shadow .2s, background .2s;
-  }
-  .field-input:focus {
-    border-color: var(--gold);
-    background: #fff;
-    box-shadow: 0 0 0 3px rgba(201,168,76,0.16);
-  }
-  .field-input.invalid { border-color: var(--red); box-shadow: 0 0 0 3px rgba(192,57,43,0.10); }
-  .field-input::placeholder { color: #B8B1A2; }
-  .input-wrap { position: relative; }
-  .input-prefix {
-    position: absolute; right: 14px; top: 50%;
-    transform: translateY(-50%);
-    font-size: 15px; color: var(--text3);
-  }
-  .pw-toggle {
-    position: absolute; left: 12px; top: 50%;
-    transform: translateY(-50%);
-    background: none; border: none; cursor: pointer;
-    color: var(--text3); font-size: 18px; padding: 4px;
-    display: flex; align-items: center;
-  }
-  .pw-toggle:hover { color: var(--gold2); }
-
-  /* inline validation message */
-  .field-error {
-    font-size: 12px; color: var(--red);
-    margin-top: 7px; display: none;
-    align-items: center; gap: 6px;
-  }
-  .field-error.show { display: flex; }
-  .field-error i { font-size: 14px; }
-
-  /* PASSWORD STRENGTH */
-  .pw-meter { display: flex; gap: 5px; margin-top: 10px; }
-  .pw-bar { flex: 1; height: 4px; border-radius: 3px; background: var(--bg3); transition: background .25s; }
-  .pw-bar.f1 { background: #C0392B; }
-  .pw-bar.f2 { background: #E67E22; }
-  .pw-bar.f3 { background: var(--gold); }
-  .pw-bar.f4 { background: var(--green); }
-  .pw-hint { font-size: 11.5px; color: var(--text3); margin-top: 8px; line-height: 1.5; }
-
-  /* forgot password */
-  .forgot-row { text-align: left; margin: -2px 0 18px; }
-  .forgot-row a { font-size: 12.5px; color: var(--gold2); text-decoration: none; font-weight: 500; }
-  .forgot-row a:hover { text-decoration: underline; }
-
-  /* OTP */
-  .otp-wrap { display: flex; gap: 9px; }
-  .otp-input {
-    flex: 1; padding: 14px 0;
-    border: 1px solid var(--border2);
-    border-radius: var(--r);
-    background: #FCFBF8;
-    color: var(--ink); font-family: var(--fen);
-    font-size: 22px; font-weight: 700;
-    text-align: center; outline: none;
-    transition: border-color .2s, box-shadow .2s;
-    min-width: 0;
-  }
-  .otp-input:focus {
-    border-color: var(--gold); background: #fff;
-    box-shadow: 0 0 0 3px rgba(201,168,76,0.16);
-  }
-
-  /* ─────────── BUTTONS (clear hierarchy) ─────────── */
-  .btn-main {
-    width: 100%; padding: 15px;
-    background: var(--gold); border: 1px solid var(--gold2);
-    border-radius: var(--r);
-    color: #1C1606;
-    font-family: var(--font); font-size: 15px; font-weight: 700;
-    cursor: pointer; transition: all .2s;
-    display: flex; align-items: center; justify-content: center; gap: 9px;
-    margin-bottom: 16px; letter-spacing: .3px;
-    box-shadow: 0 8px 20px -8px rgba(201,168,76,0.7);
-  }
-  .btn-main:hover { background: var(--gold2); border-color: var(--gold2); color: #fff; transform: translateY(-1px); box-shadow: 0 12px 26px -8px rgba(160,120,40,0.6); }
-  .btn-main i { font-size: 18px; }
-
-  .btn-ghost {
-    width: 100%; padding: 13px;
-    background: var(--card); border: 1px solid var(--border2);
-    border-radius: var(--r); color: var(--text2);
-    font-family: var(--font); font-size: 13.5px; font-weight: 600;
-    cursor: pointer; transition: all .2s;
-    display: flex; align-items: center; justify-content: center; gap: 7px;
-  }
-  .btn-ghost:hover { border-color: var(--gold); color: var(--gold2); background: var(--gold-soft); }
-
-  /* DIVIDER */
-  .or-divider {
-    display: flex; align-items: center; gap: 12px;
-    margin: 18px 0; color: var(--text3); font-size: 12px; font-family: var(--fen);
-  }
-  .or-divider::before, .or-divider::after {
-    content: ''; flex: 1; height: 1px; background: var(--border);
-  }
-
-  /* SOCIAL BUTTONS */
-  .social-btns { display: flex; gap: 10px; margin-bottom: 20px; }
-  .social-login {
-    flex: 1; padding: 12px;
-    border: 1px solid var(--border2); border-radius: var(--r);
-    background: var(--card); cursor: pointer;
-    transition: all .2s; font-family: var(--font);
-    font-size: 13.5px; font-weight: 600; color: var(--text2);
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-  }
-  .social-login:hover { border-color: var(--ink); color: var(--ink); box-shadow: 0 4px 12px -6px rgba(20,16,8,0.25); }
-  .social-login i { font-size: 18px; }
-
-  /* TERMS */
-  .terms-text { font-size: 11.5px; color: var(--text3); text-align: center; line-height: 1.7; }
-  .terms-text a { color: var(--gold2); text-decoration: none; font-weight: 500; }
-  .terms-text a:hover { text-decoration: underline; }
-
-  /* PANEL SWITCH */
   .form-panel { display: none; }
-  .form-panel.on { display: block; animation: fadeIn .25s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  /* a panel appears in its final state at once — no entrance fade, so switching
+     Sign In ⇄ Create Account can never leave a half-faded / shifted panel */
+  .form-panel.on { display: block; }
+  @media (prefers-reduced-motion: reduce) { .auth-seg::after { transition: none; } }
+  .form-sub { font-size: 13.5px; color: var(--text2); line-height: 1.7; margin: -8px 0 18px; }
 
-  /* OTP HEADER */
-  .otp-header { text-align: center; margin-bottom: 24px; }
-  .otp-icon-wrap {
-    width: 60px; height: 60px;
-    background: var(--gold-soft);
-    border: 1px solid rgba(201,168,76,0.30);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 26px; color: var(--gold2);
-    margin: 0 auto 16px;
-  }
-  .otp-title { font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: 7px; }
-  .otp-desc { font-size: 12.5px; color: var(--text3); line-height: 1.6; }
-  .otp-desc b { color: var(--text); font-weight: 700; }
+  /* the field: icon · floating label · underline · (password toggle) — no box, ever */
+  .field { margin-bottom: 8px; }
+  .field[hidden], .forgot-row[hidden] { display: none; }
+  .fl { position: relative; display: flex; align-items: center; gap: 12px; min-height: 60px; border-bottom: 1px solid var(--line);
+    transition: border-color .2s, box-shadow .2s; }
+  /* focus = the underline itself thickens and darkens, the icon and label take the gold — no surrounding rectangle */
+  .fl:focus-within { border-bottom-color: var(--ink); box-shadow: 0 1px 0 0 var(--ink); }
+  .fl:focus-within > .ti, .fl:focus-within > .fl-pre { opacity: 1; color: var(--gold2); }
+  .login-card .field-input:focus, .login-card .field-input:focus-visible,
+  .login-card .otp-input:focus, .login-card .otp-input:focus-visible { outline: none; box-shadow: none; border-radius: 0; }
+  .field-input:-webkit-autofill, .field-input:-webkit-autofill:focus { -webkit-text-fill-color: var(--ink); caret-color: var(--ink);
+    transition: background-color 600000s 0s, color 600000s 0s; }
+  .fl > .ti, .fl > .fl-pre { flex: 0 0 auto; color: var(--ink); font-size: 21px; opacity: .8; transition: color .2s; }
+  .fl-pre { font-family: var(--fen); font-size: 14px !important; font-weight: 700; direction: ltr; }
+  .fl-b { position: relative; flex: 1 1 auto; min-width: 0; align-self: stretch; }
+  .field-input { width: 100%; height: 100%; min-height: 60px; padding: 26px 0 6px; border: 0; background: transparent; outline: none;
+    font-family: inherit; font-size: 16px; color: var(--ink); }
+  html[dir="rtl"] .field-input { text-align: right; } html[dir="ltr"] .field-input { text-align: left; }
+  .field-label { position: absolute; inset-inline-start: 0; top: 50%; transform: translateY(-50%); font-size: 16px; font-weight: 500; color: var(--ink);
+    pointer-events: none; transition: color .15s; white-space: nowrap; line-height: 1.3; }
+  /* the floated label takes its own line above the value — set directly, not
+     animated, so it can never be caught half-way over the typed text */
+  .field-input:focus + .field-label, .field-input:not(:placeholder-shown) + .field-label { top: 8px; transform: none; font-size: 12px; color: var(--text3); }
+  /* separate rule: a browser that does not know this selector must not drop the one above */
+  .field-input:-webkit-autofill + .field-label { top: 8px; transform: none; font-size: 12px; color: var(--text3); }
+  .field-input:focus + .field-label { color: var(--gold2); }
+  .fl:has(.field-input.invalid) { border-bottom-color: var(--red); }
+  .pw-toggle { flex: 0 0 auto; width: 44px; height: 44px; margin-inline-end: -8px; border: 0; background: none; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center; color: var(--text2); font-size: 20px; cursor: pointer; }
+  .pw-toggle:hover { color: var(--ink); }
+  .login-card .pw-toggle:focus-visible { outline: 2px solid var(--gold); outline-offset: 0; border-radius: 50%; }
+  .field-error { display: none; align-items: center; gap: 6px; margin-top: 6px; font-size: 12.5px; color: var(--red); font-weight: 600; }
+  .field-error.show { display: flex; }
+  .field-error .ti { font-size: 15px; }
 
-  /* ACTIVATED SUCCESS */
-  .activated-wrap { text-align: center; padding: 14px 0 6px; }
-  .activated-icon {
-    width: 84px; height: 84px; margin: 0 auto 22px;
-    border-radius: 50%;
-    background: rgba(46,158,91,0.10);
-    border: 1px solid rgba(46,158,91,0.35);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 42px; color: var(--green);
-    animation: pop .4s ease;
-  }
-  @keyframes pop { 0% { transform: scale(.5); opacity: 0; } 70% { transform: scale(1.08); } 100% { transform: scale(1); opacity: 1; } }
-  .activated-title { font-family: var(--fdisplay); font-size: 25px; font-weight: 700; color: var(--ink); margin-bottom: 10px; }
-  .activated-sub { font-size: 13.5px; color: var(--text3); line-height: 1.7; margin-bottom: 28px; }
+  /* password strength — the existing meter, restyled */
+  .pw-meter { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 10px; }
+  .pw-bar { height: 3px; border-radius: 3px; background: var(--border); transition: background .2s; }
+  .pw-bar.f1 { background: #C0392B; } .pw-bar.f2 { background: #E67E22; } .pw-bar.f3 { background: var(--gold2); } .pw-bar.f4 { background: var(--green); }
+  .pw-hint { margin-top: 8px; font-size: 12.5px; line-height: 1.6; color: var(--text3); }
 
-  /* RESEND */
-  .resend-row { text-align: center; margin-bottom: 16px; }
-  .resend-row span { font-size: 12.5px; color: var(--text3); }
-  .resend-row a { font-size: 12.5px; color: var(--gold2); text-decoration: none; font-weight: 600; }
-  .resend-row a:hover { text-decoration: underline; }
+  .forgot-row { display: flex; justify-content: flex-end; margin: 18px 0 0; }
+  .forgot-row a { font-size: 14px; color: var(--text2); text-decoration: none; min-height: 32px; display: inline-flex; align-items: center; }
+  .forgot-row a:hover { color: var(--ink); text-decoration: underline; }
 
-  /* STAFF SECTION */
-  .staff-section { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
-  .staff-label {
-    text-align: center; font-size: 10px; color: var(--text3);
-    letter-spacing: 2px; text-transform: uppercase;
-    font-family: var(--fen); margin-bottom: 10px; font-weight: 600;
-  }
-  .staff-note {
-    font-size: 12.5px; color: var(--text2); line-height: 1.7;
-    text-align: center; margin: 6px auto 0; max-width: 320px;
-  }
+  /* the one primary action */
+  .btn-main { display: flex; align-items: center; justify-content: center; gap: 9px; width: 100%; min-height: 54px; margin-top: 26px;
+    border: 0; border-radius: 12px; background: var(--ink); color: #fff; font-size: 16.5px; font-weight: 700; cursor: pointer;
+    transition: background .2s, transform .1s; }
+  .btn-main:hover { background: #2A261D; }
+  .btn-main:active { transform: scale(.99); }
+  .btn-main:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .btn-main .ti { font-size: 19px; }
+  .btn-ghost { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; min-height: 48px; margin-top: 10px;
+    border: 0; background: none; color: var(--text2); font-size: 14.5px; font-weight: 700; cursor: pointer; border-radius: 12px; }
+  .btn-ghost:hover { color: var(--ink); background: rgba(21,19,15,.04); }
+  html[dir="ltr"] .btn-ghost .ti-arrow-right { transform: scaleX(-1); }
 
-  /* ── MOBILE ── */
-  @media (max-width: 768px) {
-    img, video, iframe { max-width: 100% !important; height: auto; }
+  .or-divider { display: flex; align-items: center; gap: 12px; margin: 26px 0 14px; font-size: 12.5px; color: var(--text3); }
+  .or-divider::before, .or-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .social-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .social-login { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-radius: 12px;
+    border: 1px solid var(--border2); background: #fff; color: var(--ink); font-size: 14.5px; font-weight: 700; cursor: pointer; }
+  .social-login:hover { border-color: var(--ink); }
+  .social-login:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .social-login .ti { font-size: 19px; }
+  .terms-text { margin-top: 20px; font-size: 12.5px; line-height: 1.8; color: var(--text3); text-align: center; }
+  .terms-text a { color: var(--ink); font-weight: 700; }
+
+  /* codes, confirmations */
+  .otp-header, .activated-wrap { text-align: center; }
+  .otp-icon-wrap, .activated-icon { width: 60px; height: 60px; margin: 6px auto 14px; border-radius: 50%; background: var(--gold-soft);
+    color: var(--gold2); display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  .activated-icon { background: rgba(46,158,91,.12); color: var(--green); }
+  .otp-title, .activated-title { font-size: 21px; font-weight: 800; color: var(--ink); }
+  .otp-desc, .activated-sub { margin: 8px 0 22px; font-size: 14px; line-height: 1.7; color: var(--text2); }
+  .otp-desc b { color: var(--ink); direction: ltr; unicode-bidi: isolate; }
+  .otp-wrap { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+  .otp-input { width: 100%; min-height: 56px; border: 0; border-bottom: 2px solid var(--line); background: transparent; text-align: center;
+    font-family: var(--fen); font-size: 22px; font-weight: 700; color: var(--ink); outline: none; }
+  .otp-input:focus { border-bottom-color: var(--gold2); }
+  .resend-row { margin-top: 16px; text-align: center; font-size: 13.5px; color: var(--text2); }
+  .resend-row a { color: var(--ink); font-weight: 700; }
+
+  .staff-section { margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line); text-align: center; }
+  .staff-label { font-size: 11.5px; font-weight: 800; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; margin-bottom: 6px; }
+  .staff-note { font-size: 12.5px; color: var(--text2); line-height: 1.7; max-width: 340px; margin: 0 auto; }
+
+  /* actions row: the primary button + its companion (forgot link / terms) */
+  .au-actions .forgot-row { margin-top: 16px; }
+  #view-register .au-actions .terms-text { order: -1; margin-top: 18px; text-align: start; }
+  .au-actions { display: flex; flex-direction: column; }
+
+  /* TABLET + DESKTOP — the same system laid across the screen: no card, no frame.
+     The two tabs sit over two field columns; every row (fields, actions, social)
+     follows the same two columns, so the form spans the viewport's content width. */
+  @media (min-width: 768px) {
+    .au-bg img { width: 1200px; max-width: none; top: auto; bottom: -300px; inset-inline-end: auto; inset-inline-start: -320px; opacity: .035; }
+    .au-top { padding: 22px 32px 0; }
+    .au-main { align-items: center; padding: 8px 40px 48px; }
+    .login-card { max-width: 920px; }
+    .au-logo { margin: 0 0 28px; }
+    .au-logo img { height: 64px; }
+    .auth-toggle { margin-bottom: 30px; }
+    .auth-seg { font-size: 17px; }
+    .fgrid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 48px; align-items: start; }
+    .au-actions { display: grid; grid-template-columns: 1fr 1fr; column-gap: 48px; align-items: center; margin-top: 26px; }
+    .au-actions .btn-main { margin-top: 0; }
+    .au-actions .forgot-row { margin-top: 0; justify-content: flex-start; }
+    #view-register .au-actions .terms-text { order: 0; margin-top: 0; }
+    .social-btns { column-gap: 48px; }
+    .or-divider { margin-top: 32px; }
+    #view-signin-otp, #view-register-otp, #view-activated, #view-staff-pending { max-width: 460px; margin-inline: auto; }
   }
-  @media (max-width: 480px) {
-    .auth-main { padding: 22px 14px 40px; }
-    .login-card { padding: 28px 20px 24px; border-radius: 18px; }
-    .nav-logo img { height: 36px; }
-    .nav-back span { display: none; }
-    .nav-back { padding: 9px 11px; }
-    .otp-wrap { gap: 6px; }
-    .otp-input { font-size: 19px; padding: 12px 0; }
+  @media (min-width: 1200px) {
+    .au-main { padding-bottom: 64px; }
+    .login-card { max-width: 1040px; }
+    .fgrid, .au-actions, .social-btns { column-gap: 64px; }
   }
+  @media (max-width: 380px) { .au-main { padding-inline: 16px; } .otp-wrap { gap: 6px; } .social-btns { gap: 8px; } }
+  /* the theme's global button floor (40px, higher specificity) must not shrink the designed auth targets */
+  .login-card .btn-main { min-height: 54px; } .login-card .social-login, .login-card .btn-ghost { min-height: 48px; } .login-card .auth-seg { min-height: 52px; } .login-card .pw-toggle { min-height: 44px; }
 </style>
 <link rel="stylesheet" href="raf_header.css">
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
@@ -372,109 +204,66 @@
 </head>
 <body>
 
-<!-- ─────────── TOP NAV ─────────── -->
-<header class="auth-nav">
-  <a href="raf_homepage.html" class="nav-logo" aria-label="RAF">
-    <img src="assets/branding/logo.svg" alt="RAF Marketplace">
+<div class="au-bg" aria-hidden="true"><img src="assets/branding/logo.svg" alt=""></div>
+
+<!-- ─────────── TOP BAR ─────────── -->
+<header class="au-top">
+  <a href="raf_homepage.html" class="au-ic au-back" aria-label="العودة للتسوق" data-aria-ar="العودة للتسوق" data-aria-en="Back to shopping" title="العودة للتسوق">
+    <i class="ti ti-chevron-right" aria-hidden="true"></i>
   </a>
-  <div class="nav-right">
-    <button class="lang-btn" onclick="toggleLang()">
-      <span class="lang-dot"></span>
-      <span id="langLabel">EN</span>
-    </button>
-    <a href="raf_homepage.html" class="nav-back">
-      <i class="ti ti-arrow-right"></i>
-      <span data-ar="العودة للتسوق" data-en="Back to shopping">العودة للتسوق</span>
-    </a>
-  </div>
+  <button class="lang-btn" type="button" onclick="toggleLang()" aria-label="English / العربية">
+    <span class="lang-dot" aria-hidden="true"></span>
+    <span id="langLabel">EN</span>
+  </button>
 </header>
 
 <!-- ─────────── MAIN ─────────── -->
-<main class="auth-main">
-<div class="login-card">
+<main class="au-main">
+  <div class="login-card">
 
-  <div class="card-head">
-    <span class="kicker" data-ar="هوية رف" data-en="RAF ID">هوية رف</span>
-  </div>
+  <div class="au-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace"></div>
 
-  <!-- SEGMENTED TOGGLE -->
-  <div class="auth-toggle" id="authToggle">
-    <button class="auth-seg on" id="seg-signin" onclick="setMode('signin')" data-ar="تسجيل الدخول" data-en="Sign In">تسجيل الدخول</button>
-    <button class="auth-seg" id="seg-register" onclick="setMode('register')" data-ar="إنشاء حساب" data-en="Create Account">إنشاء حساب</button>
+  <!-- SIGN IN | CREATE ACCOUNT -->
+  <div class="auth-toggle" id="authToggle" role="tablist" aria-label="هوية رف">
+    <button class="auth-seg on" id="seg-signin" type="button" role="tab" aria-selected="true" aria-controls="view-signin" onclick="setMode('signin')" data-ar="تسجيل الدخول" data-en="Sign In">تسجيل الدخول</button>
+    <button class="auth-seg" id="seg-register" type="button" role="tab" aria-selected="false" aria-controls="view-register" onclick="setMode('register')" data-ar="إنشاء حساب" data-en="Create Account">إنشاء حساب</button>
   </div>
 
   <!-- ══════════ SIGN IN ══════════ -->
-  <div class="form-panel on" id="view-signin">
+  <div class="form-panel on" id="view-signin" role="tabpanel" aria-labelledby="seg-signin">
 
-    <div class="form-header">
-      <div class="form-title" data-ar="أهلاً بعودتك" data-en="Welcome Back">أهلاً بعودتك</div>
-      <div class="form-sub" data-ar="سجّل دخولك إلى هوية رف الخاصة بك" data-en="Sign in to your RAF ID">سجّل دخولك إلى هوية رف الخاصة بك</div>
-    </div>
-
-    <!-- METHOD TABS -->
-    <div class="method-tabs">
-      <button class="method-tab on" id="si-tab-email" onclick="selectSigninMethod('email')">
-        <i class="ti ti-mail"></i>
-        <span data-ar="البريد الإلكتروني" data-en="Email">البريد الإلكتروني</span>
-      </button>
-      <button class="method-tab" id="si-tab-phone" onclick="selectSigninMethod('phone')">
-        <i class="ti ti-device-mobile"></i>
-        <span data-ar="رقم الجوال" data-en="Phone">رقم الجوال</span>
-      </button>
-    </div>
-
-    <!-- EMAIL + PASSWORD -->
-    <div id="si-email">
+    <!-- ONE identifier: email or phone — the page decides which it is -->
+    <div class="fgrid">
       <div class="field">
-        <label class="field-label" data-ar="البريد الإلكتروني" data-en="Email Address">البريد الإلكتروني</label>
-        <div class="input-wrap">
-          <input id="si-email-input" type="email" class="field-input" placeholder="example@email.com" style="direction:ltr;text-align:right;padding-right:44px;">
-          <span class="input-prefix"><i class="ti ti-mail"></i></span>
+        <div class="fl"><i class="ti ti-user" aria-hidden="true"></i>
+          <div class="fl-b"><input id="si-id-input" type="text" class="field-input" placeholder=" " dir="ltr" autocomplete="username" autocapitalize="off" spellcheck="false" aria-describedby="err-si-id" oninput="onSigninIdInput()">
+            <label class="field-label" for="si-id-input" data-ar="البريد الإلكتروني أو رقم الجوال" data-en="Email or Phone Number">البريد الإلكتروني أو رقم الجوال</label></div>
         </div>
-        <div class="field-error" id="err-si-email"><i class="ti ti-alert-circle"></i><span></span></div>
+        <div class="field-error" id="err-si-id" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span></span></div>
       </div>
-      <div class="field">
-        <label class="field-label" data-ar="كلمة المرور" data-en="Password">كلمة المرور</label>
-        <div class="input-wrap">
-          <input id="si-pw-input" type="password" class="field-input" placeholder="••••••••" style="direction:ltr;text-align:right;padding-left:42px;">
-          <button type="button" class="pw-toggle" onclick="togglePw('si-pw-input',this)"><i class="ti ti-eye"></i></button>
+      <!-- password: the email path requires it; a phone number continues with its verification code instead -->
+      <div class="field" id="si-pw-field">
+        <div class="fl"><i class="ti ti-lock" aria-hidden="true"></i>
+          <div class="fl-b"><input id="si-pw-input" type="password" class="field-input" placeholder=" " dir="ltr" autocomplete="current-password" aria-describedby="err-si-pw">
+            <label class="field-label" for="si-pw-input" data-ar="كلمة المرور" data-en="Password">كلمة المرور</label></div>
+          <button type="button" class="pw-toggle" onclick="togglePw('si-pw-input',this)" aria-label="إظهار كلمة المرور" aria-pressed="false"><i class="ti ti-eye" aria-hidden="true"></i></button>
         </div>
-        <div class="field-error" id="err-si-pw"><i class="ti ti-alert-circle"></i><span></span></div>
+        <div class="field-error" id="err-si-pw" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span></span></div>
       </div>
-      <div class="forgot-row">
+    </div>
+    <div class="au-actions">
+      <button class="btn-main" id="si-submit" type="button" onclick="doSignin()">
+        <span id="si-submit-label" data-ar="تسجيل الدخول" data-en="Sign In">تسجيل الدخول</span>
+      </button>
+      <div class="forgot-row" id="si-forgot">
         <a href="#" onclick="return false;" data-ar="نسيت كلمة المرور؟" data-en="Forgot password?">نسيت كلمة المرور؟</a>
       </div>
-      <button class="btn-main" onclick="doEmailLogin()">
-        <i class="ti ti-login-2"></i>
-        <span data-ar="تسجيل الدخول" data-en="Login">تسجيل الدخول</span>
-      </button>
-    </div>
-
-    <!-- PHONE (OTP) -->
-    <div id="si-phone" style="display:none;">
-      <div class="field">
-        <label class="field-label" data-ar="رقم الجوال" data-en="Mobile Number">رقم الجوال</label>
-        <div class="input-wrap">
-          <input id="si-phone-input" type="tel" class="field-input" placeholder="XXXXXXXX" style="padding-right:82px;direction:ltr;text-align:right;">
-          <span class="input-prefix" style="display:flex;align-items:center;gap:4px;font-size:12.5px;color:var(--text2);">🇰🇼 +965</span>
-        </div>
-        <div class="field-error" id="err-si-phone"><i class="ti ti-alert-circle"></i><span></span></div>
-      </div>
-      <button class="btn-main" onclick="doPhoneSignin()">
-        <i class="ti ti-send"></i>
-        <span data-ar="إرسال رمز التحقق" data-en="Send Verification Code">إرسال رمز التحقق</span>
-      </button>
     </div>
 
     <div class="or-divider" data-ar="أو تابع باستخدام" data-en="or continue with">أو تابع باستخدام</div>
-
     <div class="social-btns">
-      <button class="social-login" onclick="socialAuth('google')">
-        <i class="ti ti-brand-google" style="color:#EA4335;"></i> Google
-      </button>
-      <button class="social-login" onclick="socialAuth('apple')">
-        <i class="ti ti-brand-apple" style="color:#111;"></i> Apple
-      </button>
+      <button class="social-login" type="button" onclick="socialAuth('google')"><i class="ti ti-brand-google" aria-hidden="true" style="color:#EA4335;"></i> Google</button>
+      <button class="social-login" type="button" onclick="socialAuth('apple')"><i class="ti ti-brand-apple" aria-hidden="true"></i> Apple</button>
     </div>
 
     <div class="terms-text">
@@ -488,133 +277,121 @@
   <!-- ══════════ SIGN IN — PHONE OTP ══════════ -->
   <div class="form-panel" id="view-signin-otp">
     <div class="otp-header">
-      <div class="otp-icon-wrap"><i class="ti ti-device-mobile"></i></div>
+      <div class="otp-icon-wrap" aria-hidden="true"><i class="ti ti-device-mobile"></i></div>
       <div class="otp-title" data-ar="أدخل رمز التحقق" data-en="Enter Verification Code">أدخل رمز التحقق</div>
-      <div class="otp-desc" data-ar="تم إرسال رمز مكوّن من 6 أرقام إلى" data-en="A 6-digit code was sent to">تم إرسال رمز مكوّن من 6 أرقام إلى <b id="si-otp-dest">+965 XXXXXXXX</b></div>
+      <div class="otp-desc"><span data-ar="تم إرسال رمز مكوّن من 6 أرقام إلى" data-en="A 6-digit code was sent to">تم إرسال رمز مكوّن من 6 أرقام إلى</span> <b id="si-otp-dest">+965 XXXXXXXX</b></div>
     </div>
     <div class="field">
-      <div class="otp-wrap" style="direction:ltr;">
-        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
-        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
-        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
-        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
-        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
-        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
+      <div class="otp-wrap" style="direction:ltr;" role="group" aria-label="رمز التحقق">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" autocomplete="one-time-code" aria-label="1" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" aria-label="2" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" aria-label="3" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" aria-label="4" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" aria-label="5" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" aria-label="6" oninput="moveOtp(this)">
       </div>
     </div>
-    <button class="btn-main" style="margin-top:14px;" onclick="confirmPhoneSignin()">
-      <i class="ti ti-check"></i>
+    <button class="btn-main" type="button" onclick="confirmPhoneSignin()">
       <span data-ar="تأكيد الدخول" data-en="Confirm">تأكيد الدخول</span>
     </button>
     <div class="resend-row">
       <span data-ar="لم يصلك الرمز؟ " data-en="Didn't receive it? ">لم يصلك الرمز؟ </span>
       <a href="#" onclick="return false;" data-ar="إعادة الإرسال" data-en="Resend">إعادة الإرسال</a>
     </div>
-    <button class="btn-ghost" onclick="setMode('signin')">
-      <i class="ti ti-arrow-right"></i>
+    <button class="btn-ghost" type="button" onclick="setMode('signin')">
+      <i class="ti ti-arrow-right" aria-hidden="true"></i>
       <span data-ar="رجوع" data-en="Back">رجوع</span>
     </button>
   </div><!-- /view-signin-otp -->
 
   <!-- ══════════ CREATE ACCOUNT ══════════ -->
-  <div class="form-panel" id="view-register">
-    <div class="form-header">
-      <div class="form-title" data-ar="أنشئ هوية رف" data-en="Create your RAF ID">أنشئ هوية رف</div>
-      <div class="form-sub" data-ar="حساب واحد لكل تجربة رف الخاصة بك" data-en="One account for your entire RAF experience">حساب واحد لكل تجربة رف الخاصة بك</div>
+  <div class="form-panel" id="view-register" role="tabpanel" aria-labelledby="seg-register">
+    <div class="fgrid">
+    <div class="field">
+      <div class="fl"><i class="ti ti-user" aria-hidden="true"></i>
+        <div class="fl-b"><input id="reg-name" type="text" class="field-input" placeholder=" " autocomplete="name" aria-describedby="err-reg-name">
+          <label class="field-label" for="reg-name" data-ar="الاسم الكامل" data-en="Full Name">الاسم الكامل</label></div>
+      </div>
+      <div class="field-error" id="err-reg-name" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span></span></div>
     </div>
 
     <div class="field">
-      <label class="field-label" data-ar="الاسم الكامل" data-en="Full Name">الاسم الكامل</label>
-      <div class="input-wrap">
-        <input id="reg-name" type="text" class="field-input" placeholder="محمد العنزي" style="padding-right:44px;">
-        <span class="input-prefix"><i class="ti ti-user"></i></span>
+      <div class="fl"><i class="ti ti-mail" aria-hidden="true"></i>
+        <div class="fl-b"><input id="reg-email" type="email" class="field-input" placeholder=" " dir="ltr" autocomplete="email" inputmode="email" aria-describedby="err-reg-email">
+          <label class="field-label" for="reg-email" data-ar="البريد الإلكتروني" data-en="Email Address">البريد الإلكتروني</label></div>
       </div>
-      <div class="field-error" id="err-reg-name"><i class="ti ti-alert-circle"></i><span></span></div>
+      <div class="field-error" id="err-reg-email" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span></span></div>
     </div>
 
     <div class="field">
-      <label class="field-label" data-ar="البريد الإلكتروني" data-en="Email Address">البريد الإلكتروني</label>
-      <div class="input-wrap">
-        <input id="reg-email" type="email" class="field-input" placeholder="example@email.com" style="direction:ltr;text-align:right;padding-right:44px;">
-        <span class="input-prefix"><i class="ti ti-mail"></i></span>
+      <div class="fl"><span class="fl-pre" aria-hidden="true">+965</span>
+        <div class="fl-b"><input id="reg-phone" type="tel" class="field-input" placeholder=" " dir="ltr" autocomplete="tel-national" inputmode="numeric" aria-describedby="err-reg-phone">
+          <label class="field-label" for="reg-phone" data-ar="رقم الجوال" data-en="Phone Number">رقم الجوال</label></div>
       </div>
-      <div class="field-error" id="err-reg-email"><i class="ti ti-alert-circle"></i><span></span></div>
+      <div class="field-error" id="err-reg-phone" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span></span></div>
     </div>
 
     <div class="field">
-      <label class="field-label" data-ar="كلمة المرور" data-en="Create Password">كلمة المرور</label>
-      <div class="input-wrap">
-        <input id="reg-pw" type="password" class="field-input" placeholder="••••••••" style="direction:ltr;text-align:right;padding-left:42px;" oninput="updateStrength()">
-        <button type="button" class="pw-toggle" onclick="togglePw('reg-pw',this)"><i class="ti ti-eye"></i></button>
+      <div class="fl"><i class="ti ti-lock" aria-hidden="true"></i>
+        <div class="fl-b"><input id="reg-pw" type="password" class="field-input" placeholder=" " dir="ltr" autocomplete="new-password" aria-describedby="pw-hint err-reg-pw" oninput="updateStrength()">
+          <label class="field-label" for="reg-pw" data-ar="كلمة المرور" data-en="Create Password">كلمة المرور</label></div>
+        <button type="button" class="pw-toggle" onclick="togglePw('reg-pw',this)" aria-label="إظهار كلمة المرور" aria-pressed="false"><i class="ti ti-eye" aria-hidden="true"></i></button>
       </div>
-      <div class="pw-meter">
+      <div class="pw-meter" aria-hidden="true">
         <div class="pw-bar" id="pwb1"></div><div class="pw-bar" id="pwb2"></div>
         <div class="pw-bar" id="pwb3"></div><div class="pw-bar" id="pwb4"></div>
       </div>
-      <div class="pw-hint" id="pw-hint" data-ar="8 أحرف على الأقل، مع أحرف كبيرة وأرقام لقوة أعلى." data-en="At least 8 characters, with uppercase letters and numbers for more strength.">8 أحرف على الأقل، مع أحرف كبيرة وأرقام لقوة أعلى.</div>
-      <div class="field-error" id="err-reg-pw"><i class="ti ti-alert-circle"></i><span></span></div>
+      <div class="pw-hint" id="pw-hint" aria-live="polite" data-ar="8 أحرف على الأقل، مع أحرف كبيرة وأرقام لقوة أعلى." data-en="At least 8 characters, with uppercase letters and numbers for more strength.">8 أحرف على الأقل، مع أحرف كبيرة وأرقام لقوة أعلى.</div>
+      <div class="field-error" id="err-reg-pw" role="alert"><i class="ti ti-alert-circle" aria-hidden="true"></i><span></span></div>
     </div>
 
-    <div class="field">
-      <label class="field-label" data-ar="تأكيد كلمة المرور" data-en="Confirm Password">تأكيد كلمة المرور</label>
-      <div class="input-wrap">
-        <input id="reg-cpw" type="password" class="field-input" placeholder="••••••••" style="direction:ltr;text-align:right;padding-left:42px;">
-        <button type="button" class="pw-toggle" onclick="togglePw('reg-cpw',this)"><i class="ti ti-eye"></i></button>
+    </div><!-- /fgrid -->
+
+    <div class="au-actions">
+      <button class="btn-main" type="button" onclick="createAccount()">
+        <span data-ar="إنشاء الحساب" data-en="Create Account">إنشاء الحساب</span>
+      </button>
+      <div class="terms-text">
+        <span data-ar="بإنشائك حساباً أنت توافق على" data-en="By creating an account you agree to">بإنشائك حساباً أنت توافق على</span>
+        <a href="raf_terms.html" target="_blank" data-ar="الشروط" data-en="Terms">الشروط</a>
+        <span data-ar="و" data-en="&amp;"> و </span>
+        <a href="raf_privacy.html" target="_blank" data-ar="الخصوصية" data-en="Privacy">الخصوصية</a>
       </div>
-      <div class="field-error" id="err-reg-cpw"><i class="ti ti-alert-circle"></i><span></span></div>
     </div>
-
-    <button class="btn-main" style="margin-top:8px;" onclick="createAccount()">
-      <i class="ti ti-user-plus"></i>
-      <span data-ar="إنشاء الحساب" data-en="Create Account">إنشاء الحساب</span>
-    </button>
 
     <div class="or-divider" data-ar="أو سجّل باستخدام" data-en="or sign up with">أو سجّل باستخدام</div>
-
     <div class="social-btns">
-      <button class="social-login" onclick="socialAuth('google')">
-        <i class="ti ti-brand-google" style="color:#EA4335;"></i> Google
-      </button>
-      <button class="social-login" onclick="socialAuth('apple')">
-        <i class="ti ti-brand-apple" style="color:#111;"></i> Apple
-      </button>
-    </div>
-
-    <div class="terms-text">
-      <span data-ar="بإنشائك حساباً أنت توافق على" data-en="By creating an account you agree to">بإنشائك حساباً أنت توافق على</span>
-      <a href="raf_terms.html" target="_blank" data-ar="الشروط" data-en="Terms">الشروط</a>
-      <span data-ar="و" data-en="&amp;"> و </span>
-      <a href="raf_privacy.html" target="_blank" data-ar="الخصوصية" data-en="Privacy">الخصوصية</a>
+      <button class="social-login" type="button" onclick="socialAuth('google')"><i class="ti ti-brand-google" aria-hidden="true" style="color:#EA4335;"></i> Google</button>
+      <button class="social-login" type="button" onclick="socialAuth('apple')"><i class="ti ti-brand-apple" aria-hidden="true"></i> Apple</button>
     </div>
   </div><!-- /view-register -->
 
   <!-- ══════════ REGISTER — OTP ══════════ -->
   <div class="form-panel" id="view-register-otp">
     <div class="otp-header">
-      <div class="otp-icon-wrap"><i class="ti ti-mail-opened"></i></div>
+      <div class="otp-icon-wrap" aria-hidden="true"><i class="ti ti-mail-opened"></i></div>
       <div class="otp-title" data-ar="تأكيد بريدك الإلكتروني" data-en="Verify your email">تأكيد بريدك الإلكتروني</div>
-      <div class="otp-desc" data-ar="أدخل الرمز المكوّن من 6 أرقام المُرسَل إلى" data-en="Enter the 6-digit code sent to">أدخل الرمز المكوّن من 6 أرقام المُرسَل إلى <b id="reg-otp-dest">example@email.com</b></div>
+      <div class="otp-desc"><span data-ar="أدخل الرمز المكوّن من 6 أرقام المُرسَل إلى" data-en="Enter the 6-digit code sent to">أدخل الرمز المكوّن من 6 أرقام المُرسَل إلى</span> <b id="reg-otp-dest">example@email.com</b></div>
     </div>
     <div class="field">
-      <div class="otp-wrap" style="direction:ltr;">
-        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
-        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
-        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
-        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
-        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
-        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" oninput="moveOtp(this)">
+      <div class="otp-wrap" style="direction:ltr;" role="group" aria-label="رمز التحقق">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" autocomplete="one-time-code" aria-label="1" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" aria-label="2" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" aria-label="3" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" aria-label="4" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" aria-label="5" oninput="moveOtp(this)">
+        <input type="text" class="otp-input" maxlength="1" inputmode="numeric" aria-label="6" oninput="moveOtp(this)">
       </div>
     </div>
-    <button class="btn-main" style="margin-top:14px;" onclick="verifyRegisterOtp()">
-      <i class="ti ti-shield-check"></i>
+    <button class="btn-main" type="button" onclick="verifyRegisterOtp()">
       <span data-ar="تفعيل الحساب" data-en="Activate Account">تفعيل الحساب</span>
     </button>
     <div class="resend-row">
       <span data-ar="لم يصلك الرمز؟ " data-en="Didn't receive it? ">لم يصلك الرمز؟ </span>
       <a href="#" onclick="return false;" data-ar="إعادة الإرسال" data-en="Resend">إعادة الإرسال</a>
     </div>
-    <button class="btn-ghost" onclick="setMode('register')">
-      <i class="ti ti-arrow-right"></i>
+    <button class="btn-ghost" type="button" onclick="setMode('register')">
+      <i class="ti ti-arrow-right" aria-hidden="true"></i>
       <span data-ar="رجوع" data-en="Back">رجوع</span>
     </button>
   </div><!-- /view-register-otp -->
@@ -622,11 +399,10 @@
   <!-- ══════════ ACCOUNT ACTIVATED ══════════ -->
   <div class="form-panel" id="view-activated">
     <div class="activated-wrap">
-      <div class="activated-icon"><i class="ti ti-circle-check"></i></div>
+      <div class="activated-icon" aria-hidden="true"><i class="ti ti-circle-check"></i></div>
       <div class="activated-title" data-ar="تم تفعيل حسابك" data-en="Account Activated">تم تفعيل حسابك</div>
       <div class="activated-sub" data-ar="مرحباً بك في رف! هوية رف الخاصة بك جاهزة الآن." data-en="Welcome to RAF! Your RAF ID is now ready.">مرحباً بك في رف! هوية رف الخاصة بك جاهزة الآن.</div>
-      <button class="btn-main" onclick="goToAccount()">
-        <i class="ti ti-arrow-left"></i>
+      <button class="btn-main" type="button" onclick="goToAccount()">
         <span data-ar="الانتقال إلى هوية رف" data-en="Go to your RAF ID">الانتقال إلى هوية رف</span>
       </button>
     </div>
@@ -635,11 +411,10 @@
   <!-- ────────── STAFF: NO INTERFACE YET ────────── -->
   <div class="form-panel" id="view-staff-pending" role="status" aria-live="polite">
     <div class="activated-wrap">
-      <div class="activated-icon"><i class="ti ti-tools" aria-hidden="true"></i></div>
+      <div class="otp-icon-wrap" aria-hidden="true"><i class="ti ti-tools"></i></div>
       <div class="activated-title" data-ar="لا توجد واجهة متاحة لحسابك بعد" data-en="No interface is available for your account yet">لا توجد واجهة متاحة لحسابك بعد</div>
       <div class="activated-sub" data-ar="تم تسجيل دخولك، لكن الواجهة الخاصة بدورك لم تُبنَ بعد، لذلك لا توجد صفحة يتم توجيهك إليها." data-en="You are signed in, but the interface for your role has not been built yet, so there is no page to send you to.">تم تسجيل دخولك، لكن الواجهة الخاصة بدورك لم تُبنَ بعد، لذلك لا توجد صفحة يتم توجيهك إليها.</div>
       <button class="btn-main" type="button" onclick="showView('view-signin')">
-        <i class="ti ti-arrow-right"></i>
         <span data-ar="العودة إلى تسجيل الدخول" data-en="Back to sign in">العودة إلى تسجيل الدخول</span>
       </button>
     </div>
@@ -651,7 +426,7 @@
     <p class="staff-note" data-ar="سجّل الدخول بحسابك المعتاد — سيتم توجيهك تلقائياً إلى لوحة التحكم المناسبة لصلاحياتك (تاجر)." data-en="Sign in with your usual account — you'll be routed automatically to the dashboard that matches your role (Merchant).">سجّل الدخول بحسابك المعتاد — سيتم توجيهك تلقائياً إلى لوحة التحكم المناسبة لصلاحياتك (تاجر).</p>
   </div>
 
-</div><!-- /login-card -->
+  </div><!-- /login-card -->
 </main>
 
 <script src="raf_permissions.js"></script>
@@ -691,17 +466,44 @@
   function setMode(mode){
     document.getElementById('seg-signin').classList.toggle('on', mode === 'signin');
     document.getElementById('seg-register').classList.toggle('on', mode === 'register');
+    document.getElementById('seg-signin').setAttribute('aria-selected', String(mode === 'signin'));
+    document.getElementById('seg-register').setAttribute('aria-selected', String(mode === 'register'));
     showView(mode === 'signin' ? 'view-signin' : 'view-register');
   }
 
   /* ───────── SIGN IN ───────── */
-  let signinMethod = 'email';
-  function selectSigninMethod(m){
-    signinMethod = m;
-    document.getElementById('si-tab-email').classList.toggle('on', m === 'email');
-    document.getElementById('si-tab-phone').classList.toggle('on', m === 'phone');
-    document.getElementById('si-email').style.display = m === 'email' ? 'block' : 'none';
-    document.getElementById('si-phone').style.display = m === 'phone' ? 'block' : 'none';
+  /* One identifier field. Anything with "@" is an email; digits (with an
+     optional +, spaces, dashes, brackets) are a phone number; anything else is
+     neither. The two existing paths are kept as they were: email → password,
+     phone → verification code. */
+  function signinIdKind(v){
+    v = (v || '').trim();
+    if (!v) return '';
+    if (v.indexOf('@') > -1) return 'email';
+    return /^\+?[\d\s\-()]+$/.test(v) ? 'phone' : 'unknown';
+  }
+  /* a local Kuwaiti number is completed with +965 (the only prefix this page
+     uses); a number typed with its own + or 965 prefix is kept as typed */
+  function signinFullPhone(v){
+    const raw = (v || '').trim(), d = raw.replace(/\D/g,'');
+    if (d.indexOf('965') === 0 && d.length > 8) return '+965 ' + d.slice(3);
+    if (raw.charAt(0) === '+') return '+' + d;
+    return '+965 ' + d;
+  }
+  function onSigninIdInput(){
+    clearErr('err-si-id');
+    const phone = signinIdKind(val('si-id-input')) === 'phone';
+    document.getElementById('si-pw-field').hidden = phone;
+    document.getElementById('si-forgot').hidden = phone;
+    if (phone) clearErr('err-si-pw');
+    const lbl = document.getElementById('si-submit-label');
+    lbl.setAttribute('data-ar', phone ? 'إرسال رمز التحقق' : 'تسجيل الدخول');
+    lbl.setAttribute('data-en', phone ? 'Send Verification Code' : 'Sign In');
+    lbl.textContent = lbl.getAttribute('data-' + curLang());
+  }
+  function doSignin(){
+    const id = val('si-id-input');
+    if (signinIdKind(id) === 'phone') doPhoneSignin(id); else doEmailLogin(id);
   }
 
   function togglePw(id, btn){
@@ -709,29 +511,36 @@
     const showing = inp.type === 'text';
     inp.type = showing ? 'password' : 'text';
     btn.querySelector('i').className = showing ? 'ti ti-eye' : 'ti ti-eye-off';
+    btn.setAttribute('aria-pressed', String(!showing));
+    btn.setAttribute('aria-label', showing ? t('إظهار كلمة المرور','Show password') : t('إخفاء كلمة المرور','Hide password'));
   }
 
   /* Email login REQUIRES password */
-  function doEmailLogin(){
-    clearErr('err-si-email'); clearErr('err-si-pw');
-    const email = val('si-email-input');
+  function doEmailLogin(email){
+    clearErr('err-si-id'); clearErr('err-si-pw');
     const pw = document.getElementById('si-pw-input').value;
     let ok = true;
-    if (!isEmail(email)) { showErr('err-si-email', t('يرجى إدخال بريد إلكتروني صالح','Please enter a valid email address')); ok = false; }
+    if (!isEmail(email)) {
+      showErr('err-si-id', email.indexOf('@') > -1
+        ? t('يرجى إدخال بريد إلكتروني صالح','Please enter a valid email address')
+        : t('يرجى إدخال بريد إلكتروني أو رقم جوال صالح','Please enter a valid email or phone number'));
+      ok = false;
+    }
     if (!pw) { showErr('err-si-pw', t('كلمة المرور مطلوبة','Password is required')); ok = false; }
     if (!ok) return;
     routeByRole(email);
   }
 
-  function doPhoneSignin(){
-    clearErr('err-si-phone');
-    const phone = val('si-phone-input');
-    if (phone.replace(/\D/g,'').length < 6) { showErr('err-si-phone', t('يرجى إدخال رقم جوال صالح','Please enter a valid phone number')); return; }
-    document.getElementById('si-otp-dest').textContent = '+965 ' + phone;
+  let signinPhone = '';
+  function doPhoneSignin(phone){
+    clearErr('err-si-id');
+    if (phone.replace(/\D/g,'').length < 6) { showErr('err-si-id', t('يرجى إدخال رقم جوال صالح','Please enter a valid phone number')); return; }
+    signinPhone = signinFullPhone(phone);
+    document.getElementById('si-otp-dest').textContent = signinPhone;
     showView('view-signin-otp');
     setTimeout(() => document.querySelector('#view-signin-otp .otp-input').focus(), 60);
   }
-  function confirmPhoneSignin(){ routeByRole(val('si-phone-input')); }
+  function confirmPhoneSignin(){ routeByRole(signinPhone); }
 
   function socialAuth(provider){ /* placeholder — OAuth in production */ window.location = 'raf_account.html'; }
 
@@ -762,15 +571,16 @@
 
   function createAccount(){
     clearAllErrors();
-    const name = val('reg-name'), email = val('reg-email');
-    const pw = document.getElementById('reg-pw').value, cpw = document.getElementById('reg-cpw').value;
+    const name = val('reg-name'), email = val('reg-email'), phone = val('reg-phone');
+    const pw = document.getElementById('reg-pw').value;
     let ok = true;
     if (name.length < 2){ showErr('err-reg-name', t('يرجى إدخال الاسم الكامل','Please enter your full name')); ok = false; }
     if (!isEmail(email)){ showErr('err-reg-email', t('يرجى إدخال بريد إلكتروني صالح','Please enter a valid email address')); ok = false; }
+    /* the page's existing phone rule (as used by phone sign-in) */
+    if (phone.replace(/\D/g,'').length < 6){ showErr('err-reg-phone', t('يرجى إدخال رقم جوال صالح','Please enter a valid phone number')); ok = false; }
     if (pwScore(pw) < 2){ showErr('err-reg-pw', t('كلمة المرور ضعيفة جداً — استخدم 8 أحرف على الأقل وأرقاماً','Password too weak — use 8+ characters and numbers')); ok = false; }
-    if (cpw !== pw || !cpw){ showErr('err-reg-cpw', t('كلمتا المرور غير متطابقتين','Passwords do not match')); ok = false; }
     if (!ok) return;
-    window._pendingAccount = { name, email };
+    window._pendingAccount = { name, email, phone: '+965 ' + phone.replace(/\D/g,'') };
     document.getElementById('reg-otp-dest').textContent = email;
     showView('view-register-otp');
     setTimeout(() => document.querySelector('#view-register-otp .otp-input').focus(), 60);
@@ -788,10 +598,16 @@
       }
       localStorage.setItem('raf_account', JSON.stringify(window._pendingAccount || {}));
     } catch(e){}
+    /* the activation button says where it goes: back to the page sign-up was
+       opened from, or (as before) to the RAF ID when there is none */
+    const go = document.querySelector('#view-activated .btn-main span');
+    go.setAttribute('data-ar', authReturn ? 'متابعة' : 'الانتقال إلى هوية رف');
+    go.setAttribute('data-en', authReturn ? 'Continue' : 'Go to your RAF ID');
+    go.textContent = go.getAttribute('data-' + curLang());
     showView('view-activated');
   }
 
-  function goToAccount(){ window.location = 'raf_account.html'; }
+  function goToAccount(){ window.location = authReturn || 'raf_account.html'; }
 
   /* ───────── OTP input auto-advance (generic) ───────── */
   function moveOtp(input){
@@ -800,6 +616,30 @@
     input.value = input.value.replace(/\D/g,'').slice(0,1);
     if (input.value.length === 1 && i < inputs.length - 1) inputs[i + 1].focus();
   }
+
+  /* ───────── where to return after authenticating ─────────
+     raf_nav.js records the page a sign-in link was clicked on (this tab only);
+     the browser referrer is used when that is absent. Only a RAF page on this
+     same site is accepted — never another site, never this page — and the
+     record is read once so an old one cannot resurface later. */
+  function authSafeReturn(u){
+    try {
+      if (!u) return '';
+      const x = new URL(u, location.href);
+      if (x.protocol !== location.protocol) return '';
+      if (x.protocol !== 'file:' && x.origin !== location.origin) return '';   /* file: URLs have an opaque origin; the folder check below scopes them */
+      const dir = location.pathname.replace(/[^\/]*$/, '');
+      if (x.pathname.indexOf(dir) !== 0) return '';
+      const name = x.pathname.slice(dir.length);
+      if (!/^raf_[a-z0-9_]+\.html$/i.test(name) || /^raf_login\.html$/i.test(name)) return '';
+      return name + x.search + x.hash;
+    } catch(e){ return ''; }
+  }
+  const authReturn = (function(){
+    let rec = '';
+    try { rec = sessionStorage.getItem('raf_auth_return') || ''; sessionStorage.removeItem('raf_auth_return'); } catch(e){}
+    return authSafeReturn(rec) || authSafeReturn(document.referrer);
+  })();
 
   /* ───────── RBAC auto-routing (single source of truth) ───────── */
   function routeByRole(identifier){
@@ -823,6 +663,9 @@
           RAFPerm.setCurrentUser(u.id);
           if (STAFF.indexOf(u.roleId) > -1) { showView('view-staff-pending'); return; }
           dest = map[u.roleId] || 'raf_account.html';
+          /* a customer goes back to the page sign-in was opened from; every
+             other role keeps its own interface */
+          if (u.roleId === 'customer' && authReturn) dest = authReturn;
         }
       }
     } catch(e){}
@@ -849,6 +692,15 @@
       if (tx !== null) el.textContent = tx;
     });
     updateStrength();
+    authA11y();
+  }
+  /* accessible names that follow the page language */
+  function authA11y(){
+    document.querySelectorAll('[data-aria-ar]').forEach(el => {
+      const tx = el.getAttribute('data-aria-' + curLang()); if (tx) { el.setAttribute('aria-label', tx); el.setAttribute('title', tx); } });
+    document.querySelectorAll('.pw-toggle').forEach(b => {
+      const on = b.getAttribute('aria-pressed') === 'true';
+      b.setAttribute('aria-label', on ? t('إخفاء كلمة المرور','Hide password') : t('إظهار كلمة المرور','Show password')); });
   }
   (function(){
     if (localStorage.getItem('raf_lang') === 'en'){
@@ -859,6 +711,7 @@
         const tx = el.getAttribute('data-en'); if (tx !== null) el.textContent = tx;
       });
     }
+    authA11y();
   })();
 </script>
 </body>

@@ -408,9 +408,12 @@
     /* sponsored stores rank first — visibility is a paid, clearly-badged option */
     return list.sort(function(a,b){ return (b.sponsored?1:0) - (a.sponsored?1:0); });
   }
+  /* a product the public may see at all: active (not hidden, not deleted).
+     Whether its store is currently open is a separate, store-level fact. */
+  function isPublic(p){ return !!p && p.status === PRODUCT_STATUS.ACTIVE; }
   /* a product is listable only when it is active AND its store is open */
   function isVisible(p){
-    if (!p || p.status !== PRODUCT_STATUS.ACTIVE) return false;
+    if (!isPublic(p)) return false;
     var s = store(p.store);
     return !!s && s.status === STORE_STATUS.OPEN;
   }
@@ -420,6 +423,9 @@
     /* seeded and merchant-created entries are one catalogue to every reader */
     var list = PRODUCTS.concat(createdProducts()).map(function(p){ return merge(p, ov[p.id]); });
     if (opts.visibleOnly !== false) list = list.filter(isVisible);
+    /* a store's own listing: its public products, open or temporarily closed
+       (a closed store stays browsable — the Store Status Policy) */
+    else if (opts.publicOnly) list = list.filter(isPublic);
     if (opts.cat) list = list.filter(function(p){ return p.cat === opts.cat; });
     if (opts.store) list = list.filter(function(p){ return p.store === opts.store; });
     if (opts.onSale) list = list.filter(function(p){ return (p.disc || 0) > 0; });
@@ -456,7 +462,7 @@
   global.RAFSource = {
     STORE_STATUS:STORE_STATUS, PRODUCT_STATUS:PRODUCT_STATUS,
     product:product, products:products, store:store, stores:stores,
-    categories:categories, isVisible:isVisible,
+    categories:categories, isVisible:isVisible, isPublic:isPublic,
     updateProduct:updateProduct, updateStore:updateStore, resetOverrides:resetOverrides,
     /* creation — identity and persistence are owned here, never by a page */
     addProduct:addProduct, nextProductId:nextProductId, createdProducts:createdProducts,
