@@ -16,25 +16,73 @@
 /* ===== page-specific (the tracking journey card lives in raf_tracking_journey.js) ===== */
 .od-wrap{max-width:860px;}
 
-/* 2 · the products in the order — products only, nothing else */
-.pr-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid var(--border);}
-.pr-row:first-of-type{border-top:0;}
-.pr-img{width:54px;height:54px;flex:0 0 auto;border-radius:14px;background:var(--bg2) center/cover no-repeat;
-  display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--gold2);}
-.pr-b{flex:1;min-width:0;}
-.pr-b b{display:block;font-size:14.5px;font-weight:800;color:var(--ink);line-height:1.5;overflow-wrap:anywhere;}
-.pr-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
-.pr-tag{display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;
-  padding:4px 10px;font-size:11.5px;color:var(--text2);}
-.pr-tag b{color:var(--ink);font-weight:700;}
-.pr-price{flex:0 0 auto;font-size:14px;font-weight:800;color:var(--ink);white-space:nowrap;}
-.pr-price small{font-size:11px;font-weight:700;color:var(--text3);}
-.pr-more{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;min-height:46px;margin-top:4px;
-  border:1px dashed var(--border2);border-radius:13px;background:transparent;color:var(--gold2);
-  font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;}
-.pr-more:hover{border-color:var(--gold);background:var(--gold-soft);}
-.pr-more:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 
+/* ===== ORDER DETAILS — one surface below the tracking journey, in its visual language ===== */
+.od2{--od-line:var(--border,#E2DBCC);--od-mute:var(--text3,#8A857C);position:relative;background:linear-gradient(180deg,#FFFFFF 0%,#FBF8F2 100%);
+  border:1px solid var(--od-line);border-radius:28px;box-shadow:0 1px 2px rgba(20,16,8,.04),0 24px 48px -30px rgba(20,16,8,.24);
+  margin-bottom:16px;overflow:hidden;}
+.od2-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px 18px;padding:18px 26px;border-bottom:1px solid var(--od-line);font-size:13px;color:var(--text2);}
+.od2-meta span{display:inline-flex;align-items:center;gap:6px;min-width:0;}
+.od2-meta .ti{font-size:16px;color:var(--gold2);}
+.od2-meta b{color:var(--ink);font-weight:800;}
+.od2-meta .od2-paym{margin-inline-start:auto;}
+.od2-pill{display:inline-flex;align-items:center;min-height:24px;padding:0 10px;border-radius:999px;background:rgba(46,158,91,.1);color:#1F7A45;font-size:11.5px;font-weight:800;}
+.od2-pill.warn{background:rgba(201,168,76,.16);color:#8A6418;}
+.od2-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);}
+.od2-col{padding:20px 26px;min-width:0;}
+.od2-col + .od2-col{border-inline-start:1px solid var(--od-line);}
+.od2-sec + .od2-sec{margin-top:18px;padding-top:18px;border-top:1px dashed var(--od-line);}
+.od2-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:0 0 10px;font-size:11.5px;font-weight:800;letter-spacing:.6px;color:var(--od-mute);text-transform:uppercase;}
+.od2-h em{font-style:normal;font-weight:700;letter-spacing:0;text-transform:none;}
+/* items */
+.od2-it{display:flex;align-items:center;gap:12px;padding:9px 0;}
+.od2-it + .od2-it{border-top:1px solid rgba(226,219,204,.6);}
+.od2-img{width:46px;height:46px;flex:0 0 auto;border-radius:13px;background:#F4F1EA center/cover no-repeat;display:flex;align-items:center;justify-content:center;font-size:21px;color:var(--gold2);}
+.od2-ib{flex:1 1 auto;min-width:0;}
+.od2-ib b{display:block;font-size:14px;font-weight:800;color:var(--ink);line-height:1.45;overflow-wrap:anywhere;}
+.od2-ib span{display:block;font-size:12px;color:var(--od-mute);margin-top:2px;overflow-wrap:anywhere;}
+.od2-pr{flex:0 0 auto;text-align:end;font-size:14px;font-weight:800;color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums;}
+.od2-pr small{font-size:11px;font-weight:700;color:var(--od-mute);}
+.od2-pr .od2-each{display:block;font-size:11px;font-weight:600;color:var(--od-mute);}
+.od2-more{display:inline-flex;align-items:center;gap:6px;margin-top:6px;padding:6px 0;border:0;background:none;color:var(--gold2);font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;}
+.od2-more:focus-visible,.od2-addr summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:6px;}
+/* delivery */
+.od2-dl{display:flex;gap:10px;align-items:flex-start;}
+.od2-dl > .ti{font-size:19px;color:var(--gold2);margin-top:2px;flex:0 0 auto;}
+.od2-addr{min-width:0;font-size:13.5px;line-height:1.7;color:var(--ink);font-weight:700;}
+.od2-addr summary{list-style:none;cursor:pointer;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.od2-addr summary::-webkit-details-marker{display:none;}
+.od2-addr[open] summary{display:block;-webkit-line-clamp:unset;}
+.od2-addr .more{display:block;margin-top:2px;font-size:12px;color:var(--gold2);font-weight:800;}
+.od2-addr[open] .more{display:none;}
+.od2-dl small{display:block;font-size:12px;color:var(--od-mute);font-weight:600;margin-top:2px;}
+/* payment summary */
+.od2-row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:13.5px;color:var(--text2);font-variant-numeric:tabular-nums;}
+.od2-row b{font-weight:700;color:var(--ink);white-space:nowrap;}
+.od2-row.minus b{color:#1F7A45;}
+.od2-tot{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-top:8px;padding-top:12px;border-top:1px solid var(--od-line);}
+.od2-tot span{font-size:14px;font-weight:800;color:var(--ink);}
+.od2-tot b{font-size:21px;font-weight:800;color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums;}
+.od2-tot b small{font-size:12px;font-weight:700;color:var(--od-mute);}
+.od2-after{margin-top:10px;padding:10px 12px;border-radius:14px;background:#F6FAF7;}
+.od2-after .od2-row{font-size:13px;}
+.od2-after .od2-row b{color:#1F7A45;}
+/* help + continue */
+.od2-foot{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap;padding:14px 26px;border-top:1px solid var(--od-line);background:rgba(244,241,234,.55);}
+.od2-foot > span{flex:1 1 200px;min-width:0;font-size:13px;color:var(--text2);display:inline-flex;align-items:center;gap:8px;}
+.od2-foot > span .ti{font-size:18px;color:var(--gold2);}
+.od2-foot a{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:0 16px;border-radius:13px;font-size:13.5px;font-weight:800;text-decoration:none;flex:0 0 auto;}
+.od2-foot a.sup{border:1px solid var(--border2,#CFC6B3);background:#fff;color:var(--ink);}
+.od2-foot a.sup:hover{border-color:var(--gold);color:var(--gold2);}
+.od2-foot a.shop{background:linear-gradient(180deg,#D9B85C,var(--gold,#C9A84C));color:#1C1606;}
+.od2-foot a:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+@media (max-width:760px){
+  .od2-grid{grid-template-columns:minmax(0,1fr);}
+  .od2-col + .od2-col{border-inline-start:0;border-top:1px solid var(--od-line);}
+  .od2-meta,.od2-col,.od2-foot{padding-inline:18px;}
+  .od2-meta .od2-paym{margin-inline-start:0;}
+}
+@media (max-width:420px){ .od2{border-radius:22px;} .od2-foot a{flex:1 1 100%;} }
 /* the close control: an X in the header's own pill style */
 .co-back.co-close{width:40px;padding:0;justify-content:center;font-size:19px;}
 .co-back.co-close:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
@@ -114,26 +162,6 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 .cc-err.show{display:block;}
 @media (min-width:560px){ .cc-acts{flex-direction:row;} .cc-acts button{flex:1;} }
 
-/* compact summary + support */
-.trk-kv{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-top:1px solid var(--border);
-  font-size:13.5px;line-height:1.6;}
-.trk-kv:first-of-type{border-top:0;}
-.trk-kv .k{color:var(--text3);font-weight:700;display:inline-flex;align-items:center;gap:7px;flex:0 0 auto;}
-.trk-kv .k i{color:var(--gold2);font-size:16px;}
-.trk-kv .v{color:var(--ink);font-weight:700;text-align:end;max-width:62%;overflow-wrap:anywhere;}
-.trk-help{display:flex;align-items:center;gap:13px;flex-wrap:wrap;}
-.trk-help .b{flex:1 1 180px;min-width:0;}
-.trk-help .b b{display:block;font-size:15px;font-weight:800;color:var(--ink);}
-.trk-help .b span{display:block;font-size:13px;color:var(--text3);margin-top:3px;line-height:1.6;}
-.trk-help a{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:48px;padding:0 18px;
-  border-radius:14px;border:1px solid var(--border2);background:var(--card);color:var(--ink);text-decoration:none;
-  font-size:14px;font-weight:800;flex:0 0 auto;}
-.trk-help a:hover{border-color:var(--gold);color:var(--gold2);}
-.trk-help a:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
-
-@media (max-width:420px){
-  .trk-help a{width:100%;}
-}
 </style>
 <script src="raf_features.js"></script>
 <script src="raf_config.js"></script>
@@ -289,14 +317,6 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     return {cls:'b-progress',ic:'ti-truck-delivery',label:T('قيد التوصيل','In progress')};
   }
 
-  /* the delivery commitment frozen into the snapshot at checkout. It is the
-     only authoritative "when" RAF has: there is no live ETA anywhere, so when
-     this is absent the page says so rather than estimating. */
-  function commitmentOf(o){
-    try { return (window.RAFStoreSchedule && o.snapshot) ? RAFStoreSchedule.formatCommitment(o.snapshot, T('ar','en')) : null; }
-    catch(e){ return null; }
-  }
-
   /* ---------- 1 · the delivery journey ----------
      RAFJourneyUI draws; every value below is read here from the authority
      that owns it, and nothing is guessed:
@@ -312,7 +332,7 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
                         average of real submitted ratings, or none
        compensation     RAFCompensation.forOrder()    — only a real record
        rating the order RAFCustomerExperience.orderRatingStatus() — delivered only */
-  var CALLNOTE = null, COMPNOTE = null;
+  var CALLNOTE = null, COMPNOTE = null, CL_AT = null, CL_T = null;
   function journeyModel(o){
     var st=stageOf(o), f=fulfilmentOf(o)||{}, E=window.RAFOrderEngine;
     var slug=(o.snapshot && o.snapshot.storeSlug) || o.storeSlug || null;
@@ -332,6 +352,14 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     if(odrv) drating = odrv.rating;
     var comp = null;
     if(!st.cancelled && window.RAFCompensation){ try { var cr = RAFCompensation.forOrder(o.id); comp = cr && cr.ok ? cr.compensation : null; } catch(e){ comp=null; } }
+    /* the live delay against the approved compensation rules (an ESTIMATE from
+       RAFCompensation — nothing is issued before Delivered); shown only once it
+       has actually started */
+    var compLive = null; CL_AT = null;
+    if(!st.cancelled && !st.delivered && !comp && window.RAFCompensation && RAFCompensation.liveDelay){
+      try { var ld = RAFCompensation.liveDelay(o.id); compLive = ld && ld.ok && ld.live && ld.started ? ld : null;
+            /* not started yet: the line appears on its own at the moment it begins */
+            CL_AT = ld && ld.ok && ld.live && !ld.started ? ld.startsAt : null; } catch(e){ compLive=null; } }
     var rating = null;
     if(st.delivered && window.RAFCustomerExperience){ try { var rs = RAFCustomerExperience.orderRatingStatus(o.id); rating = rs && rs.ok ? { state:rs.state } : null; } catch(e){ rating=null; } }
     /* the driver at the door, and the code to hand over — RAFLogistics.customerArrival,
@@ -339,10 +367,12 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     var arr = null;
     if(!st.cancelled && !st.delivered && window.RAFLogistics && RAFLogistics.customerArrival){ try { var ar = RAFLogistics.customerArrival(o.id); arr = ar && ar.ok ? ar : null; } catch(e){ arr=null; } }
     var arrived = !!(arr && arr.arrived);
-    var prepared = !!ready || !!f.driverId;           /* the store marked it ready (or a driver already has it) */
+    /* prepared = the store's own Ready. A driver can now be assigned from acceptance,
+       so an assigned driver no longer implies the order is ready */
+    var prepared = !!ready;
     var label = st.cancelled ? T('ملغى','Cancelled')
               : st.index===2 ? T('تم التوصيل','Delivered')
-              : st.index===1 && arrived ? T('وصل السائق','Driver arrived')
+              : st.index===1 && arrived ? T('التسليم — وصل السائق','Handover — driver arrived')
               : st.index===1 ? T('قيد التوصيل','Out for delivery')
               : prepared ? T('تم تجهيز طلبك','Order prepared')
               : T('جاري التجهيز','Being prepared');
@@ -350,21 +380,31 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
                 : st.index===2 ? T('تم تسليم طلبك بنجاح، شكراً لاستخدامك رف!','Your order was delivered. Thank you for using RAF!')
                 : st.index===1 && arrived ? T('وصل السائق إلى موقعك. يرجى الاستعداد لاستلام طلبك.','Your driver has arrived at your destination. Please prepare to receive your order.')
                 : st.index===1 ? T('استلم السائق طلبك من المتجر وهو في طريقه إليك.','The driver collected your order from the store and is on the way to you.')
-                : f.driverId ? T('طلبك جاهز، وتم تعيين سائق لاستلامه من المتجر.','Your order is ready and a driver has been assigned to collect it from the store.')
+                : f.driverId && prepared ? T('طلبك جاهز، وتم تعيين سائق لاستلامه من المتجر.','Your order is ready and a driver has been assigned to collect it from the store.')
+                : f.driverId ? T('المتجر يجهّز طلبك، وتم تعيين سائق سيستلمه عند جاهزيته.','The store is preparing your order, and a driver has been assigned to collect it once it is ready.')
                 : prepared ? T('طلبك جاهز في المتجر.','Your order is ready at the store.')
                 : T('المتجر يجهّز طلبك الآن، وسنخبرك فور خروجه للتوصيل.','The store is preparing your order — we will tell you as soon as it leaves for delivery.');
     return {
-      orderId:o.id, stage:st.index, cancelled:st.cancelled, prepared:prepared,
+      orderId:o.id, stage:st.index, handover:st.index===1 && arrived, cancelled:st.cancelled, prepared:prepared,
       store:{ name:name, category:store && store.cat ? L(store.cat) : null, logo:store && store.logo ? store.logo : null,
               initial:String(name||'').trim().charAt(0) },
       status:{ label:label, message:message },
       acceptedAt:accepted, deliveredAt:st.delivered ? delivered : null,
       driver: odrv ? { name:odrv.name, rating:drating } : (live && conv.conversation.currentDriver ? { name:conv.conversation.currentDriver.name, rating:null } : null),
       canMessage:live, canCall:live && calls.remaining!==0,
+      /* unread = the driver's messages to this customer on THIS order that the
+         customer has not read yet (the communication authority's own receipts) */
+      unread:live ? (conv.messages || []).filter(function(x){ return !x.mine && !(x.status && x.status.state==='read'); }).length : 0,
       callNote:live ? CALLNOTE : null,
       compensation:comp, compNote:comp ? COMPNOTE : null,
       rating:rating,
-      arrived:arrived, deliveryCode:arr && arr.code ? arr.code : null
+      arrived:arrived, deliveryCode:arr && arr.code ? arr.code : null,
+      /* THE DELIVERY ETA. RAF has no authoritative delivery ETA (the merchant's
+         Promised ETA is a different value and is never shown as one), so this is
+         null and the ETA line honestly reads "—" until a delivery authority
+         records one */
+      deliveryEtaAt:null,
+      compLive:compLive
     };
   }
   function journeyHTML(o){
@@ -411,106 +451,100 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
   /* the conversation itself lives on its own screen (raf_order_chat.html) —
      RAFDriverCommunication decides who may see or write, exactly as before */
 
-  /* ---------- 5 · the products, and only the products ----------
-     No address, no payment, no order metadata: those belong to their own
-     cards below. A long order shows the first two and opens on request. */
+  /* ---------- 5 · THE ORDER DETAILS, below the tracking journey ----------
+     One surface in the journey's visual language, ordered by what the
+     customer needs while the order is on its way: what was ordered, what was
+     paid, where it is going, how to get help. Stored values only — no
+     calculation is changed here, and nothing already shown above is repeated:
+       · the store and the status live in the journey header and timeline
+       · the delivery estimate lives in the ETA line (so no delivery time here)
+       · the compensation's progress lives in its own line; below, only its
+         financial result appears */
   var SHOWALL=false;
   window.showAllItems=function(){ SHOWALL=true; render(); };
-  function productsHTML(o){
+  function kwd(v){ return '<bdi dir="ltr">'+esc(v)+'</bdi> <small>'+T('د.ك','KWD')+'</small>'; }
+  function itemsSection(o){
     var items=o.items||[];
     var count=items.reduce(function(n,it){ return n + (parseInt(it.qty,10)||1); },0);
-    var COMPACT=2, shown=(SHOWALL || items.length<=COMPACT) ? items : items.slice(0,COMPACT);
+    var COMPACT=3, shown=(SHOWALL || items.length<=COMPACT) ? items : items.slice(0,COMPACT);
     var rows=shown.map(function(it){
-      var qty=parseInt(it.qty,10)||1;
-      var v=it.variant||{};
-      var tags=Object.keys(v).map(function(k){ return '<span class="pr-tag">'+esc(k)+': <b>'+esc(v[k])+'</b></span>'; });
-      if(!tags.length && it.meta) tags.push('<span class="pr-tag">'+L(it.meta)+'</span>');
-      tags.push('<span class="pr-tag">'+T('الكمية','Qty')+': <b>'+qty+'</b></span>');
-      /* a real product image when the record has one; RAF's own icon otherwise */
+      var qty=parseInt(it.qty,10)||1, v=it.variant||{};
+      /* the chosen options only (their values), else the item's own stored description */
+      var opts=Object.keys(v).map(function(k){ return v[k]; }).filter(Boolean);
+      var sub=opts.length ? opts.join(' · ') : (it.meta ? L(it.meta) : '');
       var media = it.img ? ' style="background-image:url(\''+esc(it.img)+'\')"' : '';
-      return '<div class="pr-row"><span class="pr-img"'+media+' aria-hidden="true">'
-        + (it.img ? '' : '<i class="ti '+esc(it.ic||'ti-box')+'"></i>')+'</span>'
-        + '<span class="pr-b"><b>'+L(it.name)+'</b><span class="pr-meta">'+tags.join('')+'</span></span>'
-        + (it.price ? '<span class="pr-price">'+it.price+' <small>'+T('د.ك','KWD')+'</small></span>' : '')
+      return '<div class="od2-it"><span class="od2-img"'+media+' aria-hidden="true">'+(it.img ? '' : '<i class="ti '+esc(it.ic||'ti-box')+'"></i>')+'</span>'
+        + '<span class="od2-ib"><b>'+esc(L(it.name))+'</b>'
+          + '<span>'+(sub ? esc(sub)+' · ' : '')+T('الكمية: ','Qty: ')+'<bdi>'+qty+'</bdi></span></span>'
+        + (it.price ? '<span class="od2-pr">'+kwd(it.price)+(qty>1 ? '<span class="od2-each">'+T('للقطعة','each')+'</span>' : '')+'</span>' : '')
         + '</div>';
     }).join('');
     var more = (!SHOWALL && items.length>COMPACT)
-      ? '<button class="pr-more" type="button" onclick="showAllItems()"><i class="ti ti-chevron-down" aria-hidden="true"></i>'
-        + T('عرض جميع المنتجات','View all products')+' ('+items.length+')</button>' : '';
-    return '<div class="panel"><div class="panel-h" role="heading" aria-level="2"><i class="ti ti-shopping-bag"></i> '+T('المنتجات في طلبك','Products in your order')
-      + '<span class="side">'+count+' '+T('قطعة','items')+'</span></div>'
-      + '<div class="panel-b">'+(rows||('<div class="trk-kv"><span class="v">'+T('لا توجد منتجات','No products')+'</span></div>'))+more+'</div></div>';
+      ? '<button class="od2-more" type="button" onclick="showAllItems()"><i class="ti ti-chevron-down" aria-hidden="true"></i>'
+        + T('عرض كل المنتجات','Show all items')+' ('+items.length+')</button>' : '';
+    return '<section class="od2-sec" aria-labelledby="odItemsH"><h2 class="od2-h" id="odItemsH">'+T('منتجات الطلب','Order items')
+      + '<em>'+T(count+' قطعة', count+(count===1?' item':' items'))+'</em></h2>'
+      + (rows || '<p class="od2-row">'+T('لا توجد منتجات','No items')+'</p>') + more + '</section>';
   }
-
-  /* ---------- 6 · order details — order-level facts, stored values only ---------- */
-  function orderDetailsHTML(o){
-    return '<div class="panel"><div class="panel-h" role="heading" aria-level="2"><i class="ti ti-file-description"></i> '+T('تفاصيل الطلب','Order details')+'</div>'
-      + '<div class="panel-b">'
-        + '<div class="trk-kv"><span class="k"><i class="ti ti-hash" aria-hidden="true"></i>'+T('رقم الطلب','Order number')+'</span><span class="v">'+o.id+'</span></div>'
-        + '<div class="trk-kv"><span class="k"><i class="ti ti-building-store" aria-hidden="true"></i>'+T('المتجر','Store')+'</span><span class="v">'+(L(o.store)||'—')+'</span></div>'
-        + '<div class="trk-kv"><span class="k"><i class="ti ti-calendar" aria-hidden="true"></i>'+T('تاريخ الطلب','Order date')+'</span><span class="v">'+(L(o.date)||'—')+'</span></div>'
-        + '<div class="trk-kv"><span class="k"><i class="ti ti-credit-card" aria-hidden="true"></i>'+T('طريقة الدفع','Payment method')+'</span><span class="v">'+(L(o.pay)||'—')+'</span></div>'
-        + '<div class="trk-kv"><span class="k"><i class="ti ti-coin" aria-hidden="true"></i>'+T('الإجمالي','Total')+'</span><span class="v">'+o.total+' '+T('د.ك','KWD')+'</span></div>'
-      + '</div></div>';
-  }
-
-  /* ---------- 7 · delivery information ----------
-     The address and the commitment exactly as the order holds them. There is
-     no live ETA in RAF, so none is shown and none is estimated. */
-  function deliveryHTML(o){
-    var commitment=commitmentOf(o);
+  /* the delivery address — the one delivery fact not shown above. The delivery
+     type is added only when it changes the meaning (a store pickup) */
+  function deliverySection(o){
     var d=(o.snapshot && o.snapshot.delivery) || {};
-    var TYPE={ delivery:{ar:'توصيل إلى العنوان',en:'Delivery to your address'}, pickup:{ar:'استلام من المتجر',en:'Pickup from the store'} };
-    var TIMING={ instant:{ar:'فوري',en:'Instant'}, scheduled:{ar:'موعد محدد',en:'Scheduled'}, next_opening:{ar:'عند افتتاح المتجر',en:'At the next opening'} };
-    return '<div class="panel"><div class="panel-h" role="heading" aria-level="2"><i class="ti ti-map-pin"></i> '+T('معلومات التوصيل','Delivery information')+'</div>'
-      + '<div class="panel-b">'
-        + '<div class="trk-kv"><span class="k"><i class="ti ti-map-pin" aria-hidden="true"></i>'+T('عنوان التوصيل','Delivery address')+'</span><span class="v">'+(L(o.addr)||'—')+'</span></div>'
-        + (TYPE[d.type] ? '<div class="trk-kv"><span class="k"><i class="ti ti-truck-delivery" aria-hidden="true"></i>'+T('نوع التوصيل','Delivery type')+'</span><span class="v">'+T(TYPE[d.type].ar,TYPE[d.type].en)+'</span></div>' : '')
-        + (TIMING[d.timing] ? '<div class="trk-kv"><span class="k"><i class="ti ti-clock" aria-hidden="true"></i>'+T('وقت التوصيل','Delivery timing')+'</span><span class="v">'+T(TIMING[d.timing].ar,TIMING[d.timing].en)+'</span></div>' : '')
-        + '<div class="trk-kv" id="dlvCommit"><span class="k"><i class="ti ti-clock-hour-4" aria-hidden="true"></i>'+T('الوقت المتوقع للوصول','Expected arrival')+'</span>'
-          + '<span class="v">'+(commitment ? commitment : '<span style="color:var(--text3);font-weight:700">'+T('غير متاح','Not available')+'</span>')+'</span></div>'
-      + '</div></div>';
+    var addr=L(o.addr) || d.address || '';
+    var pickup = d.type==='pickup';
+    return '<section class="od2-sec" aria-labelledby="odDlvH"><h2 class="od2-h" id="odDlvH">'+T(pickup?'الاستلام':'التوصيل إلى', pickup?'Pickup':'Delivery to')+'</h2>'
+      + '<div class="od2-dl"><i class="ti '+(pickup?'ti-building-store':'ti-map-pin')+'" aria-hidden="true"></i><div style="min-width:0">'
+      + (addr ? '<details class="od2-addr"><summary>'+esc(addr)+(addr.length>70 ? '<span class="more">'+T('عرض العنوان كاملًا','Show full address')+'</span>' : '')+'</summary></details>'
+              : '<div class="od2-addr">—</div>')
+      + (pickup ? '<small>'+T('استلام من المتجر','Pickup from the store')+'</small>' : '')
+      + '</div></div></section>';
   }
-
-  /* ---------- 6 · help ----------
-     Points at RAF's existing support centre, carrying THIS order as the
-     support context (an active order). The ticket itself is created there, by
-     RAFCustomerService — nothing is opened or faked here. */
-  function supportHTML(o){
-    var href = 'raf_support.html' + (o && o.id ? '?order=' + encodeURIComponent(o.id) + '&ctx=active' : '');
-    return '<div class="panel"><div class="panel-b"><div class="trk-help">'
-      + '<span class="b"><b>'+T('تحتاج إلى مساعدة؟','Need help?')+'</b>'
-      + '<span>'+T('فريق الدعم جاهز لمساعدتك في أي استفسار عن طلبك.',
-                   'Our support team is ready to help with anything about your order.')+'</span></span>'
-      + '<a href="'+href+'"><i class="ti ti-headset" aria-hidden="true"></i>'+T('الدعم لهذا الطلب','Support for this order')+'</a>'
-      + '</div></div></div>';
-  }
-
-  /* ---------- 6 · invoice summary ---------- */
-  function invoiceHTML(o){
+  /* what was paid, from the order's stored breakdown (the same values as
+     before); a row appears only when it has a value. After the total, the
+     money that came back — refunds recorded by RAFOrderChanges and a delay
+     compensation issued by RAFCompensation — as results only, no status */
+  function paymentSection(o){
     var total=parseFloat(o.total)||0, ship=parseFloat(o.ship)||0;
     var disc=parseFloat(o.discount)||0, tax=parseFloat(o.tax)||0, tip=parseFloat(o.tip)||0;
-    /* prefer the stored breakdown; otherwise derive the subtotal from the grand
-       total so the receipt always adds up (legacy orders have no breakdown) */
-    var sub = o.subtotal!=null ? parseFloat(o.subtotal)
-            : Math.max(0, total - ship - tax - tip + disc);
-    return '<div class="panel"><div class="panel-h" role="heading" aria-level="2"><i class="ti ti-receipt"></i> '+T('ملخص الفاتورة','Invoice summary')+'</div>'
-      + '<div class="panel-b">'
-        + '<div class="sum-row"><span>'+T('المجموع الفرعي','Subtotal')+'</span><span>'+money(sub)+' '+T('د.ك','KWD')+'</span></div>'
-        + (disc>0?'<div class="sum-row disc"><span>'+T('الخصم','Discount')+(o.coupon?' ('+o.coupon+')':'')+'</span><span>− '+money(disc)+'</span></div>':'')
-        + '<div class="sum-row"><span>'+T('رسوم التوصيل','Delivery fee')+'</span>'+(ship===0?'<span class="free">'+T('مجاني','Free')+'</span>':'<span>'+money(ship)+'</span>')+'</div>'
-        + (tip>0?'<div class="sum-row"><span>'+T('إكرامية السائق','Driver tip')+'</span><span>'+money(tip)+'</span></div>':'')
-        + (tax>0?'<div class="sum-row"><span>'+T('الضريبة','Tax')+'</span><span>'+money(tax)+'</span></div>':'')
-        + '<div class="sum-row total"><span>'+T('الإجمالي','Grand total')+'</span><b>'+money(total)+' '+T('د.ك','KWD')+'</b></div>'
-      + '</div></div>';
+    var sub = o.subtotal!=null ? parseFloat(o.subtotal) : Math.max(0, total - ship - tax - tip + disc);
+    function row(k, v, cls){ return '<div class="od2-row'+(cls?' '+cls:'')+'"><span>'+k+'</span><b>'+v+'</b></div>'; }
+    var h = row(T('المجموع الفرعي','Subtotal'), kwd(money(sub)))
+      + (disc>0 ? row(T('الخصم','Discount')+(o.coupon?' ('+esc(o.coupon)+')':''), '− '+kwd(money(disc)), 'minus') : '')
+      + (ship>0 ? row(T('التوصيل','Delivery'), kwd(money(ship))) : '')
+      + (tip>0 ? row(T('إكرامية السائق','Driver tip'), kwd(money(tip))) : '')
+      + (tax>0 ? row(T('الضريبة','Tax'), kwd(money(tax))) : '')
+      + '<div class="od2-tot"><span>'+T('الإجمالي','Total')+'</span><b>'+kwd(money(total))+'</b></div>';
+    var after=[];
+    try {
+      var hist = window.RAFOrderChanges && RAFOrderChanges.historyOf ? (RAFOrderChanges.historyOf(o.id) || []) : [];
+      hist.forEach(function(c){ var r=c && c.refundResult; if(!r || !r.amount) return;
+        after.push(row(r.destination==='wallet' ? T('مسترد إلى محفظة رف','Refunded to RAF Wallet') : T('مسترد إلى وسيلة الدفع','Refunded to your payment method'), '+ '+kwd(r.amount))); });
+    } catch(e){}
+    try {
+      var cr = window.RAFCompensation ? RAFCompensation.forOrder(o.id) : null, cp = cr && cr.ok ? cr.compensation : null;
+      if(cp && cp.amountFils>0) after.push(row(T('تعويض التأخير (قسيمة محفظة)','Delay compensation (wallet coupon)'), '+ '+kwd(cp.amount)));
+    } catch(e){}
+    return '<section class="od2-sec" aria-labelledby="odPayH"><h2 class="od2-h" id="odPayH">'+T('ملخص الدفع','Payment summary')+'</h2>'
+      + h + (after.length ? '<div class="od2-after">'+after.join('')+'</div>' : '') + '</section>';
   }
-
-  /* ---------- 7 · actions ---------- */
-  function actionsHTML(){
-    return '<div class="od-actions">'
-      + '<a href="raf_orders.html" class="btn btn-gold"><i class="ti ti-receipt"></i> '+T('طلباتي','My Orders')+'</a>'
-      + '<a href="raf_homepage.html" class="btn btn-ghost"><i class="ti ti-building-store"></i> '+T('متابعة التسوق','Continue Shopping')+'</a>'
+  var PAYSTATUS={ paid:{ar:'مدفوع',en:'Paid'}, cod:{ar:'الدفع عند الاستلام',en:'Cash on delivery'}, pending:{ar:'بانتظار الدفع',en:'Payment pending'}, refunded:{ar:'مسترد',en:'Refunded'} };
+  function detailsHTML(o){
+    var cm=(o.snapshot && o.snapshot.commercial) || {}, ps=PAYSTATUS[cm.paymentStatus] || null;
+    var meta='<div class="od2-meta">'
+      + '<span><i class="ti ti-receipt" aria-hidden="true"></i>'+T('الطلب','Order')+' <b><bdi dir="ltr">#'+esc(o.id)+'</bdi></b></span>'
+      + (L(o.date) ? '<span><i class="ti ti-calendar" aria-hidden="true"></i>'+esc(L(o.date))+'</span>' : '')
+      + '<span class="od2-paym"><i class="ti ti-credit-card" aria-hidden="true"></i>'+T('الدفع: ','Payment: ')+'<b>'+esc(L(o.pay)||'—')+'</b>'
+        + (ps ? ' <span class="od2-pill'+(cm.paymentStatus==='paid'||cm.paymentStatus==='refunded'?'':' warn')+'">'+T(ps.ar,ps.en)+'</span>' : '')+'</span>'
       + '</div>';
+    var sup='raf_support.html'+(o && o.id ? '?order='+encodeURIComponent(o.id)+'&ctx=active' : ''   /* the same support link tracking always used */);
+    return '<section class="od2" aria-label="'+esc(T('تفاصيل الطلب','Order details'))+'">'
+      + meta
+      + '<div class="od2-grid"><div class="od2-col">'+itemsSection(o)+deliverySection(o)+'</div>'
+      + '<div class="od2-col">'+paymentSection(o)+'</div></div>'
+      + '<div class="od2-foot"><span><i class="ti ti-headset" aria-hidden="true"></i>'+T('تحتاج مساعدة في هذا الطلب؟','Need help with this order?')+'</span>'
+        + '<a class="sup" href="'+sup+'"><i class="ti ti-message-circle" aria-hidden="true"></i>'+T('تواصل مع الدعم','Contact support')+'</a>'
+        + '<a class="shop" href="raf_homepage.html"><i class="ti ti-building-store" aria-hidden="true"></i>'+T('متابعة التسوق','Continue shopping')+'</a></div>'
+      + '</section>';
   }
 
   /* ---------- customer approved change ----------
@@ -745,6 +779,19 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     try { location.replace(to); } catch(e){ location.href=to; }
     return true;
   }
+  /* a NEW driver message while tracking is open: a visible alert, beside the
+     badge. The message itself is already a RAF notification (created by
+     RAFDriverCommunication); this only surfaces it on the screen in front of
+     the customer. Only an increase alerts — never a re-render or a refresh. */
+  var UNREAD={ id:null, n:null };
+  function unreadAlert(o){
+    var n=0;
+    try { var cv=window.RAFDriverCommunication ? RAFDriverCommunication.conversation(o.id) : null;
+          n = cv && cv.ok ? (cv.messages||[]).filter(function(x){ return !x.mine && !(x.status && x.status.state==='read'); }).length : 0; } catch(e){ n=0; }
+    if(UNREAD.id===o.id && UNREAD.n!==null && n>UNREAD.n && window.RAFShop && RAFShop.toast)
+      RAFShop.toast(T('رسالة جديدة من السائق','New message from your driver'), { icon:'ti-message-dots' });
+    UNREAD={ id:o.id, n:n };
+  }
   function render(){
     closeLabels();
     var root=document.getElementById('odRoot');
@@ -765,10 +812,11 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
       return;
     }
     /* progress first, then the delivery itself, then the order's own detail */
-    root.innerHTML = journeyHTML(o) + changeHTML(o)
-                   + productsHTML(o) + orderDetailsHTML(o) + deliveryHTML(o)
-                   + invoiceHTML(o) + supportHTML(o) + actionsHTML();
+    root.innerHTML = journeyHTML(o) + changeHTML(o) + detailsHTML(o);
     if(window.RAFJourneyUI) RAFJourneyUI.settle(document.getElementById('jrRoot'));
+    unreadAlert(o);
+    clearTimeout(CL_T); CL_T = null;
+    if(typeof CL_AT==='number'){ var wait=CL_AT-Date.now(); if(wait>0 && wait<2147000000) CL_T=setTimeout(render, wait+50); }
     RAFShop.Cart.badge();
   }
 
@@ -790,6 +838,10 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     window.addEventListener('storage', function(e){
       if (e.key === 'raf_order_changes' || e.key === 'raf_orders') render();
     });
+    /* messages and read receipts (another tab, or the chat screen) refresh the
+       unread count — the event is a reason to re-read, never data */
+    if(window.RAFEventBus){ try { RAFEventBus.subscribe('communication.*', function(){ render(); }); } catch(e){} }
+    document.addEventListener('visibilitychange', function(){ if(document.visibilityState==='visible') render(); });
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();

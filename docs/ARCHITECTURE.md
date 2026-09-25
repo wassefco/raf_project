@@ -466,6 +466,17 @@ Do not recreate old Driver Performance, Delivery, Communication, or Reports impl
 - Driver identity after delivery remains visible to the order's own customer (name, avatar initial, aggregate rating from `RAFCustomerExperience`), without contact controls.
 - Driver customer ratings are presented in the Logistics Driver Profile. The data stays in `RAFCustomerExperience`.
 
+
+### Delivery lifecycle (driver side)
+
+Accepted → driver assignable → Ready → Pickup → Out for delivery → Arrived (Handover) → Delivery code → Delivered.
+
+- **Assignment from acceptance.** A driver can be assigned (dispatch or pool claim) once the merchant's Accept is committed. This is `RAFOrderEngine.assignableState`, the one rule shared by dispatch and the pool. An early assignment leaves the merchant state (accepted / preparing) untouched; the driver lives on `fulfilment.driverId`. Pickup still requires the store's committed Ready (`NOT_READY_FOR_PICKUP` otherwise).
+- **Arrived at the customer.** `RAFLogistics.arrive()` records `fulfilment.arrivedAt` and issues a two-digit delivery verification code (10–99) on the order's own record. `RAFOrderEngine.driverArrived` writes the timeline, the `driver.arrived` audit and the `order.driver_arrived` customer notification. No new merchant state is created.
+- **Delivery requires the code.** `RAFLogistics.completeDelivery(orderId, { code })` refuses delivery before the arrival (`NOT_ARRIVED`), without a code (`CODE_REQUIRED`) and with a wrong code (`INCORRECT_CODE`). Only the order's own customer can read the code (`RAFLogistics.customerArrival`). The driver's views never carry it.
+- **Customer screens.** Tracking shows Delivery / Handover after the arrival, with the code. The conversation lives on its own screen (`raf_order_chat.html`), and the Message icon shows the unread count from the communication authority's receipts. Once delivered, the customer is taken straight to Delivery Completed → Rating (`raf_delivery_rating.html?flow=delivered`). The active-order bar (`raf_active_order.js`) reopens an order in progress from the customer pages.
+- **ETA.** Tracking has a delivery-ETA line that reads "—", because RAF holds no authoritative delivery ETA. The merchant Promised ETA is never shown as one.
+- **Compensation line.** It is drawn only when a real process exists. First, the live delay (`RAFCompensation.liveDelay`) is shown as an estimate: same rules as issuance, nothing issued before Delivered. Then the issued coupon's validity is shown, stopping once it is added to the wallet or used.
 The deleted Driver Performance system is not revived. Customer ratings are not a performance score.
 
 ---

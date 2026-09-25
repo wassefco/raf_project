@@ -14,6 +14,9 @@
 <style>
 /* ===== Delivery & Rating — the visual language of the tracking journey ===== */
 .dr-wrap{max-width:860px;}
+/* the close control — the same X pattern as tracking */
+.co-back.co-close{width:40px;padding:0;justify-content:center;font-size:19px;}
+.co-back.co-close:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 .dr{--dr-green:var(--green,#2E9E5B);--dr-green-d:#1F7A45;--dr-cream:#FBF8F2;}
 
 /* the completion hero */
@@ -128,8 +131,8 @@
 <body>
 
 <header class="co-head">
-  <button type="button" class="co-back" onclick="goBack()"><i class="ti ti-arrow-right"></i> <span data-ar="رجوع" data-en="Back">رجوع</span></button>
-  <div class="co-title" data-ar="تسليم الطلب والتقييم" data-en="Delivery &amp; Rating">تسليم الطلب والتقييم</div>
+  <!-- a focused completion/rating screen: no page title, just close (X) and language -->
+  <button type="button" class="co-back co-close" id="drClose" onclick="closeRating()" aria-label="إغلاق" title="إغلاق"><i class="ti ti-x" aria-hidden="true"></i></button>
   <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
 </header>
 
@@ -263,6 +266,7 @@
   function render(){
     var root=el('drRoot'); if(!root) return;
     document.title=T('رف — تسليم الطلب والتقييم','RAF — Delivery & Rating');
+    var xb=el('drClose'); if(xb){ xb.setAttribute('aria-label',T('إغلاق','Close')); xb.setAttribute('title',T('إغلاق','Close')); }
     if(S.done){
       root.innerHTML='<section class="dr-card dr-done" role="status"><div class="dr-ok">'+CHECK+'</div>'
         + '<h2>'+T('شكرًا لتقييمك!','Thank you for your rating!')+'</h2>'
@@ -337,7 +341,7 @@
       if(r && r.ok){
         /* saved and read back by the authority — only now is success shown */
         S.done=true; render();
-        setTimeout(function(){ location.href=HOME; }, REDIRECT_MS);
+        setTimeout(function(){ try { location.replace(HOME); } catch(e){ location.href=HOME; } }, REDIRECT_MS);
       } else if(r && r.code==='ALREADY_RATED'){
         render();                                                 /* shows the already-rated state */
       } else {
@@ -370,7 +374,9 @@
     var c=el('cnt-'+k); if(c) c.innerHTML='<bdi dir="ltr">'+t.value.length+' / '+t.getAttribute('maxlength')+'</bdi>';
   });
 
-  window.goBack=function(){ if(history.length>1) history.back(); else location.href='raf_tracking.html?id='+encodeURIComponent(ORDER||''); };
+  /* CLOSE — the same pattern as tracking: straight to the homepage, REPLACING this
+     entry so Back cannot return to it. Closing never touches the order or a rating. */
+  window.closeRating=function(){ clearTimeout(STEP_T); try { location.replace(HOME); } catch(e){ location.href=HOME; } };
   function boot(){
     render();
     var root=document.getElementById('htmlRoot');

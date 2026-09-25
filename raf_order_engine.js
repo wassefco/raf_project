@@ -712,9 +712,35 @@
      timeline wording differ, so one business action leaves one audit event
      ('dispatch.assigned' instead of 'driver.assigned'). The caller (RAFDriver)
      has already proved the staff session, the lock and the target driver. */
+  /* EARLY ASSIGNMENT: a driver may be assigned as soon as the merchant has
+     ACCEPTED the order (accept committed — not inside its undo window), while
+     the store is still preparing it. The order then stays in the merchant's
+     own state (accepted / preparing) — the store's work is not touched and its
+     Ready action works exactly as before; the driver is on the order's own
+     fulfilment record. Assigning at READY moves it to WAITING_DRIVER as it
+     always did. Pickup still needs Ready (RAFLogistics.pickUp). */
+  function assignableState(orderId){
+    var cur = mstate(orderId);
+    if (cur === MSTATE.READY) return { ok:true, cur:cur, early:false };
+    if (cur === MSTATE.ACCEPTED || cur === MSTATE.PREPARING) {
+      var u = undoOf(orderId);
+      if (u && u.action === ACTION.ACCEPT) return { ok:false, reason:'accept_pending' };
+      return { ok:true, cur:cur, early:true };
+    }
+    return { ok:false, reason:'not_ready' };
+  }
   function driverAssigned(orderId, actor, ctx){
-    if (mstate(orderId) !== MSTATE.READY) return { ok:false, reason:'not_ready' };
+    var as = assignableState(orderId);
+    if (!as.ok) return { ok:false, reason:as.reason };
     var dispatch = !!(ctx && ctx.via === 'dispatch');
+    if (as.early) {
+      appendTimeline(orderId, 'm-waiting-driver', 'تم تعيين سائق لطلبك', 'A driver was assigned to your order', 'active');
+      audit(dispatch ? 'dispatch.assigned' : 'driver.assigned', orderId, { actor:actor, source:dispatch ? 'admin' : 'driver',
+        key:'assign:' + orderId + ':' + Date.now(), previousState:as.cur, newState:as.cur,
+        metadata:(dispatch && ctx.metadata && typeof ctx.metadata === 'object') ? ctx.metadata : null });
+      emit(orderId, 'assigned');
+      return { ok:true, early:true };
+    }
     /* NOTE ON NAMING: the stored state WAITING_DRIVER ('waiting_driver') is
        entered when a driver CLAIMS the order and kept through pickup, so it
        means "a driver has it". It is not renamed here (stored data); every
@@ -747,8 +773,27 @@
      line is neutral — no internal reason, no staff identity. Pickup (if it
      happened) is not undone: the engine keeps no pickup flag of its own and
      the snapshot keeps fulfilment.pickedUpAt. */
+  /* the driver on the order's own fulfilment record (early assignments keep
+     the merchant state, so the record is where the assignment lives) */
+  function fulfilmentDriver(orderId){
+    try { var sn = global.RAFOrderSnapshot ? RAFOrderSnapshot.of(orderId) : null; return (sn && sn.fulfilment && sn.fulfilment.driverId) || null; } catch (e) { return null; }
+  }
   function driverUnassigned(orderId, actor, ctx){
-    if (mstate(orderId) !== MSTATE.WAITING_DRIVER) return { ok:false, reason:'not_assigned' };
+    var cur0 = mstate(orderId);
+    /* an EARLY assignment (accepted / preparing, or Ready reached with the
+       driver already on it) is undone without touching the merchant's state */
+    if (cur0 !== MSTATE.WAITING_DRIVER
+        && (cur0 === MSTATE.ACCEPTED || cur0 === MSTATE.PREPARING || cur0 === MSTATE.READY) && fulfilmentDriver(orderId)) {
+      var retE = !!(ctx && ctx.via === 'return_to_pool');
+      dropTimeline(orderId, 'm-waiting-driver');
+      var aE = audit(retE ? 'dispatch.returned_to_pool' : 'driver.returned', orderId, { actor:actor, source:retE ? 'admin' : 'driver',
+        key:'return:' + orderId + ':' + Date.now(), previousState:cur0, newState:cur0,
+        reason:retE ? (ctx.reason || null) : null,
+        metadata:(retE && ctx.metadata && typeof ctx.metadata === 'object') ? ctx.metadata : null });
+      emit(orderId, 'returned');
+      return { ok:true, state:cur0, auditEventId:(aE && aE.event && aE.event.eventId) || null };
+    }
+    if (cur0 !== MSTATE.WAITING_DRIVER) return { ok:false, reason:'not_assigned' };
     var ret = !!(ctx && ctx.via === 'return_to_pool');
     setMState(orderId, MSTATE.READY, actor);
     /* the assignment line goes with the assignment it described, and only the
@@ -1134,7 +1179,7 @@
     undo: undo, undoOf: undoOf, undoMsLeft: undoMsLeft, commitUndo: commitUndo, sweepUndo: sweepUndo,
     acceptedAt: acceptedAt, readyAt: readyAt, deliveredAt: deliveredAt, promisedEtaAt: promisedEtaAt,
     driverPickedUp: driverPickedUp, driverAssigned: driverAssigned,
-    driverUnassigned: driverUnassigned, driverArrived: driverArrived, driverDelivered: driverDelivered,
+    driverUnassigned: driverUnassigned, driverArrived: driverArrived, assignableState: assignableState, driverDelivered: driverDelivered,
     /* locking */
     lockOf: lockOf, acquireLock: acquireLock, heartbeat: heartbeat, releaseLock: releaseLock,
     overrideLock: overrideLock, lockedByOther: lockedByOther, canProcess: canProcess, sweepLocks: sweepLocks,

@@ -90,6 +90,7 @@
     NO_SNAPSHOT:       { ar:'سجل الطلب غير مكتمل، لا يمكن التعيين.',        en:'The order record is incomplete; it cannot be assigned.' },
     ORDER_CLOSED:      { ar:'الطلب غير جارٍ.',                             en:'The order is not in progress.' },
     NOT_READY:         { ar:'الطلب غير جاهز للتعيين بعد.',                 en:'The order is not ready for assignment yet.' },
+    NOT_READY_FOR_PICKUP:{ ar:'المتجر لم يجهّز الطلب بعد. يمكنك استلامه عندما يصبح جاهزًا.', en:'The store has not finished preparing the order yet. You can pick it up once it is ready.' },
     ALREADY_ASSIGNED:  { ar:'الطلب معيَّن إلى سائق بالفعل.',               en:'The order is already assigned to a driver.' },
     NOT_ASSIGNED:      { ar:'الطلب غير معيَّن إلى سائق.',                  en:'The order is not assigned to a driver.' },
     /* the driver's own half of the domain */
@@ -474,9 +475,13 @@
     if (!snap) return fail('NO_SNAPSHOT');
     var f = snap.fulfilment || {};
     if (f.driverId) return fail('ALREADY_ASSIGNED', { driverId:f.driverId });
+    /* assignable from the merchant's committed ACCEPT onward (the engine's own
+       rule, RAFOrderEngine.assignableState): a driver can be on the order while
+       the store is still preparing it; pickup still waits for Ready */
     var E = Engine();
     var m = null; try { m = E ? E.mstate(orderId) : null; } catch (e) { m = null; }
-    if (m !== (E && E.MSTATE ? E.MSTATE.READY : 'ready')) return fail('NOT_READY', { mstate:m });
+    var as = null; try { as = E && E.assignableState ? E.assignableState(orderId) : null; } catch (e) { as = null; }
+    if (!as || !as.ok) return fail('NOT_READY', { mstate:m });
     return { ok:true, order:o, snapshot:snap };
   }
   /* the orders Logistics may hand to a driver right now — the authority's own
@@ -633,9 +638,14 @@
     var promised = null;
     try { promised = E && E.promisedEtaAt ? E.promisedEtaAt(orderId) : null; } catch (e) { promised = null; }
     var d = snap.delivery || {}, c = snap.customer || {};
+    /* can it be collected yet? The store's Ready (committed), read from the engine */
+    var ms = null, ru = null;
+    try { ms = E ? E.mstate(orderId) : null; ru = E && E.undoOf ? E.undoOf(orderId) : null; } catch (e) { ms = null; }
+    var readyForPickup = ms === 'waiting_driver' || (ms === 'ready' && !(ru && ru.action === 'ready'));
     return {
       orderId:orderId,
       stage:deliveryStage(f),
+      readyForPickup:!!(f.pickedUpAt || readyForPickup),
       assignedAt:f.assignedAt || null,
       pickedUpAt:f.pickedUpAt || null,
       /* the moment the driver reached the drop-off. The delivery code itself is
@@ -659,7 +669,7 @@
       items:(snap.items || []).length,
       payment:snap.commercial ? { method:copy(snap.commercial.paymentMethod), status:snap.commercial.paymentStatus || null,
                                   total:snap.commercial.grandTotal || null, currency:snap.commercial.currency || null } : null,
-      canPickUp:!f.pickedUpAt,
+      canPickUp:!f.pickedUpAt && readyForPickup,
       canArrive:!!f.pickedUpAt && !f.arrivedAt,
       /* delivery is confirmed only at the door, with the customer's code */
       canDeliver:!!f.pickedUpAt && !!f.arrivedAt,
@@ -713,7 +723,13 @@
       store:{ slug:snap.storeSlug || null, name:store ? copy(store.name) : null },
       area:d.area || null,
       items:(snap.items || []).length,
-      promisedEtaAt:promised ? promised.at : null
+      promisedEtaAt:promised ? promised.at : null,
+      /* offered from acceptance onward: is it collectable yet (the store's committed Ready)? */
+      readyForPickup:(function () {
+        var ms = null, ru = null;
+        try { ms = E ? E.mstate(orderId) : null; ru = E && E.undoOf ? E.undoOf(orderId) : null; } catch (e) { ms = null; }
+        return ms === 'ready' && !(ru && ru.action === 'ready');
+      })()
     };
   }
   function availableDeliveries(){
@@ -859,7 +875,12 @@
     /* the engine recovers a missing Ready on pickup by design; that recovery
        is for a real pickup, so the state is proved HERE before asking */
     var st = null; try { st = E.mstate(orderId); } catch (e) { st = null; }
-    if (st !== 'waiting_driver') return fail('NOT_IN_DELIVERY', { state:st });
+    /* a driver assigned early waits for the store: pickup needs Ready, and a
+       Ready still inside its undo window is not final yet */
+    if (st === 'accepted' || st === 'preparing') return fail('NOT_READY_FOR_PICKUP', { state:st });
+    if (st === 'ready') { var u = null; try { u = E.undoOf ? E.undoOf(orderId) : null; } catch (e) { u = null; }
+      if (u && u.action === 'ready') return fail('NOT_READY_FOR_PICKUP', { state:st }); }
+    else if (st !== 'waiting_driver') return fail('NOT_IN_DELIVERY', { state:st });
 
     var me = { id:a.id, name:a.name, roleId:a.roleId };
 

@@ -1423,10 +1423,10 @@ table.app tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
         render:function(){
           if(!opts.length)
             return '<div class="empty"><i class="ti ti-package-off" aria-hidden="true"></i><b>'
-              + T('لا توجد طلبات جاهزة للتعيين حالياً.','No orders are ready for assignment right now.') + '</b></div>';
+              + T('لا توجد طلبات متاحة للتعيين حالياً.','No orders are available for assignment right now.') + '</b></div>';
           return field('orderId', T('الطلب','Order'), 'select', {
             required:true, placeholder:T('اختر الطلب','Select an order'), options:opts,
-            hint:T('تعرض القائمة الطلبات الجاهزة في المتجر وغير المعيَّنة.','The list shows orders that are ready at the store and not yet assigned.') });
+            hint:T('تعرض القائمة الطلبات التي قبلها المتجر وغير المعيَّنة.','The list shows orders the store has accepted that are not yet assigned.') });
         },
         submit:function(){
           if(!opts.length) return;

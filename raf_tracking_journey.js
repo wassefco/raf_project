@@ -123,6 +123,28 @@
     '.jr-j{padding-bottom:10px;}',
     /* below the journey */
     '.jr-f{display:flex;flex-direction:column;gap:16px;padding:22px 28px 26px;border-top:1px solid rgba(226,219,204,.8);background:rgba(255,255,255,.6);}',
+    /* below the tracking line: the ETA, then (only once it has begun) the compensation line */
+    '.jr-mid{display:flex;flex-direction:column;gap:12px;padding:0 28px 18px;}',
+    '.jr-eta{display:flex;align-items:center;gap:12px;min-height:58px;padding:9px 14px;border-radius:16px;background:#fff;border:1px solid var(--jr-line);}',
+    '.jr-eta .ic{width:38px;height:38px;flex:0 0 auto;border-radius:12px;background:#F4F1EA;color:var(--jr-gold-d);display:flex;align-items:center;justify-content:center;font-size:19px;}',
+    '.jr-eta-b{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;line-height:1.35;}',
+    '.jr-eta-b span{font-size:12px;color:var(--jr-mute);}',
+    '.jr-eta-b b{font-size:16px;font-weight:800;color:var(--jr-ink);min-width:7.5ch;font-variant-numeric:tabular-nums;white-space:nowrap;}',
+    '.jr-eta small{flex:0 1 auto;font-size:11.5px;color:var(--jr-mute);text-align:end;max-width:52%;}',
+    '.jr-cl{padding:14px 16px 16px;border-radius:18px;background:linear-gradient(120deg,#FFFBEF 0%,#FFF6DF 100%);border:1px solid rgba(201,168,76,.45);}',
+    '.jr-cl.done{background:#F6FAF7;border-color:rgba(46,158,91,.3);}',
+    '.jr-cl-h{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:var(--jr-ink);}',
+    '.jr-cl-h .ti{font-size:19px;color:var(--jr-gold-d);}.jr-cl.done .jr-cl-h .ti{color:var(--jr-green-d);}',
+    '.jr-cl-m{margin:4px 0 12px;font-size:12.5px;line-height:1.7;color:var(--text2,#5A5650);}',
+    '.jr-cl-t{position:relative;height:10px;border-radius:999px;background:#EDE6D4;margin:4px 10px 30px;}',
+    '.jr-cl-f{position:absolute;inset-block:0;inset-inline-start:0;border-radius:inherit;background:linear-gradient(90deg,#D9B85C,var(--jr-gold));max-width:100%;}',
+    '.jr-cl.done .jr-cl-f{background:var(--jr-green);}',
+    '.jr-cl-k{position:absolute;top:50%;inset-inline-start:var(--at);width:22px;height:22px;margin-top:-11px;margin-inline-start:-11px;border-radius:50%;background:#fff;',
+    '  border:2px solid #D9CFB6;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--jr-mute);}',
+    '.jr-cl-k.on{border-color:var(--jr-gold-d);background:var(--jr-gold);color:#1C1606;}.jr-cl.done .jr-cl-k.on{border-color:var(--jr-green-d);background:var(--jr-green);color:#fff;}',
+    '.jr-cl-k em{position:absolute;top:24px;font-style:normal;font-size:11px;font-weight:700;color:var(--jr-mute);white-space:nowrap;}',
+    '.jr-cl-s{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--jr-mute);}',
+    '.jr-cl-s b{color:var(--jr-ink);font-variant-numeric:tabular-nums;}',
     '.jr-info{display:flex;align-items:center;gap:16px 24px;flex-wrap:wrap;}',
     '.jr-acts{display:flex;gap:12px;flex-wrap:wrap;margin-inline-start:auto;}',
     '.jr .jr-btn{min-height:52px;min-width:150px;padding:0 22px;border-radius:16px;border:1px solid var(--jr-line);background:#F4F1EA;color:var(--jr-ink);',
@@ -161,6 +183,9 @@
     '.jr .jr-ic:focus-visible{outline:2px solid var(--jr-gold);outline-offset:3px;}',
     '.jr .jr-ic:disabled{opacity:.55;cursor:not-allowed;}',
     '.jr-drv .jr-acts{gap:10px;}',
+    '.jr .jr-ic{position:relative;}',
+    '.jr-unread{position:absolute;top:-5px;inset-inline-end:-5px;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#C8412D;color:#fff;',
+    '  font-family:var(--fen,"DM Sans",sans-serif);font-size:12px;font-weight:800;line-height:22px;text-align:center;box-shadow:0 0 0 2px #fff;font-variant-numeric:tabular-nums;}',
     /* the driver is at the door: the delivery verification code */
     '.jr-code{display:flex;align-items:center;gap:14px 18px;flex-wrap:wrap;padding:16px 18px;border-radius:20px;',
     '  background:linear-gradient(120deg,#EEF7F0 0%,#F7FBF8 100%);border:1px solid rgba(46,158,91,.35);box-shadow:0 14px 30px -24px rgba(31,122,69,.55);}',
@@ -215,7 +240,7 @@
     '@keyframes jrCloud{to{transform:translateX(18px);}}',
     '@media (prefers-reduced-motion:reduce){.jr *,.jr *::before{animation:none !important;transition:none !important;}}',
     /* tablet */
-    '@media (max-width:760px){.jr-h{padding:20px 18px 4px;}.jr-sc{height:150px;}.jr-f{padding:18px;}}',
+    '@media (max-width:760px){.jr-h{padding:20px 18px 4px;}.jr-sc{height:150px;}.jr-f{padding:18px;}.jr-mid{padding:0 18px 16px;}}',
     /* phone: same journey, re-proportioned; the timer and the driver stack */
     '@media (max-width:560px){.jr{border-radius:22px;}.jr-h{flex-direction:column;gap:12px;}.jr-sep{display:none;}',
     '  .jr-idrow{width:100%;justify-content:space-between;}.jr-logo{width:48px;height:48px;border-radius:14px;}',
@@ -228,7 +253,7 @@
     '  .jr-f{padding:16px;}.jr-info{flex-direction:column;align-items:stretch;gap:16px;}.jr-drv{flex:0 0 auto;}.jr-vr{display:none;}',
     '  .jr-acts{flex-basis:100%;margin-inline-start:0;}.jr .jr-btn{flex:1 1 0;min-width:0;}.jr-drv .jr-acts{flex-basis:auto;margin-inline-start:auto;}.jr .jr-rate,.jr-rated{margin-inline-start:0;}',
     '  .jr-comp{flex-wrap:wrap;padding:14px;}.jr-comp::before,.jr-comp::after{display:none;}.jr-comp-stub{width:52px;height:52px;font-size:26px;}',
-    '  .jr-comp-b{padding-inline-start:0;border-inline-start:0;}.jr-comp-amt{font-size:24px;}.jr .jr-comp-cta{flex:1 1 100%;}.jr-timer{width:100%;}.jr-code-n{flex:1 1 100%;}}'
+    '  .jr-comp-b{padding-inline-start:0;border-inline-start:0;}.jr-comp-amt{font-size:24px;}.jr .jr-comp-cta{flex:1 1 100%;}.jr-timer{width:100%;}.jr-code-n{flex:1 1 100%;}.jr-mid{padding:0 16px 14px;}.jr-eta{flex-wrap:wrap;}.jr-eta small{max-width:none;flex-basis:100%;text-align:start;}}'
   ].join('\n');
   function injectCss(){
     if (document.getElementById('jrCss')) return;
@@ -379,7 +404,12 @@
 
   function html(m){
     injectCss();
-    var stage = Math.max(0, Math.min(2, m.stage | 0)), cancelled = !!m.cancelled, delivered = stage === 2 && !cancelled;
+    /* HANDOVER: the driver is at the door (the order's own arrival record). The
+       journey moves on to its last milestone — Delivery / Handover — as the
+       CURRENT step, not yet completed: the route is full, the home scene is live,
+       and it becomes Delivered only when the order record says so */
+    var handover = !!m.handover && !m.cancelled;
+    var stage = handover ? 2 : Math.max(0, Math.min(2, m.stage | 0)), cancelled = !!m.cancelled, delivered = stage === 2 && !cancelled && !handover;
     function state(i){
       if (cancelled) return 'up';
       if (i < stage) return 'done';
@@ -389,7 +419,7 @@
     var titles = [
       state(0) === 'cur' && !m.prepared ? T('جاري تجهيز طلبك', 'Preparing your order') : T('تم تجهيز طلبك', 'Order prepared'),
       T('قيد التوصيل', 'Out for delivery'),
-      T('تم التوصيل', 'Delivered')
+      handover ? T('التسليم', 'Delivery / Handover') : T('تم التوصيل', 'Delivered')
     ];
     var target = progressOf(stage, cancelled);
     var mv = motionFor(m.orderId, target), from = Math.round(mv.from * 100) / 100;
@@ -450,8 +480,12 @@
     if (m.callNote) blocks.push('<p class="jr-callnote" role="alert">' + esc(m.callNote) + '</p>');
     var foot = blocks.length ? '<div class="jr-f"' + dirAttr + '>' + blocks.join('') + '</div>' : '';
 
-    return '<section class="jr' + (cancelled ? ' is-cancelled' : '') + (raster() ? ' jr-raster' : '') + (isEn() ? '' : ' jr-rtl') + '" data-stage="' + stage + '" aria-label="' + T('تتبع الطلب', 'Order tracking') + '">'
-      + head + journey + foot + '</section>';
+    var mid = [];
+    if (!cancelled && !delivered) mid.push(etaHTML(m));
+    var cl = clHTML(m, cancelled); if (cl) mid.push(cl);
+    var midHtml = mid.length ? '<div class="jr-mid"' + dirAttr + '>' + mid.join('') + '</div>' : '';
+    return '<section class="jr' + (cancelled ? ' is-cancelled' : '') + (raster() ? ' jr-raster' : '') + (isEn() ? '' : ' jr-rtl') + '" data-stage="' + stage + '"' + (handover ? ' data-handover="1"' : '') + ' aria-label="' + T('تتبع الطلب', 'Order tracking') + '">'
+      + head + journey + midHtml + foot + '</section>';
   }
 
   /* ---------------------------------------------------- the lower section */
@@ -496,9 +530,85 @@
       + '<div><span>' + (delivered ? T('وصّل طلبك', 'Delivered by') : T('سائق التوصيل', 'Your driver')) + '</span><b>' + esc(d.name) + '</b>' + rate + '</div>'
       + (!delivered && (m.canCall || m.canMessage) ? '<div class="jr-acts">'
         + (m.canCall ? '<button type="button" class="jr-ic" data-jr="call" aria-label="' + esc(T('اتصال بالسائق', 'Call the driver')) + '" title="' + esc(T('اتصال', 'Call')) + '"><i class="ti ti-phone" aria-hidden="true"></i></button>' : '')
-        + (m.canMessage ? '<button type="button" class="jr-ic" data-jr="message" aria-label="' + esc(T('مراسلة السائق', 'Message the driver')) + '" title="' + esc(T('مراسلة', 'Message')) + '"><i class="ti ti-message-dots" aria-hidden="true"></i></button>' : '')
+        + (m.canMessage ? '<button type="button" class="jr-ic" data-jr="message" aria-label="'
+            + esc(T('مراسلة السائق', 'Message the driver') + (m.unread > 0 ? ' — ' + T(m.unread + ' رسالة غير مقروءة', m.unread + ' unread message' + (m.unread === 1 ? '' : 's')) : ''))
+            + '" title="' + esc(T('مراسلة', 'Message')) + '"><i class="ti ti-message-dots" aria-hidden="true"></i>'
+            /* the unread count — the communication authority's own receipts, this order only */
+            + (m.unread > 0 ? '<span class="jr-unread" aria-hidden="true">' + (m.unread > 99 ? '99+' : m.unread) + '</span>' : '')
+            + '</button>' : '')
         + '</div>' : '')
       + '</div>';
+  }
+  /* THE ETA — the DELIVERY estimate only. RAF holds none today (the merchant's
+     Promised ETA is a different value and is never presented as one), so the
+     line reads "—" and says so. It fills itself from m.deliveryEtaAt the day a
+     delivery authority records one. The value box has a fixed minimum width. */
+  function etaMinutes(at){ return Math.max(0, Math.ceil((at - Date.now()) / 60000)); }
+  function etaHTML(m){
+    var has = typeof m.deliveryEtaAt === 'number';
+    var v = has ? T(etaMinutes(m.deliveryEtaAt) + ' دقيقة', etaMinutes(m.deliveryEtaAt) + ' min') : '—';
+    return '<div class="jr-eta" role="group" aria-label="' + esc(T('الوقت المتوقع للتوصيل', 'Estimated delivery')) + '"' + (has ? ' data-jr-eta="' + m.deliveryEtaAt + '"' : '') + '>'
+      + '<span class="ic" aria-hidden="true"><i class="ti ti-clock-share"></i></span>'
+      + '<div class="jr-eta-b"><span>' + T('الوقت المتوقع للتوصيل', 'Estimated delivery') + '</span><b class="jr-eta-v" dir="auto">' + esc(v) + '</b></div>'
+      + (has ? '' : '<small>' + T('لا يتوفر وقت توصيل مؤكد لهذا الطلب بعد.', 'No confirmed delivery time is available for this order yet.') + '</small>')
+      + '</div>';
+  }
+  /* THE COMPENSATION LINE — a second, independent line, drawn only once a real
+     compensation process exists, in sequence:
+       1 · live delay (RAFCompensation.liveDelay, an estimate): from the moment
+           the delay passes the excluded minutes, one marker per step of the
+           approved rules; the fill is elapsed time against the steps drawn
+       2 · the issued coupon (RAFCompensation.forOrder): issuance → expiry, with
+           "added to wallet" as its completion; frozen once complete
+     Everything is computed from recorded timestamps, so a refresh or reopening
+     tracking lands on the same point. */
+  function clLiveInner(start, step, per, now){
+    var el = Math.max(0, now - start), blocks = Math.floor(el / step), K = Math.max(3, blocks + 1);
+    var fill = Math.min(100, el / (K * step) * 100), marks = '';
+    for (var i = 1; i <= K; i++) marks += '<span class="jr-cl-k' + (i <= blocks ? ' on' : '') + '" style="--at:' + (i / K * 100) + '%" aria-hidden="true">1<em>+' + esc(per) + '</em></span>';
+    var next = step - (el % step), mm = Math.floor(next / 60000), ss = Math.floor(next / 1000) % 60;
+    return { track:'<span class="jr-cl-f" style="width:' + fill.toFixed(2) + '%"></span>' + marks, blocks:blocks,
+             next:(mm < 10 ? '0' : '') + mm + ':' + (ss < 10 ? '0' : '') + ss };
+  }
+  function clHTML(m, cancelled){
+    if (cancelled) return '';
+    var c = m.compensation, L = m.compLive;
+    if (c) {
+      var done = !(c.status === 'issued' || c.status === 'add_pending');
+      var span = Math.max(1, c.expiresAt - c.issuedAt);
+      var addedAt = c.wallet && c.wallet.added && typeof c.wallet.addedAt === 'number' ? c.wallet.addedAt : null;
+      var endAt = done ? (addedAt || Math.min(Date.now(), c.expiresAt)) : Date.now();
+      var fill = Math.max(0, Math.min(100, (endAt - c.issuedAt) / span * 100));
+      var st = COMP_STATUS[c.status] || null;
+      return '<div class="jr-cl' + (done ? ' done' : '') + '" role="group" aria-label="' + esc(T('تعويض التأخير', 'Delay compensation')) + '"'
+        + (done ? '' : ' data-jr-cl="coupon" data-start="' + c.issuedAt + '" data-end="' + c.expiresAt + '"') + '>'
+        + '<div class="jr-cl-h"><i class="ti ' + (done ? 'ti-circle-check' : 'ti-gift') + '" aria-hidden="true"></i>' + T('تعويض التأخير', 'Delay compensation') + '</div>'
+        + '<p class="jr-cl-m">' + (done ? (st ? T(st.ar, st.en) + ' — ' : '') + T('اكتملت مرحلة التعويض.', 'The compensation is complete.')
+                                     : T('صدرت قسيمة تعويض بقيمة ', 'A compensation coupon of ') + '<bdi dir="ltr">' + esc(c.amount) + '</bdi> ' + T('د.ك — أضفها إلى محفظة رف قبل انتهاء صلاحيتها.', 'KWD was issued — add it to your RAF Wallet before it expires.')) + '</p>'
+        + '<div class="jr-cl-t" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(fill) + '">'
+          + '<span class="jr-cl-f" style="width:' + fill.toFixed(2) + '%"></span>'
+          + '<span class="jr-cl-k on" style="--at:0%" aria-hidden="true">1<em>' + T('صدرت', 'Issued') + '</em></span>'
+          + (addedAt ? '<span class="jr-cl-k on" style="--at:' + Math.max(8, Math.min(92, (addedAt - c.issuedAt) / span * 100)).toFixed(2) + '%" aria-hidden="true">2<em>' + T('أُضيفت', 'Added') + '</em></span>'
+                     : '<span class="jr-cl-k" style="--at:50%" aria-hidden="true">2<em>' + T('إضافتها للمحفظة', 'Add to wallet') + '</em></span>')
+          + '<span class="jr-cl-k' + (c.status === 'expired' ? ' on' : '') + '" style="--at:100%" aria-hidden="true">3<em>' + T('تنتهي', 'Expires') + '</em></span>'
+        + '</div>'
+        + '<div class="jr-cl-s"><span>' + T('المبلغ: ', 'Amount: ') + '<b dir="ltr">' + esc(c.amount) + '</b> ' + T('د.ك', 'KWD') + '</span>'
+          + '<span>' + T('صالحة حتى ', 'Valid until ') + '<b>' + esc(dateOf(c.expiresAt) || '—') + '</b></span></div>'
+        + '</div>';
+    }
+    if (L && L.started) {
+      var inner = clLiveInner(L.startsAt, L.stepMs, L.amountPerStep, Date.now());
+      return '<div class="jr-cl" role="group" aria-label="' + esc(T('تعويض التأخير', 'Delay compensation')) + '" data-jr-cl="live"'
+        + ' data-start="' + L.startsAt + '" data-step="' + L.stepMs + '" data-per="' + esc(L.amountPerStep) + '" data-perfils="' + L.amountPerStepFils + '">'
+        + '<div class="jr-cl-h"><i class="ti ti-hourglass-high" aria-hidden="true"></i>' + T('تعويض التأخير', 'Delay compensation') + '</div>'
+        + '<p class="jr-cl-m">' + T('تأخر طلبك عن الوقت الذي وعد به المتجر، وبدأ احتساب تعويض التأخير. يُحتسب المبلغ نهائيًا عند تسليم طلبك.',
+                                    'Your order is past the time the store promised, and delay compensation has started. The final amount is set when your order is delivered.') + '</p>'
+        + '<div class="jr-cl-t" role="progressbar" aria-valuemin="0" aria-valuemax="100">' + inner.track + '</div>'
+        + '<div class="jr-cl-s"><span>' + T('التقدير حتى الآن: ', 'Estimate so far: ') + '<b dir="ltr" data-cl-amt>' + esc((inner.blocks * L.amountPerStepFils / 1000).toFixed(3)) + '</b> ' + T('د.ك', 'KWD') + '</span>'
+          + '<span>' + T('الخطوة التالية بعد ', 'Next step in ') + '<b dir="ltr" data-cl-next>' + inner.next + '</b></span></div>'
+        + '</div>';
+    }
+    return '';
   }
   /* THE DELIVERY VERIFICATION CODE — issued by RAFLogistics when the driver
      arrived and read from the order's own record; the customer hands it over
@@ -552,7 +662,23 @@
   var TICK = null;
   function tick(){
     var live = document.querySelectorAll('[data-jr-timer]:not([data-end])');
-    if (!live.length) { clearInterval(TICK); TICK = null; return; }
+    var cls = document.querySelectorAll('[data-jr-cl]'), etas = document.querySelectorAll('[data-jr-eta]');
+    Array.prototype.forEach.call(cls, function (el) {
+      var t = el.querySelector('.jr-cl-t'), start = +el.getAttribute('data-start'); if (!t || !start) return;
+      if (el.getAttribute('data-jr-cl') === 'live') {
+        var r = clLiveInner(start, +el.getAttribute('data-step'), el.getAttribute('data-per'), Date.now());
+        t.innerHTML = r.track;
+        var a = el.querySelector('[data-cl-amt]'); if (a) a.textContent = (r.blocks * (+el.getAttribute('data-perfils')) / 1000).toFixed(3);
+        var nx = el.querySelector('[data-cl-next]'); if (nx) nx.textContent = r.next;
+      } else {
+        var end = +el.getAttribute('data-end'), f = el.querySelector('.jr-cl-f');
+        if (f && end > start) f.style.width = Math.max(0, Math.min(100, (Date.now() - start) / (end - start) * 100)).toFixed(2) + '%';
+      }
+    });
+    Array.prototype.forEach.call(etas, function (el) {
+      var b = el.querySelector('.jr-eta-v'); if (b) b.textContent = T(etaMinutes(+el.getAttribute('data-jr-eta')) + ' دقيقة', etaMinutes(+el.getAttribute('data-jr-eta')) + ' min');
+    });
+    if (!live.length && !cls.length && !etas.length) { clearInterval(TICK); TICK = null; return; }
     Array.prototype.forEach.call(live, function (el) {
       var b = el.querySelector('.jr-clock'), start = +el.getAttribute('data-start'); if (!b || !start) return;
       var v = hms(Date.now() - start); b.textContent = v;
@@ -562,7 +688,7 @@
 
   /* move the green from where this page last drew it to where the order is now */
   function settle(root){
-    if (document.querySelector('[data-jr-timer]:not([data-end])') && !TICK) TICK = setInterval(tick, 1000);
+    if (document.querySelector('[data-jr-timer]:not([data-end]), [data-jr-cl], [data-jr-eta]') && !TICK) TICK = setInterval(tick, 1000);
     var r = root && root.querySelector ? root.querySelector('.jr-road') : null; if (!r) return;
     var to = r.getAttribute('data-to');
     if (r.getAttribute('data-from') === to) return;

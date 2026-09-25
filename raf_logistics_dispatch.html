@@ -599,7 +599,8 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
      and not the security boundary. */
   function actionCell(r){
     var k = stateOf(r).k;
-    if(k !== 'unassigned') return DASH;
+    /* assignable from the merchant's acceptance onward (RAFLogistics decides) */
+    if(k !== 'unassigned' && k !== 'preparing') return DASH;
     if(!(CAP && CAP.assign))
       return '<span class="nc"><i class="ti ti-lock" aria-hidden="true"></i>' + T('لا تملك صلاحية التعيين','No assignment permission') + '</span>';
     return '<button class="btn sm pri" type="button" onclick="event.stopPropagation();OPS.openAssign(\'' + esc(r.id) + '\')">'
@@ -687,7 +688,7 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
     el('view').innerHTML =
       '<h1 class="sr-only">' + T('التوزيع والتعيين','Dispatch & Assignment') + '</h1>'
       + '<div class="wk">'
-      + '<div class="wk-head"><p>' + T('الطلبات الجاهزة في المتاجر وما هو في الطريق.','Orders ready at the stores and what is already on the way.') + '</p>'
+      + '<div class="wk-head"><p>' + T('الطلبات المقبولة في المتاجر وما هو في الطريق.','Orders accepted by the stores and what is already on the way.') + '</p>'
       + '<span class="wk-count">' + T(list.length + ' من ' + total + ' طلب', list.length + ' of ' + total + ' orders') + '</span></div>'
       + strip()
       + '<div class="scopes" role="group" aria-label="' + esc(T('نطاق التوزيع','Dispatch scope')) + '">'
@@ -719,7 +720,7 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
       + kv(T('السائق','Driver'), driverCell(r))
       + kv(T('وقت التعيين','Assigned at'), r.assignedAt ? '<bdi>' + esc(clockOf(r.assignedAt)) + '</bdi>' : DASH)
       + kv(T('مدة الانتظار','Waiting'), stateSince(r) ? esc(mins(Date.now() - stateSince(r))) : DASH)
-      + (st.k === 'unassigned'
+      + (st.k === 'unassigned' || st.k === 'preparing'
           ? (CAP && CAP.assign
               ? '<div class="acts-row"><button class="btn pri" type="button" onclick="OPS.openAssign(\'' + esc(r.id) + '\')">'
                 + '<i class="ti ti-user-check" aria-hidden="true"></i>' + T('تعيين سائق','Assign a driver') + '</button></div>'

@@ -67,7 +67,7 @@
     if (f.pickedUpAt) return { ar:'قيد التوصيل', en:'Out for delivery', ic:'ti-truck-delivery' };
     var ready = false;
     try { var r = global.RAFOrderEngine && RAFOrderEngine.readyAt ? RAFOrderEngine.readyAt(o.id) : null; ready = !!(r && typeof r.at === 'number'); } catch (e) { ready = false; }
-    if (f.driverId || ready) return { ar:'تم تجهيز طلبك', en:'Order prepared', ic:'ti-package' };
+    if (ready) return { ar:'تم تجهيز طلبك', en:'Order prepared', ic:'ti-package' };
     return { ar:'جاري تجهيز طلبك', en:'Order being prepared', ic:'ti-package' };
   }
 

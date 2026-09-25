@@ -313,6 +313,33 @@
     var rec = recordOf(idFor(orderId));
     return { ok:true, compensation:rec ? view(rec, isManager(u)) : null };
   }
+  /* THE LIVE DELAY — while an order is still on its way, how its delay stands
+     against the approved rules, for the tracking screen's compensation line.
+     The SAME rules and the SAME calculation as issuance (rules(), calculate()),
+     read now instead of at Delivered. It is an ESTIMATE and says so: nothing
+     is issued, recorded or promised here — issuance still happens only at
+     Delivered, with the ON/OFF switch as it stood at that instant. With
+     compensation OFF, rules not configured, or no Promised ETA, it reports
+     live:false and the reason, and the screen shows no line. */
+  function liveDelay(orderId, opts){
+    if (opts !== undefined && !onlyKeys(opts, [])) return fail('FIELD_NOT_ACCEPTED');
+    var u = me(); if (!u) return fail('FORBIDDEN');
+    if (u.status !== 'active') return fail('ACTOR_INACTIVE');
+    var o = orderOf(orderId);
+    var owner = !!(o && o.snapshot && o.snapshot.customer && o.snapshot.customer.id === u.id && u.roleId === 'customer');
+    if (!owner && !isManager(u)) return fail('FORBIDDEN');
+    if (!o || o.status !== 'progress') return { ok:true, live:false, reason:'NOT_IN_PROGRESS' };
+    var r = rules();
+    if (!r.enabled) return { ok:true, live:false, reason:'OFF' };
+    if (!rulesConfigured(r)) return { ok:true, live:false, reason:'NOT_CONFIGURED' };
+    var E = global.RAFOrderEngine, p = E && E.promisedEtaAt ? E.promisedEtaAt(orderId) : null;
+    if (!p || typeof p.at !== 'number') return { ok:true, live:false, reason:'ETA_UNAVAILABLE' };
+    var now = Date.now(), c = calculate(p.at, now, r), startsAt = p.at + r.excludedMinutes * MIN;
+    return { ok:true, live:true, estimate:true, started:now >= startsAt,
+             promisedEtaAt:p.at, startsAt:startsAt, stepMs:r.stepMinutes * MIN, stepMinutes:r.stepMinutes,
+             amountPerStepFils:r.amountPerStepFils, amountPerStep:fmtFils(r.amountPerStepFils),
+             completedBlocks:c.completedBlocks, amountFils:c.amountFils, amount:fmtFils(c.amountFils) };
+  }
   function mine(opts){
     if (opts !== undefined && !onlyKeys(opts, [])) return fail('FIELD_NOT_ACCEPTED');
     var u = me(); if (!u || u.roleId !== 'customer') return fail('FORBIDDEN');
@@ -437,6 +464,8 @@
 
   global.RAFCompensation = {
     ERRORS:ERRORS, processDelivered:processDelivered, evaluate:evaluate, get:get, forOrder:forOrder, mine:mine, list:list,
+    /* the tracking screen's live delay line — an estimate, never an issuance */
+    liveDelay:liveDelay,
     /* lifecycle writes return a Promise: they run serialized per compensation */
     addToWallet:addToWallet, void:voidCompensation, reverse:reverseCompensation
   };
