@@ -251,7 +251,10 @@
     /* phone: each scene keeps its OWN column at a controlled height (whole image,
        aspect kept, nothing cropped), and the road runs BELOW the art in normal
        flow — no widened, overlapping scenes and no negative pull-up */
-    '  .jr-raster .jr-sc{height:clamp(78px,26vw,112px);min-height:0;padding-top:6px;column-gap:4px;}',
+    '  .jr-raster .jr-sc{height:clamp(78px,26vw,112px);min-height:0;padding-top:6px;column-gap:8px;grid-template-columns:repeat(3,minmax(0,1fr));}',
+    /* three hard zones: HOME | DRIVER | STORE — each scene is clipped to its own column, and the
+       full-width sky/skyline layer (which ran behind all three) is left out on phones */
+    '  .jr-raster .jr-art{overflow:hidden;}.jr-raster .jr-sky{display:none;}',
     '  .jr-raster .jr-art{height:100%;min-width:0;justify-content:center !important;}',
     '  .jr-raster .jr-img{width:auto;height:auto;max-width:100%;max-height:100%;}',
     '  .jr-raster .jr-img-ride{max-height:94%;margin-bottom:0;}',
