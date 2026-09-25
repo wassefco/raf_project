@@ -271,7 +271,7 @@
 
     if(!CAN.tickets)
       return wrap('<div class="card-b"><div class="notice"><i class="ti ti-lock" aria-hidden="true"></i><span>'
-        + T('لا تملك صلاحية قراءة التذاكر (support.view).','You do not have the ticket read permission (support.view).') + '</span></div></div>');
+        + T('قراءة التذاكر غير متاحة لحسابك.','Reading tickets is not available to your account.') + '</span></div></div>');
     if(DATA.tickets == null)
       return wrap('<div class="card-b"><div class="notice warn"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>'
         + esc(DATA.ticketsErr || T('تعذّرت قراءة التذاكر.','Tickets could not be read.')) + '</span></div></div>');
@@ -418,7 +418,7 @@
       return '<section class="card" aria-labelledby="h-act">'
         + '<div class="card-h"><h2 id="h-act"><i class="ti ti-history" aria-hidden="true"></i>' + T('آخر النشاطات التشغيلية','Recent Operational Activity') + '</h2></div>'
         + '<div class="card-b"><div class="notice"><i class="ti ti-lock" aria-hidden="true"></i><span>'
-        + T('سجل النشاط يتطلب صلاحية reports.view، وهي غير متوفرة لحسابك.','The activity log requires the reports.view permission, which your account does not hold.')
+        + T('سجل النشاط غير متاح لحسابك.','The activity log is not available to your account.')
         + '</span></div></div></section>';
     var list = [];
     try { list = A.auditLog({ since:Date.now() - 7*24*60*60*1000 }) || []; } catch(e){ list = []; }
@@ -448,6 +448,12 @@
      does not exist is worse. Tickets in particular must never route to another
      department's console: RAF's ticket record is central, and Logistics gets
      its own authorised view when that page is built. */
+  /* the existing settings permission decides whether Settings is listed */
+  function canSettings(){ try { return !!(ME && P.can(ME.id, 'settings.view')); } catch(e){ return false; } }
+  /* Compensation is listed for the accounts the compensation authority lets
+     manage compensations — the same existing Logistics management permission
+     these pages already gate their operational actions on. */
+  function canCompensation(){ try { return !!(ME && P.can(ME.id, 'drivers.suspend')); } catch(e){ return false; } }
   function renderNav(){
     el('navTree').innerHTML =
       '<span class="grp">' + T('العمليات','Operations') + '</span><ul>'
@@ -461,6 +467,16 @@
       + '<span>' + T('التذاكر','Tickets') + '</span></a></li>'
       + '<li><a href="raf_logistics_drivers.html"><i class="ti ti-motorbike" aria-hidden="true"></i>'
       + '<span>' + T('السائقون','Drivers') + '</span></a></li>'
+      /* Settings is the final administrative section, listed only for an
+         account that may actually open it */
+      + (canSettings()
+          ? '<li><a href="raf_logistics_settings.html"><i class="ti ti-settings" aria-hidden="true"></i>'
+            + '<span>' + T('الإعدادات','Settings') + '</span></a></li>'
+          : '')
+      + (canCompensation()
+          ? '<li><a href="raf_logistics_compensation.html"><i class="ti ti-receipt-refund" aria-hidden="true"></i>'
+            + '<span>' + T('التعويضات','Compensation') + '</span></a></li>'
+          : '')
       + '</ul>'
       + '<div class="ops-nav-foot"><b>' + T('العمليات واللوجستيات','Operations & Logistics') + '</b>'
       + T('منصة رف','RAF platform') + '</div>';
@@ -534,10 +550,7 @@
        checked first and an empty session is refused. */
     var sid = null;
     try {
-      var key = (P.LS && P.LS.session) || 'raf_current_user';
-      var raw = localStorage.getItem(key);
-      if(raw != null && raw !== ''){ try { sid = JSON.parse(raw); } catch(e){ sid = raw; } }
-      if(typeof sid !== 'string' || !sid) sid = null;
+      sid = P.sessionUserId ? P.sessionUserId() : null;   /* RAFPerm owns this tab's session */
     } catch(e){ sid = null; }
     if(!sid){
       gate('يلزم تسجيل الدخول','Sign-in required', T('مركز العمليات متاح لفريق عمليات رف بعد تسجيل الدخول.','The Command Center is available to RAF operations staff after signing in.'));

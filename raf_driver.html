@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — تطبيق السائق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   DRIVER APP — a phone application for the person carrying the delivery.
+   Not an admin dashboard: no sidebar, no tables, no filters, no counters.
+   One job per screen, one obvious next action, thumb-sized targets.
+   ══════════════════════════════════════════════════════════════════════ */
+:root{
+  --d-bg:#EEF0EC; --d-card:#FFFFFF; --d-line:#DFE3DD; --d-line2:#C9CFC7;
+  --d-ink:#121714; --d-text:#29302D; --d-muted:#5C6661; --d-faint:#87908B;
+  --d-accent:#1C7466; --d-accent-2:#155C51; --d-soft:#E2F0EC;
+  --d-go:#2B7446; --d-go-bg:#E3F1E7;
+  --d-wait:#9A6414; --d-wait-bg:#FBF0DA;
+  --d-alert:#A8412D; --d-alert-bg:#FAE8E3;
+  --d-r:14px; --d-rs:10px;
+  --d-sh:0 2px 10px rgba(18,23,20,.06);
+  --d-sh-lg:0 -6px 24px rgba(18,23,20,.10);
+  --d-font:'Tajawal',sans-serif;
+}
+html[lang="en"]{ --d-font:'DM Sans',sans-serif; }
+*{ box-sizing:border-box; }
+/* the shells below set `display`, which would otherwise beat the `hidden`
+   attribute the page uses to show one of them at a time */
+[hidden]{ display:none !important; }
+html,body{ margin:0; padding:0; }
+body{ background:var(--d-bg); color:var(--d-text); font-family:var(--d-font);
+  font-size:15px; line-height:1.6; -webkit-text-size-adjust:100%; }
+.sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+button{ font-family:inherit; }
+
+/* ---- the gate ---- */
+.gate{ min-height:100dvh; display:grid; place-items:center; padding:28px 20px; }
+.gate-c{ max-width:380px; text-align:center; background:var(--d-card); border:1px solid var(--d-line);
+  border-radius:var(--d-r); padding:30px 22px; box-shadow:var(--d-sh); }
+.gate-c .ic{ width:56px; height:56px; margin:0 auto 14px; border-radius:50%; background:var(--d-soft);
+  color:var(--d-accent); display:grid; place-items:center; font-size:26px; }
+.gate-c h1{ margin:0 0 8px; font-size:19px; color:var(--d-ink); }
+.gate-c p{ margin:0 0 18px; color:var(--d-muted); font-size:14px; }
+
+/* ---- the shell ---- */
+.app{ min-height:100dvh; display:flex; flex-direction:column;
+  padding-block-end:calc(66px + env(safe-area-inset-bottom)); }
+.top{ position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:10px;
+  padding:10px 14px; padding-block-start:calc(10px + env(safe-area-inset-top));
+  background:var(--d-card); border-block-end:1px solid var(--d-line); }
+.top .mark{ width:34px; height:34px; border-radius:9px; background:var(--d-accent); color:#fff;
+  display:grid; place-items:center; font-size:18px; flex-shrink:0; }
+.top .who{ flex:1; min-width:0; }
+.top .who b{ display:block; font-size:14px; color:var(--d-ink); font-weight:700;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.top .who span{ display:block; font-size:11.5px; color:var(--d-faint); }
+.ibtn{ width:40px; height:40px; flex-shrink:0; border:1px solid var(--d-line); border-radius:var(--d-rs);
+  background:var(--d-card); color:var(--d-muted); cursor:pointer; display:grid; place-items:center; font-size:19px; }
+.ibtn:hover{ color:var(--d-ink); border-color:var(--d-line2); }
+.ibtn:focus-visible{ outline:2px solid var(--d-accent); outline-offset:2px; }
+.ibtn.lang{ font-size:13px; font-weight:800; font-family:'DM Sans',sans-serif; }
+
+main{ flex:1; padding:14px; display:flex; flex-direction:column; gap:12px; }
+.h{ display:flex; align-items:baseline; gap:10px; }
+.h h2{ margin:0; font-size:17px; color:var(--d-ink); font-weight:800; }
+.h .n{ color:var(--d-faint); font-size:12.5px; font-family:'DM Sans',sans-serif; font-weight:700; }
+
+/* ---- a delivery ---- */
+.card{ background:var(--d-card); border:1px solid var(--d-line); border-radius:var(--d-r);
+  box-shadow:var(--d-sh); overflow:hidden; }
+/* the card is a column: the id and the stage share the top row and each wraps
+   on its own, so a long stage label can never squeeze the delivery details */
+.card-t{ display:flex; flex-direction:column; align-items:stretch; gap:2px; padding:14px;
+  cursor:pointer; text-align:start; width:100%; border:0; background:transparent; }
+.card-t:focus-visible{ outline:2px solid var(--d-accent); outline-offset:-2px; }
+.card-t .row{ display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.oid{ font-family:'DM Sans',ui-monospace,monospace; font-size:14px; font-weight:800; color:var(--d-ink); }
+.st{ display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:999px;
+  font-size:11.5px; font-weight:800; max-width:100%; }
+.st::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; }
+.st.wait{ background:var(--d-wait-bg); color:var(--d-wait); }
+.st.go{ background:var(--d-go-bg); color:var(--d-go); }
+.line{ display:flex; align-items:flex-start; gap:8px; color:var(--d-text); font-size:13.5px; margin-block-start:6px; }
+.line i{ font-size:16px; color:var(--d-faint); flex-shrink:0; margin-block-start:2px; }
+.line span{ min-width:0; overflow-wrap:anywhere; }
+.line b{ font-weight:700; color:var(--d-ink); }
+.muted{ color:var(--d-muted); }
+.card-a{ padding:0 14px 14px; }
+
+/* ---- the one big action ---- */
+.go{ display:flex; align-items:center; justify-content:center; gap:9px; width:100%; min-height:52px;
+  border:0; border-radius:var(--d-rs); background:var(--d-accent); color:#fff; cursor:pointer;
+  font-size:15.5px; font-weight:800; }
+.go:hover{ background:var(--d-accent-2); }
+.go:focus-visible{ outline:3px solid var(--d-accent); outline-offset:2px; }
+.go:disabled{ opacity:.6; cursor:default; }
+.go i{ font-size:20px; }
+.go.sec{ background:var(--d-card); color:var(--d-accent); border:1px solid var(--d-line2); }
+.go.sec:hover{ background:var(--d-soft); }
+
+.msg{ display:flex; gap:9px; align-items:flex-start; padding:11px 12px; border-radius:var(--d-rs);
+  font-size:13px; margin-block-start:10px; }
+.msg i{ font-size:17px; flex-shrink:0; }
+.msg.err{ background:var(--d-alert-bg); color:var(--d-alert); }
+.msg.ok{ background:var(--d-go-bg); color:var(--d-go); }
+
+/* ---- the delivery code, asked at the door ---- */
+.code{ margin-block-start:10px; padding:14px; border-radius:var(--d-rs); background:var(--d-soft); border:1px solid var(--d-line2); }
+.code label{ display:block; font-size:14px; font-weight:800; color:var(--d-ink); margin-bottom:4px; }
+.code p{ margin:0 0 10px; font-size:12.5px; color:var(--d-muted); }
+.code input{ display:block; width:100%; max-width:180px; margin:0 auto 12px; min-height:56px; text-align:center;
+  font-family:'DM Sans',ui-monospace,monospace; font-variant-numeric:tabular-nums; font-size:30px; font-weight:800; letter-spacing:10px;
+  border:2px solid var(--d-line2); border-radius:var(--d-rs); background:#fff; color:var(--d-ink); }
+.code input:focus{ outline:none; border-color:var(--d-accent); box-shadow:0 0 0 3px rgba(28,116,102,.18); }
+.code .row2{ display:flex; gap:8px; }
+.code .row2 .go{ flex:1 1 0; }
+.st.at{ background:var(--d-soft); color:var(--d-accent); }
+
+.empty{ background:var(--d-card); border:1px solid var(--d-line); border-radius:var(--d-r);
+  padding:40px 22px; text-align:center; box-shadow:var(--d-sh); }
+.empty i{ font-size:34px; color:var(--d-accent); }
+.empty b{ display:block; margin-block-start:10px; font-size:15px; color:var(--d-ink); }
+.empty span{ display:block; margin-block-start:5px; font-size:13px; color:var(--d-faint); }
+
+/* ---- the detail, a full sheet on a phone ---- */
+.sheet{ position:fixed; inset:0; z-index:40; background:rgba(12,20,17,.45); display:flex; align-items:flex-end; }
+.sheet-c{ width:100%; max-height:92dvh; background:var(--d-bg); border-start-start-radius:var(--d-r);
+  border-start-end-radius:var(--d-r); display:flex; flex-direction:column; box-shadow:var(--d-sh-lg); }
+.sheet-h{ display:flex; align-items:center; gap:10px; padding:14px; background:var(--d-card);
+  border-block-end:1px solid var(--d-line); border-start-start-radius:var(--d-r); border-start-end-radius:var(--d-r); }
+.sheet-h .t{ flex:1 1 55%; min-width:0; }
+.sheet-h .st{ white-space:normal; }
+.sheet-b{ flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:12px; }
+.sheet-f{ padding:12px 14px; padding-block-end:calc(12px + env(safe-area-inset-bottom));
+  background:var(--d-card); border-block-start:1px solid var(--d-line); }
+.blk{ background:var(--d-card); border:1px solid var(--d-line); border-radius:var(--d-r); padding:13px 14px; }
+.blk h3{ margin:0 0 9px; font-size:11px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--d-faint); display:flex; align-items:center; gap:7px; }
+.blk h3 i{ font-size:15px; color:var(--d-accent); letter-spacing:0; }
+.kv{ display:flex; gap:12px; padding:5px 0; font-size:13.5px; align-items:baseline; }
+.kv .k{ color:var(--d-muted); flex:0 0 42%; max-width:42%; }
+.kv .v{ color:var(--d-ink); font-weight:600; min-width:0; overflow-wrap:anywhere; }
+.tel{ display:inline-flex; align-items:center; gap:6px; color:var(--d-accent); font-weight:700; text-decoration:none; }
+.tel:hover{ text-decoration:underline; }
+.dash{ color:var(--d-faint); }
+
+/* ---- the bottom bar: the only navigation a driver needs ---- */
+.tabs{ position:fixed; inset-inline:0; bottom:0; z-index:30; display:flex;
+  background:var(--d-card); border-block-start:1px solid var(--d-line);
+  padding-block-end:env(safe-area-inset-bottom); }
+.tab{ flex:1; min-height:62px; border:0; background:transparent; cursor:pointer; color:var(--d-faint);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+  font-size:11.5px; font-weight:700; }
+.tab i{ font-size:22px; }
+.tab[aria-selected="true"]{ color:var(--d-accent); }
+.tab{ position:relative; min-width:0; padding-inline:2px; }
+.tab > span{ max-width:100%; overflow-wrap:anywhere; text-align:center; line-height:1.2; }
+/* the view is focused programmatically on a tab change so screen readers land
+   on it; it is not a control, so it draws no focus ring */
+#view:focus, #view:focus-visible{ outline:none; }
+.tab:focus-visible{ outline:2px solid var(--d-accent); outline-offset:-3px; }
+/* raf_theme.css sets a 40px floor on every button through
+   `html:not([data-ui="admin"]) button` (specificity 0,1,2), which beats a
+   single class and silently shrank the tab bar (labels clipped) and the main
+   actions. These selectors outrank it so the designed sizes actually apply. */
+.tabs .tab{ min-height:62px; }
+.card-a .go, .sheet-f .go, .empty .go, .go.sec{ min-height:52px; }
+
+/* ---- desktop fallback: the phone app, centred, not stretched ---- */
+@media (min-width:720px){
+  body{ background:var(--d-bg); }
+  .app{ max-width:560px; margin:0 auto; background:var(--d-bg);
+    border-inline:1px solid var(--d-line); min-height:100dvh; }
+  .tabs{ max-width:560px; margin:0 auto; border-inline:1px solid var(--d-line); }
+  .sheet{ align-items:center; justify-content:center; }
+  .sheet-c{ max-width:560px; border-radius:var(--d-r); max-height:86dvh; }
+  .sheet-h{ border-radius:var(--d-r) var(--d-r) 0 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-c" role="alert">
+    <div class="ic"><i class="ti ti-motorbike" aria-hidden="true"></i></div>
+    <h1 id="gateT"></h1>
+    <p id="gateP"></p>
+    <a class="go" href="raf_login.html"><i class="ti ti-login" aria-hidden="true"></i><span data-ar="تسجيل الدخول" data-en="Sign in">تسجيل الدخول</span></a>
+  </div>
+</div>
+
+<div class="app" id="app" hidden>
+  <header class="top">
+    <span class="mark" aria-hidden="true"><i class="ti ti-motorbike"></i></span>
+    <span class="who"><b id="drvName"></b><span id="drvRole"></span></span>
+    <button class="ibtn" type="button" id="refreshBtn" onclick="APP.refresh()" aria-label="تحديث"><i class="ti ti-refresh" aria-hidden="true"></i></button>
+    <button class="ibtn lang" type="button" id="langBtn" onclick="APP.toggleLang()"></button>
+    <button class="ibtn" type="button" onclick="RAFSignOut()" aria-label="تسجيل الخروج"><i class="ti ti-logout" aria-hidden="true"></i></button>
+  </header>
+  <main id="view" tabindex="-1"></main>
+</div>
+
+<nav class="tabs" id="tabs" role="tablist" aria-label="التنقل" hidden>
+  <button class="tab" type="button" role="tab" id="tab-pool" aria-selected="false" onclick="APP.go('pool')">
+    <i class="ti ti-list-search" aria-hidden="true"></i><span data-ar="المتاحة" data-en="Available">المتاحة</span></button>
+  <button class="tab" type="button" role="tab" id="tab-active" aria-selected="true" onclick="APP.go('active')">
+    <i class="ti ti-package" aria-hidden="true"></i><span data-ar="الجارية" data-en="Active">الجارية</span></button>
+  <button class="tab" type="button" role="tab" id="tab-history" aria-selected="false" onclick="APP.go('history')">
+    <i class="ti ti-history" aria-hidden="true"></i><span data-ar="السجل" data-en="History">السجل</span></button>
+  <button class="tab" type="button" role="tab" id="tab-account" aria-selected="false" onclick="APP.go('account')">
+    <i class="ti ti-user" aria-hidden="true"></i><span data-ar="الحساب" data-en="Account">الحساب</span></button>
+</nav>
+
+<div id="sheetHost"></div>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_store_ops.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_wallet.js"></script>
+<script src="raf_compensation.js"></script>
+<script src="raf_logistics_authority.js"></script>
+<!-- Customer ↔ Driver communication: authority, translation, widget -->
+<script src="raf_driver_communication.js"></script>
+<script src="raf_message_translation.js"></script>
+<script src="raf_driver_communication_ui.js"></script>
+<script>
+/* ============================================================================
+   DRIVER APP — تطبيق السائق
+   The screen the person carrying the delivery uses: the deliveries assigned to
+   them, and the one action each is waiting for.
+
+   RAFLogistics IS THE AUTHORITY. Every list, every fact on a delivery and every
+   action come from RAFLogistics: availableDeliveries() / claim() for the pool,
+   myDeliveries() / pickUp() / completeDelivery() for active work, myHistory()
+   for completed work.
+   This page decides nothing: it never reads an order, a snapshot or the order
+   engine directly, writes no storage, and keeps no copy of a delivery after an
+   action — it re-reads the authority and shows whatever came back.
+
+   IDENTITY is the stored session, resolved inside the authority. This page
+   never sends a driver id, and there is nothing in a URL it would accept as
+   one. A suspended account, a customer, a staff account or an anonymous
+   visitor is refused by the authority, and that refusal is this page's gate.
+
+   COMPENSATION IS NOT A DRIVER MATTER. Completing a delivery is what the
+   driver does; whether RAF owes the customer a delay compensation is decided
+   by RAFCompensation inside the delivery workflow, and nothing about it is
+   requested, calculated, shown or influenced here.
+   ==========================================================================*/
+(function(){
+  'use strict';
+
+  var LG = window.RAFLogistics, P = window.RAFPerm;
+  var ME = null, TAB = 'active', ITEMS = [], POOL = [], HIST = [], OPEN = null;
+  var BUSY = false, MSG = null;          /* the authority's last answer */
+  var CODE = null;                       /* { id, value } — the delivery code being typed at the door */
+
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function L(o){ return (o && typeof o === 'object') ? (isEn() ? (o.en||o.ar) : (o.ar||o.en)) : (o||''); }
+  function el(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function bidi(s){ return '<bdi>' + esc(s) + '</bdi>'; }
+  var DASH = '<span class="dash">—</span>';
+
+  function clockOf(ms){
+    if(ms == null) return null;
+    try { return new Date(ms).toLocaleString(isEn() ? 'en-GB' : 'ar-KW-u-nu-latn',
+      { timeZone:'Asia/Kuwait', day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }); }
+    catch(e){ return null; }
+  }
+  /* the full address, from the parts the order actually recorded */
+  function addressOf(d){
+    if(!d) return null;
+    if(d.type === 'pickup') return null;
+    var parts = [];
+    if(d.area) parts.push(d.area);
+    if(d.block) parts.push(T('قطعة ','Block ') + d.block);
+    if(d.street) parts.push(T('شارع ','Street ') + d.street);
+    if(d.building) parts.push(T('مبنى ','Building ') + d.building);
+    if(d.floor) parts.push(T('دور ','Floor ') + d.floor);
+    if(d.apartment) parts.push(T('شقة ','Apt ') + d.apartment);
+    if(parts.length) return parts.join('، ');
+    return d.address || null;
+  }
+  /* the three stages the order record actually holds */
+  function stageTxt(s){
+    return s === 'arrived'
+      ? { ar:'وصلت إلى العميل', en:'Arrived at the customer', cls:'at' }
+      : s === 'picked_up'
+      ? { ar:'في الطريق إلى العميل', en:'On the way', cls:'go' }
+      : { ar:'بانتظار الاستلام من المتجر', en:'Waiting for pickup', cls:'wait' };
+  }
+
+  /* ───────── the deliveries ───────── */
+  function readDeliveries(){
+    ITEMS = [];
+    if(!LG) return { ok:false, message:T('تعذّر تحميل التطبيق.','The app could not load.') };
+    var r = null;
+    try { r = LG.myDeliveries(); } catch(e){ r = null; }
+    if(!r || !r.ok) return r || { ok:false, message:T('تعذّرت قراءة التوصيلات.','Your deliveries could not be read.') };
+    ITEMS = r.items || [];
+    return { ok:true, driver:r.driver };
+  }
+  /* the pool and the history are the authority's answers too; a refusal
+     leaves the list empty rather than showing anything stale */
+  function readPool(){
+    POOL = [];
+    var r = null; try { r = LG.availableDeliveries(); } catch(e){ r = null; }
+    if(r && r.ok) POOL = r.items || [];
+  }
+  function readHistory(){
+    HIST = [];
+    var r = null; try { r = LG.myHistory(); } catch(e){ r = null; }
+    if(r && r.ok) HIST = r.items || [];
+  }
+  function readAll(){ var r = readDeliveries(); if(r.ok){ readPool(); readHistory(); } else { POOL = []; HIST = []; } return r; }
+  function itemById(id){ for(var i=0;i<ITEMS.length;i++) if(ITEMS[i].orderId === id) return ITEMS[i]; return null; }
+
+  function actionButton(d, big){
+    if(BUSY) return '<button class="go" type="button" disabled><i class="ti ti-loader-2" aria-hidden="true"></i>'
+      + T('جارٍ التنفيذ...','Working...') + '</button>';
+    if(d.canPickUp)
+      return '<button class="go" type="button" onclick="event.stopPropagation();APP.pickUp(\'' + esc(d.orderId) + '\')">'
+        + '<i class="ti ti-package-import" aria-hidden="true"></i>' + T('استلمت الطلب من المتجر','Picked up from the store') + '</button>';
+    if(d.canArrive)
+      return '<button class="go" type="button" onclick="event.stopPropagation();APP.arrive(\'' + esc(d.orderId) + '\')">'
+        + '<i class="ti ti-map-pin-check" aria-hidden="true"></i>' + T('وصلت إلى العميل','Arrived at customer') + '</button>';
+    if(d.canDeliver){
+      /* the code the customer hands over at the door. The app never has it:
+         the authority checks what is typed against the order's own record */
+      if(CODE && CODE.id === d.orderId)
+        return '<div class="code" onclick="event.stopPropagation()">'
+          + '<label for="code-' + (big ? 's-' : '') + esc(d.orderId) + '">' + T('أدخل رمز التسليم من العميل','Enter customer delivery code') + '</label>'
+          + '<p>' + T('اطلب من العميل رمز التحقق المكوّن من رقمين الظاهر في تطبيقه.','Ask the customer for the two-digit verification code shown in their app.') + '</p>'
+          + '<input id="code-' + (big ? 's-' : '') + esc(d.orderId) + '" data-code="' + esc(d.orderId) + '" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="one-time-code"'
+          + ' dir="ltr" aria-describedby="codeMsg-' + (big ? 's-' : '') + esc(d.orderId) + '" value="' + esc(CODE.value || '') + '" oninput="APP.codeInput(this)">'
+          + '<div class="row2">'
+            + '<button class="go" type="button" onclick="APP.confirmDeliver(\'' + esc(d.orderId) + '\')"'
+            + ((CODE.value || '').length === 2 ? '' : ' disabled') + '>'
+            + '<i class="ti ti-circle-check" aria-hidden="true"></i>' + T('تأكيد التسليم','Confirm delivery') + '</button>'
+            + '<button class="go sec" type="button" onclick="APP.cancelDeliver()">' + T('إلغاء','Cancel') + '</button>'
+          + '</div><span id="codeMsg-' + (big ? 's-' : '') + esc(d.orderId) + '" class="sr-only"></span></div>';
+      return '<button class="go" type="button" onclick="event.stopPropagation();APP.deliver(\'' + esc(d.orderId) + '\')">'
+        + '<i class="ti ti-circle-check" aria-hidden="true"></i>' + T('تسليم الطلب','Deliver order') + '</button>';
+    }
+    return '';
+  }
+  /* offered only when the communication authority says this driver has a
+     live conversation for the delivery */
+  function contactButton(d){
+    var C = window.RAFDriverCommunication, r = null;
+    try { r = C ? C.conversation(d.orderId) : null; } catch(e){ r = null; }
+    if(!r || !r.ok) return '';
+    return '<button class="go sec" type="button" style="margin-top:8px" onclick="event.stopPropagation();APP.open(\'' + esc(d.orderId) + '\', true)">'
+      + '<i class="ti ti-messages" aria-hidden="true"></i>' + T('التواصل مع العميل','Contact the customer') + '</button>';
+  }
+  function msgBlock(id){
+    if(!MSG || MSG.id !== id) return '';
+    return '<div class="msg ' + MSG.kind + '"><i class="ti ' + (MSG.kind === 'err' ? 'ti-alert-circle' : 'ti-check')
+      + '" aria-hidden="true"></i><span>' + esc(MSG.text) + '</span></div>';
+  }
+
+  function card(d){
+    var st = stageTxt(d.stage), addr = addressOf(d.delivery);
+    return '<div class="card">'
+      + '<button class="card-t" type="button" onclick="APP.open(\'' + esc(d.orderId) + '\')"'
+      + ' aria-label="' + esc(T('تفاصيل الطلب ','Details for order ') + d.orderId) + '">'
+      + '<span class="row"><span class="oid">' + bidi(d.orderId) + '</span>'
+        + '<span class="st ' + st.cls + '">' + T(st.ar, st.en) + '</span></span>'
+      + '<span class="b">'
+        + '<span class="line"><i class="ti ti-building-store" aria-hidden="true"></i><span>'
+          + (d.store && d.store.name ? bidi(L(d.store.name)) : DASH) + '</span></span>'
+        + (addr ? '<span class="line"><i class="ti ti-map-pin" aria-hidden="true"></i><span>' + bidi(addr) + '</span></span>'
+                : '<span class="line muted"><i class="ti ti-building-store" aria-hidden="true"></i><span>'
+                  + T('استلام من المتجر','Store pickup') + '</span></span>')
+        + (d.promisedEtaAt ? '<span class="line"><i class="ti ti-clock" aria-hidden="true"></i><span>'
+            + T('الوقت الموعود للعميل: ','Promised to the customer: ') + bidi(clockOf(d.promisedEtaAt)) + '</span></span>' : '')
+      + '</span>'
+      + '</button>'
+      + '<div class="card-a">' + actionButton(d) + contactButton(d) + msgBlock(d.orderId) + '</div>'
+      + '</div>';
+  }
+
+  function activeView(){
+    if(!ITEMS.length)
+      return '<div class="empty"><i class="ti ti-package-off" aria-hidden="true"></i>'
+        + '<b>' + T('لا توجد لديك توصيلات جارية','You have no active deliveries') + '</b>'
+        + '<span>' + T('اسحب توصيلة من «المتاحة»، أو انتظر تعيينها لك من إدارة العمليات.',
+                       'Take one from Available, or wait for Operations to assign one to you.') + '</span>'
+        + '<button class="go sec" type="button" style="margin-top:16px" onclick="APP.go(\'pool\')">'
+        + '<i class="ti ti-list-search" aria-hidden="true"></i>' + T('عرض التوصيلات المتاحة','See available deliveries') + '</button></div>';
+    return '<div class="h"><h2>' + T('توصيلاتك الجارية','Your active deliveries') + '</h2>'
+      + '<span class="n">' + T(ITEMS.length + ' طلب', ITEMS.length + ' order(s)') + '</span></div>'
+      + ITEMS.map(card).join('');
+  }
+
+  /* ───────── the available pool ─────────
+     Exactly what the authority says is free right now, in the order it
+     returned. No distance, zone or ranking exists in RAF, so none is shown. */
+  function poolCard(d){
+    return '<div class="card">'
+      + '<div class="card-t" style="cursor:default">'
+      + '<span class="row"><span class="oid">' + bidi(d.orderId) + '</span>'
+        + '<span class="st wait">' + T('متاحة','Available') + '</span></span>'
+      + '<span class="b">'
+        + '<span class="line"><i class="ti ti-building-store" aria-hidden="true"></i><span>'
+          + T('الاستلام من: ','Pick up from: ') + (d.store && d.store.name ? bidi(L(d.store.name)) : DASH) + '</span></span>'
+        + '<span class="line"><i class="ti ti-map-pin" aria-hidden="true"></i><span>'
+          + T('التسليم إلى منطقة: ','Deliver to: ') + (d.area ? bidi(d.area) : DASH) + '</span></span>'
+        + '<span class="line"><i class="ti ti-shopping-bag" aria-hidden="true"></i><span>'
+          + T('عدد الأصناف: ','Items: ') + (d.items != null ? bidi(d.items) : DASH) + '</span></span>'
+        + (d.promisedEtaAt ? '<span class="line"><i class="ti ti-clock" aria-hidden="true"></i><span>'
+            + T('الوقت الموعود للعميل: ','Promised to the customer: ') + bidi(clockOf(d.promisedEtaAt)) + '</span></span>' : '')
+      + '</span></div>'
+      + '<div class="card-a">'
+      + (BUSY ? '<button class="go" type="button" disabled><i class="ti ti-loader-2" aria-hidden="true"></i>' + T('جارٍ التنفيذ...','Working...') + '</button>'
+              : '<button class="go" type="button" onclick="APP.claim(\'' + esc(d.orderId) + '\')">'
+                + '<i class="ti ti-hand-grab" aria-hidden="true"></i>' + T('سحب التوصيلة','Take this delivery') + '</button>')
+      + msgBlock(d.orderId) + '</div>'
+      + '</div>';
+  }
+  function poolView(){
+    /* a refusal on a delivery that has since left the pool still needs saying */
+    var gone = (MSG && MSG.kind === 'err' && !POOL.some(function(x){ return x.orderId === MSG.id; }))
+      ? '<div class="msg err" style="margin:0"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>' + esc(MSG.text) + '</span></div>' : '';
+    if(!POOL.length)
+      return gone + '<div class="empty"><i class="ti ti-list-search" aria-hidden="true"></i>'
+        + '<b>' + T('لا توجد توصيلات متاحة الآن','No deliveries are available right now') + '</b>'
+        + '<span>' + T('تظهر هنا الطلبات الجاهزة في المتاجر والتي لم يسحبها سائق بعد.',
+                       'Orders a store has marked ready, and no driver has taken yet, appear here.') + '</span></div>';
+    return '<div class="h"><h2>' + T('التوصيلات المتاحة','Available deliveries') + '</h2>'
+      + '<span class="n">' + T(POOL.length + ' طلب', POOL.length + ' order(s)') + '</span></div>'
+      + '<p style="margin:0;font-size:13px;color:var(--d-muted)">'
+      + T('أول سائق يسحب التوصيلة تصبح مسؤوليته.','The first driver to take a delivery is responsible for it.') + '</p>'
+      + gone + POOL.map(poolCard).join('');
+  }
+
+  /* ───────── history ───────── */
+  function historyView(){
+    if(!HIST.length)
+      return '<div class="empty"><i class="ti ti-history" aria-hidden="true"></i>'
+        + '<b>' + T('لا توجد توصيلات مكتملة بعد','No completed deliveries yet') + '</b>'
+        + '<span>' + T('تظهر هنا التوصيلات التي سلّمتها.','Deliveries you complete appear here.') + '</span></div>';
+    return '<div class="h"><h2>' + T('سجل التوصيلات','Delivery history') + '</h2>'
+      + '<span class="n">' + T(HIST.length + ' طلب', HIST.length + ' order(s)') + '</span></div>'
+      + HIST.map(function(d){
+        return '<div class="card"><div class="card-t" style="cursor:default">'
+          + '<span class="row"><span class="oid">' + bidi(d.orderId) + '</span>'
+            + '<span class="st go">' + T('تم التسليم','Delivered') + '</span></span>'
+          + '<span class="b">'
+            + '<span class="line"><i class="ti ti-building-store" aria-hidden="true"></i><span>'
+              + (d.store && d.store.name ? bidi(L(d.store.name)) : DASH) + '</span></span>'
+            + '<span class="line"><i class="ti ti-map-pin" aria-hidden="true"></i><span>' + (d.area ? bidi(d.area) : DASH) + '</span></span>'
+            + '<span class="line"><i class="ti ti-circle-check" aria-hidden="true"></i><span>'
+              + T('وقت التسليم: ','Delivered at: ') + (clockOf(d.deliveredAt) ? bidi(clockOf(d.deliveredAt)) : DASH) + '</span></span>'
+          + '</span></div></div>';
+      }).join('');
+  }
+
+  /* the driver's own account, from their own account record. Nothing
+     administrative, and no other driver. */
+  function accountView(){
+    var role = null; try { role = P.getRole(ME.roleId); } catch(e){}
+    return '<div class="h"><h2>' + T('حسابك','Your account') + '</h2></div>'
+      + '<div class="blk">'
+      + '<div class="kv"><span class="k">' + T('الاسم','Name') + '</span><span class="v">' + bidi(ME.name || '') + '</span></div>'
+      + '<div class="kv"><span class="k">' + T('الصفة','Role') + '</span><span class="v">'
+        + (role ? esc(T(role.nameAr, role.nameEn)) : DASH) + '</span></div>'
+      + '<div class="kv"><span class="k">' + T('حالة الحساب','Account state') + '</span><span class="v">'
+        + T('نشط','Active') + '</span></div>'
+      + '<div class="kv"><span class="k">' + T('التوصيلات الجارية','Active deliveries') + '</span><span class="v">'
+        + bidi(ITEMS.length) + '</span></div>'
+      + '</div>'
+      + '<div class="blk"><h3><i class="ti ti-info-circle" aria-hidden="true"></i>' + T('ملاحظة','Note') + '</h3>'
+      + '<p style="margin:0;font-size:13.5px;color:var(--d-muted)">'
+      + T('تصلك التوصيلات بسحبها من «المتاحة» أو بتعيينها لك من إدارة العمليات. لتعديل بيانات حسابك تواصل مع إدارة العمليات.',
+          'You get deliveries by taking them from Available, or when Operations assigns them to you. To change your account details, contact Operations.')
+      + '</p></div>'
+      + '<button class="go sec" type="button" onclick="RAFSignOut()">'
+      + '<i class="ti ti-logout" aria-hidden="true"></i>' + T('تسجيل الخروج','Sign out') + '</button>';
+  }
+
+  function render(){
+    renderTop();
+    el('view').innerHTML = TAB === 'account' ? accountView()
+      : TAB === 'pool' ? poolView() : TAB === 'history' ? historyView() : activeView();
+    ['pool','active','history','account'].forEach(function(t){
+      el('tab-' + t).setAttribute('aria-selected', String(TAB === t)); });
+    if(OPEN) renderSheet();
+  }
+  function renderTop(){
+    el('langBtn').textContent = isEn() ? 'ع' : 'EN';
+    el('langBtn').setAttribute('aria-label', T('التبديل إلى الإنجليزية','Switch to Arabic'));
+    if(ME){
+      el('drvName').textContent = ME.name || '';
+      var role = null; try { role = P.getRole(ME.roleId); } catch(e){}
+      el('drvRole').textContent = role ? T(role.nameAr, role.nameEn) : '';
+    }
+    document.title = T('رف — تطبيق السائق','RAF — Driver App');
+  }
+
+  /* ───────── one delivery, in full ───────── */
+  function renderSheet(){
+    var d = itemById(OPEN);
+    if(!d){ closeSheet(); return; }
+    var st = stageTxt(d.stage), addr = addressOf(d.delivery), c = d.customer || {};
+    var pay = d.payment || {};
+    el('sheetHost').innerHTML =
+      '<div class="sheet" id="sheet" onclick="if(event.target===this)APP.close()">'
+      + '<div class="sheet-c" role="dialog" aria-modal="true" aria-labelledby="shT">'
+      + '<div class="sheet-h"><div class="t"><b id="shT" class="oid">' + bidi(d.orderId) + '</b>'
+        + '<span style="display:block;font-size:12px;color:var(--d-faint)">'
+        + (d.store && d.store.name ? esc(L(d.store.name)) : '') + '</span></div>'
+        + '<span class="st ' + st.cls + '">' + T(st.ar, st.en) + '</span>'
+        + '<button class="ibtn" type="button" onclick="APP.close()" aria-label="' + esc(T('إغلاق','Close')) + '">'
+        + '<i class="ti ti-x" aria-hidden="true"></i></button></div>'
+      + '<div class="sheet-b">'
+
+      /* الاستلام */
+      + '<div class="blk"><h3><i class="ti ti-building-store" aria-hidden="true"></i>' + T('الاستلام','Pickup') + '</h3>'
+        + kv(T('المتجر','Store'), d.store && d.store.name ? bidi(L(d.store.name)) : DASH)
+        + kv(T('عدد الأصناف','Items'), d.items != null ? bidi(d.items) : DASH)
+        + kv(T('وقت التعيين','Assigned at'), clockOf(d.assignedAt) ? bidi(clockOf(d.assignedAt)) : DASH)
+        + (d.pickedUpAt ? kv(T('وقت الاستلام','Picked up at'), bidi(clockOf(d.pickedUpAt))) : '')
+      + '</div>'
+
+      /* التسليم */
+      + '<div class="blk"><h3><i class="ti ti-map-pin" aria-hidden="true"></i>' + T('التسليم','Drop-off') + '</h3>'
+        + kv(T('المستلم','Recipient'), c.name ? bidi(c.name) : DASH)
+        + kv(T('العنوان','Address'), addr ? bidi(addr) : (d.delivery && d.delivery.type === 'pickup'
+            ? esc(T('استلام من المتجر','Store pickup')) : DASH))
+        + (d.delivery && d.delivery.instructions ? kv(T('تعليمات','Instructions'), bidi(d.delivery.instructions)) : '')
+        + (c.notes ? kv(T('ملاحظات العميل','Customer notes'), bidi(c.notes)) : '')
+        + (d.promisedEtaAt ? kv(T('الوقت الموعود','Promised time'), bidi(clockOf(d.promisedEtaAt))) : '')
+      + '</div>'
+
+      /* الدفع — what the driver must know at the door, nothing more */
+      + '<div class="blk"><h3><i class="ti ti-receipt" aria-hidden="true"></i>' + T('الدفع','Payment') + '</h3>'
+        + kv(T('طريقة الدفع','Method'), pay.method ? bidi(L(pay.method)) : DASH)
+        + kv(T('حالة الدفع','Status'), pay.status === 'paid' ? esc(T('مدفوع','Paid'))
+            : (pay.status ? esc(T('غير مدفوع','Unpaid')) : DASH))
+        + kv(T('الإجمالي','Total'), pay.total ? bidi(pay.total + ' ' + T('د.ك','KWD')) : DASH)
+      + '</div>'
+
+      /* messaging and calling — RAFDriverCommunication decides; the block
+         stays hidden whenever there is no live conversation for this driver */
+      + (window.RAFCommUI ? '<div class="blk" id="commBlk" hidden><div id="commRoot"></div></div>' : '')
+
+      + msgBlock(d.orderId)
+      + '</div>'
+      + '<div class="sheet-f">' + (actionButton(d, true) || '') + '</div>'
+      + '</div></div>';
+    mountComm(d.orderId);
+  }
+  function mountComm(orderId){
+    var root = el('commRoot'); if(!root || !window.RAFCommUI) return;
+    RAFCommUI.mount(root, { orderId:orderId, onRender:function(x){
+      var b = el('commBlk'); if(b) b.hidden = !x.innerHTML; } });
+  }
+  function kv(k, v){ return '<div class="kv"><span class="k">' + esc(k) + '</span><span class="v">' + v + '</span></div>'; }
+  function closeSheet(){ OPEN = null; el('sheetHost').innerHTML = ''; }
+
+  /* ───────── the gate ───────── */
+  function gate(titleAr, titleEn, msg){
+    ME = null;
+    el('app').hidden = true; el('tabs').hidden = true;
+    el('sheetHost').innerHTML = '';
+    el('gate').hidden = false;
+    el('gateT').textContent = T(titleAr, titleEn);
+    el('gateP').textContent = msg;
+    document.title = T('رف — تطبيق السائق','RAF — Driver App');
+  }
+  function applyLang(){
+    var en = isEn();
+    document.querySelectorAll('[data-ar][data-en]').forEach(function(e){
+      var t = e.getAttribute('data-' + (en ? 'en' : 'ar')); if(t !== null) e.textContent = t;
+    });
+  }
+
+  function boot(){
+    var l = null; try { l = localStorage.getItem('raf_lang'); } catch(e){}
+    if(l === 'en'){ root().lang = 'en'; root().dir = 'ltr'; }
+    applyLang();
+
+    if(!LG || !P){
+      gate('تعذّر التحميل','Could not load', T('لم يتم تحميل وحدات رف المطلوبة.','The required RAF modules did not load.'));
+      return;
+    }
+    /* identity from the stored session only — never from the URL */
+    var sid = null;
+    try {
+      sid = P.sessionUserId ? P.sessionUserId() : null;   /* RAFPerm owns this tab's session */
+    } catch(e){ sid = null; }
+    if(!sid){ gate('يلزم تسجيل الدخول','Sign-in required', T('سجّل الدخول بحساب السائق.','Sign in with your driver account.')); return; }
+    var u = null; try { u = P.getUser(sid); } catch(e){ u = null; }
+    if(!u){ gate('يلزم تسجيل الدخول','Sign-in required', T('تعذّر التعرف على الحساب.','That account could not be identified.')); return; }
+    ME = { id:u.id, name:u.name, roleId:u.roleId };
+
+    /* THE AUTHORITY DECIDES ACCESS. It is asked for this driver's deliveries;
+       its refusal — not a role check written here — is the gate. */
+    var r = readAll();
+    if(!r.ok){
+      gate('هذا التطبيق للسائقين','Drivers only',
+           (r.message || T('هذا التطبيق متاح لحسابات السائقين النشطة فقط.','This app is for active driver accounts only.')));
+      return;
+    }
+
+    el('gate').hidden = true; el('app').hidden = false; el('tabs').hidden = false;
+    render();
+
+    /* the central assignment state, reflected here: Logistics assigning,
+       reassigning or returning an order changes the order's own record */
+    window.addEventListener('storage', function(e){
+      if(e.key && /^raf_(orders|order_snapshots|order_mstate|pending)/.test(e.key)){
+        readAll(); render();
+      }
+    });
+    if(window.RAFEventBus){
+      try { RAFEventBus.subscribe('order.*', function(){ readAll(); render(); }); } catch(e){}
+    }
+  }
+
+  /* ───────── the two actions ─────────
+     Both are the authority's. This page collects the tap, shows the answer and
+     re-reads; it never decides whether an action is allowed. */
+  function settle(id, call, okAr, okEn, after){
+    if(BUSY) return;
+    BUSY = true; MSG = null; render();
+    var res = null;
+    try { res = call(); } catch(e){ res = null; }
+    Promise.resolve(res).then(function(r){
+      BUSY = false;
+      if(r && r.ok){
+        MSG = { id:id, kind:'ok', text:T(okAr, okEn) };
+        readAll();
+        /* a delivered order leaves the driver's workload entirely */
+        if(!itemById(id)) closeSheet();
+      } else {
+        MSG = { id:id, kind:'err', text:(r && r.message) || T('تعذّر تنفيذ الإجراء.','The action could not be completed.') };
+        readAll();
+      }
+      if(after) after(r);
+      render();
+      /* a refused code keeps the step open, ready for the next try */
+      if(CODE && CODE.id === id){ var ci = document.querySelector('[data-code="' + id + '"]'); if(ci) ci.focus(); }
+    });
+  }
+
+  window.APP = {
+    refresh: function(){ MSG = null; readAll(); render(); },
+    go: function(t){ TAB = t; MSG = null; closeSheet(); render(); el('view').focus(); },
+    open: function(id, focusComm){
+      OPEN = id; MSG = null; renderSheet();
+      var t = focusComm ? el('commBlk') : null;
+      if(t && !t.hidden){ t.scrollIntoView({ block:'start' }); var b = t.querySelector('[data-rc="text"]'); if(b) b.focus(); }
+      else { var x = el('sheet') && el('sheet').querySelector('.ibtn'); if(x) x.focus(); }
+    },
+    close: function(){ closeSheet(); },
+    /* taking a delivery from the pool — the authority decides who wins; on
+       success the delivery is now in the driver's active list */
+    claim: function(id){
+      if(BUSY) return;
+      BUSY = true; MSG = null; render();
+      var res = null;
+      try { res = LG.claim(id); } catch(e){ res = null; }
+      Promise.resolve(res).then(function(r){
+        BUSY = false;
+        readAll();
+        if(r && r.ok){
+          TAB = 'active';
+          MSG = { id:id, kind:'ok', text:T('أصبحت هذه التوصيلة مسؤوليتك. توجّه إلى المتجر لاستلامها.',
+                                          'This delivery is now yours. Head to the store to pick it up.') };
+        } else {
+          MSG = { id:id, kind:'err', text:(r && r.message) || T('تعذّر سحب التوصيلة.','The delivery could not be taken.') };
+        }
+        render();
+      });
+    },
+    pickUp: function(id){
+      settle(id, function(){ return LG.pickUp(id); },
+             'تم تسجيل استلام الطلب من المتجر.', 'The pickup from the store was recorded.');
+    },
+    arrive: function(id){
+      settle(id, function(){ return LG.arrive(id); },
+             'تم تسجيل وصولك إلى العميل. اطلب منه رمز التسليم.', 'Your arrival was recorded. Ask the customer for the delivery code.');
+    },
+    /* Deliver opens the code step; nothing is recorded until the code is confirmed */
+    deliver: function(id){
+      if(BUSY) return;
+      CODE = { id:id, value:'' }; MSG = null; render();
+      var i = document.querySelector('[data-code="' + id + '"]'); if(i) i.focus();
+    },
+    codeInput: function(inp){
+      var v = String(inp.value || '').replace(/\D/g, '').slice(0, 2);
+      if(inp.value !== v) inp.value = v;
+      if(CODE) CODE.value = v;
+      document.querySelectorAll('[data-code]').forEach(function(x){
+        var b = x.parentNode.querySelector('.row2 .go:not(.sec)'); if(b) b.disabled = v.length !== 2; });
+    },
+    confirmDeliver: function(id){
+      if(!CODE || CODE.id !== id) return;
+      var code = CODE.value;
+      settle(id, function(){ return LG.completeDelivery(id, { code:code }); },
+             'تم تسجيل تسليم الطلب. شكراً لك.', 'The delivery was recorded. Thank you.',
+             function(r){ if(r && r.ok) CODE = null; else if(CODE) CODE.value = ''; });
+    },
+    cancelDeliver: function(){ CODE = null; MSG = null; render(); },
+    toggleLang: function(){
+      var r = root(), en = r.lang === 'en';
+      r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+      try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+      applyLang(); readAll(); render();
+      el('langBtn').focus();
+    }
+  };
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && el('sheet')) APP.close();
+  });
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

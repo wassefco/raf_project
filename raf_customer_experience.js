@@ -5,6 +5,8 @@
  *   · Reviews          — a customer rates a product they bought in an order
  *   · Customer Issues  — a customer raises a problem about their own order
  *   · Rating summary   — always calculated from the actual reviews
+ *   · Order ratings    — after delivery, the customer rates the store and the
+ *                        driver of one order (one immutable record per order)
  *
  * It is not Order Management, Inventory, Marketing, Finance or Merchant
  * Support. Orders are only READ, through the immutable Order Snapshot.
@@ -87,7 +89,16 @@
     INVALID_TRANSITION:   { ar:'لا يمكن الانتقال إلى هذه الحالة.',              en:'The issue cannot move to that status.' },
     ISSUE_RESOLVED:       { ar:'تم حل هذه المشكلة. يمكن للعميل إعادة فتحها.',   en:'This issue is resolved. The customer can reopen it.' },
     NOT_RESOLVED:         { ar:'لا يمكن إعادة فتح مشكلة لم تُحل.',              en:'Only a resolved issue can be reopened.' },
-    PERSIST_FAILED:       { ar:'تعذّر الحفظ.',                                 en:'Could not save.' }
+    PERSIST_FAILED:       { ar:'تعذّر الحفظ.',                                 en:'Could not save.' },
+    /* order ratings */
+    UNAUTHENTICATED:      { ar:'يلزم تسجيل الدخول.',                           en:'Sign-in is required.' },
+    ACTOR_INACTIVE:       { ar:'حسابك غير نشط.',                              en:'Your account is not active.' },
+    NOT_DELIVERED:        { ar:'يمكن تقييم الطلب بعد تسليمه فقط.',              en:'An order can be rated only after it is delivered.' },
+    ALREADY_RATED:        { ar:'تم تقييم هذا الطلب من قبل.',                    en:'This order has already been rated.' },
+    INVALID_STORE_RATING: { ar:'تقييم المتجر يكون من 1 إلى 5 نجوم.',            en:'A store rating is 1 to 5 stars.' },
+    INVALID_DRIVER_RATING:{ ar:'تقييم السائق يكون من 1 إلى 5 نجوم.',            en:'A driver rating is 1 to 5 stars.' },
+    NO_DRIVER:            { ar:'لا يوجد سائق مسجّل لهذا الطلب.',                en:'No driver is recorded for this order.' },
+    COMMENT_TOO_LONG:     { ar:'التعليق أطول من المسموح.',                      en:'The comment is too long.' }
   };
   function fail(code, extra){
     var m = ERRORS[code] || { ar:'', en:'' };
@@ -105,9 +116,12 @@
   function readAll(){
     try {
       var v = JSON.parse(localStorage.getItem(LS) || 'null');
-      if (v && typeof v === 'object') return { reviews:Array.isArray(v.reviews) ? v.reviews : [], issues:Array.isArray(v.issues) ? v.issues : [] };
+      /* every writer rewrites this whole object, so every collection it holds
+         must be read back here or a write elsewhere would drop it */
+      if (v && typeof v === 'object') return { reviews:Array.isArray(v.reviews) ? v.reviews : [], issues:Array.isArray(v.issues) ? v.issues : [],
+                                               orderRatings:Array.isArray(v.orderRatings) ? v.orderRatings : [] };
     } catch (e) {}
-    return { reviews:[], issues:[] };
+    return { reviews:[], issues:[], orderRatings:[] };
   }
   function writeAll(db){
     try { localStorage.setItem(LS, JSON.stringify(db)); } catch (e) { return false; }
@@ -360,6 +374,203 @@
     return { ok:true, issue:copy(rec) };
   }
 
+  /* ══════════════════════ ORDER RATINGS ══════════════════════
+     After delivery the customer may rate the STORE and the DRIVER of one order.
+
+     Rules:
+       · only the order's own customer, signed in and active — identity from
+         the session, never from a caller-supplied id;
+       · only a DELIVERED order;
+       · EVERYTHING IS OPTIONAL: store stars, store comment, driver stars,
+         driver comment. A submission with all four empty is valid;
+       · ONE rating record per order, immutable once submitted — no edit, no
+         delete; the store and the driver parts live in that one record, written
+         by one append, so a submission can never half-succeed;
+       · the store is the order's own (snapshot storeSlug) and the driver is the
+         one on the order's own record (fulfilment.driverId) — never a caller's.
+
+     WHO SEES WHAT (reads are scoped here, not in the pages):
+       · the customer   — their order's driver (name + aggregate rating), during
+                          AND after delivery; only communication ends at delivery
+       · the store      — its own store feedback (existing `stores.view`, the
+                          account's own store link; no slug is accepted)
+       · administration — every store's feedback history (existing `stores.view`,
+                          staff accounts only)
+       · Logistics      — one driver's ratings for the driver profile (existing
+                          `drivers.view`); no customer identity is included
+     A driver's aggregate is calculated from these records every time; nothing
+     is stored, ranked or scored. */
+  var MERCHANT_ROLES = ['merchant', 'merchant_employee'];
+  var NOT_STAFF = ['customer', 'driver', 'merchant', 'merchant_employee'];
+  function sessionUser(){
+    var u = null;
+    try { u = global.RAFPerm && RAFPerm.currentUser ? RAFPerm.currentUser() : null; } catch (e) { u = null; }
+    if (!u || !u.id) return fail('UNAUTHENTICATED');
+    if (u.status !== 'active') return fail('ACTOR_INACTIVE');
+    return { ok:true, id:u.id, user:u };
+  }
+  function sessionCustomer(){
+    var s = sessionUser(); if (!s.ok) return s;
+    if (s.user.roleId !== 'customer') return fail('FORBIDDEN');
+    return s;
+  }
+  function sessionStaff(perm){
+    var s = sessionUser(); if (!s.ok) return s;
+    if (NOT_STAFF.indexOf(s.user.roleId) > -1 || !can(s.id, perm)) return fail('FORBIDDEN');
+    return s;
+  }
+  function orderRecOf(orderId){
+    try { return (global.RAFShop && orderId) ? (RAFShop.Orders.get(orderId) || null) : null; } catch (e) { return null; }
+  }
+  function ratingOf(orderId){ return readAll().orderRatings.filter(function (r) { return r.orderId === orderId; })[0] || null; }
+  /* ownership first, then state: another customer learns nothing about the order */
+  function ownOrder(orderId){
+    var sc = sessionCustomer(); if (!sc.ok) return sc;
+    var own = ownedOrder(orderId, sc.id); if (!own.ok) return own;
+    var o = orderRecOf(orderId), f = own.snap.fulfilment || {};
+    return { ok:true, sc:sc, snap:own.snap, order:o, delivered:!!(o && o.status === 'delivered'), driverId:f.driverId || null };
+  }
+  function has(v){ return v != null && v !== ''; }
+  function driverSummary(driverId){
+    var list = readAll().orderRatings.filter(function (x) { return x.driver && x.driver.driverId === driverId && typeof x.driver.rating === 'number'; });
+    var sum = 0; list.forEach(function (x) { sum += x.driver.rating; });
+    return { count:list.length, average:list.length ? Math.round((sum / list.length) * 10) / 10 : null };
+  }
+  function driverCard(driverId){
+    var u = userOf(driverId);
+    var name = u && u.roleId === 'driver' ? (u.name || null) : null;
+    return { name:name, initial:name ? String(name).trim().charAt(0) : null, rating:driverSummary(driverId) };
+  }
+  function storeCard(snap){
+    var s = null;
+    try { s = global.RAFSource ? RAFSource.store(snap.storeSlug) : null; } catch (e) { s = null; }
+    return { slug:snap.storeSlug, name:s ? s.name : { ar:snap.storeNameAr, en:snap.storeNameEn }, logo:s ? s.logo || null : null, category:s ? s.cat || null : null };
+  }
+  function mineView(rec){
+    if (!rec) return null;
+    return { submittedAt:rec.createdAt,
+             store:{ rating:rec.store.rating, comment:rec.store.comment },
+             driver:rec.driver ? { rating:rec.driver.rating, comment:rec.driver.comment } : null };
+  }
+
+  /* the Delivery & Rating page: store, the order's driver, and whether it is rated */
+  function orderRatingStatus(orderId, opts){
+    if (opts !== undefined && onlyKeys(opts, []).length) return fail('FIELD_NOT_ACCEPTED');
+    var r = ownOrder(orderId); if (!r.ok) return r;
+    if (!r.delivered) return fail('NOT_DELIVERED');
+    var existing = ratingOf(orderId);
+    return { ok:true, orderId:orderId, state:existing ? 'rated' : 'available', hasDriver:!!r.driverId,
+             store:storeCard(r.snap), driver:r.driverId ? driverCard(r.driverId) : null,
+             mine:mineView(existing), limits:{ comment:LIMITS.comment } };
+  }
+  /* the driver of the customer's OWN order — live or delivered. Only the
+     identity and the aggregate; contact and conversation are not here. */
+  function orderDriver(orderId, opts){
+    if (opts !== undefined && onlyKeys(opts, []).length) return fail('FIELD_NOT_ACCEPTED');
+    var r = ownOrder(orderId); if (!r.ok) return r;
+    if (!r.driverId) return fail('NO_DRIVER');
+    var existing = ratingOf(orderId);
+    return { ok:true, driver:driverCard(r.driverId), delivered:r.delivered,
+             rating:r.delivered ? { state:existing ? 'rated' : 'available' } : null };
+  }
+  /* kept for callers of the live-order variant */
+  function currentDriverRating(orderId, opts){
+    var d = orderDriver(orderId, opts); if (!d.ok) return d;
+    var o = orderRecOf(orderId); if (!o || o.status !== 'progress') return fail('NO_DRIVER');
+    return { ok:true, count:d.driver.rating.count, average:d.driver.rating.average };
+  }
+
+  function ratingValue(v){ return v == null || (typeof v === 'number' && v % 1 === 0 && v >= 1 && v <= 5); }
+  function commentValue(v){
+    if (v == null) return '';
+    if (typeof v !== 'string') return null;
+    return v.trim();
+  }
+  function serializedRating(orderId, fn){
+    var locks = null;
+    try { locks = global.navigator && navigator.locks && typeof navigator.locks.request === 'function' ? navigator.locks : null; } catch (e) { locks = null; }
+    if (!locks) { try { return Promise.resolve(fn()); } catch (e) { return Promise.resolve(fail('PERSIST_FAILED')); } }
+    return locks.request('raf-order-rating:' + String(orderId), { mode:'exclusive' }, function () {
+      try { return fn(); } catch (e) { return fail('PERSIST_FAILED'); }
+    }).catch(function () { return fail('PERSIST_FAILED'); });
+  }
+  /* rateOrder({ orderId, storeRating?, storeComment?, driverRating?, driverComment? }) → Promise.
+     Every field but the order is optional. */
+  function rateOrder(input){
+    input = input || {};
+    if (onlyKeys(input, ['orderId','storeRating','storeComment','driverRating','driverComment']).length) return Promise.resolve(fail('FIELD_NOT_ACCEPTED'));
+    var r0 = ownOrder(input.orderId); if (!r0.ok) return Promise.resolve(r0);
+    if (!r0.delivered) return Promise.resolve(fail('NOT_DELIVERED'));
+    if (!ratingValue(input.storeRating)) return Promise.resolve(fail('INVALID_STORE_RATING'));
+    if (!ratingValue(input.driverRating)) return Promise.resolve(fail('INVALID_DRIVER_RATING'));
+    var storeComment = commentValue(input.storeComment), driverComment = commentValue(input.driverComment);
+    if (storeComment === null || driverComment === null) return Promise.resolve(fail('FIELD_NOT_ACCEPTED'));
+    if (storeComment.length > LIMITS.comment || driverComment.length > LIMITS.comment) return Promise.resolve(fail('COMMENT_TOO_LONG'));
+    if (!r0.driverId && (has(input.driverRating) || driverComment)) return Promise.resolve(fail('NO_DRIVER'));
+    return serializedRating(input.orderId, function () {
+      var r = ownOrder(input.orderId); if (!r.ok) return r;                   /* re-read inside the lock */
+      if (!r.delivered) return fail('NOT_DELIVERED');
+      var db = readAll();
+      if (db.orderRatings.some(function (x) { return x.orderId === input.orderId; })) return fail('ALREADY_RATED');
+      var rec = { ratingId:newId('OR'), orderId:input.orderId, storeSlug:r.snap.storeSlug, customerId:r.sc.id,
+                  store:{ rating:has(input.storeRating) ? input.storeRating : null, comment:storeComment },
+                  driver:r.driverId ? { driverId:r.driverId, rating:has(input.driverRating) ? input.driverRating : null, comment:driverComment } : null,
+                  createdAt:Date.now(), version:2 };
+      db.orderRatings.push(rec);
+      if (!writeAll(db)) return fail('PERSIST_FAILED');
+      /* proved to have landed before anyone is told it did */
+      var back = ratingOf(input.orderId);
+      if (!back || back.ratingId !== rec.ratingId) return fail('PERSIST_FAILED');
+      audit('customer_experience.order_rated', rec, { source:'customer', key:rec.ratingId, actor:{ id:r.sc.id, name:r.sc.user.name },
+        metadata:{ ratingId:rec.ratingId, storeRating:rec.store.rating, driverRating:rec.driver ? rec.driver.rating : null,
+                   storeComment:!!rec.store.comment, driverComment:!!(rec.driver && rec.driver.comment) } });
+      return { ok:true, ratingId:rec.ratingId };
+    });
+  }
+
+  /* ---- the store part, for the store and for administration ---- */
+  function storeItem(rec, withStore){
+    var out = { ratingId:rec.ratingId, orderId:rec.orderId, rating:rec.store.rating, comment:rec.store.comment,
+                customerName:customerNameOf(rec.orderId), createdAt:rec.createdAt };
+    if (withStore) { var snap = snapOf(rec.orderId); out.store = snap ? storeCard(snap) : { slug:rec.storeSlug, name:null }; out.storeSlug = rec.storeSlug; }
+    return out;
+  }
+  function hasStoreFeedback(rec){ return typeof rec.store.rating === 'number' || !!rec.store.comment; }
+  function newestFirst(a, b){ return b.createdAt - a.createdAt; }
+  function summarizeStore(items){
+    var rated = items.filter(function (x) { return typeof x.rating === 'number'; }), sum = 0;
+    rated.forEach(function (x) { sum += x.rating; });
+    return { count:rated.length, feedback:items.length, average:rated.length ? Math.round((sum / rated.length) * 10) / 10 : null };
+  }
+  /* the signed-in merchant's OWN store — no slug is accepted from the caller */
+  function storeRatings(opts){
+    if (opts !== undefined && onlyKeys(opts, []).length) return fail('FIELD_NOT_ACCEPTED');
+    var s = sessionUser(); if (!s.ok) return s;
+    if (MERCHANT_ROLES.indexOf(s.user.roleId) < 0) return fail('FORBIDDEN');
+    var sc = merchantScope(s.id, 'stores.view'); if (!sc.ok) return sc;
+    var items = readAll().orderRatings.filter(function (r) { return r.storeSlug === sc.slug && hasStoreFeedback(r); }).sort(newestFirst)
+      .map(function (r) { return storeItem(r, false); });
+    return { ok:true, slug:sc.slug, items:items, summary:summarizeStore(items) };
+  }
+  /* administration: every store, read-only */
+  function storeRatingsHistory(opts){
+    opts = opts || {};
+    if (onlyKeys(opts, ['storeSlug']).length) return fail('FIELD_NOT_ACCEPTED');
+    var s = sessionStaff('stores.view'); if (!s.ok) return s;
+    var items = readAll().orderRatings.filter(function (r) { return hasStoreFeedback(r) && (!opts.storeSlug || r.storeSlug === opts.storeSlug); })
+      .sort(newestFirst).map(function (r) { return storeItem(r, true); });
+    return { ok:true, items:items, summary:summarizeStore(items) };
+  }
+  /* Logistics: one driver's ratings for the driver profile. No customer identity. */
+  function driverRatings(driverId, opts){
+    if (opts !== undefined && onlyKeys(opts, []).length) return fail('FIELD_NOT_ACCEPTED');
+    var s = sessionStaff('drivers.view'); if (!s.ok) return s;
+    var u = userOf(driverId); if (!u || u.roleId !== 'driver') return fail('NOT_FOUND');
+    var items = readAll().orderRatings.filter(function (r) { return r.driver && r.driver.driverId === driverId && (typeof r.driver.rating === 'number' || !!r.driver.comment); })
+      .sort(newestFirst).map(function (r) { return { ratingId:r.ratingId, orderId:r.orderId, rating:r.driver.rating, comment:r.driver.comment, createdAt:r.createdAt }; });
+    return { ok:true, driverId:driverId, items:items, summary:driverSummary(driverId) };
+  }
+
   global.RAFCustomerExperience = {
     CATEGORIES:CATEGORIES, STATUS:STATUS, STATUS_TXT:STATUS_TXT, TRANSITIONS:TRANSITIONS, LIMITS:LIMITS, ERRORS:ERRORS,
     canView:canView, canManage:canManage,
@@ -369,6 +580,9 @@
     /* issues */
     issues:issues, createIssue:createIssue, replyIssue:replyIssue,
     changeIssueStatus:changeIssueStatus, reopenIssue:reopenIssue, categoryOf:categoryOf,
+    /* order ratings (store + driver), after delivery */
+    orderRatingStatus:orderRatingStatus, rateOrder:rateOrder, orderDriver:orderDriver, currentDriverRating:currentDriverRating,
+    storeRatings:storeRatings, storeRatingsHistory:storeRatingsHistory, driverRatings:driverRatings,
     /* read-only display helpers — from the historical order snapshot */
     productOf:productOf, customerNameOf:customerNameOf
   };

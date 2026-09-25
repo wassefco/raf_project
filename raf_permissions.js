@@ -89,6 +89,24 @@
     escalate:{ ar: 'تصعيد',    en: 'Escalate' }
   };
 
+  /* A module's name reads differently as the OBJECT of an action: the label is
+     «المستخدمون» on its own but «عرض المستخدمين» in a permission. Without this
+     every Arabic permission name came out ungrammatical. One map, so the
+     permission screens and the departmental settings surface read the same. */
+  var MODULE_OBJECT_AR = {
+    users:       'المستخدمين',
+    stores:      'المتاجر',
+    products:    'المنتجات',
+    orders:      'الطلبات',
+    auctions:    'المزادات',
+    offers:      'العروض',
+    drivers:     'السائقين',
+    reports:     'التقارير',
+    support:     'تذاكر خدمة العملاء',
+    settings:    'إعدادات النظام',
+    permissions: 'الصلاحيات'
+  };
+
   function buildCatalog() {
     var cat = [];
     MODULES.forEach(function (m) {
@@ -98,7 +116,7 @@
           key: m.id + '.' + a,
           module: m.id,
           action: a,
-          labelAr: al.ar + ' ' + m.labelAr,
+          labelAr: al.ar + ' ' + (MODULE_OBJECT_AR[m.id] || m.labelAr),
           labelEn: al.en + ' ' + m.labelEn
         });
       });
@@ -143,6 +161,14 @@
            authority. Ending the case and talking to the customer stay with
            Customer Service, so support.resolve and support.escalate are not held. */
         .concat(['support.view', 'support.create', 'support.manage'])
+        /* Operations is the manager responsible for Logistics, so it both reads
+           and changes the operational configuration Logistics runs on, and
+           administers the permissions of the accounts RAF places under that
+           department (see DELEGATED_SCOPE — driver accounts today). The keys
+           are the existing ones; what keeps them from reaching further than
+           Logistics is the authority's own scope check, never a hidden
+           control. */
+        .concat(['settings.view', 'settings.edit', 'permissions.view', 'permissions.edit'])
     },
     {
       id: 'customer_service', nameAr: 'خدمة العملاء', nameEn: 'Customer Service', system: true,
@@ -307,6 +333,27 @@
     try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
   }
 
+  /* ---- the session: TAB-SCOPED ----
+     Being signed in is the one fact kept in sessionStorage, under the same key
+     and JSON encoding as before, so each browser tab (or window) carries its
+     own identity while every account, role and business record stays shared in
+     localStorage. Nothing but these three helpers touches the session. They
+     fail closed: storage that cannot be read means nobody is signed in. */
+  function sessionRead() {
+    try {
+      var raw = sessionStorage.getItem(LS.session);
+      if (raw == null || raw === '') return null;
+      var id = JSON.parse(raw);
+      return (typeof id === 'string' && id) ? id : null;
+    } catch (e) { return null; }
+  }
+  function sessionWrite(userId) {
+    try { sessionStorage.setItem(LS.session, JSON.stringify(userId)); return true; } catch (e) { return false; }
+  }
+  function sessionClear() {
+    try { sessionStorage.removeItem(LS.session); return true; } catch (e) { return false; }
+  }
+
   function seed(force) {
     if (force || !localStorage.getItem(LS.catalog))   write(LS.catalog, CATALOG);
     else /* catalog is derived/static — always refresh to stay in sync */     write(LS.catalog, CATALOG);
@@ -356,6 +403,18 @@
       add:['drivers.create', 'drivers.edit', 'drivers.assign'] },
     { id:'drivers_logistics_higher_mgmt_v1', roleId:'higher_mgmt',
       add:['drivers.create', 'drivers.edit', 'drivers.assign'] },
+    /* The Logistics Settings surface is read through settings.view, which
+       Operations did not hold, so the department that works against that
+       configuration could not see it. Only the read key is added; settings.edit
+       stays exactly where it was, and no other role is touched. */
+    { id:'settings_view_ops_manager_v1', roleId:'ops_manager', add:['settings.view'] },
+    /* Operations is the responsible manager for Logistics: it configures the
+       values Logistics runs on, and administers permissions for the accounts
+       inside its declared scope. Recorded as its own migration because
+       settings_view_ops_manager_v1 has already run in browsers seeded before
+       this decision, and a migration that has run is never re-applied. */
+    { id:'settings_edit_ops_manager_v1', roleId:'ops_manager',
+      add:['settings.edit', 'permissions.view', 'permissions.edit'] },
     { id:'support_finance_v1',      roleId:'finance',      add:['support.view', 'support.manage'] },
     { id:'support_higher_mgmt_v1',  roleId:'higher_mgmt',
       add:['support.view', 'support.create', 'support.manage', 'support.resolve', 'support.escalate'] },
@@ -422,28 +481,36 @@
      stored session nobody is signed in, so every caller either handles an
      anonymous visitor or refuses them. */
   function currentUser() {
-    return getUser(read(LS.session, null));
+    return getUser(sessionRead());
   }
 
-  function saveRole(role) {
+  /* ---- raw writers ----
+     These decide NOTHING. They are private: every public path that reaches
+     them proves the caller may make the change first (section 7b). Keeping the
+     write and the decision apart is what stops a guard being skipped by
+     calling a different method. */
+  function putRole(role) {
     var roles = getRoles();
     var i = roles.findIndex(function (r) { return r.id === role.id; });
     if (i >= 0) roles[i] = role; else roles.push(role);
     write(LS.roles, roles);
   }
-  function saveUser(user) {
+  function putUser(user) {
     var users = getUsers();
     var i = users.findIndex(function (uu) { return uu.id === user.id; });
     if (i >= 0) users[i] = user; else users.push(user);
     write(LS.users, users);
   }
-  function saveTemplate(tpl) {
+  function putTemplate(tpl) {
     var tpls = getTemplates();
     var i = tpls.findIndex(function (t) { return t.id === tpl.id; });
     if (i >= 0) tpls[i] = tpl; else tpls.push(tpl);
     write(LS.templates, tpls);
   }
-  function setCurrentUser(userId) { write(LS.session, userId); }
+  function setCurrentUser(userId) { sessionWrite(userId); }
+  /* the raw id this tab is signed in as, or null — for the few surfaces that
+     must tell "no session" apart from "a session naming an unknown account" */
+  function sessionUserId() { return sessionRead(); }
   /* ---- sign out ----
      THE one way to end a session, so no page implements session clearing of
      its own. Being signed in is a single fact — the stored session id — and
@@ -454,8 +521,8 @@
      unchanged; with no session every surface simply treats the visitor as
      anonymous, exactly as it already does before a first sign-in. */
   function signOut() {
-    var was = read(LS.session, null);
-    try { localStorage.removeItem(LS.session); } catch (e) { return { ok:false, reason:'persist_failed' }; }
+    var was = sessionRead();
+    if (!sessionClear()) return { ok:false, reason:'persist_failed' };
     return { ok:true, signedOutId:(typeof was === 'string' ? was : null) };
   }
 
@@ -530,7 +597,16 @@
   function createAccount(spec) {
     spec = spec || {};
     if (!spec.accountType || !spec.roleId) return { ok: false, reason: 'account_type_required' };
-    if (!getRole(spec.roleId)) return { ok: false, reason: 'role_not_found' };
+    var wantRole = getRole(spec.roleId);
+    if (!wantRole) return { ok: false, reason: 'role_not_found' };
+    /* Creating an account IS a role assignment. The calling authority decides
+       its own fixed role (RAFLogistics opens driver accounts, sign-up opens
+       customer ones) and that stays open. What is closed is opening an
+       ADMINISTRATIVE account — one whose role carries authority over
+       permissions or configuration — which only central administration does. */
+    var administrative = (wantRole.permissions || []).some(function (k) { return NON_DELEGABLE.indexOf(k) > -1; });
+    if (administrative && !isCentralPermAdmin(actingUser()))
+      return { ok: false, reason: 'forbidden' };
     var id = nextUserId();
     var user = u(id, String(spec.name || ''), String(spec.email || ''), String(spec.phone || ''),
                  spec.accountType, spec.roleId, 'active',
@@ -585,14 +661,310 @@
     return Object.keys(set);
   }
 
-  /* set / clear an override for a user (effect: 'grant' | 'revoke' | null) */
+
+  /* -------------------------------------------------------------------------
+   * 7b) PERMISSION ADMINISTRATION — THE SECURITY BOUNDARY
+   * -------------------------------------------------------------------------
+   * EVERY permission mutation in RAF goes through this section. The writers
+   * above are private and decide nothing; the public methods below decide and
+   * then write. A screen that hides a control protects nothing — the same call
+   * typed into a console reaches exactly these checks and is refused the same
+   * way.
+   *
+   * THE ACTOR IS THE STORED SESSION. It is never a parameter, so naming
+   * somebody else in the call, or passing the target as the actor, changes
+   * nothing at all.
+   *
+   * TWO KINDS OF ADMINISTRATOR, both from data RAF already holds:
+   *   · CENTRAL — holds permissions.edit and has no delegated scope. It
+   *     administers accounts, roles and templates across RAF. Today: Super
+   *     Admin. Higher Management deliberately does not hold permissions.edit,
+   *     and that exclusion is preserved exactly as it was.
+   *   · DELEGATED — holds permissions.edit AND has a declared scope below. It
+   *     administers the accounts inside that scope and nothing else. It never
+   *     reaches roles, templates or a reset, because those are not scoped.
+   *
+   * WHOSE PERMISSIONS A MANAGER MAY TOUCH — RAF has no org chart. No account
+   * records a manager, no role records a rank, and nothing anywhere states who
+   * reports to whom. So the scope is NOT inferred from a screen, a list or a
+   * permission set: it is DECLARED here, in the authority, and a surface can
+   * only ask for it.
+   *
+   * Today RAF places exactly one population under a department: driver
+   * accounts belong to Logistics Management — RAFLogistics administers them
+   * and the drivers.* keys exist for that department. The Operations Manager
+   * is the manager responsible for Logistics, so that is the scope. No other
+   * reporting line is declared, because no other one exists in RAF to read.
+   *
+   * ESCALATION — a manager can only hand out what they already hold, never to
+   * themselves, and never a key that carries administrative authority over
+   * permissions or configuration. Every one of those checks lives here, so a
+   * direct call from a console is refused exactly like a hidden button.
+   * ---------------------------------------------------------------------- */
+  var DELEGATED_SCOPE = { ops_manager: ['driver'] };
+
+  /* Authority over permissions and over system configuration is not delegated.
+     A manager holding these keys administers their scope with them; handing
+     one to an account inside that scope is how the scope gets escaped. */
+  var NON_DELEGABLE = ['permissions.view', 'permissions.edit', 'settings.view', 'settings.edit'];
+
+  /* the acting account — the stored session, never a caller-supplied id, so
+     naming somebody else in the call changes nothing */
+  function actingUser() {
+    var a = currentUser();
+    return (a && a.id && a.status === 'active') ? a : null;
+  }
+  function knownKey(key) {
+    return getCatalog().some(function (p) { return p.key === key; });
+  }
+  /* administers RAF-wide: holds the edit key and is not a scoped delegate */
+  function isCentralPermAdmin(a) {
+    return !!(a && can(a, 'permissions.edit') && !DELEGATED_SCOPE[a.roleId]);
+  }
+  function isDelegatedManager(a) {
+    return !!(a && can(a, 'permissions.edit') && DELEGATED_SCOPE[a.roleId]);
+  }
+  function delegatedRoleIds(actorOrId) {
+    var a = actorOrId ? resolveUser(actorOrId) : actingUser();
+    if (!a) return [];
+    return (DELEGATED_SCOPE[a.roleId] || []).slice();
+  }
+  /* the accounts that manager administers — from the declared scope only */
+  function manageableUsers(actorOrId) {
+    var a = actorOrId ? resolveUser(actorOrId) : actingUser();
+    if (!a) return [];
+    var roles = DELEGATED_SCOPE[a.roleId] || [];
+    if (!roles.length) return [];
+    return getUsers().filter(function (t) {
+      return t.id !== a.id && roles.indexOf(t.roleId) > -1;
+    });
+  }
+  /* the permissions that manager may hand out: the ones they effectively hold,
+     less the non-delegable ones. Catalog entries, so a caller never builds a
+     key of its own and always has the human labels. */
+  function grantablePermissions(actorOrId) {
+    var a = actorOrId ? resolveUser(actorOrId) : actingUser();
+    if (!a) return [];
+    var mine = {};
+    effectivePermissions(a).forEach(function (kk) { mine[kk] = true; });
+    return getCatalog().filter(function (p) {
+      return mine[p.key] && NON_DELEGABLE.indexOf(p.key) < 0;
+    });
+  }
+  /* may the acting administrator touch this ACCOUNT at all? A central
+     administrator reaches every account; a delegate only its declared scope;
+     nobody reaches their own permissions. */
+  function canManagePermissions(targetId, actorOrId) {
+    var a = actorOrId ? resolveUser(actorOrId) : actingUser();
+    if (!a) return { ok:false, reason:'not_signed_in' };
+    if (a.status !== 'active') return { ok:false, reason:'actor_inactive' };
+    if (!can(a, 'permissions.edit')) return { ok:false, reason:'forbidden' };
+    var t = getUser(targetId);
+    if (!t) return { ok:false, reason:'user_not_found' };
+    if (t.id === a.id) return { ok:false, reason:'self' };
+    var scope = DELEGATED_SCOPE[a.roleId];
+    if (scope && scope.indexOf(t.roleId) < 0) return { ok:false, reason:'out_of_scope' };
+    return { ok:true, reason:null, actor:a, target:t };
+  }
+  /* ...and may they touch THIS PERMISSION on it? */
+  function mayChangePermission(targetId, key, actorOrId) {
+    if (!knownKey(key)) return { ok:false, reason:'unknown_permission' };
+    var guard = canManagePermissions(targetId, actorOrId);
+    if (!guard.ok) return guard;
+    if (isDelegatedManager(guard.actor) && NON_DELEGABLE.indexOf(key) > -1)
+      return { ok:false, reason:'not_delegable' };
+    /* nobody hands out what they do not hold themselves */
+    if (!can(guard.actor, key)) return { ok:false, reason:'exceeds_actor' };
+    return guard;
+  }
+
+  /* ---- THE one permission mutation ----
+     Every permission change in RAF ends here: the delegated settings surface,
+     the central permissions screen, and anything else. It authorises, writes
+     through the private writer, reads the result back from storage rather
+     than trusting the write, and records it in RAFAudit.
+     effect: 'grant' | 'revoke' | null (clear the override) */
   function setOverride(userId, key, effect) {
-    var user = getUser(userId);
-    if (!user) return;
-    user.overrides = user.overrides || {};
-    if (effect === 'grant' || effect === 'revoke') user.overrides[key] = effect;
-    else delete user.overrides[key];
-    saveUser(user);
+    if (effect !== 'grant' && effect !== 'revoke' && effect !== null && effect !== undefined)
+      return { ok:false, reason:'invalid_effect' };
+    var guard = mayChangePermission(userId, key);
+    if (!guard.ok) return guard;
+    var a = guard.actor, t = guard.target;
+
+    var before = can(t, key);
+    var next = Object.assign({}, t);
+    next.overrides = Object.assign({}, t.overrides || {});
+    if (effect === 'grant' || effect === 'revoke') next.overrides[key] = effect;
+    else delete next.overrides[key];
+    putUser(next);
+
+    var saved = getUser(userId);
+    var after = can(saved, key);
+    if (!saved || JSON.stringify(saved.overrides || {}) !== JSON.stringify(next.overrides))
+      return { ok:false, reason:'persist_failed' };
+
+    if (after !== before) auditPermission(a, saved, key, before, after);
+    return { ok:true, userId:t.id, key:key, effect:effect || null, enabled:after };
+  }
+
+  /* the existing audit authority, through its own API — no second mechanism */
+  function auditPermission(actor, target, key, before, after) {
+    if (!global.RAFAudit) return;
+    try {
+      RAFAudit.record({
+        action: after ? 'permission.granted' : 'permission.revoked',
+        actor:{ id:actor.id }, source:'admin',
+        key: (target.id || target.roleId) + '|' + key + '|' + Date.now(),
+        previousState: before ? 'granted' : 'not_granted',
+        newState: after ? 'granted' : 'not_granted',
+        metadata: target.id
+          ? { targetUserId:target.id, targetRoleId:target.roleId, permissionKey:key }
+          : { targetRoleId:target.roleId, permissionKey:key }
+      });
+    } catch (e) {}
+    /* No event is published: RAFEventBus registers no permission event type,
+       and publishing an unregistered one is refused. */
+  }
+
+  /* GRANT / REMOVE one permission for one account. The caller says what the
+     account should END UP with; the authority works out which override that
+     takes, so no surface reasons about grant-versus-revoke. */
+  function setUserPermission(targetId, key, enabled) {
+    if (typeof enabled !== 'boolean') return { ok:false, reason:'invalid_effect' };
+    var t = getUser(targetId);
+    if (!t) return { ok:false, reason:'user_not_found' };
+    var role = getRole(t.roleId);
+    var inRole = !!(role && Array.isArray(role.permissions) && role.permissions.indexOf(key) > -1);
+    /* an account keeps its role; only its own override moves */
+    var r = setOverride(targetId, key, enabled ? (inRole ? null : 'grant') : (inRole ? 'revoke' : null));
+    if (!r.ok) return r;
+    if (r.enabled !== enabled) return { ok:false, reason:'persist_failed' };
+    return { ok:true, userId:t.id, key:key, enabled:r.enabled };
+  }
+
+  /* ---- the whole-record account write ----
+     saveUser() REPLACES an account record. Whatever the caller leaves out is
+     gone — including status, which decides whether the account may act at all
+     — so the method is security-sensitive as a whole, not only when the role
+     or the overrides move. It therefore needs an administrator, and then each
+     sensitive part is checked on its own:
+       · the ROLE the account holds  — central administration only;
+       · its permission OVERRIDES    — the same rules as setOverride, per key.
+     Editing a person's name, email or phone does NOT come through here: that
+     is updateProfile(), which touches three named fields and is deliberately
+     left as it was.
+     A record for an account that does not exist yet assigns a role by
+     definition, so an insert is central administration too. */
+  function saveUser(user) {
+    if (!user || !user.id) return { ok:false, reason:'invalid_record' };
+    var before = getUser(user.id);
+    var a = actingUser();
+    if (!a) return { ok:false, reason:'not_signed_in' };
+    /* replacing a whole account record is account administration */
+    if (!isCentralPermAdmin(a)) {
+      var g = canManagePermissions(user.id);
+      if (!g.ok) return g;
+    }
+
+    var roleChanged = !before || before.roleId !== user.roleId;
+    var ovBefore = (before && before.overrides) || {};
+    var ovAfter = user.overrides || {};
+    var touched = {};
+    Object.keys(ovBefore).forEach(function (k) { if (ovBefore[k] !== ovAfter[k]) touched[k] = true; });
+    Object.keys(ovAfter).forEach(function (k) { if (ovBefore[k] !== ovAfter[k]) touched[k] = true; });
+    var changedKeys = Object.keys(touched);
+
+    if (roleChanged) {
+      if (!isCentralPermAdmin(a)) return { ok:false, reason:'forbidden' };
+      if (before && before.id === a.id) return { ok:false, reason:'self' };
+    }
+    /* every override the record moves is checked on its own, so a batch write
+       can never slip a key past the per-key rules */
+    for (var i = 0; i < changedKeys.length; i++) {
+      var chk = mayChangePermission(user.id, changedKeys[i]);
+      if (!chk.ok) return chk;
+    }
+
+    var states = changedKeys.map(function (k) { return { key:k, before: before ? can(before, k) : false }; });
+    putUser(user);
+    var saved = getUser(user.id);
+    if (!saved) return { ok:false, reason:'persist_failed' };
+    states.forEach(function (s) {
+      var after = can(saved, s.key);
+      if (after !== s.before) auditPermission(a, saved, s.key, s.before, after);
+    });
+    return { ok:true, user:saved };
+  }
+
+  /* ---- role permission sets ----
+     A role reaches every account that holds it, so it is never scoped: only a
+     central administrator edits one. Super Admin's own role stays immutable —
+     it is the definition of full access, and the administration screen has
+     always locked it. */
+  function saveRole(role) {
+    if (!role || !role.id) return { ok:false, reason:'invalid_record' };
+    var a = actingUser();
+    if (!a) return { ok:false, reason:'not_signed_in' };
+    if (!isCentralPermAdmin(a)) return { ok:false, reason:'forbidden' };
+    if (role.id === 'super_admin') return { ok:false, reason:'role_immutable' };
+    if (role.id === a.roleId) return { ok:false, reason:'self' };
+
+    var before = getRole(role.id);
+    var had = {}; ((before && before.permissions) || []).forEach(function (k) { had[k] = true; });
+    var wants = Array.isArray(role.permissions) ? role.permissions : [];
+    for (var i = 0; i < wants.length; i++) {
+      if (!knownKey(wants[i])) return { ok:false, reason:'unknown_permission' };
+      /* nobody writes into a role what they do not hold themselves */
+      if (!had[wants[i]] && !can(a, wants[i])) return { ok:false, reason:'exceeds_actor' };
+    }
+    putRole(role);
+    var saved = getRole(role.id);
+    if (!saved) return { ok:false, reason:'persist_failed' };
+    var now = {}; (saved.permissions || []).forEach(function (k) { now[k] = true; });
+    Object.keys(had).concat(Object.keys(now)).forEach(function (k) {
+      if (!!had[k] !== !!now[k]) auditPermission(a, { roleId:saved.id }, k, !!had[k], !!now[k]);
+    });
+    return { ok:true, role:saved };
+  }
+
+  /* a template is a preset that an administrator later applies; it grants
+     nothing by itself, but it is permission data, so it is central too */
+  function saveTemplate(tpl) {
+    if (!tpl || !tpl.id) return { ok:false, reason:'invalid_record' };
+    var a = actingUser();
+    if (!a) return { ok:false, reason:'not_signed_in' };
+    if (!isCentralPermAdmin(a)) return { ok:false, reason:'forbidden' };
+    var wants = Array.isArray(tpl.permissions) ? tpl.permissions : [];
+    for (var i = 0; i < wants.length; i++) if (!knownKey(wants[i])) return { ok:false, reason:'unknown_permission' };
+    putTemplate(tpl);
+    return { ok:true, template:tpl };
+  }
+
+  /* restoring every role, account and override to the seed is the largest
+     permission mutation there is */
+  function resetPermissionData() {
+    var a = actingUser();
+    if (!a) return { ok:false, reason:'not_signed_in' };
+    if (!isCentralPermAdmin(a)) return { ok:false, reason:'forbidden' };
+    seed(true);
+    return { ok:true };
+  }
+
+  /* ---- testing accounts ----
+     raf_demo_accounts.js installs one account per role so the permission model
+     can be exercised, including an administrative one. That is a role
+     assignment, which saveUser() now refuses to an anonymous visitor — and it
+     ran on load, before anybody had signed in. Rather than punch a hole in
+     saveUser, the testing door is its own named function that accepts NOTHING
+     but a flagged demo record. Deleting this function and its one caller
+     closes the door completely; it is the only unauthenticated write left. */
+  function installTestAccount(record) {
+    if (!record || typeof record.id !== 'string') return { ok:false, reason:'invalid_record' };
+    if (record.demo !== true || record.id.indexOf('demo-') !== 0) return { ok:false, reason:'not_a_test_account' };
+    if (!getRole(record.roleId)) return { ok:false, reason:'role_not_found' };
+    putUser(record);
+    var saved = getUser(record.id);
+    return saved ? { ok:true, user:saved } : { ok:false, reason:'persist_failed' };
   }
 
   /* -------------------------------------------------------------------------
@@ -607,11 +979,11 @@
      looking at. Resolution is by stored id only; display name, email and
      username are never consulted. */
   function isMerchant(userOrId) {
-    var user = resolveUser(userOrId || read(LS.session, null));
+    var user = resolveUser(userOrId || sessionRead());
     return !!(user && (user.roleId === 'merchant' || user.roleId === 'merchant_employee'));
   }
   function storeSlugOf(userOrId) {
-    var user = resolveUser(userOrId || read(LS.session, null));
+    var user = resolveUser(userOrId || sessionRead());
     return (user && user.storeSlug) || null;
   }
   /* The store record itself, straight from the central authority.
@@ -627,7 +999,7 @@
      "assigned to a store that is missing" and report it as the data problem it
      is instead of guessing. reason: null | 'unassigned' | 'store_not_found'. */
   function storeLinkOf(userOrId) {
-    var user = resolveUser(userOrId || read(LS.session, null));
+    var user = resolveUser(userOrId || sessionRead());
     var slug = (user && user.storeSlug) || null;
     if (!slug) return { slug:null, store:null, ok:false, reason:'unassigned' };
     var store = global.RAFSource ? global.RAFSource.store(slug) : null;
@@ -636,7 +1008,7 @@
   }
 
   function enforce(userOrId) {
-    var user = resolveUser(userOrId || read(LS.session, null));
+    var user = resolveUser(userOrId || sessionRead());
     /* page-level guard */
     var guard = document.body ? document.body.getAttribute('data-perm-guard') : null;
     if (guard && user && !can(user, guard)) {
@@ -662,8 +1034,10 @@
     LS: LS,
     MODULES: MODULES,
     ACTION_LABELS: ACTION_LABELS,
-    seed: seed,
-    reset: function () { seed(true); },
+    /* the exported seed never forces: re-seeding from scratch is a permission
+       mutation and goes through reset(), which authorises first */
+    seed: function () { return seed(false); },
+    reset: resetPermissionData,
     /* accessors */
     getCatalog: getCatalog,
     getModules: getModules,
@@ -674,6 +1048,7 @@
     getUser: getUser,
     currentUser: currentUser,
     setCurrentUser: setCurrentUser,
+    sessionUserId: sessionUserId,
     signOut: signOut,
     /* mutators */
     saveRole: saveRole,
@@ -683,6 +1058,21 @@
     updateProfile: updateProfile, setStatus: setStatus, createAccount: createAccount,
     saveTemplate: saveTemplate,
     setOverride: setOverride,
+    /* permission administration (see section 7b) */
+    DELEGATED_SCOPE: DELEGATED_SCOPE,
+    NON_DELEGABLE: NON_DELEGABLE,
+    delegatedRoleIds: delegatedRoleIds,
+    manageableUsers: manageableUsers,
+    grantablePermissions: grantablePermissions,
+    canManagePermissions: canManagePermissions,
+    mayChangePermission: mayChangePermission,
+    setUserPermission: setUserPermission,
+    /* so a screen can render the right controls — never the boundary itself */
+    isCentralPermAdmin: function (userOrId) {
+      return isCentralPermAdmin(userOrId ? resolveUser(userOrId) : actingUser());
+    },
+    /* testing accounts only (see section 7b) */
+    installTestAccount: installTestAccount,
     /* resolution */
     can: can,
     originOf: originOf,
@@ -694,6 +1084,11 @@
     /* enforcement */
     enforce: enforce
   };
+
+  /* the old browser-wide session (localStorage) is discarded, never adopted:
+     carrying it over would hand every new tab the same identity again. Only
+     that one key is removed; every account and business record is kept. */
+  try { localStorage.removeItem(LS.session); } catch (e) {}
 
   /* auto-seed on load so any page including this script has the data ready */
   seed(false);

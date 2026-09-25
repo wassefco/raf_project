@@ -88,7 +88,13 @@
 
   /* Install / refresh every demo account (upsert by stable id). */
   function install() {
-    if (!global.RAFPerm || typeof RAFPerm.saveUser !== 'function') return { ok: false, reason: 'RAFPerm unavailable' };
+    /* Writes through RAFPerm.installTestAccount(), the authority's explicit
+       testing-account door. saveUser() is no longer usable here and should not
+       be: assigning a role is central administration now, and this file runs
+       on page load with nobody signed in. installTestAccount() accepts only a
+       record flagged demo:true with a demo- id — exactly these accounts. */
+    if (!global.RAFPerm || typeof RAFPerm.installTestAccount !== 'function')
+      return { ok: false, reason: 'RAFPerm unavailable' };
     var roles = {};
     (RAFPerm.getRoles() || []).forEach(function (r) { roles[r.id] = r; });
 
@@ -96,8 +102,10 @@
     ACCOUNTS.forEach(function (a) {
       if (!roles[a.roleId]) { report.push({ email: a.email, ok: false, reason: 'missing role ' + a.roleId }); return; }
       var existing = RAFPerm.getUser ? RAFPerm.getUser(a.id) : null;
-      RAFPerm.saveUser(toUser(a));                 /* update when present, insert when not */
-      report.push({ email: a.email, ok: true, action: existing ? 'updated' : 'created' });
+      var res = RAFPerm.installTestAccount(toUser(a));   /* update when present, insert when not */
+      report.push(res && res.ok
+        ? { email: a.email, ok: true, action: existing ? 'updated' : 'created' }
+        : { email: a.email, ok: false, reason: (res && res.reason) || 'refused' });
     });
     return { ok: true, accounts: report };
   }

@@ -301,6 +301,7 @@ table.app tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
 <script src="raf_store_ops.js"></script>
 <script src="raf_order_engine.js"></script>
 <script src="raf_permissions.js"></script>
+<script src="raf_customer_experience.js"></script>
 <script src="raf_logistics_authority.js"></script>
 <script>
 /* ============================================================================
@@ -745,6 +746,22 @@ table.app tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
             + '</li>'; }).join('') + '</ul>'
       : '<div class="empty"><span>' + T('لا توجد طلبات معيَّنة لهذا السائق.','No orders are currently assigned to this driver.') + '</span></div>');
 
+    /* customer ratings of THIS driver — owned by RAFCustomerExperience, read
+       through RAFLogistics.driverRatings (drivers.view). Aggregate, count and the
+       individual ratings with order and date; no customer identity. */
+    var rt = null; try { rt = LG && LG.driverRatings ? LG.driverRatings(d.driverId) : null; } catch(e){ rt = null; }
+    h += sec(T('تقييمات العملاء','Customer ratings'), 'ti-star', !rt || !rt.ok
+      ? '<div class="empty"><span>' + T('تعذّر تحميل التقييمات.','Ratings could not be loaded.') + '</span></div>'
+      : kv(T('متوسط التقييم','Average rating'), rt.summary.count ? '<bdi>★ ' + esc(Number(rt.summary.average).toFixed(1)) + '</bdi>' : T('لا توجد تقييمات بعد','No ratings yet'))
+        + kv(T('عدد التقييمات','Ratings'), '<bdi>' + esc(rt.summary.count) + '</bdi>')
+        + (rt.items.length
+          ? '<ul class="lines" id="drvRatings">' + rt.items.map(function(x){
+              var s = ''; if (typeof x.rating === 'number') for (var i = 1; i <= 5; i++) s += i <= x.rating ? '★' : '☆';
+              return '<li><span class="nm">' + (s ? '<bdi aria-label="' + esc(T(x.rating + ' من 5', x.rating + ' of 5')) + '">' + s + '</bdi>' : '<span class="sub">' + T('بدون نجوم','No stars') + '</span>')
+                + (x.comment ? '<span class="sub">' + esc(x.comment) + '</span>' : '')
+                + '<span class="sub"><bdi class="mono">' + esc(x.orderId) + '</bdi> · <bdi>' + esc(dayOf(x.createdAt)) + '</bdi></span></span></li>'; }).join('') + '</ul>'
+          : '<div class="empty"><span>' + T('لم يقيّم العملاء هذا السائق بعد.','Customers have not rated this driver yet.') + '</span></div>'));
+
     /* the operations this ACCOUNT holds, from the authority's capabilities() */
     var acts = '';
     if(MSG) acts += '<div class="form-msg ' + MSG.kind + '"><i class="ti ' + (MSG.kind === 'err' ? 'ti-alert-circle' : MSG.kind === 'ok' ? 'ti-check' : 'ti-loader') + '" aria-hidden="true"></i><span>' + esc(MSG.text) + '</span></div>';
@@ -868,7 +885,7 @@ table.app tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
     if(MSG) acts += '<div class="form-msg ' + MSG.kind + '"><i class="ti ' + (MSG.kind === 'err' ? 'ti-alert-circle' : MSG.kind === 'ok' ? 'ti-check' : 'ti-loader') + '" aria-hidden="true"></i><span>' + esc(MSG.text) + '</span></div>';
     if(!(CAP && CAP.approve)){
       acts += '<div class="notice"><i class="ti ti-eye" aria-hidden="true"></i><span>'
-        + T('مراجعة الطلبات واعتمادها تتطلب صلاحية drivers.approve.','Reviewing and deciding applications requires the drivers.approve permission.') + '</span></div>';
+        + T('مراجعة الطلبات واعتمادها غير متاحة لحسابك.','Reviewing and deciding applications is not available to your account.') + '</span></div>';
     } else if(a.status !== 'pending'){
       acts += '<div class="notice"><i class="ti ti-lock" aria-hidden="true"></i><span>'
         + T('تم البت في هذا الطلب ولا يقبل إجراءً جديداً.','This application has been decided and takes no further action.') + '</span></div>';
@@ -1069,6 +1086,12 @@ table.app tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
   }
 
   /* ───────── shell ───────── */
+  /* the existing settings permission decides whether Settings is listed */
+  function canSettings(){ try { return !!(ME && P.can(ME.id, 'settings.view')); } catch(e){ return false; } }
+  /* Compensation is listed for the accounts the compensation authority lets
+     manage compensations — the same existing Logistics management permission
+     these pages already gate their operational actions on. */
+  function canCompensation(){ try { return !!(ME && P.can(ME.id, 'drivers.suspend')); } catch(e){ return false; } }
   function renderNav(){
     function item(href, icon, ar, en, current){
       return '<li><a href="' + href + '"' + (current ? ' aria-current="page"' : '') + '>'
@@ -1081,6 +1104,10 @@ table.app tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
       + item('raf_logistics_dispatch.html', 'ti-route', 'التوزيع والتعيين', 'Dispatch & Assignment', false)
       + item('raf_logistics_tickets.html', 'ti-ticket', 'التذاكر', 'Tickets', false)
       + item('raf_logistics_drivers.html', 'ti-motorbike', 'السائقون', 'Drivers', true)
+      /* Settings is the final administrative section, listed only for an
+         account that may actually open it */
+      + (canSettings() ? item('raf_logistics_settings.html', 'ti-settings', 'الإعدادات', 'Settings', false) : '')
+      + (canCompensation() ? item('raf_logistics_compensation.html', 'ti-receipt-refund', 'التعويضات', 'Compensation', false) : '')
       + '</ul>'
       + '<div class="ops-nav-foot"><b>' + T('العمليات واللوجستيات','Operations & Logistics') + '</b>'
       + T('منصة رف','RAF platform') + '</div>';
@@ -1133,10 +1160,7 @@ table.app tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
        first and an empty session is refused. */
     var sid = null;
     try {
-      var key = (P.LS && P.LS.session) || 'raf_current_user';
-      var raw = localStorage.getItem(key);
-      if(raw != null && raw !== ''){ try { sid = JSON.parse(raw); } catch(e){ sid = raw; } }
-      if(typeof sid !== 'string' || !sid) sid = null;
+      sid = P.sessionUserId ? P.sessionUserId() : null;   /* RAFPerm owns this tab's session */
     } catch(e){ sid = null; }
     if(!sid){ gate('يلزم تسجيل الدخول','Sign-in required', T('السائقون متاح لفريق عمليات رف بعد تسجيل الدخول.','Drivers is available to RAF operations staff after signing in.')); return; }
     var u = null; try { u = P.getUser(sid); } catch(e){ u = null; }
@@ -1151,7 +1175,7 @@ table.app tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
       return;
     }
     if(!c.view){
-      gate('لا تملك صلاحية الوصول','You do not have access', T('عرض السائقين يتطلب صلاحية drivers.view.','Viewing drivers requires the drivers.view permission.'));
+      gate('لا تملك صلاحية الوصول','You do not have access', T('عرض السائقين غير متاح لحسابك.','Viewing drivers is not available to your account.'));
       return;
     }
 

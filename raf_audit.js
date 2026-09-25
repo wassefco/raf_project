@@ -94,6 +94,7 @@
     'driver.pickup_recovery':{tl:true,  ar:'اكتمل "جاهز" تلقائيًا بعد استلام السائق',
                                         en:'Ready auto-completed after driver pickup' },
     'driver.delivery_start':{ tl:true,  ar:'بدأ التوصيل',                 en:'Delivery started' },
+    'driver.arrived':       { tl:true,  ar:'وصل السائق إلى موقع العميل',  en:'Driver arrived at the customer' },
     'driver.delivered':     { tl:true,  ar:'تم التسليم',                  en:'Delivered' },
     /* the driver handed an unclaimed-again order back to the pool, before
        pickup. It is an ownership event on the order, so it belongs on the
@@ -109,6 +110,15 @@
                                         en:'Logistics assigned the order to a driver' },
     'dispatch.returned_to_pool':{ tl:true, ar:'أعادت اللوجستيات الطلب إلى قائمة الطلبات المتاحة',
                                         en:'Logistics returned the order to the available pool' },
+    /* RAFConfig has always recorded every configuration change as
+       'config.changed', but the action was never registered here, so record()
+       refused each one and the change history had no audit entry beside it.
+       Registering it is what makes a settings change auditable. */
+    'config.changed':       { tl:false, ar:'تم تغيير إعداد في النظام',            en:'A system setting was changed' },
+    /* a department manager administering an account inside their declared
+       scope, through RAFPerm's authorised path (never the raw override) */
+    'permission.granted':   { tl:false, ar:'تمت إضافة صلاحية لحساب',              en:'A permission was added to an account' },
+    'permission.revoked':   { tl:false, ar:'تمت إزالة صلاحية من حساب',            en:'A permission was removed from an account' },
     /* driver account administration, performed by the Logistics authority */
     'logistics.driver_created':    { tl:false, ar:'أنشأت اللوجستيات حساب سائق',   en:'Logistics created a driver account' },
     'logistics.driver_updated':    { tl:false, ar:'حدّثت اللوجستيات بيانات سائق', en:'Logistics updated a driver profile' },
@@ -162,6 +172,7 @@
     /* customer experience — recorded against the store (audit log, not the order timeline) */
     'customer_experience.review_created':       { tl:false, ar:'أضاف العميل تقييماً',        en:'Customer added a review' },
     'customer_experience.review_replied':       { tl:false, ar:'ردّ المتجر على تقييم',       en:'Store replied to a review' },
+    'customer_experience.order_rated':          { tl:false, ar:'قيّم العميل المتجر والسائق', en:'Customer rated the store and the driver' },
     'customer_experience.issue_created':        { tl:false, ar:'فتح العميل مشكلة',          en:'Customer opened an issue' },
     'customer_experience.issue_message_added':  { tl:false, ar:'رسالة جديدة في مشكلة عميل', en:'Message added to a customer issue' },
     'customer_experience.issue_status_changed': { tl:false, ar:'تغيّرت حالة مشكلة عميل',    en:'Customer issue status changed' },

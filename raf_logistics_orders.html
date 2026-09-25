@@ -827,14 +827,14 @@ td.num{ font-family:'DM Sans',sans-serif; font-weight:700; white-space:nowrap; }
     /* the delivery milestones the order lifecycle already defines; they appear
        only for an order that really carries them */
     'driver.assigned':'ti-user-check', 'driver.ready_ack':'ti-check', 'driver.pickup':'ti-package',
-    'driver.delivery_start':'ti-truck-delivery', 'driver.delivered':'ti-circle-check',
+    'driver.delivery_start':'ti-truck-delivery', 'driver.arrived':'ti-map-pin-check', 'driver.delivered':'ti-circle-check',
     'driver.returned':'ti-arrow-back-up'
   };
   function activitySection(r){
     var A = window.RAFAudit;
     if(!A || !CAN.audit)
       return '<div class="notice"><i class="ti ti-lock" aria-hidden="true"></i><span>'
-        + T('سجل النشاط يتطلب صلاحية reports.view.','The activity log requires the reports.view permission.') + '</span></div>';
+        + T('سجل النشاط غير متاح لحسابك.','The activity log is not available to your account.') + '</span></div>';
     var list = [];
     try { list = (A.forOrder(r.id) || []).filter(function(e){ return !!OPS_ACTIVITY[e.action]; }); } catch(e){ list = []; }
     if(!list.length)
@@ -882,7 +882,7 @@ td.num{ font-family:'DM Sans',sans-serif; font-weight:700; white-space:nowrap; }
     var A = window.RAFAudit;
     if(!A || !CAN.audit)
       return '<div class="sec"><div class="notice"><i class="ti ti-lock" aria-hidden="true"></i><span>'
-        + T('التدقيق يتطلب صلاحية reports.view.','Audit requires the reports.view permission.') + '</span></div></div>';
+        + T('التدقيق غير متاح لحسابك.','Audit is not available to your account.') + '</span></div></div>';
     var list = [];
     try { list = (A.forOrder(orderId) || []).slice(); } catch(e){ list = []; }
     if(!list.length)
@@ -893,8 +893,8 @@ td.num{ font-family:'DM Sans',sans-serif; font-weight:700; white-space:nowrap; }
         var lbl = ''; try { lbl = A.label(e.action); } catch(err){ lbl = e.action; }
         var meta = auditMeta(e);
         return '<li><span class="ai" aria-hidden="true"><i class="ti ' + (AUDIT_IC[e.action] || OPS_ACTIVITY[e.action] || 'ti-point') + '"></i></span>'
+          /* the audit action's own human label, not the internal event name */
           + '<span class="ab"><b>' + esc(lbl || e.action) + '</b>'
-          + '<span class="act"><code>' + esc(e.action) + '</code></span>'
           + '<span class="who"><bdi>' + esc(e.actorName || (e.actorType === 'system' ? T('النظام','System') : '—')) + '</bdi>'
             + ' · <bdi>' + esc(e.orderId || orderId) + '</bdi></span>'
           + (meta.length ? '<span class="md">' + meta.map(function(m){ return '<bdi>' + esc(m) + '</bdi>'; }).join('<span class="sep">·</span>') + '</span>' : '')
@@ -942,6 +942,12 @@ td.num{ font-family:'DM Sans',sans-serif; font-weight:700; white-space:nowrap; }
   }
 
   /* ───────── shell ───────── */
+  /* the existing settings permission decides whether Settings is listed */
+  function canSettings(){ try { return !!(ME && P.can(ME.id, 'settings.view')); } catch(e){ return false; } }
+  /* Compensation is listed for the accounts the compensation authority lets
+     manage compensations — the same existing Logistics management permission
+     these pages already gate their operational actions on. */
+  function canCompensation(){ try { return !!(ME && P.can(ME.id, 'drivers.suspend')); } catch(e){ return false; } }
   function renderNav(){
     function item(href, icon, ar, en, current){
       return '<li><a href="' + href + '"' + (current ? ' aria-current="page"' : '') + '>'
@@ -954,6 +960,10 @@ td.num{ font-family:'DM Sans',sans-serif; font-weight:700; white-space:nowrap; }
       + item('raf_logistics_dispatch.html', 'ti-route', 'التوزيع والتعيين', 'Dispatch & Assignment', false)
       + item('raf_logistics_tickets.html', 'ti-ticket', 'التذاكر', 'Tickets', false)
       + item('raf_logistics_drivers.html', 'ti-motorbike', 'السائقون', 'Drivers', false)
+      /* Settings is the final administrative section, listed only for an
+         account that may actually open it */
+      + (canSettings() ? item('raf_logistics_settings.html', 'ti-settings', 'الإعدادات', 'Settings', false) : '')
+      + (canCompensation() ? item('raf_logistics_compensation.html', 'ti-receipt-refund', 'التعويضات', 'Compensation', false) : '')
       + '</ul>'
       + '<div class="ops-nav-foot"><b>' + T('العمليات واللوجستيات','Operations & Logistics') + '</b>'
       + T('منصة رف','RAF platform') + '</div>';
@@ -1004,10 +1014,7 @@ td.num{ font-family:'DM Sans',sans-serif; font-weight:700; white-space:nowrap; }
        first and an empty session is refused. */
     var sid = null;
     try {
-      var key = (P.LS && P.LS.session) || 'raf_current_user';
-      var raw = localStorage.getItem(key);
-      if(raw != null && raw !== ''){ try { sid = JSON.parse(raw); } catch(e){ sid = raw; } }
-      if(typeof sid !== 'string' || !sid) sid = null;
+      sid = P.sessionUserId ? P.sessionUserId() : null;   /* RAFPerm owns this tab's session */
     } catch(e){ sid = null; }
     if(!sid){ gate('يلزم تسجيل الدخول','Sign-in required', T('الطلبات متاحة لفريق عمليات رف بعد تسجيل الدخول.','Orders are available to RAF operations staff after signing in.')); return; }
     var u = null; try { u = P.getUser(sid); } catch(e){ u = null; }

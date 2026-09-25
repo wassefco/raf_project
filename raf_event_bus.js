@@ -41,7 +41,7 @@
   var VERSION = 1;
   var CHANNEL = 'raf_event_bus';            /* transient channel, not a store */
 
-  var DOMAINS = ['order', 'notification', 'audit', 'config', 'compensation', 'support'];
+  var DOMAINS = ['order', 'notification', 'audit', 'config', 'compensation', 'support', 'communication'];
 
   /* the registered event types — the only names that can be published */
   var TYPES = {
@@ -72,6 +72,12 @@
     'notification.created':          { domain:'notification', entityType:'notification' },
     'notification.read':             { domain:'notification', entityType:'notification' },
     'notification.preference.changed':{ domain:'notification', entityType:'user' },
+    /* Customer ↔ Driver communication (RAFDriverCommunication). Payloads carry
+       ids only; a receiving page re-reads the authority, which re-checks access,
+       so an event is never treated as permission to see anything. */
+    'communication.message.sent':      { domain:'communication', entityType:'order' },
+    'communication.message.delivered': { domain:'communication', entityType:'order' },
+    'communication.message.read':      { domain:'communication', entityType:'order' },
     /* configuration */
     'config.changed':                { domain:'config',       entityType:'config_key' }
   };

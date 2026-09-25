@@ -281,7 +281,8 @@ body{background:var(--bg2);margin:0;}
   var TABS = [
     { k:'overview', ic:'ti-layout-dashboard', ar:'نظرة عامة',     en:'Overview' },
     { k:'reviews',  ic:'ti-star',             ar:'التقييمات',     en:'Reviews' },
-    { k:'issues',   ic:'ti-message-report',   ar:'مشاكل العملاء', en:'Customer Issues' }
+    { k:'issues',   ic:'ti-message-report',   ar:'مشاكل العملاء', en:'Customer Issues' },
+    { k:'store_ratings', ic:'ti-building-store', ar:'تقييمات المتجر', en:'Store Ratings' }
   ];
   var PERIODS = [
     { k:'all', ar:'كل الفترات',   en:'All time' },
@@ -349,7 +350,9 @@ body{background:var(--bg2);margin:0;}
     try {
       var r = CX.reviews({ actor:ME.id }), i = CX.issues({ actor:ME.id });
       if (!r.ok || !i.ok) throw new Error('scope');
-      data = { reviews:r.items, issues:i.items, editable:!!r.editable };
+      /* order-level store ratings: the authority resolves the store from the session, never from here */
+      var sr = CX.storeRatings ? CX.storeRatings() : null;
+      data = { reviews:r.items, issues:i.items, editable:!!r.editable, storeRatings:(sr && sr.ok) ? sr : null };
       st.state = 'ready';
     } catch(e){ data = null; st.state = 'error'; }
   }
@@ -373,7 +376,7 @@ body{background:var(--bg2);margin:0;}
       else if (st.state === 'error') h = errorHTML();
       else if (st.detail && st.detail.kind === 'review') h = reviewDetailHTML();
       else if (st.detail && st.detail.kind === 'issue') h = issueDetailHTML();
-      else h = st.tab === 'reviews' ? reviewsHTML() : st.tab === 'issues' ? issuesHTML() : overviewHTML();
+      else h = st.tab === 'reviews' ? reviewsHTML() : st.tab === 'issues' ? issuesHTML() : st.tab === 'store_ratings' ? storeRatingsHTML() : overviewHTML();
     } catch(e){ st.state = 'error'; h = errorHTML(); }
     el('panel').innerHTML = h;
   }
@@ -413,6 +416,30 @@ body{background:var(--bg2);margin:0;}
       }).join('') + '</div>';
     }
     return h + '</section></div>';
+  }
+
+  /* ════════════════════ STORE RATINGS (order-level, read-only) ════════════════════ */
+  function storeRatingsHTML(){
+    var sr = data.storeRatings;
+    if (!sr) return '<div class="cx-wrap"><section class="cx-sec">'+stateHTML('ti-lock', T('تقييمات المتجر غير متاحة لهذا الحساب.','Store ratings are not available for this account.'), '')+'</section></div>';
+    var s = sr.summary, none = T('لا توجد تقييمات بعد','No ratings yet');
+    var h = '<div class="cx-wrap"><div class="cx-kpis" id="srKpis">'
+      + '<div class="cx-kpi"><div class="l"><i class="ti ti-star"></i>'+esc(T('متوسط تقييم المتجر','Store average'))+'</div>'
+        + '<div class="v'+(s.count?'':' muted')+'">'+(s.count ? num(s.average.toFixed(1)) : esc(none))+'</div>'+(s.count ? '<div class="s">'+stars(Math.round(s.average))+'</div>' : '')+'</div>'
+      + '<div class="cx-kpi"><div class="l"><i class="ti ti-stars"></i>'+esc(T('تقييمات بالنجوم','Star ratings'))+'</div><div class="v">'+num(s.count)+'</div></div>'
+      + '<div class="cx-kpi"><div class="l"><i class="ti ti-message"></i>'+esc(T('ملاحظات العملاء','Customer feedback'))+'</div><div class="v">'+num(s.feedback)+'</div></div>'
+      + '</div>';
+    if (!sr.items.length) return h + '<section class="cx-sec">'+stateHTML('ti-building-store', none,
+      T('تظهر هنا تقييمات العملاء لمتجرك بعد تسليم طلباتهم.','Customers\' ratings of your store appear here after their orders are delivered.'))+'</section></div>';
+    h += '<div class="cx-list" id="srList">' + sr.items.map(function(r){
+      return '<div class="cx-card" data-id="'+esc(r.ratingId)+'"><div class="cx-card-top">'
+        + (typeof r.rating === 'number' ? stars(r.rating) : '<span class="cx-tag">'+esc(T('بدون نجوم','No stars'))+'</span>')
+        + '<span class="date">'+esc(fmtDate(r.createdAt))+'</span></div>'
+        + (r.comment ? '<div class="body">'+esc(r.comment)+'</div>' : '<div class="body muted">'+esc(T('بدون تعليق','No comment'))+'</div>')
+        + '<div class="cx-meta"><span><i class="ti ti-receipt"></i><bdi>'+esc(r.orderId)+'</bdi></span>'
+        + '<span><i class="ti ti-user"></i>'+esc(r.customerName || '—')+'</span></div></div>';
+    }).join('') + '</div>';
+    return h + '<div class="cx-note" style="margin-top:12px"><i class="ti ti-lock"></i>'+esc(T('تقييمات العملاء سجلات ثابتة لا يمكن تعديلها أو حذفها.','Customer ratings are permanent records and cannot be changed or deleted.'))+'</div></div>';
   }
 
   /* ════════════════════ REVIEWS ════════════════════ */

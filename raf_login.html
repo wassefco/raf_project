@@ -810,16 +810,15 @@
         const norm = s => (s || '').toString().toLowerCase().replace(/[\s+]/g,'');
         const u = RAFPerm.getUsers().find(x => (x.email||'').toLowerCase() === id || norm(x.phone) === norm(id));
         if (u){
-          /* Roles whose interface is not built: RAF Management does not exist,
-             and the Driver App was decommissioned with the old Logistics
-             system. They are signed in as before — every surface their
-             permissions already open keeps working — but they are told so
-             plainly instead of being sent to a page that does not exist, or
-             silently dropped into the customer account. The Operations
-             Manager's first rebuilt page is the Logistics Command Center;
-             that page's own check still decides access. */
-          const STAFF = ['super_admin','higher_mgmt','customer_service','finance','marketing','driver'];
-          const map = { ops_manager:'raf_logistics.html',
+          /* Roles whose interface is not built: RAF Management does not exist.
+             They are signed in as before — every surface their permissions
+             already open keeps working — but they are told so plainly instead
+             of being sent to a page that does not exist, or silently dropped
+             into the customer account. The Operations Manager's first rebuilt
+             page is the Logistics Command Center, and a driver now has the
+             rebuilt Driver App; each page's own check still decides access. */
+          const STAFF = ['super_admin','higher_mgmt','customer_service','finance','marketing'];
+          const map = { ops_manager:'raf_logistics.html', driver:'raf_driver.html',
             merchant:'raf_merchant.html', merchant_employee:'raf_merchant.html', customer:'raf_account.html' };
           RAFPerm.setCurrentUser(u.id);
           if (STAFF.indexOf(u.roleId) > -1) { showView('view-staff-pending'); return; }

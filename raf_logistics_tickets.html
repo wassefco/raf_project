@@ -833,6 +833,9 @@ table.tkt tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
       case 'message':  return a.direction === 'inbound' ? T('رسالة من العميل','Message from the customer')
                                                         : T('رسالة إلى العميل','Message to the customer');
       case 'update':   return T('تم تحديث بيانات التذكرة','Ticket details updated');
+      case 'escalate': return T('تم تصعيد التذكرة للإدارة','Escalated to management');
+      /* written once at creation as the uniqueness token for the ticket */
+      case 'guard':    return T('تم إنشاء التذكرة','Ticket created');
       default:         return a.kind;
     }
   }
@@ -854,17 +857,86 @@ table.tkt tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
   /* the operations this ACCOUNT holds, from the authority's own capabilities().
      Nothing is rendered that the account could not actually perform, and a
      missing capability leaves the ticket readable rather than hiding it. */
+  /* ───────── the ticket lifecycle ─────────
+     Resolve, close, reopen and escalate are RAFCustomerService operations that
+     already exist; this page only decides whether to draw them. An action is
+     drawn when BOTH are true:
+       · the authority says this account holds the permission
+         (capabilities().resolve / .escalate — never assumed from a role), and
+       · the ticket's own state machine allows the move (CS.TRANSITIONS, and
+         the authority's own guards: close only from resolved, reopen only from
+         closed, escalate only while the ticket is active).
+     Anything else is not rendered, so no control is offered that would always
+     be refused. The authority re-proves both when the call runs. */
+  function lifecycleOf(t){
+    var TR = (CS && CS.TRANSITIONS) || {}, S = STATUS();
+    var next = TR[t.status] || [];
+    return {
+      canResolve:  !!(CAP && CAP.resolve) && next.indexOf(S.RESOLVED) > -1,
+      canClose:    !!(CAP && CAP.resolve) && t.status === S.RESOLVED,
+      canReopen:   !!(CAP && CAP.resolve) && next.indexOf(S.REOPENED) > -1,
+      canEscalate: !!(CAP && CAP.escalate) && !!t.active
+    };
+  }
+  function lifecycleBlocks(t, lc){
+    var h = '';
+    if(lc.canResolve){
+      h += '<div class="note-f"><label class="sub-f" for="a-resolution">'
+        + T('الحل (مطلوب)','Resolution (required)')
+        + '<textarea id="a-resolution" rows="3" maxlength="' + ((CS.LIMITS && CS.LIMITS.resolution) || 2000) + '"></textarea></label>'
+        + '<div class="acts-row" style="margin-block-start:8px"><button class="btn pri" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.resolve()">'
+        + '<i class="ti ti-circle-check" aria-hidden="true"></i>' + T('حل التذكرة','Resolve ticket') + '</button></div></div>';
+    }
+    if(lc.canClose){
+      h += '<div class="acts-row"><button class="btn" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.closeTicket()">'
+        + '<i class="ti ti-archive" aria-hidden="true"></i>' + T('إغلاق التذكرة','Close ticket') + '</button></div>';
+    }
+    if(lc.canReopen){
+      h += '<div class="note-f"><label class="sub-f" for="a-reopen">'
+        + T('سبب إعادة الفتح (مطلوب)','Reopen reason (required)')
+        + '<textarea id="a-reopen" rows="2" maxlength="' + ((CS.LIMITS && CS.LIMITS.reason) || 500) + '"></textarea></label>'
+        + '<div class="acts-row" style="margin-block-start:8px"><button class="btn" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.reopen()">'
+        + '<i class="ti ti-rotate" aria-hidden="true"></i>' + T('إعادة فتح التذكرة','Reopen ticket') + '</button></div></div>';
+    }
+    if(lc.canEscalate){
+      h += '<div class="note-f"><label class="sub-f" for="a-escalate">'
+        + T('سبب التصعيد للإدارة (مطلوب)','Escalation details for management (required)')
+        + '<textarea id="a-escalate" rows="3" maxlength="' + ((CS.LIMITS && CS.LIMITS.resolution) || 2000) + '"></textarea></label>'
+        + '<div class="acts-row" style="margin-block-start:8px"><button class="btn" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.escalate()">'
+        + '<i class="ti ti-arrow-up-circle" aria-hidden="true"></i>' + T('تصعيد التذكرة','Escalate ticket') + '</button></div>'
+        + '<span class="hint">' + T('تبقى التذكرة نفسها بنفس رقمها وسجلها، ويُسجَّل التصعيد لانتباه الإدارة العليا.',
+                                    'The same ticket keeps its id and history; the escalation is recorded for Higher Management’s attention.') + '</span></div>';
+    }
+    return h;
+  }
   function actionsSection(t){
-    if(!CAP || !CAP.manage)
+    var lc = lifecycleOf(t);
+    var anyLifecycle = lc.canResolve || lc.canClose || lc.canReopen || lc.canEscalate;
+    if((!CAP || !CAP.manage) && !anyLifecycle)
       return '<div class="notice"><i class="ti ti-eye" aria-hidden="true"></i><span>'
         + T('لديك صلاحية القراءة فقط على التذاكر.','You have read-only access to tickets.') + '</span></div>';
-    if(!t.active)
-      return '<div class="notice"><i class="ti ti-lock" aria-hidden="true"></i><span>'
-        + T('هذه التذكرة منتهية ولا تقبل إجراءات.','This ticket is closed and takes no further action.') + '</span></div>';
 
-    var h = '<div class="acts-box">';
-    if(MSG) h += '<div class="act-msg ' + MSG.kind + '"><i class="ti ' + (MSG.kind === 'err' ? 'ti-alert-circle' : MSG.kind === 'ok' ? 'ti-check' : 'ti-loader') + '" aria-hidden="true"></i><span>' + esc(MSG.text) + '</span></div>';
+    var msgHtml = MSG ? '<div class="act-msg ' + MSG.kind + '"><i class="ti ' + (MSG.kind === 'err' ? 'ti-alert-circle' : MSG.kind === 'ok' ? 'ti-check' : 'ti-loader') + '" aria-hidden="true"></i><span>' + esc(MSG.text) + '</span></div>' : '';
 
+    /* a decided ticket — resolved or closed — still has its own legitimate
+       moves (close a resolved one, reopen a closed one) for an account that
+       holds support.resolve. When it has none, the page says so plainly. */
+    if(!t.active){
+      if(!anyLifecycle)
+        return '<div class="notice"><i class="ti ti-lock" aria-hidden="true"></i><span>'
+          + (CAP && !CAP.resolve
+              ? T('إنهاء التذكرة وإعادة فتحها من مسؤولية خدمة العملاء.',
+                  'Ending and reopening a ticket belong to Customer Service.')
+              : T('هذه التذكرة منتهية ولا تقبل إجراءات.','This ticket is closed and takes no further action.'))
+          + '</span></div>';
+      return '<div class="acts-box">' + msgHtml + lifecycleBlocks(t, lc) + '</div>';
+    }
+
+    var h = '<div class="acts-box">' + msgHtml;
+
+    /* everything below the claim needs support.manage; the lifecycle actions
+       after it need support.resolve / support.escalate instead */
+    if(CAP && CAP.manage){
     /* claim — the authority refuses a second claim itself */
     var mine = ME && t.assignedEmployeeId === ME.id;
     h += '<div class="acts-row">';
@@ -919,6 +991,14 @@ table.tkt tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
       + '<textarea id="a-note" rows="3" maxlength="' + ((CS.LIMITS && CS.LIMITS.body) || 4000) + '"></textarea></label>'
       + '<div class="acts-row" style="margin-block-start:8px"><button class="btn" type="button"' + (BUSY ? ' disabled' : '') + ' onclick="OPS.addNote()">'
       + '<i class="ti ti-note" aria-hidden="true"></i>' + T('إضافة ملاحظة','Add note') + '</button></div></div>';
+    }
+
+    h += lifecycleBlocks(t, lc);
+    /* the deliberate boundary, named once where an operator would look for it */
+    if(CAP && !CAP.resolve)
+      h += '<div class="notice"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+        + T('إنهاء التذكرة وإغلاقها وإعادة فتحها تبقى من صلاحيات خدمة العملاء.',
+            'Resolving, closing and reopening a ticket remain with Customer Service.') + '</span></div>';
 
     h += '</div>';
     return h;
@@ -977,6 +1057,17 @@ table.tkt tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
             + '<span class="hw"><bdi>' + esc(clockOf(m[1]) || '') + '</bdi></span></li>'; }).join('')
       + '</ul>');
 
+    /* escalations raised on this ticket — the authority's own records. An
+       escalation is never a second ticket: it hangs off this one. */
+    if(t.escalations && t.escalations.length)
+      h += sec(T('التصعيدات','Escalations'), 'ti-arrow-up-circle', '<ul class="hist">' + t.escalations.map(function(e){
+          return '<li><span class="hi" aria-hidden="true"><i class="ti ti-arrow-up-circle"></i></span>'
+            + '<span class="hb"><b>' + T('تصعيد للإدارة العليا','Escalated to Higher Management') + '</b>'
+            + '<span class="who"><bdi>' + esc(e.actorName || '—') + '</bdi></span>'
+            + (e.description ? '<span class="body"><bdi>' + esc(e.description) + '</bdi></span>' : '')
+            + '</span>'
+            + '<span class="hw"><bdi>' + esc(shortClock(e.createdAt) || '') + '</bdi></span></li>'; }).join('') + '</ul>');
+
     h += sec(T('الإجراءات','Actions'), 'ti-settings-automation', actionsSection(t));
     h += sec(T('النشاط','Activity'), 'ti-history', historySection(t));
 
@@ -1012,7 +1103,7 @@ table.tkt tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
     var A = window.RAFAudit;
     if(!A || !CAN.audit)
       return '<div class="sec"><div class="notice"><i class="ti ti-lock" aria-hidden="true"></i><span>'
-        + T('التدقيق يتطلب صلاحية reports.view.','Audit requires the reports.view permission.') + '</span></div></div>';
+        + T('التدقيق غير متاح لحسابك.','Audit is not available to your account.') + '</span></div></div>';
     var list = [];
     try {
       list = (A.auditLog({}) || []).filter(function(e){
@@ -1026,8 +1117,8 @@ table.tkt tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
         var lbl = ''; try { lbl = A.label(e.action); } catch(err){ lbl = e.action; }
         var meta = auditMeta(e);
         return '<li><span class="ai" aria-hidden="true"><i class="ti ti-point"></i></span>'
+          /* the audit action's own human label, not the internal event name */
           + '<span class="ab"><b>' + esc(lbl || e.action) + '</b>'
-          + '<span class="act"><code>' + esc(e.action) + '</code></span>'
           + '<span class="who"><bdi>' + esc(e.actorName || (e.actorType === 'system' ? T('النظام','System') : '—')) + '</bdi></span>'
           + (meta.length ? '<span class="md">' + meta.map(function(m){ return '<bdi>' + esc(m) + '</bdi>'; }).join('<span class="sep">·</span>') + '</span>' : '')
           + '</span>'
@@ -1104,6 +1195,12 @@ table.tkt tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
   function valOf(id){ var e = el(id); return e ? String(e.value || '') : ''; }
 
   /* ───────── shell ───────── */
+  /* the existing settings permission decides whether Settings is listed */
+  function canSettings(){ try { return !!(ME && P.can(ME.id, 'settings.view')); } catch(e){ return false; } }
+  /* Compensation is listed for the accounts the compensation authority lets
+     manage compensations — the same existing Logistics management permission
+     these pages already gate their operational actions on. */
+  function canCompensation(){ try { return !!(ME && P.can(ME.id, 'drivers.suspend')); } catch(e){ return false; } }
   function renderNav(){
     function item(href, icon, ar, en, current){
       return '<li><a href="' + href + '"' + (current ? ' aria-current="page"' : '') + '>'
@@ -1116,6 +1213,10 @@ table.tkt tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
       + item('raf_logistics_dispatch.html', 'ti-route', 'التوزيع والتعيين', 'Dispatch & Assignment', false)
       + item('raf_logistics_tickets.html', 'ti-ticket', 'التذاكر', 'Tickets', true)
       + item('raf_logistics_drivers.html', 'ti-motorbike', 'السائقون', 'Drivers', false)
+      /* Settings is the final administrative section, listed only for an
+         account that may actually open it */
+      + (canSettings() ? item('raf_logistics_settings.html', 'ti-settings', 'الإعدادات', 'Settings', false) : '')
+      + (canCompensation() ? item('raf_logistics_compensation.html', 'ti-receipt-refund', 'التعويضات', 'Compensation', false) : '')
       + '</ul>'
       + '<div class="ops-nav-foot"><b>' + T('العمليات واللوجستيات','Operations & Logistics') + '</b>'
       + T('منصة رف','RAF platform') + '</div>';
@@ -1166,10 +1267,7 @@ table.tkt tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
        read first and an empty session is refused. */
     var sid = null;
     try {
-      var key = (P.LS && P.LS.session) || 'raf_current_user';
-      var raw = localStorage.getItem(key);
-      if(raw != null && raw !== ''){ try { sid = JSON.parse(raw); } catch(e){ sid = raw; } }
-      if(typeof sid !== 'string' || !sid) sid = null;
+      sid = P.sessionUserId ? P.sessionUserId() : null;   /* RAFPerm owns this tab's session */
     } catch(e){ sid = null; }
     if(!sid){ gate('يلزم تسجيل الدخول','Sign-in required', T('التذاكر متاحة لفريق عمليات رف بعد تسجيل الدخول.','Tickets are available to RAF operations staff after signing in.')); return; }
     var u = null; try { u = P.getUser(sid); } catch(e){ u = null; }
@@ -1180,7 +1278,7 @@ table.tkt tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
     if(!ok){ gate('لا تملك صلاحية الوصول','You do not have access', T('التذاكر متاحة لفريق عمليات رف فقط.','Tickets are available to RAF operations staff only.')); return; }
     /* reading tickets is the ticket authority's own permission, not this page's */
     var canTickets = false; try { canTickets = !!P.can(u.id, PERM.tickets); } catch(e){ canTickets = false; }
-    if(!canTickets){ gate('لا تملك صلاحية قراءة التذاكر','You cannot read tickets', T('قراءة التذاكر تتطلب صلاحية support.view.','Reading tickets requires the support.view permission.')); return; }
+    if(!canTickets){ gate('لا تملك صلاحية قراءة التذاكر','You cannot read tickets', T('قراءة التذاكر غير متاحة لحسابك.','Reading tickets is not available to your account.')); return; }
 
     ME = { id:u.id, name:u.name, roleId:u.roleId };
     try { var c = CS.capabilities(); CAP = (c && c.ok) ? c : null; } catch(e){ CAP = null; }
@@ -1315,6 +1413,42 @@ table.tkt tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
         renderSheet(); return;
       }
       runOp(CS.addInternalNote(OPEN, { body:body }), 'تمت إضافة الملاحظة.', 'Note added.');
+    },
+
+    /* ---- the ticket lifecycle, performed by RAFCustomerService ----
+       Each is the authority's own operation on the SAME central ticket: no
+       second ticket, no local status, no history rewritten. The authority
+       re-proves the permission and the state transition when it runs. */
+    resolve: function(){
+      if(!OPEN || BUSY || !CS) return;
+      var description = valOf('a-resolution').trim();
+      if(!description){
+        MSG = { kind:'err', text:T('اكتب وصف الحل.','Describe the resolution first.') };
+        renderSheet(); return;
+      }
+      runOp(CS.resolveTicket(OPEN, { description:description }), 'تم حل التذكرة.', 'Ticket resolved.');
+    },
+    closeTicket: function(){
+      if(!OPEN || BUSY || !CS) return;
+      runOp(CS.closeTicket(OPEN, {}), 'تم إغلاق التذكرة.', 'Ticket closed.');
+    },
+    reopen: function(){
+      if(!OPEN || BUSY || !CS) return;
+      var reason = valOf('a-reopen').trim();
+      if(!reason){
+        MSG = { kind:'err', text:T('اكتب سبب إعادة الفتح.','Give a reason for reopening.') };
+        renderSheet(); return;
+      }
+      runOp(CS.reopenTicket(OPEN, { reason:reason }), 'أُعيد فتح التذكرة.', 'Ticket reopened.');
+    },
+    escalate: function(){
+      if(!OPEN || BUSY || !CS) return;
+      var description = valOf('a-escalate').trim();
+      if(!description){
+        MSG = { kind:'err', text:T('اكتب سبب التصعيد.','Describe why this is being escalated.') };
+        renderSheet(); return;
+      }
+      runOp(CS.escalateTicket(OPEN, { description:description }), 'تم تصعيد التذكرة.', 'Ticket escalated.');
     },
 
     toggleLang: function(){

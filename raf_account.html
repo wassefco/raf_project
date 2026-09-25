@@ -434,7 +434,7 @@ html[dir="ltr"] .sh .line{background:linear-gradient(270deg,var(--border),transp
   function paintLastOrder(){
     var slot = document.getElementById('lastOrderSlot');
     if(!slot || !window.RAFShop) return;
-    var o = (RAFShop.Orders.all()||[])[0];
+    var o = (typeof rafOrders==='function' ? rafOrders() : [])[0];   /* the signed-in customer's OWN latest order only */
     if(!o){ slot.innerHTML=''; return; }
     var meta = (typeof statusMeta==='function') ? statusMeta(o.status) : {cls:'b-progress',ic:'ti-truck-delivery',label:''};
     var items = o.items||[];
@@ -480,5 +480,7 @@ html[dir="ltr"] .sh .line{background:linear-gradient(270deg,var(--border),transp
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
 })();
 </script>
+<!-- the active-order bar: reopens the signed-in customer's order in progress -->
+<script src="raf_active_order.js"></script>
 </body>
 </html>

@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl" data-ui="admin">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — الإعدادات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_logistics.css">
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   SETTINGS — the administrative configuration surface of the Logistics
+   workspace. Shares the Logistics shell and components; every rule here is
+   scoped to this page.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.wk{ display:flex; flex-direction:column; gap:14px; }
+.wk-head{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.wk-head p{ margin:0; color:var(--muted); font-size:13px; flex:1 1 240px; min-width:0; }
+.wk-count{ color:var(--faint); font-size:12px; font-weight:700; font-family:'DM Sans',sans-serif; white-space:nowrap; }
+
+/* one setting = one row: what it is, what it is now, and where it comes from */
+.set{ display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) auto; gap:14px; align-items:start;
+  padding:14px 16px; border-block-end:1px solid var(--line); }
+.set:last-child{ border-block-end:0; }
+.set-t{ min-width:0; }
+.set-t b{ display:block; color:var(--ink); font-size:13.5px; font-weight:700; }
+.set-t .desc{ display:block; color:var(--muted); font-size:12.5px; margin-block-start:3px; line-height:1.7; }
+.set-t .src{ display:block; color:var(--faint); font-size:11px; margin-block-start:5px; line-height:1.6; overflow-wrap:anywhere; }
+.set-t code{ font-family:'DM Sans',ui-monospace,monospace; font-size:11px; color:var(--accent-2);
+  background:var(--accent-soft); border-radius:4px; padding:1px 6px; }
+.set-v{ min-width:0; }
+.set-v .now{ display:block; color:var(--ink); font-size:14px; font-weight:800; font-family:'DM Sans',sans-serif; }
+.set-v .unit{ color:var(--muted); font-size:12px; font-weight:600; font-family:var(--font); }
+.set-v .raw{ display:block; color:var(--faint); font-size:11px; margin-block-start:3px; }
+.set-v .dash{ font-size:14px; font-weight:800; }
+.set-a{ display:flex; flex-direction:column; gap:8px; align-items:stretch; min-width:0; }
+.set-a .row{ display:flex; gap:8px; align-items:center; }
+.set-a input,.set-a select{ width:120px; min-height:40px; padding:0 10px; border:1px solid var(--line-2);
+  border-radius:var(--r-sm); background:var(--surface); color:var(--ink); font-size:13.5px; font-family:'DM Sans',sans-serif; }
+.set-a select{ width:auto; min-width:140px; font-family:var(--font); }
+.set-a textarea{ width:min(420px,60vw); min-height:76px; padding:8px 10px; border:1px solid var(--line-2);
+  border-radius:var(--r-sm); background:var(--surface); color:var(--ink); font-size:13px; font-family:inherit; resize:vertical; }
+.set-a input:focus,.set-a select:focus,.set-a textarea:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+.set-a .btn{ min-height:40px; flex-shrink:0; }
+.set-a .sub-f{ display:block; font-size:11.5px; font-weight:700; color:var(--faint); }
+.set-a .sub-f textarea{ margin-block-start:5px; }
+.set-a .fixed{ display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:999px;
+  background:var(--surface-2); border:1px solid var(--line); color:var(--muted); font-size:11px; font-weight:700; white-space:nowrap; }
+.set-msg{ grid-column:1 / -1; display:flex; gap:9px; padding:10px 12px; border-radius:var(--r); font-size:12.5px; }
+.set-msg i{ font-size:17px; flex-shrink:0; }
+.set-msg.ok{ background:var(--done-bg); color:var(--done); }
+.set-msg.err{ background:var(--alert-bg); color:var(--alert); }
+
+.st{ display:inline-flex; align-items:center; gap:5px; padding:2px 8px; border-radius:var(--r-sm);
+  font-size:11px; font-weight:700; white-space:nowrap; margin-block-start:6px; }
+.st::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; }
+.st-none{ background:var(--shut-bg); color:var(--shut); }
+
+/* إدارة الصلاحيات — the accounts this manager administers, then that
+   account's permissions grouped the way the permission catalog groups them */
+.pa-list{ display:flex; flex-wrap:wrap; gap:8px; }
+.pa{ display:inline-flex; align-items:center; gap:9px; padding:7px 12px 7px 9px; border-radius:999px;
+  border:1px solid var(--line-2); background:var(--surface); color:var(--ink); cursor:pointer;
+  font-family:inherit; text-align:start; }
+html[dir="rtl"] .pa{ padding:7px 9px 7px 12px; }
+.pa:hover{ border-color:var(--accent); }
+.pa:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+.pa.on{ border-color:var(--accent); background:var(--accent-soft); }
+.pa-av{ width:28px; height:28px; border-radius:50%; background:var(--surface-2); color:var(--muted);
+  display:grid; place-items:center; font-size:12.5px; font-weight:800; flex-shrink:0; }
+.pa.on .pa-av{ background:var(--accent); color:#fff; }
+.pa-b{ display:block; min-width:0; }
+.pa-b b{ display:block; font-size:13px; font-weight:700; }
+.pa-b span{ display:block; color:var(--faint); font-size:11px; }
+.pa-s{ padding:1px 7px; border-radius:999px; background:var(--shut-bg); color:var(--shut);
+  font-size:10.5px; font-weight:700; white-space:nowrap; }
+.pm-wrap{ padding:0; }
+.pm-who{ padding:12px 16px; border-block-end:1px solid var(--line); }
+.pm-who b{ font-size:13.5px; }
+.pm-who span{ display:block; color:var(--faint); font-size:11.5px; margin-block-start:2px; }
+.pm{ border-block-end:1px solid var(--line); }
+.pm:last-of-type{ border-block-end:0; }
+.pm-h{ display:flex; align-items:center; gap:8px; padding:10px 16px; background:var(--surface-2);
+  color:var(--muted); font-size:12px; font-weight:800; }
+.pr{ display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:9px 16px; border-block-end:1px solid var(--line); cursor:pointer; }
+.pm .pr:last-child{ border-block-end:0; }
+.pr:hover{ background:var(--surface-2); }
+.pr-n{ font-size:13px; color:var(--ink); min-width:0; overflow-wrap:anywhere; }
+.pr-v{ color:var(--faint); font-size:11.5px; font-weight:700; white-space:nowrap; }
+.pr input{ width:18px; height:18px; accent-color:var(--accent); flex-shrink:0; cursor:pointer; }
+.pm-wrap .set-msg{ margin:12px 16px; }
+
+/* the capabilities RAF has no configuration authority for at all */
+.na{ list-style:none; margin:0; padding:0; }
+.na li{ display:flex; gap:10px; align-items:center; padding:10px 16px; border-block-end:1px solid var(--line); font-size:13px; }
+.na li:last-child{ border-block-end:0; }
+.na .ni{ width:28px; height:28px; border-radius:var(--r-sm); background:var(--surface-2); color:var(--faint);
+  display:grid; place-items:center; flex-shrink:0; }
+.na .nn{ flex:1; min-width:0; color:var(--ink); overflow-wrap:anywhere; }
+.na .nn .sub{ display:block; color:var(--faint); font-size:11.5px; margin-block-start:2px; line-height:1.6; }
+
+@media (max-width:1100px){
+  .set{ grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) auto; gap:12px; }
+  .set-a textarea{ width:min(320px,55vw); }
+}
+@media (max-width:860px){
+  .set{ grid-template-columns:minmax(0,1fr); gap:10px; }
+  .set-a{ align-items:flex-start; }
+  .set-a input{ width:100%; max-width:200px; }
+  .set-a textarea{ width:100%; }
+}
+@media (max-width:520px){
+  .set{ padding:14px; }
+  .na li{ padding-inline:14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-c" role="alert">
+    <div class="ic"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
+    <h1 id="gateT"></h1>
+    <p id="gateP"></p>
+    <a class="btn" href="raf_login.html"><i class="ti ti-login" aria-hidden="true"></i><span data-ar="تسجيل الدخول" data-en="Sign in">تسجيل الدخول</span></a>
+  </div>
+</div>
+
+<div class="ops" id="shell" hidden>
+  <aside class="ops-nav" id="opsNav">
+    <div class="ops-brand">
+      <span class="ops-brand-mark" aria-hidden="true"><i class="ti ti-route"></i></span>
+      <span class="ops-brand-t"><b data-ar="اللوجستيات" data-en="Logistics">اللوجستيات</b>
+        <span data-ar="منصة رف" data-en="RAF platform">منصة رف</span></span>
+      <button class="ibtn ops-nav-x" type="button" onclick="OPS.closeNav()" aria-label="إغلاق"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <nav class="ops-nav-scroll" id="navTree" aria-label="التنقل"></nav>
+  </aside>
+  <div class="scrim" onclick="OPS.closeNav()" aria-hidden="true"></div>
+
+  <div class="ops-main">
+    <header class="ops-head">
+      <button class="ibtn ops-burger" type="button" aria-controls="opsNav" onclick="OPS.openNav()" aria-label="القائمة"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+      <div class="ops-crumb"><small id="crumbGroup"></small><b id="crumbPage"></b></div>
+      <div class="ops-tools">
+        <button class="ibtn" type="button" id="refreshBtn" onclick="OPS.refresh()" aria-label="تحديث"><i class="ti ti-refresh" aria-hidden="true"></i></button>
+        <button class="ibtn lang" type="button" id="langBtn" onclick="OPS.toggleLang()"></button>
+        <span class="ops-sep" aria-hidden="true"></span>
+        <div class="ops-user"><span class="ops-av" id="userAv"></span>
+          <span class="ops-user-t"><b id="userName"></b><span id="userRole"></span></span></div>
+        <!-- the shared RAF sign-out action; this page adds no session logic -->
+        <button class="ibtn signout" type="button" id="signOutBtn" onclick="RAFSignOut()">
+          <i class="ti ti-logout" aria-hidden="true"></i>
+          <span class="signout-t" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span>
+        </button>
+      </div>
+    </header>
+    <main class="ops-content" id="view" tabindex="-1"></main>
+  </div>
+</div>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_store_ops.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_permissions.js"></script>
+<script>
+/* ============================================================================
+   SETTINGS — الإعدادات
+   The administrative configuration surface of the Logistics workspace.
+
+   RAFConfig IS THE AUTHORITY. Every value on this page is read with
+   RAFConfig.get() and written with RAFConfig.set() — the page holds no
+   configuration of its own, writes no storage key, and keeps no copy of a
+   value after saving: it re-reads the authority and shows whatever came back.
+
+   RAFConfig.set() already proves the session, requires the existing
+   `settings.edit` permission, validates by type, appends to the append-only
+   change history, records `config.changed` in RAFAudit and publishes on
+   RAFEventBus. None of that is re-implemented here, and hiding a control in
+   this page is not what protects a value — the authority refuses the call.
+
+   RAFPerm IS THE AUTHORITY for the permissions section, in exactly the same
+   way: the accounts, the grantable permissions and every refusal come from
+   it, and the change itself goes through RAFPerm.setUserPermission(), which
+   re-derives the actor from the session and re-runs every check.
+
+   WHAT AN OPERATOR IS NOT SHOWN — configuration keys, the authority's own
+   source strings, the internal state of a value, storage and audit names.
+   They all still exist in the authorities; none of them is a business fact,
+   so none of them is rendered here.
+
+   WHAT IS NOT CONFIGURABLE — service areas, zones, distance, proximity,
+   driver SLA, delivery pricing, contracts, driver performance and driver
+   availability. RAF has no value and no authority for any of them, so they
+   are listed as unavailable rather than given a form that would save nothing.
+   ==========================================================================*/
+(function(){
+  'use strict';
+
+  var P = window.RAFPerm, CFG = window.RAFConfig;
+  var ME = null, CAN = { view:false, edit:false, permView:false, permEdit:false };
+  var MSG = {};                 /* per-key feedback from the authority */
+  var SEL_USER = null;          /* the account being administered, chosen from
+                                   the authority's own scope list — never typed
+                                   in, never taken from the URL */
+  var PMSG = null;              /* feedback from the permission authority */
+
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function L(o){ return (o && typeof o === 'object') ? (isEn() ? (o.en||o.ar) : (o.ar||o.en)) : (o||''); }
+  function el(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  var DASH = '<span class="dash">—</span>';
+
+  /* ───────── how a value reads to a person, without losing the real one ───────── */
+  function minutesText(n){
+    if(typeof n !== 'number') return null;
+    if(n < 60) return T(n + ' دقيقة', n + ' minutes');
+    var h = Math.floor(n/60), r = n%60;
+    return r ? T(h + ' ساعة و' + r + ' دقيقة', h + 'h ' + r + 'm') : T(h + ' ساعة', h + ' hour(s)');
+  }
+  function secondsText(n){
+    if(typeof n !== 'number') return null;
+    if(n < 60) return T(n + ' ثانية', n + ' seconds');
+    var m = Math.floor(n/60), r = n%60;
+    return r ? T(m + ' دقيقة و' + r + ' ثانية', m + 'm ' + r + 's') : T(m + ' دقيقة', m + ' minute(s)');
+  }
+  function msText(n){
+    if(typeof n !== 'number') return null;
+    if(n < 1000) return T(n + ' مللي ثانية', n + ' ms');
+    var s = n/1000;
+    if(s < 60) return T((s % 1 ? s : s.toFixed(0)) + ' ثانية', (s % 1 ? s : s.toFixed(0)) + ' seconds');
+    var m = s/60;
+    return T((m % 1 ? m.toFixed(1) : m.toFixed(0)) + ' دقيقة', (m % 1 ? m.toFixed(1) : m.toFixed(0)) + ' minutes');
+  }
+  function filsText(n){
+    if(typeof n !== 'number') return null;
+    return T((n/1000).toFixed(3) + ' د.ك', (n/1000).toFixed(3) + ' KWD');
+  }
+  /* the presented value and the authoritative one beneath it */
+  function shown(type, v, allowed){
+    if(v === null || v === undefined) return { main:null, raw:null };
+    if(type === 'minutes') return { main:minutesText(v), raw:T(v + ' دقيقة (القيمة المحفوظة)', v + ' minutes (stored value)') };
+    if(type === 'ms')      return { main:msText(v),      raw:T(v + ' مللي ثانية (القيمة المحفوظة)', v + ' ms (stored value)') };
+    if(type === 'fils')    return { main:filsText(v),    raw:T(v + ' فلس (القيمة المحفوظة)', v + ' fils (stored value)') };
+    if(type === 'integer') return { main:String(v),      raw:null };
+    if(type === 'boolean') return { main:v ? T('مُفعّل','Enabled') : T('مُعطّل','Disabled'), raw:null };
+    if(type === 'seconds') return { main:secondsText(v),  raw:null };
+    if(type === 'enum')    return { main:ENUM_TXT[v] ? T(ENUM_TXT[v].ar, ENUM_TXT[v].en) : String(v), raw:null };
+    if(type === 'text')    return { main:T('نص مُهيّأ','Configured text'), raw:null };
+    if(type === 'list')    return { main:T((v.length||0) + ' عنصر', (v.length||0) + ' item(s)'), raw:null };
+    return { main:String(v), raw:null };
+  }
+  /* the one enum value the registry allows today */
+  var ENUM_TXT = {
+    merchant_accepted_at: { ar:'من وقت قبول المتجر للطلب', en:'From the merchant’s accept time' }
+  };
+
+  /* ───────── the settings this page presents ─────────
+     Every key below is a key RAFConfig already registers. No key is invented,
+     and a key RAFConfig does not have does not appear as a setting. */
+  var GROUPS = [
+    { id:'eta', ar:'إعدادات الوقت والتوصيل', en:'Time & delivery settings', icon:'ti-clock',
+      /* THE MERCHANT PROMISE — not a driver or delivery ETA. RAF has no
+         authoritative delivery ETA at all; this is the promise recorded when
+         the merchant accepts an order. */
+      intro:{ ar:'الوقت الذي يَعِد به المتجر عند قبول الطلب. هذا ليس الوقت المتوقع لوصول السائق — لا يوجد في رف إعداد لوقت وصول التوصيل.',
+              en:'The time the store promises when it accepts an order. This is NOT a driver or delivery ETA — RAF has no delivery-ETA configuration at all.' },
+      rows:[
+        { key:'eta.base', ar:'بداية احتساب الوقت الموعود', en:'Promised time starts from',
+          desc:{ ar:'اللحظة التي يبدأ منها احتساب الوقت الموعود للعميل.',
+                 en:'The moment the customer’s promised time is measured from.' } },
+        { key:'eta.promisedDurationMinutes', ar:'مدة الوقت الموعود', en:'Promised duration',
+          desc:{ ar:'يُضاف هذا إلى وقت قبول المتجر لتحديد الوقت الموعود للعميل.',
+                 en:'Added to the merchant accept time to give the customer’s promised time.' } }
+      ] },
+
+    { id:'checkout', ar:'إعدادات الطلبات', en:'Order settings', icon:'ti-shopping-bag',
+      rows:[
+        { key:'orders.acceptanceWindowMinutes', ar:'مهلة قبول المتجر للطلب', en:'Merchant acceptance window',
+          desc:{ ar:'المدة المتاحة للمتجر لقبول الطلب أو رفضه قبل انتهاء المهلة.',
+                 en:'How long the store has to accept or reject an order before the window closes.' } },
+        { key:'orders.undoWindowSeconds', ar:'مهلة التراجع', en:'Undo window',
+          desc:{ ar:'المدة التي يمكن للمتجر خلالها التراجع عن الإجراء الذي اتخذه على الطلب.',
+                 en:'How long the store may undo the action it just took on an order.' } },
+        { key:'checkout.reservationHoldMinutes', ar:'مدة حجز المخزون أثناء الشراء', en:'Stock hold during checkout',
+          desc:{ ar:'المدة التي تُحجز فيها كميات السلة لجلسة شراء قبل أن تعود للمخزون.',
+                 en:'How long a checkout session holds the cart’s units before they return to stock.' } },
+        { key:'storeOps.orderCutoffMinutes', ar:'إيقاف استقبال الطلبات قبل الإغلاق', en:'Order cutoff before closing',
+          desc:{ ar:'يتوقف استقبال طلبات اليوم قبل موعد إغلاق المتجر بهذه المدة.',
+                 en:'Same-day ordering stops this long before the store’s closing time.' } }
+      ] },
+
+    { id:'compensation', ar:'إعدادات التعويضات', en:'Compensation settings', icon:'ti-receipt-refund',
+      intro:{ ar:'سياسة تعويض العميل عند تأخر التسليم عن الوقت الموعود.',
+              en:'The policy for compensating a customer when delivery runs past the promised time.' },
+      rows:[
+        { key:'compensation.enabled', ar:'تفعيل التعويض', en:'Compensation enabled',
+          desc:{ ar:'عند التعطيل لا يُحتسب تعويض جديد. القسائم الصادرة تبقى صالحة.',
+                 en:'When off, no new compensation is issued. Coupons already issued stay valid.' } },
+        { key:'compensation.excludedDelayMinutes', ar:'التأخير المستثنى', en:'Excluded delay',
+          desc:{ ar:'لا يُحتسب تعويض عن هذه المدة الأولى من التأخير.',
+                 en:'No compensation is counted for this first stretch of the delay.' } },
+        { key:'compensation.stepMinutes', ar:'مدة الشريحة', en:'Step length',
+          desc:{ ar:'عن كل شريحة مكتملة بعد التأخير المستثنى يُحتسب مبلغ الشريحة.',
+                 en:'Each completed step after the excluded delay earns the step amount.' } },
+        { key:'compensation.amountPerStepFils', ar:'مبلغ الشريحة', en:'Amount per step',
+          desc:{ ar:'المبلغ المستحق عن كل شريحة مكتملة.',
+                 en:'The amount earned for each completed step.' } },
+        { key:'compensation.couponExpiryDays', ar:'صلاحية القسيمة بالأيام', en:'Coupon validity (days)',
+          desc:{ ar:'مدة صلاحية قسيمة التعويض من لحظة إصدارها.',
+                 en:'How long a compensation coupon stays valid from issue.' } },
+        { key:'compensation.customerMessage', ar:'نص رسالة التعويض', en:'Compensation message',
+          desc:{ ar:'النص الذي يصل العميل عند إصدار التعويض.',
+                 en:'The wording the customer receives when compensation is issued.' } }
+      ] },
+
+    { id:'communication', ar:'إعدادات التواصل مع السائق', en:'Driver communication settings', icon:'ti-messages',
+      intro:{ ar:'حدود المراسلة والاتصال بين العميل والسائق أثناء التوصيل.',
+              en:'Limits on messaging and calling between the customer and the driver during a delivery.' },
+      rows:[
+        { key:'communication.callAttemptLimit', ar:'الحد الأقصى لمحاولات الاتصال', en:'Maximum call attempts',
+          desc:{ ar:'لكل طرف في المحادثة: من العميل إلى السائق، ومن السائق إلى العميل. لا يؤثر على المراسلة.',
+                 en:'For each side of the conversation: customer to driver, and driver to customer. Messaging is not affected.' } },
+        { key:'communication.maxImagesPerMessage', ar:'عدد الصور في الرسالة الواحدة', en:'Images per message',
+          desc:{ ar:'أقصى عدد من الصور يمكن إرساله في رسالة واحدة.',
+                 en:'The most images one message can carry.' } },
+        { key:'communication.maxImageKB', ar:'حجم الصورة الواحدة (كيلوبايت)', en:'Size of one image (KB)',
+          desc:{ ar:'تُرسل الصورة كما هي دون ضغط؛ الأكبر من هذا الحجم تُرفض.',
+                 en:'Images are sent as they are, never compressed; larger ones are refused.' } },
+        { key:'communication.maxVoiceKB', ar:'حجم الرسالة الصوتية (كيلوبايت)', en:'Size of a voice message (KB)',
+          desc:{ ar:'أقصى حجم لتسجيل صوتي واحد.',
+                 en:'The largest a single voice recording may be.' } },
+        { key:'communication.maxVoiceSeconds', ar:'مدة الرسالة الصوتية', en:'Length of a voice message',
+          desc:{ ar:'يتوقف التسجيل تلقائيًا عند هذه المدة.',
+                 en:'Recording stops automatically at this length.' } }
+      ] }
+  ];
+
+  /* ───────── capabilities RAF does not offer yet ─────────
+     Listed so the responsible manager can see they are genuinely absent
+     rather than hidden somewhere. Nothing here has a value or a form,
+     because RAF has nothing to configure for them. */
+  var NOT_CONFIGURED = [
+    { ar:'مناطق الخدمة', en:'Service areas', icon:'ti-map-2',
+      why:{ ar:'لا يوجد في رف نموذج معتمد لمناطق الخدمة.', en:'RAF has no approved service-area model.' } },
+    { ar:'النطاقات والمسافات والقرب الجغرافي', en:'Zones, distance and proximity', icon:'ti-route',
+      why:{ ar:'لا تُسجَّل مواقع أو مسافات في رف.', en:'RAF records no location or distance data.' } },
+    { ar:'الوقت المتوقع لوصول التوصيل', en:'Delivery ETA', icon:'ti-truck-delivery',
+      why:{ ar:'لا يوجد مصدر معتمد لوقت وصول التوصيل — الوقت الموعود أعلاه وعدٌ من المتجر وليس وقت وصول السائق.',
+            en:'There is no authoritative delivery ETA — the promised time above is the store’s promise, not a driver’s arrival time.' } },
+    { ar:'مستويات الخدمة للسائقين (SLA)', en:'Driver SLA targets', icon:'ti-gauge',
+      why:{ ar:'لم تُعتمد أي أهداف زمنية للسائقين.', en:'No driver time targets are approved.' } },
+    { ar:'أسعار التوصيل والعقود', en:'Delivery pricing and contracts', icon:'ti-receipt',
+      why:{ ar:'التسعير تملكه سلطة التسعير في إتمام الشراء، ولا توجد عقود توصيل في رف.',
+            en:'Pricing belongs to the checkout pricing authority, and RAF has no delivery contracts.' } },
+    { ar:'أداء السائقين وترتيبهم وتقييمهم', en:'Driver performance, ranking and scoring', icon:'ti-chart-bar',
+      why:{ ar:'لا تُسجَّل مقاييس أداء للسائقين.', en:'No driver performance figures are recorded.' } },
+    { ar:'توفر السائقين وورديّاتهم', en:'Driver availability and shifts', icon:'ti-calendar-time',
+      why:{ ar:'لا يوجد نموذج توفر أو ورديّات للسائقين.', en:'There is no driver availability or shift model.' } }
+  ];
+
+  /* ───────── rendering ───────── */
+  function editor(g, def){
+    /* the control is drawn only for an account the authority would accept —
+       and the authority checks again when Save runs */
+    if(!CAN.edit)
+      return '<span class="fixed"><i class="ti ti-eye" aria-hidden="true"></i>' + T('للاطلاع فقط','View only') + '</span>';
+    var k = def.key, cur = g.configured ? g.value : null;
+    var id = 'v-' + k.replace(/[^a-zA-Z0-9]/g,'_');
+    if(g.type === 'boolean'){
+      return '<div class="row"><select id="' + id + '">'
+        + '<option value="true"' + (cur === true ? ' selected' : '') + '>' + T('مُفعّل','Enabled') + '</option>'
+        + '<option value="false"' + (cur === false ? ' selected' : '') + '>' + T('مُعطّل','Disabled') + '</option>'
+        + '</select>' + saveBtn(k) + '</div>';
+    }
+    if(g.type === 'enum'){
+      var d = CFG.describe(k) || {};
+      var opts = (d.allowed || []).map(function(v){
+        return '<option value="' + esc(v) + '"' + (cur === v ? ' selected' : '') + '>'
+          + esc(ENUM_TXT[v] ? T(ENUM_TXT[v].ar, ENUM_TXT[v].en) : v) + '</option>'; }).join('');
+      return '<div class="row"><select id="' + id + '">' + opts + '</select>' + saveBtn(k) + '</div>';
+    }
+    if(g.type === 'text'){
+      var t = cur || {};
+      return '<label class="sub-f">' + T('عربي','Arabic')
+        + '<textarea id="' + id + '_ar">' + esc(t.ar || '') + '</textarea></label>'
+        + '<label class="sub-f">' + T('إنجليزي','English')
+        + '<textarea id="' + id + '_en">' + esc(t.en || '') + '</textarea></label>'
+        + '<div class="row">' + saveBtn(k) + '</div>';
+    }
+    if(g.type === 'minutes' || g.type === 'seconds' || g.type === 'ms' || g.type === 'integer' || g.type === 'fils'){
+      return '<div class="row"><input id="' + id + '" type="number" inputmode="numeric" step="1" min="1" dir="ltr"'
+        + ' value="' + (cur == null ? '' : esc(String(cur))) + '"'
+        + ' aria-label="' + esc(T('القيمة','Value')) + '">' + saveBtn(k) + '</div>';
+    }
+    /* a type this page has no editor for stays read-only rather than guessing */
+    return '<span class="fixed"><i class="ti ti-lock" aria-hidden="true"></i>' + T('غير قابل للتحرير هنا','Not editable here') + '</span>';
+  }
+  function saveBtn(k){
+    return '<button class="btn sm pri" type="button" onclick="OPS.save(\'' + esc(k) + '\')">'
+      + '<i class="ti ti-check" aria-hidden="true"></i>' + T('حفظ','Save') + '</button>';
+  }
+  function unitOf(type){
+    if(type === 'minutes') return T('بالدقائق','in minutes');
+    if(type === 'seconds') return T('بالثواني','in seconds');
+    if(type === 'ms')      return T('بالمللي ثانية','in milliseconds');
+    if(type === 'fils')    return T('بالفلس','in fils');
+    if(type === 'integer') return T('عدد','count');
+    return '';
+  }
+  function settingRow(def){
+    var g = null;
+    try { g = CFG.get(def.key); } catch(e){ g = null; }
+    if(!g || !g.ok)
+      return '<div class="set"><div class="set-t"><b>' + T(def.ar, def.en) + '</b>'
+        + '<span class="src">' + T('تعذّرت قراءة هذا الإعداد.','This setting could not be read.') + '</span></div>'
+        + '<div class="set-v">' + DASH + '</div><div class="set-a"></div></div>';
+
+    var s = shown(g.type, g.configured ? g.value : null);
+    var m = MSG[def.key];
+    /* NAME · DESCRIPTION · VALUE · CONTROL — the business facts and nothing
+       else. The configuration key, the authority's source string and the
+       internal status of the value are implementation detail: the authority
+       still holds every one of them, and the operator is not shown any. */
+    return '<div class="set">'
+      + '<div class="set-t"><b>' + T(def.ar, def.en) + '</b>'
+        + (def.desc ? '<span class="desc">' + esc(L(def.desc)) + '</span>' : '') + '</div>'
+      + '<div class="set-v">'
+        + (s.main ? '<span class="now">' + esc(s.main) + '</span>' : DASH)
+        + (s.raw ? '<span class="raw">' + esc(s.raw) + '</span>' : '')
+        + (!g.configured ? '<span class="raw">' + T('لا توجد قيمة — الميزة غير متاحة.','No value — the capability is unavailable.') + '</span>' : '')
+        + '</div>'
+      + '<div class="set-a">' + editor(g, def) + '</div>'
+      + (m ? '<div class="set-msg ' + m.kind + '"><i class="ti ' + (m.kind === 'err' ? 'ti-alert-circle' : 'ti-check') + '" aria-hidden="true"></i><span>' + esc(m.text) + '</span></div>' : '')
+      + '</div>';
+  }
+  function groupCard(gr){
+    return '<section class="card" aria-labelledby="h-' + gr.id + '">'
+      + '<div class="card-h"><h2 id="h-' + gr.id + '"><i class="ti ' + gr.icon + '" aria-hidden="true"></i>'
+      + T(gr.ar, gr.en) + '</h2>'
+      + '<span class="count">' + T(gr.rows.length + ' إعداد', gr.rows.length + ' setting(s)') + '</span></div>'
+      + (gr.intro ? '<div class="card-b" style="padding-block-end:0"><div class="notice"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+          + esc(L(gr.intro)) + '</span></div></div>' : '')
+      + '<div class="card-b flush">' + gr.rows.map(settingRow).join('') + '</div></section>';
+  }
+  /* ───────── إدارة الصلاحيات — Permission Management ─────────
+     RAFPerm IS THE AUTHORITY, exactly as RAFConfig is for the settings above.
+     This page asks it three questions and calls one operation:
+       · manageableUsers()       — WHO this manager administers. The scope is
+                                   declared inside the authority; the page has
+                                   no list of its own and accepts no account id
+                                   that did not come from here.
+       · grantablePermissions()  — WHICH permissions this manager may hand out.
+                                   Catalog entries, so the page never writes a
+                                   permission key and always has the label.
+       · canManagePermissions()  — may this account be administered at all.
+       · setUserPermission()     — the change itself. It re-derives the actor
+                                   from the stored session, re-runs every check
+                                   and records the result in RAFAudit. Hiding a
+                                   control here protects nothing; the authority
+                                   refuses the call. */
+  function permAccountChip(u){
+    var role = null; try { role = P.getRole(u.roleId); } catch(e){}
+    var on = (SEL_USER === u.id);
+    return '<button type="button" class="pa' + (on ? ' on' : '') + '"'
+      + ' aria-pressed="' + (on ? 'true' : 'false') + '"'
+      + ' onclick="OPS.pickAccount(\'' + esc(u.id) + '\')">'
+      + '<span class="pa-av" aria-hidden="true">' + esc(String(u.name || '?').trim().charAt(0)) + '</span>'
+      + '<span class="pa-b"><b><bdi>' + esc(u.name || '') + '</bdi></b>'
+      + '<span>' + esc(role ? T(role.nameAr, role.nameEn) : '') + '</span></span>'
+      + (u.status !== 'active'
+          ? '<span class="pa-s">' + T('موقوف','Suspended') + '</span>' : '')
+      + '</button>';
+  }
+  function permRows(target){
+    var grantable = [];
+    try { grantable = P.grantablePermissions() || []; } catch(e){ grantable = []; }
+    if(!grantable.length)
+      return '<div class="empty"><i class="ti ti-shield-off" aria-hidden="true"></i><b>'
+        + T('لا توجد صلاحيات يمكنك منحها.','There are no permissions you can grant.') + '</b></div>';
+
+    var mods = [];
+    try { mods = P.getModules() || []; } catch(e){ mods = []; }
+    var byMod = {};
+    grantable.forEach(function(p){ (byMod[p.module] = byMod[p.module] || []).push(p); });
+
+    return mods.filter(function(m){ return byMod[m.id]; }).map(function(m){
+      return '<div class="pm"><div class="pm-h"><i class="ti ' + m.icon + '" aria-hidden="true"></i>'
+        + esc(T(m.labelAr, m.labelEn)) + '</div>'
+        + byMod[m.id].map(function(p){
+            var has = false; try { has = !!P.can(target.id, p.key); } catch(e){}
+            var id = 'p-' + p.key.replace(/[^a-zA-Z0-9]/g,'_');
+            return '<label class="pr" for="' + id + '">'
+              + '<span class="pr-n">' + esc(T(p.labelAr, p.labelEn)) + '</span>'
+              + (CAN.permEdit
+                  ? '<input type="checkbox" id="' + id + '"' + (has ? ' checked' : '')
+                    + ' onchange="OPS.setPerm(\'' + esc(p.key) + '\', this.checked)">'
+                  : '<span class="pr-v">' + (has ? T('ممنوحة','Granted') : T('غير ممنوحة','Not granted')) + '</span>')
+              + '</label>';
+          }).join('')
+        + '</div>';
+    }).join('');
+  }
+  function permissionsCard(){
+    if(!CAN.permView) return '';
+    var scope = [];
+    try { scope = P.delegatedRoleIds() || []; } catch(e){ scope = []; }
+    if(!scope.length) return '';          /* no declared scope ⇒ no section */
+
+    var users = [];
+    try { users = P.manageableUsers() || []; } catch(e){ users = []; }
+    var scopeNames = scope.map(function(rid){
+      var r = null; try { r = P.getRole(rid); } catch(e){}
+      return r ? T(r.nameAr, r.nameEn) : rid;
+    }).join(T('، ', ', '));
+
+    var body;
+    if(!users.length){
+      body = '<div class="card-b"><div class="empty"><i class="ti ti-users-off" aria-hidden="true"></i><b>'
+        + T('لا توجد حسابات ضمن نطاق إدارتك.','There are no accounts within your management scope.') + '</b></div></div>';
+    } else {
+      var sel = null;
+      for(var i=0;i<users.length;i++) if(users[i].id === SEL_USER) sel = users[i];
+      if(!sel){ sel = users[0]; SEL_USER = sel.id; }
+      body = '<div class="card-b"><div class="pa-list">' + users.map(permAccountChip).join('') + '</div></div>'
+        + '<div class="card-b flush"><div class="pm-wrap">'
+        + '<div class="pm-who"><b><bdi>' + esc(sel.name || '') + '</bdi></b>'
+        + '<span>' + T('الصلاحيات الممنوحة لهذا الحساب','Permissions granted to this account') + '</span></div>'
+        + permRows(sel)
+        + (PMSG ? '<div class="set-msg ' + PMSG.kind + '"><i class="ti '
+            + (PMSG.kind === 'err' ? 'ti-alert-circle' : 'ti-check') + '" aria-hidden="true"></i><span>'
+            + esc(PMSG.text) + '</span></div>' : '')
+        + '</div></div>';
+    }
+
+    return '<section class="card" aria-labelledby="h-perm">'
+      + '<div class="card-h"><h2 id="h-perm"><i class="ti ti-shield-lock" aria-hidden="true"></i>'
+      + T('إدارة الصلاحيات','Permission Management') + '</h2>'
+      + '<span class="count">' + T(users.length + ' حساب', users.length + ' account(s)') + '</span></div>'
+      + '<div class="card-b" style="padding-block-end:0"><div class="notice"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+      + T('الحسابات التابعة لإدارتك (' + scopeNames + '). لا يمكنك تعديل صلاحيات حسابك ولا أي حساب خارج نطاق إدارتك، ولا منح صلاحية لا تملكها.',
+          'The accounts under your management (' + scopeNames + '). You cannot change your own permissions, any account outside your scope, or grant a permission you do not hold yourself.')
+      + '</span></div></div>'
+      + (!CAN.permEdit
+          ? '<div class="card-b" style="padding-block-start:0"><div class="notice"><i class="ti ti-eye" aria-hidden="true"></i><span>'
+            + T('حسابك يطّلع على هذه الصلاحيات دون تعديلها.','Your account may view these permissions but not change them.')
+            + '</span></div></div>'
+          : '')
+      + body + '</section>';
+  }
+
+  function notConfiguredCard(){
+    return '<section class="card" aria-labelledby="h-na">'
+      + '<div class="card-h"><h2 id="h-na"><i class="ti ti-help-circle" aria-hidden="true"></i>'
+      + T('مجالات غير متاحة في رف','Areas RAF does not offer yet') + '</h2>'
+      + '<span class="count">' + T(NOT_CONFIGURED.length + ' مجال', NOT_CONFIGURED.length + ' area(s)') + '</span></div>'
+      + '<div class="card-b" style="padding-block-end:0"><div class="notice"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+      + T('هذه المجالات ليست جزءاً من عمل رف اليوم، فلا توجد لها قيم ولا نماذج.',
+          'These areas are not part of how RAF operates today, so they have no values and no forms.')
+      + '</span></div></div>'
+      + '<div class="card-b flush"><ul class="na">' + NOT_CONFIGURED.map(function(n){
+          return '<li><span class="ni" aria-hidden="true"><i class="ti ' + n.icon + '"></i></span>'
+            + '<span class="nn">' + T(n.ar, n.en) + '<span class="sub">' + esc(L(n.why)) + '</span></span>'
+            + '<span class="st st-none">' + T('غير متاح','Unavailable') + '</span></li>'; }).join('')
+      + '</ul></div></section>';
+  }
+
+  function render(){
+    renderHeader(); renderNav();
+    var total = GROUPS.reduce(function(n,g){ return n + g.rows.length; }, 0);
+    el('view').innerHTML =
+      '<h1 class="sr-only">' + T('الإعدادات','Settings') + '</h1>'
+      + '<div class="wk">'
+      + '<div class="wk-head"><p>'
+      + T('إعدادات اللوجستيات التشغيلية والصلاحيات التابعة لإدارة العمليات.',
+          'Logistics operational settings and the permissions Operations is responsible for.')
+      + '</p><span class="wk-count">' + T(total + ' إعداد', total + ' setting(s)') + '</span></div>'
+      + (!CAN.edit
+          ? '<div class="notice"><i class="ti ti-eye" aria-hidden="true"></i><span>'
+            + T('حسابك يطّلع على الإعدادات دون تعديلها.',
+                'Your account may view settings but not change them.')
+            + '</span></div>'
+          : '')
+      + GROUPS.map(groupCard).join('')
+      + permissionsCard()
+      + notConfiguredCard()
+      + '</div>';
+  }
+
+  /* ───────── shell ───────── */
+  function canCompensation(){ try { return !!(ME && P.can(ME.id, 'drivers.suspend')); } catch(e){ return false; } }
+  function renderNav(){
+    function item(href, icon, ar, en, current){
+      return '<li><a href="' + href + '"' + (current ? ' aria-current="page"' : '') + '>'
+        + '<i class="ti ' + icon + '" aria-hidden="true"></i><span>' + T(ar,en) + '</span></a></li>';
+    }
+    el('navTree').innerHTML =
+      '<span class="grp">' + T('العمليات','Operations') + '</span><ul>'
+      + item('raf_logistics.html', 'ti-layout-dashboard', 'مركز العمليات', 'Command Center', false)
+      + item('raf_logistics_orders.html', 'ti-shopping-bag', 'الطلبات', 'Orders', false)
+      + item('raf_logistics_dispatch.html', 'ti-route', 'التوزيع والتعيين', 'Dispatch & Assignment', false)
+      + item('raf_logistics_tickets.html', 'ti-ticket', 'التذاكر', 'Tickets', false)
+      + item('raf_logistics_drivers.html', 'ti-motorbike', 'السائقون', 'Drivers', false)
+      + item('raf_logistics_settings.html', 'ti-settings', 'الإعدادات', 'Settings', true)
+      /* Compensation is listed for the accounts the compensation authority
+         lets manage compensations — the existing Logistics management
+         permission these pages already gate their operational actions on. */
+      + (canCompensation() ? item('raf_logistics_compensation.html', 'ti-receipt-refund', 'التعويضات', 'Compensation', false) : '')
+      + '</ul>'
+      + '<div class="ops-nav-foot"><b>' + T('العمليات واللوجستيات','Operations & Logistics') + '</b>'
+      + T('منصة رف','RAF platform') + '</div>';
+  }
+  function renderHeader(){
+    el('crumbGroup').textContent = T('اللوجستيات · العمليات','Logistics · Operations');
+    el('crumbPage').textContent = T('الإعدادات','Settings');
+    el('langBtn').textContent = isEn() ? 'ع' : 'EN';
+    el('langBtn').setAttribute('aria-label', T('التبديل إلى الإنجليزية','Switch to Arabic'));
+    if(ME){
+      el('userAv').textContent = String(ME.name || '?').trim().charAt(0);
+      el('userName').textContent = ME.name || '';
+      var role = null; try { role = P.getRole(ME.roleId); } catch(e){}
+      el('userRole').textContent = role ? T(role.nameAr, role.nameEn) : '';
+    }
+    document.title = T('رف — الإعدادات','RAF — Settings');
+  }
+  function refresh(){ render(); }
+
+  function gate(titleAr, titleEn, msg){
+    ME = null; CAN = { view:false, edit:false, permView:false, permEdit:false };
+    el('shell').hidden = true;
+    var g = el('gate'); g.hidden = false;
+    el('gateT').textContent = T(titleAr, titleEn);
+    el('gateP').textContent = msg;
+    document.title = T('رف — الإعدادات','RAF — Settings');
+  }
+  function applyLang(){
+    var en = isEn();
+    document.querySelectorAll('[data-ar][data-en]').forEach(function(e){
+      var t = e.getAttribute('data-' + (en ? 'en' : 'ar')); if(t !== null) e.textContent = t;
+    });
+  }
+  function boot(){
+    var l = null; try { l = localStorage.getItem('raf_lang'); } catch(e){}
+    if(l === 'en'){ root().lang = 'en'; root().dir = 'ltr'; }
+    applyLang();
+
+    if(!P || !CFG){
+      gate('تعذّر التحميل','Could not load', T('لم يتم تحميل وحدات رف المطلوبة.','The required RAF modules did not load.'));
+      return;
+    }
+    /* identity from the stored session only — never from the URL or a
+       caller-supplied id. */
+    var sid = null;
+    try {
+      sid = P.sessionUserId ? P.sessionUserId() : null;   /* RAFPerm owns this tab's session */
+    } catch(e){ sid = null; }
+    if(!sid){ gate('يلزم تسجيل الدخول','Sign-in required', T('الإعدادات متاحة بعد تسجيل الدخول.','Settings are available after signing in.')); return; }
+    var u = null; try { u = P.getUser(sid); } catch(e){ u = null; }
+    if(!u){ gate('يلزم تسجيل الدخول','Sign-in required', T('تعذّر التعرف على الحساب.','That account could not be identified.')); return; }
+    if(u.status !== 'active'){ gate('حسابك موقوف','Your account is suspended', T('لا يمكن فتح الإعدادات بحساب موقوف.','A suspended account cannot open Settings.')); return; }
+
+    /* THE EXISTING SETTINGS PERMISSIONS, reused as they are: settings.view to
+       read the configuration, settings.edit to change it. No key is invented
+       and none is granted here. */
+    try { CAN.view = !!P.can(u.id, 'settings.view'); } catch(e){ CAN.view = false; }
+    try { CAN.edit = !!P.can(u.id, 'settings.edit'); } catch(e){ CAN.edit = false; }
+    /* the same existing pair for the permissions section */
+    try { CAN.permView = !!P.can(u.id, 'permissions.view'); } catch(e){ CAN.permView = false; }
+    try { CAN.permEdit = !!P.can(u.id, 'permissions.edit'); } catch(e){ CAN.permEdit = false; }
+    if(!CAN.view){
+      gate('لا تملك صلاحية الوصول','You do not have access',
+           T('فتح الإعدادات غير متاح لحسابك.','Your account cannot open Settings.'));
+      return;
+    }
+
+    ME = { id:u.id, name:u.name, roleId:u.roleId };
+    el('gate').hidden = true; el('shell').hidden = false;
+    render();
+
+    /* another surface changing a value is reflected here, through the bus the
+       configuration authority already publishes on */
+    if(window.RAFEventBus){
+      try { RAFEventBus.subscribe('config.*', function(){ render(); }); } catch(e){}
+    }
+    window.addEventListener('storage', function(e){
+      if(e.key && /^raf_config/.test(e.key)) render();
+    });
+  }
+
+  /* the authority's refusal, said in business terms */
+  function permError(reason){
+    switch(reason){
+      case 'forbidden':
+      case 'not_signed_in':     return T('لا تملك صلاحية تعديل صلاحيات الحسابات.','You may not change account permissions.');
+      case 'self':              return T('لا يمكنك تعديل صلاحيات حسابك.','You cannot change your own permissions.');
+      case 'out_of_scope':      return T('هذا الحساب خارج نطاق إدارتك.','That account is outside your management scope.');
+      case 'exceeds_actor':     return T('لا يمكنك منح صلاحية لا تملكها.','You cannot grant a permission you do not hold.');
+      case 'not_delegable':     return T('هذه الصلاحية لا تُمنح من هنا.','That permission is not granted from here.');
+      case 'unknown_permission':return T('صلاحية غير معروفة.','Unknown permission.');
+      case 'user_not_found':    return T('تعذّر العثور على الحساب.','That account could not be found.');
+      default:                  return T('تعذّر حفظ التغيير.','The change could not be saved.');
+    }
+  }
+
+  function numVal(id){
+    var e = el(id); if(!e) return null;
+    var s = String(e.value || '').trim();
+    if(s === '') return null;
+    var n = Number(s);
+    return isFinite(n) ? n : NaN;
+  }
+
+  window.OPS = {
+    refresh: refresh,
+    /* SAVE — the authority validates, authorises, persists, audits and
+       publishes. This page only collects the value and shows the answer, then
+       re-reads from the authority rather than trusting the form. */
+    save: function(key){
+      if(!ME || !CFG) return;
+      var g = null; try { g = CFG.get(key); } catch(e){ g = null; }
+      if(!g || !g.ok) return;
+      var id = 'v-' + key.replace(/[^a-zA-Z0-9]/g,'_');
+      var v;
+      if(g.type === 'boolean') v = (el(id) && el(id).value === 'true');
+      else if(g.type === 'enum') v = el(id) ? el(id).value : null;
+      else if(g.type === 'text'){
+        var ar = el(id + '_ar') ? String(el(id + '_ar').value || '').trim() : '';
+        var en = el(id + '_en') ? String(el(id + '_en').value || '').trim() : '';
+        v = { ar:ar, en:en };
+      }
+      else v = numVal(id);
+
+      /* an empty or non-numeric box never becomes a value — the authority
+         would refuse it, and the operator is told before the round trip */
+      if((g.type === 'minutes' || g.type === 'seconds' || g.type === 'ms' || g.type === 'integer' || g.type === 'fils')
+         && (v === null || isNaN(v))){
+        MSG[key] = { kind:'err', text:T('أدخل قيمة رقمية صحيحة.','Enter a valid number.') };
+        render(); return;
+      }
+      var res = null;
+      try { res = CFG.set(key, v); } catch(e){ res = null; }
+      if(res && res.ok){
+        /* read back what the authority now holds */
+        var after = CFG.get(key);
+        MSG[key] = { kind:'ok', text:T('تم الحفظ. القيمة الحالية: ','Saved. Current value: ')
+          + (shown(after.type, after.configured ? after.value : null).main || '—') };
+      } else {
+        MSG[key] = { kind:'err', text:(res && res.message) || T('تعذّر حفظ الإعداد.','The setting could not be saved.') };
+      }
+      render();
+    },
+    /* pick an account to administer — only one the authority itself listed */
+    pickAccount: function(id){
+      var users = [];
+      try { users = P.manageableUsers() || []; } catch(e){ users = []; }
+      for(var i=0;i<users.length;i++) if(users[i].id === id){ SEL_USER = id; PMSG = null; render(); return; }
+    },
+    /* GRANT / REMOVE — the authority re-derives the actor from the session,
+       re-checks the scope, refuses a key this manager does not hold, records
+       the change, and hands back what the account now actually has. */
+    setPerm: function(key, enabled){
+      if(!ME || !P || !SEL_USER) return;
+      var res = null;
+      try { res = P.setUserPermission(SEL_USER, key, !!enabled); } catch(e){ res = null; }
+      if(res && res.ok){
+        var name = '';
+        try { var t = P.getUser(SEL_USER); name = (t && t.name) || ''; } catch(e){}
+        PMSG = { kind:'ok', text:(enabled
+          ? T('تمت إضافة الصلاحية إلى ','Permission added to ')
+          : T('تمت إزالة الصلاحية من ','Permission removed from ')) + name };
+      } else {
+        PMSG = { kind:'err', text:permError(res && res.reason) };
+      }
+      render();
+    },
+    toggleLang: function(){
+      var r = root(), en = r.lang === 'en';
+      r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+      try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+      applyLang(); render(); el('langBtn').focus();
+    },
+    openNav: function(){ el('shell').classList.add('nav-open'); var x = document.querySelector('.ops-nav-x'); if(x) x.focus(); },
+    closeNav: function(){ el('shell').classList.remove('nav-open'); var b = document.querySelector('.ops-burger'); if(b) b.focus(); }
+  };
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && el('shell') && el('shell').classList.contains('nav-open')) OPS.closeNav();
+  });
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

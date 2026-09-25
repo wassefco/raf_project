@@ -107,6 +107,14 @@ The current session is represented by:
 
 `raf_current_user`
 
+The session is **tab-scoped**. `raf_current_user` lives in `sessionStorage`, and only `RAFPerm` reads or writes it. Each browser tab or window therefore carries its own signed-in account: a customer, a merchant, a driver and staff can be signed in side by side in the same browser. Accounts, roles and all business data stay in `localStorage` and are shared by every tab.
+
+- Signing in or out changes only the current tab.
+- A refresh keeps the tab's session. Closing the tab ends it. A new tab starts signed out.
+- A browser-duplicated tab may start with a copy of the session. It then changes independently.
+- The old browser-wide `localStorage.raf_current_user` is removed on load and never adopted.
+- Surfaces that must tell "no session" apart from "an unknown account" use `RAFPerm.sessionUserId()`. No page reads the session from storage itself.
+
 Canonical permission/session operations belong to `RAFPerm`.
 
 Use:
@@ -201,6 +209,17 @@ If authoritative information does not exist, display:
 `—`
 
 or the appropriate empty state.
+
+
+### Customer order access (ownership)
+
+A customer reaches an order only through `RAFShop.Orders.mine()` / `RAFShop.Orders.mineById(id)`.
+
+- Identity comes from the RAFPerm session (signed-in, active `customer`), never from a URL parameter.
+- Ownership comes from the order's own record (`snapshot.customer.id`).
+- Another customer's order and a non-existent order both answer `NOT_FOUND` (nothing is revealed); no session answers `UNAUTHENTICATED`.
+- An order with no recorded customer (legacy seed data) cannot be proven to be anyone's and is not shown to any customer.
+- Tracking (`raf_tracking.html`), order history (`raf_orders.html`), order details (`raf_order_details.html`) and the account page's last order all read through this path. There is no "first order" fallback.
 
 ---
 
@@ -387,6 +406,25 @@ It does not represent Customer ↔ RAF administrative support.
 
 Its records, storage, status model, permissions, and communication flow remain separate from `RAFCustomerService`.
 
+### Order ratings (store + driver)
+
+The ratings capability exists and is owned by `RAFCustomerExperience`. No separate ratings authority exists or may be created.
+
+- One immutable rating record per delivered order, covering the store and, when the order had a driver, the driver.
+- Every field is optional: store stars, store comment, driver stars, driver comment. A submission with everything empty is still the one record for that order.
+- There is no edit or delete. A second submission is refused (`ALREADY_RATED`).
+- Identity comes from the session, ownership from the order record, the store from the order snapshot, and the driver from `fulfilment.driverId`. Undelivered orders cannot be rated (`NOT_DELIVERED`).
+- The driver aggregate (average and count) is computed only from real driver star ratings. With none, surfaces show "لا توجد تقييمات بعد". There is no ranking, leaderboard, tier or score.
+
+Visibility (read-only, enforced in the authority):
+
+- Merchant / merchant employee: `storeRatings()`. Only their own store (store resolved from the session, `stores.view`). Shown in the merchant Customer Experience page, tab "تقييمات المتجر".
+- Administration: `storeRatingsHistory({storeSlug?})`. Staff session with `stores.view`. Shown in the Customer Service workspace, "تقييمات المتاجر".
+- Logistics: `driverRatings(driverId)`. Staff session with `drivers.view`. Presented through `RAFLogistics.driverRatings` in the Driver Profile. One driver's ratings only, with no customer identity.
+- Customer: `orderRatingStatus(orderId)` and `orderDriver(orderId)`. Only for their own order.
+
+After delivery, the customer still sees the driver's display name, avatar initial and aggregate rating (tracking, rating page, order history, order details). Only communication ends at delivery.
+
 ### Separation Rule
 
 The three authorities are intentionally separate:
@@ -419,6 +457,16 @@ The Logistics area includes concepts such as:
 Do not revive deleted legacy modules simply because old code exists in Git history.
 
 Do not recreate old Driver Performance, Delivery, Communication, or Reports implementations unless explicitly requested.
+
+
+### Rebuilt under the current architecture (explicitly requested)
+
+- Driver App (`raf_driver.html`) through `RAFLogistics` (available pool, claim, pickup, delivery).
+- Customer ↔ Driver communication: `RAFDriverCommunication` (`raf_driver_communication.js`). The conversation and calls are available from assignment until delivery. After delivery, the customer can no longer call, message, or open or read the conversation.
+- Driver identity after delivery remains visible to the order's own customer (name, avatar initial, aggregate rating from `RAFCustomerExperience`), without contact controls.
+- Driver customer ratings are presented in the Logistics Driver Profile. The data stays in `RAFCustomerExperience`.
+
+The deleted Driver Performance system is not revived. Customer ratings are not a performance score.
 
 ---
 

@@ -257,3 +257,13 @@ body{display:flex;flex-direction:column;min-height:100vh;}
 @media(max-width:620px){
   .afoot-in{flex-direction:column;text-align:center;gap:14px;}
 }
+/* delivered order — who delivered it + the customer's own feedback status (no contact controls) */
+.ord-drv{display:flex;align-items:center;gap:10px;padding:12px 18px;border-top:1px solid var(--border);flex-wrap:wrap;}
+.ord-drv-av{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#F4E3B5,#D9B25A);color:#4A3712;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ord-drv-b{flex:1;min-width:0;}
+.ord-drv-l{font-size:11px;color:var(--text3);}
+.ord-drv-n{font-size:13px;font-weight:700;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ord-drv-r{font-size:11.5px;color:var(--text2);}
+.ord-drv-r .ti{color:var(--gold2);}
+.ord-fb{flex-shrink:0;font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:5px;}
+.ord-fb.done{color:var(--text2);}

@@ -165,7 +165,9 @@
   ];
 
   /* orders come from the shared RAFShop store (falls back to the seed array) */
-  window.rafOrders = function () { return (window.RAFShop && RAFShop.Orders) ? RAFShop.Orders.all() : (window.RAF_ORDERS || []); };
+  /* the signed-in customer's OWN orders only (RAFShop.Orders.mine proves it from each
+     order's own record); nobody else's order, and no unowned legacy order, is listed or opened */
+  window.rafOrders = function () { return (window.RAFShop && RAFShop.Orders && RAFShop.Orders.mine) ? RAFShop.Orders.mine() : []; };
   window.orderById = function (id) { return rafOrders().find(function (o) { return o.id === id; }); };
 
   window.statusMeta = function (st) {
@@ -191,6 +193,31 @@
         '<div><div class="ord-num">#' + o.id + '</div><div class="ord-store"><i class="ti ti-building-store" style="font-size:12px"></i> ' + o.store[en ? 'en' : 'ar'] + '</div></div>' +
         '<span class="badge ' + sm.cls + '"><i class="ti ' + sm.ic + '"></i> ' + sm.label + '</span></div>' +
       '<div class="ord-bot"><div class="ord-meta"><div class="ord-date"><i class="ti ti-calendar" style="font-size:12px"></i> ' + o.date[en ? 'en' : 'ar'] + '</div>' +
-        '<div class="ord-total">' + o.total + ' <small>' + (en ? 'KWD' : 'د.ك') + '</small></div></div>' + act + '</div></article>';
+        '<div class="ord-total">' + o.total + ' <small>' + (en ? 'KWD' : 'د.ك') + '</small></div></div>' + act + '</div>' +
+      deliveredStripHTML(o) + '</article>';
+  };
+
+  /* A delivered order keeps showing WHO delivered it (identity + aggregate from
+     RAFCustomerExperience, the customer's own order only) and the customer's own
+     feedback status. Contact and conversation end at delivery — none here. */
+  function escA(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  window.deliveredStripHTML = function (o) {
+    var CX = window.RAFCustomerExperience;
+    if (!CX || !CX.orderRatingStatus) return '';
+    var st = CX.orderRatingStatus(o.id);
+    if (!st || !st.ok) return '';                       /* not delivered / not the customer's own order */
+    var en = curLang() === 'en', d = st.driver, drv = '';
+    if (d && d.name) {
+      var r = d.rating || {};
+      drv = '<span class="ord-drv-av" aria-hidden="true">' + (d.initial ? escA(d.initial) : '<i class="ti ti-motorbike"></i>') + '</span>' +
+        '<div class="ord-drv-b"><div class="ord-drv-l">' + (en ? 'Delivered by' : 'وصّل طلبك') + '</div>' +
+        '<div class="ord-drv-n">' + escA(d.name) + '</div>' +
+        '<div class="ord-drv-r">' + (r.count ? '<i class="ti ti-star-filled"></i> ' + Number(r.average).toFixed(1) + ' (' + r.count + ')'
+                                             : (en ? 'No ratings yet' : 'لا توجد تقييمات بعد')) + '</div></div>';
+    } else drv = '<div class="ord-drv-b"></div>';
+    var fb = st.state === 'rated'
+      ? '<span class="ord-fb done"><i class="ti ti-circle-check"></i> ' + (en ? 'Order rated' : 'تم تقييم الطلب') + '</span>'
+      : '<a class="ord-fb btn btn-ghost btn-sm" href="raf_delivery_rating.html?id=' + encodeURIComponent(o.id) + '" onclick="event.stopPropagation()"><i class="ti ti-star"></i> ' + (en ? 'Rate order' : 'تقييم الطلب') + '</a>';
+    return '<div class="ord-drv">' + drv + fb + '</div>';
   };
 })();

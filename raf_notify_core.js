@@ -59,6 +59,8 @@
     'order.accepted':                    { audience:'customer' },
     'order.cancelled':                   { audience:'customer' },
     'order.delivered':                   { audience:'customer' },
+    /* the driver reached the drop-off (RAFOrderEngine.driverArrived) */
+    'order.driver_arrived':              { audience:'customer' },
     'order.change':                      { audience:'customer' },
     /* merchant store accounts — titles are the workspace's existing wording */
     'merchant.order.new':                { audience:'merchant', legacyType:'new',
@@ -85,7 +87,11 @@
     'support.followup.due':              { audience:'support', title:{ ar:'حان موعد متابعة', en:'A follow-up is due' } },
     /* the two the CUSTOMER sees — outcome and reply only */
     'support.ticket.message':            { audience:'customer', title:{ ar:'رد جديد على تذكرة الدعم', en:'New reply on your support ticket' } },
-    'support.ticket.resolved':           { audience:'customer', title:{ ar:'تم حل تذكرة الدعم', en:'Your support ticket was resolved' } }
+    'support.ticket.resolved':           { audience:'customer', title:{ ar:'تم حل تذكرة الدعم', en:'Your support ticket was resolved' } },
+    /* Customer ↔ Driver communication (RAFDriverCommunication): one per stored
+       message, to the other participant only */
+    'communication.message.customer':    { audience:'customer', title:{ ar:'رسالة جديدة من السائق', en:'New message from your driver' } },
+    'communication.message.driver':      { audience:'driver',   title:{ ar:'رسالة جديدة من العميل', en:'New message from the customer' } }
   };
   var LEGACY_MERCHANT_TYPE = {
     'new':'merchant.order.new', 'timeout':'merchant.order.acceptance_warning',
@@ -123,7 +129,8 @@
         var u = RAFPerm.currentUser();
         return u && u.id ? { id:u.id, roleId:u.roleId || null, status:u.status || null, verified:true } : null;
       }
-      var raw = localStorage.getItem('raf_current_user');
+      /* the session is tab-scoped (RAFPerm keeps it in sessionStorage) */
+      var raw = sessionStorage.getItem('raf_current_user');
       if (!raw) return null;
       var id = null; try { id = JSON.parse(raw); } catch (e) { id = raw; }
       return typeof id === 'string' && id ? { id:id, roleId:null, status:null, verified:false } : null;

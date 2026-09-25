@@ -29,7 +29,25 @@
   'use strict';
   if (global.RAFOrderEngine) return;
 
-  var WINDOW_MS = 5 * 60 * 1000;          /* unchanged: 5-minute acceptance window */
+  /* ---- the two configurable lifecycle timings ----
+     RAFConfig owns them now ('orders.acceptanceWindowMinutes' /
+     'orders.undoWindowSeconds'), seeded with the values this engine has always
+     applied. They are read at call time, so a change made in Settings takes
+     effect without a reload and without this file keeping a second copy. The
+     numbers below are the same values, used ONLY when RAFConfig is not loaded
+     on a page — never as an alternative source of truth. */
+  var WINDOW_MS_FALLBACK = 5 * 60 * 1000;
+  var UNDO_MS_FALLBACK   = 10 * 1000;
+  function cfgNum(key, factor, fallback){
+    try {
+      var v = global.RAFConfig ? RAFConfig.value(key) : null;
+      if (typeof v === 'number' && isFinite(v) && v > 0) return v * factor;
+    } catch (e) {}
+    return fallback;
+  }
+  function windowMs(){ return cfgNum('orders.acceptanceWindowMinutes', 60000, WINDOW_MS_FALLBACK); }
+  function undoMs(){   return cfgNum('orders.undoWindowSeconds',        1000, UNDO_MS_FALLBACK); }
+
   var LS        = 'raf_pending';          /* unchanged storage key */
   /* customer notifications go through RAFNotify (see notify()) */
   var LS_ORDERS = 'raf_orders';
@@ -92,7 +110,7 @@
                actionableAt:(d.receiveAt && d.receiveAt.date) ? at(d.receiveAt.date, d.receiveAt.time) : null };
     if (t === 'scheduled' && sn.scheduled && sn.scheduled.date)
       return { timing:t, deadline:null, actionableAt:at(sn.scheduled.date, sn.scheduled.from) };
-    return { timing:t || null, deadline:now + WINDOW_MS, actionableAt:null };
+    return { timing:t || null, deadline:now + windowMs(), actionableAt:null };
   }
 
   /* ---------- opening the window ----------
@@ -151,7 +169,7 @@
     var s = get(orderId);
     if (!s) return 1;
     if (s.deadline == null) return 0;          /* no countdown to show */
-    return 1 - (msLeft(orderId) / WINDOW_MS);
+    return 1 - (msLeft(orderId) / windowMs());
   }
 
   /* ---------- outcomes ----------
@@ -308,7 +326,6 @@
   var MSTATE   = { PENDING:'pending', ACCEPTED:'accepted', PREPARING:'preparing',
                    READY:'ready', WAITING_DRIVER:'waiting_driver' };
   var ACTION   = { ACCEPT:'accept', REJECT:'reject', READY:'ready' };
-  var UNDO_MS  = 10 * 1000;
   var LOCK_HEARTBEAT_MS = 10 * 1000;
   var LOCK_STALE_MS     = 60 * 1000;
   var LS_MSTATE = 'raf_order_mstate';
@@ -382,12 +399,12 @@
   function undoOf(orderId){
     var u = undoAll()[orderId];
     if (!u) return null;
-    if (Date.now() - u.at >= UNDO_MS) return null;
+    if (Date.now() - u.at >= undoMs()) return null;
     return u;
   }
   function undoMsLeft(orderId){
     var u = undoOf(orderId);
-    return u ? Math.max(0, UNDO_MS - (Date.now() - u.at)) : 0;
+    return u ? Math.max(0, undoMs() - (Date.now() - u.at)) : 0;
   }
   function openUndo(orderId, action, prevState, actor, context){
     var all = undoAll();
@@ -446,7 +463,7 @@
   function sweepUndo(){
     var all = undoAll(), now = Date.now(), fired = false;
     Object.keys(all).forEach(function (k) {
-      if (now - all[k].at >= UNDO_MS) { commitUndo(k); fired = true; }
+      if (now - all[k].at >= undoMs()) { commitUndo(k); fired = true; }
     });
     return fired;
   }
@@ -479,7 +496,7 @@
     /* the Promised ETA becomes historical fact here, with the configuration as
        it stands now; later configuration changes affect later orders only */
     recordPromise(orderId, actor);
-    return { ok:true, undoMs:UNDO_MS };
+    return { ok:true, undoMs:undoMs() };
   }
   /* ---------- GROUP B · rejection reasons ----------
      A rejection is never a bare state change: the merchant states why, and
@@ -661,7 +678,7 @@
     audit('order.reject', orderId, { actor:actor, source:'merchant', reversible:true,
       key:(mrecord(orderId) || {}).at, previousState:MSTATE.PENDING, newState:'rejected',
       reason:ctx.reasonId, metadata:{ rejection:ctx } });
-    return { ok:true, undoMs:UNDO_MS, rejection:ctx };
+    return { ok:true, undoMs:undoMs(), rejection:ctx };
   }
   function merchantReady(orderId, actor){
     var auth = processGuard(orderId, actor); if (!auth.ok) return auth;
@@ -684,7 +701,7 @@
     openUndo(orderId, ACTION.READY, prev, actor);
     audit('order.ready', orderId, { actor:actor, source:'merchant', reversible:true,
       key:(mrecord(orderId) || {}).at, previousState:cur, newState:MSTATE.READY });
-    return { ok:true, undoMs:UNDO_MS };
+    return { ok:true, undoMs:undoMs() };
   }
   /* Driver workflow hook: the order has a driver on the way. Out of scope for
      the merchant phases, exposed so the driver module never has to reach into
@@ -808,6 +825,30 @@
       previousState:recovered ? MSTATE.READY : cur, newState:MSTATE.WAITING_DRIVER });
     emit(orderId, 'pickup');
     return true;
+  }
+  /* ---------- the driver is at the customer ----------
+     Between pickup and delivery: the driver has reached the drop-off. It is
+     NOT a new merchant state — the order stays with its driver
+     (WAITING_DRIVER, "a driver has it") exactly as through pickup, and the
+     moment itself lives on the order's own fulfilment record
+     (fulfilment.arrivedAt), written by the driver authority that proved WHO
+     may call this. The engine records the milestone and tells the customer
+     through the one notification path every order event uses. */
+  function driverArrived(orderId, actor){
+    var all = global.RAFShop ? RAFShop.Orders.all() : [];
+    var o = all.filter(function (x) { return x.id === orderId; })[0];
+    if (!o) return { ok:false, reason:'order_not_found' };
+    if (o.status !== STATUS.PROGRESS) return { ok:false, reason:'order_closed' };
+    var cur = mstate(orderId);
+    if (cur !== MSTATE.WAITING_DRIVER) return { ok:false, reason:'not_with_driver' };
+    appendTimeline(orderId, 'm-arrived', 'وصل السائق إلى موقعك', 'The driver arrived at your location', 'active');
+    audit('driver.arrived', orderId, { actor:actor, source:'driver',
+      key:'arrived:' + orderId, previousState:cur, newState:cur });
+    notify(orderId, { ar:'وصل السائق إلى موقعك. يرجى الاستعداد لاستلام طلبك.',
+                      en:'Your driver has arrived at your destination. Please prepare to receive your order.' },
+           'raf_tracking.html?id=' + encodeURIComponent(orderId), 'order.driver_arrived');
+    emit(orderId, 'arrived');
+    return { ok:true };
   }
   /* ---------- delivery completion ----------
      The transition the delivery workflow was missing: the order leaves the
@@ -1084,16 +1125,16 @@
   }
 
   global.RAFOrderEngine = {
-    WINDOW_MS: WINDOW_MS, DECISION: DECISION, STATUS: STATUS,
+    get WINDOW_MS(){ return windowMs(); }, DECISION: DECISION, STATUS: STATUS,
     /* merchant processing */
-    MSTATE: MSTATE, ACTION: ACTION, UNDO_MS: UNDO_MS,
+    MSTATE: MSTATE, ACTION: ACTION, get UNDO_MS(){ return undoMs(); },
     LOCK_HEARTBEAT_MS: LOCK_HEARTBEAT_MS, LOCK_STALE_MS: LOCK_STALE_MS,
     mstate: mstate, mrecord: mrecord, merchantDone: merchantDone, queueOf: queueOf,
     merchantAccept: merchantAccept, merchantReject: merchantReject, merchantReady: merchantReady,
     undo: undo, undoOf: undoOf, undoMsLeft: undoMsLeft, commitUndo: commitUndo, sweepUndo: sweepUndo,
     acceptedAt: acceptedAt, readyAt: readyAt, deliveredAt: deliveredAt, promisedEtaAt: promisedEtaAt,
     driverPickedUp: driverPickedUp, driverAssigned: driverAssigned,
-    driverUnassigned: driverUnassigned, driverDelivered: driverDelivered,
+    driverUnassigned: driverUnassigned, driverArrived: driverArrived, driverDelivered: driverDelivered,
     /* locking */
     lockOf: lockOf, acquireLock: acquireLock, heartbeat: heartbeat, releaseLock: releaseLock,
     overrideLock: overrideLock, lockedByOther: lockedByOther, canProcess: canProcess, sweepLocks: sweepLocks,

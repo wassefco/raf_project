@@ -42,9 +42,12 @@
 <script src="raf_order_snapshot.js"></script>
 <script src="raf_account.js"></script>
 <script src="raf_permissions.js"></script>
+<script src="raf_customer_experience.js"></script>
 <script>
   function T(ar,en){ return curLang()==='en' ? en : ar; }
-  function getId(){ return new URLSearchParams(location.search).get('id') || (RAF_ORDERS[0] && RAF_ORDERS[0].id); }
+  /* no fallback to "some other order": only the requested id, and orderById
+     resolves it among the signed-in customer's OWN orders */
+  function getId(){ return new URLSearchParams(location.search).get('id'); }
 
   function escH(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
   function tlIcon(k){ return {placed:'ti-receipt',prep:'ti-package',ship:'ti-truck-delivery',done:'ti-home-check',cancel:'ti-circle-x'}[k] || 'ti-point'; }
@@ -82,7 +85,7 @@
 
     /* primary action */
     var action = '';
-    if(o.status==='progress') action = '<a class="btn btn-gold btn-block" href="raf_tracking.html"><i class="ti ti-map-pin"></i> '+T('تتبّع الطلب مباشرة','Live track order')+'</a>';
+    if(o.status==='progress') action = '<a class="btn btn-gold btn-block" href="raf_tracking.html?id='+encodeURIComponent(o.id)+'"><i class="ti ti-map-pin"></i> '+T('تتبّع الطلب مباشرة','Live track order')+'</a>';
     else if(o.status==='delivered') action = '<button class="btn btn-ghost btn-block"><i class="ti ti-refresh"></i> '+T('إعادة الطلب','Reorder')+'</button>';
     else action = '<button class="btn btn-ghost btn-block"><i class="ti ti-refresh"></i> '+T('اطلب مرة أخرى','Order again')+'</button>';
 
@@ -91,6 +94,8 @@
         '<div><div class="od-num">#'+o.id+'</div><div class="od-sub"><i class="ti ti-building-store" style="font-size:13px"></i> '+o.store[en?'en':'ar']+' · '+o.date[en?'en':'ar']+'</div></div>'+
         '<span class="badge '+sm.cls+'"><i class="ti '+sm.ic+'"></i> '+sm.label+'</span>'+
       '</div></div>'+
+      /* delivered: who delivered it + the customer's own feedback status (no contact controls) */
+      (function(){ var s = deliveredStripHTML(o); return s ? '<div class="panel" style="margin-top:14px">'+s.replace('class="ord-drv"','class="ord-drv" style="border-top:0"')+'</div>' : ''; })()+
 
       '<div class="section-h">'+T('حالة الطلب','Status History')+'</div>'+
       '<div class="panel"><div class="panel-pad"><div class="tl">'+tl+'</div></div></div>'+
@@ -124,5 +129,7 @@
   render();
   if(location.hash==='#track'){ var h=document.querySelector('.tl'); if(h) h.scrollIntoView({block:'center'}); }
 </script>
+<!-- the active-order bar: reopens the signed-in customer's order in progress -->
+<script src="raf_active_order.js"></script>
 </body>
 </html>

@@ -262,6 +262,7 @@ dialog.modal::backdrop{ background:rgba(14,25,23,.45); }
 <script src="raf_permissions.js"></script>
 <script src="raf_wallet.js"></script>
 <script src="raf_compensation.js"></script>
+<script src="raf_customer_experience.js"></script>
 <script src="raf_customer_service.js"></script>
 <script>
 /* ══════════════════════════════════════════════════════════════════════
@@ -301,6 +302,7 @@ var CS = (function(){
     { k:'mywork',    ic:'ti-user-check',       ar:'أعمالي',         en:'My Work' },
     { k:'followups', ic:'ti-clock-hour-4',     ar:'المتابعات',      en:'Follow-ups' },
     { k:'c360',      ic:'ti-id-badge-2',       ar:'ملف العميل 360', en:'Customer 360' },
+    { k:'ratings',   ic:'ti-star',             ar:'تقييمات المتاجر', en:'Store Ratings' },
     { k:'knowledge', ic:'ti-book-2',           ar:'قاعدة المعرفة',  en:'Knowledge', soon:true }
   ];
   function pageOf(k){ for (var i=0;i<NAV.length;i++) if (NAV[i].k === k) return NAV[i]; return NAV[0]; }
@@ -478,6 +480,37 @@ var CS = (function(){
       + '<div class="card"><h2><i class="ti ti-check"></i>' + esc(T('منتهية','Finished')) + '</h2>' + followupRows(done) + '</div>';
   }
 
+
+  /* Store ratings history — read-only. RAFCustomerExperience decides access
+     (stores.view, staff session); this view only presents what it returns. */
+  var RSTORE = '';
+  function vRatings(){
+    var CXA = window.RAFCustomerExperience;
+    var r = CXA && CXA.storeRatingsHistory ? CXA.storeRatingsHistory() : { ok:false };
+    if (!r.ok) return notAllowed(r);
+    var stores = {}; r.items.forEach(function(x){ stores[x.storeSlug] = x.store; });
+    var items = RSTORE ? r.items.filter(function(x){ return x.storeSlug === RSTORE; }) : r.items;
+    var rated = items.filter(function(x){ return typeof x.rating === 'number'; });
+    var avg = rated.length ? Math.round(rated.reduce(function(s,x){ return s + x.rating; }, 0) / rated.length * 10) / 10 : null;
+    function stars(n){ var s=''; for (var i=1;i<=5;i++) s += i <= n ? '★' : '☆'; return '<span aria-label="' + esc(T(n + ' من 5', n + ' of 5')) + '">' + s + '</span>'; }
+    var sel = '<label class="sub" for="rStore">' + esc(T('المتجر','Store')) + '</label> <select id="rStore" onchange="CS.ratingsStore(this.value)">'
+      + '<option value="">' + esc(T('كل المتاجر','All stores')) + '</option>'
+      + Object.keys(stores).map(function(k){ return '<option value="' + esc(k) + '"' + (RSTORE === k ? ' selected' : '') + '>' + esc(L(stores[k] && stores[k].name) || k) + '</option>'; }).join('')
+      + '</select>';
+    var h = '<div class="tiles">' + tile(T('متوسط التقييم','Average'), avg == null ? '—' : avg.toFixed(1))
+      + tile(T('تقييمات بالنجوم','Star ratings'), rated.length) + tile(T('ملاحظات العملاء','Feedback'), items.length) + '</div>'
+      + '<div class="card"><h2><i class="ti ti-star"></i>' + esc(T('سجل تقييمات المتاجر','Store ratings history')) + '</h2><div style="margin:6px 0 12px">' + sel + '</div>';
+    if (!items.length) return h + emptyBox('لا توجد تقييمات للمتاجر بعد.','No store ratings yet.','ti-star') + '</div>';
+    return h + '<div class="tbl-wrap"><table><thead><tr><th>' + esc(T('التاريخ','Date')) + '</th><th>' + esc(T('المتجر','Store')) + '</th>'
+      + '<th>' + esc(T('الطلب','Order')) + '</th><th>' + esc(T('التقييم','Rating')) + '</th><th>' + esc(T('التعليق','Comment')) + '</th><th>' + esc(T('العميل','Customer')) + '</th></tr></thead><tbody>'
+      + items.map(function(x){
+        return '<tr><td class="mono">' + esc(when(x.createdAt)) + '</td><td>' + esc(L(x.store && x.store.name) || x.storeSlug) + '</td>'
+          + '<td class="mono"><bdi>' + esc(x.orderId) + '</bdi></td>'
+          + '<td>' + (typeof x.rating === 'number' ? stars(x.rating) : '—') + '</td>'
+          + '<td>' + (x.comment ? esc(x.comment) : '—') + '</td><td><bdi>' + esc(x.customerName || '—') + '</bdi></td></tr>';
+      }).join('') + '</tbody></table></div>'
+      + '<div class="notice"><i class="ti ti-lock"></i><span>' + esc(T('سجلات التقييم ثابتة ولا يمكن تعديلها أو حذفها.','Rating records are permanent and cannot be changed or deleted.')) + '</span></div></div>';
+  }
   function vCustomers(){
     var r = SVC.listTickets({});
     if (!r.ok) return notAllowed(r);
@@ -821,6 +854,7 @@ var CS = (function(){
     else if (route.p === 'followups') html = vFollowUps();
     else if (route.p === 'customers') html = vCustomers();
     else if (route.p === 'c360')      html = vC360();
+    else if (route.p === 'ratings')   html = vRatings();
     else html = vKnowledge();
     el('view').innerHTML = html;
     renderNav();
@@ -876,6 +910,7 @@ var CS = (function(){
            open:function(id){ go('tickets', id); },
            go:function(p){ go(p); },
            go360:function(id){ C360 = id; go('c360'); },
+           ratingsStore:function(v){ RSTORE = v || ''; render(); },
            set360:function(v){ C360 = v.trim(); clearTimeout(window.__c); window.__c = setTimeout(render, 350); },
            setFilter:function(k, v){ FILTERS[k] = v; clearTimeout(window.__f); window.__f = setTimeout(render, 300); },
            clearFilters:function(){ Object.keys(FILTERS).forEach(function(k){ FILTERS[k] = ''; }); render(); } };

@@ -54,6 +54,8 @@
 <script src="raf_data.js"></script>
 <script src="raf_order_snapshot.js"></script>
 <script src="raf_inventory.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_customer_experience.js"></script>
 <script src="raf_account.js"></script>
 <script>
   var curFilter = 'all';
@@ -71,5 +73,7 @@
   window.onLangChange = renderOrders;
   renderOrders();
 </script>
+<!-- the active-order bar: reopens the signed-in customer's order in progress -->
+<script src="raf_active_order.js"></script>
 </body>
 </html>

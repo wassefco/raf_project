@@ -130,6 +130,14 @@ select.field-inp{cursor:pointer;appearance:auto;}
 .seg-btn.on.s-revoke{background:var(--red);color:#fff;}
 /* role matrix checkbox */
 .pchk{width:18px;height:18px;accent-color:var(--gold);cursor:pointer;flex-shrink:0;}
+/* an account that may read permission data but not administer it: the controls
+   that would be refused are not drawn. The refusal itself lives in RAFPerm. */
+body.read-only #actionBar,
+body.read-only #resetBtn,
+body.read-only .seg,
+body.read-only .tb-btn.gold{ display:none !important; }
+body.read-only .pchk,
+body.read-only #detailRole{ pointer-events:none; opacity:.55; }
 .prow.locked{opacity:.55;}
 /* ROLE / TEMPLATE CARDS */
 .card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
@@ -215,7 +223,7 @@ select.field-inp{cursor:pointer;appearance:auto;}
     </div>
     <div style="display:flex;gap:6px;margin-bottom:8px;">
       <button class="lang-btn" onclick="toggleLang()" data-ar="EN" data-en="ع" style="flex:1;">EN</button>
-      <button class="lang-btn" onclick="resetData()" data-ar="إعادة تعيين" data-en="Reset" style="flex:1;">إعادة تعيين</button>
+      <button class="lang-btn" id="resetBtn" onclick="resetData()" data-ar="إعادة تعيين" data-en="Reset" style="flex:1;">إعادة تعيين</button>
     </div>
     <!-- the account area's sign-out: the shared RAFSignOut action -->
     <button class="sb-signout" onclick="RAFSignOut()"><i class="ti ti-logout"></i>
@@ -378,6 +386,8 @@ function applyLang(){
 let DRAFT = null;            // user draft {id, roleId, overrides}
 let ROLE_DRAFT = null;       // role draft {id, permissions:[]}
 let CUR_VIEW = 'users';
+let CAN_VIEW = false;        // resolved from RAFPerm in applyAccess()
+let CAN_EDIT = false;
 let SEL_ROLE_ID = null;
 let SEL_TPL_ID = null;
 
@@ -404,7 +414,8 @@ function toggleSb(open){
 }
 
 /* ========== HELPERS ========== */
-function initials(name){ const p=name.trim().split(/\s+/); return (p[0]?p[0][0]:'')+(p[1]?p[1][0]:''); }
+/* one account with no name must not take the whole screen down with it */
+function initials(name){ const p=String(name||'').trim().split(/\s+/); return (p[0]?p[0][0]:'')+(p[1]?p[1][0]:''); }
 function roleName(roleId){ const r=RAFPerm.getRole(roleId); return r?t(r.nameAr,r.nameEn):roleId; }
 function roleTagClass(roleId){
   return { super_admin:'tag-gold', higher_mgmt:'tag-purple', ops_manager:'tag-blue',
@@ -571,18 +582,47 @@ function updateActionBar(){
                          : t('تغييرات غير محفوظة على الدور','Unsaved changes for this role');
   } else bar.classList.add('hidden');
 }
+/* Every save below asks the AUTHORITY and reports whatever it answers. The
+   page never decides that a change is allowed; it renders the result. */
+function permRefusal(reason){
+  switch(reason){
+    case 'forbidden':
+    case 'not_signed_in':      return t('لا تملك صلاحية إدارة الصلاحيات.','You may not administer permissions.');
+    case 'actor_inactive':     return t('حسابك موقوف.','Your account is suspended.');
+    case 'self':               return t('لا يمكنك تعديل صلاحيات حسابك أو دورك.','You cannot change your own permissions or role.');
+    case 'out_of_scope':       return t('هذا الحساب خارج نطاق إدارتك.','That account is outside your management scope.');
+    case 'exceeds_actor':      return t('لا يمكنك منح صلاحية لا تملكها.','You cannot grant a permission you do not hold.');
+    case 'not_delegable':      return t('هذه الصلاحية لا تُمنح من هنا.','That permission is not granted from here.');
+    case 'unknown_permission': return t('صلاحية غير معروفة.','Unknown permission.');
+    case 'role_immutable':     return t('هذا الدور غير قابل للتعديل.','That role cannot be edited.');
+    case 'user_not_found':     return t('تعذّر العثور على الحساب.','That account could not be found.');
+    default:                   return t('تعذّر حفظ التغيير.','The change could not be saved.');
+  }
+}
 function saveDraft(){
   if(CUR_VIEW==='users'&&DRAFT){
     const u=RAFPerm.getUser(DRAFT.id);
     u.roleId=DRAFT.roleId; u.overrides=Object.assign({},DRAFT.overrides);
-    RAFPerm.saveUser(u);
-    toast(t('تم حفظ صلاحيات المستخدم ✓','User permissions saved ✓'));
+    const res=RAFPerm.saveUser(u);
+    if(res&&res.ok){
+      toast(t('تم حفظ صلاحيات المستخدم ✓','User permissions saved ✓'));
+    } else {
+      toast(permRefusal(res&&res.reason));
+      resetDraft();                       /* the stored record, not the refused one */
+      return;
+    }
     renderDetail();
   } else if(CUR_VIEW==='roles'&&ROLE_DRAFT){
     const r=RAFPerm.getRole(ROLE_DRAFT.id);
     r.permissions=ROLE_DRAFT.permissions.slice();
-    RAFPerm.saveRole(r);
-    toast(t('تم حفظ صلاحيات الدور ✓','Role permissions saved ✓'));
+    const res=RAFPerm.saveRole(r);
+    if(res&&res.ok){
+      toast(t('تم حفظ صلاحيات الدور ✓','Role permissions saved ✓'));
+    } else {
+      toast(permRefusal(res&&res.reason));
+      resetDraft();
+      return;
+    }
     renderRolesGrid(); renderRoleAccordion();
   }
   updateActionBar();
@@ -657,7 +697,7 @@ function renderTemplates(){
     return '<div class="rcard'+(tp.id===SEL_TPL_ID?' on':'')+'" onclick="selectTemplate(\''+tp.id+'\')">'
       +'<div class="rcard-top"><div class="rcard-ico"><i class="ti ti-template"></i></div>'
       +'<div><div class="rcard-name">'+t(tp.nameAr,tp.nameEn)+'</div></div></div>'
-      +'<div class="rcard-desc">'+t(tp.descAr,tp.descEn)+'</div>'
+      +'<div class="rcard-desc">'+(t(tp.descAr,tp.descEn)||'—')+'</div>'
       +'<div class="rcard-foot"><span class="tag tag-gold">'+tp.permissions.length+' '+t('صلاحية','perms')+'</span></div>'
     +'</div>';
   }).join('');
@@ -688,16 +728,19 @@ function applyTemplate(){
   if(!uid){ toast(t('اختر مستخدماً أولاً','Select a user first')); return; }
   const tp=RAFPerm.getTemplates().filter(x=>x.id===SEL_TPL_ID)[0];
   const u=RAFPerm.getUser(uid);
-  u.overrides=u.overrides||{};
+  u.overrides=Object.assign({},u.overrides||{});
   tp.permissions.forEach(k=>{ if(!RAFPerm.can(u,k)) u.overrides[k]='grant'; });
-  RAFPerm.saveUser(u);
-  toast(t('تم تطبيق القالب على ','Template applied to ')+u.name+' ✓');
+  const res=RAFPerm.saveUser(u);
+  if(res&&res.ok) toast(t('تم تطبيق القالب على ','Template applied to ')+u.name+' ✓');
+  else toast(permRefusal(res&&res.reason));
 }
 
 /* ========== RESET DATA ========== */
 function resetData(){
   if(confirm(t('إعادة تعيين كل بيانات الصلاحيات للوضع الافتراضي؟','Reset all permission data to defaults?'))){
-    RAFPerm.reset(); SEL_ROLE_ID=null; SEL_TPL_ID=null; DRAFT=null; ROLE_DRAFT=null;
+    const res=RAFPerm.reset();
+    if(!(res&&res.ok)){ toast(permRefusal(res&&res.reason)); return; }
+    SEL_ROLE_ID=null; SEL_TPL_ID=null; DRAFT=null; ROLE_DRAFT=null;
     document.getElementById('tplDetailCard').classList.add('hidden');
     rerenderAll(); closeDetail();
     toast(t('تمت إعادة التعيين ✓','Data reset ✓'));
@@ -712,11 +755,38 @@ function rerenderAll(){
   if(SEL_TPL_ID) selectTemplate(SEL_TPL_ID);
 }
 
+/* ========== ACCESS ==========
+   The authority is the boundary: every save below is refused by RAFPerm on its
+   own terms whatever this page renders. What happens here is only that an
+   account which cannot administer permissions is not shown the screen, and one
+   that can only read is not shown controls that would be refused. */
+function applyAccess(){
+  const me = RAFPerm.currentUser ? RAFPerm.currentUser() : null;
+  CAN_VIEW = !!(me && me.status==='active' && RAFPerm.can(me.id,'permissions.view'));
+  CAN_EDIT = !!(me && RAFPerm.isCentralPermAdmin && RAFPerm.isCentralPermAdmin(me.id));
+  if(me){
+    const n=document.querySelector('.sb-admin-name'), r=document.querySelector('.sb-admin-role');
+    if(n) n.textContent = me.name || '';
+    const role = RAFPerm.getRole(me.roleId);
+    if(r && role){ r.textContent = t(role.nameAr, role.nameEn); r.removeAttribute('data-ar'); r.removeAttribute('data-en'); }
+  }
+  if(!CAN_VIEW){
+    document.body.innerHTML =
+      '<div style="padding:64px 24px;text-align:center;font-family:\'IBM Plex Sans Arabic\',sans-serif;color:#6b7280">'
+      + '<h2 style="margin:0 0 10px;color:#111827">' + t('لا تملك صلاحية الوصول','You do not have access') + '</h2>'
+      + '<p style="margin:0">' + t('إدارة الصلاحيات غير متاحة لحسابك.','Permission administration is not available to your account.') + '</p></div>';
+    return false;
+  }
+  if(!CAN_EDIT) document.body.classList.add('read-only');
+  return true;
+}
+
 /* ========== INIT ========== */
 (function(){
   const l=localStorage.getItem('raf_lang');
   if(l){ const r=document.getElementById('htmlRoot'); r.lang=l; r.dir=l==='en'?'ltr':'rtl'; }
   applyLang();
+  if(!applyAccess()) return;
   fillRoleFilter();
   renderUsers();
   renderRolesGrid();

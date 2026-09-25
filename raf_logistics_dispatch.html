@@ -724,7 +724,7 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
               ? '<div class="acts-row"><button class="btn pri" type="button" onclick="OPS.openAssign(\'' + esc(r.id) + '\')">'
                 + '<i class="ti ti-user-check" aria-hidden="true"></i>' + T('تعيين سائق','Assign a driver') + '</button></div>'
               : '<div class="notice"><i class="ti ti-lock" aria-hidden="true"></i><span>'
-                + T('التعيين يتطلب صلاحية drivers.assign.','Assignment requires the drivers.assign permission.') + '</span></div>')
+                + T('التعيين غير متاح لحسابك.','Assignment is not available to your account.') + '</span></div>')
           : '')
       + (st.k !== 'unassigned' && r.driverId && !r.pickedUpAt && CAP && CAP.assign
           ? '<div class="acts-row"><button class="btn" type="button" onclick="OPS.openReturn(\'' + esc(r.id) + '\')">'
@@ -811,6 +811,12 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
   }
 
   /* ───────── shell ───────── */
+  /* the existing settings permission decides whether Settings is listed */
+  function canSettings(){ try { return !!(ME && P.can(ME.id, 'settings.view')); } catch(e){ return false; } }
+  /* Compensation is listed for the accounts the compensation authority lets
+     manage compensations — the same existing Logistics management permission
+     these pages already gate their operational actions on. */
+  function canCompensation(){ try { return !!(ME && P.can(ME.id, 'drivers.suspend')); } catch(e){ return false; } }
   function renderNav(){
     function item(href, icon, ar, en, current){
       return '<li><a href="' + href + '"' + (current ? ' aria-current="page"' : '') + '>'
@@ -823,6 +829,10 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
       + item('raf_logistics_dispatch.html', 'ti-route', 'التوزيع والتعيين', 'Dispatch & Assignment', true)
       + item('raf_logistics_tickets.html', 'ti-ticket', 'التذاكر', 'Tickets', false)
       + item('raf_logistics_drivers.html', 'ti-motorbike', 'السائقون', 'Drivers', false)
+      /* Settings is the final administrative section, listed only for an
+         account that may actually open it */
+      + (canSettings() ? item('raf_logistics_settings.html', 'ti-settings', 'الإعدادات', 'Settings', false) : '')
+      + (canCompensation() ? item('raf_logistics_compensation.html', 'ti-receipt-refund', 'التعويضات', 'Compensation', false) : '')
       + '</ul>'
       + '<div class="ops-nav-foot"><b>' + T('العمليات واللوجستيات','Operations & Logistics') + '</b>'
       + T('منصة رف','RAF platform') + '</div>';
@@ -911,10 +921,7 @@ table.dsp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
        read first and an empty session is refused. */
     var sid = null;
     try {
-      var key = (P.LS && P.LS.session) || 'raf_current_user';
-      var raw = localStorage.getItem(key);
-      if(raw != null && raw !== ''){ try { sid = JSON.parse(raw); } catch(e){ sid = raw; } }
-      if(typeof sid !== 'string' || !sid) sid = null;
+      sid = P.sessionUserId ? P.sessionUserId() : null;   /* RAFPerm owns this tab's session */
     } catch(e){ sid = null; }
     if(!sid){ gate('يلزم تسجيل الدخول','Sign-in required', T('التوزيع والتعيين متاح لفريق عمليات رف بعد تسجيل الدخول.','Dispatch is available to RAF operations staff after signing in.')); return; }
     var u = null; try { u = P.getUser(sid); } catch(e){ u = null; }

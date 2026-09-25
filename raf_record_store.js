@@ -66,6 +66,15 @@
                           purpose:'append-only driver join applications — the immutable facts at submission (applicant, vehicle, document metadata, consent, source)' },
     logistics_application_events:{ key:'raf_logistics_application_events', owner:'RAFLogistics',
                           purpose:'append-only application lifecycle (submitted / review note / approved / rejected); the application status is derived from these' },
+    /* Customer ↔ Driver communication — owned by RAFDriverCommunication.
+       Who may take part is NEVER stored here: it is read, every time, from
+       the order's own record (fulfilment.driverId, customer.id, status). */
+    communication_messages:      { key:'raf_communication_messages',      owner:'RAFDriverCommunication',
+                          purpose:'append-only, immutable Customer ↔ Driver messages (text / images / voice, original media embedded so one send is one write)' },
+    communication_receipts:      { key:'raf_communication_receipts',      owner:'RAFDriverCommunication',
+                          purpose:'append-only delivered / read receipts, written only by the recipient’s own page; message status is derived from these' },
+    communication_call_attempts: { key:'raf_communication_call_attempts', owner:'RAFDriverCommunication',
+                          purpose:'append-only call ATTEMPTS used only to enforce the configured attempt limit — caller, callee, time; no phone number, no outcome, not a call record' },
     notifications:      { key:'raf_notifications',        owner:'RAFNotify',
                           purpose:'append-only per-recipient notifications' },
     notification_reads: { key:'raf_notification_reads',   owner:'RAFNotify',

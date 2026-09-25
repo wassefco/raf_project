@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl" data-ui="admin">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — التعويضات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_logistics.css">
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   COMPENSATION MANAGEMENT — the compensations RAF has actually issued.
+   Shares the Logistics shell and components; what follows is only what
+   this page adds: the toolbar, the scope tabs, the grid and the details
+   sheet. The shared stylesheet is untouched — every rule here is scoped
+   to this page's own classes.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.wk{ display:flex; flex-direction:column; gap:12px; }
+.wk-head{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.wk-head p{ margin:0; color:var(--muted); font-size:13px; flex:1 1 240px; min-width:0; }
+.wk-count{ color:var(--faint); font-size:12px; font-weight:700; font-family:'DM Sans',sans-serif; white-space:nowrap; }
+
+/* scope: where a compensation stands in the customer's hands */
+.scopes{ display:flex; gap:2px; padding:3px; background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r); overflow-x:auto; }
+.scope{ display:inline-flex; align-items:center; gap:7px; min-height:36px; padding:0 14px; border:0; background:transparent; cursor:pointer;
+  border-radius:var(--r-sm); color:var(--muted); font-size:13px; font-weight:700; white-space:nowrap; }
+.scope:hover{ color:var(--ink); }
+.scope[aria-pressed="true"]{ background:var(--surface); color:var(--ink); box-shadow:var(--shadow); }
+.scope .n{ font-family:'DM Sans',sans-serif; font-size:11.5px; color:var(--faint); }
+.scope[aria-pressed="true"] .n{ color:var(--accent); }
+
+/* toolbar — the fixed Logistics pattern: search, then one Filter button */
+.tools{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r); padding:10px; box-shadow:var(--shadow); }
+.srch{ position:relative; flex:1 1 280px; min-width:0; }
+.srch > i{ position:absolute; inset-inline-start:11px; top:50%; transform:translateY(-50%); color:var(--faint); font-size:18px; pointer-events:none; }
+.srch input{ width:100%; min-height:42px; padding:0 12px; padding-inline-start:38px; padding-inline-end:36px; border:1px solid var(--line-2);
+  border-radius:var(--r-sm); background:var(--surface); color:var(--ink); font-size:13.5px; }
+.srch input:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+.srch .clr{ position:absolute; inset-inline-end:4px; top:50%; transform:translateY(-50%); width:32px; height:32px; border:0; border-radius:var(--r-sm);
+  background:transparent; color:var(--faint); cursor:pointer; display:grid; place-items:center; }
+.srch .clr:hover{ background:var(--surface-2); color:var(--ink); }
+.tools .btn{ min-height:42px; }
+.filter-btn{ flex:0 0 auto; gap:8px; }
+.filter-btn.on{ border-color:var(--accent); color:var(--accent-2); background:var(--accent-soft); }
+.filter-btn .fcount{ min-width:20px; height:20px; padding:0 6px; border-radius:10px; background:var(--accent); color:#fff;
+  font-size:11.5px; font-weight:800; display:inline-grid; place-items:center; font-family:'DM Sans',sans-serif; }
+
+/* filter applet — the same sheet family as the details sheet */
+.applet{ width:min(440px,100%); }
+.applet .sheet-b{ padding:4px 16px 16px; }
+.fld{ padding:12px 0; border-block-end:1px solid var(--line); }
+.fld:last-child{ border-block-end:0; }
+.fld > label,.fld > .lg{ display:block; font-size:12px; font-weight:800; color:var(--muted); margin-block-end:6px; }
+.fld select,.fld input[type="date"]{ width:100%; min-height:44px; padding:0 10px; border:1px solid var(--line-2);
+  border-radius:var(--r-sm); background:var(--surface); color:var(--ink); font-size:13.5px; }
+.fld select:focus,.fld input:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+.fld .two{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.sub-f{ display:block; font-size:11.5px; font-weight:700; color:var(--faint); }
+.sub-f input{ margin-block-start:5px; }
+.sheet-f{ display:flex; gap:10px; padding:12px 16px; border-block-start:1px solid var(--line); background:var(--surface-2); }
+.sheet-f .btn{ flex:1 1 auto; min-height:44px; }
+
+/* the reason form — the same sheet family as the filter applet */
+.fld textarea{ width:100%; min-height:88px; padding:8px 10px; border:1px solid var(--line-2); border-radius:var(--r-sm);
+  background:var(--surface); color:var(--ink); font-size:13.5px; font-family:inherit; resize:vertical; }
+.fld textarea:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:var(--accent); }
+.fld .req{ color:var(--alert); font-weight:800; }
+.fld .hint{ display:block; margin-block-start:5px; font-size:11.5px; color:var(--faint); line-height:1.6; }
+.acts-row{ display:flex; gap:8px; flex-wrap:wrap; margin-block-start:10px; }
+.acts-row .btn{ flex:0 1 auto; }
+.form-msg{ display:flex; gap:9px; padding:11px 12px; border-radius:var(--r); font-size:12.5px; margin-block-start:12px; }
+.form-msg i{ font-size:17px; flex-shrink:0; }
+.form-msg.err{ background:var(--alert-bg); color:var(--alert); }
+.form-msg.ok{ background:var(--done-bg); color:var(--done); }
+.form-msg.busy{ background:var(--surface-2); color:var(--muted); }
+
+/* active filter chips */
+.fchips{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+.fchip{ display:inline-flex; align-items:center; gap:6px; min-height:30px; padding:0 6px 0 11px; border-radius:999px;
+  border:1px solid var(--line-2); background:var(--surface); color:var(--text); font-size:12.5px; font-weight:600; }
+[dir="rtl"] .fchip{ padding:0 11px 0 6px; }
+.fchip b{ color:var(--ink); font-weight:800; }
+.fchip button{ width:22px; height:22px; border:0; border-radius:50%; background:var(--surface-2); color:var(--muted); cursor:pointer;
+  display:grid; place-items:center; flex-shrink:0; }
+.fchip button:hover{ background:var(--alert-bg); color:var(--alert); }
+.fchip button i{ font-size:13px; }
+
+/* the list is the workspace: full-bleed inside its card, sticky header */
+.tbl-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow); overflow:hidden; }
+.tbl-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; }
+/* ───────── the compensation grid ─────────
+   A fixed grid: every column keeps its width whatever the content is, so
+   headers never drift from their data. Scoped to .cmp — the shared
+   stylesheet is untouched. */
+table.cmp{ width:100%; border-collapse:collapse; table-layout:fixed; min-width:760px; }
+table.cmp th,table.cmp td{ padding:10px 10px; vertical-align:middle; }
+table.cmp col.c-ref  { width:16%; }
+table.cmp col.c-order{ width:14%; }
+table.cmp col.c-cust { width:16%; }
+table.cmp col.c-store{ width:12%; }
+table.cmp col.c-amt  { width:11%; }
+table.cmp col.c-state{ width:15%; }
+table.cmp col.c-date { width:16%; }
+
+table.cmp .c-ref,table.cmp .c-order,table.cmp .c-cust,table.cmp .c-store{ text-align:start; }
+table.cmp .c-amt,table.cmp .c-state,table.cmp .c-date{ text-align:center; }
+table.cmp .c-cust,table.cmp .c-store,table.cmp .c-state{ overflow-wrap:anywhere; }
+table.cmp .c-ref .ref-id,table.cmp .c-order .ord-id{ white-space:nowrap; }
+table.cmp .badge{ max-width:100%; white-space:normal; overflow-wrap:anywhere; }
+table.cmp th{ position:sticky; top:0; z-index:1; }
+table.cmp tbody tr{ cursor:pointer; }
+table.cmp tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+.ref-id,.ord-id{ display:inline-flex; align-items:center; gap:7px; font-family:'DM Sans',ui-monospace,monospace;
+  font-size:12.5px; font-weight:700; color:var(--ink); }
+.amt{ font-family:'DM Sans',sans-serif; font-weight:800; color:var(--ink); white-space:nowrap; }
+.amt .cur{ font-family:var(--font); font-weight:600; color:var(--muted); font-size:11.5px; }
+/* the flags a compensation can carry, from facts the authorities already hold */
+.flag{ display:inline-flex; align-items:center; gap:4px; font-size:11.5px; font-weight:700; margin-block-start:2px; }
+.flag.soon{ color:var(--pend); }
+.flag.tkt{ color:var(--pend); }
+
+/* details sheet */
+.sheet{ position:fixed; inset:0; z-index:90; background:rgba(12,20,17,.42); display:flex; justify-content:flex-end; }
+.sheet-c{ width:min(560px,100%); height:100%; background:var(--surface); display:flex; flex-direction:column; box-shadow:var(--shadow-pop); }
+.sheet-h{ display:flex; align-items:center; gap:10px; padding:12px 16px; border-block-end:1px solid var(--line); background:var(--surface-2); }
+.sheet-h .t{ flex:1; min-width:0; }
+.sheet-h .t b{ display:block; color:var(--ink); font-size:14.5px; font-family:'DM Sans',sans-serif; }
+.sheet-h .t span{ display:block; color:var(--muted); font-size:12px; }
+.sheet-b{ flex:1; overflow-y:auto; padding:0 0 20px; }
+.sec{ padding:14px 16px; border-block-end:1px solid var(--line); }
+.sec:last-child{ border-block-end:0; }
+.sec > h3{ margin:0 0 10px; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--faint);
+  display:flex; align-items:center; gap:7px; }
+.sec > h3 i{ font-size:15px; color:var(--accent); letter-spacing:0; }
+.kv{ display:flex; gap:12px; padding:5px 0; font-size:13px; align-items:baseline; }
+.kv .k{ color:var(--muted); flex:0 0 40%; max-width:40%; }
+.kv .v{ color:var(--ink); font-weight:600; min-width:0; overflow-wrap:anywhere; }
+.ms{ list-style:none; margin:0; padding:0; }
+.ms li{ display:flex; gap:10px; align-items:baseline; padding:7px 0; border-block-end:1px dashed var(--line); font-size:12.5px; }
+.ms li:last-child{ border-block-end:0; }
+.ms .k{ flex:1; color:var(--ink); min-width:0; overflow-wrap:anywhere; }
+.ms .k .sub{ display:block; color:var(--faint); font-size:11.5px; margin-block-start:2px; }
+.ms .v{ color:var(--muted); font-weight:600; font-family:'DM Sans',sans-serif; white-space:nowrap; }
+
+@media (max-width:1400px){
+  table.cmp th,table.cmp td{ padding:9px 8px; }
+  table.cmp th{ white-space:normal; }
+  table.cmp .ref-id,table.cmp .ord-id{ font-size:12px; }
+}
+@media (max-width:1100px){
+  table.cmp th,table.cmp td{ padding:9px 6px; }
+  table.cmp .ref-id,table.cmp .ord-id{ font-size:11px; gap:5px; }
+  table.cmp .badge{ font-size:11px; padding:3px 7px; }
+  html[lang="en"] table.cmp th{ font-size:10px; letter-spacing:.02em; }
+}
+@media (max-width:900px){ .tools{ padding:8px; } }
+/* the list becomes one card per compensation */
+@media (max-width:860px){
+  table.cmp{ min-width:0; table-layout:auto; }
+  table.cmp colgroup{ display:none; }
+  table.cmp td[class*="c-"]{ text-align:start; }
+  table.cmp, table.cmp tbody, table.cmp tr, table.cmp td{ display:block; width:100%; }
+  table.cmp thead{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+  table.cmp tbody tr{ border-block-end:1px solid var(--line); padding:8px 0; }
+  table.cmp tbody tr:last-child{ border-block-end:0; }
+  table.cmp td{ border:0; display:flex; align-items:center; gap:12px; padding:5px 14px; }
+  table.cmp td::before{ content:attr(data-l); flex:0 0 38%; max-width:38%; color:var(--faint); font-size:11.5px; font-weight:700; }
+  table.cmp td > *{ min-width:0; }
+  table.cmp td .badge{ white-space:normal; }
+  .sheet-c{ width:100%; }
+  .kv .k{ flex-basis:44%; max-width:44%; }
+  .kv .badge{ white-space:normal; }
+}
+@media (max-width:520px){
+  .scope{ padding:0 10px; font-size:12.5px; }
+  .tools .btn{ flex:1 1 auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-c" role="alert">
+    <div class="ic"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
+    <h1 id="gateT"></h1>
+    <p id="gateP"></p>
+    <a class="btn" href="raf_login.html"><i class="ti ti-login" aria-hidden="true"></i><span data-ar="تسجيل الدخول" data-en="Sign in">تسجيل الدخول</span></a>
+  </div>
+</div>
+
+<div class="ops" id="shell" hidden>
+  <aside class="ops-nav" id="opsNav">
+    <div class="ops-brand">
+      <span class="ops-brand-mark" aria-hidden="true"><i class="ti ti-route"></i></span>
+      <span class="ops-brand-t"><b data-ar="اللوجستيات" data-en="Logistics">اللوجستيات</b>
+        <span data-ar="منصة رف" data-en="RAF platform">منصة رف</span></span>
+      <button class="ibtn ops-nav-x" type="button" onclick="OPS.closeNav()" aria-label="إغلاق"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <nav class="ops-nav-scroll" id="navTree" aria-label="التنقل"></nav>
+  </aside>
+  <div class="scrim" onclick="OPS.closeNav()" aria-hidden="true"></div>
+
+  <div class="ops-main">
+    <header class="ops-head">
+      <button class="ibtn ops-burger" type="button" aria-controls="opsNav" onclick="OPS.openNav()" aria-label="القائمة"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+      <div class="ops-crumb"><small id="crumbGroup"></small><b id="crumbPage"></b></div>
+      <div class="ops-tools">
+        <button class="ibtn" type="button" id="refreshBtn" onclick="OPS.refresh()" aria-label="تحديث"><i class="ti ti-refresh" aria-hidden="true"></i></button>
+        <button class="ibtn lang" type="button" id="langBtn" onclick="OPS.toggleLang()"></button>
+        <span class="ops-sep" aria-hidden="true"></span>
+        <div class="ops-user"><span class="ops-av" id="userAv"></span>
+          <span class="ops-user-t"><b id="userName"></b><span id="userRole"></span></span></div>
+        <button class="ibtn signout" type="button" id="signOutBtn" onclick="RAFSignOut()">
+          <i class="ti ti-logout" aria-hidden="true"></i>
+          <span class="signout-t" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span>
+        </button>
+      </div>
+    </header>
+    <main class="ops-content" id="view" tabindex="-1"></main>
+  </div>
+</div>
+<div id="sheetHost"></div>
+<div id="appletHost"></div>
+<div id="formHost"></div>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_store_ops.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_wallet.js"></script>
+<script src="raf_customer_service.js"></script>
+<script src="raf_compensation.js"></script>
+<script>
+/* ============================================================================
+   COMPENSATION MANAGEMENT — التعويضات
+   The compensations RAF has actually issued to customers, and the two
+   decisions management is allowed to take on them.
+
+   RAFCompensation IS THE AUTHORITY. Every record, figure, status and
+   capability on this page comes from RAFCompensation.list(); the two actions
+   call RAFCompensation.void() and .reverse(). The page calculates no
+   compensation, writes no record, never touches a wallet balance, an order,
+   the audit log or storage, and keeps no copy of a compensation after an
+   action: it re-reads the authority and shows whatever came back.
+
+   AUTHORISATION is the authority's. It answers FORBIDDEN to an account that
+   may not manage compensations, and this page simply shows that answer —
+   hiding a button here protects nothing.
+
+   WHAT COMPENSATION IS IN RAF — one mechanism: a Compensation Coupon issued
+   automatically for a delivery that ran past the promised time, which only
+   its own customer can add to their RAF Wallet. There is no refund to the
+   original payment method anywhere in RAF, so this page offers none.
+
+   WHAT MANAGEMENT MAY DO — Void a coupon nobody has claimed yet, and Reverse
+   the unused remainder of one already in a wallet. Both need a reason. The
+   authority exposes nothing else to management: issuance is the automatic
+   post-delivery step, and adding a coupon to a wallet belongs to the customer.
+
+   SETTINGS ARE ELSEWHERE — the compensation policy values live in
+   Logistics → Settings. This page manages cases, never parameters.
+   ==========================================================================*/
+(function(){
+  'use strict';
+
+  var P = window.RAFPerm, C = window.RAFCompensation, CS = window.RAFCustomerService,
+      SNAP = window.RAFOrderSnapshot, SRC = window.RAFSource;
+  var ME = null, CAN = { tickets:false };
+  var ROWS = [], TKT = {};
+  var F = { scope:'all', q:'', state:'', store:'', from:'', to:'' };
+  var DRAFT = null;                 /* the filter applet edits a copy */
+  var OPEN = null, openTrigger = null;
+  var FORM = null;                  /* { id, kind:'void'|'reverse', reason, busy, err, ok } */
+
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar,en){ return isEn() ? en : ar; }
+  function L(o){ return (o && typeof o === 'object') ? (isEn() ? (o.en||o.ar) : (o.ar||o.en)) : (o||''); }
+  function el(id){ return document.getElementById(id); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function bidi(s){ return '<bdi>' + esc(s) + '</bdi>'; }
+  var DASH = '<span class="dash">—</span>';
+
+  function clockOf(ms){
+    if(ms == null) return null;
+    try { return new Date(ms).toLocaleString(isEn() ? 'en-GB' : 'ar-KW-u-nu-latn',
+      { timeZone:'Asia/Kuwait', day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
+    catch(e){ return null; }
+  }
+  function dayOf(ms){
+    if(ms == null) return '';
+    var d = new Date(ms);
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function minutes(n){
+    if(typeof n !== 'number') return null;
+    if(n < 60) return T(n + ' دقيقة', n + ' min');
+    var h = Math.floor(n/60), r = n % 60;
+    return r ? T(h + ' ساعة و' + r + ' دقيقة', h + 'h ' + r + 'm') : T(h + ' ساعة', h + ' hour(s)');
+  }
+  /* the amount exactly as the authority formatted it — no arithmetic here */
+  function money(v){
+    if(v == null || v === '') return DASH;
+    return '<span class="amt"><bdi dir="ltr">' + esc(v) + '</bdi> <span class="cur">' + T('د.ك','KWD') + '</span></span>';
+  }
+
+  /* ───────── the states the authority derives ─────────
+     Every one of these comes back from RAFCompensation as a status; this map
+     only gives each the words an operator reads. No state is invented and
+     none is computed here. */
+  var STATES = {
+    issued:      { ar:'بانتظار العميل',  en:'Awaiting the customer', cls:'b-wait',
+                   noteAr:'صدرت القسيمة ولم يضفها العميل إلى محفظته بعد.',
+                   noteEn:'The coupon was issued and the customer has not added it to their wallet yet.' },
+    add_pending: { ar:'قيد الإضافة',     en:'Being added',           cls:'b-prep',
+                   noteAr:'بدأ العميل إضافة القسيمة إلى محفظته ولم تكتمل بعد.',
+                   noteEn:'The customer started adding the coupon to their wallet and it has not completed yet.' },
+    in_wallet:   { ar:'في محفظة العميل', en:'In the wallet',         cls:'b-go',
+                   noteAr:'أُضيفت القسيمة إلى محفظة العميل كرصيد تعويض.',
+                   noteEn:'The coupon was added to the customer’s wallet as compensation credit.' },
+    consumed:    { ar:'استُخدمت بالكامل', en:'Fully used',           cls:'b-done',
+                   noteAr:'استخدم العميل كامل رصيد التعويض.',
+                   noteEn:'The customer used all of the compensation credit.' },
+    expired:     { ar:'منتهية الصلاحية', en:'Expired',               cls:'b-off',
+                   noteAr:'انتهت صلاحية القسيمة قبل إضافتها أو استخدامها.',
+                   noteEn:'The coupon expired before it was added or used.' },
+    voided:      { ar:'مُبطلة',          en:'Voided',                cls:'b-off',
+                   noteAr:'أبطلت الإدارة القسيمة قبل أن يطالب بها العميل.',
+                   noteEn:'Management voided the coupon before the customer claimed it.' },
+    reversed:    { ar:'معكوسة',          en:'Reversed',              cls:'b-hot',
+                   noteAr:'استردّت الإدارة الرصيد غير المستخدم من محفظة العميل.',
+                   noteEn:'Management took back the unused credit from the customer’s wallet.' }
+  };
+  function stateOf(r){ return STATES[r.status] || { ar:r.status, en:r.status, cls:'b-plain', noteAr:'', noteEn:'' }; }
+
+  /* the scopes: where the compensation stands in the customer's hands */
+  var SCOPES = [
+    { k:'all',     ar:'الكل',           en:'All',
+      emptyAr:'لا توجد تعويضات صادرة', emptyEn:'No compensations have been issued',
+      test:function(){ return true; } },
+    { k:'waiting', ar:'بانتظار العميل', en:'Awaiting the customer',
+      emptyAr:'لا توجد قسائم بانتظار العميل', emptyEn:'No coupons are waiting for a customer',
+      test:function(r){ return r.status === 'issued' || r.status === 'add_pending'; } },
+    { k:'wallet',  ar:'في المحفظة',     en:'In the wallet',
+      emptyAr:'لا توجد أرصدة تعويض في محافظ العملاء', emptyEn:'No compensation credit sits in a customer wallet',
+      test:function(r){ return r.status === 'in_wallet' || r.status === 'consumed'; } },
+    { k:'ended',   ar:'منتهية',         en:'Ended',
+      emptyAr:'لا توجد تعويضات منتهية', emptyEn:'No compensations have ended',
+      test:function(r){ return r.status === 'expired' || r.status === 'voided' || r.status === 'reversed'; } }
+  ];
+  function scopeOf(k){ for(var i=0;i<SCOPES.length;i++) if(SCOPES[i].k === k) return SCOPES[i]; return SCOPES[0]; }
+
+  /* ───────── reading ─────────
+     One call to the authority. The order and store details beside each record
+     come from the authorities that own them; a value that does not exist is
+     shown as "—" rather than filled in. */
+  function readTickets(){
+    TKT = {};
+    if(!CAN.tickets || !CS) return;
+    try {
+      var r = CS.listTickets({ active:true });
+      if(r && r.ok) (r.items || []).forEach(function(t){
+        var oid = t.context && t.context.orderId;
+        if(oid) TKT[oid] = (TKT[oid] || 0) + 1;
+      });
+    } catch(e){ TKT = {}; }
+  }
+  function storeOf(slug){
+    if(!slug || !SRC) return null;
+    try { var s = SRC.store(slug); return s ? s.name : null; } catch(e){ return null; }
+  }
+  function customerOf(orderId){
+    if(!SNAP) return null;
+    try {
+      var s = SNAP.of(orderId);
+      return (s && s.customer && s.customer.name) ? s.customer.name : null;
+    } catch(e){ return null; }
+  }
+  function read(){
+    ROWS = [];
+    if(!C) return { ok:false, code:'UNAVAILABLE', message:T('خدمة التعويضات غير محمّلة.','The compensation service is not loaded.') };
+    var r = null;
+    try { r = C.list(); } catch(e){ r = null; }
+    if(!r || !r.ok) return r || { ok:false, code:'UNAVAILABLE', message:T('تعذّرت قراءة التعويضات.','Compensations could not be read.') };
+    readTickets();
+    ROWS = (r.compensations || []).map(function(c){
+      return Object.assign({}, c, {
+        customerName:customerOf(c.orderId),
+        storeName:storeOf(c.storeSlug),
+        tickets:TKT[c.orderId] || 0
+      });
+    });
+    return { ok:true };
+  }
+
+  /* ───────── filtering — search, then ONE applet ───────── */
+  function stateOptions(){
+    var seen = {}, out = [];
+    ROWS.forEach(function(r){ if(!seen[r.status]){ seen[r.status] = 1; out.push(r.status); } });
+    return out.map(function(k){ var s = STATES[k] || { ar:k, en:k }; return { k:k, ar:s.ar, en:s.en }; });
+  }
+  function storeOptions(){
+    var seen = {}, out = [];
+    ROWS.forEach(function(r){
+      if(!r.storeSlug || seen[r.storeSlug]) return;
+      seen[r.storeSlug] = 1;
+      out.push({ slug:r.storeSlug, name:r.storeName ? L(r.storeName) : r.storeSlug });
+    });
+    return out;
+  }
+  function matchQ(r, q){
+    var hay = [r.compensationId, r.orderId, r.customerName, r.storeName ? L(r.storeName) : '']
+      .filter(Boolean).join(' ').toLowerCase();
+    return hay.indexOf(q) > -1;
+  }
+  function visibleRows(){
+    var q = String(F.q || '').trim().toLowerCase();
+    var from = F.from ? new Date(F.from + 'T00:00:00').getTime() : null;
+    var to   = F.to   ? new Date(F.to   + 'T23:59:59.999').getTime() : null;
+    return ROWS.filter(scopeOf(F.scope).test).filter(function(r){
+      if(q && !matchQ(r, q)) return false;
+      if(F.state && r.status !== F.state) return false;
+      if(F.store && r.storeSlug !== F.store) return false;
+      if(from != null && !(r.issuedAt >= from)) return false;
+      if(to != null && !(r.issuedAt <= to)) return false;
+      return true;
+    });
+  }
+  function activeFilterCount(){
+    return ['state','store','from','to'].filter(function(k){ return !!F[k]; }).length;
+  }
+  function filtersActive(){ return !!F.q || activeFilterCount() > 0; }
+
+  function toolbar(){
+    var n = activeFilterCount();
+    return '<div class="tools" role="search">'
+      + '<div class="srch"><i class="ti ti-search" aria-hidden="true"></i>'
+      + '<input id="q" type="search" value="' + esc(F.q) + '" autocomplete="off" spellcheck="false"'
+      + ' placeholder="' + esc(T('ابحث عن مرجع التعويض أو رقم الطلب أو العميل...','Search compensation reference, order number or customer...')) + '"'
+      + ' aria-label="' + esc(T('بحث في التعويضات','Search compensations')) + '" oninput="OPS.setQ(this.value)">'
+      + (F.q ? '<button class="clr" type="button" onclick="OPS.setQ(\'\')" aria-label="' + esc(T('مسح البحث','Clear search')) + '"><i class="ti ti-x" aria-hidden="true"></i></button>' : '')
+      + '</div>'
+      + '<button class="btn filter-btn' + (n ? ' on' : '') + '" type="button" id="filterBtn" onclick="OPS.openFilters()"'
+      + ' aria-haspopup="dialog" aria-label="' + esc(T('تصفية التعويضات','Filter compensations')) + '">'
+      + '<i class="ti ti-filter" aria-hidden="true"></i>' + T('فلتر','Filter')
+      + (n ? '<span class="fcount">' + n + '</span>' : '') + '</button>'
+      + '</div>';
+  }
+  function renderApplet(){
+    if(!DRAFT) return;
+    var stOpts = stateOptions().map(function(s){
+      return '<option value="' + esc(s.k) + '"' + (DRAFT.state === s.k ? ' selected' : '') + '>' + T(s.ar,s.en) + '</option>'; }).join('');
+    var srOpts = storeOptions().map(function(s){
+      return '<option value="' + esc(s.slug) + '"' + (DRAFT.store === s.slug ? ' selected' : '') + '>' + esc(s.name) + '</option>'; }).join('');
+    el('appletHost').innerHTML =
+      '<div class="sheet" id="applet" onclick="if(event.target===this)OPS.closeFilters()">'
+      + '<div class="sheet-c applet" role="dialog" aria-modal="true" aria-labelledby="flT">'
+      + '<div class="sheet-h"><div class="t"><b id="flT">' + T('تصفية التعويضات','Filter Compensations') + '</b>'
+        + '<span>' + T('تُطبَّق على النطاق المحدد','Applied within the selected scope') + '</span></div>'
+        + '<button class="ibtn" type="button" onclick="OPS.closeFilters()" aria-label="' + esc(T('إغلاق','Close')) + '"><i class="ti ti-x" aria-hidden="true"></i></button></div>'
+      + '<div class="sheet-b">'
+        + '<div class="fld"><label for="f-state">' + T('الحالة','Status') + '</label>'
+          + '<select id="f-state" onchange="OPS.draft(\'state\',this.value)"><option value="">' + T('كل الحالات','All statuses') + '</option>' + stOpts + '</select></div>'
+        + (srOpts ? '<div class="fld"><label for="f-store">' + T('المتجر','Store') + '</label>'
+          + '<select id="f-store" onchange="OPS.draft(\'store\',this.value)"><option value="">' + T('كل المتاجر','All stores') + '</option>' + srOpts + '</select></div>' : '')
+        + '<div class="fld"><span class="lg">' + T('تاريخ الإصدار','Issue date') + '</span><div class="two">'
+          + '<label class="sub-f" for="f-from">' + T('من تاريخ','From date')
+            + '<input id="f-from" type="date" dir="ltr" value="' + esc(DRAFT.from) + '" onchange="OPS.draft(\'from\',this.value)"></label>'
+          + '<label class="sub-f" for="f-to">' + T('إلى تاريخ','To date')
+            + '<input id="f-to" type="date" dir="ltr" value="' + esc(DRAFT.to) + '" onchange="OPS.draft(\'to\',this.value)"></label>'
+          + '</div></div>'
+      + '</div>'
+      + '<div class="sheet-f">'
+        + '<button class="btn" type="button" onclick="OPS.clearFilters()"><i class="ti ti-filter-off" aria-hidden="true"></i>' + T('مسح الفلاتر','Clear Filters') + '</button>'
+        + '<button class="btn pri" type="button" onclick="OPS.applyFilters()"><i class="ti ti-check" aria-hidden="true"></i>' + T('تطبيق','Apply') + '</button>'
+      + '</div></div></div>';
+    var first = el('f-state'); if(first) first.focus();
+  }
+  function chips(){
+    if(!filtersActive()) return '';
+    var out = [];
+    function chip(key, label, value){
+      out.push('<span class="fchip">' + esc(label) + ': <b><bdi>' + esc(value) + '</bdi></b>'
+        + '<button type="button" onclick="OPS.setF(\'' + key + '\',\'\')" aria-label="' + esc(T('إزالة الفلتر','Remove filter')) + '">'
+        + '<i class="ti ti-x" aria-hidden="true"></i></button></span>');
+    }
+    if(F.q) chip('q', T('بحث','Search'), F.q);
+    if(F.state){ var s = STATES[F.state]; chip('state', T('الحالة','Status'), s ? T(s.ar,s.en) : F.state); }
+    if(F.store){ var st = storeOptions().filter(function(x){ return x.slug === F.store; })[0]; chip('store', T('المتجر','Store'), st ? st.name : F.store); }
+    if(F.from) chip('from', T('من','From'), F.from);
+    if(F.to) chip('to', T('إلى','To'), F.to);
+    return '<div class="fchips">' + out.join('') + '</div>';
+  }
+
+  /* ───────── the summary strip ─────────
+     Every figure is counted from the records the authority returned. Nothing
+     is hard-coded and no order total is borrowed. */
+  function strip(){
+    var all = ROWS;
+    function n(test){ return all.filter(test).length; }
+    var waiting = n(scopeOf('waiting').test);
+    var wallet  = n(scopeOf('wallet').test);
+    /* the total value is summed in fils, the integer the authority stores,
+       and handed to the wallet authority to format — never rounded here */
+    var fils = all.reduce(function(s,r){ return s + (typeof r.amountFils === 'number' ? r.amountFils : 0); }, 0);
+    var totalValue = window.RAFWallet && RAFWallet.format ? RAFWallet.format(fils) : null;
+    var cells = [
+      { k:T('إجمالي التعويضات','Total compensations'), v:all.length, cls:'' },
+      { k:T('بانتظار العميل','Awaiting the customer'), v:waiting, cls:waiting ? 'wait' : '' },
+      { k:T('في محفظة العميل','In the wallet'), v:wallet, cls:'' },
+      { k:T('إجمالي القيمة','Total value'), v:(totalValue == null ? '—' : totalValue), cls:'', unit:totalValue == null ? '' : T('د.ك','KWD') }
+    ];
+    return '<div class="strip">' + cells.map(function(c){
+      return '<span class="s ' + c.cls + '"><b class="v"><bdi dir="ltr">' + esc(String(c.v)) + '</bdi>'
+        + (c.unit ? ' <span style="font-size:11px;font-weight:700">' + esc(c.unit) + '</span>' : '')
+        + '</b><span class="k">' + c.k + '</span></span>'; }).join('') + '</div>';
+  }
+
+  /* ───────── the list ───────── */
+  var COLS = ['c-ref','c-order','c-cust','c-store','c-amt','c-state','c-date'];
+  function rows(list){
+    var H = [T('المرجع','Reference'), T('الطلب','Order'), T('العميل','Customer'), T('المتجر','Store'),
+             T('القيمة','Value'), T('الحالة','Status'), T('تاريخ الإصدار','Issued')];
+    return '<div class="tbl-scroll"><table class="cmp"><colgroup>'
+      + COLS.map(function(c){ return '<col class="' + c + '">'; }).join('') + '</colgroup>'
+      + '<thead><tr>' + H.map(function(h,i){ return '<th scope="col" class="' + COLS[i] + '">' + h + '</th>'; }).join('')
+      + '</tr></thead><tbody>'
+      + list.map(function(r){
+          var st = stateOf(r);
+          return '<tr tabindex="0" onclick="OPS.open(\'' + esc(r.compensationId) + '\')"'
+            + ' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();OPS.open(\'' + esc(r.compensationId) + '\');}">'
+            + '<td class="c-ref" data-l="' + esc(H[0]) + '"><span class="ref-id">' + bidi(r.compensationId) + '</span></td>'
+            + '<td class="c-order" data-l="' + esc(H[1]) + '"><span class="ord-id">' + bidi(r.orderId) + '</span>'
+              + (r.tickets ? '<span class="flag tkt"><i class="ti ti-ticket" aria-hidden="true"></i>'
+                  + T(r.tickets + ' تذكرة', r.tickets + ' ticket(s)') + '</span>' : '') + '</td>'
+            + '<td class="c-cust" data-l="' + esc(H[2]) + '">' + (r.customerName ? bidi(r.customerName) : DASH) + '</td>'
+            + '<td class="c-store" data-l="' + esc(H[3]) + '">' + (r.storeName ? bidi(L(r.storeName)) : DASH) + '</td>'
+            + '<td class="c-amt" data-l="' + esc(H[4]) + '">' + money(r.amount) + '</td>'
+            + '<td class="c-state" data-l="' + esc(H[5]) + '"><span class="badge ' + st.cls + '">' + T(st.ar,st.en) + '</span></td>'
+            + '<td class="c-date" data-l="' + esc(H[6]) + '">' + (clockOf(r.issuedAt) ? bidi(clockOf(r.issuedAt)) : DASH) + '</td>'
+            + '</tr>';
+        }).join('')
+      + '</tbody></table></div>';
+  }
+
+  function render(){
+    renderHeader(); renderNav();
+    var list = visibleRows(), total = ROWS.length;
+    var body = list.length
+      ? rows(list)
+      : '<div class="empty"><i class="ti ti-receipt-off" aria-hidden="true"></i><b>'
+        + (filtersActive()
+            ? T('لا توجد تعويضات مطابقة للفلاتر الحالية','No compensations match the current filters')
+            : T(scopeOf(F.scope).emptyAr, scopeOf(F.scope).emptyEn))
+        + '</b>'
+        + (filtersActive()
+            ? '<button class="btn sm" type="button" onclick="OPS.clearFilters()">' + T('مسح الفلاتر','Clear Filters') + '</button>'
+            : '<span class="sub">' + T('يصدر التعويض تلقائياً عند تسليم طلب بعد الوقت الموعود.',
+                                        'A compensation is issued automatically when an order is delivered after its promised time.') + '</span>')
+        + '</div>';
+    el('view').innerHTML =
+      '<h1 class="sr-only">' + T('التعويضات','Compensation') + '</h1>'
+      + '<div class="wk">'
+      + '<div class="wk-head"><p>'
+      + T('تعويضات تأخر التسليم الصادرة للعملاء وحالتها الحالية.',
+          'Delay compensations issued to customers and where each one stands.')
+      + '</p><span class="wk-count">'
+      + T(list.length + ' من ' + total + ' تعويض', list.length + ' of ' + total + ' compensation(s)') + '</span></div>'
+      + strip()
+      + '<div class="scopes" role="group" aria-label="' + esc(T('نطاق التعويضات','Compensation scope')) + '">'
+      + SCOPES.map(function(s){
+          var n = ROWS.filter(s.test).length;
+          return '<button class="scope" type="button" aria-pressed="' + (F.scope === s.k) + '" onclick="OPS.setScope(\'' + s.k + '\')">'
+            + T(s.ar,s.en) + '<span class="n">' + n + '</span></button>'; }).join('')
+      + '</div>'
+      + toolbar() + chips()
+      + '<div class="tbl-card">' + body + '</div>'
+      + '</div>';
+    if(OPEN) renderSheet();
+  }
+
+  /* ───────── details sheet ───────── */
+  function sec(title, icon, inner){
+    return '<section class="sec"><h3><i class="ti ' + icon + '" aria-hidden="true"></i>' + esc(title) + '</h3>' + inner + '</section>';
+  }
+  function kv(k, v){ return '<div class="kv"><span class="k">' + esc(k) + '</span><span class="v">' + v + '</span></div>'; }
+  function rowById(id){ for(var i=0;i<ROWS.length;i++) if(ROWS[i].compensationId === id) return ROWS[i]; return null; }
+
+  function lifecycleList(r){
+    var items = [{ at:r.issuedAt, label:T('صدر التعويض تلقائياً','Issued automatically'), sub:null }];
+    (r.lifecycle || []).forEach(function(e){
+      var label = e.type === 'added_to_wallet' ? T('أضافه العميل إلى محفظته','Added to the wallet by the customer')
+        : e.type === 'voided' ? T('أبطلته الإدارة','Voided by management')
+        : e.type === 'reversed' ? T('عكسته الإدارة','Reversed by management') : e.type;
+      var sub = [];
+      if(e.actor && e.actor.name) sub.push(e.actor.name);
+      if(e.amount) sub.push(e.amount + ' ' + T('د.ك','KWD'));
+      if(e.reason) sub.push(e.reason);
+      items.push({ at:e.at, label:label, sub:sub.length ? sub.join(' · ') : null });
+    });
+    return '<ul class="ms">' + items.map(function(i){
+      return '<li><span class="k">' + esc(i.label)
+        + (i.sub ? '<span class="sub">' + esc(i.sub) + '</span>' : '') + '</span>'
+        + '<span class="v">' + (clockOf(i.at) ? esc(clockOf(i.at)) : '—') + '</span></li>'; }).join('') + '</ul>';
+  }
+
+  function actionsBlock(r){
+    /* the authority decides what is possible; this only draws its answer */
+    if(FORM && FORM.id === r.compensationId){
+      var isVoid = FORM.kind === 'void';
+      return '<div class="fld" style="border:0;padding-block-start:0">'
+        + '<label for="cmpReason">' + (isVoid ? T('سبب الإبطال','Reason for voiding') : T('سبب العكس','Reason for reversing'))
+        + ' <span class="req">*</span></label>'
+        + '<textarea id="cmpReason" maxlength="500" oninput="OPS.reason(this.value)"'
+        + (FORM.busy ? ' disabled' : '') + '>' + esc(FORM.reason || '') + '</textarea>'
+        + '<span class="hint">' + (isVoid
+            ? T('يُبطل القسيمة قبل أن يضيفها العميل إلى محفظته. لا يمكن التراجع.',
+                'Voids the coupon before the customer adds it to their wallet. This cannot be undone.')
+            : T('يسترد الرصيد غير المستخدم فقط من محفظة العميل. ما استخدمه العميل يبقى له.',
+                'Takes back only the unused remainder from the customer’s wallet. Whatever the customer already used stays theirs.')) + '</span>'
+        + '<div class="acts-row">'
+        + '<button class="btn danger" type="button" onclick="OPS.confirm()"' + (FORM.busy ? ' disabled' : '') + '>'
+          + '<i class="ti ti-check" aria-hidden="true"></i>'
+          + (isVoid ? T('تأكيد الإبطال','Confirm void') : T('تأكيد العكس','Confirm reverse')) + '</button>'
+        + '<button class="btn" type="button" onclick="OPS.cancelForm()"' + (FORM.busy ? ' disabled' : '') + '>'
+          + T('إلغاء','Cancel') + '</button>'
+        + '</div>'
+        + (FORM.busy ? '<div class="form-msg busy"><i class="ti ti-loader-2" aria-hidden="true"></i><span>'
+            + T('جارٍ التنفيذ...','Working...') + '</span></div>' : '')
+        + (FORM.err ? '<div class="form-msg err"><i class="ti ti-alert-circle" aria-hidden="true"></i><span>'
+            + esc(FORM.err) + '</span></div>' : '')
+        + '</div>';
+    }
+    var btns = '';
+    if(r.canVoid) btns += '<button class="btn danger" type="button" onclick="OPS.form(\'' + esc(r.compensationId) + '\',\'void\')">'
+      + '<i class="ti ti-ban" aria-hidden="true"></i>' + T('إبطال القسيمة','Void the coupon') + '</button>';
+    if(r.canReverse) btns += '<button class="btn danger" type="button" onclick="OPS.form(\'' + esc(r.compensationId) + '\',\'reverse\')">'
+      + '<i class="ti ti-arrow-back-up" aria-hidden="true"></i>' + T('عكس الرصيد غير المستخدم','Reverse the unused credit') + '</button>';
+    if(btns) return '<div class="acts-row">' + btns + '</div>'
+      + (MSG && MSG.id === r.compensationId ? '<div class="form-msg ok"><i class="ti ti-check" aria-hidden="true"></i><span>' + esc(MSG.text) + '</span></div>' : '');
+    /* nothing is possible — say why, in the state's own words */
+    return '<p class="kv"><span class="v" style="color:var(--muted);font-weight:500">'
+      + esc(T(stateOf(r).noteAr, stateOf(r).noteEn)) + '</span></p>'
+      + (MSG && MSG.id === r.compensationId ? '<div class="form-msg ok"><i class="ti ti-check" aria-hidden="true"></i><span>' + esc(MSG.text) + '</span></div>' : '');
+  }
+  var MSG = null;
+
+  function sheetBody(r){
+    var st = stateOf(r), h = '';
+
+    /* التعويض — what it is and where it stands */
+    h += sec(T('التعويض','Compensation'), 'ti-receipt-refund',
+        kv(T('المرجع','Reference'), '<span class="ref-id">' + bidi(r.compensationId) + '</span>')
+      + kv(T('الحالة','Status'), '<span class="badge ' + st.cls + '">' + T(st.ar,st.en) + '</span>')
+      + kv(T('القيمة','Value'), money(r.amount))
+      + kv(T('النوع','Type'), esc(T('قسيمة تعويض تُضاف إلى محفظة العميل','Compensation coupon, added to the customer’s wallet')))
+      + kv(T('تاريخ الإصدار','Issued'), clockOf(r.issuedAt) ? bidi(clockOf(r.issuedAt)) : DASH)
+      + kv(T('صالحة حتى','Valid until'), clockOf(r.expiresAt) ? bidi(clockOf(r.expiresAt)) : DASH));
+
+    /* سبب التعويض — the delay, exactly as the record holds it */
+    h += sec(T('سبب التعويض','Why it was issued'), 'ti-clock-exclamation',
+        kv(T('السبب','Reason'), esc(T('تأخر التسليم عن الوقت الموعود','Delivery ran past the promised time')))
+      + kv(T('الوقت الموعود','Promised time'), clockOf(r.promisedEtaAt) ? bidi(clockOf(r.promisedEtaAt)) : DASH)
+      + kv(T('وقت التسليم','Delivered at'), clockOf(r.deliveredAt) ? bidi(clockOf(r.deliveredAt)) : DASH)
+      + kv(T('التأخير الفعلي','Actual delay'), minutes(r.actualDelayMinutes) ? bidi(minutes(r.actualDelayMinutes)) : DASH)
+      + kv(T('التأخير المستثنى','Excluded delay'), minutes(r.excludedDelayMinutes) ? bidi(minutes(r.excludedDelayMinutes)) : DASH)
+      + kv(T('التأخير المحتسب','Counted delay'), minutes(r.eligibleDelayMinutes) ? bidi(minutes(r.eligibleDelayMinutes)) : DASH)
+      + kv(T('الشرائح المكتملة','Completed steps'), r.completedBlocks != null ? bidi(r.completedBlocks) : DASH)
+      + kv(T('مبلغ الشريحة','Amount per step'), money(r.amountPerStep)));
+
+    /* الطلب المرتبط */
+    h += sec(T('الطلب المرتبط','Related order'), 'ti-shopping-bag',
+        kv(T('رقم الطلب','Order number'), '<span class="ord-id">' + bidi(r.orderId) + '</span>')
+      + kv(T('المتجر','Store'), r.storeName ? bidi(L(r.storeName)) : DASH)
+      + kv(T('التذاكر المرتبطة','Related tickets'),
+          !CAN.tickets ? DASH : (r.tickets ? bidi(T(r.tickets + ' تذكرة', r.tickets + ' ticket(s)')) : DASH)));
+
+    /* العميل — the name recorded on the order, nothing more */
+    h += sec(T('العميل','Customer'), 'ti-user',
+        kv(T('الاسم','Name'), r.customerName ? bidi(r.customerName) : DASH));
+
+    /* التسوية — only when a real wallet credit exists */
+    if(r.wallet && r.wallet.added){
+      var w = r.wallet, ref = r.walletReference || {};
+      h += sec(T('التسوية','Settlement'), 'ti-wallet',
+          kv(T('الوجهة','Destination'), esc(T('محفظة RAF للعميل','The customer’s RAF Wallet')))
+        + kv(T('تاريخ الإضافة','Added on'), clockOf(w.addedAt) ? bidi(clockOf(w.addedAt)) : DASH)
+        + kv(T('القيمة الأصلية','Original'), money(w.original))
+        + kv(T('المستخدم','Used'), money(w.consumed))
+        + kv(T('المتبقي','Remaining'), money(w.remaining))
+        + (w.expired && w.expired !== '0.000' ? kv(T('انتهت صلاحيته','Expired'), money(w.expired)) : '')
+        + (w.reversed && w.reversed !== '0.000' ? kv(T('المسترد','Reversed'), money(w.reversed)) : '')
+        + (ref.creditTransactionId ? kv(T('مرجع الإضافة','Credit reference'), bidi(ref.creditTransactionId)) : '')
+        + (ref.reversalTransactionId ? kv(T('مرجع الاسترداد','Reversal reference'), bidi(ref.reversalTransactionId)) : ''));
+    } else {
+      h += sec(T('التسوية','Settlement'), 'ti-wallet',
+          '<p class="kv"><span class="v" style="color:var(--muted);font-weight:500">'
+        + esc(T('لم تُضف القسيمة إلى محفظة العميل، فلا توجد حركة مالية بعد.',
+                'The coupon has not been added to the customer’s wallet, so there is no transaction yet.'))
+        + '</span></p>');
+    }
+
+    /* السجل — the authority's own lifecycle, not a page-local history */
+    h += sec(T('السجل','History'), 'ti-history', lifecycleList(r));
+
+    /* الإجراءات */
+    h += sec(T('الإجراءات','Actions'), 'ti-settings-check', actionsBlock(r));
+    return h;
+  }
+
+  function renderSheet(){
+    var r = rowById(OPEN);
+    if(!r){ closeSheet(); return; }
+    var st = stateOf(r);
+    el('sheetHost').innerHTML =
+      '<div class="sheet" id="sheet" onclick="if(event.target===this)OPS.close()">'
+      + '<div class="sheet-c" role="dialog" aria-modal="true" aria-labelledby="shT">'
+      + '<div class="sheet-h"><div class="t"><b id="shT"><bdi>' + esc(r.compensationId) + '</bdi></b>'
+        + '<span>' + (r.customerName ? esc(r.customerName) : esc(r.orderId)) + '</span></div>'
+        + '<span class="badge ' + st.cls + '">' + T(st.ar,st.en) + '</span>'
+        + '<button class="ibtn" type="button" onclick="OPS.close()" aria-label="' + esc(T('إغلاق','Close')) + '"><i class="ti ti-x" aria-hidden="true"></i></button></div>'
+      + '<div class="sheet-b">' + sheetBody(r) + '</div></div></div>';
+    if(FORM && FORM.id === r.compensationId && !FORM.busy){
+      var ta = el('cmpReason');
+      if(ta){ ta.focus(); try { ta.setSelectionRange(ta.value.length, ta.value.length); } catch(e){} }
+    } else {
+      var x = el('sheet').querySelector('.ibtn'); if(x) x.focus();
+    }
+  }
+  function closeSheet(){
+    OPEN = null; FORM = null; MSG = null; el('sheetHost').innerHTML = '';
+    if(openTrigger && document.contains(openTrigger)) openTrigger.focus();
+    openTrigger = null;
+  }
+
+  /* ───────── shell ───────── */
+  /* the existing settings permission decides whether Settings is listed */
+  function canSettings(){ try { return !!(ME && P.can(ME.id, 'settings.view')); } catch(e){ return false; } }
+  function renderNav(){
+    function item(href, icon, ar, en, current){
+      return '<li><a href="' + href + '"' + (current ? ' aria-current="page"' : '') + '>'
+        + '<i class="ti ' + icon + '" aria-hidden="true"></i><span>' + T(ar,en) + '</span></a></li>';
+    }
+    el('navTree').innerHTML =
+      '<span class="grp">' + T('العمليات','Operations') + '</span><ul>'
+      + item('raf_logistics.html', 'ti-layout-dashboard', 'مركز العمليات', 'Command Center', false)
+      + item('raf_logistics_orders.html', 'ti-shopping-bag', 'الطلبات', 'Orders', false)
+      + item('raf_logistics_dispatch.html', 'ti-route', 'التوزيع والتعيين', 'Dispatch & Assignment', false)
+      + item('raf_logistics_tickets.html', 'ti-ticket', 'التذاكر', 'Tickets', false)
+      + item('raf_logistics_drivers.html', 'ti-motorbike', 'السائقون', 'Drivers', false)
+      + (canSettings() ? item('raf_logistics_settings.html', 'ti-settings', 'الإعدادات', 'Settings', false) : '')
+      + item('raf_logistics_compensation.html', 'ti-receipt-refund', 'التعويضات', 'Compensation', true)
+      + '</ul>'
+      + '<div class="ops-nav-foot"><b>' + T('العمليات واللوجستيات','Operations & Logistics') + '</b>'
+      + T('منصة رف','RAF platform') + '</div>';
+  }
+  function renderHeader(){
+    el('crumbGroup').textContent = T('اللوجستيات · العمليات','Logistics · Operations');
+    el('crumbPage').textContent = T('التعويضات','Compensation');
+    el('langBtn').textContent = isEn() ? 'ع' : 'EN';
+    el('langBtn').setAttribute('aria-label', T('التبديل إلى الإنجليزية','Switch to Arabic'));
+    if(ME){
+      el('userAv').textContent = String(ME.name || '?').trim().charAt(0);
+      el('userName').textContent = ME.name || '';
+      var role = null; try { role = P.getRole(ME.roleId); } catch(e){}
+      el('userRole').textContent = role ? T(role.nameAr, role.nameEn) : '';
+    }
+    document.title = T('رف — التعويضات','RAF — Compensation');
+  }
+
+  function gate(titleAr, titleEn, msg){
+    ME = null;
+    el('shell').hidden = true;
+    el('sheetHost').innerHTML = ''; el('appletHost').innerHTML = '';
+    var g = el('gate'); g.hidden = false;
+    el('gateT').textContent = T(titleAr, titleEn);
+    el('gateP').textContent = msg;
+    document.title = T('رف — التعويضات','RAF — Compensation');
+  }
+  function applyLang(){
+    var en = isEn();
+    document.querySelectorAll('[data-ar][data-en]').forEach(function(e){
+      var t = e.getAttribute('data-' + (en ? 'en' : 'ar')); if(t !== null) e.textContent = t;
+    });
+  }
+
+  function boot(){
+    var l = null; try { l = localStorage.getItem('raf_lang'); } catch(e){}
+    if(l === 'en'){ root().lang = 'en'; root().dir = 'ltr'; }
+    applyLang();
+
+    if(!P || !C){
+      gate('تعذّر التحميل','Could not load', T('لم يتم تحميل وحدات رف المطلوبة.','The required RAF modules did not load.'));
+      return;
+    }
+    /* identity from the stored session only — never from the URL */
+    var sid = null;
+    try {
+      sid = P.sessionUserId ? P.sessionUserId() : null;   /* RAFPerm owns this tab's session */
+    } catch(e){ sid = null; }
+    if(!sid){ gate('يلزم تسجيل الدخول','Sign-in required', T('التعويضات متاحة بعد تسجيل الدخول.','Compensation is available after signing in.')); return; }
+    var u = null; try { u = P.getUser(sid); } catch(e){ u = null; }
+    if(!u){ gate('يلزم تسجيل الدخول','Sign-in required', T('تعذّر التعرف على الحساب.','That account could not be identified.')); return; }
+    if(u.status !== 'active'){ gate('حسابك موقوف','Your account is suspended', T('لا يمكن فتح التعويضات بحساب موقوف.','A suspended account cannot open Compensation.')); return; }
+    ME = { id:u.id, name:u.name, roleId:u.roleId };
+    try { CAN.tickets = !!P.can(u.id, 'support.view'); } catch(e){ CAN.tickets = false; }
+
+    /* THE AUTHORITY DECIDES ACCESS. It is asked for the list; if it refuses,
+       that refusal is the gate. No permission key is re-implemented here. */
+    var r = read();
+    if(!r.ok){
+      gate('لا تملك صلاحية الوصول','You do not have access',
+           T('إدارة التعويضات غير متاحة لحسابك.','Compensation management is not available to your account.'));
+      return;
+    }
+
+    el('gate').hidden = true; el('shell').hidden = false;
+    render();
+
+    /* another surface changing a compensation is reflected here, through the
+       bus the compensation authority already publishes on */
+    if(window.RAFEventBus){
+      try { RAFEventBus.subscribe('compensation.*', function(){ read(); render(); }); } catch(e){}
+    }
+    window.addEventListener('storage', function(e){
+      if(e.key && /^raf_(compensations|compensation_events|wallet)/.test(e.key)){ read(); render(); }
+    });
+  }
+
+  window.OPS = {
+    refresh: function(){ read(); render(); },
+    setScope: function(k){ F.scope = k; MSG = null; render(); },
+    setQ: function(v){
+      F.q = v; MSG = null;
+      var list = visibleRows(), had = document.activeElement && document.activeElement.id === 'q';
+      render();
+      if(had){ var q = el('q'); if(q){ q.focus(); try { q.setSelectionRange(q.value.length, q.value.length); } catch(e){} } }
+      return list;
+    },
+    setF: function(k, v){ F[k] = v; MSG = null; render(); },
+    openFilters: function(){
+      DRAFT = { state:F.state, store:F.store, from:F.from, to:F.to };
+      renderApplet();
+    },
+    closeFilters: function(){
+      DRAFT = null; el('appletHost').innerHTML = '';
+      var b = el('filterBtn'); if(b) b.focus();
+    },
+    draft: function(k, v){ if(DRAFT) DRAFT[k] = v; },
+    applyFilters: function(){
+      if(DRAFT){ F.state = DRAFT.state; F.store = DRAFT.store; F.from = DRAFT.from; F.to = DRAFT.to; }
+      OPS.closeFilters(); render();
+    },
+    clearFilters: function(){
+      F.q = ''; F.state = ''; F.store = ''; F.from = ''; F.to = '';
+      DRAFT = null; el('appletHost').innerHTML = '';
+      render();
+    },
+    open: function(id){
+      openTrigger = document.activeElement;
+      OPEN = id; FORM = null; MSG = null;
+      renderSheet();
+    },
+    close: function(){ closeSheet(); },
+
+    /* ── the two management decisions ──
+       The reason is collected here; everything else — whether the action is
+       allowed at all, whether this account may take it, what it does to the
+       wallet, the audit record — belongs to RAFCompensation. */
+    form: function(id, kind){ FORM = { id:id, kind:kind, reason:'', busy:false, err:'' }; MSG = null; renderSheet(); },
+    cancelForm: function(){ FORM = null; renderSheet(); },
+    reason: function(v){ if(FORM) FORM.reason = v; },
+    confirm: function(){
+      if(!FORM || FORM.busy) return;
+      var id = FORM.id, kind = FORM.kind, reason = String(FORM.reason || '');
+      FORM.busy = true; FORM.err = ''; renderSheet();
+      var call;
+      try { call = kind === 'void' ? C.void(id, { reason:reason }) : C.reverse(id, { reason:reason }); }
+      catch(e){ call = Promise.resolve(null); }
+      Promise.resolve(call).then(function(res){
+        if(!FORM) return;
+        FORM.busy = false;
+        if(res && res.ok){
+          /* the authority's answer, re-read rather than assumed */
+          FORM = null;
+          MSG = { id:id, text:(res.reversed
+            ? T('تم استرداد الرصيد غير المستخدم: ','Unused credit reversed: ') + res.reversed + ' ' + T('د.ك','KWD')
+            : T('تم إبطال القسيمة.','The coupon was voided.')) };
+          read(); render();
+        } else {
+          FORM.err = (res && res.message) || T('تعذّر تنفيذ العملية.','The operation could not be completed.');
+          renderSheet();
+        }
+      });
+    },
+
+    toggleLang: function(){
+      var r = root(), en = r.lang === 'en';
+      r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+      try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+      applyLang(); render();
+      if(DRAFT) renderApplet();
+      el('langBtn').focus();
+    },
+    openNav: function(){ el('shell').classList.add('nav-open'); var x = document.querySelector('.ops-nav-x'); if(x) x.focus(); },
+    closeNav: function(){ el('shell').classList.remove('nav-open'); var b = document.querySelector('.ops-burger'); if(b) b.focus(); }
+  };
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Escape') return;
+    if(el('applet')){ OPS.closeFilters(); return; }
+    if(el('sheet')){ OPS.close(); return; }
+    if(el('shell') && el('shell').classList.contains('nav-open')) OPS.closeNav();
+  });
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+</body>
+</html>

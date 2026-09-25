@@ -75,11 +75,8 @@
   function holdsAll(keys) {
     try {
       if (!window.RAFPerm || !RAFPerm.can) return false;
-      var sessionKey = (RAFPerm.LS && RAFPerm.LS.session) || 'raf_current_user';
-      var raw = localStorage.getItem(sessionKey);
-      if (raw == null || raw === '') return false;
-      var id = null;
-      try { id = JSON.parse(raw); } catch (e) { id = raw; }
+      /* this tab's session, from RAFPerm — never read from storage here */
+      var id = RAFPerm.sessionUserId ? RAFPerm.sessionUserId() : null;
       if (typeof id !== 'string' || !id) return false;
       var u = RAFPerm.getUser(id);
       if (!u || u.status !== 'active') return false;

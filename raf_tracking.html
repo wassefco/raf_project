@@ -13,35 +13,8 @@
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <style>
-/* ===== page-specific: confirmation · timeline · driver · map ===== */
+/* ===== page-specific (the tracking journey card lives in raf_tracking_journey.js) ===== */
 .od-wrap{max-width:860px;}
-
-/* 1 · the order header — one dark, premium card carrying the state,
-      the live indicator and the three facts that matter at a glance */
-.hero{position:relative;overflow:hidden;background:linear-gradient(150deg,var(--ink),#1c180f);
-  border:1px solid rgba(201,168,76,.34);border-radius:var(--rl);padding:20px 20px 16px;margin-bottom:14px;color:#F3EEDD;}
-.hero::after{content:'';position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(420px 190px at 88% -30%,rgba(201,168,76,.22),transparent 62%);}
-.hero>*{position:relative;}
-.hero-top{display:flex;align-items:flex-start;gap:13px;}
-.hero-ic{width:50px;height:50px;flex:0 0 auto;border-radius:16px;background:rgba(201,168,76,.16);
-  border:1px solid rgba(201,168,76,.42);display:flex;align-items:center;justify-content:center;font-size:25px;color:var(--gold);}
-.hero.is-done .hero-ic{background:rgba(46,158,91,.16);border-color:rgba(46,158,91,.45);color:#5FD08A;}
-.hero.is-cancelled .hero-ic{background:rgba(217,83,79,.16);border-color:rgba(217,83,79,.5);color:#F09490;}
-.hero-t{flex:1;min-width:0;}
-.hero-t h1{margin:0;font-family:var(--fdisplay);font-size:21px;font-weight:800;color:#fff;line-height:1.35;}
-.hero-t p{margin:5px 0 0;font-size:13px;color:#c2b9a6;line-height:1.6;}
-.hero-live{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;height:28px;padding:0 11px;border-radius:20px;
-  background:rgba(46,158,91,.18);border:1px solid rgba(46,158,91,.45);color:#8FE0AF;font-size:11.5px;font-weight:800;}
-.hero-live b{width:7px;height:7px;border-radius:50%;background:#5FD08A;animation:heroBlink 1.8s ease-in-out infinite;}
-@keyframes heroBlink{0%,100%{opacity:1;}50%{opacity:.3;}}
-.hero-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:16px;}
-.hero-fact{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.13);border-radius:14px;padding:10px 11px;min-width:0;}
-.hero-fact span{display:block;font-size:10.5px;font-weight:700;color:#a99f8c;margin-bottom:4px;line-height:1.4;}
-.hero-fact b{display:block;font-size:13.5px;font-weight:800;color:#F7F2E4;line-height:1.45;overflow-wrap:anywhere;}
-.hero-fact.gold b{color:var(--gold);}
-.hero-fact.muted b{color:#a99f8c;font-weight:700;}
-@media (max-width:400px){ .hero-facts{grid-template-columns:1fr 1fr;} .hero-fact:last-child{grid-column:1 / -1;} }
 
 /* 2 · the products in the order — products only, nothing else */
 .pr-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid var(--border);}
@@ -61,6 +34,10 @@
   font-family:inherit;font-size:13.5px;font-weight:800;cursor:pointer;}
 .pr-more:hover{border-color:var(--gold);background:var(--gold-soft);}
 .pr-more:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+/* the close control: an X in the header's own pill style */
+.co-back.co-close{width:40px;padding:0;justify-content:center;font-size:19px;}
+.co-back.co-close:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 
 /* 7 · action buttons */
 .od-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;}
@@ -137,67 +114,6 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 .cc-err.show{display:block;}
 @media (min-width:560px){ .cc-acts{flex-direction:row;} .cc-acts button{flex:1;} }
 
-/* ══════════════════════════════════════════════════════════════
-   CUSTOMER TRACKING — three stages, horizontally.
-   The whole component is written in logical properties, so the
-   progression runs right→left in Arabic and left→right in English
-   from the same markup: the connector fills from `inset-inline-start`
-   and the row is an ordinary flex row, which the document direction
-   already reverses. Nothing here is mirrored by hand.
-   ══════════════════════════════════════════════════════════════ */
-.trk-steps{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);
-  padding:20px 18px 16px;margin-bottom:14px;}
-.trk-row{display:flex;align-items:flex-start;gap:0;position:relative;}
-.trk-step{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:9px;position:relative;}
-/* the connector lives behind the nodes and runs between them */
-.trk-step::before{content:'';position:absolute;top:21px;height:3px;border-radius:3px;background:var(--border2);
-  inset-inline-start:-50%;width:100%;z-index:0;}
-.trk-step:first-child::before{display:none;}
-.trk-step::after{content:'';position:absolute;top:21px;height:3px;border-radius:3px;background:var(--gold2);
-  inset-inline-start:-50%;width:0;z-index:1;transition:width .55s cubic-bezier(.22,1,.36,1);}
-.trk-step:first-child::after{display:none;}
-.trk-step.done::after,.trk-step.current::after{width:100%;}
-.trk-node{position:relative;z-index:2;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;font-size:21px;background:var(--bg2);border:2px solid var(--border2);color:var(--text3);
-  transition:background .35s,border-color .35s,color .35s,transform .35s;}
-.trk-step.done .trk-node{background:rgba(46,158,91,.14);border-color:#2E9E5B;color:#1F7A45;}
-.trk-step.current .trk-node{background:var(--gold-soft);border-color:var(--gold2);color:var(--gold2);transform:scale(1.06);}
-.trk-step.current .trk-node::after{content:'';position:absolute;inset:-6px;border-radius:50%;
-  border:2px solid var(--gold2);opacity:.55;animation:trkPulse 2.1s ease-out infinite;}
-@keyframes trkPulse{0%{transform:scale(.92);opacity:.5;}70%{transform:scale(1.22);opacity:0;}100%{opacity:0;}}
-.trk-lbl{font-size:12.5px;font-weight:800;line-height:1.5;text-align:center;color:var(--text3);
-  max-width:11ch;overflow-wrap:anywhere;transition:color .35s;}
-.trk-step.done .trk-lbl{color:var(--text2);}
-.trk-step.current .trk-lbl{color:var(--ink);}
-.trk-state{font-size:11px;font-weight:700;color:var(--text3);}
-.trk-step.current .trk-state{color:var(--gold2);}
-.trk-steps.is-cancelled .trk-node{background:rgba(217,83,79,.1);border-color:rgba(217,83,79,.4);color:var(--red);}
-.trk-steps.is-cancelled .trk-step::after{background:var(--red);}
-.trk-note{margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:flex-start;
-  gap:8px;font-size:12.5px;line-height:1.7;color:var(--text3);}
-.trk-note i{font-size:16px;color:var(--gold2);flex:0 0 auto;margin-top:1px;}
-
-/* live delivery */
-.trk-live{background:var(--card);border:1px solid rgba(201,168,76,.4);border-radius:var(--rl);
-  padding:18px;margin-bottom:14px;box-shadow:0 0 0 3px var(--gold-soft);}
-.trk-live-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px;}
-.trk-live-h h2{margin:0;flex:1;min-width:140px;font-size:15.5px;font-weight:800;color:var(--ink);}
-.trk-dot{display:inline-flex;align-items:center;gap:6px;height:27px;padding:0 11px;border-radius:20px;
-  background:rgba(46,158,91,.13);color:#1F7A45;font-size:11.5px;font-weight:800;white-space:nowrap;}
-.trk-dot span{width:8px;height:8px;border-radius:50%;background:#2E9E5B;animation:trkBlink 1.8s ease-in-out infinite;}
-@keyframes trkBlink{0%,100%{opacity:1;}50%{opacity:.35;}}
-.trk-sub{font-size:13px;color:var(--text2);line-height:1.7;}
-.trk-leg{display:flex;align-items:flex-start;gap:11px;padding:12px 0;border-top:1px solid var(--border);margin-top:12px;}
-.trk-leg:first-of-type{border-top:0;margin-top:6px;}
-.trk-leg .ic{width:36px;height:36px;flex:0 0 auto;border-radius:11px;background:var(--bg2);color:var(--gold2);
-  display:flex;align-items:center;justify-content:center;font-size:18px;}
-.trk-leg .b{flex:1;min-width:0;}
-.trk-leg .b b{display:block;font-size:11.5px;font-weight:800;color:var(--text3);margin-bottom:3px;}
-.trk-leg .b span{display:block;font-size:14px;color:var(--ink);line-height:1.6;overflow-wrap:anywhere;}
-.trk-na{display:flex;align-items:flex-start;gap:9px;margin-top:12px;padding:12px 13px;border-radius:13px;
-  border:1px dashed var(--border2);font-size:12.5px;line-height:1.7;color:var(--text3);}
-.trk-na i{font-size:17px;flex:0 0 auto;margin-top:1px;}
-
 /* compact summary + support */
 .trk-kv{display:flex;justify-content:space-between;gap:14px;padding:11px 0;border-top:1px solid var(--border);
   font-size:13.5px;line-height:1.6;}
@@ -216,16 +132,7 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 .trk-help a:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 
 @media (max-width:420px){
-  .trk-steps{padding:18px 12px 14px;}
-  .trk-lbl{font-size:11.5px;max-width:9ch;}
   .trk-help a{width:100%;}
-}
-/* motion is a flourish, never the message */
-@media (prefers-reduced-motion:reduce){
-  .trk-step::after{transition:none;}
-  .trk-step.current .trk-node::after{animation:none;opacity:.4;}
-  .trk-dot span{animation:none;}
-  .trk-node{transition:none;}
 }
 </style>
 <script src="raf_features.js"></script>
@@ -238,7 +145,7 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 <body>
 
 <header class="co-head">
-  <button type="button" class="co-back" onclick="goBack()"><i class="ti ti-arrow-right"></i> <span data-ar="رجوع" data-en="Back">رجوع</span></button>
+  <button type="button" class="co-back co-close" id="trkClose" onclick="closeTracking()" aria-label="إغلاق التتبع" title="إغلاق" data-aria-ar="إغلاق التتبع" data-aria-en="Close tracking" data-title-ar="إغلاق" data-title-en="Close"><i class="ti ti-x" aria-hidden="true"></i></button>
   <div class="co-title" data-ar="تفاصيل الطلب والتتبع" data-en="Order Details &amp; Tracking">تفاصيل الطلب والتتبع</div>
   <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
 </header>
@@ -280,7 +187,17 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 
 <!-- Phase I: delay compensation (authority + widget) -->
 <script src="raf_compensation.js"></script>
-<script src="raf_compensation_ui.js"></script>
+<!-- order ratings (store + driver) and the current driver's rating -->
+<script src="raf_customer_experience.js"></script>
+<!-- Customer ↔ Driver communication: the authority only (call + whether a live
+     conversation exists); the conversation screen is raf_order_chat.html -->
+<script src="raf_driver_communication.js"></script>
+<!-- the delivery authority: arrival and the delivery verification code -->
+<script src="raf_logistics_authority.js"></script>
+<!-- the delivery journey card (presentation only) -->
+<script src="raf_tracking_journey.js"></script>
+<!-- the three approved rendered scenes (transparent cutouts of the supplied artwork) -->
+<script>RAFJourneyUI.useScenes({ store:"assets/tracking/scene-store.png", ride:"assets/tracking/scene-ride.png", rideRtl:"assets/tracking/scene-ride-rtl.png", home:"assets/tracking/scene-home.png" });</script>
 <script src="raf_checkout.js"></script>
 <script>
 /* ============================================================
@@ -292,10 +209,18 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
     return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 
+  /* THE ORDER, ONLY FOR ITS OWN CUSTOMER. RAFShop.Orders.mineById proves the
+     signed-in customer is the one on the order record; an id in the URL grants
+     nothing, and a refused visitor learns nothing about the order. */
+  var ACCESS=null;
   function getOrder(){
     var id=new URLSearchParams(location.search).get('id');
-    var all=RAFShop.Orders.all();
-    return (id && RAFShop.Orders.get(id)) || all[0] || null;
+    /* no id (e.g. the "Track your order" nav link): the signed-in customer's own
+       most recent order still in progress — never anyone else's */
+    if(!id && RAFShop.Orders.mine){ var act=RAFShop.Orders.mine().filter(function(x){ return x.status==='progress'; })[0]; if(act) id=act.id; }
+    var r=(RAFShop.Orders.mineById ? RAFShop.Orders.mineById(id) : { ok:false, code:'NOT_FOUND' });
+    ACCESS=r.ok ? null : r.code;
+    return r.ok ? r.order : null;
   }
 
   /* ══════════════════════════════════════════════════════════════
@@ -310,9 +235,10 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
 
        Stage 1 · جاري تجهيز طلبك   the store still has the order — placed,
                                    accepted, preparing, ready, or ready and
-                                   waiting for a driver to take it
-       Stage 2 · قيد التوصيل        a driver owns the delivery: from the
-                                   moment the order is taken, through pickup,
+                                   waiting for a driver, or ready with a driver
+                                   assigned who has not collected it yet
+       Stage 2 · قيد التوصيل        the driver has PICKED UP the order: from
+                                   the audited pickup
                                    until it is handed over
        Stage 3 · تم التوصيل         the order was delivered
 
@@ -346,8 +272,12 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     var f = fulfilmentOf(o);
     var idx;
     if(o.status==='delivered' || (f && f.deliveredAt)) idx=2;
-    else if(f && f.driverId)                           idx=1;   /* taken, picked up or on the way */
-    else if(f)                                         idx=0;   /* still the store's */
+    /* ASSIGNMENT IS NOT PICKUP. The order is out for delivery only once the
+       driver has physically collected it (fulfilment.pickedUpAt, written by
+       RAFLogistics.pickUp with the audited 'driver.pickup'); a driver who is
+       merely assigned leaves it at the store's stage */
+    else if(f && f.pickedUpAt)                         idx=1;
+    else if(f)                                         idx=0;   /* still at the store — preparing, ready, or ready with a driver assigned */
     else                                               idx=legacyStage(o);
     return { index:idx, cancelled:cancelled,
              claimed:!!(f && f.driverId), picked:!!(f && f.pickedUpAt),
@@ -367,108 +297,119 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
     catch(e){ return null; }
   }
 
-  /* ---------- 1 · header — the current stage, in the customer's words ---------- */
-  function confirmationHTML(o){
-    var cancelled=o.status==='cancelled';
-    var st=stageOf(o);
-    var title = cancelled ? T('تم إلغاء الطلب','Order cancelled')
-              : st.index===2 ? T('تم توصيل طلبك','Your order was delivered')
-              : st.index===1 ? T('طلبك قيد التوصيل','Your order is out for delivery')
-              : T('جاري تجهيز طلبك','Your order is being prepared');
-    var sub = cancelled ? T('إذا كان لديك أي استفسار تواصل مع الدعم.','Contact support if you have any questions.')
-            : st.index===2 ? T('شكراً لتسوقك من رف.','Thanks for shopping with RAF.')
-            : st.index===1 ? T('سيصل إليك قريباً..','It will reach you shortly…')
-            : T('المتجر يجهّز طلبك الآن، وسنخبرك فور خروجه للتوصيل.','The store is preparing your order — we will tell you as soon as it leaves for delivery.');
-    var icon = cancelled ? 'ti-x' : st.index===2 ? 'ti-circle-check' : st.index===1 ? 'ti-truck-delivery' : 'ti-package';
-    var commit = commitmentOf(o);
-    /* the live badge belongs to a delivery that is actually happening */
-    var live = (!cancelled && st.index===1)
-      ? '<span class="hero-live"><b aria-hidden="true"></b>'+T('مباشر','Live')+'</span>' : '';
-    return '<header class="hero'+(cancelled?' is-cancelled':'')+(st.index===2?' is-done':'')+'">'
-      + '<div class="hero-top"><span class="hero-ic" aria-hidden="true"><i class="ti '+icon+'"></i></span>'
-        + '<div class="hero-t"><h1>'+title+'</h1><p>'+sub+'</p></div>'+live+'</div>'
-      + '<div class="hero-facts">'
-        + '<div class="hero-fact'+(commit?'':' muted')+'"><span>'+T('الوقت المتوقع للوصول','Expected arrival')+'</span>'
-          + '<b>'+(commit ? commit : T('غير متاح','Not available'))+'</b></div>'
-        + '<div class="hero-fact"><span>'+T('إجمالي الطلب','Order total')+'</span><b>'+o.total+' '+T('د.ك','KWD')+'</b></div>'
-        + '<div class="hero-fact gold"><span>'+T('رقم الطلب','Order number')+'</span><b>'+o.id+'</b></div>'
-      + '</div></header>';
+  /* ---------- 1 · the delivery journey ----------
+     RAFJourneyUI draws; every value below is read here from the authority
+     that owns it, and nothing is guessed:
+       stage            stageOf() — out for delivery only after the PICKUP
+       prepared         RAFOrderEngine.readyAt()      (audited 'order.ready')
+       store            RAFSource.store(slug from the snapshot) → name, category, logo
+       delivery timer   RAFOrderEngine.acceptedAt()   (audited 'order.accept')
+                        → RAFOrderEngine.deliveredAt() (audited 'driver.delivered')
+       driver, message, call   RAFDriverCommunication — whenever this customer
+                        has a LIVE conversation (a driver owns the delivery,
+                        from assignment until delivery); never after delivery
+       driver rating    RAFCustomerExperience.currentDriverRating() — the
+                        average of real submitted ratings, or none
+       compensation     RAFCompensation.forOrder()    — only a real record
+       rating the order RAFCustomerExperience.orderRatingStatus() — delivered only */
+  var CALLNOTE = null, COMPNOTE = null;
+  function journeyModel(o){
+    var st=stageOf(o), f=fulfilmentOf(o)||{}, E=window.RAFOrderEngine;
+    var slug=(o.snapshot && o.snapshot.storeSlug) || o.storeSlug || null;
+    var store=null; try { store = (slug && window.RAFSource) ? RAFSource.store(slug) : null; } catch(e){ store=null; }
+    var name = store ? L(store.name) : (L(o.store) || '');
+    function ms(fn){ try { var r = E && E[fn] ? E[fn](o.id) : null; return r && typeof r.at==='number' ? r.at : null; } catch(e){ return null; } }
+    var accepted=ms('acceptedAt'), ready=ms('readyAt');
+    var delivered=ms('deliveredAt') || (typeof f.deliveredAt==='number' ? f.deliveredAt : null);
+    var conv=null;
+    try { conv = (!st.cancelled && !st.delivered && window.RAFDriverCommunication) ? RAFDriverCommunication.conversation(o.id) : null; } catch(e){ conv=null; }
+    var live = !!(conv && conv.ok);
+    var calls = live ? (conv.conversation.calls || {}) : {};
+    var drating = null;
+    /* the order's own driver — identity and aggregate stay visible after delivery; only contact ends */
+    var odrv = null;
+    if(!st.cancelled && window.RAFCustomerExperience){ try { var dr = RAFCustomerExperience.orderDriver(o.id); odrv = dr && dr.ok && dr.driver.name ? dr.driver : null; } catch(e){ odrv=null; } }
+    if(odrv) drating = odrv.rating;
+    var comp = null;
+    if(!st.cancelled && window.RAFCompensation){ try { var cr = RAFCompensation.forOrder(o.id); comp = cr && cr.ok ? cr.compensation : null; } catch(e){ comp=null; } }
+    var rating = null;
+    if(st.delivered && window.RAFCustomerExperience){ try { var rs = RAFCustomerExperience.orderRatingStatus(o.id); rating = rs && rs.ok ? { state:rs.state } : null; } catch(e){ rating=null; } }
+    /* the driver at the door, and the code to hand over — RAFLogistics.customerArrival,
+       the order's own customer only; the code lives on the shared order record */
+    var arr = null;
+    if(!st.cancelled && !st.delivered && window.RAFLogistics && RAFLogistics.customerArrival){ try { var ar = RAFLogistics.customerArrival(o.id); arr = ar && ar.ok ? ar : null; } catch(e){ arr=null; } }
+    var arrived = !!(arr && arr.arrived);
+    var prepared = !!ready || !!f.driverId;           /* the store marked it ready (or a driver already has it) */
+    var label = st.cancelled ? T('ملغى','Cancelled')
+              : st.index===2 ? T('تم التوصيل','Delivered')
+              : st.index===1 && arrived ? T('وصل السائق','Driver arrived')
+              : st.index===1 ? T('قيد التوصيل','Out for delivery')
+              : prepared ? T('تم تجهيز طلبك','Order prepared')
+              : T('جاري التجهيز','Being prepared');
+    var message = st.cancelled ? T('تم إلغاء الطلب. إذا كان لديك أي استفسار تواصل مع الدعم.','This order was cancelled. Contact support if you have any questions.')
+                : st.index===2 ? T('تم تسليم طلبك بنجاح، شكراً لاستخدامك رف!','Your order was delivered. Thank you for using RAF!')
+                : st.index===1 && arrived ? T('وصل السائق إلى موقعك. يرجى الاستعداد لاستلام طلبك.','Your driver has arrived at your destination. Please prepare to receive your order.')
+                : st.index===1 ? T('استلم السائق طلبك من المتجر وهو في طريقه إليك.','The driver collected your order from the store and is on the way to you.')
+                : f.driverId ? T('طلبك جاهز، وتم تعيين سائق لاستلامه من المتجر.','Your order is ready and a driver has been assigned to collect it from the store.')
+                : prepared ? T('طلبك جاهز في المتجر.','Your order is ready at the store.')
+                : T('المتجر يجهّز طلبك الآن، وسنخبرك فور خروجه للتوصيل.','The store is preparing your order — we will tell you as soon as it leaves for delivery.');
+    return {
+      orderId:o.id, stage:st.index, cancelled:st.cancelled, prepared:prepared,
+      store:{ name:name, category:store && store.cat ? L(store.cat) : null, logo:store && store.logo ? store.logo : null,
+              initial:String(name||'').trim().charAt(0) },
+      status:{ label:label, message:message },
+      acceptedAt:accepted, deliveredAt:st.delivered ? delivered : null,
+      driver: odrv ? { name:odrv.name, rating:drating } : (live && conv.conversation.currentDriver ? { name:conv.conversation.currentDriver.name, rating:null } : null),
+      canMessage:live, canCall:live && calls.remaining!==0,
+      callNote:live ? CALLNOTE : null,
+      compensation:comp, compNote:comp ? COMPNOTE : null,
+      rating:rating,
+      arrived:arrived, deliveryCode:arr && arr.code ? arr.code : null
+    };
   }
+  function journeyHTML(o){
+    if(!window.RAFJourneyUI) return '';
+    return '<div id="jrRoot">'+RAFJourneyUI.html(journeyModel(o))+'</div>';
+  }
+  /* the two actions go to the communication authority; nothing is decided here */
+  /* Message opens the order's own chat screen (the same RAFDriverCommunication
+     conversation); its X brings the customer back here */
+  window.trkMessage=function(){
+    var o=getOrder(); if(!o) return;
+    location.href='raf_order_chat.html?id='+encodeURIComponent(o.id);
+  };
+  window.trkCall=function(){
+    var o=getOrder(); if(!o || !window.RAFDriverCommunication) return;
+    Promise.resolve(RAFDriverCommunication.call(o.id)).then(function(r){
+      if(r && r.ok){
+        CALLNOTE=null;
+        var a=document.createElement('a'); a.href=r.dialHref; a.style.display='none'; document.body.appendChild(a); a.click(); a.remove();
+      } else CALLNOTE=(r && r.message) || T('تعذّر الاتصال.','The call could not be placed.');
+      render();
+    });
+  };
+  /* the compensation's existing customer action: add the coupon to RAF Wallet */
+  var WALLET_BUSY=false;
+  window.trkWallet=function(){
+    var o=getOrder(); if(!o || WALLET_BUSY || !window.RAFCompensation) return;
+    var cr=null; try { cr=RAFCompensation.forOrder(o.id); } catch(e){ cr=null; }
+    var c=cr && cr.ok ? cr.compensation : null; if(!c || !c.canAddToWallet) return;
+    WALLET_BUSY=true;
+    Promise.resolve(RAFCompensation.addToWallet(c.compensationId)).then(function(r){
+      WALLET_BUSY=false;
+      COMPNOTE = r && r.ok ? null : ((r && r.message) || T('تعذّرت إضافة القسيمة إلى المحفظة.','The coupon could not be added to your wallet.'));
+      render();
+    });
+  };
+  document.addEventListener('click', function(e){
+    var b=e.target.closest && e.target.closest('#jrRoot [data-jr]'); if(!b) return;
+    var act=b.getAttribute('data-jr');
+    if(act==='call') trkCall(); else if(act==='wallet') trkWallet(); else trkMessage();
+  });
 
-  /* ---------- 2 · the three-stage tracker ----------
-     One horizontal row. Every stage carries an icon AND its own word, so the
-     state never depends on colour, and the whole row is announced to a screen
-     reader as a progress bar with the stage the order is actually at. */
-  function timelineHTML(o){
-    var st=stageOf(o);
-    var stages=STAGES.map(function(s,i){
-      /* a delivered order has no "current" stage left — all three are done,
-         so the finished tracker rests instead of pulsing forever */
-      var state = st.cancelled ? (i<=st.index?'done':'')
-                : i<st.index ? 'done'
-                : i===st.index ? (st.delivered ? 'done' : 'current') : '';
-      var icon  = st.cancelled ? 'ti-circle-x' : (state==='done' ? 'ti-check' : s.ic);
-      var word  = state==='done' ? T('تم','Done') : state==='current' ? T('الآن','Now') : T('قادم','Next');
-      return '<div class="trk-step '+state+'">'
-        + '<span class="trk-node" aria-hidden="true"><i class="ti '+icon+'"></i></span>'
-        + '<span class="trk-lbl">'+T(s.ar,s.en)+'</span>'
-        + '<span class="trk-state">'+(st.cancelled?'—':word)+'</span>'
-        + '</div>';
-    }).join('');
-    var current=STAGES[Math.min(st.index,2)];
-    var reading = st.cancelled
-      ? T('الطلب ملغى','Order cancelled')
-      : T('المرحلة '+(st.index+1)+' من 3: '+current.ar, 'Stage '+(st.index+1)+' of 3: '+current.en);
-    return '<section class="trk-steps'+(st.cancelled?' is-cancelled':'')+'" aria-label="'+T('مراحل الطلب','Order progress')+'">'
-      + '<div class="trk-row" role="progressbar" aria-valuemin="1" aria-valuemax="3" aria-valuenow="'+(st.index+1)+'"'
-        + ' aria-valuetext="'+reading+'">'+stages+'</div>'
-      + '<p class="trk-note"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'+reading+'</span></p>'
-      + '</section>';
-  }
 
-  /* ---------- 3 · live delivery ----------
-     Shown while the order is out for delivery. It states what is genuinely
-     known — that a driver has the order, where it came from and where it is
-     going — and says plainly that live location is not configured. RAF holds
-     no coordinates, no route and no ETA, so none is drawn or estimated. */
-  function liveHTML(o){
-    var st=stageOf(o); if(st.cancelled || st.index!==1) return '';
-    var storeName=L(o.store);
-    var commitment=commitmentOf(o);
-    var statusLine = st.picked
-      ? T('استلم المندوب طلبك من المتجر وهو في طريقه إليك.','The driver collected your order from the store and is on the way to you.')
-      : T('طلبك جاهز ومع مندوب التوصيل الآن.','Your order is ready and with the delivery driver now.');
-    return '<section class="trk-live" aria-label="'+T('التتبع المباشر','Live tracking')+'">'
-      + '<div class="trk-live-h"><h2>'+T('التتبع المباشر','Live tracking')+'</h2>'
-        + '<span class="trk-dot"><span aria-hidden="true"></span>'+T('مباشر','Live')+'</span></div>'
-      + '<p class="trk-sub">'+statusLine+'</p>'
-      + '<div class="trk-leg"><span class="ic" aria-hidden="true"><i class="ti ti-building-store"></i></span>'
-        + '<span class="b"><b>'+T('من المتجر','From the store')+'</b><span>'+(storeName||'—')+'</span></span></div>'
-      + '<div class="trk-leg"><span class="ic" aria-hidden="true"><i class="ti ti-map-pin"></i></span>'
-        + '<span class="b"><b>'+T('إلى عنوانك','To your address')+'</b><span>'+(L(o.addr)||'—')+'</span></span></div>'
-      + (commitment
-          ? '<div class="trk-leg"><span class="ic" aria-hidden="true"><i class="ti ti-clock-hour-4"></i></span>'
-            + '<span class="b"><b>'+T('موعد التوصيل','Delivery time')+'</b><span>'+commitment+'</span></span></div>'
-          : '')
-      + '<div class="trk-na"><i class="ti ti-map-off" aria-hidden="true"></i><span>'
-        + T('التتبع على الخريطة والوقت المتبقي غير مُهيّأين في هذه النسخة. حالة التوصيل أعلاه محدّثة وصحيحة.',
-            'Map tracking and a remaining-time estimate are not configured in this version. The delivery status above is live and accurate.')
-        + '</span></div></section>';
-  }
-
-  /* ---------- Phase I: delay compensation ----------
-     RAFCompensation decides whether this customer has a compensation for the
-     order and what it is worth; the widget renders it. Hidden when there is none. */
-  function compHTML(o){
-    if(!window.RAFCompUI) return '';
-    return '<div class="panel" id="compWrap" hidden><div class="panel-h" role="heading" aria-level="2"><i class="ti ti-discount-2"></i> '
-      + T('تعويض التأخير','Delay compensation')+'</div><div class="panel-b" id="compRoot"></div></div>';
-  }
-  function mountComp(o){
-    var el = document.getElementById('compRoot'); if(!el || !window.RAFCompUI) return;
-    RAFCompUI.mount(el, { mode:'order', orderId:o.id, onRender:function(x){
-      var w = document.getElementById('compWrap'); if(w) w.hidden = !x.innerHTML; } });
-  }
+  /* the conversation itself lives on its own screen (raf_order_chat.html) —
+     RAFDriverCommunication decides who may see or write, exactly as before */
 
   /* ---------- 5 · the products, and only the products ----------
      No address, no payment, no order metadata: those belong to their own
@@ -778,9 +719,44 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
   };
 
   /* ---------- render ---------- */
+  /* the close control follows the page language */
+  function closeLabels(){
+    var b=document.getElementById('trkClose'); if(!b) return;
+    b.setAttribute('aria-label', T('إغلاق التتبع','Close tracking')); b.setAttribute('title', T('إغلاق','Close'));
+  }
+  /* AFTER DELIVERY the customer is taken straight into the post-delivery flow:
+     Delivery Completed → Rating (raf_delivery_rating.html, the existing ratings
+     screen). It happens when this page sees the order become delivered, or the
+     first time this tab opens an already-delivered, not-yet-rated order; the
+     tracking entry is REPLACED so Back does not return to it. An order already
+     rated, or one this tab has already been through, stays on tracking. */
+  var LASTSTAGE=null;
+  function postDelivery(o){
+    var st=stageOf(o), prev=LASTSTAGE; LASTSTAGE=st.index;
+    if(!st.delivered || st.cancelled || !window.RAFCustomerExperience) return false;
+    var rs=null; try { rs=RAFCustomerExperience.orderRatingStatus(o.id); } catch(e){ rs=null; }
+    if(!rs || !rs.ok || rs.state!=='available') return false;
+    var key='raf_post_delivery_'+o.id, done=null;
+    try { done=sessionStorage.getItem(key); } catch(e){ done=null; }
+    var live = prev!==null && prev<2;
+    if(done && !live) return false;
+    try { sessionStorage.setItem(key,'1'); } catch(e){}
+    var to='raf_delivery_rating.html?id='+encodeURIComponent(o.id)+'&flow=delivered';
+    try { location.replace(to); } catch(e){ location.href=to; }
+    return true;
+  }
   function render(){
+    closeLabels();
     var root=document.getElementById('odRoot');
     var o=getOrder();
+    if(o && postDelivery(o)) return;
+    if(!o && ACCESS==='UNAUTHENTICATED'){
+      root.innerHTML='<div class="empty"><div class="empty-ic"><i class="ti ti-lock"></i></div>'
+        + '<div class="empty-t">'+T('يلزم تسجيل الدخول','Sign-in required')+'</div>'
+        + '<div class="empty-s">'+T('سجّل الدخول بحسابك لتتبع طلبك.','Sign in with your account to track your order.')+'</div>'
+        + '<div class="empty-actions"><a href="raf_login.html" class="btn btn-gold"><i class="ti ti-login"></i> '+T('تسجيل الدخول','Sign in')+'</a></div></div>';
+      return;
+    }
     if(!o){
       root.innerHTML='<div class="empty"><div class="empty-ic"><i class="ti ti-package-off"></i></div>'
         + '<div class="empty-t">'+T('الطلب غير موجود','Order not found')+'</div>'
@@ -789,15 +765,17 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
       return;
     }
     /* progress first, then the delivery itself, then the order's own detail */
-    root.innerHTML = confirmationHTML(o) + changeHTML(o) + timelineHTML(o) + liveHTML(o)
-                   + compHTML(o)
+    root.innerHTML = journeyHTML(o) + changeHTML(o)
                    + productsHTML(o) + orderDetailsHTML(o) + deliveryHTML(o)
                    + invoiceHTML(o) + supportHTML(o) + actionsHTML();
-    mountComp(o);
+    if(window.RAFJourneyUI) RAFJourneyUI.settle(document.getElementById('jrRoot'));
     RAFShop.Cart.badge();
   }
 
-  window.goBack=function(){ if(history.length>1) history.back(); else window.location='raf_orders.html'; };
+  /* CLOSE: tracking is left for the homepage, REPLACING this history entry so
+     Back does not bring the closed tracking screen back. Closing never touches
+     the order; the active-order bar reopens it. */
+  window.closeTracking=function(){ try { location.replace('raf_homepage.html'); } catch(e){ location.href='raf_homepage.html'; } };
 
   function boot(){
     /* arriving straight from checkout: clean the flag so a refresh isn't treated as new */

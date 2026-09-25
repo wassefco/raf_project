@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — المحادثة مع السائق</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<!-- the shared checkout design system (header, panels, buttons) -->
+<link rel="stylesheet" href="raf_checkout.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<style>
+/* ===== the order's chat screen — its own layout, not part of tracking ===== */
+.chat-wrap{flex:1 0 auto;width:100%;max-width:720px;margin:0 auto;padding:20px clamp(16px,4vw,32px) 32px;display:flex;flex-direction:column;}
+.co-back.co-close{width:40px;padding:0;justify-content:center;font-size:19px;}
+.co-back.co-close:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.chat-t{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;text-align:center;}
+.chat-t .co-title{flex:0 0 auto;}
+.chat-sub{font-size:12.5px;color:var(--text3);margin-top:1px;}
+.chat-card{flex:1 0 auto;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--border);border-radius:20px;
+  box-shadow:0 18px 40px -30px rgba(20,16,8,.45);padding:16px 16px 14px;}
+/* the widget's conversation fills the screen here instead of a fixed box */
+.chat-card .rc-thread{max-height:none;min-height:min(52vh,460px);flex:1 1 auto;}
+#chatRoot{--rc-pri-ink:#1C1606;display:flex;flex-direction:column;flex:1 1 auto;}
+.chat-state{text-align:center;padding:36px 12px;color:var(--text2);}
+.chat-state .ti{font-size:40px;color:var(--gold2);display:block;margin-bottom:10px;}
+.chat-state b{display:block;font-size:16px;color:var(--ink);margin-bottom:6px;}
+.chat-state p{margin:0 0 16px;font-size:13.5px;line-height:1.8;}
+</style>
+<script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+</head>
+<body>
+
+<header class="co-head">
+  <button type="button" class="co-back co-close" id="chatClose" onclick="closeChat()" aria-label="إغلاق المحادثة" title="إغلاق"><i class="ti ti-x" aria-hidden="true"></i></button>
+  <div class="chat-t">
+    <div class="co-title" data-ar="المحادثة مع السائق" data-en="Chat with your driver">المحادثة مع السائق</div>
+    <div class="chat-sub" id="chatSub"></div>
+  </div>
+  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
+</header>
+
+<main class="chat-wrap"><section class="chat-card" id="chatCard" aria-live="polite"></section></main>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_store_schedule.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_rules.js"></script>
+<script src="raf_inventory.js"></script>
+<script src="raf_order_engine.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_wallet.js"></script>
+<script src="raf_order_changes.js"></script>
+<!-- Customer ↔ Driver communication: the one authority, translation, and the shared widget -->
+<script src="raf_driver_communication.js"></script>
+<script src="raf_message_translation.js"></script>
+<script src="raf_driver_communication_ui.js"></script>
+<script src="raf_checkout.js"></script>
+<script>
+/* ============================================================
+   THE ORDER'S CHAT SCREEN — the existing Customer ↔ Driver
+   conversation (RAFDriverCommunication), on its own screen.
+   Nothing here decides access: the order is resolved only among
+   the signed-in customer's OWN orders (RAFShop.Orders.mineById),
+   and RAFCommUI renders nothing unless the communication authority
+   says this customer has a live conversation. X returns to the
+   order's tracking screen.
+   ============================================================ */
+(function(){
+  var T=RAFCO.T;
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  var ID=new URLSearchParams(location.search).get('id');
+  var ACCESS=null, MOUNTED=false;
+  function order(){
+    var r=(RAFShop.Orders.mineById ? RAFShop.Orders.mineById(ID) : { ok:false, code:'NOT_FOUND' });
+    ACCESS=r.ok ? null : r.code;
+    return r.ok ? r.order : null;
+  }
+  function trackingUrl(){ return 'raf_tracking.html?id='+encodeURIComponent(ID||''); }
+  /* X → the order's tracking screen. Arriving from it, go back to that same
+     entry; otherwise replace this one, so no extra history step is added */
+  window.closeChat=function(){
+    var fromTrk=false;
+    try { var ref=new URL(document.referrer); fromTrk=/raf_tracking\.html$/.test(ref.pathname) && ref.searchParams.get('id')===ID; } catch(e){}
+    if(fromTrk && history.length>1) history.back();
+    else { try { location.replace(trackingUrl()); } catch(e){ location.href=trackingUrl(); } }
+  };
+  function labels(){
+    var b=document.getElementById('chatClose');
+    if(b){ b.setAttribute('aria-label',T('إغلاق المحادثة','Close chat')); b.setAttribute('title',T('إغلاق','Close')); }
+    document.title=T('رف — المحادثة مع السائق','RAF — Chat with your driver');
+    var ht=document.querySelector('.co-title'); if(ht) ht.textContent=T('المحادثة مع السائق','Chat with your driver');
+    var ll=document.getElementById('langLabel'); if(ll) ll.textContent=T('EN','ع');
+  }
+  function state(ic, t, p, act){
+    return '<div class="chat-state"><i class="ti '+ic+'" aria-hidden="true"></i><b>'+t+'</b><p>'+p+'</p>'+(act||'')+'</div>';
+  }
+  function render(){
+    labels();
+    var card=document.getElementById('chatCard'), o=order();
+    var sub=document.getElementById('chatSub');
+    if(!o){
+      MOUNTED=false; if(sub) sub.textContent='';
+      card.innerHTML = ACCESS==='UNAUTHENTICATED'
+        ? state('ti-lock', T('يلزم تسجيل الدخول','Sign-in required'), T('سجّل الدخول بحسابك للتواصل مع سائقك.','Sign in with your account to contact your driver.'),
+                '<a href="raf_login.html" class="btn btn-gold"><i class="ti ti-login"></i> '+T('تسجيل الدخول','Sign in')+'</a>')
+        : state('ti-message-off', T('المحادثة غير متاحة','Chat not available'), T('لم نعثر على هذا الطلب ضمن طلباتك.','We couldn\'t find this order among your orders.'),
+                '<a href="raf_orders.html" class="btn btn-gold"><i class="ti ti-receipt"></i> '+T('طلباتي','My Orders')+'</a>');
+      return;
+    }
+    if(sub) sub.innerHTML=T('الطلب ','Order ')+'<bdi>#'+esc(o.id)+'</bdi>';
+    /* delivered while this screen was open: the conversation has closed —
+       back to tracking, which continues into the post-delivery flow */
+    if(o.status!=='progress'){ MOUNTED=false; try { location.replace(trackingUrl()); } catch(e){} return; }
+    if(!MOUNTED){
+      card.innerHTML='<div id="chatRoot"></div><div id="chatNone" hidden>'
+        + state('ti-message-circle-off', T('لا توجد محادثة الآن','No conversation right now'),
+                T('تتوفر المحادثة عندما يتولى سائق توصيل طلبك، وتنتهي عند التسليم.','Chat is available once a driver is delivering your order, and ends at delivery.'),
+                '<button type="button" class="btn btn-gold" onclick="closeChat()"><i class="ti ti-map-pin"></i> '+T('العودة إلى التتبع','Back to tracking')+'</button>')
+        + '</div>';
+      MOUNTED=true;
+      if(window.RAFCommUI) RAFCommUI.mount(document.getElementById('chatRoot'), { orderId:o.id, title:false, call:false, onRender:function(x){
+        var n=document.getElementById('chatNone'); if(n) n.hidden=!!x.innerHTML;
+        var t=x.querySelector('.rc-thread'); if(t) t.scrollTop=t.scrollHeight;
+      } });
+    }
+  }
+  function boot(){
+    render();
+    var root=document.getElementById('htmlRoot');
+    if(root) new MutationObserver(function(){ MOUNTED=false; render(); }).observe(root,{attributes:true,attributeFilter:['lang']});
+    /* the order changing in another tab (delivery) is reflected here */
+    window.addEventListener('storage', function(e){ if(e.key==='raf_orders') render(); });
+    document.addEventListener('keydown', function(e){ if(e.key==='Escape' && !(e.target && /textarea|input/i.test(e.target.tagName))) closeChat(); });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+})();
+</script>
+</body>
+</html>

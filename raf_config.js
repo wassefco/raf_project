@@ -23,9 +23,11 @@
  * this is RAF Management, which is not built yet; this phase provides the
  * authority only.
  *
- * SCOPE — logistics and notification policy. Existing merchant-side timings
- * (acceptance window, undo window, merchant order lock) stay owned by
- * RAFOrderEngine and are deliberately NOT duplicated here.
+ * SCOPE — logistics, order-lifecycle, communication and notification policy. The order
+ * acceptance window and undo window are registered here and READ from here by
+ * RAFOrderEngine: one configurable value, every consumer on it. The merchant
+ * order-processing LOCK (heartbeat, stale threshold) stays inside the engine —
+ * it is concurrency mechanics, not a business value anyone configures.
  *
  * PROTOTYPE — overrides persist through RAFRecordStore's 'config' state map
  * (localStorage). Production requires a server-side configuration store with
@@ -43,12 +45,14 @@
     compensation:  { ar:'التعويض',                   en:'Compensation' },
     notifications: { ar:'الإشعارات',                 en:'Notifications' },
     checkout:      { ar:'إتمام الشراء',              en:'Checkout' },
+    orders:        { ar:'الطلبات',                   en:'Orders' },
     store_ops:     { ar:'تشغيل المتجر',              en:'Store operations' },
-    support:       { ar:'خدمة العملاء',              en:'Customer Service' }
+    support:       { ar:'خدمة العملاء',              en:'Customer Service' },
+    communication: { ar:'التواصل مع السائق',         en:'Driver communication' }
   };
 
   /* ---------- the registry ----------
-     type: minutes | ms | integer | fils | boolean | enum | text | list
+     type: minutes | seconds | ms | integer | fils | boolean | enum | text | list
      approved: the approved value, or null when none has been approved */
   function k(key, category, type, approved, extra){
     return Object.assign({ key:key, category:category, type:type, approved:approved === undefined ? null : approved }, extra || {});
@@ -61,6 +65,18 @@
     k('eta.promisedDurationMinutes',      'eta', 'minutes', null,
       { prototype:90, note:'Promised ETA = Merchant Accepted Time + this offset. TEMPORARY PROTOTYPE CONFIGURATION.' }),
 
+    /* orders — the two order-lifecycle timings Operations is responsible for.
+       They lived as constants inside RAFOrderEngine; the values here are the
+       ones the engine has always applied (5 minutes / 10 seconds), moved, not
+       changed and not duplicated: RAFOrderEngine now READS them from here, so
+       there is one configurable value and every consumer uses it. The order
+       LOCK heartbeat and stale threshold stay inside the engine — they are
+       concurrency mechanics, not a business policy anyone configures. */
+    k('orders.acceptanceWindowMinutes',   'orders', 'minutes', 5,
+      { note:'How long a store has to accept or reject an order before the window closes.' }),
+    k('orders.undoWindowSeconds',         'orders', 'seconds', 10,
+      { note:'How long a merchant may undo the action just taken on an order.' }),
+
     /* checkout — the stock hold a checkout session keeps (RAFRules.Reserve).
        Moved here from a constant in raf_rules.js; the value is unchanged. */
     k('checkout.reservationHoldMinutes',  'checkout', 'minutes', null,
@@ -72,7 +88,12 @@
       { prototype:30, note:'Same-day ordering stops this long before the store’s closing time, and Instant Delivery stops this long before the end of the day’s final period. TEMPORARY PROTOTYPE CONFIGURATION — the 30 minutes RAFStoreOps already applied.' }),
 
     /* compensation */
-    k('compensation.enabled',             'compensation', 'boolean', null, { note:'Feature is ON/OFF configurable. No approved value ⇒ OFF by default until a Super Admin enables it. OFF affects new issuance only (RAFCompensation).' }),
+    /* ON/OFF carries a real value — `false`, the state RAF has always operated
+       under and the one RAFCompensation already applies (anything but true is
+       OFF). It is recorded as a value rather than left unconfigured so the
+       responsible manager sees the state the business is actually in and can
+       change it. OFF affects new issuance only. */
+    k('compensation.enabled',             'compensation', 'boolean', false, { note:'When off, no new compensation is issued. Coupons already issued stay valid (RAFCompensation).' }),
     k('compensation.excludedDelayMinutes','compensation', 'minutes', 90),
     k('compensation.stepMinutes',         'compensation', 'minutes', 20),
     k('compensation.amountPerStepFils',   'compensation', 'fils', 1000, { note:'1 KD per completed step.' }),
@@ -104,6 +125,21 @@
         { key:'technical', ar:'مشكلة تقنية',    en:'Technical' },
         { key:'general',   ar:'عام',            en:'General' }
       ], { note:'Initial Customer Service categories approved; Arabic labels not approved yet.' }),
+
+    /* Customer ↔ Driver communication (RAFDriverCommunication). Each key has
+       exactly one consumer: that authority, which enforces it on every send and
+       call. No value is approved; these are the TEMPORARY PROTOTYPE values the
+       business set for the prototype, and every one can be changed here. */
+    k('communication.callAttemptLimit',     'communication', 'integer', null,
+      { prototype:15, note:'Maximum call attempts per caller to the other participant in one conversation, counted separately for Customer → Driver and Driver → Customer. Messaging is never limited by it. TEMPORARY PROTOTYPE CONFIGURATION.' }),
+    k('communication.maxImagesPerMessage',  'communication', 'integer', null,
+      { prototype:3, note:'Maximum images in one message. TEMPORARY PROTOTYPE CONFIGURATION.' }),
+    k('communication.maxImageKB',           'communication', 'integer', null,
+      { prototype:200, note:'Maximum size of one image as sent, in KB (1 KB = 1024 bytes). Originals are never re-compressed. TEMPORARY PROTOTYPE CONFIGURATION.' }),
+    k('communication.maxVoiceKB',           'communication', 'integer', null,
+      { prototype:300, note:'Maximum size of one voice message as recorded, in KB (1 KB = 1024 bytes). TEMPORARY PROTOTYPE CONFIGURATION.' }),
+    k('communication.maxVoiceSeconds',      'communication', 'seconds', null,
+      { prototype:60, note:'Maximum voice message length. TEMPORARY PROTOTYPE CONFIGURATION.' }),
 
     /* notifications */
     k('notifications.soundDefault',       'notifications', 'boolean', null,
@@ -182,7 +218,7 @@
   /* ---------- validation ---------- */
   function valid(def, v){
     switch (def.type) {
-      case 'minutes': case 'ms': case 'integer': case 'fils':
+      case 'minutes': case 'seconds': case 'ms': case 'integer': case 'fils':
         return typeof v === 'number' && isFinite(v) && Math.floor(v) === v && v > 0;
       case 'boolean': return typeof v === 'boolean';
       case 'enum':    return (def.allowed || []).indexOf(v) > -1;

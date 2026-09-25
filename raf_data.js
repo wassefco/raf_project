@@ -361,9 +361,32 @@
       pay: { ar: 'بطاقة ماستركارد •••• 9035', en: 'Mastercard •••• 9035' }, addr: { ar: 'شرق، برج X، الطابق 8', en: 'Sharq, Tower X, Floor 8' }, ship: '0.000',
       tl: [{ k: 'placed', t: { ar: 'تم استلام الطلب', en: 'Order placed' }, time: { ar: '28 مايو', en: 'May 28' }, s: 'done' }, { k: 'done', t: { ar: 'تم التسليم', en: 'Delivered' }, time: { ar: '29 مايو', en: 'May 29' }, s: 'done' }] }
   ];
+  function ownerOf(o){ return (o && o.snapshot && o.snapshot.customer && o.snapshot.customer.id) || null; }
+  function sessionCustomer(){
+    var u = null;
+    try { u = window.RAFPerm && RAFPerm.currentUser ? RAFPerm.currentUser() : null; } catch (e) { u = null; }
+    return (u && u.id && u.roleId === 'customer' && u.status === 'active') ? u : null;
+  }
   var Orders = {
     all: function () { var o = read(LS.orders, null); if (o == null) { write(LS.orders, SEED); return SEED.slice(); } return o; },
     get: function (id) { return Orders.all().find(function (o) { return o.id === id; }); },
+    /* THE CUSTOMER'S OWN ORDERS. An order belongs to the customer recorded on
+       its own immutable snapshot (snapshot.customer.id) — never to whoever
+       holds the id in a URL. The session is RAFPerm's signed-in, active
+       customer; with RAFPerm absent, or anyone else signed in, this fails
+       closed. An order with no recorded customer (legacy seed data) cannot be
+       proven to be anyone's and is nobody's. */
+    mine: function () {
+      var u = sessionCustomer(); if (!u) return [];
+      return Orders.all().filter(function (o) { return ownerOf(o) === u.id; });
+    },
+    mineById: function (id) {
+      var u = sessionCustomer();
+      if (!u) return { ok:false, code:'UNAUTHENTICATED' };
+      var o = id ? Orders.get(id) : null;
+      if (!o || ownerOf(o) !== u.id) return { ok:false, code:'NOT_FOUND' };   /* not yours = not found: nothing is revealed */
+      return { ok:true, order:o };
+    },
     create: function (opts) {
       opts = opts || {};
       var lines = Cart.items();
