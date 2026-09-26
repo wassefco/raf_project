@@ -154,13 +154,15 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_cx.css">
+<script src="raf_transition.js"></script>
 <script src="raf_features.js"></script>
 <script src="raf_config.js"></script>
 <script src="raf_event_bus.js"></script>
 <script src="raf_record_store.js"></script>
 <script src="raf_notify_core.js"></script>
 </head>
-<body>
+<body class="cx">
 
 <!-- NAV -->
 <nav>
@@ -182,41 +184,30 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
   <a href="raf_homepage.html" class="nav-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace" class="brand-logo"></a>
 </nav>
 
-<!-- FLASH SALE BANNER -->
-<div class="flash-banner">
-  <div class="flash-left">
-    <div class="flash-ico"><i class="ti ti-bolt"></i></div>
+<main class="cx-page">
+  <div class="cx-crumbs" role="navigation" aria-label="breadcrumb">
+    <a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
+    <i class="ti ti-chevron-left" aria-hidden="true"></i>
+    <span class="cur" id="ofCrumb"></span>
+  </div>
+  <div class="cx-head">
     <div>
-      <div class="flash-title">تخفيضات رف الكبرى ⚡</div>
-      <div class="flash-sub">خصومات حصرية لفترة محدودة — لا تفوّت الفرصة!</div>
+      <h1 class="cx-title" id="ofTitle"></h1>
+      <div class="cx-meta" id="ofMeta"></div>
+    </div>
+    <div class="cx-tools">
+      <!-- the shared filter sheet (raf_search_filters.js), same state as the URL -->
+      <button type="button" class="cx-btn" onclick="openFilters(event)"><i class="ti ti-adjustments-horizontal"></i> <span data-ar="تصفية" data-en="Filters">تصفية</span> <span class="cnt" id="ofFilterCount" hidden>0</span></button>
     </div>
   </div>
-  <div class="flash-timer">
-    <div class="ft-block"><div class="ft-num" id="timerH">04</div><div class="ft-lbl">ساعة</div></div>
-    <div class="ft-sep">:</div>
-    <div class="ft-block"><div class="ft-num" id="timerM">27</div><div class="ft-lbl">دقيقة</div></div>
-    <div class="ft-sep">:</div>
-    <div class="ft-block"><div class="ft-num" id="timerS">13</div><div class="ft-lbl">ثانية</div></div>
-  </div>
-</div>
+  <div class="cx-chips" id="rc-cats" data-hscroll></div>
+  <div id="rc-pills"></div>
 
-<!-- BREADCRUMB -->
-<div class="breadcrumb">
-  <a href="raf_homepage.html">الرئيسية</a>
-  <i class="ti ti-chevron-left"></i>
-  <span style="color:var(--text);">العروض والخصومات</span>
-</div>
+  <!-- PREMIUM AD -->
+  <div class="ad-slot" data-ad-slot="filter-offers" style="margin-bottom:18px;"></div>
 
-<div class="main">
-
-  <!-- PREMIUM AD (replaces removed legacy filter block) -->
-  <div class="ad-slot" data-ad-slot="filter-offers" style="margin-bottom:20px;"></div>
-
-  <!-- PRODUCTS GRID -->
-  <div class="prod-grid" id="prodGrid">
-  </div><!-- /prod-grid -->
-
-</div><!-- /main -->
+  <div class="cx-grid" id="prodGrid"></div>
+</main>
 
 <!-- FOOTER -->
 <footer data-raf-footer></footer>
@@ -329,19 +320,6 @@ function toggleWish(btn){
   if(ico.className.includes('ti-heart-filled')){ico.className='ti ti-heart';btn.classList.remove('on');}
   else{ico.className='ti ti-heart-filled';btn.classList.add('on');}
 }
-/* ===== COUNTDOWN ===== */
-let totalSecs = 4*3600+27*60+13;
-function tick(){
-  if(totalSecs<=0)return;totalSecs--;
-  const h=Math.floor(totalSecs/3600),m=Math.floor((totalSecs%3600)/60),s=totalSecs%60;
-  const pad=n=>String(n).padStart(2,'0');
-  document.querySelectorAll('.ft-num,#timerH').forEach((el,i)=>{if(i===0)el.textContent=pad(h);});
-  document.querySelectorAll('.ft-num,#timerM').forEach((el,i)=>{if(i===1)el.textContent=pad(m);});
-  document.querySelectorAll('.ft-num,#timerS').forEach((el,i)=>{if(i===2)el.textContent=pad(s);});
-  const all=document.querySelectorAll('.ft-num');if(all[0])all[0].textContent=pad(h);if(all[1])all[1].textContent=pad(m);if(all[2])all[2].textContent=pad(s);
-  document.querySelectorAll('.ct-seg').forEach((el,i)=>{const g=i%3;if(g===0)el.textContent=pad(h);else if(g===1)el.textContent=pad(m);else el.textContent=pad(s);});
-}
-setInterval(tick,1000);
 
 </script>
 
@@ -368,6 +346,7 @@ setInterval(tick,1000);
 <script src="raf_card.js"></script>
 <script src="raf_quick.js"></script>
 <script src="raf_search_filters.js"></script>
+<script src="raf_hscroll.js"></script>
 <script>
 (function(){
   /* Results page. One filter state — RAFSearchFilters, read from the URL —
@@ -400,9 +379,9 @@ setInterval(tick,1000);
   window.rafClearAll = function(){ var st = state(); setState({ q: st.q, cat:'', store:'', pmin:null, pmax:null, rating:'', inStock:false, onSale:false }); };
 
   function chipsHTML(en, st){
-    var all = '<button class="rc-cat'+(st.cat?'':' on')+'" onclick="rafPickCat(\'\')">'+(en?'All':'الكل')+'</button>';
+    var all = '<button type="button" class="cx-chip'+(st.cat?'':' on')+'" aria-pressed="'+(!st.cat)+'" onclick="rafPickCat(\'\')">'+(en?'All':'الكل')+'</button>';
     return all + CATS.map(function(c){
-      return '<button class="rc-cat'+(st.cat===c.k?' on':'')+'" onclick="rafPickCat(\''+c.k+'\')">'+
+      return '<button type="button" class="cx-chip'+(st.cat===c.k?' on':'')+'" aria-pressed="'+(st.cat===c.k)+'" onclick="rafPickCat(\''+c.k+'\')">'+
         '<i class="ti '+c.ic+'"></i> '+(en?c.en:c.ar)+'</button>';
     }).join('');
   }
@@ -423,30 +402,35 @@ setInterval(tick,1000);
     var en=document.getElementById('htmlRoot').lang==='en';
     var st=state();
     var list=SF.results(st);
+    var offersView=!location.search||location.search==='?';
+    var c=st.cat?CATS.filter(function(x){return x.k===st.cat;})[0]:null;
 
-    /* category chip rail, kept directly above the grid */
-    var chips=document.getElementById('rc-cats');
-    if(!chips){ chips=document.createElement('div'); chips.id='rc-cats'; g.parentNode.insertBefore(chips,g); }
-    chips.innerHTML=chipsHTML(en, st);
-    /* the other active filters, each removable */
+    /* title + real count — what this list is */
+    var title = st.q ? (en?'Search results':'نتائج البحث')
+              : offersView ? (en?'Offers':'العروض')
+              : c ? (en?c.en:c.ar)
+              : (en?'Products':'المنتجات');
+    var n = '<b>'+list.length+'</b> '+(en?(list.length===1?'product':'products'):'منتج');
+    document.getElementById('ofTitle').textContent=title;
+    document.getElementById('ofCrumb').textContent=title;
+    document.getElementById('ofMeta').innerHTML = st.q ? n+' '+(en?'for':'لـ')+' “'+esc(st.q)+'”'
+                                                : offersView ? n+' '+(en?'on sale':'عليها خصم') : n;
+    document.title=(en?'RAF — ':'رف — ')+title;
+    var fc=SF.activeCount(st)-(st.cat?1:0)-(offersView?1:0);
+    var cnt=document.getElementById('ofFilterCount'); cnt.textContent=fc; cnt.hidden=!fc;
+
+    document.getElementById('rc-cats').innerHTML=chipsHTML(en, st);
     var pills=document.getElementById('rc-pills');
-    if(!pills){ pills=document.createElement('div'); pills.id='rc-pills'; g.parentNode.insertBefore(pills,g); }
-    pills.innerHTML=pillsHTML(en, st);
+    pills.innerHTML=offersView?'':pillsHTML(en, st);
     pills.style.display=pills.innerHTML?'flex':'none';
 
-    var rc=document.getElementById('rc-results');
-    if(!rc){ rc=document.createElement('div'); rc.id='rc-results'; rc.style.cssText='margin:0 0 16px;font-size:14px;font-weight:700;color:#15130F;'; g.parentNode.insertBefore(rc,g); }
-    var n=list.length+' '+(en?(list.length===1?'product':'products'):'منتج');
-    var c=st.cat?CATS.filter(function(x){return x.k===st.cat;})[0]:null;
-    rc.textContent = st.q ? ((en?'Search results for ':'نتائج البحث عن ')+'“'+st.q+'” — '+n)
-                          : ((c?(en?c.en:c.ar)+' — ':'')+n);
-
-    var emptyMsg = st.q ? ((en?'No results for':'لا توجد نتائج لـ')+' “'+st.q+'”')
+    var emptyMsg = st.q ? ((en?'No results for':'لا توجد نتائج لـ')+' “'+esc(st.q)+'”')
                         : (en?'No products match these filters':'لا توجد منتجات مطابقة لهذه الخيارات');
     g.innerHTML = list.length ? list.map(function(p){ return RAFCard.product(p); }).join('')
-      : '<div style="grid-column:1/-1;text-align:center;padding:52px 20px;color:#8A857C;"><i class="ti ti-search-off" style="font-size:46px;color:#C9A84C;display:block;margin-bottom:12px;"></i><div style="font-size:15px;font-weight:700;color:#15130F;">'+emptyMsg+'</div></div>';
+      : '<div class="cx-empty"><i class="ti ti-search-off"></i><b>'+emptyMsg+'</b></div>';
     var inp=document.getElementById('navSearch'); if(inp && document.activeElement!==inp) inp.value=st.q;
   }
+  function esc(s){ return String(s).replace(/[&<>"']/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];}); }
   window.rafRenderResults = render;
   render();
   new MutationObserver(render).observe(document.getElementById('htmlRoot'),{attributes:true,attributeFilter:['lang']});

@@ -192,6 +192,7 @@
 <script src="raf_inventory.js"></script>
 <script src="raf_rules.js"></script>
 <script src="raf_marketing.js"></script>
+<script src="raf_payment_methods.js"></script>
 <script src="raf_checkout.js"></script>
 <script>
 /* ============================================================
@@ -200,11 +201,8 @@
 (function(){
   var T=RAFCO.T, L=RAFCO.L, money=RAFCO.money;
   var TIPS=[0.500,1.000,2.000];
-  var PAYMENTS=[
-    {id:'cod',  ic:'ti-cash',         ar:'الدفع عند الاستلام', en:'Cash on delivery', sAr:'نقداً عند وصول الطلب',  sEn:'Pay in cash on arrival'},
-    {id:'knet', ic:'ti-credit-card',  ar:'كي-نت',              en:'K-Net',            sAr:'بطاقة الدفع الكويتية',  sEn:'Kuwaiti debit card'},
-    {id:'visa', ic:'ti-brand-visa',   ar:'بطاقة ائتمانية',      en:'Credit card',      sAr:'فيزا / ماستركارد',      sEn:'Visa / Mastercard'}
-  ];
+  /* the one payment-method list (raf_payment_methods.js) — shared with the wallet top-up */
+  var PAYMENTS=RAFPaymentMethods.list();
 
   function addresses(){
     var a = RAFCO.getJSON('raf_addresses', null);
@@ -218,7 +216,7 @@
   function addrText(a, lang){
     var e = lang ? lang==='en' : RAFCO.en();
     var lb = function(ar,en){ return e?en:ar; };
-    return [a.area, a.block?lb('ق','Block ')+a.block:'', a.street, a.building?lb('م','Bldg ')+a.building:'', a.floor?lb('ط','Floor ')+a.floor:'', a.apartment?lb('ش','Apt ')+a.apartment:'']
+    return [a.governorate, a.area, a.block?lb('ق','Block ')+a.block:'', a.street, a.avenue?lb('جادة/منزل ','Ave/House ')+a.avenue:'', a.building?lb('م','Bldg ')+a.building:'', a.floor?lb('ط','Floor ')+a.floor:'', a.apartment?lb('ش','Apt ')+a.apartment:'']
       .filter(Boolean).join(e?', ':'، ');
   }
 
@@ -231,7 +229,8 @@
       return '<div class="addr'+(a.id===sel?' on':'')+'" onclick="pickAddr(\''+a.id+'\')">'
         + '<div class="addr-radio"></div>'
         + '<div class="addr-ic"><i class="ti '+(icons[a.type]||'ti-map-pin')+'"></i></div>'
-        + '<div class="addr-b"><div class="addr-t">'+L(names[a.type]||names.other)
+        /* the address name the customer typed (My Addresses), else the older type label */
+        + '<div class="addr-b"><div class="addr-t">'+(a.label ? String(a.label).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}) : L(names[a.type]||names.other))
           + (a.isDefault?' <span class="addr-tag">'+T('افتراضي','Default')+'</span>':'')+'</div>'
         + '<div class="addr-x">'+addrText(a)+'<br>'+(a.name||'')+' · '+(a.phone||'')+'</div></div></div>';
     }).join('');

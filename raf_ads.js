@@ -87,9 +87,10 @@
     '.ad-banner{position:relative;display:flex;align-items:stretch;height:196px;border-radius:18px;overflow:hidden;color:#fff;cursor:pointer;box-shadow:0 8px 30px rgba(20,16,8,.08);margin:18px 0;text-decoration:none;}' +
     '.ad-banner.ad-tall{height:250px;}' +
     '.ad-banner .adb-glow{position:absolute;inset:0;z-index:0;}' +
+    '.ad-banner .adb-img{position:absolute;inset:0;z-index:0;background:center/cover no-repeat;}' +
     '.ad-banner .adb-ov{position:absolute;inset:0;z-index:1;background:linear-gradient(270deg,rgba(10,10,10,.85) 0%,rgba(10,10,10,.45) 50%,rgba(10,10,10,.06) 100%);}' +
     'html[dir="ltr"] .ad-banner .adb-ov{background:linear-gradient(90deg,rgba(10,10,10,.85) 0%,rgba(10,10,10,.45) 50%,rgba(10,10,10,.06) 100%);}' +
-    '.adb-content{position:relative;z-index:2;flex:1;max-width:60%;padding:0 40px;display:flex;flex-direction:column;justify-content:center;}' +
+    '.adb-content{position:relative;z-index:2;flex:1;max-width:66%;padding:0 40px;display:flex;flex-direction:column;justify-content:center;}' +
     '.adb-type{display:inline-flex;align-items:center;gap:6px;background:#C9A84C;color:#0A0A0A;font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;margin-bottom:12px;letter-spacing:.5px;align-self:flex-start;}' +
     '.adb-title{font-family:"Playfair Display",serif;font-size:24px;font-weight:900;line-height:1.12;margin-bottom:7px;}' +
     '.adb-sub{font-size:13.5px;opacity:.92;font-weight:300;margin-bottom:14px;max-width:420px;}' +
@@ -145,23 +146,22 @@
     var chips = (c.chips || []).map(function (ch) {
       return '<span class="adb-chip"><i class="ti ti-check"></i> ' + L(ch, lang) + '</span>';
     }).join('');
-    var visual = c.image
-      ? '<div class="adb-visual"><div class="adb-product" style="background-image:url(\'' + c.image + '\');background-size:cover;border:none;"></div></div>'
-      : '<div class="adb-visual"><div class="adb-product"><i class="ti ' + c.pic + '"></i></div></div>';
-    return '<a class="ad-banner ad-' + (size || 'standard') + '" href="' + c.url + '" onclick="RAFAds.click(\'' + c.id + '\')">' +
-      '<div class="adb-glow" style="background:' + c.g + '"></div><div class="adb-ov"></div>' +
+    /* The whole banner is the one interactive surface: no button, store chip,
+       product card or other control inside it. A campaign image fills the
+       banner behind the text; without one the campaign glow stays. */
+    var bg = c.image ? '<div class="adb-img" style="background-image:url(\'' + c.image + '\')"></div>' : '';
+    return '<a class="ad-banner ad-' + (size || 'standard') + (c.image ? ' has-img' : '') + '" href="' + c.url + '" onclick="RAFAds.click(\'' + c.id + '\')"' +
+        ' aria-label="' + String(L(c.title, lang)).replace(/"/g, '&quot;') + '">' +
+      '<div class="adb-glow" style="background:' + c.g + '"></div>' + bg + '<div class="adb-ov"></div>' +
       '<div class="adb-content">' +
         '<span class="adb-type"><i class="ti ' + c.brand.ic + '" style="font-size:12px"></i> ' + L(c.type, lang) + '</span>' +
         '<div class="adb-title">' + L(c.title, lang) + '</div>' +
         '<div class="adb-sub">' + L(c.sub, lang) + '</div>' +
-        '<div class="adb-chips">' + chips + '</div>' +
-        '<span class="adb-cta">' + (en ? 'Shop Now' : 'تسوّق الآن') + ' <i class="ti ti-arrow-left"></i></span>' +
-      '</div>' + visual +
+        (chips ? '<div class="adb-chips">' + chips + '</div>' : '') +
+      '</div>' +
       (c.promo ? '<span class="adb-promo">' + c.promo + '</span>' : '') +
-      '<div class="adb-brand"><span class="bl"><i class="ti ' + c.brand.ic + '"></i></span><b>' + L(c.brand, lang) + '</b></div>' +
     '</a>';
   }
-
   function mountAll(lang) {
     injectCSS();
     lang = lang || (document.getElementById('htmlRoot') && document.getElementById('htmlRoot').lang === 'en' ? 'en' : 'ar');

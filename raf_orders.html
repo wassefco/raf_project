@@ -5,9 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>رف — طلباتي</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<link rel="stylesheet" href="raf_account.css">
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
@@ -17,29 +16,55 @@
 <script src="raf_record_store.js"></script>
 <script src="raf_notify_core.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_cx.css">
+<link rel="stylesheet" href="raf_acct.css">
+<script src="raf_transition.js"></script>
+<style>
+/* one order = one row: number & store · date · products · count · total · status */
+.or-row{display:grid;grid-template-columns:minmax(150px,1.3fr) minmax(120px,1fr) minmax(130px,1.2fr) 90px 120px minmax(140px,1fr) 24px;align-items:center;gap:18px;min-height:84px;padding:14px 4px;border-bottom:1px solid #ECE6DA;color:#15130F;text-decoration:none;cursor:pointer;transition:background .15s;}
+.or-row:hover{background:rgba(201,168,76,.06);}
+.or-row:focus-visible{outline:2px solid #C9A84C;outline-offset:-2px;}
+.or-id b{display:block;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:800;}
+.or-id span{display:block;font-size:13px;color:#5A5650;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.or-date{font-size:13.5px;color:#5A5650;}
+.or-th{display:flex;align-items:center;gap:6px;}
+.or-th .t{width:42px;height:42px;border-radius:10px;background:#F1ECE2 center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:#A07828;font-size:18px;flex-shrink:0;border:1px solid #ECE6DA;}
+.or-th .more{font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:800;color:#5A5650;}
+.or-cnt{font-size:13.5px;color:#5A5650;}
+.or-tot{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:800;}
+.or-tot small{font-family:'Tajawal',sans-serif;font-size:12px;color:#8A857C;font-weight:600;}
+.or-st{display:flex;flex-direction:column;align-items:flex-start;gap:6px;}
+.or-rate{font-size:12.5px;font-weight:800;color:#A07828;text-decoration:none;display:inline-flex;align-items:center;gap:4px;}
+.or-rate:hover{color:#15130F;}
+.or-go{font-size:18px;color:#B5AE9F;}
+html[dir="ltr"] .or-go{transform:scaleX(-1);}
+.or-headrow{display:grid;grid-template-columns:minmax(150px,1.3fr) minmax(120px,1fr) minmax(130px,1.2fr) 90px 120px minmax(140px,1fr) 24px;gap:18px;padding:12px 4px 8px;font-size:12.5px;font-weight:800;color:#8A857C;border-bottom:1px solid #E8E1D3;}
+@media(max-width:900px){
+  .or-headrow{display:none;}
+  .or-row{grid-template-columns:minmax(0,1fr) auto 18px;grid-template-areas:"id st go" "date tot go" "th cnt go";gap:6px 12px;padding:16px 2px;}
+  .or-id{grid-area:id;} .or-st{grid-area:st;align-items:flex-end;} .or-go{grid-area:go;align-self:center;}
+  .or-date{grid-area:date;font-size:12.5px;} .or-tot{grid-area:tot;text-align:end;}
+  .or-th{grid-area:th;margin-top:4px;} .or-cnt{grid-area:cnt;text-align:end;align-self:end;font-size:12.5px;}
+}
+</style>
 </head>
-<body>
+<body class="cx acct">
 
-<header class="ahead">
-  <button type="button" class="ahead-back" onclick="goBack('raf_account.html')"><i class="ti ti-arrow-right"></i> <span data-ar="العودة" data-en="Back">العودة</span></button>
-  <div class="ahead-title" data-ar="طلباتي" data-en="My Orders">طلباتي</div>
-  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
-</header>
+<nav></nav>
 
-<div class="wrap">
-  <div class="tabs" id="ordTabs">
-    <button class="tab on" data-f="all" onclick="filterOrders('all',this)" data-ar="الكل" data-en="All">الكل</button>
-    <button class="tab" data-f="progress" onclick="filterOrders('progress',this)" data-ar="قيد التوصيل" data-en="In Progress">قيد التوصيل</button>
-    <button class="tab" data-f="delivered" onclick="filterOrders('delivered',this)" data-ar="تم التسليم" data-en="Delivered">تم التسليم</button>
-    <button class="tab" data-f="cancelled" onclick="filterOrders('cancelled',this)" data-ar="ملغاة" data-en="Cancelled">ملغاة</button>
+<main class="cx-page ac-main ac-mid">
+  <div class="cx-crumbs" role="navigation" aria-label="breadcrumb">
+    <a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
+    <i class="ti ti-chevron-left" aria-hidden="true"></i>
+    <a href="raf_account.html" data-ar="حسابي" data-en="My Account">حسابي</a>
+    <i class="ti ti-chevron-left" aria-hidden="true"></i>
+    <span class="cur" data-ar="طلباتي" data-en="My Orders">طلباتي</span>
   </div>
+  <div class="ac-head"><h1 class="ac-title" data-ar="طلباتي" data-en="My Orders">طلباتي</h1></div>
   <div id="ordList"></div>
-  <div class="empty" id="ordEmpty" style="display:none;">
-    <i class="ti ti-package-off"></i>
-    <div class="empty-t" data-ar="لا توجد طلبات" data-en="No orders">لا توجد طلبات</div>
-    <div data-ar="لا توجد طلبات في هذه الحالة" data-en="No orders in this status">لا توجد طلبات في هذه الحالة</div>
-  </div>
-</div>
+</main>
+
+<footer data-raf-footer></footer>
 
 <nav class="app-bnav">
   <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
@@ -55,25 +80,90 @@
 <script src="raf_order_snapshot.js"></script>
 <script src="raf_inventory.js"></script>
 <script src="raf_permissions.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_order_engine.js"></script>
 <script src="raf_customer_experience.js"></script>
 <script src="raf_account.js"></script>
-<script>
-  var curFilter = 'all';
-  function renderOrders(){
-    var list = rafOrders().filter(function(o){ return curFilter === 'all' || o.status === curFilter; });
-    document.getElementById('ordList').innerHTML = list.map(orderCardHTML).join('');
-    document.getElementById('ordEmpty').style.display = list.length ? 'none' : 'block';
-  }
-  function filterOrders(f, btn){
-    curFilter = f;
-    document.querySelectorAll('#ordTabs .tab').forEach(function(t){ t.classList.remove('on'); });
-    btn.classList.add('on');
-    renderOrders();
-  }
-  window.onLangChange = renderOrders;
-  renderOrders();
-</script>
-<!-- the active-order bar: reopens the signed-in customer's order in progress -->
+<script src="raf_topbar.js"></script>
+<script src="raf_notify.js"></script>
+<script src="raf_nav.js"></script>
+<script src="raf_search.js"></script>
+<script src="raf_footer.js"></script>
+<!-- the active-order bar; its stage projection is also what an in-progress row shows -->
 <script src="raf_active_order.js"></script>
+<script>
+/* My Orders — the signed-in customer's own orders (RAFShop.Orders.mine),
+   newest first by their checkout time. A row opens the existing flow: live
+   tracking for an order in progress, Order Details otherwise. */
+(function(){
+  function en(){ return document.getElementById('htmlRoot').lang === 'en'; }
+  function T(ar,e){ return en() ? e : ar; }
+  function L(o){ return (o && typeof o === 'object') ? (en() ? o.en : o.ar) : (o || ''); }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function at(o){ return (o.snapshot && typeof o.snapshot.checkoutAt === 'number') ? o.snapshot.checkoutAt : 0; }
+  function dateText(o){
+    var t = at(o);
+    if (!t) return L(o.date);
+    try { return new Date(t).toLocaleString(en() ? 'en-GB' : 'ar-KW', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }); } catch(e){ return L(o.date); }
+  }
+  function status(o){
+    var m = statusMeta(o.status);
+    var tone = o.status === 'delivered' ? 'green' : o.status === 'progress' ? 'gold' : 'red';
+    var label = m.label;
+    if (o.status === 'progress' && window.RAFActiveOrderBar && RAFActiveOrderBar.stageOf){
+      try { var s = RAFActiveOrderBar.stageOf(o); if (s) label = L(s); } catch(e){}
+    }
+    return '<span class="ac-pill ' + tone + '"><i class="ti ' + m.ic + '"></i> ' + esc(label) + '</span>';
+  }
+  function thumbs(o){
+    var items = o.items || [];
+    var html = items.slice(0, 3).map(function(it){
+      var c = window.RAFCatalog && it.id ? RAFCatalog.get(it.id) : null;
+      var img = c && c.img ? c.img : '';
+      return '<span class="t"' + (img ? ' style="background-image:url(\'' + esc(img) + '\')"' : '') + ' title="' + esc(L(it.name)) + '">' + (img ? '' : '<i class="ti ' + esc(it.ic || 'ti-box') + '"></i>') + '</span>';
+    }).join('');
+    if (items.length > 3) html += '<span class="more">+' + (items.length - 3) + '</span>';
+    return html;
+  }
+  function count(o){ return (o.items || []).reduce(function(s, it){ return s + (parseInt(it.qty, 10) || 1); }, 0); }
+  function rateLink(o){
+    var CX = window.RAFCustomerExperience;
+    if (!CX || !CX.orderRatingStatus) return '';
+    var st = CX.orderRatingStatus(o.id);
+    if (!st || !st.ok) return '';
+    return st.state === 'rated' ? '<span class="or-cnt"><i class="ti ti-circle-check"></i> ' + esc(T('تم التقييم','Rated')) + '</span>'
+      : '<a class="or-rate" href="raf_delivery_rating.html?id=' + encodeURIComponent(o.id) + '" onclick="event.stopPropagation()"><i class="ti ti-star"></i> ' + esc(T('قيّم الطلب','Rate order')) + '</a>';
+  }
+  function row(o){
+    var href = o.status === 'progress' ? 'raf_tracking.html?id=' + encodeURIComponent(o.id) : 'raf_order_details.html?id=' + encodeURIComponent(o.id);
+    var n = count(o);
+    return '<a class="or-row" href="' + href + '" data-order="' + esc(o.id) + '">'
+      + '<div class="or-id"><b>#' + esc(o.id) + '</b><span><i class="ti ti-building-store"></i> ' + esc(L(o.store)) + '</span></div>'
+      + '<div class="or-date">' + esc(dateText(o)) + '</div>'
+      + '<div class="or-th">' + thumbs(o) + '</div>'
+      + '<div class="or-cnt">' + n + ' ' + esc(T(n === 1 ? 'منتج' : 'منتجات', n === 1 ? 'item' : 'items')) + '</div>'
+      + '<div class="or-tot">' + esc(o.total) + ' <small>' + esc(T('د.ك','KWD')) + '</small></div>'
+      + '<div class="or-st">' + status(o) + rateLink(o) + '</div>'
+      + '<i class="ti ti-chevron-left or-go" aria-hidden="true"></i></a>';
+  }
+  function render(){
+    var list = (typeof rafOrders === 'function' ? rafOrders() : []).slice();
+    list = list.map(function(o, i){ return { o:o, i:i }; })
+      .sort(function(a, b){ return (at(b.o) - at(a.o)) || (b.i - a.i); }).map(function(x){ return x.o; });
+    var host = document.getElementById('ordList');
+    if (!list.length){
+      host.innerHTML = '<div class="ac-empty"><i class="ti ti-package-off"></i><b>' + esc(T('لا توجد طلبات بعد','No orders yet')) + '</b>'
+        + '<a class="ac-link" href="raf_homepage.html">' + esc(T('ابدأ التسوق','Start shopping')) + '</a></div>';
+      return;
+    }
+    host.innerHTML = '<div class="or-headrow" aria-hidden="true"><span>' + esc(T('الطلب','Order')) + '</span><span>' + esc(T('التاريخ','Date')) + '</span><span>'
+      + esc(T('المنتجات','Products')) + '</span><span>' + esc(T('العدد','Items')) + '</span><span>' + esc(T('الإجمالي','Total')) + '</span><span>'
+      + esc(T('الحالة','Status')) + '</span><span></span></div>' + list.map(row).join('');
+  }
+  window.onLangChange = render;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render); else render();
+  window.addEventListener('storage', function(e){ if (!e.key || e.key === 'raf_orders' || e.key === 'raf_order_mstate') render(); });
+})();
+</script>
 </body>
 </html>

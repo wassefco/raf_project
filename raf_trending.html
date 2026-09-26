@@ -144,13 +144,15 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_cx.css">
+<script src="raf_transition.js"></script>
 <script src="raf_features.js"></script>
 <script src="raf_config.js"></script>
 <script src="raf_event_bus.js"></script>
 <script src="raf_record_store.js"></script>
 <script src="raf_notify_core.js"></script>
 </head>
-<body>
+<body class="cx">
 
 <nav>
   <div class="nav-actions">
@@ -171,108 +173,34 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
   <a href="raf_homepage.html" class="nav-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace" class="brand-logo"></a>
 </nav>
 
-<div class="page-header">
-  <div class="page-header-inner">
+<main class="cx-page">
+  <div class="cx-crumbs" role="navigation" aria-label="breadcrumb">
+    <a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
+    <i class="ti ti-chevron-left" aria-hidden="true"></i>
+    <span class="cur" data-ar="الترندات" data-en="Trends">الترندات</span>
+  </div>
+  <div class="cx-head">
     <div>
-      <div class="page-title">الترندات <span>والجديد</span></div>
-      <div class="page-sub">أحدث المنتجات وأكثرها رواجاً هذا الأسبوع</div>
-    </div>
-    <div class="stat-pills">
-      <div class="stat-pill"><div class="stat-pill-num">248</div><div class="stat-pill-lbl">منتج جديد</div></div>
-      <div class="stat-pill"><div class="stat-pill-num">1.2K</div><div class="stat-pill-lbl">مبيع اليوم</div></div>
+      <h1 class="cx-title" data-ar="الترندات" data-en="Trends">الترندات</h1>
+      <div class="cx-meta" id="trMeta"></div>
     </div>
   </div>
-</div>
-
-<div class="breadcrumb">
-  <a href="raf_homepage.html">الرئيسية</a>
-  <i class="ti ti-chevron-left"></i>
-  <span style="color:var(--text);">الترندات والجديد</span>
-</div>
-
-<div class="main">
-
-  <!-- TABS -->
-  <div class="tab-row">
-    <button class="tab-btn on" onclick="switchTab('trending',this)" id="tabTrend">
-      <i class="ti ti-flame"></i> الأكثر رواجاً
-    </button>
-    <button class="tab-btn" onclick="switchTab('new',this)" id="tabNew">
-      <i class="ti ti-sparkles"></i> أضيف حديثاً
-    </button>
-    <button class="tab-btn" onclick="switchTab('weekly',this)" id="tabWeekly">
-      <i class="ti ti-trending-up"></i> الأكثر مبيعاً
-    </button>
+  <!-- two honest orderings of RAF's listable products -->
+  <div class="cx-chips" role="tablist" data-hscroll>
+    <button type="button" class="cx-chip on" role="tab" aria-selected="true" id="tabTrend" onclick="switchTab('trending',this)"><i class="ti ti-message-star"></i> <span data-ar="الأكثر تقييماً من العملاء" data-en="Most reviewed">الأكثر تقييماً من العملاء</span></button>
+    <button type="button" class="cx-chip" role="tab" aria-selected="false" id="tabTop" onclick="switchTab('top',this)"><i class="ti ti-star"></i> <span data-ar="الأعلى تقييماً" data-en="Top rated">الأعلى تقييماً</span></button>
   </div>
 
-  <!-- PREMIUM AD (replaces removed legacy filter block) -->
-  <div class="ad-slot" data-ad-slot="filter-trending" style="margin-bottom:20px;"></div>
+  <!-- PREMIUM AD -->
+  <div class="ad-slot" data-ad-slot="filter-trending" style="margin-bottom:18px;"></div>
 
-  <!-- ======== TRENDING TAB ======== -->
-  <div id="view-trending">
-    <div class="sec-head">
-      <div class="sec-label"><i class="ti ti-flame"></i> الأكثر رواجاً هذا الأسبوع</div>
-      <span style="font-size:13px;color:var(--text3);">148 منتج</span>
-    </div>
-    <div class="prod-grid" data-rendered>
-    </div>
-  </div>
-
-  <!-- ======== NEW TAB ======== -->
-  <div id="view-new" style="display:none;">
-    <div class="sec-head">
-      <div class="sec-label"><i class="ti ti-sparkles"></i> أضيف حديثاً</div>
-      <span style="font-size:13px;color:var(--text3);">248 منتج جديد</span>
-    </div>
-    <div class="prod-grid" data-rendered>
-    </div>
-  </div>
-
-  <!-- ======== WEEKLY BEST SELLERS ======== -->
-  <div id="view-weekly" style="display:none;">
-    <div class="sec-head">
-      <div class="sec-label"><i class="ti ti-trending-up"></i> الأكثر مبيعاً هذا الشهر</div>
-    </div>
-    <div class="prod-grid" data-rendered>
-    </div>
-  </div>
-
-</div>
+  <div id="view-trending"><div class="cx-grid prod-grid"></div></div>
+  <div id="view-top" style="display:none;"><div class="cx-grid prod-grid"></div></div>
+</main>
 
 <footer data-raf-footer></footer>
 
 <script>
-/* TABS */
-function switchTab(tab,btn){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
-  ['trending','new','weekly'].forEach(t=>document.getElementById('view-'+t).style.display='none');
-  document.getElementById('view-'+tab).style.display='block';
-  filterTrending();
-}
-/* CHIPS */
-function selChip(el){
-  document.querySelectorAll('#trendChips .chip').forEach(c=>c.classList.remove('on'));
-  el.classList.add('on');
-  filterTrending();
-}
-/* FILTER */
-function filterTrending(){
-  const q = (document.getElementById('trendSearch')?.value||'').toLowerCase();
-  const store = document.getElementById('trendStore')?.value||'';
-  const cat = document.querySelector('#trendChips .chip.on')?.dataset.cat||'';
-  document.querySelectorAll('.prod-card').forEach(card=>{
-    const name  = (card.querySelector('.prod-name')?.textContent||'').toLowerCase();
-    const cs    = card.dataset.store||'';
-    const cc    = card.dataset.cat||'';
-    const pnum  = (card.querySelector('.prod-num')?.textContent||'').toLowerCase();
-    const mQ    = !q     || name.includes(q) || cs.toLowerCase().includes(q) || pnum.includes(q);
-    const mSt   = !store || cs === store;
-    const mCat  = !cat   || cc === cat;
-    card.style.display = (mQ && mSt && mCat) ? '' : 'none';
-  });
-}
-/* LANG */
 function toggleLang(){
   const html=document.getElementById('htmlRoot'),isAR=html.lang==='ar',nl=isAR?'en':'ar';
   html.lang=nl;html.dir=isAR?'ltr':'rtl';
@@ -318,37 +246,50 @@ function toggleWish(btn){
 <script src="raf_marketing.js"></script>
 <script src="raf_card.js"></script>
 <script src="raf_quick.js"></script>
+<script src="raf_hscroll.js"></script>
 <script>
-  /* Trending / New / Best sellers now render from the central authority.
-     They previously duplicated product names, prices and stores in static
-     markup, which drifted from the rest of the marketplace. Each tab is a
-     different ordering of the same canonical list. */
+  /* Trends — two orderings of the same canonical list (RAFCatalog, listable
+     products): by number of customer reviews, and by rating. Enough products
+     to fill three full rows of the grid at the current width. */
   (function(){
-    function views(){
-      var all = RAFCatalog.list({});                       /* visible products only */
-      var byRating = all.slice().sort(function(a,b){ return parseFloat(b.rate||0) - parseFloat(a.rate||0); });
-      var byReviews = all.slice().sort(function(a,b){ return (parseInt(b.rev||0)) - (parseInt(a.rev||0)); });
+    var cur = 'trending';
+    function en(){ return document.getElementById('htmlRoot').lang === 'en'; }
+    function cols(grid){ try { return getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length || 4; } catch(e){ return 4; } }
+    function lists(){
+      var all = RAFCatalog.list({});
       return {
-        'view-trending': byReviews.slice(0, 12),           /* most talked about */
-        'view-new':      all.slice().reverse().slice(0, 12),
-        'view-weekly':   byRating.slice(0, 12)             /* top rated this month */
+        'view-trending': all.slice().sort(function(a,b){ return (parseInt(b.rev,10)||0) - (parseInt(a.rev,10)||0) || (parseFloat(b.rate)||0) - (parseFloat(a.rate)||0); }),
+        'view-top':      all.slice().sort(function(a,b){ return (parseFloat(b.rate)||0) - (parseFloat(a.rate)||0) || (parseInt(b.rev,10)||0) - (parseInt(a.rev,10)||0); }),
+        total: all.length
       };
     }
     function render(){
       if (!window.RAFCard) return;
-      var v = views();
-      Object.keys(v).forEach(function(id){
-        var host = document.getElementById(id);
-        var grid = host && host.querySelector('.prod-grid');
-        if (!grid) return;
-        grid.innerHTML = v[id].map(function(p){ return RAFCard.product(p); }).join('');
+      var v = lists();
+      ['view-trending','view-top'].forEach(function(id){
+        var grid = document.querySelector('#' + id + ' .cx-grid'); if (!grid) return;
+        var n = Math.min(v[id].length, Math.max(12, cols(grid) * 3));
+        grid.innerHTML = v[id].slice(0, n).map(function(p){ return RAFCard.product(p); }).join('');
+        grid.setAttribute('data-count', n);
       });
+      var shown = document.querySelector('#view-' + cur + ' .cx-grid').getAttribute('data-count');
+      document.getElementById('trMeta').innerHTML = en()
+        ? 'Top <b>' + shown + '</b> of ' + v.total + ' products — ' + (cur === 'top' ? 'ordered by rating' : 'ordered by number of reviews')
+        : 'أفضل <b>' + shown + '</b> من ' + v.total + ' منتج — ' + (cur === 'top' ? 'مرتبة حسب التقييم' : 'مرتبة حسب عدد التقييمات');
       RAFCard.badge();
     }
+    window.switchTab = function(tab, btn){
+      cur = tab;
+      document.querySelectorAll('.cx-chips [role="tab"]').forEach(function(b){ b.classList.toggle('on', b === btn); b.setAttribute('aria-selected', String(b === btn)); });
+      document.getElementById('view-trending').style.display = tab === 'trending' ? '' : 'none';
+      document.getElementById('view-top').style.display = tab === 'top' ? '' : 'none';
+      render();
+    };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render); else render();
     var r = document.getElementById('htmlRoot');
     if (r) new MutationObserver(render).observe(r, { attributes:true, attributeFilter:['lang'] });
     document.addEventListener('raf:source', render);
+    var rt = null; window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(render, 200); });
   })();
 </script>
 <script src="raf_footer.js"></script>

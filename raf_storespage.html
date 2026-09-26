@@ -137,13 +137,15 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_cx.css">
+<script src="raf_transition.js"></script>
 <script src="raf_features.js"></script>
 <script src="raf_config.js"></script>
 <script src="raf_event_bus.js"></script>
 <script src="raf_record_store.js"></script>
 <script src="raf_notify_core.js"></script>
 </head>
-<body>
+<body class="cx">
 <nav>
   <div class="nav-actions">
     <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
@@ -163,100 +165,40 @@ html[lang="en"] body{font-family:'DM Sans',sans-serif;}
   <a href="raf_homepage.html" class="nav-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace" class="brand-logo"></a>
 </nav>
 
-<div class="page-header">
-  <div class="page-header-inner">
+<main class="cx-page">
+  <div class="cx-crumbs" role="navigation" aria-label="breadcrumb">
+    <a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
+    <i class="ti ti-chevron-left" aria-hidden="true"></i>
+    <span class="cur" data-ar="المحلات" data-en="Stores">المحلات</span>
+  </div>
+  <div class="cx-head">
     <div>
-      <div class="page-title">جميع <span>المحلات</span></div>
-      <div class="page-sub">تصفح أفضل المتاجر المحلية في الكويت</div>
-    </div>
-    <div class="stat-pills">
-      <div class="stat-pill"><div class="stat-pill-num">128</div><div class="stat-pill-lbl">متجر نشط</div></div>
-      <div class="stat-pill"><div class="stat-pill-num">4,800+</div><div class="stat-pill-lbl">منتج</div></div>
+      <h1 class="cx-title" data-ar="المحلات" data-en="Stores">المحلات</h1>
+      <div class="cx-meta" id="spCount"></div>
     </div>
   </div>
-</div>
+  <!-- categories the stores actually sell in (from their public products) -->
+  <div class="cx-chips" id="spCats" data-hscroll></div>
 
-<div class="breadcrumb">
-  <a href="raf_homepage.html">الرئيسية</a>
-  <i class="ti ti-chevron-left"></i>
-  <span style="color:var(--text);">جميع المحلات</span>
-</div>
+  <!-- PREMIUM AD -->
+  <div class="ad-slot" data-ad-slot="filter-stores" style="margin-bottom:18px;"></div>
 
-<div class="main">
-  <!-- PREMIUM AD (replaces removed legacy filter block) -->
-  <div class="ad-slot" data-ad-slot="filter-stores" style="margin-bottom:20px;"></div>
-
-  <div class="stores-grid" id="storesGrid">
-  </div>
-</div>
-
+  <div class="cx-stores-grid" id="storesGrid"></div>
+</main>
 <footer data-raf-footer></footer>
 <script>
-function setView(type, btn) {
-  document.querySelectorAll('.vt-btn').forEach(b => b.classList.remove('on'));
-  btn.classList.add('on');
-  const grid = document.getElementById('storesGrid');
-  grid.classList.toggle('list-view', type === 'list');
-}
-function filterCat(cat, el) {
-  document.querySelectorAll('#catChips .chip').forEach(c => c.classList.remove('on'));
-  el.classList.add('on');
-  applyStoreFilters();
-}
-function applyStoreFilters() {
-  const q      = (document.getElementById('storeSearch')?.value||'').toLowerCase();
-  const status = document.getElementById('storeStatus')?.value||'';
-  const pkg    = document.getElementById('storePkg')?.value||'';
-  const cat    = document.querySelector('#catChips .chip.on')?.dataset.cat||'';
-  let visible  = 0;
-  document.querySelectorAll('#storesGrid .store-card').forEach(card => {
-    const name    = (card.querySelector('.store-name')?.textContent||'').toLowerCase();
-    const numEl   = card.querySelector('.store-num');
-    const num     = numEl ? numEl.textContent.toLowerCase() : '';
-    const catText = (card.querySelector('.store-cat')?.textContent||'');
-    const isOpen  = !!card.querySelector('.store-status-open');
-    const isClosed= !!card.querySelector('.store-status-closed');
-    const hasPrem = !!card.querySelector('.badge-premium');
-    const hasFeat = !!card.querySelector('.badge-featured');
-    const mQ    = !q      || name.includes(q) || num.includes(q);
-    const mSt   = !status || (status==='open'&&isOpen) || (status==='closed'&&isClosed);
-    const mPkg  = !pkg    || (pkg==='premium'&&hasPrem) || (pkg==='featured'&&hasFeat) || (pkg==='free'&&!hasPrem&&!hasFeat);
-    const mCat  = !cat    || catText.includes(cat);
-    const show  = mQ && mSt && mPkg && mCat;
-    card.style.display = show ? '' : 'none';
-    if (show) visible++;
-  });
-  const rc = document.getElementById('resultsCount');
-  if (rc) rc.textContent = visible + ' محل';
-}
-// Kept for backward compatibility (selects previously called these directly)
-function filterStores(q)    { document.getElementById('storeSearch').value=q; applyStoreFilters(); }
-function filterByStatus(v)  { document.getElementById('storeStatus').value=v; applyStoreFilters(); }
-function filterByPkg(v)     { document.getElementById('storePkg').value=v;    applyStoreFilters(); }
-function sortStores(v)      { applyStoreFilters(); }
-
-/* LANG */
+/* LANG (the shared header's language button calls this) */
 function toggleLang() {
   const html=document.getElementById('htmlRoot'),isAR=html.lang==='ar',nl=isAR?'en':'ar';
   html.lang=nl;html.dir=isAR?'ltr':'rtl';
-  document.getElementById('langLabel').textContent=isAR?'ع':'EN';
+  const lb=document.getElementById('langLabel'); if(lb) lb.textContent=isAR?'ع':'EN';
   localStorage.setItem('raf_lang',nl);
   document.querySelectorAll('[data-ar]').forEach(el=>{const t=el.getAttribute('data-'+nl);if(t)el.textContent=t;});
 }
 (function(){
-  const cc=JSON.parse(localStorage.getItem('raf_cart')||'{}');
-  const ct=Object.values(cc).reduce((s,i)=>s+(i.qty||1),0);
-  document.getElementById('cartBadge').textContent=ct||0;
-  // Handle ?cat= param from homepage category tiles
-  const params=new URLSearchParams(window.location.search);
-  const cat=params.get('cat');
-  if(cat){
-    const chip=Array.from(document.querySelectorAll('#catChips .chip')).find(c=>c.dataset.cat===cat||c.textContent.includes(cat));
-    if(chip){document.querySelectorAll('#catChips .chip').forEach(c=>c.classList.remove('on'));chip.classList.add('on');applyStoreFilters();}
-  }
   if(localStorage.getItem('raf_lang')==='en'){
     document.getElementById('htmlRoot').lang='en';document.getElementById('htmlRoot').dir='ltr';
-    document.getElementById('langLabel').textContent='ع';
+    const lb=document.getElementById('langLabel'); if(lb) lb.textContent='ع';
     document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.getAttribute('data-en');});
   }
 })();
@@ -279,39 +221,37 @@ function toggleLang() {
 <script src="raf_data.js"></script>
 <script src="raf_catalog.js"></script>
 <script src="raf_rules.js"></script>
+<script src="raf_hscroll.js"></script>
+<script src="raf_store_card.js"></script>
 <script>
-/* Store directory now renders from the central authority. The cards keep the
-   exact markup the existing filter/sort code reads, so those keep working. */
+/* Stores directory — RAF's open stores (RAFCatalog.stores), drawn with the
+   shared store card. A store belongs to a category when it has public
+   products in it; ?cat=<key> preselects one (existing links keep working). */
 (function(){
   function en(){ var r=document.getElementById('htmlRoot')||document.documentElement; return r.lang==='en'; }
   function T(ar,e){ return en()?e:ar; }
-  function card(s){
-    var open = s.status === 'open';
-    var badge = s.sponsored
-      ? '<span class="store-badge badge-premium">'+T('بريميوم','Premium')+'</span>' : '';
-    var status = open
-      ? '<span class="store-status-open"><i class="ti ti-circle-filled" style="font-size:8px;"></i> '+T('مفتوح','Open')+'</span>'
-      : '<span class="store-status-closed"><i class="ti ti-circle-filled" style="font-size:8px;"></i> '+T('مغلق','Closed')+'</span>';
-    return '<div class="store-card" onclick="window.location=\'raf_store.html?store='+encodeURIComponent(s.slug)+'\'">'
-      + '<span class="store-num">'+(s.num||'')+'</span>'
-      + '<div class="store-img"'+(s.cover?' style="background-image:url(\''+s.cover+'\');background-size:cover;background-position:center;"':'')+'>'
-      + (s.cover?'':'<i class="ti '+(s.ic||'ti-building-store')+'"></i>')+badge
-      + '<div class="verified-ico"><i class="ti ti-check"></i></div></div>'
-      + '<div class="store-body">'
-        + '<div class="store-name">'+(en()?s.name.en:s.name.ar)+'</div>'
-        + '<div class="store-cat-row"><span class="store-cat">'+(en()?s.cat.en:s.cat.ar)+'</span>'
-        + '<span class="store-rating"><i class="ti ti-star-filled"></i> '+s.rating+'</span></div>'
-        + '<div class="store-footer">'+status
-        + '<span>'+s.productCount+' '+T('منتج','products')+'</span>'
-        + '<span>'+s.followers+' '+T('متابع','followers')+'</span></div>'
-      + '</div></div>';
+  var cat = (new URLSearchParams(location.search).get('cat')||'').trim();
+  function storeCats(slug){
+    var u={}; RAFCatalog.list({ store:slug, visibleOnly:false, publicOnly:true }).forEach(function(p){ u[p.cat]=1; }); return u;
   }
   function render(){
-    var grid = document.getElementById('storesGrid');
-    if (!grid || !window.RAFCatalog) return;
-    grid.innerHTML = RAFCatalog.stores().map(card).join('');
-    if (typeof applyStoreFilters === 'function') applyStoreFilters();
+    var grid=document.getElementById('storesGrid'); if(!grid||!window.RAFCatalog||!window.RAFStoreCard) return;
+    var stores=RAFCatalog.stores(), cats={};
+    stores.forEach(function(s){ s.__cats=storeCats(s.slug); Object.keys(s.__cats).forEach(function(k){ cats[k]=(cats[k]||0)+1; }); });
+    var CATS=RAFCatalog.categories({ populatedOnly:false }).filter(function(c){ return cats[c.k]; });
+    if(cat && !cats[cat]) cat='';
+    document.getElementById('spCats').innerHTML=
+      '<button type="button" class="cx-chip'+(cat?'':' on')+'" aria-pressed="'+(cat?'false':'true')+'" onclick="spPick(\'\')">'+T('الكل','All')+' <span class="n">'+stores.length+'</span></button>'+
+      CATS.map(function(c){ return '<button type="button" class="cx-chip'+(cat===c.k?' on':'')+'" aria-pressed="'+(cat===c.k)+'" onclick="spPick(\''+c.k+'\')"><i class="ti '+c.ic+'"></i> '+(en()?c.en:c.ar)+' <span class="n">'+cats[c.k]+'</span></button>'; }).join('');
+    var list=stores.filter(function(s){ return !cat || s.__cats[cat]; });
+    document.getElementById('spCount').innerHTML='<b>'+list.length+'</b> '+T('متجر', list.length===1?'store':'stores');
+    grid.innerHTML=list.map(function(s){ return RAFStoreCard.html(RAFStoreCard.model(s), { showPremium:true, showStatus:true }); }).join('');
   }
+  window.spPick=function(k){
+    cat=k;
+    try{ var u=new URL(location.href); if(k) u.searchParams.set('cat',k); else u.searchParams.delete('cat'); history.replaceState({},'',u.pathname+(u.search||'')+u.hash); }catch(e){}
+    render();
+  };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render); else render();
   var r = document.getElementById('htmlRoot');
   if (r) new MutationObserver(render).observe(r, { attributes:true, attributeFilter:['lang'] });

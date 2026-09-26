@@ -61,9 +61,14 @@
     /* Phase I — lot operations; reserved: only the lot API below may use them */
     COMPENSATION_CREDIT:           'COMPENSATION_CREDIT',
     COMPENSATION_EXPIRY:           'COMPENSATION_EXPIRY',
-    COMPENSATION_REVERSAL:         'COMPENSATION_REVERSAL'
+    COMPENSATION_REVERSAL:         'COMPENSATION_REVERSAL',
+    /* customer-initiated value — reserved: only topUp() and redeemGift() below may use them */
+    WALLET_TOPUP:                  'WALLET_TOPUP',
+    GIFT_REDEMPTION:               'GIFT_REDEMPTION'
   };
   var LOT_REASONS = { COMPENSATION_CREDIT:true, COMPENSATION_EXPIRY:true, COMPENSATION_REVERSAL:true };
+  /* reasons that only one internal path may post (checked in post()) */
+  var PATH_REASONS = { WALLET_TOPUP:'topup', GIFT_REDEMPTION:'gift' };
   var LOT_SOURCE = { COMPENSATION:'compensation' };
   /* customer-facing wording for each reason; the customer never sees the key */
   var REASON_TEXT = {
@@ -72,10 +77,12 @@
     ORDER_ADJUSTMENT_REFUND:        { ar:'تعديل على الطلب',              en:'Order adjustment' },
     COMPENSATION_CREDIT:            { ar:'رصيد تعويض (ينتهي في موعد محدد)', en:'Compensation credit (expires on a set date)' },
     COMPENSATION_EXPIRY:            { ar:'انتهاء صلاحية رصيد تعويض غير مستخدم', en:'Unused compensation credit expired' },
-    COMPENSATION_REVERSAL:          { ar:'إلغاء رصيد تعويض غير مستخدم',   en:'Unused compensation credit reversed' }
+    COMPENSATION_REVERSAL:          { ar:'إلغاء رصيد تعويض غير مستخدم',   en:'Unused compensation credit reversed' },
+    WALLET_TOPUP:                   { ar:'إعادة تعبئة المحفظة',            en:'Wallet top-up' },
+    GIFT_REDEMPTION:                { ar:'استخدام رمز هدية',              en:'Gift code redeemed' }
   };
   var SOURCE = { ORDER_CHANGE:'order_change', REFUND:'refund',
-                 CUSTOMER_PAYMENT:'customer_payment', SYSTEM:'system', MANUAL:'manual' };
+                 CUSTOMER_PAYMENT:'customer_payment', SYSTEM:'system', MANUAL:'manual', GIFT:'gift' };
 
   var ERRORS = {
     WALLET_FORBIDDEN:             { ar:'لا يمكنك الوصول إلى هذه المحفظة.',    en:'You cannot access this wallet.' },
@@ -92,7 +99,11 @@
     LOT_NOT_FOUND:                { ar:'رصيد التعويض غير موجود.',              en:'That compensation credit does not exist.' },
     LOT_EXPIRED:                  { ar:'انتهت صلاحية رصيد التعويض.',            en:'The compensation credit has expired.' },
     LOT_NOTHING_REMAINING:        { ar:'لا يوجد رصيد تعويض غير مستخدم.',       en:'No unused compensation credit remains.' },
-    LEDGER_WRITE_FAILED:          { ar:'تعذّر حفظ عملية المحفظة.',            en:'The wallet transaction could not be saved.' }
+    LEDGER_WRITE_FAILED:          { ar:'تعذّر حفظ عملية المحفظة.',            en:'The wallet transaction could not be saved.' },
+    PAYMENT_METHOD_INVALID:       { ar:'طريقة الدفع غير متاحة لإعادة التعبئة.', en:'That payment method cannot be used for a top-up.' },
+    GIFT_NOT_FOUND:               { ar:'رمز الهدية غير صحيح.',                en:'That gift code is not valid.' },
+    GIFT_USED:                    { ar:'تم استخدام رمز الهدية من قبل.',        en:'That gift code has already been used.' },
+    GIFT_EXPIRED:                 { ar:'انتهت صلاحية رمز الهدية.',             en:'That gift code has expired.' }
   };
 
   function isEn(){ var r = document.getElementById('htmlRoot') || document.documentElement; return r.lang === 'en'; }
@@ -261,6 +272,7 @@
     if (currency !== CURRENCY) return fail('INVALID_CURRENCY', { currency:currency });
     if (!p.reason || !REASON[p.reason]) return fail('INVALID_REASON', { reason:p.reason });
     if (LOT_REASONS[p.reason] && !internal) return fail('REASON_RESERVED', { reason:p.reason });
+    if (PATH_REASONS[p.reason] && !(internal && internal.via === PATH_REASONS[p.reason])) return fail('REASON_RESERVED', { reason:p.reason });
     if (!p.idempotencyKey) return fail('IDEMPOTENCY_KEY_REQUIRED');
 
     var minor = toMinor(p.amount);
@@ -334,6 +346,7 @@
       balanceAfter: fmt(after)
     };
     if (internal && internal.lot) tx.lot = internal.lot;
+    if (internal && internal.meta) tx.meta = internal.meta;
     if (internal && internal.lotEvent) tx.lotEvent = internal.lotEvent;
     if (consumes) tx.consumes = consumes;
 
@@ -498,6 +511,51 @@
   }
 
   /* what a customer surface may see — no keys, no actor ids, no wallet id */
+  /* ---------- customer-initiated credits (reserved reasons) ----------
+     TOP-UP (prototype): RAF has no payment gateway. A top-up names one of
+     RAF's online payment methods (RAFPaymentMethods.online) and is treated
+     as a confirmed payment — exactly as checkout treats an online payment
+     today — and is recorded as a PROTOTYPE payment on the ledger entry.
+     GIFT: a gift code issued through RAFGift; the wallet reads the code's
+     record, credits its value once (idempotency key per code) and RAFGift
+     marks the code used. Both only for the signed-in customer's own wallet. */
+  function topUp(p){
+    p = p || {};
+    var sid = sessionUserId();
+    if (!sid) return fail('WALLET_FORBIDDEN');
+    var PM = global.RAFPaymentMethods;
+    var m = PM && PM.get(p.methodId);
+    if (!m || !m.online) return fail('PAYMENT_METHOD_INVALID', { methodId:p.methodId });
+    var minor = toMinor(p.amount);
+    if (minor === null || minor <= 0) return fail('INVALID_AMOUNT', { amount:p.amount });
+    if (!p.paymentRef) return fail('IDEMPOTENCY_KEY_REQUIRED');
+    return post(TYPE.CREDIT, { customerId:sid, actor:{ id:sid, type:ACTOR.CUSTOMER }, amount:fmt(minor), reason:REASON.WALLET_TOPUP,
+      source:SOURCE.CUSTOMER_PAYMENT, idempotencyKey:'TOPUP-' + p.paymentRef },
+      { via:'topup', meta:{ method:m.id, methodAr:m.ar, methodEn:m.en, prototypePayment:true, paymentRef:String(p.paymentRef) } });
+  }
+  function redeemGift(code){
+    var sid = sessionUserId();
+    if (!sid) return fail('WALLET_FORBIDDEN');
+    var G = global.RAFGift;
+    if (!G || !G._record) return fail('GIFT_NOT_FOUND');
+    var norm = String(code || '').trim().toUpperCase();
+    var rec = G._record(norm);
+    if (!rec) return fail('GIFT_NOT_FOUND');
+    var key = 'GIFT-' + rec.code;
+    var prior = findByKey(key);
+    /* a code is used once, by one customer; the same customer asking again gets the same answer */
+    if (prior) {
+      if (prior.customerId !== sid) return fail('GIFT_USED');
+      return { ok:true, duplicate:true, transaction:publicTx(prior), balance:fmt(balanceMinorOf(prior.walletId)), balanceMinor:balanceMinorOf(prior.walletId) };
+    }
+    if (rec.status !== 'active') return fail('GIFT_USED');
+    if (rec.expiresAt && Date.now() >= rec.expiresAt) return fail('GIFT_EXPIRED');
+    var r = post(TYPE.CREDIT, { customerId:sid, actor:{ id:sid, type:ACTOR.CUSTOMER }, amount:fmt(rec.amountMinor), reason:REASON.GIFT_REDEMPTION,
+      source:SOURCE.GIFT, idempotencyKey:key }, { via:'gift', meta:{ giftCode:rec.code } });
+    if (r.ok && G._markUsed) G._markUsed(rec.code, sid, r.transaction.id);
+    return r;
+  }
+
   function publicTx(t){
     var txt = REASON_TEXT[t.reason] || { ar:t.reason, en:t.reason };
     return {
@@ -510,7 +568,10 @@
       orderId: t.orderId,
       timestamp: t.timestamp,
       balanceAfter: t.balanceAfter,
-      expiresAt: t.lot ? t.lot.expiresAt : null
+      expiresAt: t.lot ? t.lot.expiresAt : null,
+      reason: t.reason,
+      source: t.source,
+      meta: t.meta || null
     };
   }
 
@@ -565,6 +626,7 @@
     credit: credit, debit: debit,
     /* expiring credit lots (Phase I) */
     creditLot: creditLot, reverseLot: reverseLot, expireDue: expireDue,
+    topUp: topUp, redeemGift: redeemGift,
     /* reads */
     balance: balance, history: history, rawLedger: rawLedger, lots: lots, lotBySource: lotBySource,
     /* helpers */

@@ -271,7 +271,7 @@
     u('usr-015', 'حمد القحطاني', 'hamad.driver@raf.kw', '+965 9000 1015', 'driver', 'driver', 'suspended', '2024-04-02'),
     /* 3 Customers */
     u('usr-016', 'محمد العنزي', 'm.anzi@gmail.com', '+965 99096686', 'customer', 'customer', 'active', '2024-05-21'),
-    u('usr-017', 'دانة الصباح', 'dana.s@gmail.com', '+965 9000 1017', 'customer', 'customer', 'active', '2024-06-17'),
+    u('usr-017', 'دانة سالم', 'dana.s@gmail.com', '+965 9000 1017', 'customer', 'customer', 'active', '2024-06-17'),
     u('usr-018', 'عبدالعزيز الحربي', 'a.harbi@gmail.com', '+965 9000 1018', 'customer', 'customer', 'active', '2024-07-09')
   ];
 

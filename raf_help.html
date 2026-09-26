@@ -79,70 +79,74 @@
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <script src="raf_features.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_cx.css">
+<link rel="stylesheet" href="raf_acct.css">
+<script src="raf_transition.js"></script>
 </head>
-<body>
-<nav class="top">
-  <div class="nav-actions">
-    <button class="lang-btn" onclick="toggleLang()"><span id="langLabel">EN</span></button>
-    <a class="nav-ico" href="raf_homepage.html" title="الرئيسية"><i class="ti ti-home-2"></i></a>
-    <button class="nav-ico" onclick="history.back()" title="رجوع"><i class="ti ti-arrow-right"></i></button>
-  </div>
-  <a href="raf_homepage.html" class="nav-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace" class="brand-logo"></a>
-</nav>
+<body class="cx acct">
+<nav></nav>
 
-<main class="doc">
-  <div class="crumbs"><a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a> / <span data-ar="مركز المساعدة" data-en="Help Center">مركز المساعدة</span></div>
-  <div class="doc-head">
-    <div class="doc-kicker">RAF MARKETPLACE</div>
-    <h1 class="doc-title" data-ar="مركز المساعدة" data-en="Help Center">مركز المساعدة</h1>
-    <div class="doc-meta" data-ar="كل ما تحتاج معرفته للاستفادة من رف في مكان واحد." data-en="Everything you need to know to get the most out of RAF, in one place.">كل ما تحتاج معرفته للاستفادة من رف في مكان واحد.</div>
+<main class="cx-page ac-main">
+  <div class="cx-crumbs" role="navigation" aria-label="breadcrumb">
+    <a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
+    <i class="ti ti-chevron-left" aria-hidden="true"></i>
+    <a href="raf_support.html" data-ar="المساعدة والدعم" data-en="Help & Support">المساعدة والدعم</a>
+    <i class="ti ti-chevron-left" aria-hidden="true"></i>
+    <span class="cur" data-ar="مركز المساعدة" data-en="Help Center">مركز المساعدة</span>
   </div>
-
-  <div class="help-search">
-    <i class="ti ti-search"></i>
-    <input type="text" placeholder="ابحث عن موضوع..." data-ar-ph="ابحث عن موضوع..." data-en-ph="Search for a topic...">
+  <div class="ac-head">
+    <div>
+      <h1 class="ac-title" data-ar="مركز المساعدة" data-en="Help Center">مركز المساعدة</h1>
+      <div class="ac-meta" data-ar="كل ما تحتاج معرفته للاستفادة من رف في مكان واحد." data-en="Everything you need to know to get the most out of RAF, in one place.">كل ما تحتاج معرفته للاستفادة من رف في مكان واحد.</div>
+    </div>
   </div>
 
-  <div class="help-grid">
-    <a href="raf_how_to_order.html" class="help-card">
-      <i class="ti ti-shopping-bag"></i>
-      <h3 data-ar="كيف تطلب" data-en="How to Order">كيف تطلب</h3>
-      <p data-ar="خطوات الطلب من التصفّح حتى التوصيل." data-en="Order steps from browsing to delivery.">خطوات الطلب من التصفّح حتى التوصيل.</p>
-    </a>
-    <a href="raf_returns.html" class="help-card">
-      <i class="ti ti-arrow-back-up"></i>
-      <h3 data-ar="سياسة الإرجاع" data-en="Returns Policy">سياسة الإرجاع</h3>
-      <p data-ar="شروط ومدة إرجاع المنتجات واسترداد المبلغ." data-en="Conditions, period, and refunds for returns.">شروط ومدة إرجاع المنتجات واسترداد المبلغ.</p>
-    </a>
-    <a href="raf_faq.html" class="help-card">
-      <i class="ti ti-help-circle"></i>
-      <h3 data-ar="الأسئلة الشائعة" data-en="FAQ">الأسئلة الشائعة</h3>
-      <p data-ar="إجابات سريعة على أكثر الأسئلة تكراراً." data-en="Quick answers to the most common questions.">إجابات سريعة على أكثر الأسئلة تكراراً.</p>
-    </a>
-    <a href="raf_how_auctions.html" class="help-card">
-      <i class="ti ti-gavel"></i>
-      <h3 data-ar="كيف تشارك في مزاد" data-en="How Auctions Work">كيف تشارك في مزاد</h3>
-      <p data-ar="طريقة المزايدة والفوز بالمنتجات المميزة." data-en="How to bid and win featured products.">طريقة المزايدة والفوز بالمنتجات المميزة.</p>
-    </a>
-    <a href="raf_how_to_sell.html" class="help-card">
-      <i class="ti ti-building-store"></i>
-      <h3 data-ar="كيف تبيع" data-en="How to Sell">كيف تبيع</h3>
-      <p data-ar="افتح متجرك وابدأ البيع على رف." data-en="Open your store and start selling on RAF.">افتح متجرك وابدأ البيع على رف.</p>
-    </a>
-    <a href="raf_contact.html" class="help-card">
-      <i class="ti ti-message-circle"></i>
-      <h3 data-ar="تواصل معنا" data-en="Contact Us">تواصل معنا</h3>
-      <p data-ar="راسل فريق الدعم لأي استفسار أو مشكلة." data-en="Reach our support team for any question or issue.">راسل فريق الدعم لأي استفسار أو مشكلة.</p>
-    </a>
+  <!-- search filters the topics and questions on this page -->
+  <div class="hc-search" role="search">
+    <i class="ti ti-search" aria-hidden="true"></i>
+    <input id="hcQ" type="search" placeholder="ابحث عن موضوع..." data-ar-ph="ابحث عن موضوع..." data-en-ph="Search for a topic..." aria-label="ابحث عن موضوع">
   </div>
 
-  <div class="help-cta">
-    <h3 data-ar="لم تجد ما تبحث عنه؟" data-en="Didn't find what you're looking for?">لم تجد ما تبحث عنه؟</h3>
-    <p data-ar="فريق الدعم جاهز لمساعدتك في أي وقت." data-en="Our support team is ready to help you anytime.">فريق الدعم جاهز لمساعدتك في أي وقت.</p>
-    <a href="raf_contact.html" class="cta-btn" data-ar="تواصل مع الدعم" data-en="Contact Support">تواصل مع الدعم</a>
-  </div>
+  <section class="ac-sec">
+    <div class="ac-sec-h" data-ar="المواضيع" data-en="Topics">المواضيع</div>
+    <div class="ac-list" id="hcTopics">
+      <a href="raf_how_to_order.html" class="ac-row"><i class="ti ti-shopping-bag ic" aria-hidden="true"></i><span class="tx"><span class="lb" data-ar="كيف تطلب" data-en="How to Order">كيف تطلب</span><span class="ds" data-ar="خطوات الطلب من التصفّح حتى التوصيل." data-en="Order steps from browsing to delivery.">خطوات الطلب من التصفّح حتى التوصيل.</span></span><i class="ti ti-chevron-left go" aria-hidden="true"></i></a>
+      <a href="raf_returns.html" class="ac-row"><i class="ti ti-arrow-back-up ic" aria-hidden="true"></i><span class="tx"><span class="lb" data-ar="سياسة الإرجاع" data-en="Returns Policy">سياسة الإرجاع</span><span class="ds" data-ar="شروط ومدة إرجاع المنتجات واسترداد المبلغ." data-en="Conditions, period, and refunds for returns.">شروط ومدة إرجاع المنتجات واسترداد المبلغ.</span></span><i class="ti ti-chevron-left go" aria-hidden="true"></i></a>
+      <a href="raf_faq.html" class="ac-row"><i class="ti ti-help-circle ic" aria-hidden="true"></i><span class="tx"><span class="lb" data-ar="الأسئلة الشائعة" data-en="FAQ">الأسئلة الشائعة</span><span class="ds" data-ar="إجابات سريعة على أكثر الأسئلة تكراراً." data-en="Quick answers to the most common questions.">إجابات سريعة على أكثر الأسئلة تكراراً.</span></span><i class="ti ti-chevron-left go" aria-hidden="true"></i></a>
+      <a href="raf_how_auctions.html" class="ac-row"><i class="ti ti-gavel ic" aria-hidden="true"></i><span class="tx"><span class="lb" data-ar="كيف تشارك في مزاد" data-en="How Auctions Work">كيف تشارك في مزاد</span><span class="ds" data-ar="طريقة المزايدة والفوز بالمنتجات المميزة." data-en="How to bid and win featured products.">طريقة المزايدة والفوز بالمنتجات المميزة.</span></span><i class="ti ti-chevron-left go" aria-hidden="true"></i></a>
+      <a href="raf_how_to_sell.html" class="ac-row"><i class="ti ti-building-store ic" aria-hidden="true"></i><span class="tx"><span class="lb" data-ar="كيف تبيع" data-en="How to Sell">كيف تبيع</span><span class="ds" data-ar="افتح متجرك وابدأ البيع على رف." data-en="Open your store and start selling on RAF.">افتح متجرك وابدأ البيع على رف.</span></span><i class="ti ti-chevron-left go" aria-hidden="true"></i></a>
+      <a href="raf_contact.html" class="ac-row"><i class="ti ti-message-circle ic" aria-hidden="true"></i><span class="tx"><span class="lb" data-ar="تواصل معنا" data-en="Contact Us">تواصل معنا</span><span class="ds" data-ar="راسل فريق الدعم لأي استفسار أو مشكلة." data-en="Reach our support team for any question or issue.">راسل فريق الدعم لأي استفسار أو مشكلة.</span></span><i class="ti ti-chevron-left go" aria-hidden="true"></i></a>
+    </div>
+  </section>
+
+  <!-- the questions that were on the support page, unchanged -->
+  <section class="ac-sec">
+    <div class="ac-sec-h" data-ar="أسئلة شائعة" data-en="Common questions">أسئلة شائعة</div>
+    <div id="hcFaqs">
+      <details class="hc-q"><summary><span data-ar="كيف أتتبّع طلبي؟" data-en="How do I track my order?">كيف أتتبّع طلبي؟</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><p data-ar="من صفحة طلباتي اختر الطلب ثم اضغط تتبّع الطلب لرؤية حالته مباشرة." data-en="Open My Orders, select the order, then tap Track Order to see its live status.">من صفحة طلباتي اختر الطلب ثم اضغط تتبّع الطلب لرؤية حالته مباشرة.</p></details>
+      <details class="hc-q"><summary><span data-ar="ما هي سياسة الإرجاع؟" data-en="What is the return policy?">ما هي سياسة الإرجاع؟</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><p data-ar="يمكنك إرجاع معظم المنتجات خلال 14 يوماً من الاستلام بشرط بقائها بحالتها الأصلية." data-en="Most items can be returned within 14 days of delivery if they remain in original condition.">يمكنك إرجاع معظم المنتجات خلال 14 يوماً من الاستلام بشرط بقائها بحالتها الأصلية.</p></details>
+      <details class="hc-q"><summary><span data-ar="كيف أضيف طريقة دفع؟" data-en="How do I add a payment method?">كيف أضيف طريقة دفع؟</span><i class="ti ti-chevron-down" aria-hidden="true"></i></summary><p data-ar="من هوية رف اذهب إلى طرق الدفع ثم اضغط إضافة بطاقة جديدة." data-en="From RAF ID open Payment Methods then tap Add new card.">من هوية رف اذهب إلى طرق الدفع ثم اضغط إضافة بطاقة جديدة.</p></details>
+    </div>
+    <div class="ac-empty" id="hcNone" hidden><i class="ti ti-search-off"></i><b data-ar="لا توجد نتائج" data-en="No results">لا توجد نتائج</b></div>
+  </section>
+
+  <div class="ac-note" style="margin-top:18px"><i class="ti ti-headset"></i><span><span data-ar="لم تجد ما تبحث عنه؟" data-en="Didn't find what you're looking for?">لم تجد ما تبحث عنه؟</span> <a class="ac-link" href="raf_contact.html" data-ar="تواصل مع الدعم" data-en="Contact Support">تواصل مع الدعم</a></span></div>
 </main>
 
+<style>
+.hc-search{display:flex;align-items:center;gap:10px;max-width:640px;margin:16px 0 4px;padding:0 14px;min-height:50px;border:1px solid #E6E0D3;border-radius:999px;background:#fff;}
+.hc-search i{color:#A07828;font-size:20px;}
+.hc-search input{flex:1;border:0;background:transparent;font:inherit;font-size:15px;color:#15130F;min-height:46px;}
+.hc-search input:focus{outline:none;}
+.hc-search:focus-within{border-color:#C9A84C;box-shadow:0 0 0 3px rgba(201,168,76,.16);}
+.hc-q{border-bottom:1px solid #ECE6DA;}
+.hc-q summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:58px;padding:12px 4px;font-size:15px;font-weight:700;cursor:pointer;list-style:none;}
+.hc-q summary::-webkit-details-marker{display:none;}
+.hc-q summary i{color:#B5AE9F;transition:transform .2s;}
+.hc-q[open] summary i{transform:rotate(180deg);}
+.hc-q p{padding:0 4px 16px;font-size:14px;line-height:1.8;color:#5A5650;}
+.ac-row[hidden],.hc-q[hidden]{display:none;}
+</style>
 <footer data-raf-footer></footer>
 
 <nav class="app-bnav">
@@ -158,7 +162,7 @@ function toggleLang(){
   const html=document.getElementById('htmlRoot');
   const isAR=html.lang==='ar';const newLang=isAR?'en':'ar';
   html.lang=newLang;html.dir=isAR?'ltr':'rtl';
-  document.getElementById('langLabel').textContent=isAR?'ع':'EN';
+  (document.getElementById('langLabel')||{}).textContent=isAR?'ع':'EN';
   localStorage.setItem('raf_lang',newLang);
   document.querySelectorAll('[data-ar]').forEach(el=>{const t=el.getAttribute('data-'+newLang);if(t)el.textContent=t;});
   document.querySelectorAll('[data-ar-ph]').forEach(el=>{const t=el.getAttribute('data-'+newLang+'-ph');if(t)el.placeholder=t;});
@@ -167,12 +171,37 @@ function toggleLang(){
   if(localStorage.getItem('raf_lang')==='en'){
     document.getElementById('htmlRoot').lang='en';
     document.getElementById('htmlRoot').dir='ltr';
-    document.getElementById('langLabel').textContent='ع';
+    (document.getElementById('langLabel')||{}).textContent='ع';
     document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.getAttribute('data-en');});
     document.querySelectorAll('[data-en-ph]').forEach(el=>{el.placeholder=el.getAttribute('data-en-ph');});
   }
 })();
 </script>
+<script>
+/* Help Center search — filters this page's topics and questions by their text */
+(function(){
+  var q = document.getElementById('hcQ');
+  function norm(s){ return String(s || '').toLowerCase().replace(/[ً-ْ]/g, '').trim(); }
+  function run(){
+    var v = norm(q.value), hits = 0;
+    document.querySelectorAll('#hcTopics .ac-row, #hcFaqs .hc-q').forEach(function(el){
+      var show = !v || norm(el.textContent).indexOf(v) > -1;
+      el.hidden = !show; if (show) hits++;
+      if (v && show && el.tagName === 'DETAILS' && norm(el.querySelector('p').textContent).indexOf(v) > -1) el.open = true;
+    });
+    document.getElementById('hcNone').hidden = hits > 0;
+  }
+  q.addEventListener('input', run);
+})();
+</script>
+<script src="raf_topbar.js"></script>
+<script src="raf_notify.js"></script>
+<script src="raf_nav.js"></script>
+<script src="raf_search.js"></script>
+<script src="raf_source.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_permissions.js"></script>
 <script src="raf_footer.js"></script>
 </body>
 </html>

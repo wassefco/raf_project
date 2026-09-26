@@ -1,0 +1,109 @@
+/* ============================================================================
+ * RAF Marketplace — Customer design system (shared)
+ * ----------------------------------------------------------------------------
+ * One set of customer-facing building blocks used by the Homepage, Stores,
+ * Products / Offers, Trends, Store and Product pages, so they read as one
+ * marketplace: content width, breadcrumb, page title, section heads, the one
+ * "View All" link, chip rails, horizontal rails, the product grid, the store
+ * card, and the page transition. Values are literal so the file does not
+ * depend on each page's own :root naming.
+ * ==========================================================================*/
+
+/* ── content width: grows with the viewport (to 1760px); gutters scale ── */
+body.cx{
+  --cx-max:1760px; --cx-gut:clamp(16px,2.6vw,48px);
+  /* the shared header (raf_topbar.js) lines up with this content */
+  --rtb-inner-max:calc(1760px - 2 * var(--cx-gut)); --rtb-sub-max:1760px;
+}
+body.cx{background:#FAF8F4;}
+.cx-page{max-width:var(--cx-max);margin:0 auto;padding:0 var(--cx-gut);}
+
+/* ── breadcrumb ── */
+.cx-crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:16px 0 4px;font-size:12.5px;color:#8A857C;}
+.cx-crumbs a{color:#8A857C;text-decoration:none;transition:color .2s;}
+.cx-crumbs a:hover{color:#A07828;}
+.cx-crumbs .cur{color:#15130F;font-weight:700;}
+.cx-crumbs i{font-size:13px;opacity:.7;}
+html[dir="ltr"] .cx-crumbs i{transform:scaleX(-1);}
+
+/* ── page title row: a title and a real count — no banner band ── */
+.cx-head{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px 16px;padding:8px 0 18px;}
+.cx-title{font-family:'Tajawal',sans-serif;font-size:30px;font-weight:800;color:#15130F;line-height:1.2;}
+html[lang="en"] .cx-title{font-family:'Playfair Display',serif;}
+.cx-meta{font-size:14px;color:#5A5650;margin-top:4px;}
+.cx-meta b{font-family:'DM Sans',sans-serif;color:#15130F;}
+.cx-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+
+/* ── section heads + the ONE "View All" pattern ── */
+.cx-sec-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;}
+.cx-sec-title{font-family:'Tajawal',sans-serif;font-size:24px;font-weight:800;color:#15130F;line-height:1.2;}
+html[lang="en"] .cx-sec-title{font-family:'Playfair Display',serif;}
+.cx-viewall{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 2px;font-family:'Tajawal',sans-serif;font-size:13.5px;font-weight:700;color:#A07828;text-decoration:none;white-space:nowrap;flex-shrink:0;transition:gap .2s,color .2s;}
+.cx-viewall i{font-size:16px;transition:transform .2s;}
+.cx-viewall:hover{gap:9px;color:#C9A84C;}
+.cx-viewall:active{color:#15130F;}
+.cx-viewall:focus-visible{outline:2px solid #C9A84C;outline-offset:3px;border-radius:6px;}
+html[dir="ltr"] .cx-viewall i{transform:scaleX(-1);}
+
+/* ── chip rail (categories, tabs) ── */
+.cx-chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 0 4px;margin:0 0 14px;}
+.cx-chips::-webkit-scrollbar{display:none;}
+.cx-chip{flex-shrink:0;display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 16px;border:1px solid #E2DBCC;border-radius:999px;background:#fff;color:#3F3B35;font-family:'Tajawal',sans-serif;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none;transition:all .15s;}
+.cx-chip i{font-size:16px;color:#A07828;}
+.cx-chip:hover{border-color:#C9A84C;}
+.cx-chip.on{background:#15130F;border-color:#15130F;color:#F5F0E4;}
+.cx-chip.on i{color:#C9A84C;}
+.cx-chip .n{font-family:'DM Sans',sans-serif;font-size:12px;opacity:.7;}
+.cx-btn{display:inline-flex;align-items:center;gap:7px;height:40px;min-height:40px;padding:0 16px;border:1px solid #D8D0BE;border-radius:999px;background:#fff;color:#15130F;font-family:'Tajawal',sans-serif;font-size:13.5px;font-weight:800;cursor:pointer;}
+.cx-btn:hover{border-color:#C9A84C;color:#A07828;}
+.cx-btn .cnt{min-width:19px;height:19px;padding:0 5px;border-radius:20px;background:#C9A84C;color:#1C1606;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;}
+
+/* ── horizontal rails: native touch scrolling (pan-x), gentle snapping,
+   mouse drag via raf_hscroll.js (data-hscroll) ── */
+.cx-rail,.car-track,.cx-chips{-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;overscroll-behavior-x:contain;scroll-snap-type:x proximity;}
+
+/* ── product grid (listing pages) ── */
+.cx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
+.cx-empty{grid-column:1/-1;text-align:center;padding:52px 20px;color:#8A857C;}
+.cx-empty i{font-size:46px;color:#C9A84C;display:block;margin-bottom:12px;}
+.cx-empty b{display:block;font-size:15px;color:#15130F;}
+@media(max-width:860px){.cx-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}}
+
+/* ── store card (Homepage featured stores, Stores page) ── */
+.cx-stores-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;}
+@media(max-width:560px){.cx-stores-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}}
+.cx-store{background:#fff;border:1px solid #ECE6DA;border-radius:16px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;transition:box-shadow .22s,border-color .22s;}
+.cx-store:hover{border-color:#E0D6C2;box-shadow:0 16px 34px -22px rgba(20,16,8,.35);}
+.cx-store-cover{position:relative;height:78px;background:linear-gradient(120deg,#15130F,#2a2419) center/cover no-repeat;}
+.cx-store-promo,.cx-store-tag{position:absolute;top:8px;inset-inline-start:8px;display:inline-flex;align-items:center;gap:4px;background:#C9A84C;color:#1C1606;font-family:'DM Sans','Tajawal',sans-serif;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;}
+.cx-store-tag.closed{background:#15130F;color:#F4B1AF;}
+.cx-store-logo{width:64px;height:64px;margin:-32px auto 0;border-radius:16px;background:#fff;border:3px solid #fff;box-shadow:0 6px 16px -8px rgba(20,16,8,.4);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:28px;color:#A07828;position:relative;}
+.cx-store-logo img{width:100%;height:100%;object-fit:cover;border-radius:12px;}
+.cx-store-b{padding:10px 12px 12px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;flex:1;}
+.cx-store-name{font-family:'Tajawal',sans-serif;font-size:15px;font-weight:800;color:#15130F;line-height:1.3;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-decoration:none;}
+.cx-store-name:hover{color:#A07828;}
+.cx-store-cat{font-size:12px;color:#8A857C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.cx-store-meta{display:flex;align-items:center;gap:8px;font-size:12.5px;color:#5A5650;}
+.cx-store-meta b{font-family:'DM Sans',sans-serif;color:#15130F;}
+.cx-store-meta i{color:#C9A84C;}
+.cx-store-meta .dot{width:3px;height:3px;border-radius:50%;background:#D8D0BE;}
+.cx-store-act{display:flex;gap:8px;width:100%;margin-top:auto;padding-top:8px;}
+.cx-follow{flex:1;min-width:0;height:38px;min-height:38px;border:1px solid #15130F;border-radius:10px;background:#fff;color:#15130F;font-family:'Tajawal',sans-serif;font-size:13px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:all .2s;}
+.cx-follow:hover{background:#15130F;color:#fff;}
+.cx-follow.on{background:rgba(201,168,76,.12);border-color:#C9A84C;color:#A07828;}
+.cx-visit{flex:0 0 38px;height:38px;border-radius:10px;background:#C9A84C;color:#1C1606;display:flex;align-items:center;justify-content:center;font-size:18px;text-decoration:none;transition:background .2s;}
+.cx-visit:hover{background:#15130F;color:#fff;}
+html[dir="ltr"] .cx-visit i{transform:scaleX(-1);}
+
+/* ── page transition (raf_transition.js) ──
+   Arriving: the page fades in (opacity only, ~200ms). Leaving: a quick fade
+   out before the next page loads. The script always restores full opacity
+   on a timer, so a paused animation can never leave a page faded.
+   Reduced motion: the script does nothing. */
+html.cx-pt-in body{opacity:0;}
+html.cx-pt-in.cx-pt-go body{opacity:1;transition:opacity .2s ease-out;}
+html.cx-pt-out body{opacity:0;transition:opacity .13s ease-in;}
+@media (prefers-reduced-motion: reduce){
+  html.cx-pt-in body,html.cx-pt-out body{opacity:1!important;transition:none!important;}
+}
+.cx-btn .cnt[hidden]{display:none;}

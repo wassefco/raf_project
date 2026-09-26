@@ -1,235 +1,156 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" id="htmlRoot">
+<html id="htmlRoot" lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>رف — عناويني</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<link rel="stylesheet" href="raf_account.css">
-<style>
-:root{--bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;--gold:#C9A84C;--gold2:#A07828;--black:#0A0A0A;--text:#0A0A0A;--text2:#555;--text3:#888;--border:#D8D3C8;--r:8px;--rl:12px;--font:'Tajawal',sans-serif;--fdisplay:'Playfair Display',serif;--fen:'DM Sans',sans-serif;--green:#2E7D32;--red:#C62828;}
-*{box-sizing:border-box;margin:0;padding:0;}
-html{overflow-x:hidden;}
-body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;max-width:100%;overflow-x:hidden;}
-
-/* NAV */
-nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.3);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;}
-.nav-logo{font-family:var(--fdisplay);font-size:28px;font-weight:900;color:var(--gold);text-decoration:none;}
-.nav-logo span{color:var(--text);font-size:11px;font-family:var(--fen);font-weight:300;letter-spacing:3px;display:block;margin-top:-6px;}
-.nav-actions{display:flex;align-items:center;gap:8px;}
-.btn-ghost{padding:8px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
-.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
-.btn-gold{padding:8px 20px;border:none;border-radius:var(--r);background:var(--gold);color:var(--black);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
-.btn-gold:hover{background:var(--gold2);}
-.nav-ico{width:40px;height:40px;border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;background:transparent;font-size:18px;position:relative;transition:all .2s;}
-.nav-ico:hover{border-color:var(--gold);color:var(--gold);}
-.lang-btn{padding:6px 12px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text3);font-family:var(--fen);font-size:12px;cursor:pointer;transition:all .2s;letter-spacing:1px;display:inline-flex;align-items:center;gap:5px;}
-.lang-btn:hover{border-color:var(--gold);color:var(--gold);}
-.lang-btn .lang-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);display:inline-block;}
-
-/* MAIN */
-.main{max-width:900px;margin:0 auto;padding:40px;}
-.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;}
-.page-title{font-family:var(--fdisplay);font-size:28px;font-weight:900;color:var(--text);}
-.page-title span{color:var(--gold);}
-
-/* ADDRESS GRID */
-.addr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:32px;}
-.addr-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:20px;position:relative;transition:all .2s;}
-.addr-card:hover{border-color:var(--gold);box-shadow:0 4px 16px rgba(0,0,0,.06);}
-.addr-card.default-card{border-color:var(--gold);background:rgba(201,168,76,.03);}
-.addr-type-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
-.addr-type-icon{width:34px;height:34px;border-radius:8px;background:rgba(201,168,76,.12);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:16px;}
-.addr-type-name{font-size:13px;font-weight:700;color:var(--text);}
-.default-badge{font-size:10px;font-weight:700;background:var(--gold);color:var(--black);padding:2px 8px;border-radius:20px;margin-right:auto;}
-.addr-details{font-size:13px;color:var(--text2);line-height:1.8;margin-bottom:14px;}
-.addr-actions{display:flex;gap:8px;}
-.addr-btn{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:5px;font-family:var(--font);}
-.addr-btn-edit{background:transparent;border:1px solid var(--border);color:var(--text2);}
-.addr-btn-edit:hover{border-color:var(--gold);color:var(--gold);}
-.addr-btn-default{background:transparent;border:1px solid var(--border);color:var(--text2);}
-.addr-btn-default:hover{border-color:var(--gold);color:var(--gold);}
-.addr-btn-default.on{background:rgba(201,168,76,.1);border-color:var(--gold);color:var(--gold);}
-.addr-btn-del{background:transparent;border:1px solid transparent;color:var(--text3);}
-.addr-btn-del:hover{border-color:#C62828;color:#C62828;}
-
-/* ADD ADDRESS FORM */
-.form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:28px;margin-bottom:32px;}
-.form-card-title{font-size:17px;font-weight:700;margin-bottom:24px;display:flex;align-items:center;gap:8px;}
-.form-card-title i{color:var(--gold);}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.form-group{display:flex;flex-direction:column;gap:6px;}
-.form-group.full{grid-column:1/-1;}
-.form-label{font-size:12px;font-weight:700;color:var(--text2);letter-spacing:.5px;}
-.form-input,.form-select{padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);font-family:var(--font);font-size:14px;color:var(--text);outline:none;transition:border-color .2s;width:100%;}
-.form-input:focus,.form-select:focus{border-color:var(--gold);}
-.type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
-.type-opt{padding:10px 8px;border:1px solid var(--border);border-radius:var(--r);cursor:pointer;text-align:center;transition:all .2s;font-size:12px;font-weight:500;color:var(--text2);}
-.type-opt i{display:block;font-size:18px;color:var(--gold);margin-bottom:4px;}
-.type-opt:hover,.type-opt.on{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.06);}
-.form-actions{display:flex;gap:12px;margin-top:24px;justify-content:flex-end;}
-.btn-cancel{padding:11px 24px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:14px;cursor:pointer;transition:all .2s;}
-.btn-cancel:hover{border-color:var(--gold);color:var(--gold);}
-.btn-save{padding:11px 28px;border:none;border-radius:var(--r);background:var(--gold);color:var(--black);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;}
-.btn-save:hover{background:var(--gold2);}
-
-/* BREADCRUMB */
-.breadcrumb{padding:12px 40px;font-size:13px;color:var(--text3);display:flex;align-items:center;gap:6px;background:var(--bg2);border-bottom:1px solid var(--border);}
-.breadcrumb a{color:var(--text3);text-decoration:none;transition:color .2s;}
-.breadcrumb a:hover{color:var(--gold);}
-
-/* EMPTY STATE */
-.empty-state{text-align:center;padding:48px 20px;color:var(--text3);}
-.empty-state i{font-size:48px;color:var(--border);margin-bottom:12px;display:block;}
-.empty-state p{font-size:15px;}
-
-/* FOOTER */
-footer{background:#0A0A0A;border-top:1px solid rgba(201,168,76,.2);padding:40px 40px 20px;}
-.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:20px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.35);max-width:900px;margin:0 auto;}
-
-/* ── GLOBAL MOBILE RESET ── */
-@media(max-width:768px){*{max-width:100%;}img,video,iframe{max-width:100%!important;height:auto;}table{max-width:100%;}}
-@media(max-width:768px){nav{padding:0 16px;}.main{padding:20px 16px;}.form-grid{grid-template-columns:1fr;}.breadcrumb{padding:10px 16px;}.type-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:480px){
-  .main{padding:12px;}
-  .addr-grid{grid-template-columns:1fr;}
-  .type-grid{grid-template-columns:1fr 1fr;}
-  .form-grid{grid-template-columns:1fr;}
-  footer{padding:20px 16px;}
-  .footer-bottom{flex-direction:column;gap:6px;text-align:center;}
-}
-html[lang="en"] body{font-family:'DM Sans',sans-serif;}
-
-  /* ===== APP BOTTOM NAV ===== */
-  .app-bnav{display:none;}
-  @media (max-width:1024px), (max-height:500px){
-    body{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))!important;}
-    footer{display:none!important;}
-    .app-bnav{display:flex;position:fixed;top:auto;bottom:0;left:0;right:0;height:56px;background:#fff;border-top:1px solid #e8e4dc;box-shadow:0 -2px 16px rgba(0,0,0,.06);z-index:998;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);align-items:stretch;}
-    .bnav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#aaa;font-size:10px;font-family:'Tajawal',sans-serif;font-weight:500;transition:color .15s;border:none;background:transparent;cursor:pointer;padding:0;}
-    .bnav-tab i{font-size:22px;line-height:1;}
-    .bnav-tab.on{color:#C9A84C;}
-    .bnav-cart{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;text-decoration:none;font-size:10px;font-family:'Tajawal',sans-serif;color:#aaa;padding-bottom:4px;}
-    .bnav-cart-ring{width:44px;height:44px;border-radius:50%;background:#C9A84C;display:flex;align-items:center;justify-content:center;font-size:20px;color:#0A0A0A;margin-top:-14px;box-shadow:0 4px 14px rgba(201,168,76,.3);}
-    .bnav-cart.on .bnav-cart-ring{background:#A07828;}
-    nav a.btn-ghost,nav a.btn-gold,nav .btn-ghost,nav .btn-gold{display:none!important;}
-  }
-</style>
-<link rel="stylesheet" href="raf_header.css">
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
-<link rel="stylesheet" href="raf_theme.css">
 <script src="raf_features.js"></script>
 <script src="raf_config.js"></script>
 <script src="raf_event_bus.js"></script>
 <script src="raf_record_store.js"></script>
 <script src="raf_notify_core.js"></script>
-<script src="raf_account.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_cx.css">
+<link rel="stylesheet" href="raf_acct.css">
+<script src="raf_transition.js"></script>
+<style>
+/* an address = an open entry between thin dividers, one under the other */
+.ad-list{display:block;}
+.ad-item{display:flex;gap:14px;padding:18px 4px;border-bottom:1px solid #ECE6DA;}
+.ad-item > .ic{flex:0 0 auto;width:26px;font-size:22px;color:#A07828;display:flex;justify-content:center;padding-top:2px;}
+.ad-b{flex:1;min-width:0;}
+.ad-top{display:flex;align-items:center;flex-wrap:wrap;gap:8px;}
+.ad-lbl{font-size:16px;font-weight:800;}
+.ad-nm{font-size:14px;color:#3F3B35;margin-top:4px;}
+.ad-tx{font-size:13.5px;color:#5A5650;margin-top:3px;line-height:1.7;overflow-wrap:anywhere;}
+.ad-ph{font-family:'DM Sans',sans-serif;font-size:13.5px;color:#5A5650;margin-top:2px;}
+.ad-acts{display:flex;flex-wrap:wrap;align-items:center;gap:4px 16px;margin-top:8px;}
+.ad-confirm{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:10px;font-size:13.5px;font-weight:700;color:#9A332F;}
+.ad-add-row{display:flex;padding:10px 0;}
+#addrForm[hidden],#addrListWrap[hidden]{display:none;}
+.fm-h{font-size:20px;font-weight:800;padding:18px 2px 6px;}
+</style>
 </head>
-<body>
+<body class="cx acct">
 
-<!-- STANDARD ACCOUNT HEADER (shared across the module) -->
-<header class="ahead">
-  <button type="button" class="ahead-back" data-fallback="raf_account.html"><i class="ti ti-arrow-right"></i> <span data-ar="العودة" data-en="Back">العودة</span></button>
-  <div class="ahead-title" data-ar="عناويني" data-en="My Addresses">عناويني</div>
-  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
-</header>
+<nav></nav>
 
-<!-- BREADCRUMB -->
-<div class="breadcrumb">
-  <a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
-  <i class="ti ti-chevron-left"></i>
-  <a href="raf_account.html" data-ar="حسابي" data-en="My Account">حسابي</a>
-  <i class="ti ti-chevron-left"></i>
-  <span data-ar="عناويني" data-en="My Addresses">عناويني</span>
-</div>
+<main class="cx-page ac-main">
+  <div class="cx-crumbs" role="navigation" aria-label="breadcrumb">
+    <a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
+    <i class="ti ti-chevron-left" aria-hidden="true"></i>
+    <a href="raf_account.html" data-ar="حسابي" data-en="My Account">حسابي</a>
+    <i class="ti ti-chevron-left" aria-hidden="true"></i>
+    <span class="cur" data-ar="عناويني" data-en="My Addresses">عناويني</span>
+  </div>
+  <div class="ac-head"><h1 class="ac-title" data-ar="عناويني" data-en="My Addresses">عناويني</h1></div>
 
-<!-- MAIN -->
-<div class="main">
-
-  <!-- PAGE HEADER -->
-  <div class="page-header">
-    <div class="page-title" data-ar="عناويني" data-en="My Addresses">عناويني</div>
-    <button class="btn-gold" onclick="openForm()" id="addBtn">
-      <i class="ti ti-plus"></i>
-      <span data-ar="إضافة عنوان" data-en="Add Address">إضافة عنوان</span>
-    </button>
+  <!-- LIST -->
+  <div id="addrListWrap">
+    <div class="ad-add-row"><button type="button" class="ac-add" onclick="openForm()"><i class="ti ti-plus" aria-hidden="true"></i><span data-ar="إضافة عنوان جديد" data-en="Add a new address">إضافة عنوان جديد</span></button></div>
+    <div class="ad-list" id="addrGrid"></div>
   </div>
 
-  <!-- ADD/EDIT FORM (hidden by default) -->
-  <div class="form-card" id="addrForm" style="display:none;">
-    <div class="form-card-title"><i class="ti ti-map-pin"></i> <span id="formTitle" data-ar="إضافة عنوان جديد" data-en="Add New Address">إضافة عنوان جديد</span></div>
+  <!-- ADD / EDIT — one form for both -->
+  <form id="addrForm" hidden onsubmit="saveAddress(); return false;" novalidate>
+    <h2 class="fm-h" id="formTitle"></h2>
     <input type="hidden" id="editId">
-    <div class="form-group full" style="margin-bottom:16px;">
-      <div class="form-label" data-ar="نوع العنوان" data-en="Address Type">نوع العنوان</div>
-      <div class="type-grid">
-        <div class="type-opt on" data-type="home" onclick="selType(this)"><i class="ti ti-home"></i><span data-ar="منزل" data-en="Home">منزل</span></div>
-        <div class="type-opt" data-type="work" onclick="selType(this)"><i class="ti ti-building"></i><span data-ar="عمل" data-en="Work">عمل</span></div>
-        <div class="type-opt" data-type="family" onclick="selType(this)"><i class="ti ti-users"></i><span data-ar="عائلة" data-en="Family">عائلة</span></div>
-        <div class="type-opt" data-type="other" onclick="selType(this)"><i class="ti ti-map-pin"></i><span data-ar="أخرى" data-en="Other">أخرى</span></div>
+    <div class="ac-form">
+      <div class="ac-fld full" id="fwLabel">
+        <label for="fLabel" data-ar="اسم العنوان" data-en="Address name">اسم العنوان</label>
+        <input id="fLabel" type="text" maxlength="40" autocomplete="off" data-ar-ph="مثال: المنزل، العمل، بيت الوالدين" data-en-ph="e.g. Home, Work, Parents' house">
+        <span class="err"></span>
       </div>
-    </div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label" data-ar="الاسم الكامل" data-en="Full Name">الاسم الكامل</label>
-        <input type="text" class="form-input" id="fName" placeholder="محمد العنزي">
+      <div class="ac-fld" id="fwName">
+        <label for="fName" data-ar="الاسم الكامل" data-en="Full name">الاسم الكامل</label>
+        <input id="fName" type="text" autocomplete="name">
+        <span class="err"></span>
       </div>
-      <div class="form-group">
-        <label class="form-label" data-ar="رقم الهاتف" data-en="Phone Number">رقم الهاتف</label>
-        <input type="tel" class="form-input" id="fPhone" placeholder="+965 9XXX XXXX">
+      <div class="ac-fld" id="fwPhone">
+        <label for="fPhone" data-ar="رقم الهاتف" data-en="Phone number">رقم الهاتف</label>
+        <div class="ac-ph" dir="ltr"><span>+965</span><input id="fPhone" type="tel" inputmode="numeric" autocomplete="tel-national" maxlength="12"></div>
+        <span class="err"></span>
       </div>
-      <div class="form-group">
-        <label class="form-label" data-ar="المنطقة" data-en="Area">المنطقة</label>
-        <select class="form-select" id="fArea">
-          <option value="">اختر المنطقة</option>
+      <div class="ac-fld" id="fwGov">
+        <label for="fGov" data-ar="المحافظة" data-en="Governorate">المحافظة</label>
+        <select id="fGov"></select>
+        <span class="err"></span>
+      </div>
+      <div class="ac-fld" id="fwArea">
+        <label for="fArea" data-ar="المنطقة" data-en="Area">المنطقة</label>
+        <select id="fArea">
+          <option value="" data-ar="اختر المنطقة" data-en="Choose an area">اختر المنطقة</option>
           <option>حولي</option><option>السالمية</option><option>الرميثية</option>
           <option>الفروانية</option><option>مبارك الكبير</option><option>الأحمدي</option>
           <option>الجهراء</option><option>شرق</option><option>الكويت</option><option>أخرى</option>
         </select>
+        <span class="err"></span>
       </div>
-      <div class="form-group">
-        <label class="form-label" data-ar="القطعة" data-en="Block">القطعة</label>
-        <input type="text" class="form-input" id="fBlock" placeholder="رقم القطعة">
+      <div class="ac-fld" id="fwBlock">
+        <label for="fBlock" data-ar="القطعة" data-en="Block">القطعة</label>
+        <input id="fBlock" type="text" inputmode="numeric">
+        <span class="err"></span>
       </div>
-      <div class="form-group">
-        <label class="form-label" data-ar="الشارع" data-en="Street">الشارع</label>
-        <input type="text" class="form-input" id="fStreet" placeholder="اسم أو رقم الشارع">
+      <div class="ac-fld" id="fwStreet">
+        <label for="fStreet" data-ar="الشارع" data-en="Street">الشارع</label>
+        <input id="fStreet" type="text">
+        <span class="err"></span>
       </div>
-      <div class="form-group">
-        <label class="form-label" data-ar="المبنى / المنزل" data-en="Building / House">المبنى / المنزل</label>
-        <input type="text" class="form-input" id="fBuilding" placeholder="رقم المبنى">
+      <div class="ac-fld" id="fwAvenue">
+        <label for="fAvenue" data-ar="الجادة / المنزل" data-en="Avenue / House">الجادة / المنزل</label>
+        <input id="fAvenue" type="text">
+        <span class="err"></span>
       </div>
-      <div class="form-group">
-        <label class="form-label" data-ar="الطابق" data-en="Floor">الطابق</label>
-        <input type="text" class="form-input" id="fFloor" placeholder="رقم الطابق (اختياري)">
+      <div class="ac-fld" id="fwBuilding">
+        <label for="fBuilding" data-ar="المبنى" data-en="Building">المبنى</label>
+        <input id="fBuilding" type="text">
+        <span class="err"></span>
       </div>
-      <div class="form-group">
-        <label class="form-label" data-ar="الشقة" data-en="Apartment">الشقة</label>
-        <input type="text" class="form-input" id="fApt" placeholder="رقم الشقة (اختياري)">
+      <div class="ac-fld">
+        <label for="fFloor"><span data-ar="الدور" data-en="Floor">الدور</span> <span class="opt" data-ar="(اختياري)" data-en="(optional)">(اختياري)</span></label>
+        <input id="fFloor" type="text">
       </div>
-      <div class="form-group full">
-        <label class="form-label" data-ar="ملاحظات للتوصيل" data-en="Delivery Notes">ملاحظات للتوصيل</label>
-        <input type="text" class="form-input" id="fNotes" placeholder="أي تعليمات إضافية...">
+      <div class="ac-fld">
+        <label for="fApt"><span data-ar="الشقة" data-en="Apartment">الشقة</span> <span class="opt" data-ar="(اختياري)" data-en="(optional)">(اختياري)</span></label>
+        <input id="fApt" type="text">
+      </div>
+      <div class="ac-fld full">
+        <label for="fNotes"><span data-ar="ملاحظات إضافية" data-en="Additional notes">ملاحظات إضافية</span> <span class="opt" data-ar="(اختياري)" data-en="(optional)">(اختياري)</span></label>
+        <textarea id="fNotes" maxlength="300"></textarea>
       </div>
     </div>
-    <div class="form-actions">
-      <button class="btn-cancel" onclick="closeForm()" data-ar="إلغاء" data-en="Cancel">إلغاء</button>
-      <button class="btn-save" onclick="saveAddress()" data-ar="حفظ العنوان" data-en="Save Address">حفظ العنوان</button>
+    <div class="ac-actions">
+      <button type="submit" class="ac-btn gold" id="saveBtn"></button>
+      <button type="button" class="ac-btn ghost" onclick="closeForm()" data-ar="إلغاء" data-en="Cancel">إلغاء</button>
     </div>
-  </div>
+  </form>
+</main>
 
-  <!-- ADDRESS GRID -->
-  <div class="addr-grid" id="addrGrid">
-    <!-- rendered by JS -->
-  </div>
+<footer data-raf-footer></footer>
 
-</div><!-- /main -->
+<nav class="app-bnav">
+  <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
+  <a href="raf_notifications.html" class="bnav-tab"><i class="ti ti-bell"></i><span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span></a>
+  <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
+  <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
+  <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
+</nav>
 
-<!-- FOOTER -->
 <script>
+/* ============================================================
+   MY ADDRESSES — the customer's address book (localStorage
+   'raf_addresses', the same list checkout reads). Existing rules kept:
+   the first address is the default, deleting the default passes it to
+   the next one, one address can be made the default, ?edit=<id> opens
+   the form and ?from=cart returns to the cart after saving.
+   The address name is typed by the customer (not a fixed type).
+   ============================================================ */
 const ADDR_KEY = 'raf_addresses';
 
 const SEED_DATA = [
@@ -240,10 +161,18 @@ const SEED_DATA = [
     area:'شرق', block:'1', street:'برج X', building:'',
     floor:'8', apartment:'', notes:'مكتب 801', isDefault:false }
 ];
-
-const TYPE_ICONS = { home:'ti-home', work:'ti-building', family:'ti-users', other:'ti-map-pin' };
+/* older addresses carried a type instead of a typed name — shown by it */
 const TYPE_LABELS = { home:'منزل', work:'عمل', family:'عائلة', other:'أخرى' };
 const TYPE_LABELS_EN = { home:'Home', work:'Work', family:'Family', other:'Other' };
+/* Kuwait's six governorates */
+const GOVS = [
+  { ar:'محافظة العاصمة', en:'Capital' }, { ar:'محافظة حولي', en:'Hawalli' }, { ar:'محافظة الفروانية', en:'Farwaniya' },
+  { ar:'محافظة الأحمدي', en:'Ahmadi' }, { ar:'محافظة الجهراء', en:'Jahra' }, { ar:'محافظة مبارك الكبير', en:'Mubarak Al-Kabeer' }
+];
+
+function isEN(){ return document.getElementById('htmlRoot').lang === 'en'; }
+function T(ar,en){ return isEN() ? en : ar; }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 
 function loadAddresses() {
   try {
@@ -252,188 +181,187 @@ function loadAddresses() {
   } catch(e) {}
   return JSON.parse(JSON.stringify(SEED_DATA));
 }
+function saveAddresses(list) { localStorage.setItem(ADDR_KEY, JSON.stringify(list)); }
 
-function saveAddresses(list) {
-  localStorage.setItem(ADDR_KEY, JSON.stringify(list));
+function labelOf(a){ return a.label || (isEN() ? TYPE_LABELS_EN[a.type] : TYPE_LABELS[a.type]) || T('عنوان','Address'); }
+function govText(v){ const g = GOVS.find(x => x.ar === v || x.en === v); return g ? (isEN() ? g.en : g.ar) : (v || ''); }
+function lines(a){
+  const b = (ar,en) => isEN() ? en : ar;
+  return [govText(a.governorate), a.area, a.block ? b('ق ','Block ') + a.block : '', a.street,
+          a.avenue ? b('جادة/منزل ','Ave/House ') + a.avenue : '', a.building ? b('مبنى ','Bldg ') + a.building : '',
+          a.floor ? b('الدور ','Floor ') + a.floor : '', a.apartment ? b('شقة ','Apt ') + a.apartment : '']
+    .filter(Boolean).join(isEN() ? ', ' : '، ');
 }
 
+let confirmId = null;
 function renderAddresses() {
   const list = loadAddresses();
   const grid = document.getElementById('addrGrid');
-  const isEN = document.getElementById('htmlRoot').lang === 'en';
-  if (!list.length) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><i class="ti ti-map-pin-off"></i><p>' + (isEN?'No addresses saved yet.':'لا توجد عناوين محفوظة بعد.') + '</p></div>';
+  if (!list.length){
+    grid.innerHTML = '<div class="ac-empty" style="grid-column:1/-1"><i class="ti ti-map-pin-off"></i><b>' + esc(T('لا توجد عناوين محفوظة','No saved addresses')) + '</b></div>';
     return;
   }
-  grid.innerHTML = list.map(addr => {
-    const lbl = isEN ? TYPE_LABELS_EN[addr.type]||addr.type : TYPE_LABELS[addr.type]||addr.type;
-    const ico = TYPE_ICONS[addr.type] || 'ti-map-pin';
-    const lines = [addr.area, 'ق '+addr.block, addr.street, 'م '+addr.building, addr.floor?'ط '+addr.floor:'', addr.apartment?'ش '+addr.apartment:''].filter(Boolean).join(' · ');
-    return `<div class="addr-card${addr.isDefault?' default-card':''}">
-      <div class="addr-type-row">
-        <div class="addr-type-icon"><i class="ti ${ico}"></i></div>
-        <span class="addr-type-name">${lbl}</span>
-        ${addr.isDefault?`<span class="default-badge">${isEN?'Default':'الافتراضي'}</span>`:''}
-      </div>
-      <div class="addr-details">
-        <strong>${addr.name}</strong><br>
-        ${addr.phone}<br>
-        ${lines}
-        ${addr.notes?'<br><span style="color:var(--text3);">'+addr.notes+'</span>':''}
-      </div>
-      <div class="addr-actions">
-        <button class="addr-btn addr-btn-edit" onclick="editAddress('${addr.id}')"><i class="ti ti-pencil"></i> ${isEN?'Edit':'تعديل'}</button>
-        ${!addr.isDefault?`<button class="addr-btn addr-btn-default" onclick="setDefault('${addr.id}')"><i class="ti ti-star"></i> ${isEN?'Set Default':'جعله افتراضي'}</button>`:''}
-        <button class="addr-btn addr-btn-del" onclick="deleteAddress('${addr.id}')" style="margin-right:auto;"><i class="ti ti-trash"></i></button>
-      </div>
-    </div>`;
+  grid.innerHTML = list.map(a => {
+    const confirming = confirmId === a.id;
+    return '<div class="ad-item" data-id="' + esc(a.id) + '">'
+      + '<i class="ti ' + (a.isDefault ? 'ti-map-pin-filled' : 'ti-map-pin') + ' ic" aria-hidden="true"></i>'
+      + '<div class="ad-b">'
+        + '<div class="ad-top"><span class="ad-lbl">' + esc(labelOf(a)) + '</span>'
+          + (a.isDefault ? '<span class="ac-pill gold">' + esc(T('العنوان الافتراضي','Default')) + '</span>' : '') + '</div>'
+        + (a.name ? '<div class="ad-nm">' + esc(a.name) + '</div>' : '')
+        + '<div class="ad-tx">' + esc(lines(a)) + (a.notes ? '<br>' + esc(a.notes) : '') + '</div>'
+        + (a.phone ? '<div class="ad-ph"><bdi dir="ltr">' + esc(a.phone) + '</bdi></div>' : '')
+        + (confirming
+            ? '<div class="ad-confirm" role="alert"><span>' + esc(T('حذف هذا العنوان؟','Delete this address?')) + '</span>'
+              + '<button type="button" class="ac-btn" style="min-height:38px" onclick="deleteAddress(\'' + esc(a.id) + '\', true)">' + esc(T('نعم، احذف','Yes, delete')) + '</button>'
+              + '<button type="button" class="ac-link" onclick="cancelDelete()">' + esc(T('إلغاء','Cancel')) + '</button></div>'
+            : '<div class="ad-acts">'
+              + '<button type="button" class="ac-link" onclick="editAddress(\'' + esc(a.id) + '\')"><i class="ti ti-edit"></i> ' + esc(T('تعديل','Edit')) + '</button>'
+              + (!a.isDefault ? '<button type="button" class="ac-link" onclick="setDefault(\'' + esc(a.id) + '\')"><i class="ti ti-star"></i> ' + esc(T('تعيين كافتراضي','Set as default')) + '</button>' : '')
+              + '<button type="button" class="ac-link danger" onclick="deleteAddress(\'' + esc(a.id) + '\')"><i class="ti ti-trash"></i> ' + esc(T('حذف','Delete')) + '</button></div>')
+      + '</div></div>';
   }).join('');
 }
 
+function paintGovs(sel){
+  const s = document.getElementById('fGov');
+  s.innerHTML = '<option value="">' + esc(T('اختر المحافظة','Choose a governorate')) + '</option>'
+    + GOVS.map(g => '<option value="' + esc(g.ar) + '"' + (sel === g.ar || sel === g.en ? ' selected' : '') + '>' + esc(isEN() ? g.en : g.ar) + '</option>').join('');
+}
+function clearErrors(){ document.querySelectorAll('#addrForm .ac-fld').forEach(f => { f.classList.remove('bad'); const e = f.querySelector('.err'); if (e) e.textContent = ''; }); }
 function openForm(id) {
-  const form = document.getElementById('addrForm');
-  const isEN = document.getElementById('htmlRoot').lang === 'en';
-  document.getElementById('editId').value = id || '';
-  document.getElementById('formTitle').textContent = id ? (isEN?'Edit Address':'تعديل العنوان') : (isEN?'Add New Address':'إضافة عنوان جديد');
-  if (id) {
-    const addr = loadAddresses().find(a => a.id === id);
-    if (addr) {
-      document.getElementById('fName').value     = addr.name;
-      document.getElementById('fPhone').value    = addr.phone;
-      document.getElementById('fArea').value     = addr.area;
-      document.getElementById('fBlock').value    = addr.block;
-      document.getElementById('fStreet').value   = addr.street;
-      document.getElementById('fBuilding').value = addr.building;
-      document.getElementById('fFloor').value    = addr.floor;
-      document.getElementById('fApt').value      = addr.apartment;
-      document.getElementById('fNotes').value    = addr.notes;
-      document.querySelectorAll('.type-opt').forEach(o => {
-        o.classList.toggle('on', o.dataset.type === addr.type);
-      });
-    }
-  } else {
-    ['fName','fPhone','fBlock','fStreet','fBuilding','fFloor','fApt','fNotes'].forEach(id => document.getElementById(id).value='');
-    document.getElementById('fArea').value='';
-    document.querySelectorAll('.type-opt').forEach((o,i) => o.classList.toggle('on', i===0));
-  }
-  form.style.display = 'block';
-  form.scrollIntoView({ behavior:'smooth', block:'nearest' });
+  confirmId = null;
+  clearErrors();
+  const list = loadAddresses();
+  const a = id ? list.find(x => x.id === id) : null;
+  document.getElementById('editId').value = a ? a.id : '';
+  document.getElementById('formTitle').textContent = a ? T('تعديل العنوان','Edit address') : T('إضافة عنوان جديد','Add a new address');
+  document.getElementById('saveBtn').textContent = a ? T('حفظ التعديلات','Save changes') : T('حفظ العنوان','Save address');
+  document.getElementById('fLabel').value = a ? labelOf(a) : '';
+  document.getElementById('fName').value = a ? (a.name || '') : '';
+  document.getElementById('fPhone').value = a ? String(a.phone || '').replace(/^\+?965\s*/, '') : '';
+  paintGovs(a ? a.governorate : '');
+  document.getElementById('fArea').value = a ? (a.area || '') : '';
+  document.getElementById('fBlock').value = a ? (a.block || '') : '';
+  document.getElementById('fStreet').value = a ? (a.street || '') : '';
+  document.getElementById('fAvenue').value = a ? (a.avenue || '') : '';
+  document.getElementById('fBuilding').value = a ? (a.building || '') : '';
+  document.getElementById('fFloor').value = a ? (a.floor || '') : '';
+  document.getElementById('fApt').value = a ? (a.apartment || '') : '';
+  document.getElementById('fNotes').value = a ? (a.notes || '') : '';
+  document.getElementById('addrListWrap').hidden = true;
+  document.getElementById('addrForm').hidden = false;
+  window.scrollTo(0, 0);
+  document.getElementById('fLabel').focus();
 }
-
 function closeForm() {
-  document.getElementById('addrForm').style.display = 'none';
-}
-
-function selType(el) {
-  document.querySelectorAll('.type-opt').forEach(o => o.classList.remove('on'));
-  el.classList.add('on');
+  document.getElementById('addrForm').hidden = true;
+  document.getElementById('addrListWrap').hidden = false;
+  renderAddresses();
 }
 
 function saveAddress() {
-  const id      = document.getElementById('editId').value;
-  const name    = document.getElementById('fName').value.trim();
-  const phone   = document.getElementById('fPhone').value.trim();
-  const area    = document.getElementById('fArea').value;
-  const block   = document.getElementById('fBlock').value.trim();
-  const street  = document.getElementById('fStreet').value.trim();
-  const building= document.getElementById('fBuilding').value.trim();
-  const floor   = document.getElementById('fFloor').value.trim();
-  const apt     = document.getElementById('fApt').value.trim();
-  const notes   = document.getElementById('fNotes').value.trim();
-  const type    = document.querySelector('.type-opt.on')?.dataset.type || 'home';
-  const isEN    = document.getElementById('htmlRoot').lang === 'en';
-
-  if (!name || !area || !block || !street) {
-    alert(isEN ? 'Please fill required fields (name, area, block, street).' : 'يرجى تعبئة الحقول المطلوبة: الاسم، المنطقة، القطعة، الشارع.');
-    return;
-  }
+  clearErrors();
+  const v = id => document.getElementById(id).value.trim();
+  const id = v('editId');
+  const f = { label:v('fLabel'), name:v('fName'), phoneDigits:v('fPhone').replace(/\D/g, ''), governorate:v('fGov'), area:v('fArea'),
+              block:v('fBlock'), street:v('fStreet'), avenue:v('fAvenue'), building:v('fBuilding'),
+              floor:v('fFloor'), apartment:v('fApt'), notes:v('fNotes') };
+  const req = [['fwLabel', f.label, T('اكتب اسماً للعنوان','Enter a name for this address')],
+               ['fwName', f.name, T('الاسم الكامل مطلوب','Full name is required')],
+               ['fwPhone', f.phoneDigits.length >= 6, T('يرجى إدخال رقم هاتف صالح','Please enter a valid phone number')],
+               ['fwGov', f.governorate, T('اختر المحافظة','Choose a governorate')],
+               ['fwArea', f.area, T('اختر المنطقة','Choose an area')],
+               ['fwBlock', f.block, T('القطعة مطلوبة','Block is required')],
+               ['fwStreet', f.street, T('الشارع مطلوب','Street is required')],
+               ['fwAvenue', f.avenue, T('الجادة / المنزل مطلوب','Avenue / House is required')],
+               ['fwBuilding', f.building, T('المبنى مطلوب','Building is required')]];
+  let first = null;
+  req.forEach(r => { if (!r[1]) { const w = document.getElementById(r[0]); w.classList.add('bad'); w.querySelector('.err').textContent = r[2]; if (!first) first = w; } });
+  if (first) { const i = first.querySelector('input,select'); if (i) i.focus(); return; }
+  const rec = { label:f.label, name:f.name, phone:'+965 ' + f.phoneDigits, governorate:f.governorate, area:f.area, block:f.block,
+                street:f.street, avenue:f.avenue, building:f.building, floor:f.floor, apartment:f.apartment, notes:f.notes };
   const list = loadAddresses();
   if (id) {
     const idx = list.findIndex(a => a.id === id);
-    if (idx > -1) list[idx] = { ...list[idx], type, name, phone, area, block, street, building, floor, apartment:apt, notes };
+    if (idx > -1) list[idx] = { ...list[idx], ...rec };
   } else {
-    list.push({ id:'addr-'+Date.now(), type, name, phone, area, block, street, building, floor, apartment:apt, notes, isDefault:list.length===0 });
+    list.push({ id:'addr-' + Date.now(), type:'other', ...rec, isDefault:list.length === 0 });
   }
   saveAddresses(list);
   closeForm();
-  renderAddresses();
   // If came from cart, go back
   const params = new URLSearchParams(window.location.search);
   if (params.get('from') === 'cart') {
-    setTimeout(() => window.location='raf_cart.html', 300);
+    setTimeout(() => window.location = 'raf_cart.html', 300);
   }
 }
 
-function deleteAddress(id) {
-  const isEN = document.getElementById('htmlRoot').lang === 'en';
-  if (!confirm(isEN?'Delete this address?':'حذف هذا العنوان؟')) return;
+/* delete: a plain inline confirmation on the address itself */
+function deleteAddress(id, confirmed) {
+  if (!confirmed) { confirmId = id; renderAddresses(); return; }
+  confirmId = null;
   let list = loadAddresses().filter(a => a.id !== id);
   if (list.length > 0 && !list.some(a => a.isDefault)) list[0].isDefault = true;
   saveAddresses(list);
   renderAddresses();
 }
+function cancelDelete(){ confirmId = null; renderAddresses(); }
 
 function setDefault(id) {
   const list = loadAddresses().map(a => ({ ...a, isDefault: a.id === id }));
   saveAddresses(list);
   renderAddresses();
 }
+function editAddress(id) { openForm(id); }
 
-function editAddress(id) {
-  openForm(id);
+/* LANG (the shared header's language button calls this) */
+function applyLang(){
+  const nl = isEN() ? 'en' : 'ar';
+  document.querySelectorAll('[data-ar]').forEach(el => { const t = el.getAttribute('data-' + nl); if (t) el.textContent = t; });
+  document.querySelectorAll('[data-ar-ph]').forEach(el => { el.placeholder = el.getAttribute('data-' + nl + '-ph') || ''; });
 }
-
-function goBack() {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('from') === 'cart') window.location = 'raf_cart.html';
-  else if (document.referrer) history.back();
-  else window.location = 'raf_account.html';
-}
-
-/* LANG */
 function toggleLang() {
-  const html=document.getElementById('htmlRoot'),isAR=html.lang==='ar',nl=isAR?'en':'ar';
-  html.lang=nl;html.dir=isAR?'ltr':'rtl';
-  document.getElementById('langLabel').textContent=isAR?'ع':'EN';
-  localStorage.setItem('raf_lang',nl);
-  document.querySelectorAll('[data-ar]').forEach(el=>{const t=el.getAttribute('data-'+nl);if(t)el.textContent=t;});
-  renderAddresses(); // re-render labels in new language
+  const html = document.getElementById('htmlRoot'), isAR = html.lang === 'ar', nl = isAR ? 'en' : 'ar';
+  html.lang = nl; html.dir = isAR ? 'ltr' : 'rtl';
+  localStorage.setItem('raf_lang', nl);
+  applyLang();
+  renderAddresses();
+  if (!document.getElementById('addrForm').hidden) {
+    const id = document.getElementById('editId').value;
+    document.getElementById('formTitle').textContent = id ? T('تعديل العنوان','Edit address') : T('إضافة عنوان جديد','Add a new address');
+    document.getElementById('saveBtn').textContent = id ? T('حفظ التعديلات','Save changes') : T('حفظ العنوان','Save address');
+    paintGovs(document.getElementById('fGov').value);
+  }
 }
 
 /* INIT */
 (function init() {
   if (localStorage.getItem('raf_lang') === 'en') {
-    document.getElementById('htmlRoot').lang='en';
-    document.getElementById('htmlRoot').dir='ltr';
-    document.getElementById('langLabel').textContent='ع';
-    document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.getAttribute('data-en');});
+    document.getElementById('htmlRoot').lang = 'en';
+    document.getElementById('htmlRoot').dir = 'ltr';
   }
+  applyLang();
   // Seed default data if none exists
   if (!localStorage.getItem(ADDR_KEY)) {
     saveAddresses(SEED_DATA);
   }
   renderAddresses();
-
   // Auto-open edit form if ?edit=id in URL
   const params = new URLSearchParams(window.location.search);
   const editId = params.get('edit');
-  if (editId) {
-    setTimeout(() => openForm(editId), 100);
-  }
+  if (editId) setTimeout(() => openForm(editId), 100);
 })();
 </script>
-
-<!-- MOBILE APP BOTTOM NAV -->
-<nav class="app-bnav">
-  <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
-  <a href="raf_notifications.html" class="bnav-tab"><i class="ti ti-bell"></i><span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span></a>
-  <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
-  <a href="raf_wishlist.html" class="bnav-tab"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
-  <a href="raf_account.html" class="bnav-tab on"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
-</nav>
 <script src="raf_topbar.js"></script>
 <script src="raf_notify.js"></script>
 <script src="raf_nav.js"></script>
 <script src="raf_search.js"></script>
+<script src="raf_source.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_footer.js"></script>
+<script src="raf_active_order.js"></script>
 </body>
 </html>

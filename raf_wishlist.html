@@ -5,356 +5,97 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>رف — المفضلة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
-<style>
-:root{--bg:#F5F2EC;--bg2:#EDE8DC;--card:#FFFFFF;--gold:#C9A84C;--gold2:#A07828;--black:#0A0A0A;--text:#0A0A0A;--text2:#555;--text3:#888;--border:#D8D3C8;--r:8px;--rl:12px;--font:'Tajawal',sans-serif;--fdisplay:'Playfair Display',serif;--fen:'DM Sans',sans-serif;--green:#2E7D32;--green-bg:#E8F5E9;--red:#C62828;--red-bg:#FFEBEE;}
-*{box-sizing:border-box;margin:0;padding:0;}
-html{overflow-x:hidden;}
-body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;max-width:100%;overflow-x:hidden;}
-nav{position:sticky;top:0;z-index:100;background:rgba(245,242,236,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,168,76,.3);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:64px;}
-.nav-logo{font-family:var(--fdisplay);font-size:28px;font-weight:900;color:var(--gold);text-decoration:none;}
-.nav-logo span{color:var(--text);font-size:11px;font-family:var(--fen);font-weight:300;letter-spacing:3px;display:block;margin-top:-6px;}
-.nav-links{display:flex;align-items:center;gap:4px;}
-.nav-link{color:var(--text3);text-decoration:none;font-size:14px;padding:6px 12px;border-radius:var(--r);transition:color .2s;}
-.nav-link:hover{color:var(--text);}
-.nav-actions{display:flex;align-items:center;gap:8px;}
-.btn-ghost{padding:8px 16px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
-.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
-.btn-gold{padding:8px 20px;border:none;border-radius:var(--r);background:var(--gold);color:var(--black);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;}
-.btn-gold:hover{background:var(--gold2);}
-.lang-btn{padding:7px 14px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--fen);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;letter-spacing:.5px;}
-.lang-btn:hover{border-color:var(--gold);color:var(--gold);}
-.nav-ico{width:40px;height:40px;border:1px solid var(--border);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:var(--text3);cursor:pointer;background:transparent;font-size:18px;position:relative;transition:all .2s;}
-.nav-ico:hover{border-color:var(--gold);color:var(--gold);}
-.cart-badge{position:absolute;top:-6px;left:-6px;width:18px;height:18px;background:var(--gold);color:var(--black);border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--fen);}
-/* PAGE HEADER */
-.page-header{background:linear-gradient(150deg,var(--black),#1c180f);padding:44px 40px;position:relative;overflow:hidden;}
-.page-header::after{content:'';position:absolute;inset:0;background:radial-gradient(520px 220px at 88% -20%,rgba(201,168,76,.16),transparent 62%);pointer-events:none;}
-.page-header-inner{position:relative;max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
-.page-kicker{font-family:var(--fen);font-size:11px;font-weight:600;letter-spacing:3.5px;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
-.page-title{font-family:var(--fdisplay);font-size:clamp(26px,3.4vw,38px);font-weight:900;color:#F8F4EA;line-height:1.15;letter-spacing:-.3px;}
-.page-title span{color:var(--gold);}
-.page-sub{font-size:14.5px;color:#B5AD9C;margin-top:10px;line-height:1.7;}
-.wish-count-pill{background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.34);border-radius:30px;padding:10px 20px;display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;color:var(--gold);}
-.wish-count-pill b{font-family:var(--fen);font-size:17px;font-weight:800;}
-.wish-count-pill .sep{width:1px;height:16px;background:rgba(201,168,76,.35);}
-
-/* ===== ADD-ALL CONFIRMATION MODAL ===== */
-.aa-back{position:fixed;inset:0;z-index:4200;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(20,16,8,.55);backdrop-filter:blur(3px);opacity:0;transition:opacity .2s;}
-.aa-back.show{display:flex;opacity:1;}
-.aa-card{width:100%;max-width:520px;max-height:88vh;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 30px 70px -22px rgba(20,16,8,.55);transform:translateY(14px);transition:transform .24s;}
-.aa-back.show .aa-card{transform:none;}
-.aa-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px;border-bottom:1px solid var(--border);}
-.aa-head h3{font-family:var(--fdisplay);font-size:19px;font-weight:800;color:var(--text);}
-.aa-head p{font-size:13px;color:var(--text3);margin-top:3px;}
-.aa-x{width:34px;height:34px;flex-shrink:0;border-radius:50%;border:1px solid var(--border);background:var(--bg);color:var(--text3);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.aa-x:hover{border-color:var(--red);color:var(--red);}
-.aa-body{padding:8px 20px;overflow:auto;flex:1;}
-.aa-row{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--border);}
-.aa-row:last-child{border-bottom:none;}
-.aa-thumb{width:50px;height:50px;flex-shrink:0;border-radius:10px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:23px;color:var(--gold2);}
-.aa-info{flex:1;min-width:0;}
-.aa-name{font-size:14px;font-weight:700;color:var(--text);line-height:1.4;}
-.aa-price{font-family:var(--fen);font-size:13px;font-weight:700;color:var(--gold2);margin-top:3px;}
-.aa-note{font-size:12px;color:var(--red);margin-top:5px;display:flex;align-items:center;gap:4px;}
-.aa-note.ok{color:var(--green);}
-.aa-vars{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
-.aa-vgroup{width:100%;}
-.aa-vlabel{font-size:11.5px;font-weight:700;color:var(--text2);margin-bottom:5px;}
-.aa-vlabel .req{color:var(--red);}
-.aa-opt{padding:6px 12px;border:1px solid var(--border);border-radius:20px;background:var(--card);color:var(--text2);font-family:var(--font);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s;}
-.aa-opt:hover{border-color:var(--gold);}
-.aa-opt.on{background:var(--black);color:#F5F0E4;border-color:var(--black);}
-.aa-stores{padding:14px 0 4px;border-bottom:1px solid var(--border);margin-bottom:6px;}
-.aa-warn{display:flex;align-items:flex-start;gap:8px;background:var(--red-bg,rgba(217,83,79,.12));color:#8C2F2B;border:1px solid rgba(217,83,79,.3);
-  border-radius:10px;padding:11px 13px;font-size:12.5px;line-height:1.6;margin:12px 0 4px;}
-.aa-warn i{color:var(--red);font-size:17px;flex-shrink:0;}
-.aa-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center;}
-.aa-cancel{flex-shrink:0;height:46px;padding:0 18px;border:1px solid var(--border);border-radius:30px;background:var(--card);color:var(--text2);font-family:var(--font);font-size:14px;font-weight:600;cursor:pointer;}
-.aa-cancel:hover{border-color:var(--text3);}
-.aa-confirm{flex:1;height:46px;border:none;border-radius:30px;background:var(--gold);color:var(--black);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;}
-.aa-confirm:hover{background:var(--gold2);color:#fff;}
-.aa-confirm:disabled{background:var(--border);color:var(--text3);cursor:not-allowed;}
-.breadcrumb{padding:12px 40px;font-size:13px;color:var(--text3);display:flex;align-items:center;gap:6px;background:var(--bg2);border-bottom:1px solid var(--border);}
-.breadcrumb a{color:var(--text3);text-decoration:none;transition:color .2s;}
-.breadcrumb a:hover{color:var(--gold);}
-/* MAIN */
-/* full-width responsive layout — uses the whole desktop viewport */
-.main{max-width:1680px;margin:0 auto;padding:26px clamp(14px,3vw,44px) 40px;width:100%;}
-/* TOOLBAR */
-/* action bar — sticky under the header, clear hierarchy */
-.toolbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;
-  background:var(--card);border:1px solid var(--border);border-radius:16px;padding:12px 16px;box-shadow:0 1px 3px rgba(20,16,8,.05),0 10px 26px -20px rgba(20,16,8,.25);}
-.toolbar-left{display:flex;align-items:center;gap:10px;}
-.count-label{font-size:14px;font-weight:600;color:var(--text2);display:inline-flex;align-items:center;gap:8px;}
-.count-label i{color:var(--gold2);font-size:18px;}
-.btn-clear{padding:9px 16px;border:1px solid var(--border);border-radius:30px;background:transparent;color:var(--text3);font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
-.btn-clear:hover{border-color:var(--red);color:var(--red);}
-.btn-add-all{padding:9px 18px;border:1px solid var(--gold2);border-radius:30px;background:var(--gold);color:var(--black);font-family:var(--font);font-size:13.5px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;box-shadow:0 6px 16px -8px rgba(201,168,76,.7);}
-.btn-add-all:disabled{background:var(--bg2);color:var(--text3);border-color:var(--border);box-shadow:none;cursor:not-allowed;}
-.btn-add-all:hover{background:var(--gold2);}
-/* PRODUCT GRID */
-.prod-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:18px;}
-@media(min-width:1500px){.prod-grid{grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:22px;}}
-/* PRODUCT CARD */
-.prod-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;cursor:pointer;transition:all .2s;position:relative;}
-.prod-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 28px rgba(0,0,0,.08);}
-.prod-card.removing{opacity:0;transform:scale(.95);transition:all .3s;}
-.prod-img{height:200px;background:linear-gradient(135deg,var(--bg2),var(--border));display:flex;align-items:center;justify-content:center;font-size:56px;color:var(--gold);position:relative;}
-.prod-num{position:absolute;top:10px;left:10px;background:rgba(10,10,10,.65);color:#fff;padding:2px 8px;border-radius:20px;font-family:var(--fen);font-size:10px;font-weight:700;backdrop-filter:blur(4px);}
-.disc-badge{position:absolute;top:10px;right:44px;background:var(--red);color:#fff;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--fen);}
-.remove-btn{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;background:rgba(245,242,236,.92);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:#E05555;transition:all .2s;z-index:2;}
-.remove-btn:hover{background:#E05555;color:#fff;}
-.prod-body{padding:14px;}
-.prod-name{font-size:14px;font-weight:700;margin-bottom:3px;line-height:1.4;}
-.prod-store{font-size:12px;color:var(--gold2);margin-bottom:8px;display:flex;align-items:center;gap:4px;}
-.prod-rating{display:flex;align-items:center;gap:4px;font-size:12px;color:var(--text3);margin-bottom:10px;}
-.prod-rating i{color:var(--gold);font-size:11px;}
-.prod-price-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
-.price-old{font-size:12px;color:var(--text3);text-decoration:line-through;font-family:var(--fen);}
-.price-new{font-size:16px;font-weight:900;color:var(--gold);font-family:var(--fen);}
-/* CART BTNS */
-.cart-btn-wrap{width:100%;}
-.add-cart-btn{width:100%;padding:9px;border:1px solid var(--border);border-radius:var(--r);background:transparent;color:var(--text2);font-family:var(--font);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s;}
-.add-cart-btn:hover{border-color:var(--gold);color:var(--gold);}
-.qty-ctrl{display:flex;align-items:center;gap:4px;width:100%;}
-.qty-btn{width:32px;height:32px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all .2s;}
-.qty-btn:hover{border-color:var(--gold);color:var(--gold);}
-.qty-num{flex:1;text-align:center;font-weight:700;font-family:var(--fen);font-size:14px;}
-.qty-del{width:32px;height:32px;border:1px solid var(--red-bg);border-radius:var(--r);background:var(--red-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--red);transition:all .2s;}
-.qty-del:hover{background:var(--red);color:#fff;}
-/* EMPTY STATE */
-.empty-wrap{text-align:center;padding:56px 20px 20px;display:none;}
-.empty-wrap.show{display:block;}
-.empty-art{margin:0 auto 22px;max-width:240px;}
-.empty-art svg{width:100%;height:auto;display:block;}
-.empty-cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
-.btn-shop.ghost{background:transparent;border:1px solid var(--border);color:var(--text2);}
-.btn-shop.ghost:hover{border-color:var(--gold);color:var(--gold2);background:transparent;}
-.sugg{margin-top:52px;text-align:start;}
-.sugg-h{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:800;color:var(--ink,#15130F);margin-bottom:16px;}
-.sugg-h i{color:var(--gold2);font-size:20px;}
-.empty-ico{font-size:64px;color:var(--border);margin-bottom:20px;}
-.empty-title{font-size:20px;font-weight:700;margin-bottom:8px;}
-.empty-sub{font-size:14px;color:var(--text3);margin-bottom:24px;}
-.btn-shop{padding:12px 28px;border:none;border-radius:var(--r);background:var(--gold);color:var(--black);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;}
-.btn-shop:hover{background:var(--gold2);}
-/* FOOTER — sticky to viewport bottom on short pages, higher-contrast text */
-body{display:flex;flex-direction:column;min-height:100vh;}
-.main{flex:1 0 auto;}
-footer{background:var(--black);color:#B5AD9C;padding:48px 40px 24px;margin-top:auto;flex-shrink:0;}
-.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;max-width:1200px;margin:0 auto 40px;}
-.footer-logo{font-family:var(--fdisplay);font-size:32px;font-weight:900;color:var(--gold);text-decoration:none;display:block;margin-bottom:12px;}
-.footer-desc{font-size:13px;color:#B5AD9C;line-height:1.7;}
-.footer-col-title{font-size:13px;font-weight:700;color:#F3EFE5;margin-bottom:16px;letter-spacing:1px;}
-.footer-link{display:block;font-size:13px;color:#B5AD9C;text-decoration:none;margin-bottom:10px;transition:color .2s;}
-.footer-link:hover{color:var(--gold);}
-.footer-bottom{border-top:1px solid #2a2620;padding-top:24px;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:#9C948A;max-width:1200px;margin:0 auto;}
-/* ── GLOBAL MOBILE RESET ── */
-@media(max-width:768px){*{max-width:100%;}img,video,iframe{max-width:100%!important;height:auto;}table{max-width:100%;}}
-@media(max-width:900px){nav{padding:0 16px;}.nav-links{display:none;}.main{padding:20px 16px;}.page-header{padding:28px 16px;}.breadcrumb{padding:10px 16px;}.footer-grid{grid-template-columns:1fr 1fr;}}
-@media(max-width:480px){
-  .main{padding:12px;}
-  .prod-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
-  .page-header{padding:20px 12px;}
-  .footer-grid{grid-template-columns:1fr;}
-  .footer-bottom{flex-direction:column;text-align:center;gap:6px;}
-  footer{padding:32px 16px 16px;}
-}
-
-  /* ===== APP BOTTOM NAV ===== */
-  .app-bnav{display:none;}
-  @media (max-width:1024px), (max-height:500px){
-    body{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))!important;}
-    footer{display:none!important;}
-    .app-bnav{display:flex;position:fixed;top:auto;bottom:0;left:0;right:0;height:56px;background:#fff;border-top:1px solid #e8e4dc;box-shadow:0 -2px 16px rgba(0,0,0,.06);z-index:998;padding:0 4px;padding-bottom:env(safe-area-inset-bottom,0px);align-items:stretch;}
-    .bnav-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#aaa;font-size:10px;font-family:'Tajawal',sans-serif;font-weight:500;transition:color .15s;border:none;background:transparent;cursor:pointer;padding:0;}
-    .bnav-tab i{font-size:22px;line-height:1;}
-    .bnav-tab.on{color:#C9A84C;}
-    .bnav-cart{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;text-decoration:none;font-size:10px;font-family:'Tajawal',sans-serif;color:#aaa;padding-bottom:4px;}
-    .bnav-cart-ring{width:44px;height:44px;border-radius:50%;background:#C9A84C;display:flex;align-items:center;justify-content:center;font-size:20px;color:#0A0A0A;margin-top:-14px;box-shadow:0 4px 14px rgba(201,168,76,.3);}
-    .bnav-cart.on .bnav-cart-ring{background:#A07828;}
-    nav a.btn-ghost,nav a.btn-gold,nav .btn-ghost,nav .btn-gold{display:none!important;}
-  }
-/* ===== SECTION RHYTHM — Followed Stores · Favorite Products · Recommended ===== */
-.sec-divider{margin:40px 0 18px;padding-top:30px;border-top:1px solid var(--border);}
-.sec-head-2{display:flex;align-items:center;gap:9px;font-family:var(--fdisplay);font-size:21px;font-weight:800;color:var(--black);}
-.sec-head-2>i{font-size:22px;color:var(--gold2);}
-@media(max-width:560px){.sec-head-2{font-size:18px;}.sec-divider{margin:30px 0 14px;padding-top:24px;}}
-
-/* ===== FOLLOWED STORES (managed from Favorites only) ===== */
-/* first section on the page — no leading rule above it */
-.fstores{margin-top:0;padding-top:0;border-top:none;}
-.fstores-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
-.fstores-title{display:flex;align-items:center;gap:9px;font-family:var(--fdisplay);font-size:21px;font-weight:800;color:var(--black);}
-.fstores-title>i{font-size:22px;color:var(--gold2);}
-.fstores-count{font-family:var(--fen);font-size:12px;font-weight:800;color:var(--gold2);background:rgba(201,168,76,.14);
-  border:1px solid rgba(201,168,76,.3);border-radius:20px;padding:2px 9px;}
-.fstores-browse{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--gold2);text-decoration:none;}
-.fstores-browse:hover{text-decoration:underline;}
-.fstores-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
-.fstore{display:flex;align-items:center;gap:13px;padding:15px 16px;background:var(--card);border:1px solid var(--border);
-  border-radius:var(--rl);transition:border-color .2s,box-shadow .2s;}
-.fstore:hover{border-color:var(--gold);box-shadow:0 8px 24px -14px rgba(20,16,8,.3);}
-.fstore-logo{width:48px;height:48px;flex-shrink:0;border-radius:14px;background:linear-gradient(150deg,var(--bg2),#E7E1D4);
-  display:flex;align-items:center;justify-content:center;font-size:23px;color:var(--gold2);text-decoration:none;}
-.fstore-b{flex:1;min-width:0;}
-.fstore-n{display:flex;align-items:center;gap:5px;font-size:14.5px;font-weight:800;color:var(--black);text-decoration:none;}
-.fstore-n:hover{color:var(--gold2);}
-.fstore-n i{font-size:14px;color:var(--gold);}
-.fstore-s{font-size:12px;color:var(--text3);margin-top:3px;}
-.fstore-x{width:38px;height:38px;flex-shrink:0;border:1px solid var(--border);border-radius:50%;background:transparent;
-  color:var(--text3);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
-.fstore-x:hover{border-color:var(--red);color:var(--red);background:var(--red-bg);}
-.fstores-empty{display:none;text-align:center;padding:34px 20px;border:1px dashed var(--border);border-radius:var(--rl);background:var(--card);}
-.fstores-empty.show{display:block;}
-.fstores-empty>i{font-size:38px;color:var(--border);display:block;margin-bottom:12px;}
-.fse-t{font-size:16px;font-weight:800;color:var(--black);margin-bottom:6px;}
-.fse-s{font-size:13px;color:var(--text3);line-height:1.7;margin-bottom:16px;}
-@media(max-width:560px){.fstores-grid{grid-template-columns:1fr;}.fstores-title{font-size:18px;}}
-</style>
-<link rel="stylesheet" href="raf_header.css">
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
-<link rel="stylesheet" href="raf_theme.css">
 <script src="raf_features.js"></script>
 <script src="raf_config.js"></script>
 <script src="raf_event_bus.js"></script>
 <script src="raf_record_store.js"></script>
 <script src="raf_notify_core.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_cx.css">
+<link rel="stylesheet" href="raf_acct.css">
+<script src="raf_transition.js"></script>
+<style>
+/* the one Favorites page: followed stores, then saved products, then suggestions */
+.fv-sec{margin-top:24px;}
+.fv-sec .ac-sec-h{margin-bottom:16px;}
+.fv-sec .ac-sec-h .n{font-family:'DM Sans',sans-serif;color:#15130F;}
+.fv-empty{display:none;}
+.fv-empty.show{display:block;}
+#toolbar{display:flex;align-items:center;gap:12px;}
+</style>
 </head>
-<body>
+<body class="cx acct">
 
-<nav>
-  <div class="nav-actions">
-    <button class="lang-btn" onclick="toggleLang()" data-ar="EN" data-en="ع">EN</button>
-    <button class="nav-ico" onclick="history.back()" title="رجوع"><i class="ti ti-arrow-right"></i></button>
-    <button class="nav-ico" onclick="window.location='raf_cart.html'"><i class="ti ti-shopping-cart"></i><span class="cart-badge" id="cartBadge">0</span></button>
-    <button class="nav-ico" style="border-color:var(--gold);color:var(--gold);"><i class="ti ti-heart-filled"></i></button>
-    <a href="raf_login.html" class="btn-ghost"><i class="ti ti-user"></i> <span data-ar="تسجيل الدخول" data-en="Sign In">تسجيل الدخول</span></a>
-    <a href="raf_login.html" class="btn-gold" data-ar="إنشاء حساب" data-en="Sign Up">إنشاء حساب</a>
-  </div>
-  <div class="nav-links">
-    <a href="raf_storespage.html" class="nav-link" data-ar="المحلات" data-en="Stores">المحلات</a>
-    <a href="raf_offers.html" class="nav-link" data-ar="العروض" data-en="Offers">العروض</a>
-    <a href="raf_trending.html" class="nav-link" data-ar="الترندات" data-en="Trending">الترندات</a>
-    <a href="raf_used.html" class="nav-link" data-ar="المستعملات" data-en="Used">المستعملات</a>
-    <a href="raf_auctions.html" class="nav-link" data-ar="المزادات" data-en="Auctions">المزادات</a>
-  </div>
-  <a href="raf_homepage.html" class="nav-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace" class="brand-logo"></a>
-</nav>
+<nav></nav>
 
-<div class="page-header">
-  <div class="page-header-inner">
+<main class="cx-page ac-main ac-wide">
+  <div class="cx-crumbs" role="navigation" aria-label="breadcrumb">
+    <a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
+    <i class="ti ti-chevron-left" aria-hidden="true"></i>
+    <a href="raf_account.html" data-ar="حسابي" data-en="My Account">حسابي</a>
+    <i class="ti ti-chevron-left" aria-hidden="true"></i>
+    <span class="cur" data-ar="المفضلة" data-en="Favorites">المفضلة</span>
+  </div>
+  <div class="ac-head">
     <div>
-      <div class="page-kicker" data-ar="حسابي" data-en="My Account">حسابي</div>
-      <div class="page-title"><span data-ar="المفضلة" data-en="Wishlist">المفضلة</span></div>
-      <div class="page-sub" data-ar="المنتجات التي حفظتها لشرائها لاحقاً" data-en="Products you saved to buy later">المنتجات التي حفظتها لشرائها لاحقاً</div>
-    </div>
-    <div class="wish-count-pill">
-      <i class="ti ti-heart-filled"></i>
-      <b id="wishCountPill">0</b> <span data-ar="منتج" data-en="products">منتج</span>
-      <span class="sep"></span>
-      <b id="storeCountPill">0</b> <span data-ar="متجر" data-en="stores">متجر</span>
+      <h1 class="ac-title" data-ar="المفضلة" data-en="Favorites">المفضلة</h1>
+      <div class="ac-meta" id="countLabel"></div>
     </div>
   </div>
-</div>
 
-<div class="breadcrumb">
-  <a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
-  <i class="ti ti-chevron-left"></i>
-  <a href="raf_account.html" data-ar="حسابي" data-en="My Account">حسابي</a>
-  <i class="ti ti-chevron-left"></i>
-  <span style="color:var(--text);" data-ar="قائمة المفضلة" data-en="Wishlist">قائمة المفضلة</span>
-</div>
-
-<div class="main">
-
-  <!-- ══ 1 · FOLLOWED STORES ══ -->
-  <section class="fstores" id="followSection">
-    <div class="fstores-head">
-      <div class="fstores-title">
-        <i class="ti ti-building-store"></i>
-        <span data-ar="المتاجر المتابَعة" data-en="Followed Stores">المتاجر المتابَعة</span>
-        <span class="fstores-count" id="followCount">0</span>
-      </div>
-      <a class="fstores-browse" href="raf_storespage.html"><span data-ar="تصفّح المتاجر" data-en="Browse stores">تصفّح المتاجر</span> <i class="ti ti-arrow-left" id="fstoresArrow"></i></a>
+  <!-- ══ 1 · FOLLOWED STORES (RAFShop.Follow) ══ -->
+  <section class="fv-sec" id="followSection">
+    <div class="ac-sec-h">
+      <span><span data-ar="المتاجر المتابَعة" data-en="Followed Stores">المتاجر المتابَعة</span> · <span class="n" id="followCount">0</span></span>
+      <a class="cx-viewall" href="raf_storespage.html"><span data-ar="تصفّح المتاجر" data-en="Browse stores">تصفّح المتاجر</span> <i class="ti ti-arrow-left"></i></a>
     </div>
-    <div class="fstores-grid" id="followGrid"></div>
-    <div class="fstores-empty" id="followEmpty">
+    <div class="cx-stores-grid" id="followGrid"></div>
+    <div class="ac-empty fv-empty" id="followEmpty">
       <i class="ti ti-building-store"></i>
-      <div class="fse-t" data-ar="لا تتابع أي متجر بعد" data-en="You are not following any store yet">لا تتابع أي متجر بعد</div>
-      <div class="fse-s" data-ar="اضغط «تابع المحل» في صفحة أي متجر ليظهر هنا." data-en="Tap “Follow store” on any store page and it will appear here.">اضغط «تابع المحل» في صفحة أي متجر ليظهر هنا.</div>
-      <a href="raf_storespage.html" class="btn-shop ghost"><i class="ti ti-compass"></i> <span data-ar="اكتشف المتاجر" data-en="Discover stores">اكتشف المتاجر</span></a>
+      <b data-ar="لا تتابع أي متجر بعد" data-en="You are not following any store yet">لا تتابع أي متجر بعد</b>
+      <span data-ar="اضغط «تابع المحل» في صفحة أي متجر ليظهر هنا." data-en="Tap “Follow store” on any store page and it will appear here.">اضغط «تابع المحل» في صفحة أي متجر ليظهر هنا.</span>
     </div>
   </section>
 
-  <!-- ══ 2 · FAVORITE PRODUCTS ══ -->
-  <div class="sec-divider">
-    <div class="sec-head-2">
-      <i class="ti ti-heart-filled"></i>
+  <!-- ══ 2 · FAVORITE PRODUCTS (RAFShop.Wish) ══ -->
+  <section class="fv-sec">
+    <div class="ac-sec-h">
       <span data-ar="المنتجات المفضلة" data-en="Favorite Products">المنتجات المفضلة</span>
+      <div id="toolbar"><button type="button" class="ac-link danger" onclick="clearAll()"><i class="ti ti-trash"></i> <span data-ar="مسح الكل" data-en="Clear All">مسح الكل</span></button></div>
     </div>
-  </div>
-
-  <!-- TOOLBAR -->
-  <div class="toolbar" id="toolbar">
-    <div class="toolbar-left">
-      <span class="count-label"><i class="ti ti-heart-filled"></i><span id="countLabel"></span></span>
+    <div class="cx-grid" id="wishGrid"></div>
+    <div class="ac-empty fv-empty" id="emptyWrap">
+      <i class="ti ti-heart"></i>
+      <b data-ar="قائمة المفضلة فارغة" data-en="Your wishlist is empty">قائمة المفضلة فارغة</b>
+      <span data-ar="احفظ ما يعجبك بالنقر على أيقونة القلب في أي منتج، وسيظهر هنا لتشتريه لاحقاً." data-en="Save what you like by tapping the heart on any product — it will appear here to buy later.">احفظ ما يعجبك بالنقر على أيقونة القلب في أي منتج، وسيظهر هنا لتشتريه لاحقاً.</span>
+      <div class="ac-actions" style="justify-content:center"><a class="ac-btn gold" href="raf_offers.html?all=1"><span data-ar="تصفح المنتجات" data-en="Browse products">تصفح المنتجات</span></a></div>
     </div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn-clear" onclick="clearAll()"><i class="ti ti-trash"></i> <span data-ar="مسح الكل" data-en="Clear All">مسح الكل</span></button>
-    </div>
-  </div>
-
-  <!-- PRODUCTS GRID -->
-  <div class="prod-grid" id="wishGrid">
-  </div><!-- /prod-grid -->
-
-  <!-- EMPTY STATE — illustration + CTA + suggested products -->
-  <div class="empty-wrap" id="emptyWrap">
-    <div class="empty-art" aria-hidden="true">
-      <svg viewBox="0 0 240 160" width="240" height="160" role="img">
-        <ellipse cx="120" cy="140" rx="86" ry="11" fill="rgba(20,16,8,.06)"/>
-        <rect x="54" y="46" width="132" height="84" rx="14" fill="#EDE8DC" stroke="#D8D0BE" stroke-width="2"/>
-        <path d="M54 66h132" stroke="#D8D0BE" stroke-width="2"/>
-        <circle cx="68" cy="56" r="3.5" fill="#C9A84C"/><circle cx="80" cy="56" r="3.5" fill="#D8D0BE"/><circle cx="92" cy="56" r="3.5" fill="#D8D0BE"/>
-        <path d="M120 118c-1 0-2-.4-2.7-1L92 93.6c-8-7.6-8.3-20.3-.6-28.1 7.2-7.3 19-7.3 26.4-.3l2.2 2.1 2.2-2.1c7.4-7 19.2-7 26.4.3 7.7 7.8 7.4 20.5-.6 28.1L122.7 117c-.7.6-1.7 1-2.7 1z" fill="#C9A84C" opacity=".92"/>
-        <path d="M120 118c-1 0-2-.4-2.7-1L92 93.6c-8-7.6-8.3-20.3-.6-28.1 7.2-7.3 19-7.3 26.4-.3l2.2 2.1" fill="#A07828" opacity=".28"/>
-        <circle cx="176" cy="44" r="7" fill="#C9A84C" opacity=".35"/>
-        <circle cx="60" cy="36" r="4.5" fill="#C9A84C" opacity=".25"/>
-      </svg>
-    </div>
-    <div class="empty-title" data-ar="قائمة المفضلة فارغة" data-en="Your wishlist is empty">قائمة المفضلة فارغة</div>
-    <div class="empty-sub" data-ar="احفظ ما يعجبك بالنقر على أيقونة القلب في أي منتج، وسيظهر هنا لتشتريه لاحقاً." data-en="Save what you love by tapping the heart icon on any product — it'll appear here so you can buy it later.">احفظ ما يعجبك بالنقر على أيقونة القلب في أي منتج، وسيظهر هنا لتشتريه لاحقاً.</div>
-    <div class="empty-cta">
-      <a href="raf_homepage.html" class="btn-shop"><i class="ti ti-shopping-bag"></i> <span data-ar="تصفح المنتجات" data-en="Browse products">تصفح المنتجات</span></a>
-      <a href="raf_offers.html" class="btn-shop ghost"><i class="ti ti-discount"></i> <span data-ar="شاهد العروض" data-en="View offers">شاهد العروض</span></a>
-    </div>
-  </div>
+  </section>
 
   <!-- ══ 3 · RECOMMENDED FOR YOU ══ -->
-  <section class="sugg" id="suggWrap">
-    <div class="sec-divider">
-      <div class="sec-head-2">
-        <i class="ti ti-sparkles"></i>
-        <span data-ar="مقترحة لك" data-en="Recommended for You">مقترحة لك</span>
-      </div>
-    </div>
-    <div class="prod-grid" id="suggGrid"></div>
+  <section class="fv-sec" id="suggWrap">
+    <div class="ac-sec-h"><span data-ar="مقترحة لك" data-en="Recommended for You">مقترحة لك</span></div>
+    <div class="cx-grid" id="suggGrid"></div>
   </section>
-
-</div>
+</main>
 
 <footer data-raf-footer></footer>
 
+<nav class="app-bnav">
+  <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
+  <a href="raf_notifications.html" class="bnav-tab"><i class="ti ti-bell"></i><span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span></a>
+  <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
+  <a href="raf_wishlist.html" class="bnav-tab on"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
+  <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
+</nav>
+
 <script>
-/* Cart & wishlist state live in the shared RAF data layer (raf_data.js).
-   All legacy per-page cart logic was removed — it used an incompatible
-   object schema that overwrote the shared array-based cart. */
-/* LANG */
+/* LANG (the shared header's language button calls this) */
 function toggleLang(){
   const r=document.getElementById('htmlRoot');
   const isAr=r.lang==='ar';
@@ -368,20 +109,10 @@ function applyLang(){
 }
 (function(){const l=localStorage.getItem('raf_lang');if(l){const r=document.getElementById('htmlRoot');r.lang=l;r.dir=l==='en'?'ltr':'rtl';}applyLang();})();
 </script>
-
-<!-- MOBILE APP BOTTOM NAV -->
-<nav class="app-bnav">
-  <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
-  <a href="raf_notifications.html" class="bnav-tab"><i class="ti ti-bell"></i><span data-ar="الإشعارات" data-en="Notifications">الإشعارات</span></a>
-  <a href="raf_cart.html" class="bnav-cart"><div class="bnav-cart-ring"><i class="ti ti-shopping-cart"></i></div><span data-ar="السلة" data-en="Cart">السلة</span></a>
-  <a href="raf_wishlist.html" class="bnav-tab on"><i class="ti ti-heart"></i><span data-ar="المفضلة" data-en="Saved">المفضلة</span></a>
-  <a href="raf_account.html" class="bnav-tab"><i class="ti ti-user-circle"></i><span data-ar="حسابي" data-en="Account">حسابي</span></a>
-</nav>
 <script src="raf_topbar.js"></script>
 <script src="raf_notify.js"></script>
 <script src="raf_nav.js"></script>
 <script src="raf_search.js"></script>
-<!-- Global RAF Product Card — replace legacy wishlist cards -->
 <script src="raf_source.js"></script>
 <script src="raf_data.js"></script>
 <script src="raf_catalog.js"></script>
@@ -390,9 +121,12 @@ function applyLang(){
 <script src="raf_marketing.js"></script>
 <script src="raf_card.js"></script>
 <script src="raf_quick.js"></script>
+<script src="raf_store_card.js"></script>
 <script>
 /* ============================================================
-   FAVOURITES — powered entirely by the shared RAF data layer
+   FAVOURITES — powered entirely by the shared RAF data layer.
+   The Header's Favorites button and Account → المفضلة both open this
+   one page over the same RAFShop.Wish / RAFShop.Follow data.
    ============================================================ */
 (function(){
   function en(){ return document.getElementById('htmlRoot').lang === 'en'; }
@@ -403,8 +137,6 @@ function applyLang(){
   function refreshCounts(){
     var items = RAFShop.Wish.items();
     var n = items.length, s = RAFShop.Wish.storeCount();
-    document.getElementById('wishCountPill').textContent = n;
-    document.getElementById('storeCountPill').textContent = s;
     document.getElementById('countLabel').textContent =
       n + ' ' + T(n===1?'منتج':'منتجات','product'+(n===1?'':'s')) + ' · ' +
       s + ' ' + T(s===1?'متجر':'متاجر','store'+(s===1?'':'s'));
@@ -437,33 +169,29 @@ function applyLang(){
   /* single place that decides where a favourite navigates */
   function productHref(p){ return 'raf_product.html?id=' + encodeURIComponent(p.id); }
 
-  /* ---------- followed stores (single source: RAFShop.Follow) ---------- */
+  /* ---------- followed stores (single source: RAFShop.Follow) ----------
+     Drawn with the shared RAF store card; its button here is Unfollow (with
+     the existing undo). A followed store RAF no longer lists keeps a plain
+     card from its saved record. */
   function renderFollowed(){
     var grid = document.getElementById('followGrid');
     var empty = document.getElementById('followEmpty');
     if(!grid || !empty || !window.RAFShop) return;
     var stores = RAFShop.Follow.items();
     document.getElementById('followCount').textContent = stores.length;
-    document.getElementById('fstoresArrow').className = 'ti ' + (en() ? 'ti-arrow-right' : 'ti-arrow-left');
     empty.classList.toggle('show', stores.length === 0);
+    grid.style.display = stores.length ? '' : 'none';
     grid.innerHTML = stores.map(function(s){
-      var href = 'raf_store.html?store=' + encodeURIComponent(s.slug);
-      var meta = [];
-      if(s.cat) meta.push(L(s.cat));
-      if(s.products != null) meta.push(s.products + ' ' + T('منتج','products'));
-      if(s.rating) meta.push('★ ' + s.rating);
-      return '<div class="fstore">'+
-        '<a class="fstore-logo" href="'+href+'"><i class="ti '+(s.ic||'ti-building-store')+'"></i></a>'+
-        '<div class="fstore-b">'+
-          '<a class="fstore-n" href="'+href+'">'+L(s.name)+' <i class="ti ti-rosette-discount-check"></i></a>'+
-          '<div class="fstore-s">'+meta.join(' · ')+'</div>'+
-        '</div>'+
-        '<button class="fstore-x" onclick="unfollowStore(\''+String(s.slug).replace(/'/g,"\\'")+'\')" '+
-          'title="'+T('إلغاء المتابعة','Unfollow')+'" aria-label="'+T('إلغاء المتابعة','Unfollow')+'"><i class="ti ti-heart-off"></i></button>'+
-      '</div>';
+      var rec = window.RAFSource && RAFSource.store(s.slug);
+      var model = rec && window.RAFStoreCard ? RAFStoreCard.model(rec)
+        : { slug:s.slug, ic:s.ic, ar:L(s.name), en:L(s.name), rate:s.rating, prodN:(s.products != null ? s.products : 0), cat:s.cat || '' };
+      var slug = String(s.slug).replace(/'/g, "\\'");
+      return RAFStoreCard.html(model).replace("RAFStoreCard.follow(event,'" + model.slug + "')", "unfollowStore(event,'" + slug + "')");
     }).join('');
   }
-  window.unfollowStore = function(slug){
+  window.unfollowStore = function(e, slug){
+    if (typeof e === 'string') { slug = e; e = null; }
+    if (e){ e.preventDefault(); e.stopPropagation(); }
     var s = RAFShop.Follow.get(slug);
     if(!s) return;
     RAFShop.Follow.remove(slug);
@@ -512,6 +240,7 @@ function applyLang(){
     document.addEventListener('raf:cart', function(){ RAFShop.Cart.badge(); });
     var root = document.getElementById('htmlRoot');
     if(root) new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
+    if (location.hash === '#followSection') { var f = document.getElementById('followSection'); if (f) f.scrollIntoView(); }
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

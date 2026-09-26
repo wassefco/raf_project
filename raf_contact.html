@@ -81,57 +81,37 @@
 <link rel="apple-touch-icon" href="raf_appicon.png">
 <script src="raf_features.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_cx.css">
+<link rel="stylesheet" href="raf_acct.css">
+<script src="raf_transition.js"></script>
 </head>
-<body>
-<nav class="top">
-  <div class="nav-actions">
-    <button class="lang-btn" onclick="toggleLang()"><span id="langLabel">EN</span></button>
-    <a class="nav-ico" href="raf_homepage.html" title="الرئيسية"><i class="ti ti-home-2"></i></a>
-    <button class="nav-ico" onclick="history.back()" title="رجوع"><i class="ti ti-arrow-right"></i></button>
-  </div>
-  <a href="raf_homepage.html" class="nav-logo"><img src="assets/branding/logo.svg" alt="RAF Marketplace" class="brand-logo"></a>
-</nav>
+<body class="cx acct">
 
-<main class="doc">
-  <div class="crumbs"><a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a> / <span data-ar="تواصل معنا" data-en="Contact Us">تواصل معنا</span></div>
-  <div class="doc-head">
-    <div class="doc-kicker">RAF MARKETPLACE</div>
-    <h1 class="doc-title" data-ar="تواصل معنا" data-en="Contact Us">تواصل معنا</h1>
-    <div class="doc-meta" data-ar="نحن هنا لمساعدتك — راسلنا وسنرد عليك في أقرب وقت." data-en="We're here to help — reach out and we'll get back to you soon.">نحن هنا لمساعدتك — راسلنا وسنرد عليك في أقرب وقت.</div>
-  </div>
+<nav></nav>
 
-  <div class="contact-cards">
-    <div class="cc"><i class="ti ti-mail"></i><div class="cc-t" data-ar="البريد الإلكتروني" data-en="Email">البريد الإلكتروني</div><div class="cc-v">support@raf.com.kw</div></div>
-    <div class="cc"><i class="ti ti-phone"></i><div class="cc-t" data-ar="الهاتف" data-en="Phone">الهاتف</div><div class="cc-v">+965 2222 0000</div></div>
-    <div class="cc"><i class="ti ti-brand-whatsapp"></i><div class="cc-t" data-ar="واتساب" data-en="WhatsApp">واتساب</div><div class="cc-v">+965 9000 0000</div></div>
+<main class="cx-page ac-main">
+  <div class="cx-crumbs" role="navigation" aria-label="breadcrumb">
+    <a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
+    <i class="ti ti-chevron-left" aria-hidden="true"></i>
+    <a href="raf_support.html" data-ar="المساعدة والدعم" data-en="Help & Support">المساعدة والدعم</a>
+    <i class="ti ti-chevron-left" aria-hidden="true"></i>
+    <span class="cur" data-ar="تواصل معنا" data-en="Contact Us">تواصل معنا</span>
+  </div>
+  <div class="ac-head">
+    <div>
+      <h1 class="ac-title" data-ar="تواصل معنا" data-en="Contact Us">تواصل معنا</h1>
+      <div class="ac-meta" data-ar="نحن هنا لمساعدتك — راسلنا وسنرد عليك في أقرب وقت." data-en="We're here to help — reach out and we'll get back to you soon.">نحن هنا لمساعدتك — راسلنا وسنرد عليك في أقرب وقت.</div>
+    </div>
   </div>
 
-  <div class="form-card">
-    <div class="form-ok" id="okMsg" data-ar="✓ تم إرسال رسالتك بنجاح! سنتواصل معك قريباً." data-en="✓ Your message has been sent! We'll contact you soon.">✓ تم إرسال رسالتك بنجاح! سنتواصل معك قريباً.</div>
-    <form id="contactForm" onsubmit="return sendMsg(event)">
-      <div class="fld">
-        <label data-ar="الاسم" data-en="Name">الاسم</label>
-        <input type="text" required placeholder="اسمك الكامل">
-      </div>
-      <div class="fld">
-        <label data-ar="البريد الإلكتروني" data-en="Email">البريد الإلكتروني</label>
-        <input type="email" required placeholder="email@example.com">
-      </div>
-      <div class="fld">
-        <label data-ar="الموضوع" data-en="Subject">الموضوع</label>
-        <select>
-          <option data-ar="استفسار عام" data-en="General inquiry">استفسار عام</option>
-          <option data-ar="مشكلة في طلب" data-en="Order issue">مشكلة في طلب</option>
-          <option data-ar="اقتراح" data-en="Suggestion">اقتراح</option>
-          <option data-ar="شكوى" data-en="Complaint">شكوى</option>
-        </select>
-      </div>
-      <div class="fld">
-        <label data-ar="الرسالة" data-en="Message">الرسالة</label>
-        <textarea required placeholder="اكتب رسالتك هنا..."></textarea>
-      </div>
-      <button type="submit" class="btn-send" data-ar="إرسال الرسالة" data-en="Send Message">إرسال الرسالة</button>
-    </form>
+  <div class="ac-list">
+    <!-- RAF's support channel: a support ticket, answered by RAF Customer Service -->
+    <a class="ac-row" href="raf_support.html?view=report"><i class="ti ti-message-plus ic" aria-hidden="true"></i><span class="tx"><span class="lb" data-ar="فتح تذكرة دعم" data-en="Open a support ticket">فتح تذكرة دعم</span><span class="ds" data-ar="يرد عليك فريق خدمة عملاء رف داخل حسابك" data-en="RAF Customer Service replies inside your account">يرد عليك فريق خدمة عملاء رف داخل حسابك</span></span><i class="ti ti-chevron-left go" aria-hidden="true"></i></a>
+    <a class="ac-row" href="raf_support.html?view=orders"><i class="ti ti-package ic" aria-hidden="true"></i><span class="tx"><span class="lb" data-ar="مشكلة في طلب" data-en="A problem with an order">مشكلة في طلب</span><span class="ds" data-ar="اختر الطلب وافتح تذكرة مرتبطة به" data-en="Pick the order and open a ticket on it">اختر الطلب وافتح تذكرة مرتبطة به</span></span><i class="ti ti-chevron-left go" aria-hidden="true"></i></a>
+    <!-- the contact details this page already listed, as they were -->
+    <div class="ac-row static"><i class="ti ti-mail ic" aria-hidden="true"></i><span class="tx"><span class="lb" data-ar="البريد الإلكتروني" data-en="Email">البريد الإلكتروني</span><span class="ds" dir="ltr">support@raf.com.kw</span></span></div>
+    <div class="ac-row static"><i class="ti ti-phone ic" aria-hidden="true"></i><span class="tx"><span class="lb" data-ar="الهاتف" data-en="Phone">الهاتف</span><span class="ds" dir="ltr">+965 2222 0000</span></span></div>
+    <div class="ac-row static"><i class="ti ti-brand-whatsapp ic" aria-hidden="true"></i><span class="tx"><span class="lb" data-ar="واتساب" data-en="WhatsApp">واتساب</span><span class="ds" dir="ltr">+965 9000 0000</span></span></div>
   </div>
 </main>
 
@@ -146,18 +126,11 @@
 </nav>
 
 <script>
-function sendMsg(e){
-  e.preventDefault();
-  document.getElementById('contactForm').reset();
-  document.getElementById('okMsg').style.display='block';
-  window.scrollTo({top:0,behavior:'smooth'});
-  return false;
-}
 function toggleLang(){
   const html=document.getElementById('htmlRoot');
   const isAR=html.lang==='ar';const newLang=isAR?'en':'ar';
   html.lang=newLang;html.dir=isAR?'ltr':'rtl';
-  document.getElementById('langLabel').textContent=isAR?'ع':'EN';
+  (document.getElementById('langLabel')||{}).textContent=isAR?'ع':'EN';
   localStorage.setItem('raf_lang',newLang);
   document.querySelectorAll('[data-ar]').forEach(el=>{const t=el.getAttribute('data-'+newLang);if(t)el.textContent=t;});
 }
@@ -165,11 +138,19 @@ function toggleLang(){
   if(localStorage.getItem('raf_lang')==='en'){
     document.getElementById('htmlRoot').lang='en';
     document.getElementById('htmlRoot').dir='ltr';
-    document.getElementById('langLabel').textContent='ع';
+    (document.getElementById('langLabel')||{}).textContent='ع';
     document.querySelectorAll('[data-en]').forEach(el=>{el.textContent=el.getAttribute('data-en');});
   }
 })();
 </script>
+<script src="raf_topbar.js"></script>
+<script src="raf_notify.js"></script>
+<script src="raf_nav.js"></script>
+<script src="raf_search.js"></script>
+<script src="raf_source.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_permissions.js"></script>
 <script src="raf_footer.js"></script>
 </body>
 </html>

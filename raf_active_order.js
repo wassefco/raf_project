@@ -119,5 +119,6 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 
-  global.RAFActiveOrderBar = { refresh:render };
+  /* stageOf is shared with the Orders list, so an in-progress order reads the same everywhere */
+  global.RAFActiveOrderBar = { refresh:render, stageOf:stageOf };
 })(window);

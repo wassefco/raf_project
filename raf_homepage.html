@@ -37,10 +37,6 @@ img{max-width:100%;display:block;}
 .wrap{max-width:1300px;margin:0 auto;padding:0 24px;}
 .sec{padding:48px 0;}
 .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px;}
-.sec-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--gold2);text-decoration:none;white-space:nowrap;flex-shrink:0;transition:gap .2s,color .2s;}
-.sec-link:hover{gap:9px;color:var(--gold);}
-.sec-link i{font-size:16px;}
-html[dir="ltr"] .sec-link i{transform:scaleX(-1);}
 .sec-kicker{font-family:var(--font-en);font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold2);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
 .sec-kicker::before{content:'';width:22px;height:1px;background:var(--gold);}
 .sec-title{font-family:var(--font-display);font-size:30px;font-weight:900;color:var(--ink);line-height:1.1;}
@@ -125,9 +121,6 @@ html[dir="ltr"] .adc-slide .ov{background:linear-gradient(90deg,rgba(10,10,10,.8
 .car-arrow.prev{right:-8px;} .car-arrow.next{left:-8px;}
 .car:hover .car-arrow{display:flex;}
 /* view-all card (last item) */
-.view-all-card{flex:0 0 auto;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:var(--gold-soft);border:1.5px dashed rgba(201,168,76,.5);border-radius:var(--rl);color:var(--gold2);font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;text-align:center;padding:16px;}
-.view-all-card:hover{background:rgba(201,168,76,.18);border-color:var(--gold);}
-.view-all-card .circ{width:48px;height:48px;border-radius:50%;background:var(--gold);color:var(--black);display:flex;align-items:center;justify-content:center;font-size:24px;}
 
 /* category */
 .cat-item{width:108px;}
@@ -135,7 +128,6 @@ html[dir="ltr"] .adc-slide .ov{background:linear-gradient(90deg,rgba(10,10,10,.8
 .cat-circle{width:96px;height:96px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--gold2);box-shadow:var(--sh-sm);transition:all .25s;overflow:hidden;background-size:cover;background-position:center;}
 .cat:hover .cat-circle{transform:translateY(-4px);color:var(--gold);box-shadow:var(--sh);}
 .cat span{font-size:13px;font-weight:500;color:var(--text2);}
-.view-all-card.cat-va{width:96px;height:96px;border-radius:50%;}
 
 /* product / offer card */
 .pcard{width:230px;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;transition:transform .22s,box-shadow .22s;display:flex;flex-direction:column;cursor:pointer;}
@@ -332,7 +324,6 @@ body{background:#FAF8F4;}
 .cx-sec .sec-head{align-items:center;margin-bottom:16px;}
 .cx-sec .sec-title{font-family:var(--font-ar);font-size:24px;font-weight:800;letter-spacing:0;}
 html[lang="en"] .cx-sec .sec-title{font-family:var(--font-display);font-weight:800;}
-.cx-sec .sec-link{font-size:13.5px;}
 
 /* hero */
 .cx-hero .wrap{padding-top:22px;padding-bottom:4px;}
@@ -374,30 +365,8 @@ html[dir="ltr"] .cx-otile-cta i{transform:scaleX(-1);}
 .cx-orow{margin-top:20px;}
 .cx-sec .car-item.pwrap{width:220px;}
 
-/* featured stores */
+/* featured stores (card styles: raf_cx.css) */
 .cx-stores{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px;}
-.cx-store{background:#fff;border:1px solid #ECE6DA;border-radius:16px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;transition:box-shadow .22s,border-color .22s;}
-.cx-store:hover{border-color:#E0D6C2;box-shadow:0 16px 34px -22px rgba(20,16,8,.35);}
-.cx-store-cover{position:relative;height:70px;background:linear-gradient(120deg,#15130F,#2a2419) center/cover no-repeat;}
-.cx-store-promo{position:absolute;top:8px;inset-inline-start:8px;display:inline-flex;align-items:center;gap:4px;background:var(--gold);color:#1C1606;font-family:var(--font-en);font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;}
-.cx-store-logo{width:64px;height:64px;margin:-32px auto 0;border-radius:16px;background:#fff;border:3px solid #fff;box-shadow:0 6px 16px -8px rgba(20,16,8,.4);display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:28px;color:var(--gold2);position:relative;}
-.cx-store-logo img{width:100%;height:100%;object-fit:cover;border-radius:12px;}
-.cx-store-b{padding:10px 12px 12px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;flex:1;}
-.cx-store-name{font-size:15px;font-weight:800;color:var(--ink);line-height:1.3;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.cx-store-name:hover{color:var(--gold2);}
-.cx-store-cat{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
-.cx-store-meta{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2);}
-.cx-store-meta b{font-family:var(--font-en);color:var(--ink);}
-.cx-store-meta i{color:var(--gold);}
-.cx-store-meta .dot{width:3px;height:3px;border-radius:50%;background:var(--border2);}
-.cx-store-act{display:flex;gap:8px;width:100%;margin-top:auto;padding-top:8px;}
-.cx-follow{flex:1;min-width:0;height:38px;min-height:38px;border:1px solid var(--ink);border-radius:10px;background:#fff;color:var(--ink);font-family:var(--font-ar);font-size:13px;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:5px;transition:all .2s;}
-.cx-follow:hover{background:var(--ink);color:#fff;}
-.cx-follow.on{background:var(--gold-soft);border-color:var(--gold);color:var(--gold2);}
-.cx-visit{flex:0 0 38px;height:38px;border-radius:10px;background:var(--gold);color:#1C1606;display:flex;align-items:center;justify-content:center;font-size:18px;transition:background .2s;}
-.cx-visit:hover{background:var(--ink);color:#fff;}
-html[dir="ltr"] .cx-visit i{transform:scaleX(-1);}
-
 /* featured products */
 .cx-pgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;}
 
@@ -493,6 +462,26 @@ html[dir="rtl"] .cx-hero .adc-brand{padding:5px 6px 5px 14px;}
 @media(max-width:1180px){.cx-pgrid>*:nth-child(n+9){display:none;}}
 @media(max-width:900px){.cx-pgrid>*:nth-child(9){display:flex;}}
 @media(max-width:560px){.cx-pgrid>*:nth-child(n+7){display:none;}}
+/* ── categories: a real product photo per category (catImage) in the same
+   round frame; the icon remains the fallback. Phones and small tablets get
+   one swipeable row again. ── */
+.cx-cat-ic.has-img{background-color:#F1ECE2;background-size:cover;background-position:center;box-shadow:inset 0 0 0 1px rgba(21,19,15,.06);}
+.cx-cat:hover .cx-cat-ic.has-img{box-shadow:inset 0 0 0 2px #C9A84C;}
+@media(max-width:900px){
+  .cx-cats{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-inline:calc(-1 * var(--cx-gut));padding:2px var(--cx-gut) 6px;}
+  .cx-cats::-webkit-scrollbar{display:none;}
+  .cx-cat{flex:0 0 88px;scroll-snap-align:start;}
+}
+@media(max-width:560px){.cx-cat{flex-basis:78px;}}
+/* ── hero: the slide is the only click target — no button, chip, arrows or
+   clickable dots inside; the dots only show position ── */
+.cx-hero .adc-arrow{display:none!important;}
+.cx-hero .adc-dots,.cx-hero .adc-dots > *{pointer-events:none;}
+.cx-hero .adc-slide{cursor:pointer;}
+.cx-hero .adc-track.is-drag{transition:none;}
+/* sideways swipes belong to the carousel (its own touch handlers), vertical
+   swipes still scroll the page; nothing chains out to the browser's back gesture */
+.cx-hero .adc,.cx-hero .adc-viewport{touch-action:pan-y;overscroll-behavior-x:contain;}
 </style>
 <link rel="stylesheet" href="raf_header.css">
 <script src="raf_features.js"></script>
@@ -501,8 +490,10 @@ html[dir="rtl"] .cx-hero .adc-brand{padding:5px 6px 5px 14px;}
 <script src="raf_record_store.js"></script>
 <script src="raf_notify_core.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_cx.css">
+<script src="raf_transition.js"></script>
 </head>
-<body>
+<body class="cx">
 
 <!-- ============ HEADER ============ -->
 <!-- Shared header: raf_topbar.js fills this nav and injects the mobile search
@@ -514,8 +505,6 @@ html[dir="rtl"] .cx-hero .adc-brand{padding:5px 6px 5px 14px;}
 <section class="hero-banner cx-hero"><div class="wrap">
   <div class="adc" id="adc" onmouseenter="adcPause()" onmouseleave="adcPlay()">
     <div class="adc-viewport"><div class="adc-track" id="adcTrack"></div></div>
-    <button class="adc-arrow prev" onclick="adcGo(-1)" aria-label="prev"><i class="ti ti-chevron-right"></i></button>
-    <button class="adc-arrow next" onclick="adcGo(1)" aria-label="next"><i class="ti ti-chevron-left"></i></button>
     <div class="adc-dots" id="adcDots"></div>
   </div>
 </div></section>
@@ -525,7 +514,7 @@ html[dir="rtl"] .cx-hero .adc-brand{padding:5px 6px 5px 14px;}
      to it. A grid, so every category is visible without scrolling. -->
 <section class="sec cx-sec" id="categories"><div class="wrap">
   <h2 class="sr-only" data-ar="الأقسام" data-en="Categories">الأقسام</h2>
-  <div class="cx-cats" id="catTrack"></div>
+  <div class="cx-cats cx-rail" id="catTrack" data-hscroll></div>
 </div></section>
 
 <div class="ad-slot wrap" data-ad-slot="after-categories"></div>
@@ -535,9 +524,9 @@ html[dir="rtl"] .cx-hero .adc-brand{padding:5px 6px 5px 14px;}
      discounted products, then the discounted products themselves. -->
 <section class="sec cx-sec" id="specialOffers"><div class="wrap">
   <div class="sec-head"><h2 class="sec-title" data-ar="عروض خاصة" data-en="Special Offers">عروض خاصة</h2>
-    <a class="sec-link" href="raf_offers.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
+    <a class="cx-viewall" href="raf_offers.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
   <div class="cx-otiles" id="offerTiles"></div>
-  <div class="car cx-orow"><div class="car-track" id="offersTrack"></div>
+  <div class="car cx-orow"><div class="car-track cx-rail" id="offersTrack" data-hscroll></div>
     <button class="car-arrow prev" onclick="carScroll(this,-1)" aria-label="prev"><i class="ti ti-chevron-right"></i></button>
     <button class="car-arrow next" onclick="carScroll(this,1)" aria-label="next"><i class="ti ti-chevron-left"></i></button>
   </div>
@@ -548,7 +537,7 @@ html[dir="rtl"] .cx-hero .adc-brand{padding:5px 6px 5px 14px;}
 <!-- ============ FEATURED STORES ============ -->
 <section class="sec cx-sec" id="featuredStores"><div class="wrap">
   <div class="sec-head"><h2 class="sec-title" data-ar="متاجر مميزة" data-en="Featured Stores">متاجر مميزة</h2>
-    <a class="sec-link" href="raf_storespage.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
+    <a class="cx-viewall" href="raf_storespage.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
   <div class="cx-stores" id="storesTrack"></div>
 </div></section>
 
@@ -557,7 +546,7 @@ html[dir="rtl"] .cx-hero .adc-brand{padding:5px 6px 5px 14px;}
      none, the whole section stays hidden. -->
 <section class="sec cx-sec" id="dealStoresSec" hidden><div class="wrap">
   <div class="sec-head"><h2 class="sec-title" data-ar="محلات لديها عروض" data-en="Stores with Offers">محلات لديها عروض</h2>
-    <a class="sec-link" href="raf_offers.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
+    <a class="cx-viewall" href="raf_offers.html"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
   <div class="cx-stores" id="dealStoresTrack"></div>
 </div></section>
 
@@ -565,7 +554,7 @@ html[dir="rtl"] .cx-hero .adc-brand{padding:5px 6px 5px 14px;}
      Ranked by rating and review count (offerQuality), across all stores. -->
 <section class="sec cx-sec" id="featuredProducts"><div class="wrap">
   <div class="sec-head"><h2 class="sec-title" data-ar="منتجات مميزة" data-en="Featured Products">منتجات مميزة</h2>
-    <a class="sec-link" href="raf_offers.html?all=1"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
+    <a class="cx-viewall" href="raf_offers.html?all=1"><span data-ar="عرض الكل" data-en="View All">عرض الكل</span> <i class="ti ti-arrow-left"></i></a></div>
   <div class="cx-pgrid" id="featuredGrid"></div>
 </div></section>
 
@@ -637,6 +626,7 @@ html[dir="rtl"] .cx-hero .adc-brand{padding:5px 6px 5px 14px;}
 <script src="raf_hscroll.js"></script>
 <script src="raf_quick.js"></script>
 <script src="raf_search_filters.js"></script>
+<script src="raf_store_card.js"></script>
 <script>
 /* ===== HERO SLIDES =====
    Built from RAF data only (buildHeroSlides): real stores with their own
@@ -646,12 +636,15 @@ let ADS=[];
 /* Categories — full admin model: name/icon/image/cover/sort/active */
 /* Categories map 1:1 onto the category keys the Products page filters by
    (raf_offers.html?cat=<id>), so every category opens a real, populated list. */
-const CATEGORIES=RAFCatalog.categories().map(function(c,i){return {id:c.k,ar:c.ar,en:c.en,icon:c.ic,image:"",cover:"",sort:c.sort||i+1,active:true};});
+/* each category is pictured by a real photo from its own products: the best-rated
+   (rating, then review count) listable product in that category that has one */
+function catImage(k){var l=RAFCatalog.list({cat:k}).filter(function(p){return p.img;});l.sort(function(a,b){return (parseFloat(b.rate)||0)-(parseFloat(a.rate)||0)||(parseInt(b.rev,10)||0)-(parseInt(a.rev,10)||0);});return l.length?l[0].img:'';}
+const CATEGORIES=RAFCatalog.categories().map(function(c,i){return {id:c.k,ar:c.ar,en:c.en,icon:c.ic,image:catImage(c.k),cover:'',sort:c.sort||i+1,active:true};});
 const OFFERS=RAFCatalog.list({onSale:true}).slice(0,10);
 /* each store carries the slug its Store page is registered under, so the
    carousel opens the right storefront instead of always the default one */
 /* the product count is the store's live list, the same one its Store page shows */
-const STORES=RAFCatalog.stores().map(function(s){var n=RAFCatalog.list({store:s.slug,visibleOnly:false,publicOnly:true}).length;return {slug:s.slug,ic:s.ic,ar:s.name.ar,en:s.name.en,rate:s.rating,prod:String(n),prodN:n,cat:s.cat,desc:s.desc,sponsored:!!s.sponsored};});
+const STORES=RAFCatalog.stores().map(RAFStoreCard.model);
 const AUCS=[
   {ic:'ti-clock-hour-4',ar:'ساعة فاخرة محدودة',en:'Limited Luxury Watch',bid:'145.000',bidders:23,sec:8130},
   {ic:'ti-diamond',ar:'سوار ذهب عيار 21',en:'21K Gold Bracelet',bid:'320.000',bidders:41,sec:5460},
@@ -708,11 +701,10 @@ function adcRender(){
       <div class="adc-title">${esc(L(a.title))}</div>
       ${a.sub?`<div class="adc-sub">${esc(L(a.sub))}</div>`:''}
       ${a.facts.length?`<div class="adc-chips">${a.facts.map(c=>`<span class="adc-chip"><i class="ti ${c.ic}"></i> ${esc(L(c.t))}</span>`).join('')}</div>`:''}
-      <div class="adc-foot"><span class="adc-cta">${L(a.cta)} <i class="ti ti-arrow-left"></i></span>
-        ${a.brand?`<span class="adc-brand"><span class="bl">${a.brand.logo?`<img src="${a.brand.logo}" alt="">`:`<i class="ti ${a.brand.ic}"></i>`}</span><b>${esc(L(a.brand.name))}</b></span>`:''}</div>
     </div>
   </a>`).join('');
-  d.innerHTML=ADS.map((a,i)=>`<button class="adc-dot${i===adI?' on':''}" onclick="adcSet(${i})" aria-label="slide ${i+1}"></button>`).join('');
+  /* position indicator only — the slide itself is the one click target */
+  d.innerHTML=ADS.map((a,i)=>`<span class="adc-dot${i===adI?' on':''}" aria-hidden="true"></span>`).join('');
   document.getElementById('adc').hidden=!ADS.length;
   adcApply();
 }
@@ -731,11 +723,19 @@ function adcPause(){if(adTimer){clearInterval(adTimer);adTimer=null;}}
   el.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;
     if(Math.abs(dx)>40){const f=isRTL()?-1:1;adcGo(dx<0?f:-f);}x0=null;adcPlay();},{passive:true});
 })();
+/* mouse / trackpad drag changes slides too; a drag never also opens the slide */
+(function(){let x0=null,drag=false;const el=document.getElementById('adc');
+  el.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button!==0)return;x0=e.clientX;drag=false;});
+  el.addEventListener('pointermove',e=>{if(x0!==null&&Math.abs(e.clientX-x0)>8)drag=true;});
+  el.addEventListener('pointerup',e=>{if(x0===null)return;const dx=e.clientX-x0;x0=null;
+    if(drag&&Math.abs(dx)>40){const f=isRTL()?-1:1;adcGo(dx<0?f:-f);adcPlay();}});
+  el.addEventListener('click',e=>{if(drag){e.preventDefault();e.stopPropagation();drag=false;}},true);
+  el.addEventListener('dragstart',e=>e.preventDefault());
+})();
 
 /* ===== CONTENT SECTIONS ===== */
 function T2(ar,en){return curLang()==='en'?en:ar;}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-function viewAllCard(href,extraClass){return `<a class="view-all-card ${extraClass||''}" href="${href}"><div class="circ"><i class="ti ti-arrow-left"></i></div><span>${curLang()==='en'?'View All':'عرض الكل'}</span></a>`;}
 /* one tint per category tile — presentation only, cycles in category order */
 const CAT_TINTS=['#E8F3EC:#2E7D52','#E9EEF8:#3558A8','#F7ECEF:#B0445E','#F3EEE3:#8A6A2A','#EEF0F2:#44505C','#FBEFE6:#B45A1F','#F1EAF7:#7244A8','#E8F4F4:#2A7C7C'];
 function catCard(c,i){
@@ -743,7 +743,7 @@ function catCard(c,i){
   const inner=c.image?'':`<i class="ti ${c.icon}"></i>`;
   const bg=c.image?`background-image:url('${c.image}');`:'';
   /* categories open the Products page filtered to that category */
-  return `<a class="cx-cat" href="raf_offers.html?cat=${encodeURIComponent(c.id)}"><span class="cx-cat-ic" style="${bg}--cbg:${tint[0]};--cfg:${tint[1]}">${inner}</span><span class="cx-cat-l">${L(c)}</span></a>`;
+  return `<a class="cx-cat" href="raf_offers.html?cat=${encodeURIComponent(c.id)}"><span class="cx-cat-ic${c.image?' has-img':''}" style="${bg}--cbg:${tint[0]};--cfg:${tint[1]}">${inner}</span><span class="cx-cat-l">${L(c)}</span></a>`;
 }
 /* Uses the single global RAF Product Card component (raf_card.js).
    The homepage is a multi-store listing → products open the Quick Order page. */
@@ -782,41 +782,9 @@ function offerTile(t){
       <span class="cx-otile-s">${T2(t.n+' منتج بخصم',t.n+' discounted product'+(t.n===1?'':'s'))}</span>
       <span class="cx-otile-cta">${T2('تسوّق الآن','Shop now')} <i class="ti ti-arrow-left"></i></span></span></a>`;
 }
-
-/* Store card — identity from the store record (RAFSource logo/cover),
-   the live product count, and the shared Follow list (RAFShop.Follow). */
-function storeFollowing(slug){return !!(window.RAFShop&&RAFShop.Follow&&RAFShop.Follow.has(slug));}
-function storeCard(s){
-  var src=(window.RAFSource&&RAFSource.store(s.slug))||{}, on=storeFollowing(s.slug);
-  var cover=src.cover?` style="background-image:url('${src.cover}')"`:'';
-  var logo=src.logo?`<img src="${src.logo}" alt="">`:`<i class="ti ${s.ic}"></i>`;
-  var promo=s.promo?`<span class="cx-store-promo"><i class="ti ti-discount"></i> -${s.promo}%</span>`:'';
-  return `<article class="cx-store" data-slug="${esc(s.slug)}" onclick="window.location='raf_store.html?store=${encodeURIComponent(s.slug)}'">
-    <div class="cx-store-cover"${cover}>${promo}</div>
-    <div class="cx-store-logo">${logo}</div>
-    <div class="cx-store-b">
-      <a class="cx-store-name" href="raf_store.html?store=${encodeURIComponent(s.slug)}" onclick="event.stopPropagation()">${esc(L(s))}</a>
-      <div class="cx-store-cat">${esc(L(s.cat))}</div>
-      <div class="cx-store-meta">${s.rate?`<span><i class="ti ti-star-filled"></i> <b>${esc(s.rate)}</b></span><span class="dot"></span>`:''}<span><b>${s.prod}</b> ${T2('منتج','products')}</span></div>
-      <div class="cx-store-act">
-        <button type="button" class="cx-follow${on?' on':''}" aria-pressed="${on?'true':'false'}" onclick="homeFollow(event,'${esc(s.slug)}')"><i class="ti ${on?'ti-check':'ti-plus'}"></i> <span>${on?T2('تتابعه','Following'):T2('متابعة','Follow')}</span></button>
-        <a class="cx-visit" href="raf_store.html?store=${encodeURIComponent(s.slug)}" onclick="event.stopPropagation()" aria-label="${T2('زيارة المتجر','Visit store')}"><i class="ti ti-arrow-left"></i></a>
-      </div>
-    </div></article>`;
-}
-/* the same record the Store page writes, so Favorites shows one shape */
-function homeFollow(e,slug){
-  e.preventDefault();e.stopPropagation();
-  if(!window.RAFShop||!RAFShop.Follow) return;
-  var s=STORES.find(function(x){return x.slug===slug;}); if(!s) return;
-  var on=RAFShop.Follow.toggle({slug:s.slug,name:L(s),cat:s.cat,ic:s.ic,products:s.prodN,rating:s.rate});
-  document.querySelectorAll('.cx-store[data-slug="'+slug+'"] .cx-follow').forEach(function(b){
-    b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false');
-    b.querySelector('i').className='ti '+(on?'ti-check':'ti-plus');
-    b.querySelector('span').textContent=on?T2('تتابعه','Following'):T2('متابعة','Follow');
-  });
-  if(RAFShop.toast) RAFShop.toast(on?T2('تتابع '+L(s)+' الآن','Now following '+L(s)):T2('تم إلغاء المتابعة','Unfollowed'),{icon:on?'ti-heart-filled':'ti-heart-off'});
-}
+/* Store cards: the shared component (raf_store_card.js) — same card as the Stores page */
+function storeCard(s){ return RAFStoreCard.html(s,{promo:s.promo}); }
+function homeFollow(e,slug){ RAFStoreCard.follow(e,slug); }
 
 /* ─── Homepage ranking (comparators are algorithm/admin-ready) ─── */
 function offerQuality(o){ return parseFloat(o.rate||0)*10 + Math.min(parseInt(o.rev||0),500)/120; }  /* quality = rating + review weight, NOT discount% */
@@ -835,7 +803,7 @@ function renderCarousels(){
   var tiles=offerTiles();
   document.getElementById('offerTiles').innerHTML=tiles.map(offerTile).join('');
   document.getElementById('offerTiles').hidden=!tiles.length;
-  document.getElementById('offersTrack').innerHTML=featuredOffers().map(offerCard).join('')+viewAllCard('raf_offers.html');
+  document.getElementById('offersTrack').innerHTML=featuredOffers().map(offerCard).join('');
   document.getElementById('storesTrack').innerHTML=recommendedStores().map(storeCard).join('');
   var deals=dealStores();
   document.getElementById('dealStoresTrack').innerHTML=deals.map(storeCard).join('');

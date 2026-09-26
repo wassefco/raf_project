@@ -81,7 +81,7 @@
      One footer for the whole Account module, injected once per page so no
      page carries its own copy. Pages that already ship a .afoot are skipped. */
   function initFooter() {
-    if (document.querySelector('.afoot')) return;
+    if (document.querySelector('.afoot, footer[data-raf-footer]')) return;   /* the page uses the shared RAF footer */
     var en = curLang() === 'en';
     var f = document.createElement('footer');
     f.className = 'afoot';
@@ -109,15 +109,15 @@
   else initChrome();
 
   /* ---------- RAF ID PROFILE (from sign-up) ---------- */
+  /* the signed-in customer's own identity (RAFPerm). A field RAF does not
+     hold stays empty — never a sample name, email or number. */
   window.rafProfile = function () {
+    var u = null;
+    try { u = (window.RAFPerm && RAFPerm.currentUser) ? RAFPerm.currentUser() : null; } catch (e) {}
     var acc = {};
     try { acc = JSON.parse(localStorage.getItem('raf_account') || '{}') || {}; } catch (e) {}
-    return {
-      name: (acc.name || 'محمد العنزي'),
-      email: (acc.email || 'mohammed@example.com'),
-      phone: (acc.phone || '+965 9XXX XXXX'),
-      id: 'RAF-2026-04871'
-    };
+    if (u) return { name: u.name || '', email: u.email || '', phone: u.phone || '', id: u.id, signedIn: true };
+    return { name: acc.name || '', email: acc.email || '', phone: acc.phone || '', id: '', signedIn: false };
   };
 
   /* ---------- ORDERS DATASET ---------- */

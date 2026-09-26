@@ -2,13 +2,11 @@
 <html id="htmlRoot" lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>رف — محفظتي</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — المحفظة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" rel="stylesheet">
-<link rel="stylesheet" href="raf_account.css">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
@@ -18,45 +16,77 @@
 <script src="raf_record_store.js"></script>
 <script src="raf_notify_core.js"></script>
 <link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_cx.css">
+<link rel="stylesheet" href="raf_acct.css">
+<script src="raf_transition.js"></script>
 <style>
-/* the balance card and ledger rows; everything else reuses the account shell */
-#wBal{background:linear-gradient(135deg,var(--ink),#2A241A);border-radius:20px;padding:22px;margin-bottom:18px;
-  color:#F5F0E4;position:relative;overflow:hidden;}
-#wBal::after{content:"";position:absolute;inset-inline-end:-30px;top:-30px;width:140px;height:140px;
-  border-radius:50%;background:rgba(201,168,76,.16);}
-#wBal .wb-l{font-size:12.5px;font-weight:700;color:rgba(245,240,228,.72);margin-bottom:7px;position:relative;}
-#wBal .wb-v{font-family:var(--font-en);font-size:34px;font-weight:800;line-height:1.1;position:relative;}
-#wBal .wb-c{font-size:15px;font-weight:700;color:var(--gold);margin-inline-start:7px;}
-#wBal .wb-n{margin-top:12px;font-size:11.5px;color:rgba(245,240,228,.6);position:relative;line-height:1.6;}
-.wtx{display:flex;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--border);}
-.wtx:last-child{border-bottom:none;}
-.wtx-ic{width:40px;height:40px;flex:0 0 auto;border-radius:11px;display:flex;align-items:center;
-  justify-content:center;font-size:19px;}
-.wtx-ic.cr{background:rgba(46,158,91,.12);color:var(--green);}
-.wtx-ic.db{background:rgba(217,83,79,.1);color:var(--red);}
-.wtx-b{flex:1;min-width:0;}
-.wtx-t{font-size:13.5px;font-weight:700;color:var(--ink);overflow-wrap:anywhere;line-height:1.45;}
-.wtx-s{font-size:11.5px;color:var(--text3);font-family:var(--font-en);}
-.wtx-a{flex:0 0 auto;font-family:var(--font-en);font-size:14px;font-weight:800;white-space:nowrap;}
-.wtx-a.cr{color:var(--green);} .wtx-a.db{color:var(--red);}
-.wempty{text-align:center;padding:38px 20px;color:var(--text3);}
-.wempty i{font-size:44px;color:var(--border2);display:block;margin-bottom:12px;}
-.wempty b{display:block;font-size:15px;font-weight:800;color:var(--text2);margin-bottom:5px;}
-.wempty span{font-size:12.5px;line-height:1.7;}
-.wgate{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:26px 20px;text-align:center;}
-.wgate i{font-size:40px;color:var(--gold2);display:block;margin-bottom:12px;}
-.wgate b{display:block;font-size:16px;font-weight:800;color:var(--ink);margin-bottom:6px;}
-.wgate p{font-size:13px;color:var(--text2);line-height:1.75;}
+/* one connected flow: balance → the three ways to add value → transactions */
+.wl-bal{padding:14px 2px 18px;border-bottom:1px solid #E8E1D3;}
+.wl-bal .l{font-size:14px;font-weight:700;color:#5A5650;}
+.wl-bal .v{font-family:'DM Sans',sans-serif;font-size:44px;font-weight:800;line-height:1.1;margin-top:6px;color:#15130F;}
+.wl-bal .v small{font-family:'Tajawal',sans-serif;font-size:17px;font-weight:700;color:#A07828;margin-inline-start:8px;}
+.wl-bal .n{font-size:13px;color:#5A5650;margin-top:8px;line-height:1.7;}
+.wl-bal .n bdi{font-family:'DM Sans',sans-serif;font-weight:700;color:#15130F;}
+.wl-panel{padding:6px 34px 16px;border-bottom:1px solid #ECE6DA;}
+html[dir="ltr"] .wl-panel{padding:6px 34px 16px;}
+.wl-panel[hidden]{display:none;}
+.ac-row[aria-expanded="true"] .go{transform:rotate(-90deg);}
+html[dir="ltr"] .ac-row[aria-expanded="true"] .go{transform:rotate(90deg) scaleX(-1);}
+.wl-methods{display:grid;gap:8px;margin:6px 0 4px;}
+.wl-m{display:flex;align-items:center;gap:12px;min-height:52px;padding:10px 12px;border:1px solid #D8D0BE;border-radius:10px;background:#fff;cursor:pointer;font:inherit;text-align:start;color:#15130F;}
+.wl-m i{font-size:21px;color:#A07828;}
+.wl-m .s{display:block;font-size:12.5px;color:#8A857C;}
+.wl-m[aria-checked="true"]{border-color:#C9A84C;box-shadow:0 0 0 2px rgba(201,168,76,.25);}
+.wl-m .rd{margin-inline-start:auto;width:18px;height:18px;border-radius:50%;border:1.5px solid #D8D0BE;}
+.wl-m[aria-checked="true"] .rd{border:5px solid #C9A84C;}
+.wl-sum{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #ECE6DA;font-size:14px;}
+.wl-sum b{font-family:'DM Sans',sans-serif;}
+.wl-proto{font-size:12.5px;color:#8A6A1F;background:rgba(201,168,76,.12);border-radius:8px;padding:8px 10px;margin:10px 0 0;line-height:1.6;}
+/* compensation entitlement */
+.cp{padding:14px 0;border-bottom:1px solid #ECE6DA;}
+.cp:last-child{border-bottom:0;}
+.cp-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.cp-t{font-size:15px;font-weight:800;}
+.cp-o{font-size:13px;color:#5A5650;margin-top:2px;font-family:'DM Sans','Tajawal',sans-serif;}
+.cp-a{font-family:'DM Sans',sans-serif;font-size:18px;font-weight:800;white-space:nowrap;}
+.cp-a small{font-family:'Tajawal',sans-serif;font-size:12px;color:#8A857C;font-weight:600;}
+.cp-m{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:8px;font-size:13px;color:#5A5650;}
+.cp-terms{margin:10px 0 0;padding:10px 12px;border-inline-start:3px solid #C9A84C;background:#F6F2EA;border-radius:0 8px 8px 0;font-size:13px;line-height:1.8;color:#3F3B35;}
+html[dir="ltr"] .cp-terms{border-radius:0 8px 8px 0;}
+.cp-terms ul{margin:0;padding-inline-start:18px;}
+.cp-terms[hidden]{display:none;}
+.gift-row{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap;}
+.gift-row input{flex:1;min-width:160px;min-height:46px;padding:10px 12px;border:1px solid #D8D0BE;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:15px;letter-spacing:1px;text-transform:uppercase;}
+.gift-row input:focus{outline:none;border-color:#C9A84C;box-shadow:0 0 0 3px rgba(201,168,76,.18);}
+/* transactions */
+.tx{display:flex;align-items:center;gap:12px;padding:14px 2px;border-bottom:1px solid #ECE6DA;}
+.tx .ic{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.tx .ic.cr{background:rgba(46,158,91,.12);color:#23794A;}
+.tx .ic.db{background:rgba(217,83,79,.1);color:#A63A36;}
+.tx .b{flex:1;min-width:0;}
+.tx .t{font-size:14.5px;font-weight:700;overflow-wrap:anywhere;}
+.tx .s{font-size:12.5px;color:#8A857C;margin-top:2px;}
+.tx .a{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:800;white-space:nowrap;}
+.tx .a.cr{color:#23794A;} .tx .a.db{color:#A63A36;}
 </style>
 </head>
-<body>
-<header class="ahead">
-  <button type="button" class="ahead-back" data-fallback="raf_account.html"><i class="ti ti-arrow-right"></i> <span data-ar="العودة" data-en="Back">العودة</span></button>
-  <div class="ahead-title" data-ar="محفظتي" data-en="My Wallet">محفظتي</div>
-  <button class="lang-btn" onclick="toggleLang()"><span class="lang-dot"></span><span id="langLabel">EN</span></button>
-</header>
+<body class="cx acct">
 
-<div class="wrap" id="wRoot"></div>
+<nav></nav>
+
+<main class="cx-page ac-main">
+  <div class="cx-crumbs" role="navigation" aria-label="breadcrumb">
+    <a href="raf_homepage.html" data-ar="الرئيسية" data-en="Home">الرئيسية</a>
+    <i class="ti ti-chevron-left" aria-hidden="true"></i>
+    <a href="raf_account.html" data-ar="حسابي" data-en="My Account">حسابي</a>
+    <i class="ti ti-chevron-left" aria-hidden="true"></i>
+    <span class="cur" data-ar="المحفظة" data-en="Wallet">المحفظة</span>
+  </div>
+  <div class="ac-head"><h1 class="ac-title" data-ar="المحفظة" data-en="Wallet">المحفظة</h1></div>
+  <div id="wRoot"></div>
+</main>
+
+<footer data-raf-footer></footer>
 
 <nav class="app-bnav">
   <a href="raf_homepage.html" class="bnav-tab"><i class="ti ti-home-2"></i><span data-ar="الرئيسية" data-en="Home">الرئيسية</span></a>
@@ -70,103 +100,209 @@
 <script src="raf_audit.js"></script>
 <script src="raf_data.js"></script>
 <script src="raf_permissions.js"></script>
+<script src="raf_payment_methods.js"></script>
 <script src="raf_wallet.js"></script>
-<!-- Phase I: compensation coupons to add, and expiring compensation credits -->
+<script src="raf_gift.js"></script>
 <script src="raf_compensation.js"></script>
-<script src="raf_compensation_ui.js"></script>
 <script src="raf_account.js"></script>
+<script src="raf_topbar.js"></script>
+<script src="raf_notify.js"></script>
+<script src="raf_nav.js"></script>
+<script src="raf_search.js"></script>
+<script src="raf_catalog.js"></script>
+<script src="raf_footer.js"></script>
 <script>
 /* ============================================================
-   MY WALLET — a view over RAFWallet. It reads the authority and
-   renders it. It holds no balance of its own and performs no
-   arithmetic on money.
+   WALLET — a view over the financial authorities. It keeps no balance and
+   does no arithmetic on money:
+     · balance, lots, transactions ....... RAFWallet
+     · top-up (prototype payment) ........ RAFWallet.topUp + RAFPaymentMethods.online
+     · compensation entitlements ......... RAFCompensation (mine / addToWallet)
+     · gift codes ........................ RAFGift.redeem → RAFWallet.redeemGift
+   Refunds to the wallet are credited automatically by the order flows
+   (RAFWallet ledger) and simply appear in the transactions.
    ============================================================ */
 (function(){
-  function en(){ return (document.getElementById('htmlRoot')||document.documentElement).lang === 'en'; }
+  function en(){ return document.getElementById('htmlRoot').lang === 'en'; }
   function T(ar,e){ return en() ? e : ar; }
-  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){
-    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
-
-  function me(){
-    var u = (window.RAFPerm && RAFPerm.currentUser()) ? RAFPerm.currentUser() : null;
-    return u ? { id:u.id, name:u.name, type:'customer' } : null;
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function KWD(){ return T('د.ك','KWD'); }
+  function me(){ var u = (window.RAFPerm && RAFPerm.currentUser()) ? RAFPerm.currentUser() : null; return u ? { id:u.id, name:u.name, type:'customer' } : null; }
+  function when(ts, withTime){
+    try { return new Date(ts).toLocaleString(en() ? 'en-GB' : 'ar-KW', withTime === false ? { day:'numeric', month:'short', year:'numeric' } : { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }); } catch(e){ return ''; }
   }
-  function dateOf(ts){
-    try {
-      return new Date(ts).toLocaleDateString(en()?'en-GB':'ar-KW',
-        { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
-    } catch(e){ return ''; }
+  var S = { open:null, step:1, amount:'', method:null, msg:null, termsOpen:{}, busy:false, gift:'' };
+
+  function balanceHTML(u){
+    var b = RAFWallet.balance(u.id, u);
+    if (!b.ok) return '<div class="ac-msg err">' + esc(b.message || '') + '</div>';
+    var lots = RAFWallet.lots(u.id, u), live = lots.ok ? lots.lots.filter(function(L){ return L.remainingMinor > 0 && L.status !== 'expired'; }) : [];
+    return '<div class="wl-bal"><div class="l">' + esc(T('رصيد المحفظة','Wallet balance')) + '</div>'
+      + '<div class="v" id="wBalance">' + esc(b.balance) + '<small>' + esc(KWD()) + '</small></div>'
+      + (b.compensationCreditMinor > 0
+          ? '<div class="n">' + esc(T('منها رصيد تعويض','Of which compensation credit')) + ': <bdi dir="ltr">' + esc(b.compensationCredit) + '</bdi> ' + esc(KWD())
+            + live.map(function(L){ return '<br>' + esc(T('ينتهي','Expires')) + ' ' + esc(when(L.expiresAt)) + ' — <bdi dir="ltr">' + esc(L.remaining) + '</bdi> ' + esc(KWD()); }).join('') + '</div>'
+          : '')
+      + '</div>';
+  }
+
+  /* ── A · top-up through one of RAF's online payment methods ── */
+  function topupHTML(){
+    var M = RAFPaymentMethods.online();
+    var h = '';
+    if (S.step === 1){
+      h += '<div class="ac-fld" style="max-width:360px"><label for="tuAmt">' + esc(T('المبلغ (د.ك)','Amount (KWD)')) + '</label>'
+        + '<input id="tuAmt" type="text" inputmode="decimal" dir="ltr" value="' + esc(S.amount) + '" autocomplete="off"></div>'
+        + '<div class="ac-actions"><button type="button" class="ac-btn gold" data-act="tu-next">' + esc(T('متابعة إلى الدفع','Continue to payment')) + '</button></div>';
+    } else if (S.step === 2){
+      h += '<div class="wl-sum"><span>' + esc(T('المبلغ','Amount')) + '</span><b>' + esc(S.amount) + ' ' + esc(KWD()) + '</b></div>'
+        + '<div class="ac-fld"><label>' + esc(T('طريقة الدفع','Payment method')) + '</label><div class="wl-methods" role="radiogroup">'
+        + M.map(function(m){ var on = S.method === m.id;
+            return '<button type="button" class="wl-m" role="radio" aria-checked="' + on + '" data-act="tu-method" data-id="' + esc(m.id) + '"><i class="ti ' + esc(m.ic) + '"></i><span><b>' + esc(T(m.ar, m.en)) + '</b><span class="s">' + esc(T(m.sAr, m.sEn)) + '</span></span><span class="rd"></span></button>'; }).join('')
+        + '</div></div>'
+        + '<div class="wl-proto"><i class="ti ti-info-circle"></i> ' + esc(T('نموذج أولي: لا توجد بوابة دفع فعلية في رف بعد، ويُعتبر الدفع مؤكَّداً عند التأكيد — كما في الدفع الإلكتروني عند إتمام الطلب.','Prototype: RAF has no real payment gateway yet; the payment is treated as confirmed when you confirm — as online payment is at checkout.')) + '</div>'
+        + '<div class="ac-actions"><button type="button" class="ac-btn gold" data-act="tu-pay"' + (S.method ? '' : ' disabled') + '>' + esc(T('تأكيد الدفع','Confirm payment')) + '</button>'
+        + '<button type="button" class="ac-btn ghost" data-act="tu-back">' + esc(T('رجوع','Back')) + '</button></div>';
+    }
+    return h;
+  }
+
+  /* ── B · compensation coupons assigned to this customer ── */
+  var CSTATUS = { issued:['gold','متاح للإضافة','Available to add'], add_pending:['gold','متاح للإضافة','Available to add'],
+    in_wallet:['green','أُضيف إلى المحفظة','Added to wallet'], consumed:['green','أُضيف إلى المحفظة واستُخدم','Added and used'],
+    expired:['red','منتهي الصلاحية','Expired'], voided:['red','ملغى','Cancelled'], reversed:['red','أُلغي رصيده','Credit reversed'] };
+  function termsHTML(c){
+    return '<div class="cp-terms" id="terms_' + esc(c.compensationId) + '"' + (S.termsOpen[c.compensationId] ? '' : ' hidden') + '><ul>'
+      + '<li>' + esc(T('يُمنح تعويض التأخير عند تسليم الطلب بعد الموعد المتوقع بأكثر من ' + c.excludedDelayMinutes + ' دقيقة.',
+                      'Delay compensation applies when an order is delivered more than ' + c.excludedDelayMinutes + ' minutes after its promised time.')) + '</li>'
+      + '<li>' + esc(T('قيمته ' + c.amountPerStep + ' د.ك عن كل ' + c.stepMinutes + ' دقيقة مكتملة بعد ذلك، دون تقريب.',
+                      c.amountPerStep + ' KWD for every ' + c.stepMinutes + ' completed minutes beyond that — no rounding up.')) + '</li>'
+      + '<li>' + esc(T('يُضاف إلى محفظة رف فقط، وبواسطتك فقط، مرة واحدة.','It can only be added to your RAF Wallet, by you, once.')) + '</li>'
+      + '<li>' + esc(T('صالح للإضافة ' + c.validityDays + ' أيام من إصداره، حتى ' + when(c.expiresAt) + '، ولا يُمدَّد.',
+                      'It can be added for ' + c.validityDays + ' days from issue, until ' + when(c.expiresAt) + ', and is never extended.')) + '</li>'
+      + '<li>' + esc(T('بعد إضافته، ينتهي الجزء غير المستخدم منه في الموعد نفسه، ويُستخدم قبل رصيدك العادي عند الدفع.',
+                      'Once added, any unused part expires at that same time, and it is spent before your ordinary balance.')) + '</li>'
+      + '</ul></div>';
+  }
+  function compHTML(){
+    var r = RAFCompensation.mine();
+    if (!r.ok) return '<div class="ac-note"><i class="ti ti-info-circle"></i><span>' + esc(r.message || '') + '</span></div>';
+    if (!r.compensations.length) return '<div class="ac-note"><i class="ti ti-gift"></i><span>' + esc(T('لا توجد كوبونات تعويض لك حالياً. تظهر هنا تلقائياً عند منحك تعويضاً عن تأخير طلب.','You have no compensation coupons. They appear here automatically when RAF grants you compensation for a delayed order.')) + '</span></div>';
+    return r.compensations.map(function(c){
+      var st = CSTATUS[c.status] || ['', c.status, c.status];
+      return '<div class="cp" data-comp="' + esc(c.compensationId) + '">'
+        + '<div class="cp-h"><div><div class="cp-t">' + esc(T('تعويض تأخير الطلب','Order delay compensation')) + '</div>'
+          + '<div class="cp-o">' + esc(T('طلب','Order')) + ' #' + esc(c.orderId) + '</div></div>'
+          + '<div class="cp-a">' + esc(c.amount) + ' <small>' + esc(KWD()) + '</small></div></div>'
+        + '<div class="cp-m"><span class="ac-pill ' + st[0] + '">' + esc(T(st[1], st[2])) + '</span>'
+          + (c.expiresAt ? '<span>' + esc(T('صالح حتى','Valid until')) + ' ' + esc(when(c.expiresAt)) + '</span>' : '')
+          + '<button type="button" class="ac-link" data-act="terms" data-id="' + esc(c.compensationId) + '" aria-expanded="' + !!S.termsOpen[c.compensationId] + '" aria-controls="terms_' + esc(c.compensationId) + '">' + esc(T('الشروط والأحكام','Terms & Conditions')) + '</button>'
+          + (c.canAddToWallet ? '<button type="button" class="ac-btn gold" style="min-height:40px;margin-inline-start:auto" data-act="comp-add" data-id="' + esc(c.compensationId) + '"' + (S.busy ? ' disabled' : '') + '>' + esc(T('إضافة إلى المحفظة','Add to wallet')) + '</button>' : '')
+        + '</div>' + termsHTML(c) + '</div>';
+    }).join('');
+  }
+
+  /* ── C · gift code ── */
+  function giftHTML(){
+    return '<div class="gift-row"><label class="sr-only" for="giftCode">' + esc(T('رمز الهدية','Gift code')) + '</label>'
+      + '<input id="giftCode" type="text" autocomplete="off" dir="ltr" maxlength="24" value="' + esc(S.gift) + '" placeholder="' + esc(T('أدخل رمز الهدية','Enter gift code')) + '">'
+      + '<button type="button" class="ac-btn gold" data-act="gift"' + (S.busy ? ' disabled' : '') + '>' + esc(T('إضافة إلى المحفظة','Add to wallet')) + '</button></div>';
+  }
+
+  function methodRow(key, ic, ar, en2, dsAr, dsEn, body){
+    var open = S.open === key;
+    return '<button type="button" class="ac-row" data-act="open" data-id="' + key + '" aria-expanded="' + open + '" aria-controls="p_' + key + '">'
+      + '<i class="ti ' + ic + ' ic" aria-hidden="true"></i><span class="tx"><span class="lb">' + esc(T(ar, en2)) + '</span><span class="ds">' + esc(T(dsAr, dsEn)) + '</span></span>'
+      + '<i class="ti ti-chevron-left go" aria-hidden="true"></i></button>'
+      + '<div class="wl-panel" id="p_' + key + '"' + (open ? '' : ' hidden') + '>' + (open ? body() : '') + '</div>';
+  }
+
+  function txHTML(u){
+    var h = RAFWallet.history(u.id, u);
+    if (!h.ok) return '<div class="ac-msg err">' + esc(h.message || '') + '</div>';
+    if (!h.transactions.length) return '<div class="ac-empty"><i class="ti ti-receipt-off"></i><b>' + esc(T('لا توجد معاملات بعد','No transactions yet')) + '</b></div>';
+    return h.transactions.map(function(t){
+      var cr = t.type === 'credit';
+      var extra = [];
+      if (t.meta && t.meta.method) extra.push(T(t.meta.methodAr, t.meta.methodEn) + (t.meta.prototypePayment ? ' · ' + T('دفع تجريبي','prototype payment') : ''));
+      if (t.meta && t.meta.giftCode) extra.push(t.meta.giftCode);
+      if (t.orderId) extra.push(T('طلب','Order') + ' #' + t.orderId);
+      extra.push(when(t.timestamp));
+      return '<div class="tx"><span class="ic ' + (cr ? 'cr' : 'db') + '"><i class="ti ' + (cr ? 'ti-arrow-down-left' : 'ti-arrow-up-right') + '"></i></span>'
+        + '<div class="b"><div class="t">' + esc(T(t.descriptionAr, t.descriptionEn)) + '</div><div class="s">' + esc(extra.join(' · ')) + '</div></div>'
+        + '<div class="a ' + (cr ? 'cr' : 'db') + '" dir="ltr">' + (cr ? '+' : '−') + esc(t.amount) + ' ' + esc(KWD()) + '</div></div>';
+    }).join('');
   }
 
   function render(){
-    var root = document.getElementById('wRoot');
-    var u = me();
+    var root = document.getElementById('wRoot'), u = me();
     if (!u){
-      /* no signed-in customer means no wallet to show — and never someone else's */
-      root.innerHTML = '<div class="wgate"><i class="ti ti-user-question"></i>'
-        + '<b>'+T('سجّل الدخول لعرض محفظتك','Sign in to see your wallet')+'</b>'
-        + '<p>'+T('محفظتك مرتبطة بحسابك، ولا يمكن عرضها دون تسجيل الدخول.',
-                 'Your wallet belongs to your account and cannot be shown without signing in.')+'</p></div>';
+      root.innerHTML = '<div class="ac-empty"><i class="ti ti-user-question"></i><b>' + esc(T('سجّل الدخول لعرض محفظتك','Sign in to see your wallet')) + '</b>'
+        + '<a class="ac-link" href="raf_login.html">' + esc(T('تسجيل الدخول','Sign in')) + '</a></div>';
       return;
     }
+    var focusId = document.activeElement && document.activeElement.id;
+    root.innerHTML = balanceHTML(u)
+      + (S.msg ? '<div class="ac-msg ' + S.msg.kind + '" role="status">' + esc(S.msg.text) + '</div>' : '')
+      + ''
+        + '<section class="ac-sec"><div class="ac-sec-h">' + esc(T('إعادة تعبئة المحفظة','Top up your wallet')) + '</div>'
+          + methodRow('pay', 'ti-credit-card', 'طرق الدفع المتاحة', 'Available payment methods', 'أضف رصيداً بالدفع الإلكتروني', 'Add balance with an online payment', topupHTML)
+          + methodRow('comp', 'ti-gift', 'كوبونات التعويض', 'Compensation coupons', 'تعويضات منحتك إياها رف', 'Compensation RAF has granted you', compHTML)
+          + methodRow('gift', 'ti-gift-card', 'هدية', 'Gift', 'أدخل رمز هدية', 'Enter a gift code', giftHTML)
+        + '</section>'
+        + '<section class="ac-sec"><div class="ac-sec-h">' + esc(T('المعاملات','Transactions')) + '</div><div id="wTx">' + txHTML(u) + '</div></section>'
+      ;
+    if (focusId){ var f = document.getElementById(focusId); if (f) f.focus(); }
+  }
 
-    var bal = RAFWallet.balance(u.id, u);
-    var hist = RAFWallet.history(u.id, u);
-    if (!bal.ok || !hist.ok){
-      root.innerHTML = '<div class="wgate"><i class="ti ti-lock"></i>'
-        + '<b>'+T('لا يمكن عرض هذه المحفظة','This wallet cannot be shown')+'</b>'
-        + '<p>'+esc((bal.message || hist.message) || '')+'</p></div>';
+  function say(kind, text){ S.msg = { kind:kind, text:text }; }
+  document.addEventListener('input', function(e){
+    if (e.target.id === 'tuAmt') S.amount = e.target.value.trim();
+    if (e.target.id === 'giftCode') S.gift = e.target.value;
+  });
+  document.getElementById('wRoot').addEventListener('click', function(e){
+    var b = e.target.closest('[data-act]'); if (!b) return;
+    var act = b.getAttribute('data-act'), id = b.getAttribute('data-id');
+    if (act === 'open'){ S.open = S.open === id ? null : id; S.msg = null; if (id === 'pay'){ S.step = 1; S.method = null; } render(); return; }
+    if (act === 'tu-next'){
+      var amt = (document.getElementById('tuAmt') || {}).value || '';
+      if (RAFWallet.toMinor(amt.trim()) === null || RAFWallet.toMinor(amt.trim()) <= 0){ say('err', T('أدخل مبلغاً صحيحاً بالدينار (حتى 3 منازل عشرية).','Enter a valid amount in KWD (up to 3 decimals).')); render(); return; }
+      S.amount = RAFWallet.format(RAFWallet.toMinor(amt.trim())); S.step = 2; S.msg = null; render(); return;
+    }
+    if (act === 'tu-method'){ S.method = id; render(); return; }
+    if (act === 'tu-back'){ S.step = 1; S.msg = null; render(); return; }
+    if (act === 'tu-pay'){
+      var r = RAFWallet.topUp({ amount:S.amount, methodId:S.method, paymentRef:'P' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) });
+      if (r.ok){ say('ok', T('تمت إعادة التعبئة. رصيدك الآن ' + r.balance + ' د.ك.','Top-up complete. Your balance is now ' + r.balance + ' KWD.')); S.step = 1; S.amount = ''; S.method = null; }
+      else say('err', r.message || T('تعذّرت إعادة التعبئة.','The top-up failed.'));
+      render(); return;
+    }
+    if (act === 'terms'){ S.termsOpen[id] = !S.termsOpen[id]; render(); return; }
+    if (act === 'comp-add'){
+      if (S.busy) return; S.busy = true; render();
+      Promise.resolve(RAFCompensation.addToWallet(id)).then(function(r){
+        S.busy = false;
+        if (r && r.ok) say('ok', T('أُضيف التعويض إلى محفظتك.','The compensation was added to your wallet.'));
+        else say('err', (r && r.message) || T('تعذّرت إضافة التعويض.','The compensation could not be added.'));
+        render();
+      });
       return;
     }
-
-    var txs = hist.transactions;
-    var html = '<div id="wBal">'
-      + '<div class="wb-l">'+T('الرصيد المتاح','Available balance')+'</div>'
-      + '<div class="wb-v">'+esc(bal.balance)+'<span class="wb-c">'+T('د.ك','KWD')+'</span></div>'
-      + (bal.compensationCreditMinor > 0
-          ? '<div class="wb-n">'+T('الرصيد العادي','Ordinary balance')+': <bdi dir="ltr">'+esc(bal.ordinaryBalance)+'</bdi> '+T('د.ك','KWD')
-            + ' · '+T('رصيد تعويض ينتهي','Expiring compensation credit')+': <bdi dir="ltr">'+esc(bal.compensationCredit)+'</bdi> '+T('د.ك','KWD')+'</div>'
-          : '')
-      + '<div class="wb-n">'+T('يأتي رصيد المحفظة من عمليات الاسترداد المعتمدة ومن قسائم تعويض التأخير التي تضيفها.',
-                               'Your wallet balance comes from approved refunds and from delay compensation coupons you add.')+'</div>'
-      + '</div>';
-    /* Phase I: the widget is mounted below after the markup is in place */
-    html += '<div id="wComp"></div>';
-
-    html += '<div class="section-h">'+T('آخر العمليات','Recent transactions')+'</div>';
-    if (!txs.length){
-      html += '<div class="panel"><div class="wempty"><i class="ti ti-receipt-off"></i>'
-        + '<b>'+T('لا توجد عمليات بعد','No transactions yet')+'</b>'
-        + '<span>'+T('ستظهر هنا أي مبالغ تُضاف إلى محفظتك.',
-                     'Any amount added to your wallet will appear here.')+'</span></div></div>';
-    } else {
-      html += '<div class="panel">' + txs.map(function(t){
-        var cr = t.type === 'credit';
-        return '<div class="wtx">'
-          + '<div class="wtx-ic '+(cr?'cr':'db')+'"><i class="ti '+(cr?'ti-arrow-down-left':'ti-arrow-up-right')+'"></i></div>'
-          + '<div class="wtx-b"><div class="wtx-t">'+esc(T(t.descriptionAr,t.descriptionEn))+'</div>'
-          + '<div class="wtx-s">'+esc(dateOf(t.timestamp))+(t.orderId?' · '+esc(t.orderId):'')+'</div></div>'
-          + '<div class="wtx-a '+(cr?'cr':'db')+'">'+(cr?'+':'−')+esc(t.amount)+' '+T('د.ك','KWD')+'</div>'
-          + '</div>';
-      }).join('') + '</div>';
+    if (act === 'gift'){
+      var code = ((document.getElementById('giftCode') || {}).value || '').trim();
+      if (!code){ say('err', T('أدخل رمز الهدية.','Enter a gift code.')); render(); return; }
+      var g = RAFGift.redeem(code);
+      if (g.ok && !g.duplicate){ say('ok', T('أُضيفت الهدية إلى محفظتك. رصيدك الآن ' + g.balance + ' د.ك.','The gift was added to your wallet. Your balance is now ' + g.balance + ' KWD.')); S.gift = ''; }
+      else if (g.ok && g.duplicate) say('err', T('سبق أن استخدمت هذا الرمز.','You have already used this code.'));
+      else say('err', g.message || T('رمز الهدية غير صحيح.','That gift code is not valid.'));
+      render(); return;
     }
-    root.innerHTML = html;
-    if (window.RAFCompUI) RAFCompUI.mount(document.getElementById('wComp'), { mode:'wallet' });
-  }
-
-  function boot(){
-    var l=null; try{ l=localStorage.getItem('raf_lang'); }catch(e){}
-    if(l==='en'){ var r=document.getElementById('htmlRoot'); r.lang='en'; r.dir='ltr'; }
-    if (window.applyLang) applyLang();
-    render();
-    var root=document.getElementById('htmlRoot');
-    if(root) new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['lang']});
-    /* Phase I: a coupon added / reversed (this tab or another) changes the balance */
-    if (window.RAFEventBus) RAFEventBus.subscribe('compensation.*', render);
-    window.addEventListener('storage', function(e){ if (e.key === 'raf_wallet_ledger') render(); });
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot); else boot();
+  });
+  window.onLangChange = render;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render); else render();
+  window.addEventListener('storage', function(e){ if (!e.key || /wallet|compens|gift/.test(e.key)) render(); });
 })();
 </script>
+<script src="raf_active_order.js"></script>
 </body>
 </html>
