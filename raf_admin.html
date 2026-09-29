@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl" data-ui="admin">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — إدارة رف</title>
+<script src="raf_admin_theme.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<!-- the shared RAF administrative shell (sidebar, header, tables, badges, gate) -->
+<link rel="stylesheet" href="raf_logistics.css">
+<!-- the RAF Management tokens (light / dark), shell adjustments and components -->
+<link rel="stylesheet" href="raf_admin.css">
+</head>
+<body>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-c" role="alert">
+    <div class="ic"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
+    <h1 id="gateT"></h1>
+    <p id="gateP"></p>
+    <a class="btn" href="raf_login.html" id="gateSignIn"><i class="ti ti-login" aria-hidden="true"></i><span data-ar="تسجيل الدخول" data-en="Sign in">تسجيل الدخول</span></a>
+    <button class="btn" type="button" id="gateSignOut" onclick="RAFSignOut()" hidden><i class="ti ti-logout" aria-hidden="true"></i><span data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span></button>
+  </div>
+</div>
+
+<div class="ops" id="shell" hidden>
+  <aside class="ops-nav" id="opsNav" aria-label="إدارة رف">
+    <div class="ops-brand">
+      <span class="ops-brand-mark" aria-hidden="true"><i class="ti ti-building-community"></i></span>
+      <span class="ops-brand-t"><b data-ar="إدارة رف" data-en="RAF Management">إدارة رف</b>
+        <span data-ar="مركز التحكم" data-en="Control Center">مركز التحكم</span></span>
+      <button class="ibtn ops-nav-x" type="button" onclick="ADM.closeNav()" aria-label="إغلاق القائمة"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <nav class="ops-nav-scroll" id="navTree" aria-label="التنقل"></nav>
+  </aside>
+  <div class="scrim" onclick="ADM.closeNav()" aria-hidden="true"></div>
+
+  <div class="ops-main">
+    <header class="ops-head">
+      <button class="ibtn ops-burger" type="button" aria-controls="opsNav" aria-expanded="false" onclick="ADM.openNav()" aria-label="القائمة"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+      <div class="ops-crumb"><small id="crumbGroup"></small><b id="crumbPage"></b></div>
+      <div class="ops-tools">
+        <button class="ibtn" type="button" id="refreshBtn" onclick="ADM.refresh()" aria-label="تحديث"><i class="ti ti-refresh" aria-hidden="true"></i></button>
+        <button class="ibtn" type="button" id="themeBtn" onclick="ADM.toggleTheme()" aria-pressed="false"><i class="ti ti-moon" aria-hidden="true"></i></button>
+        <button class="ibtn lang" type="button" id="langBtn" onclick="ADM.toggleLang()"></button>
+        <span class="ops-sep" aria-hidden="true"></span>
+        <div class="ops-user"><span class="ops-av" id="userAv" aria-hidden="true"></span>
+          <span class="ops-user-t"><b id="userName"></b><span id="userRole"></span></span></div>
+        <!-- the shared RAF sign-out action; this page adds no session logic -->
+        <button class="ibtn signout" type="button" id="signOutBtn" onclick="RAFSignOut()">
+          <i class="ti ti-logout" aria-hidden="true"></i>
+          <span class="signout-t" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span>
+        </button>
+      </div>
+    </header>
+    <main class="ops-content" id="view" tabindex="-1"></main>
+  </div>
+</div>
+
+<!-- Read-only authorities only. Deliberately NOT loaded, because loading them
+     runs automatic work that writes (and this page must never be the cause of
+     a record): raf_order_engine.js (timeout / undo sweeps), raf_store_ops.js
+     (Busy Mode expiry sweep), raf_settlement.js / raf_analytics.js (store-scoped
+     to a merchant session; the rate schedule seeds itself on first read). -->
+<script src="raf_source.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_customer_service.js"></script>
+<script src="raf_logistics_authority.js"></script>
+<script src="raf_merchant_applications.js"></script>
+<script src="raf_merchant_auth.js"></script>
+<script src="raf_requests.js"></script>
+<script src="raf_admin_shell.js"></script>
+<script>
+/* ============================================================================
+   RAF MANAGEMENT — HOME · RAF CONTROL CENTER (مركز التحكم)
+   The platform's operational state at a glance. A VIEW: it owns no state,
+   keeps no business storage and writes nothing on load. Every figure is read
+   from the authority that owns it; a figure no authority can give safely is
+   not shown, or is shown as NOT CONFIGURED — never as a zero:
+     · orders          RAFShop.Orders (status) + RAFOrderSnapshot (fulfilment)
+     · stores          RAFSource (store status)
+     · customers       RAFPerm (customer accounts) + order snapshots (who ordered)
+     · tickets         RAFCustomerService (dashboard, listTickets)
+     · requests        RAFRequests (the central Requests & Approvals model)
+     · drivers         RAFLogistics (listDrivers)
+     · identity/access RAFPerm, through the shared RAFAdmin shell
+   NOT CONFIGURED: platform finance (no platform-wide finance authority) and
+   customer engagement (no central visit / view / search tracking).
+   NAVIGATION. Another administration opens in a NEW TAB (department
+   navigation); a figure or a row opens that exact queue or record in the
+   surface that owns it, also in a new tab (record navigation).
+   ==========================================================================*/
+(function(){
+  'use strict';
+
+  var A = window.RAFAdmin, CS = window.RAFCustomerService, LG = window.RAFLogistics, RQ = window.RAFRequests;
+  var DATA = null;
+  var T = A.T, L = A.L, esc = A.esc, clockOf = A.clockOf, isoOf = A.isoOf, can = A.can,
+      NEWTAB = A.NEWTAB, srNew = A.srNew, ext = A.ext, el = A.el;
+  var P = window.RAFPerm;
+  function logisticsOps(){ return A.logisticsOps(); }
+  function driversView(){ return A.driversView(); }
+  function csView(){ return A.csView(); }
+  function kuwaitDay(ms){ try { return new Date(ms).toLocaleDateString('en-CA', { timeZone:'Asia/Kuwait' }); } catch(e){ return null; } }
+
+  /* RAFShop.Orders.all() writes its seed orders the first time it is read in a
+     browser that has none. So the order list is read only once it exists —
+     a first visit shows "no orders yet" rather than creating them. */
+  function ordersExist(){ try { return localStorage.getItem('raf_orders') !== null; } catch(e){ return false; } }
+
+  /* ───────── reads ───────── */
+  function readOrders(){
+    if(!can('orders.view')) return null;
+    if(!ordersExist() || !window.RAFShop) return { rows:[] };
+    var list = []; try { list = RAFShop.Orders.all() || []; } catch(e){ list = []; }
+    return { rows:list.map(function(o){
+      var snap = null; try { snap = window.RAFOrderSnapshot ? RAFOrderSnapshot.of(o.id) : null; } catch(e){ snap = null; }
+      var f = (snap && snap.fulfilment) || {};
+      return { id:o.id, status:o.status, placedAt:snap ? snap.checkoutAt : null,
+               store:snap ? { ar:snap.storeNameAr, en:snap.storeNameEn } : (o.store || null), storeSlug:snap ? snap.storeSlug : null,
+               customerId:(snap && snap.customer && snap.customer.id) || null,
+               driverId:f.driverId || null, pickedUpAt:f.pickedUpAt || null,
+               arrivedAt:f.arrivedAt || null, deliveredAt:f.deliveredAt || null };
+    }) };
+  }
+  /* order facts only — the store's own stage (awaiting acceptance / preparing /
+     ready) lives in RAFOrderEngine, which this page does not load */
+  function orderFact(r){
+    if(r.status === 'cancelled') return 'cancelled';
+    if(r.status === 'delivered' || r.deliveredAt) return 'delivered';
+    if(r.status !== 'progress') return null;
+    if(r.arrivedAt) return 'arrived';
+    if(r.pickedUpAt) return 'on_the_way';
+    if(r.driverId) return 'assigned';
+    return 'no_driver';
+  }
+  var FACT = {
+    no_driver:{ ar:'قبل تعيين السائق', en:'Before driver assignment', tone:'warn', q:'scope=active' },
+    assigned:{ ar:'تم تعيين السائق', en:'Driver assigned', tone:'go', q:'scope=active&state=assigned' },
+    on_the_way:{ ar:'في الطريق', en:'On the way', tone:'go', q:'scope=active&state=on_the_way' },
+    arrived:{ ar:'وصل السائق', en:'Driver arrived', tone:'go', q:'scope=active&state=on_the_way' },
+    delivered:{ ar:'تم التسليم', en:'Delivered', tone:'done', q:'scope=delivered' },
+    cancelled:{ ar:'ملغى', en:'Cancelled', tone:'off', q:'scope=cancelled' }
+  };
+  function orderSummary(O){
+    var c = { no_driver:0, assigned:0, on_the_way:0, arrived:0, delivered:0, cancelled:0 }, today = 0, todayKey = kuwaitDay(Date.now());
+    O.rows.forEach(function(r){
+      var k = orderFact(r); if(k && c.hasOwnProperty(k)) c[k]++;
+      if(r.placedAt && kuwaitDay(r.placedAt) === todayKey) today++;
+    });
+    return { c:c, today:today, total:O.rows.length, inProgress:c.no_driver + c.assigned + c.on_the_way + c.arrived };
+  }
+  function readStores(){
+    if(!can('stores.view') || !window.RAFSource) return null;
+    var list = []; try { list = RAFSource.allStores() || []; } catch(e){ list = []; }
+    var S = RAFSource.STORE_STATUS, n = { open:0, closed:0, suspended:0 };
+    list.forEach(function(s){
+      if(s.status === S.OPEN) n.open++; else if(s.status === S.CLOSED) n.closed++; else if(s.status === S.SUSPENDED) n.suspended++;
+    });
+    return { total:list.length, n:n };
+  }
+  /* customer ACCOUNTS as RAF's account authority holds them. Engagement
+     (visits, views, searches, favourites, carts) has no central record. */
+  function readCustomers(orders){
+    if(!can('users.view')) return null;
+    var users = []; try { users = P.getUsers() || []; } catch(e){ users = []; }
+    var cust = users.filter(function(u){ return u && u.roleId === 'customer'; });
+    var active = cust.filter(function(u){ return u.status === 'active'; }).length;
+    var ordered = null;
+    if(orders){
+      var ids = {}; orders.rows.forEach(function(r){ if(r.customerId) ids[r.customerId] = 1; });
+      ordered = cust.filter(function(u){ return ids[u.id]; }).length;
+    }
+    return { total:cust.length, active:active, suspended:cust.length - active, ordered:ordered };
+  }
+  function readTickets(){
+    if(!csView()) return null;
+    var d = null; try { d = CS.dashboard(); } catch(e){ d = null; }
+    if(!d || !d.ok) return { err:true };
+    var open = null; try { var r = CS.listTickets({ active:true }); if(r && r.ok) open = r.items; } catch(e){ open = null; }
+    return { d:d, open:open };
+  }
+  /* the requests waiting for a decision — read through the central model,
+     which answers from each request type's own authority */
+  function readApprovals(){
+    if(!RQ || !A.requestsView()) return null;
+    var r = null; try { r = RQ.list({ status:RQ.STATUS.PENDING }); } catch(e){ r = null; }
+    if(!r || !r.ok) return { err:true };
+    return { items:r.items.map(function(x){
+      return { id:x.id, typeLabel:x.typeLabel, name:x.requester && x.requester.name, at:x.submittedAt };
+    }) };
+  }
+  function readDrivers(){
+    if(!driversView()) return null;
+    /* listDrivers reads order assignments through RAFShop.Orders — see ordersExist() */
+    if(!ordersExist()) return { unavailable:true };
+    function n(st){ try { var r = LG.listDrivers({ status:st }); return r && r.ok ? r.items.length : null; } catch(e){ return null; } }
+    return { active:n('active'), suspended:n('suspended') };
+  }
+  function readAll(){
+    var orders = readOrders();
+    return { dests:A.destinations(), orders:orders, stores:readStores(), customers:readCustomers(orders),
+             tickets:readTickets(), approvals:readApprovals(), drivers:readDrivers(),
+             finance:can('reports.view'), at:Date.now() };
+  }
+
+  /* ───────── building blocks ───────── */
+  function panel(cls, id, icon, ar, en, meta, go, body, flush){
+    return '<section class="pn ' + (cls || '') + '" aria-labelledby="' + id + '">'
+      + '<div class="pn-h"><h2 id="' + id + '"><i class="ti ' + icon + '" aria-hidden="true"></i>' + T(ar, en) + '</h2>'
+      + (meta ? '<span class="meta">' + meta + '</span>' : '')
+      + (go ? '<a class="go" href="' + esc(go.href) + '"' + NEWTAB + '>' + esc(go.label) + srNew()
+             + '<i class="ti ti-external-link" aria-hidden="true"></i></a>' : '') + '</div>'
+      + '<div class="pn-b' + (flush ? ' flush' : '') + '">' + body + '</div></section>';
+  }
+  /* one figure in a stat row: a link to the exact queue when the owning
+     surface is open to this account, plain text otherwise */
+  function stat(v, ar, en, tone, href){
+    var cls = 'stat ' + (tone || '') + (v === 0 ? ' zero' : '');
+    var inner = '<span class="k"><span class="dot" aria-hidden="true"></span><span class="kt">' + esc(T(ar, en)) + '</span></span>'
+      + '<span class="v num' + (v == null ? ' na' : '') + '">' + (v == null ? '—' : v) + '</span>';
+    return href ? '<a class="' + cls + '" href="' + esc(href) + '"' + NEWTAB + '>' + inner + srNew() + ext() + '</a>'
+                : '<div class="' + cls + '">' + inner + '</div>';
+  }
+  function stats(list){ return '<div class="stats" style="--n:' + list.length + '">' + list.join('') + '</div>'; }
+  function emptyRow(icon, ar, en, muted){
+    return '<div class="empty-row' + (muted ? ' muted' : '') + '"><i class="ti ' + icon + '" aria-hidden="true"></i><span>' + esc(T(ar, en)) + '</span></div>';
+  }
+  function status(icon, ar, en){
+    return '<div class="status" role="status"><i class="ti ' + icon + '" aria-hidden="true"></i><span>' + esc(T(ar, en)) + '</span></div>';
+  }
+  function hrefOf(k){ for(var i=0;i<DATA.dests.length;i++) if(DATA.dests[i].d.k === k) return DATA.dests[i].href; return null; }
+  function ordersHref(q){ return logisticsOps() ? 'raf_logistics_orders.html' + (q ? '#' + q : '') : null; }
+
+  /* ───────── platform overview — the one summary band ─────────
+     A headline per area; the sections below say where the work is. Finance
+     cells state that no platform source exists instead of showing a zero. */
+  function secOverview(){
+    var cells = [];
+    function cell(k, v, s, href, na){
+      var inner = '<span class="k">' + esc(k) + '</span><span class="v num' + (na ? ' na' : '') + '">' + v + '</span><span class="s">' + (s || '&nbsp;') + '</span>';
+      cells.push(href ? '<a class="bi" href="' + esc(href) + '"' + NEWTAB + '>' + inner + srNew() + ext() + '</a>' : '<div class="bi">' + inner + '</div>');
+    }
+    var naTag = '<span class="tag">' + esc(T('غير مهيأ','Not configured')) + '</span>';
+    if(DATA.finance){
+      cell(T('المبيعات','Sales'), '—', naTag, null, true);
+      cell(T('عمولة رف','RAF Commission'), '—', naTag, null, true);
+    }
+    if(DATA.orders){
+      var o = orderSummary(DATA.orders);
+      cell(T('الطلبات','Orders'), o.total, esc(T('اليوم ','Today ')) + '<b class="num">' + o.today + '</b>', ordersHref('scope=all'));
+    }
+    if(DATA.stores) cell(T('المتاجر','Stores'), DATA.stores.total, esc(T('مفتوحة ','Open ')) + '<b class="num">' + DATA.stores.n.open + '</b>');
+    if(DATA.customers) cell(T('العملاء','Customers'), DATA.customers.total, esc(T('حسابات','Accounts')));
+    if(DATA.tickets && !DATA.tickets.err){
+      cell(T('التذاكر المفتوحة','Open Tickets'), DATA.tickets.open ? DATA.tickets.open.length : '—', esc(T('خدمة العملاء','Customer Service')),
+        'raf_customer_service.html#/tickets?q=open');
+    }
+    if(!cells.length) return '';
+    return '<section class="pn span-12" aria-labelledby="h-ov"><h2 id="h-ov" class="sr-only">' + T('نظرة عامة على المنصة','Platform overview') + '</h2>'
+      + '<div class="band" style="--n:' + cells.length + '">' + cells.join('') + '</div>'
+      + '<div class="band-foot"><span><i class="ti ti-clock" aria-hidden="true"></i>' + esc(T('محدَّث ','Updated ')) + '<span class="num">' + esc(clockOf(DATA.at) || '') + '</span>'
+      + ' · ' + esc(T('من سجلات رف مباشرة','Read directly from RAF’s records')) + '</span>'
+      + secQuick() + '</div></section>';
+  }
+
+  /* ───────── requests & approvals — an ACTION INDICATOR only ─────────
+     It answers one question: is anything waiting for a Management decision?
+     Nothing pending → one short line. Something pending → the count and just
+     enough to identify each item; each opens that exact request in the central
+     Requests & Approvals page, in a new tab. */
+  function reqHref(id){ return 'raf_admin_requests.html' + (id ? '#request=' + encodeURIComponent(id) : ''); }
+  function secApprovals(){
+    var R = DATA.approvals; if(!R) return '';
+    var head = '<h2 id="h-ap"><a href="' + reqHref(null) + '" class="act-a"><i class="ti ti-checklist" aria-hidden="true"></i>' + T('الطلبات والموافقات','Requests & Approvals') + '</a></h2>';
+    if(R.err) return '<section class="pn span-12 act" aria-labelledby="h-ap"><div class="act-l">' + head
+      + '<span class="act-t muted">' + esc(T('تعذّرت قراءة الطلبات.','Requests could not be read.')) + '</span></div></section>';
+    if(!R.items.length) return '<section class="pn span-12 act" aria-labelledby="h-ap"><div class="act-l">' + head
+      + '<span class="act-t"><i class="ti ti-circle-check" aria-hidden="true"></i>' + esc(T('لا توجد طلبات حالياً','No pending requests')) + '</span></div></section>';
+    var list = R.items.slice(0, 3);   /* the central queue already puts the oldest waiting first */
+    return '<section class="pn span-12 act due" aria-labelledby="h-ap"><div class="act-l">' + head
+      + '<span class="act-t">' + esc(T('طلبات تحتاج إلى قرار','Requests awaiting a decision')) + ' <b class="num act-n">' + R.items.length + '</b></span></div>'
+      + '<ul class="act-list">' + list.map(function(x){
+          return '<li><a href="' + esc(reqHref(x.id)) + '"' + NEWTAB + '><span class="type-tag">' + esc(L(x.typeLabel)) + '</span>'
+            + '<bdi class="who">' + esc(x.name || '—') + '</bdi>'
+            + '<time class="num" datetime="' + isoOf(x.at) + '">' + esc(clockOf(x.at) || '—') + '</time>' + srNew() + ext() + '</a></li>';
+        }).join('')
+      + (R.items.length > list.length ? '<li class="more">' + esc(T('و','and ')) + '<span class="num">' + (R.items.length - list.length) + '</span>' + esc(T(' أخرى',' more')) + '</li>' : '')
+      + '</ul></section>';
+  }
+
+  /* ───────── orders — where the orders are right now ───────── */
+  function secOrders(){
+    var O = DATA.orders; if(!O) return '';
+    var lo = ordersHref(null), go = lo ? { href:lo, label:T('طلبات اللوجستيات','Logistics Orders') } : null;
+    if(!O.rows.length) return panel('span-7', 'h-orders', 'ti-route-2', 'الطلبات', 'Orders', null, go,
+      emptyRow('ti-receipt-off', 'لا توجد طلبات بعد.', 'No orders yet.', true), true);
+    var s = orderSummary(O), c = s.c;
+    var stages = ['no_driver','assigned','on_the_way','arrived','delivered'];
+    var flow = '<ol class="flow" aria-label="' + esc(T('مراحل الطلب','Order stages')) + '">' + stages.map(function(k){
+      var f = FACT[k], v = c[k], href = ordersHref(f.q);
+      var sub = k === 'no_driver' ? '<span class="sub">' + esc(T('بانتظار القبول · التجهيز · جاهز','Awaiting acceptance · preparing · ready')) + '</span>' : '';
+      var inner = '<span class="v num">' + v + '</span><span class="trk" aria-hidden="true"><b></b></span>'
+        + '<span class="lbl"><span class="k">' + esc(T(f.ar, f.en)) + '</span>' + sub + '</span>';
+      var cls = 'st ' + f.tone + (v === 0 ? ' zero' : '');
+      return '<li>' + (href ? '<a class="' + cls + '" href="' + esc(href) + '"' + NEWTAB + '>' + inner + srNew() + '</a>'
+                            : '<div class="' + cls + '">' + inner + '</div>') + '</li>';
+    }).join('') + '</ol>';
+    var cx = ordersHref(FACT.cancelled.q);
+    var sum = '<div class="osum">'
+      + '<span>' + esc(T('الإجمالي','Total')) + ' <b class="num">' + s.total + '</b></span>'
+      + '<span>' + esc(T('اليوم','Today')) + ' <b class="num">' + s.today + '</b></span>'
+      + '<span>' + esc(T('قيد التنفيذ','In progress')) + ' <b class="num">' + s.inProgress + '</b></span>'
+      + (cx ? '<a href="' + esc(cx) + '"' + NEWTAB + '>' + esc(T('ملغاة','Cancelled')) + ' <b class="num">' + c.cancelled + '</b>' + srNew() + '</a>'
+            : '<span class="item">' + esc(T('ملغاة','Cancelled')) + ' <b class="num">' + c.cancelled + '</b></span>')
+      + '</div>';
+    return panel('span-7', 'h-orders', 'ti-route-2', 'الطلبات', 'Orders', null, go, flow + sum, true);
+  }
+
+  /* ───────── finance — high level, stated honestly ─────────
+     No platform-wide finance authority exists: RAFSettlement and RAFAnalytics
+     answer for ONE merchant's store from that merchant's session, and a
+     platform figure is never assembled from them here. */
+  function secFinance(){
+    if(!DATA.finance) return '';
+    return panel('', 'h-fin', 'ti-report-money', 'المالية', 'Finance', '<span class="tag">' + esc(T('غير مهيأ','Not configured')) + '</span>', null,
+      stats([stat(null, 'المبيعات', 'Sales'), stat(null, 'العمولة', 'Commission'), stat(null, 'المستردات', 'Refunds'), stat(null, 'صافي الإيراد', 'Net Revenue')]), true);
+  }
+
+  /* ───────── stores — platform counts only ───────── */
+  function secStores(){
+    var S = DATA.stores; if(!S) return '';
+    var n = S.n, parts = [
+      { k:'open', n:n.open, tone:'done', ar:'مفتوحة', en:'Open' },
+      { k:'closed', n:n.closed, tone:'off', ar:'مغلقة', en:'Closed' },
+      { k:'suspended', n:n.suspended, tone:'hot', ar:'موقوفة', en:'Suspended' } ];
+    /* RAF Management has no Stores surface yet, so states are informational */
+    var body = S.total
+      ? '<div class="bar" role="img" aria-label="' + esc(parts.map(function(p){ return T(p.ar, p.en) + ' ' + p.n; }).join(T('، ',', '))) + '">'
+        + parts.filter(function(p){ return p.n > 0; }).map(function(p){ return '<span class="' + p.tone + '" style="width:' + (p.n / S.total * 100).toFixed(2) + '%"></span>'; }).join('') + '</div>'
+        + '<ul class="legend">' + parts.map(function(p){
+            return '<li data-state="' + p.k + '"><span class="k"><span class="sw ' + p.tone + '" aria-hidden="true"></span>' + esc(T(p.ar, p.en)) + '</span><b class="num">' + p.n + '</b></li>'; }).join('') + '</ul>'
+      : emptyRow('ti-building-store', 'لا توجد متاجر.', 'No stores.', true);
+    return panel('', 'h-st', 'ti-building-store', 'المتاجر', 'Stores', S.total ? esc(T('الإجمالي ','Total ')) + '<span class="num">' + S.total + '</span>' : null, null, body);
+  }
+
+  /* ───────── customer service — the workload, not the tickets ───────── */
+  function secTickets(){
+    var X = DATA.tickets; if(!X) return '';
+    var cs = hrefOf('cs'), go = cs ? { href:cs, label:T('خدمة العملاء','Customer Service') } : null;
+    if(X.err) return panel('w5', 'h-tk', 'ti-headset', 'خدمة العملاء', 'Customer Service', null, go,
+      emptyRow('ti-alert-triangle', 'تعذّرت قراءة التذاكر.', 'Tickets could not be read.', true), true);
+    var d = X.d, openN = X.open ? X.open.length : null;
+    function h(q){ return 'raf_customer_service.html' + q; }
+    return panel('w5', 'h-tk', 'ti-headset', 'خدمة العملاء', 'Customer Service', d.isManagement ? null : esc(T('ضمن قسمك','Your department')), go,
+      stats([
+        stat(openN, 'مفتوحة', 'Open', 'new', h('#/tickets?q=open')),
+        stat(d.unassigned, 'غير مُستلمة', 'Unassigned', d.unassigned ? 'warn' : '', h('#/tickets?q=unassigned')),
+        stat(d.escalatedCount, 'مُصعّدة', 'Escalated', d.escalatedCount ? 'hot' : '', h('#/tickets?q=escalated')),
+        stat(d.followUpsDue, 'متابعات مستحقة', 'Follow-ups', d.followUpsDue ? 'warn' : '', h('#/followups?q=due')),
+        stat(d.pending, 'معلّقة', 'Pending', '', h('#/tickets?q=pending')) ]), true);
+  }
+
+  /* ───────── customers — account indicators only ───────── */
+  function secCustomers(){
+    var C = DATA.customers; if(!C) return '';
+    var list = [stat(C.total, 'الحسابات', 'Accounts', 'new'), stat(C.active, 'نشطة', 'Active', 'go'),
+                stat(C.suspended, 'موقوفة', 'Suspended', C.suspended ? 'hot' : '')];
+    if(C.ordered != null) list.push(stat(C.ordered, 'لديهم طلبات', 'With orders', 'done'));
+    return panel('w4', 'h-cu', 'ti-users', 'العملاء', 'Customers',
+      null, null, stats(list) + '<p class="cap" style="padding:7px 14px;margin-top:auto"><span class="tag">' + esc(T('تحليلات العملاء غير مهيأة','Customer analytics not configured')) + '</span></p>', true);
+  }
+
+  /* ───────── logistics — two management indicators ───────── */
+  function secLogistics(){
+    var D = DATA.drivers; if(!D) return '';
+    var lg = hrefOf('logistics'), go = lg ? { href:lg, label:T('اللوجستيات','Logistics') } : null;
+    function dh(q){ return 'raf_logistics_drivers.html#' + q; }
+    return panel('w3', 'h-lg', 'ti-motorbike', 'اللوجستيات', 'Logistics', null, go, stats(D.unavailable
+      ? [stat(null, 'السائقون النشطون', 'Active drivers'), stat(null, 'السائقون الموقوفون', 'Suspended drivers')]
+      : [stat(D.active, 'السائقون النشطون', 'Active drivers', 'go', dh('scope=active')),
+         stat(D.suspended, 'السائقون الموقوفون', 'Suspended drivers', D.suspended ? 'warn' : '', dh('scope=suspended'))]), true);
+  }
+
+  /* quick access — compact, in the overview band: the administrations this
+     account may open, each in a new tab */
+  function secQuick(){
+    if(!DATA.dests.length) return '';
+    return '<div class="qa" role="group" aria-labelledby="h-qa"><span class="qa-l" id="h-qa">' + esc(T('الوصول السريع','Quick Access')) + '</span>'
+      + DATA.dests.map(function(x){
+        return '<a href="' + esc(x.href) + '"' + NEWTAB + '><i class="ti ' + x.d.icon + '" aria-hidden="true"></i>' + esc(T(x.d.ar, x.d.en))
+          + srNew() + '<i class="ti ti-external-link nt" aria-hidden="true"></i></a>';
+      }).join('') + '</div>';
+  }
+  /* a stack: two compact sections that together match their large neighbour */
+  function stack(parts){ var p = parts.filter(Boolean); return p.length ? '<div class="stack span-5' + (p.length === 1 ? ' one' : '') + '">' + p.join('') + '</div>' : ''; }
+  /* the workload row: Customer Service, Customers and Logistics side by side */
+  function trio(parts){ var p = parts.filter(Boolean); return p.length ? '<div class="trio span-12">' + p.join('') + '</div>' : ''; }
+
+  function render(){
+    if(!DATA) return;
+    el('view').innerHTML =
+      '<h1 class="sr-only">' + T('إدارة رف — مركز التحكم','RAF Management — Control Center') + '</h1>'
+      + '<div class="cc">'
+      + secOverview()
+      + secApprovals()
+      + row(secOrders(), stack([secFinance(), secStores()]))
+      + trio([secTickets(), secCustomers(), secLogistics()])
+      + '</div>';
+  }
+  /* one balanced row: a large section and a stack. When an account can see
+     only one side, that side takes the full width — never half a row empty. */
+  function row(big, side){
+    if(big && side) return big + side;
+    if(big) return big.replace('class="pn span-7"', 'class="pn span-12"');
+    if(side) return side.replace('stack span-5', 'stack span-12 wide');
+    return '';
+  }
+
+  A.start({ active:'home', title:{ ar:'مركز التحكم', en:'Control Center' },
+            refresh:function(){ DATA = readAll(); render(); } });
+})();
+</script>
+</body>
+</html>

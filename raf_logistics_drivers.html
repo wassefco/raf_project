@@ -1180,8 +1180,26 @@ table.app tbody tr:focus-visible{ outline:2px solid var(--accent); outline-offse
     }
 
     ME = { id:u.id, name:u.name, roleId:u.roleId }; CAP = c;
+
+    /* a link (e.g. from RAF Management) may name the view to open:
+       #mode=applications&app=… or #scope=… — view state only, applied after
+       the access check above; unknown values are ignored */
+    var link = {};
+    (location.hash || '').replace(/^#\/?/, '').split('&').forEach(function(p){
+      var kv = p.split('='); if(kv[0]) link[kv[0]] = decodeURIComponent(kv[1] || ''); });
+    if(link.mode === 'applications' || link.app) MODE = 'applications';
+    if(link.scope){
+      var list = MODE === 'applications' ? APP_SCOPES : SCOPES;
+      for(var si=0; si<list.length; si++) if(list[si].k === link.scope){
+        if(MODE === 'applications') AF.scope = link.scope; else F.scope = link.scope; }
+    }
+    if(link.app) AF.scope = 'all';
+
     el('gate').hidden = true; el('shell').hidden = false;
     refresh();
+    if(link.app){
+      for(var ai=0; ai<APPS.length; ai++) if(APPS[ai].applicationId === link.app){ OPEN = ai; MSG = null; renderAppSheet(); break; }
+    }
 
     if(window.RAFEventBus){
       ['order.*'].forEach(function(p){

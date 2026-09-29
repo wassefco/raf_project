@@ -235,41 +235,41 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
     <div class="row2">
       <div class="field">
         <label class="field-lbl">الاسم الأول <span class="req">*</span></label>
-        <input type="text" class="field-inp" placeholder="أحمد">
+        <input id="m-firstName" type="text" class="field-inp" placeholder="أحمد">
       </div>
       <div class="field">
         <label class="field-lbl">الاسم الأخير <span class="req">*</span></label>
-        <input type="text" class="field-inp" placeholder="العتيبي">
+        <input id="m-lastName" type="text" class="field-inp" placeholder="العتيبي">
       </div>
     </div>
     <div class="row2">
       <div class="field">
         <label class="field-lbl">رقم الهاتف <span class="req">*</span></label>
-        <input type="tel" class="field-inp" placeholder="5X XXX XXXX" dir="ltr">
+        <input id="m-phone" type="tel" class="field-inp" placeholder="5X XXX XXXX" dir="ltr">
       </div>
       <div class="field">
         <label class="field-lbl">البريد الإلكتروني <span class="req">*</span></label>
-        <input type="email" class="field-inp" placeholder="store@example.com" dir="ltr">
+        <input id="m-email" type="email" class="field-inp" placeholder="store@example.com" dir="ltr">
       </div>
     </div>
     <div class="row2">
       <div class="field">
         <label class="field-lbl">كلمة المرور <span class="req">*</span></label>
-        <input type="password" class="field-inp" placeholder="8 أحرف كحد أدنى">
+        <input id="m-pw" type="password" class="field-inp" placeholder="8 أحرف كحد أدنى" autocomplete="new-password">
       </div>
       <div class="field">
         <label class="field-lbl">تأكيد كلمة المرور <span class="req">*</span></label>
-        <input type="password" class="field-inp" placeholder="أعد كتابة كلمة المرور">
+        <input id="m-pw2" type="password" class="field-inp" placeholder="أعد كتابة كلمة المرور" autocomplete="new-password">
       </div>
     </div>
     <div class="row2">
       <div class="field">
         <label class="field-lbl">الرقم المدني <span class="req">*</span></label>
-        <input type="text" class="field-inp" placeholder="XXXXXXXXXXX" dir="ltr" maxlength="12">
+        <input id="m-civilId" type="text" class="field-inp" placeholder="XXXXXXXXXXX" dir="ltr" maxlength="12">
       </div>
       <div class="field">
         <label class="field-lbl">الجنسية <span class="req">*</span></label>
-        <select class="field-inp">
+        <select id="m-nationality" class="field-inp">
           <option value="">— اختر —</option>
           <option>كويتي</option>
           <option>سعودي</option>
@@ -299,11 +299,11 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
     <div class="row2">
       <div class="field">
         <label class="field-lbl">اسم المتجر <span class="req">*</span></label>
-        <input type="text" class="field-inp" placeholder="مثال: Casa Mode">
+        <input id="m-storeName" type="text" class="field-inp" placeholder="مثال: Casa Mode">
       </div>
       <div class="field">
         <label class="field-lbl">فئة المتجر <span class="req">*</span></label>
-        <select class="field-inp">
+        <select id="m-category" class="field-inp">
           <option value="">— اختر —</option>
           <option>ملابس وأزياء</option>
           <option>أحذية وحقائب</option>
@@ -319,12 +319,12 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
     </div>
     <div class="field">
       <label class="field-lbl">وصف المتجر <span class="req">*</span></label>
-      <textarea class="field-inp" placeholder="اكتب وصفاً مختصراً عن متجرك ومنتجاتك..."></textarea>
+      <textarea id="m-description" class="field-inp" placeholder="اكتب وصفاً مختصراً عن متجرك ومنتجاتك..."></textarea>
     </div>
     <div class="row2">
       <div class="field">
         <label class="field-lbl">منطقة التشغيل <span class="req">*</span></label>
-        <select class="field-inp">
+        <select id="m-area" class="field-inp">
           <option value="">— اختر —</option>
           <option>الكويت العاصمة</option>
           <option>حولي</option>
@@ -337,7 +337,7 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
       </div>
       <div class="field">
         <label class="field-lbl">عدد المنتجات المتوقعة</label>
-        <select class="field-inp">
+        <select id="m-products" class="field-inp">
           <option>1 — 20 منتج</option>
           <option>21 — 50 منتج</option>
           <option>51 — 100 منتج</option>
@@ -456,7 +456,7 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
       <div class="field">
         <label class="field-lbl">البطاقة المدنية <span class="req">*</span></label>
         <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
-          <input type="file" accept="image/*,application/pdf" onchange="markUpload(this,'id-done')">
+          <input id="m-docCivilId" type="file" accept="image/*,application/pdf" onchange="markUpload(this,'id-done')">
           <div class="upload-ico"><i class="ti ti-id-badge-2"></i></div>
           <div class="upload-title">رفع البطاقة المدنية</div>
           <div class="upload-sub">JPG أو PNG أو PDF — حد 5 ميغا</div>
@@ -466,7 +466,7 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
       <div class="field">
         <label class="field-lbl">السجل التجاري / الترخيص <span class="req">*</span></label>
         <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
-          <input type="file" accept="image/*,application/pdf" onchange="markUpload(this,'cr-done')">
+          <input id="m-docCR" type="file" accept="image/*,application/pdf" onchange="markUpload(this,'cr-done')">
           <div class="upload-ico"><i class="ti ti-building"></i></div>
           <div class="upload-title">رفع السجل التجاري</div>
           <div class="upload-sub">JPG أو PNG أو PDF — حد 5 ميغا</div>
@@ -478,7 +478,7 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
       <div class="field">
         <label class="field-lbl">شعار المتجر</label>
         <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
-          <input type="file" accept="image/*" onchange="markUpload(this,'logo-done')">
+          <input id="m-docLogo" type="file" accept="image/*" onchange="markUpload(this,'logo-done')">
           <div class="upload-ico"><i class="ti ti-photo"></i></div>
           <div class="upload-title">رفع شعار المتجر</div>
           <div class="upload-sub">PNG أو JPG — حد 2 ميغا (اختياري)</div>
@@ -488,7 +488,7 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
       <div class="field">
         <label class="field-lbl">صورة غلاف المتجر</label>
         <div class="upload-zone" ondragover="this.classList.add('over')" ondragleave="this.classList.remove('over')">
-          <input type="file" accept="image/*" onchange="markUpload(this,'cover-done')">
+          <input id="m-docCover" type="file" accept="image/*" onchange="markUpload(this,'cover-done')">
           <div class="upload-ico"><i class="ti ti-photo-scan"></i></div>
           <div class="upload-title">رفع صورة الغلاف</div>
           <div class="upload-sub">PNG أو JPG — حد 4 ميغا (اختياري)</div>
@@ -504,9 +504,10 @@ footer{background:var(--black);color:#888;padding:32px 40px;margin-top:0;}
         </div>
       </div>
     </div>
+    <div id="m-err" role="alert" hidden style="margin-top:12px;padding:10px 12px;border-radius:10px;background:#FBEDEA;color:#A8412D;font-size:13px;font-weight:700;"></div>
     <div class="btn-row">
       <button class="btn-prev" onclick="goStep(2)"><i class="ti ti-arrow-right"></i> السابق</button>
-      <button class="btn-next" onclick="submitApp()"><i class="ti ti-send"></i> إرسال الطلب</button>
+      <button class="btn-next" id="m-submit" onclick="submitApp()"><i class="ti ti-send"></i> إرسال الطلب</button>
     </div>
   </div>
 </div>
@@ -581,9 +582,12 @@ function updateProgress(n) {
   }
 }
 
+/* the plan the applicant chose — the form opens with the free plan selected */
+let selectedPlan = 'free';
 function selectPlan(el, plan) {
   document.querySelectorAll('.plan-opt').forEach(p => p.classList.remove('sel'));
   el.classList.add('sel');
+  selectedPlan = plan;
 }
 
 function markUpload(inp, doneId) {
@@ -597,19 +601,93 @@ function toggleAgree(wrap) {
   wrap.classList.toggle('on', agreed);
 }
 
-function submitApp() {
-  if (!agreed) {
-    alert('الرجاء الموافقة على الشروط والأحكام');
-    return;
-  }
-  document.getElementById('step3').style.display = 'none';
+/* ───────── SUBMIT — a real, stored application ─────────
+   The application is recorded by RAFMerchantApplications (the one owner of
+   merchant join applications) and reaches RAF Management's Requests &
+   Approvals through RAFRequests. The reference shown is the stored record's
+   own. The PASSWORD fields are checked here and never sent or stored: an
+   application is not an account. */
+function tr(ar, en){ return document.getElementById('htmlRoot').lang === 'en' ? en : ar; }
+function val(id){ const e = document.getElementById(id); return e ? e.value.trim() : ''; }
+function fileMeta(id){
+  const e = document.getElementById(id), f = e && e.files && e.files[0];
+  return f ? { name:f.name, type:f.type || null, size:f.size } : null;
+}
+function hoursOf(){
+  const out = {};
+  ['sat','sun','mon','tue','wed','thu','fri'].forEach(function(k){
+    const row = document.getElementById('wh-' + k); if (!row) return;
+    const on = row.querySelector('input[type="checkbox"]');
+    const from = row.querySelector('.wh-from'), to = row.querySelector('.wh-to');
+    out[k] = { open:!!(on && on.checked), from:from ? from.value : null, to:to ? to.value : null };
+  });
+  return out;
+}
+/* one token per filled form: a double click or a retry sends the same token,
+   and the authority returns the application already stored */
+function submissionKey(){
+  let k = null; try { k = sessionStorage.getItem('raf_mapp_key'); } catch (e) {}
+  if (!k){ k = 'mk-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+           try { sessionStorage.setItem('raf_mapp_key', k); } catch (e) {} }
+  return k;
+}
+const FIELD_TXT = {
+  firstName:['الاسم الأول','First name'], lastName:['الاسم الأخير','Last name'], phone:['رقم الهاتف','Phone'],
+  email:['البريد الإلكتروني','Email'], civilId:['الرقم المدني','Civil ID'], nationality:['الجنسية','Nationality'],
+  'store.name':['اسم المتجر','Store name'], 'store.category':['فئة المتجر','Store category'],
+  'store.description':['وصف المتجر','Store description'], 'store.area':['منطقة التشغيل','Operating area'],
+  plan:['باقة الاشتراك','Plan'], 'doc.civilId':['البطاقة المدنية','Civil ID document'],
+  'doc.commercialRecord':['السجل التجاري / الترخيص','Commercial record / licence']
+};
+function showErr(msg){ const e = document.getElementById('m-err'); e.textContent = msg; e.hidden = !msg; }
+function showSuccess(ref){
+  ['step1','step2','step3'].forEach(function(s){ const e = document.getElementById(s); if (e) e.style.display = 'none'; });
   document.getElementById('stepsBar').style.display = 'none';
-  const refNum = 'MR-2026-' + String(Math.floor(Math.random() * 90000) + 10000);
-  document.getElementById('refNum').textContent = refNum;
+  document.getElementById('refNum').textContent = ref;
   document.getElementById('successWrap').style.display = 'block';
   updateProgress(4);
+}
+let submitting = false;
+function submitApp() {
+  if (submitting) return;
+  showErr('');
+  if (!agreed) { showErr(tr('الرجاء الموافقة على الشروط والأحكام','Please accept the terms and conditions')); return; }
+  const pw = document.getElementById('m-pw').value, pw2 = document.getElementById('m-pw2').value;
+  if (pw.length < 8) { showErr(tr('كلمة المرور 8 أحرف على الأقل','The password must be at least 8 characters')); return; }
+  if (pw !== pw2) { showErr(tr('كلمتا المرور غير متطابقتين','The passwords do not match')); return; }
+  if (!window.RAFMerchantApplications) { showErr(tr('تعذّر إرسال الطلب الآن.','The application cannot be sent right now.')); return; }
+  submitting = true;
+  const btn = document.getElementById('m-submit'); btn.disabled = true;
+  const res = RAFMerchantApplications.createApplication({
+    key: submissionKey(),
+    applicant:{ firstName:val('m-firstName'), lastName:val('m-lastName'), phone:val('m-phone'), email:val('m-email'),
+                civilId:val('m-civilId'), nationality:val('m-nationality') },
+    store:{ name:val('m-storeName'), category:val('m-category'), description:val('m-description'),
+            area:val('m-area'), expectedProducts:val('m-products') },
+    hours: hoursOf(), plan: selectedPlan,
+    documents:{ civilId:fileMeta('m-docCivilId'), commercialRecord:fileMeta('m-docCR'),
+                logo:fileMeta('m-docLogo'), cover:fileMeta('m-docCover') },
+    consent:{ accepted:true, terms:'raf_terms.html' }
+  });
+  submitting = false; btn.disabled = false;
+  if (!res || !res.ok) {
+    let msg = (res && res.message) || tr('تعذّر إرسال الطلب.','The application could not be sent.');
+    if (res && res.code === 'INVALID' && res.errors && res.errors.length)
+      msg = tr('أكمل الحقول المطلوبة: ','Complete the required fields: ') + res.errors.map(function(e){ const t = FIELD_TXT[e.field]; return t ? tr(t[0], t[1]) : e.field; }).join(tr('، ',', '));
+    if (res && res.code === 'DUPLICATE_APPLICATION' && res.ref) msg += ' (' + tr('رقم الطلب: ','Reference: ') + res.ref + ')';
+    showErr(msg);
+    return;
+  }
+  /* the confirmation survives a refresh of this tab — it shows the stored
+     reference, and never submits again */
+  try { sessionStorage.setItem('raf_mapp_done', JSON.stringify({ ref:res.ref, applicationId:res.applicationId })); sessionStorage.removeItem('raf_mapp_key'); } catch (e) {}
+  showSuccess(res.ref);
   document.getElementById('successWrap').scrollIntoView({behavior:'smooth'});
 }
+(function(){
+  let d = null; try { d = JSON.parse(sessionStorage.getItem('raf_mapp_done') || 'null'); } catch (e) { d = null; }
+  if (d && d.ref) { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ showSuccess(d.ref); }); else showSuccess(d.ref); }
+})();
 /* LANG */
 function toggleLang(){
   const r=document.getElementById('htmlRoot');
@@ -624,6 +702,10 @@ function applyLang(){
 }
 (function(){const l=localStorage.getItem('raf_lang');if(l){const r=document.getElementById('htmlRoot');r.lang=l;r.dir=l==='en'?'ltr':'rtl';}applyLang();})();
 </script>
+<!-- the merchant join application authority (stores the submission; no session needed) -->
+<script src="raf_record_store.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_merchant_applications.js"></script>
 <script src="raf_nav.js"></script>
 </body>
 </html>

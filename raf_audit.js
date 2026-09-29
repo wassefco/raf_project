@@ -130,6 +130,18 @@
     'logistics.application_reviewed': { tl:false, ar:'تمت مراجعة طلب انضمام',     en:'Driver application reviewed' },
     'logistics.application_approved': { tl:false, ar:'تم قبول طلب انضمام سائق',   en:'Driver application approved' },
     'logistics.application_rejected': { tl:false, ar:'تم رفض طلب انضمام سائق',    en:'Driver application rejected' },
+    /* the merchant join application, from public submission to decision
+       (RAFMerchantApplications) */
+    'merchant.application_submitted': { tl:false, ar:'تم إرسال طلب انضمام تاجر',  en:'Merchant join application submitted' },
+    'merchant.application_approved':  { tl:false, ar:'تم قبول طلب انضمام تاجر',   en:'Merchant application approved' },
+    'merchant.application_rejected':  { tl:false, ar:'تم رفض طلب انضمام تاجر',    en:'Merchant application rejected' },
+    /* merchant onboarding provisioning, performed on approval */
+    'merchant.store_provisioned':     { tl:false, ar:'تم إنشاء متجر التاجر',        en:'Merchant store provisioned' },
+    'merchant.account_provisioned':   { tl:false, ar:'تم إنشاء حساب التاجر (بانتظار التفعيل)', en:'Merchant account provisioned (pending activation)' },
+    'merchant.provisioning_failed':   { tl:false, ar:'فشل إعداد التاجر',            en:'Merchant provisioning failed' },
+    /* merchant account activation (RAFMerchantAuth) */
+    'merchant.activation_issued':     { tl:false, ar:'تم إصدار رابط تفعيل حساب التاجر', en:'Merchant activation link issued' },
+    'merchant.account_activated':     { tl:false, ar:'تم تفعيل حساب التاجر',        en:'Merchant account activated' },
     'compensation.issued':      { tl:false, ar:'صدر تعويض',                        en:'Compensation issued' },
     'compensation.voided':      { tl:false, ar:'أُلغي تعويض',                      en:'Compensation voided' },
     'compensation.reversed':    { tl:false, ar:'عُكس تعويض',                       en:'Compensation reversed' },

@@ -66,6 +66,19 @@
                           purpose:'append-only driver join applications — the immutable facts at submission (applicant, vehicle, document metadata, consent, source)' },
     logistics_application_events:{ key:'raf_logistics_application_events', owner:'RAFLogistics',
                           purpose:'append-only application lifecycle (submitted / review note / approved / rejected); the application status is derived from these' },
+    /* Merchant onboarding — owned by RAFMerchantApplications. A merchant join
+       APPLICATION is not an account and not a store: a prospective merchant
+       lives here until RAF Management decides. Same shape as the driver
+       application: an immutable submission plus append-only decisions. */
+    merchant_applications:       { key:'raf_merchant_applications',        owner:'RAFMerchantApplications',
+                          purpose:'append-only merchant join applications — the immutable facts at submission (applicant, store, working hours, plan, document metadata, consent); never a password' },
+    merchant_application_events: { key:'raf_merchant_application_events',  owner:'RAFMerchantApplications',
+                          purpose:'append-only merchant application lifecycle (submitted / approved / rejected); the application status is derived from these' },
+    /* Merchant account activation — owned by RAFMerchantAuth. One activation
+       record per provisioned merchant account (issued), and a second append
+       when it is used; the token's state is derived, never rewritten. */
+    merchant_activations:        { key:'raf_merchant_activations',         owner:'RAFMerchantAuth',
+                          purpose:'append-only merchant activation tokens (issued / used) — account id, created, expires, used; the state is derived' },
     /* Customer ↔ Driver communication — owned by RAFDriverCommunication.
        Who may take part is NEVER stored here: it is read, every time, from
        the order's own record (fulfilment.driverId, customer.id, status). */
@@ -91,6 +104,12 @@
        identity itself is never copied here — it stays on the account. */
     logistics_driver_profiles:{ key:'raf_logistics_driver_profiles', owner:'RAFLogistics',
                           purpose:'current Logistics profile per driver account; identity stays in RAFPerm and is not duplicated' },
+
+    /* the MERCHANT sign-in credential set during activation — a salted
+       PBKDF2 hash only, never a password. Isolated to merchant accounts; no
+       other account type has a credential in this prototype. */
+    merchant_credentials:{ key:'raf_merchant_credentials', owner:'RAFMerchantAuth',
+                          purpose:'current salted password hash per activated merchant account (PBKDF2-SHA256); never a plaintext password' },
 
     config:             { key:'raf_config',               owner:'RAFConfig',
                           purpose:'configured values that override the registry (history in RAFAudit)' }

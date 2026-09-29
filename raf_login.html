@@ -430,6 +430,8 @@
 </main>
 
 <script src="raf_permissions.js"></script>
+<!-- merchant accounts that were activated carry a real credential (and only they) -->
+<script src="raf_merchant_auth.js"></script>
 <script src="raf_demo_accounts.js"></script>
 <script>
   /* ───────── helpers ───────── */
@@ -528,7 +530,28 @@
     }
     if (!pw) { showErr('err-si-pw', t('كلمة المرور مطلوبة','Password is required')); ok = false; }
     if (!ok) return;
+    /* An ACTIVATED merchant account carries a real credential (a salted hash,
+       RAFMerchantAuth): its password is verified before any session exists.
+       Every other account keeps the prototype sign-in exactly as it was. */
+    const acct = credentialedMerchant(email);
+    if (acct) {
+      RAFMerchantAuth.verifyPassword(acct.id, pw).then(function (good) {
+        if (!good) { showErr('err-si-pw', t('كلمة المرور غير صحيحة','The password is not correct')); return; }
+        routeByRole(email);
+      });
+      return;
+    }
     routeByRole(email);
+  }
+  /* the merchant account behind an identifier, when it has a credential */
+  function credentialedMerchant(identifier){
+    try {
+      if (!window.RAFPerm || !window.RAFMerchantAuth) return null;
+      const id = (identifier || '').toString().trim().toLowerCase();
+      const norm = s => (s || '').toString().toLowerCase().replace(/[\s+]/g,'');
+      const u = RAFPerm.getUsers().find(x => (x.email||'').toLowerCase() === id || (norm(x.phone) && norm(x.phone) === norm(id)));
+      return u && u.roleId === 'merchant' && RAFMerchantAuth.hasCredential(u.id) ? u : null;
+    } catch (e) { return null; }
   }
 
   let signinPhone = '';
@@ -540,7 +563,16 @@
     showView('view-signin-otp');
     setTimeout(() => document.querySelector('#view-signin-otp .otp-input').focus(), 60);
   }
-  function confirmPhoneSignin(){ routeByRole(signinPhone); }
+  /* the phone path has no real code check in this prototype, so an account
+     with a real credential is never signed in through it */
+  function confirmPhoneSignin(){
+    if (credentialedMerchant(signinPhone)) {
+      showView('view-signin');
+      showErr('err-si-id', t('سجّل الدخول بالبريد الإلكتروني وكلمة المرور لهذا الحساب.','Sign in to this account with its email and password.'));
+      return;
+    }
+    routeByRole(signinPhone);
+  }
 
   function socialAuth(provider){ /* placeholder — OAuth in production */ window.location = 'raf_account.html'; }
 
@@ -650,18 +682,25 @@
         const norm = s => (s || '').toString().toLowerCase().replace(/[\s+]/g,'');
         const u = RAFPerm.getUsers().find(x => (x.email||'').toLowerCase() === id || norm(x.phone) === norm(id));
         if (u){
-          /* Roles whose interface is not built: RAF Management does not exist.
-             They are signed in as before — every surface their permissions
-             already open keeps working — but they are told so plainly instead
-             of being sent to a page that does not exist, or silently dropped
-             into the customer account. The Operations Manager's first rebuilt
-             page is the Logistics Command Center, and a driver now has the
-             rebuilt Driver App; each page's own check still decides access. */
-          const STAFF = ['super_admin','higher_mgmt','customer_service','finance','marketing'];
-          const map = { ops_manager:'raf_logistics.html', driver:'raf_driver.html',
+          /* An account awaiting activation (a newly provisioned merchant) is
+             never signed in: no session is written. It becomes usable only
+             after the real activation / password-setup flow activates it. */
+          if (u.status === (RAFPerm.PENDING_ACTIVATION || 'pending_activation')) {
+            if (!document.getElementById('view-signin').classList.contains('on')) showView('view-signin');
+            showErr('err-si-id', t('هذا الحساب بانتظار التفعيل، ولا يمكن تسجيل الدخول به بعد.','This account is awaiting activation and cannot sign in yet.'));
+            return;
+          }
+          /* RAF staff land on the RAF Management Home (raf_admin.html). That
+             page's own check decides what the account may see, from its
+             effective permissions — an account with no administrative section
+             is told so there. The Operations Manager's first page is still the
+             Logistics Command Center, and a driver has the Driver App; each
+             page's own check still decides access. */
+          const map = { super_admin:'raf_admin.html', higher_mgmt:'raf_admin.html',
+            customer_service:'raf_admin.html', finance:'raf_admin.html', marketing:'raf_admin.html',
+            ops_manager:'raf_logistics.html', driver:'raf_driver.html',
             merchant:'raf_merchant.html', merchant_employee:'raf_merchant.html', customer:'raf_account.html' };
           RAFPerm.setCurrentUser(u.id);
-          if (STAFF.indexOf(u.roleId) > -1) { showView('view-staff-pending'); return; }
           dest = map[u.roleId] || 'raf_account.html';
           /* a customer goes back to the page sign-in was opened from; every
              other role keeps its own interface */

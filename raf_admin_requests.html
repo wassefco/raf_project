@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl" data-ui="admin">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — الطلبات والموافقات</title>
+<script src="raf_admin_theme.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_logistics.css">
+<link rel="stylesheet" href="raf_admin.css">
+<style>
+/* ══════════ REQUESTS & APPROVALS — an operational queue, not a dashboard ══════════ */
+.rq-head{ display:flex; align-items:flex-end; gap:10px 16px; flex-wrap:wrap; margin-block-end:12px; }
+.rq-head h1{ margin:0; font-size:19px; font-weight:800; color:var(--ink); }
+.rq-head p{ margin:2px 0 0; color:var(--muted); font-size:12.5px; }
+.rq-bar{ display:flex; align-items:center; gap:8px 12px; flex-wrap:wrap; padding:10px 12px; border-block-end:1px solid var(--line); }
+.seg{ display:inline-flex; border:1px solid var(--line-2); border-radius:var(--r); overflow:hidden; }
+.seg button{ min-height:36px; padding:0 12px; border:0; background:transparent; color:var(--muted); font-size:12.5px; font-weight:700; cursor:pointer;
+  display:inline-flex; align-items:center; gap:6px; border-inline-end:1px solid var(--line); }
+.seg button:last-child{ border-inline-end:0; }
+.seg button[aria-pressed="true"]{ background:var(--accent-soft); color:var(--accent); }
+.seg .c{ font-family:'DM Sans',var(--font); font-size:11.5px; color:var(--faint); }
+.seg button[aria-pressed="true"] .c{ color:var(--accent); }
+.search{ position:relative; flex:1 1 240px; max-width:380px; margin-inline-start:auto; }
+.search i{ position:absolute; inset-inline-start:10px; top:50%; transform:translateY(-50%); color:var(--faint); font-size:16px; }
+.search input{ width:100%; min-height:36px; padding-block:0; padding-inline:32px 10px; border:1px solid var(--line-2); border-radius:var(--r);
+  background:var(--surface); color:var(--ink); font-size:13px; }
+.search input:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:transparent; }
+.rq-bar select{ min-height:36px; border:1px solid var(--line-2); border-radius:var(--r); background:var(--surface); color:var(--ink); padding:0 8px; font-size:12.5px; }
+
+/* the queue table */
+.qt{ width:100%; border-collapse:collapse; min-width:0; }
+.qt th{ background:var(--surface-2); color:var(--muted); font-size:10.5px; letter-spacing:.08em; padding:9px 14px; border-block-end:1px solid var(--line); text-align:start; }
+.qt td{ padding:10px 14px; border-block-end:1px solid var(--line); font-size:13px; color:var(--text); vertical-align:middle; }
+.qt tbody tr{ cursor:pointer; }
+.qt tbody tr:hover td{ background:var(--surface-2); }
+.qt tbody tr:last-child td{ border-block-end:0; }
+.qt .ref{ font-weight:800; color:var(--ink); }
+.qt .sub{ display:block; color:var(--faint); font-size:11px; margin-block-start:2px; }
+.qt .who{ font-weight:700; color:var(--ink); }
+.qt .go{ display:inline-flex; align-items:center; gap:5px; min-height:32px; padding:0 11px; border-radius:var(--r); border:1px solid var(--line-2);
+  color:var(--ink); text-decoration:none; font-size:12px; font-weight:700; white-space:nowrap; }
+.qt .go.pri{ background:var(--gold); border-color:var(--gold); color:#15130F; }
+.qt .go:hover{ filter:brightness(.97); }
+.qt tr.pending td:first-child{ box-shadow:inset 3px 0 0 var(--pend); }
+[dir="rtl"] .qt tr.pending td:first-child{ box-shadow:inset -3px 0 0 var(--pend); }
+.b-wait,.b-done,.b-off{ font-size:11px; }
+.empty-q{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:18px 16px; color:var(--muted); font-size:13px; }
+.empty-q i{ font-size:18px; color:var(--done); }
+.empty-q .btn{ margin-inline-start:auto; }
+
+/* ══════════ REQUEST DETAILS — reviewing a case file ══════════ */
+.back{ display:inline-flex; align-items:center; gap:6px; min-height:34px; color:var(--muted); text-decoration:none; font-size:12.5px; font-weight:700; margin-block-end:8px; }
+.back:hover{ color:var(--accent); }
+[dir="rtl"] .back i{ transform:scaleX(-1); }
+.case-h{ padding:14px 18px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px 18px; align-items:start; }
+.case-h .t{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.case-h h1{ margin:0; font-size:20px; font-weight:800; color:var(--ink); font-family:'DM Sans',var(--font); }
+.case-h .origin{ display:inline-flex; align-items:center; gap:6px; color:var(--accent); font-weight:700; font-size:12.5px; text-decoration:none; min-height:32px; }
+.case-h .origin:hover{ text-decoration:underline; }
+.meta-g{ grid-column:1 / -1; display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); border-block-start:1px solid var(--line); margin:4px -18px -14px; }
+.meta-g > div{ padding:10px 18px; border-inline-end:1px solid var(--line); min-width:0; }
+.meta-g > div:last-child{ border-inline-end:0; }
+.meta-g .k{ display:block; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); }
+.meta-g .v{ display:block; margin-block-start:3px; font-size:13px; font-weight:700; color:var(--ink); overflow-wrap:anywhere; }
+
+.case{ display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:14px; align-items:start; margin-block-start:14px; }
+.case-main{ display:flex; flex-direction:column; gap:14px; min-width:0; }
+.case-side{ position:sticky; top:calc(var(--head-h) + 14px); display:flex; flex-direction:column; gap:14px; min-width:0; }
+.dl{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); margin:0; }
+.dl > div{ padding:9px 16px; border-block-end:1px solid var(--line); min-width:0; }
+.dl > div:nth-child(odd){ border-inline-end:1px solid var(--line); }
+.dl dt{ font-size:11.5px; color:var(--faint); font-weight:700; }
+.dl dd{ margin:2px 0 0; font-size:13.5px; font-weight:700; color:var(--ink); overflow-wrap:anywhere; }
+.dl dd.na{ color:var(--faint); font-weight:500; }
+.dl dd a{ color:var(--accent); }
+
+.files{ list-style:none; margin:0; padding:0; }
+.files li{ display:grid; grid-template-columns:32px minmax(0,1fr) auto; gap:4px 12px; align-items:center; padding:9px 16px; border-block-end:1px solid var(--line); }
+.files li:last-child{ border-block-end:0; }
+.files .fi{ width:32px; height:32px; border-radius:var(--r-sm); display:grid; place-items:center; background:var(--surface-2); color:var(--muted); font-size:17px; }
+.files .fn{ min-width:0; }
+.files .fn b{ display:block; font-size:13px; color:var(--ink); overflow-wrap:anywhere; }
+.files .fn span{ display:flex; flex-wrap:wrap; gap:2px 10px; font-size:11.5px; color:var(--muted); margin-block-start:2px; }
+.files .fa{ display:flex; gap:6px; align-items:center; }
+.files .fa .na{ font-size:11px; color:var(--faint); }
+.note-line{ padding:8px 16px; font-size:11.5px; color:var(--faint); border-block-end:1px solid var(--line); background:var(--surface-2); }
+.note-line.bottom{ border-block-end:0; border-block-start:1px solid var(--line); }
+
+.gallery{ display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr)); gap:10px; padding:12px 16px; }
+.gallery button{ padding:0; border:1px solid var(--line); border-radius:var(--r); background:var(--surface-2); cursor:zoom-in; overflow:hidden; text-align:start; }
+.gallery img{ display:block; width:100%; aspect-ratio:4/3; object-fit:cover; }
+.gallery span{ display:block; padding:5px 8px; font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.lb{ position:fixed; inset:0; z-index:200; background:rgba(8,8,7,.86); display:grid; place-items:center; padding:24px; }
+.lb img{ max-width:min(1100px, 94vw); max-height:84vh; object-fit:contain; border-radius:6px; background:#111; }
+.lb .cap{ color:#ddd; font-size:12.5px; margin-top:10px; text-align:center; }
+.lb .ibtn{ position:absolute; inset-block-start:14px; inset-inline-end:14px; color:#fff; }
+
+.hist{ list-style:none; margin:0; padding:6px 0; }
+.hist li{ position:relative; display:grid; grid-template-columns:18px minmax(0,1fr) auto; gap:4px 12px; padding:7px 16px; }
+.hist .dot{ width:10px; height:10px; border-radius:50%; margin:5px 4px 0; background:var(--line-2); }
+.hist li.approved .dot{ background:var(--done); } .hist li.rejected .dot{ background:var(--alert); } .hist li.submitted .dot{ background:var(--new); }
+.hist b{ font-size:13px; color:var(--ink); }
+.hist .who{ display:block; font-size:11.5px; color:var(--muted); }
+.hist .txt{ grid-column:2 / -1; font-size:12.5px; color:var(--text); background:var(--surface-2); border:1px solid var(--line); border-radius:var(--r-sm); padding:6px 9px; }
+.hist time{ font-size:11px; color:var(--faint); white-space:nowrap; }
+
+/* the decision area */
+.dec{ padding:14px 16px; display:flex; flex-direction:column; gap:10px; }
+.dec label{ font-size:12px; font-weight:800; color:var(--ink); }
+.dec .hint{ font-size:11.5px; color:var(--faint); margin-top:-6px; }
+.dec textarea{ width:100%; min-height:96px; resize:vertical; padding:9px 10px; border:1px solid var(--line-2); border-radius:var(--r);
+  background:var(--surface); color:var(--ink); font:inherit; font-size:13px; }
+.dec textarea:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:transparent; }
+.dec .row{ display:flex; gap:8px; }
+.dec .row .btn{ flex:1; min-height:44px; font-size:13.5px; }
+.btn.approve{ background:var(--gold); border-color:var(--gold); color:#15130F; }
+.btn.approve:hover{ filter:brightness(.96); background:var(--gold); }
+.btn.reject{ background:transparent; border-color:var(--alert); color:var(--alert); }
+.btn.reject:hover{ background:var(--alert-bg); }
+.btn.ghost{ background:transparent; }
+.dec .confirm{ border:1px solid var(--line-2); border-radius:var(--r); padding:10px 12px; background:var(--surface-2); font-size:12.5px; color:var(--text); display:flex; flex-direction:column; gap:8px; }
+.dec .confirm.rej{ border-color:var(--alert); background:var(--alert-bg); }
+.dec .err{ color:var(--alert); font-size:12.5px; font-weight:700; }
+.dec .ok{ color:var(--done); font-size:12.5px; font-weight:700; }
+.dec .ro{ display:flex; gap:8px; align-items:flex-start; font-size:12.5px; color:var(--muted); }
+.dec .ro i{ color:var(--accent); font-size:16px; }
+.dec-sum{ display:grid; gap:6px; font-size:12.5px; color:var(--text); }
+.dec-sum b{ color:var(--ink); }
+.dec-sum .badge{ justify-self:start; }
+
+@media (max-width:1199px){
+  .case{ grid-template-columns:minmax(0,1fr); }
+  .case-side{ position:static; order:-1; }
+}
+@media (max-width:760px){
+  .meta-g{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .meta-g > div:nth-child(2n){ border-inline-end:0; }
+  .meta-g > div{ border-block-end:1px solid var(--line); }
+  .qt, .qt thead, .qt tbody, .qt tr, .qt td{ display:block; width:100%; }
+  .qt thead{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+  .qt tbody tr{ border-block-end:1px solid var(--line); padding:6px 0; }
+  .qt td{ border:0; display:flex; gap:12px; padding:4px 14px; }
+  .qt td::before{ content:attr(data-l); flex:0 0 34%; color:var(--faint); font-size:11.5px; font-weight:700; }
+  .qt tr.pending td:first-child{ box-shadow:none; }
+  .qt td.act{ justify-content:flex-end; }
+  .qt td.act::before{ display:none; }
+  .search{ max-width:none; flex-basis:100%; margin-inline-start:0; }
+  .seg{ width:100%; } .seg button{ flex:1; justify-content:center; padding:0 6px; }
+  .dl{ grid-template-columns:minmax(0,1fr); }
+  .dl > div:nth-child(odd){ border-inline-end:0; }
+  .case-h{ grid-template-columns:minmax(0,1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-c" role="alert">
+    <div class="ic"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
+    <h1 id="gateT"></h1>
+    <p id="gateP"></p>
+    <a class="btn" href="raf_login.html" id="gateSignIn"><i class="ti ti-login" aria-hidden="true"></i><span data-ar="تسجيل الدخول" data-en="Sign in">تسجيل الدخول</span></a>
+    <button class="btn" type="button" id="gateSignOut" onclick="RAFSignOut()" hidden><i class="ti ti-logout" aria-hidden="true"></i><span data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span></button>
+  </div>
+</div>
+
+<div class="ops" id="shell" hidden>
+  <aside class="ops-nav" id="opsNav" aria-label="إدارة رف">
+    <div class="ops-brand">
+      <span class="ops-brand-mark" aria-hidden="true"><i class="ti ti-building-community"></i></span>
+      <span class="ops-brand-t"><b data-ar="إدارة رف" data-en="RAF Management">إدارة رف</b>
+        <span data-ar="مركز التحكم" data-en="Control Center">مركز التحكم</span></span>
+      <button class="ibtn ops-nav-x" type="button" onclick="ADM.closeNav()" aria-label="إغلاق القائمة"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <nav class="ops-nav-scroll" id="navTree" aria-label="التنقل"></nav>
+  </aside>
+  <div class="scrim" onclick="ADM.closeNav()" aria-hidden="true"></div>
+
+  <div class="ops-main">
+    <header class="ops-head">
+      <button class="ibtn ops-burger" type="button" aria-controls="opsNav" aria-expanded="false" onclick="ADM.openNav()" aria-label="القائمة"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+      <div class="ops-crumb"><small id="crumbGroup"></small><b id="crumbPage"></b></div>
+      <div class="ops-tools">
+        <button class="ibtn" type="button" id="refreshBtn" onclick="ADM.refresh()" aria-label="تحديث"><i class="ti ti-refresh" aria-hidden="true"></i></button>
+        <button class="ibtn" type="button" id="themeBtn" onclick="ADM.toggleTheme()" aria-pressed="false"><i class="ti ti-moon" aria-hidden="true"></i></button>
+        <button class="ibtn lang" type="button" id="langBtn" onclick="ADM.toggleLang()"></button>
+        <span class="ops-sep" aria-hidden="true"></span>
+        <div class="ops-user"><span class="ops-av" id="userAv" aria-hidden="true"></span>
+          <span class="ops-user-t"><b id="userName"></b><span id="userRole"></span></span></div>
+        <button class="ibtn signout" type="button" id="signOutBtn" onclick="RAFSignOut()">
+          <i class="ti ti-logout" aria-hidden="true"></i>
+          <span class="signout-t" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span>
+        </button>
+      </div>
+    </header>
+    <main class="ops-content" id="view" tabindex="-1"></main>
+  </div>
+</div>
+<div id="lightbox"></div>
+
+<!-- Read-only on load. The decision is executed by the request's own
+     authority (a driver application: RAFLogistics). raf_data.js and
+     raf_order_engine.js are not loaded — nothing here needs orders. -->
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_customer_service.js"></script>
+<script src="raf_logistics_authority.js"></script>
+<script src="raf_merchant_applications.js"></script>
+<script src="raf_merchant_auth.js"></script>
+<script src="raf_requests.js"></script>
+<script src="raf_admin_shell.js"></script>
+<script>
+/* ============================================================================
+   RAF MANAGEMENT — REQUESTS & APPROVALS (الطلبات والموافقات)
+   The ONE central surface where RAF Management reviews and decides requests.
+   It reads and decides ONLY through RAFRequests, which reads each request from
+   its originating authority and hands the decision back to it. This page keeps
+   no storage, writes nothing on load, and never records an audit event itself.
+
+   ROUTES (hash):  #request=<id>                one request, in full
+                   #status=…&type=…&q=…          the queue with its filters
+   Filters use replaceState (a refresh keeps them); opening a request pushes a
+   history entry, so Back returns to the queue.
+   ==========================================================================*/
+(function(){
+  'use strict';
+
+  var A = window.RAFAdmin, RQ = window.RAFRequests;
+  var T = A.T, L = A.L, esc = A.esc, clockOf = A.clockOf, isoOf = A.isoOf, el = A.el,
+      NEWTAB = A.NEWTAB, srNew = A.srNew;
+  var ROUTE = {}, LASTQ = '', DRAFT = {}, UI = { confirm:null, msg:null, err:null }, LB = null;
+
+  /* ───────── routing ───────── */
+  function parseHash(){
+    var o = {};
+    (location.hash || '').replace(/^#\/?/, '').split('&').forEach(function(p){
+      var i = p.indexOf('='); if(i > 0) o[p.slice(0, i)] = decodeURIComponent(p.slice(i + 1));
+    });
+    return o;
+  }
+  function queueHash(f){
+    var parts = [];
+    if(f.status) parts.push('status=' + encodeURIComponent(f.status));
+    if(f.type) parts.push('type=' + encodeURIComponent(f.type));
+    if(f.q) parts.push('q=' + encodeURIComponent(f.q));
+    return parts.join('&');
+  }
+  function setQueue(f){
+    var h = queueHash(f);
+    try { history.replaceState(null, '', h ? '#' + h : location.pathname + location.search); } catch(e){ location.hash = h; }
+    ROUTE = parseHash(); renderQueueBody();
+  }
+  var STATUSES = ['pending', 'approved', 'rejected'];
+
+  /* ───────── formatting ───────── */
+  function sizeOf(b){
+    if(typeof b !== 'number') return null;
+    if(b < 1024) return b + ' B';
+    if(b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1048576).toFixed(1) + ' MB';
+  }
+  function badge(status, txt){
+    var cls = status === 'approved' ? 'b-done' : status === 'rejected' ? 'b-off' : 'b-wait';
+    return '<span class="badge ' + cls + '">' + esc(L(txt) || status) + '</span>';
+  }
+  function fileIcon(a){
+    if(a.image) return 'ti-photo';
+    if(a.type === 'application/pdf' || a.ext === 'pdf') return 'ti-file-type-pdf';
+    return 'ti-file';
+  }
+
+  /* ───────── the queue ───────── */
+  function viewQueue(){
+    var c = RQ.counts(), types = RQ.types();
+    if(!c.ok) return '<div class="empty-q"><i class="ti ti-lock" aria-hidden="true"></i>' + esc(c.message) + '</div>';
+    var cc = c.counts, st = ROUTE.status && STATUSES.indexOf(ROUTE.status) > -1 ? ROUTE.status : '';
+    function seg(k, ar, en, n){
+      return '<button type="button" aria-pressed="' + (st === k) + '" onclick="RQP.status(\'' + k + '\')">' + esc(T(ar, en))
+        + ' <span class="c num">' + n + '</span></button>';
+    }
+    /* a type filter only once more than one type actually has requests */
+    var typed = Object.keys(cc.byType);
+    var typeSel = typed.length > 1
+      ? '<label class="sr-only" for="fType">' + esc(T('نوع الطلب','Request type')) + '</label><select id="fType" onchange="RQP.type(this.value)">'
+        + '<option value="">' + esc(T('كل الأنواع','All types')) + '</option>'
+        + types.filter(function(t){ return cc.byType[t.key]; }).map(function(t){
+            return '<option value="' + esc(t.key) + '"' + (ROUTE.type === t.key ? ' selected' : '') + '>' + esc(L(t.label)) + '</option>'; }).join('')
+        + '</select>' : '';
+    return '<div class="rq-head"><div><h1>' + esc(T('الطلبات والموافقات','Requests & Approvals')) + '</h1>'
+      + '<p>' + esc(T('طلبات تنتظر قرار إدارة رف، كما سجّلتها الجهات المسؤولة عنها.','Requests awaiting a RAF Management decision, as their owning authorities recorded them.')) + '</p></div></div>'
+      + '<section class="pn" aria-label="' + esc(T('قائمة الطلبات','Request queue')) + '">'
+      + '<div class="rq-bar"><div class="seg" role="group" aria-label="' + esc(T('الحالة','Status')) + '">'
+      + seg('', 'الكل', 'All', cc.all) + seg('pending', 'قيد المراجعة', 'Pending', cc.pending)
+      + seg('approved', 'مقبولة', 'Approved', cc.approved) + seg('rejected', 'مرفوضة', 'Rejected', cc.rejected) + '</div>'
+      + typeSel
+      + '<div class="search"><i class="ti ti-search" aria-hidden="true"></i><label class="sr-only" for="fQ">' + esc(T('بحث','Search')) + '</label>'
+      + '<input id="fQ" type="search" value="' + esc(ROUTE.q || '') + '" autocomplete="off" placeholder="' + esc(T('رقم الطلب، مقدّم الطلب، المرجع، النوع','Request ID, requester, reference, type')) + '" oninput="RQP.search(this.value)"></div></div>'
+      + '<div id="qBody">' + queueBody() + '</div></section>';
+  }
+  function queueBody(){
+    var st = ROUTE.status && STATUSES.indexOf(ROUTE.status) > -1 ? ROUTE.status : '';
+    var r = RQ.list({ status:st || undefined, type:ROUTE.type || undefined, q:ROUTE.q || '' });
+    if(!r.ok) return '<div class="empty-q"><i class="ti ti-lock" aria-hidden="true"></i>' + esc(r.message) + '</div>';
+    var errs = (r.errors || []).map(function(e){ return '<div class="note-line">' + esc(e.message || T('تعذّرت قراءة بعض الطلبات.','Some requests could not be read.')) + '</div>'; }).join('');
+    if(!r.items.length){
+      var filtered = !!(st || ROUTE.type || ROUTE.q);
+      return errs + '<div class="empty-q"><i class="ti ' + (filtered ? 'ti-filter-off' : 'ti-circle-check') + '" aria-hidden="true"></i>'
+        + esc(filtered ? T('لا توجد طلبات مطابقة.','No matching requests.') : T('لا توجد طلبات حالياً','No requests right now'))
+        + (filtered ? '<button class="btn sm" type="button" onclick="RQP.clear()">' + esc(T('مسح التصفية','Clear filters')) + '</button>' : '') + '</div>';
+    }
+    return errs + '<table class="qt"><caption class="sr-only">' + esc(T('الطلبات','Requests')) + '</caption><thead><tr>'
+      + '<th scope="col">' + esc(T('الطلب','Request')) + '</th><th scope="col">' + esc(T('النوع','Type')) + '</th>'
+      + '<th scope="col">' + esc(T('مقدّم الطلب','Requester')) + '</th><th scope="col">' + esc(T('تاريخ التقديم','Submitted')) + '</th>'
+      + '<th scope="col">' + esc(T('الحالة','Status')) + '</th><th scope="col"><span class="sr-only">' + esc(T('إجراء','Action')) + '</span></th></tr></thead><tbody>'
+      + r.items.map(function(x){
+          var href = '#request=' + encodeURIComponent(x.id);
+          return '<tr class="' + x.status + '" onclick="RQP.open(\'' + esc(x.id) + '\', event)">'
+            + '<td data-l="' + esc(T('الطلب','Request')) + '"><span><span class="ref num">' + esc(x.reference || '—') + '</span><span class="sub num">' + esc(x.id) + '</span></span></td>'
+            + '<td data-l="' + esc(T('النوع','Type')) + '"><span><span>' + esc(L(x.typeLabel)) + '</span><span class="sub">' + esc(L(x.owner)) + '</span></span></td>'
+            + '<td data-l="' + esc(T('مقدّم الطلب','Requester')) + '"><bdi class="who">' + esc((x.requester && x.requester.name) || '—') + '</bdi></td>'
+            + '<td data-l="' + esc(T('تاريخ التقديم','Submitted')) + '"><time class="num" datetime="' + isoOf(x.submittedAt) + '">' + esc(clockOf(x.submittedAt) || '—') + '</time></td>'
+            + '<td data-l="' + esc(T('الحالة','Status')) + '">' + badge(x.status, x.statusText) + '</td>'
+            + '<td class="act"><a class="go' + (x.status === 'pending' ? ' pri' : '') + '" href="' + href + '">'
+            + esc(x.status === 'pending' ? T('مراجعة','Review') : T('عرض','View')) + '</a></td></tr>';
+        }).join('') + '</tbody></table>';
+  }
+  function renderQueueBody(){ var b = el('qBody'); if(b) b.innerHTML = queueBody(); else render(); }
+
+  /* ───────── one request, in full ───────── */
+  function fieldValue(fl){
+    var v = fl.value;
+    if(v == null) return '<dd class="na">—</dd>';
+    if(typeof v === 'object' && v.at !== undefined){   /* a consent record */
+      return '<dd>' + esc(T('نعم','Yes')) + ' · <time class="num" datetime="' + isoOf(v.at) + '">' + esc(clockOf(v.at) || '—') + '</time>'
+        + (v.terms ? ' · <a href="' + esc(v.terms) + '"' + NEWTAB + '>' + esc(T('الشروط','Terms')) + srNew() + '</a>' : '') + '</dd>';
+    }
+    return '<dd' + (fl.mono ? ' class="num"' : '') + '>' + (fl.dir ? '<bdi dir="' + fl.dir + '">' + esc(v) + '</bdi>' : esc(v)) + '</dd>';
+  }
+  function secBlock(id, icon, ar, en, body, meta){
+    return '<section class="pn" aria-labelledby="' + id + '"><div class="pn-h"><h2 id="' + id + '"><i class="ti ' + icon + '" aria-hidden="true"></i>' + T(ar, en) + '</h2>'
+      + (meta ? '<span class="meta">' + meta + '</span>' : '') + '</div>' + body + '</section>';
+  }
+  function viewDetail(id){
+    var back = '<a class="back" href="#' + LASTQ + '"><i class="ti ti-arrow-left" aria-hidden="true"></i>' + esc(T('الطلبات والموافقات','Requests & Approvals')) + '</a>';
+    var g = RQ.get(id);
+    if(!g.ok) return back + '<section class="pn"><div class="empty-q"><i class="ti ti-file-alert" aria-hidden="true" style="color:var(--alert)"></i>'
+      + esc(g.message || T('الطلب غير موجود.','The request could not be found.')) + '</div></section>';
+    var r = g.request;
+    var head = '<section class="pn case-h" aria-labelledby="h-case"><div class="t"><h1 id="h-case" class="num">' + esc(r.reference || r.id) + '</h1>'
+      + '<span class="type-tag">' + esc(L(r.typeLabel)) + '</span>' + badge(r.status, r.statusText) + '</div>'
+      + (r.origin && r.origin.href ? '<a class="origin" href="' + esc(r.origin.href) + '"' + NEWTAB + '>' + esc(T('فتح في ','Open in ')) + esc(L(r.owner)) + srNew() + '<i class="ti ti-external-link" aria-hidden="true"></i></a>' : '<span></span>')
+      + '<div class="meta-g">'
+      + '<div><span class="k">' + esc(T('معرّف الطلب','Request ID')) + '</span><span class="v num">' + esc(r.id) + '</span></div>'
+      + '<div><span class="k">' + esc(T('تاريخ التقديم','Submitted')) + '</span><span class="v num"><time datetime="' + isoOf(r.submittedAt) + '">' + esc(clockOf(r.submittedAt) || '—') + '</time></span></div>'
+      + '<div><span class="k">' + esc(T('مقدّم الطلب','Requester')) + '</span><span class="v"><bdi>' + esc((r.requester && r.requester.name) || '—') + '</bdi></span></div>'
+      + '<div><span class="k">' + esc(T('الجهة المسؤولة','Owning authority')) + '</span><span class="v">' + esc(L(r.owner)) + '</span></div>'
+      + '</div></section>';
+
+    var info = (r.sections || []).map(function(s){
+      return secBlock('h-s-' + s.key, ({ vehicle:'ti-car', applicant:'ti-id', store:'ti-building-store', hours:'ti-clock' })[s.key] || 'ti-file-text', s.title.ar, s.title.en,
+        '<dl class="dl">' + s.fields.map(function(fl){ return '<div><dt>' + esc(L(fl.label)) + '</dt>' + fieldValue(fl) + '</div>'; }).join('') + '</dl>');
+    }).join('');
+
+    /* images: only real, viewable image content — none is invented */
+    var imgs = (r.attachments || []).filter(function(a){ return a.image && a.url; });
+    var gallery = imgs.length ? secBlock('h-img', 'ti-photo', 'الصور', 'Images',
+      '<div class="gallery">' + imgs.map(function(a, i){
+        return '<button type="button" onclick="RQP.zoom(' + i + ')" aria-label="' + esc(T('تكبير ','Enlarge ') + (a.name || L(a.label))) + '"><img src="' + esc(a.url) + '" alt="' + esc(L(a.label)) + '"><span>' + esc(a.name || L(a.label)) + '</span></button>';
+      }).join('') + '</div>', '<span class="num">' + imgs.length + '</span>') : '';
+    LB = imgs;
+
+    var att = r.attachments || [], metaOnly = att.some(function(a){ return !a.url; });
+    var files = att.length
+      ? (metaOnly ? '<div class="note-line">' + esc(T('لا تخزّن الجهة المسؤولة محتوى الملفات في هذا النموذج؛ تُعرض بيانات الملف كما سُجّلت عند التقديم.',
+                                                    'The owning authority does not store file content in this prototype; each file is shown as recorded at submission.')) + '</div>' : '')
+        + '<ul class="files">' + att.map(function(a){
+            var act = a.url
+              ? (a.image ? '<button class="btn sm" type="button" onclick="RQP.zoom(' + imgs.indexOf(a) + ')">' + esc(T('عرض','View')) + '</button>'
+                         : '<a class="btn sm" href="' + esc(a.url) + '" target="_blank" rel="noopener">' + esc(T('فتح','Open')) + srNew() + '</a>')
+              : '<span class="na">' + esc(T('المحتوى غير متاح','Content not available')) + '</span>';
+            return '<li><span class="fi" aria-hidden="true"><i class="ti ' + fileIcon(a) + '"></i></span>'
+              + '<span class="fn"><b><bdi>' + esc(a.name || '—') + '</bdi></b><span><span>' + esc(L(a.label)) + '</span>'
+              + (a.type ? '<span class="num">' + esc(a.type) + '</span>' : '') + (sizeOf(a.size) ? '<span class="num"><bdi dir="ltr">' + esc(sizeOf(a.size)) + '</bdi></span>' : '')
+              + (a.at ? '<time class="num" datetime="' + isoOf(a.at) + '">' + esc(clockOf(a.at)) + '</time>' : '') + '</span></span>'
+              + '<span class="fa">' + act + '</span></li>';
+          }).join('') + '</ul>'
+      : '<div class="empty-q" style="padding:12px 16px"><i class="ti ti-paperclip" aria-hidden="true" style="color:var(--faint)"></i>' + esc(T('لا توجد مرفقات','No attachments')) + '</div>';
+    if((r.missingAttachments || []).length) files += '<div class="note-line bottom">' + esc(T('لم يُرفق: ','Not attached: ')) + esc(r.missingAttachments.map(L).join(T('، ',', '))) + '</div>';
+    var attach = secBlock('h-att', 'ti-paperclip', 'المرفقات', 'Attachments', files, att.length ? '<span class="num">' + att.length + '</span>' : null);
+
+    var hist = secBlock('h-hist', 'ti-history', 'السجل', 'History', (r.history || []).length
+      ? '<ul class="hist">' + r.history.map(function(e){
+          return '<li class="' + esc(e.kind) + '"><span class="dot" aria-hidden="true"></span><span><b>' + esc(L(e.label)) + '</b>'
+            + '<span class="who"><bdi>' + esc(e.actorName || (e.kind === 'submitted' ? T('مقدّم الطلب','The applicant') : '—')) + '</bdi></span></span>'
+            + '<time class="num" datetime="' + isoOf(e.at) + '">' + esc(clockOf(e.at) || '—') + '</time>'
+            + (e.reason || e.note ? '<span class="txt">' + esc(e.reason || e.note) + '</span>' : '') + '</li>';
+        }).join('') + '</ul>'
+      : '<div class="empty-q" style="padding:12px 16px">' + esc(T('لا يوجد سجل.','No history.')) + '</div>');
+
+    return back + head + '<div class="case"><div class="case-main">' + info + gallery + attach + hist + '</div>'
+      + '<div class="case-side">' + decision(r) + '</div></div>';
+  }
+
+  /* ───────── the decision ─────────
+     Approve (optional note) or Reject (reason REQUIRED). The request's own
+     authority executes it, enforcing its own permission. */
+  /* what the owning authority reports about this pending request (e.g. a
+     failed provisioning attempt) — shown, never hidden */
+  function notices(r){
+    return (r.notices || []).map(function(n){
+      return '<div class="err" role="alert"><i class="ti ti-alert-triangle" aria-hidden="true"></i> ' + esc(L(n)) + '</div>';
+    }).join('');
+  }
+  /* the provisioned account's activation. There is NO email service: the
+     prototype link is shown here, to Management only, and says so. */
+  function activationBlock(v){
+    if(!v) return '';
+    var active = v.accountStatus === 'active';
+    var s = '<div class="act-box" style="border:1px solid var(--line-2);border-radius:var(--r);padding:10px 12px;display:grid;gap:6px;margin-top:4px">'
+      + '<span>' + esc(T('حالة الحساب: ','Account status: ')) + '<b>' + esc(active ? T('مفعّل','Active') : v.accountStatus === 'pending_activation' ? T('بانتظار التفعيل','Pending activation') : (v.accountStatus || '—')) + '</b></span>';
+    if(!active && v.href){
+      s += '<span style="font-size:11.5px;color:var(--pend);font-weight:800">' + esc(T('رابط تفعيل تجريبي — للنموذج الأولي فقط','Prototype activation link — prototype only')) + '</span>'
+        + '<a class="btn sm" href="' + esc(v.href) + '" target="_blank" rel="noopener" style="justify-self:start">' + esc(T('فتح رابط التفعيل','Open activation link')) + srNew() + '</a>'
+        + '<span style="font-size:11.5px;color:var(--faint)">' + esc(T('لم يُرسل أي بريد إلكتروني: خدمة البريد غير مُنفّذة بعد. سلّم الرابط للتاجر يدوياً.','No email was sent: email delivery is not implemented yet. Hand the link to the merchant yourself.'))
+        + (v.expiresAt ? ' ' + esc(T('ينتهي في ','Expires ')) + '<span class="num">' + esc(clockOf(v.expiresAt)) + '</span>' : '') + '</span>';
+    } else if(!active && v.linkState && v.linkState !== 'valid'){
+      s += '<span style="font-size:11.5px;color:var(--alert)">' + esc(v.linkState === 'expired' ? T('انتهت صلاحية رابط التفعيل؛ إعادة الإرسال غير متاحة بعد.','The activation link expired; resending is not available yet.') : T('لا يوجد رابط تفعيل صالح.','No valid activation link.')) + '</span>';
+    }
+    return s + '</div>';
+  }
+  function decision(r){
+    var body;
+    if(r.status !== 'pending'){
+      var d = r.decision || {};
+      body = '<div class="dec"><div class="dec-sum">' + badge(r.status, r.statusText)
+        + '<span>' + esc(T('بواسطة: ','By: ')) + '<b><bdi>' + esc(d.byName || '—') + '</bdi></b></span>'
+        + '<span>' + esc(T('التاريخ: ','Date: ')) + '<b class="num">' + esc(clockOf(d.at) || '—') + '</b></span>'
+        + (d.reason ? '<span>' + esc(T('سبب الرفض: ','Rejection reason: ')) + '<b>' + esc(d.reason) + '</b></span>' : '')
+        + (d.note ? '<span>' + esc(T('ملاحظة: ','Note: ')) + '<b>' + esc(d.note) + '</b></span>' : '')
+        + (d.result ? '<span class="ok"><i class="ti ti-circle-check" aria-hidden="true"></i> ' + esc(L(d.result)) + '</span>' : '')
+        + activationBlock(d.activation)
+        + '</div>' + (UI.msg ? '<div class="ok" role="status">' + esc(UI.msg) + '</div>' : '') + '</div>';
+    } else if(!r.canDecide){
+      body = '<div class="dec">' + notices(r) + '<div class="ro"><i class="ti ti-eye" aria-hidden="true"></i><span>'
+        + esc(T('عرض فقط — لا تملك صلاحية اتخاذ القرار في هذا النوع من الطلبات.','View only — you are not permitted to decide this type of request.')) + '</span></div></div>';
+    } else {
+      var c = UI.confirm;
+      body = '<div class="dec">' + notices(r) + '<label for="decNote">' + esc(T('ملاحظة القرار','Decision note')) + '</label>'
+        + '<div class="hint">' + esc(T('مطلوبة عند الرفض، واختيارية عند الاعتماد.','Required to reject; optional to approve.')) + '</div>'
+        + '<textarea id="decNote" maxlength="300" oninput="RQP.draft(this.value)">' + esc(DRAFT[r.id] || '') + '</textarea>'
+        + (UI.err ? '<div class="err" role="alert">' + esc(UI.err) + '</div>' : '')
+        + (c === 'approve'
+            ? '<div class="confirm" role="alertdialog" aria-label="' + esc(T('تأكيد الاعتماد','Confirm approval')) + '"><span>' + esc(T('ستنفّذ الجهة المسؤولة (','The owning authority (')) + esc(L(r.owner)) + esc(T(') نتيجة الاعتماد: ',') will carry out the approval: ')) + esc(L(r.approveEffect) || T('تنفيذ القرار','the decision')) + esc(T('. تأكيد؟','. Confirm?')) + '</span>'
+              + '<div class="row"><button class="btn approve" type="button" id="btnConfirm" onclick="RQP.commit(\'approve\')">' + esc(T('تأكيد الاعتماد','Confirm approval')) + '</button>'
+              + '<button class="btn ghost" type="button" onclick="RQP.cancel()">' + esc(T('إلغاء','Cancel')) + '</button></div></div>'
+            : c === 'reject'
+            ? '<div class="confirm rej" role="alertdialog" aria-label="' + esc(T('تأكيد الرفض','Confirm rejection')) + '"><span>' + esc(T('سيُرفض الطلب ويُحفظ مع السبب. تأكيد؟','The request will be rejected and kept with the reason. Confirm?')) + '</span>'
+              + '<div class="row"><button class="btn reject" type="button" id="btnConfirm" onclick="RQP.commit(\'reject\')">' + esc(T('تأكيد الرفض','Confirm rejection')) + '</button>'
+              + '<button class="btn ghost" type="button" onclick="RQP.cancel()">' + esc(T('إلغاء','Cancel')) + '</button></div></div>'
+            : '<div class="row"><button class="btn approve" type="button" onclick="RQP.ask(\'approve\')"><i class="ti ti-check" aria-hidden="true"></i>' + esc(T('اعتماد','Approve')) + '</button>'
+              + '<button class="btn reject" type="button" onclick="RQP.ask(\'reject\')"><i class="ti ti-x" aria-hidden="true"></i>' + esc(T('رفض','Reject')) + '</button></div>')
+        + '</div>';
+    }
+    return secBlock('h-dec', 'ti-gavel', 'القرار', 'Decision', body);
+  }
+
+  /* ───────── render ───────── */
+  function render(){
+    var a = document.activeElement, keep = a && a.id ? { id:a.id, s:a.selectionStart, e:a.selectionEnd } : null;
+    ROUTE = parseHash();
+    el('view').innerHTML = ROUTE.request ? viewDetail(ROUTE.request) : viewQueue();
+    if(!ROUTE.request) LASTQ = queueHash(ROUTE);
+    if(keep){ var n = el(keep.id); if(n){ n.focus(); try { if(keep.s != null) n.setSelectionRange(keep.s, keep.e); } catch(e){} } }
+  }
+  function lightbox(i){
+    var a = LB && LB[i]; if(!a) return;
+    el('lightbox').innerHTML = '<div class="lb" role="dialog" aria-modal="true" aria-label="' + esc(a.name || L(a.label)) + '" onclick="if(event.target===this)RQP.unzoom()">'
+      + '<button class="ibtn" type="button" onclick="RQP.unzoom()" aria-label="' + esc(T('إغلاق','Close')) + '"><i class="ti ti-x" aria-hidden="true"></i></button>'
+      + '<div><img src="' + esc(a.url) + '" alt="' + esc(L(a.label)) + '"><div class="cap">' + esc((a.name || '') + (a.type ? ' · ' + a.type : '') + (sizeOf(a.size) ? ' · ' + sizeOf(a.size) : '')) + '</div></div></div>';
+    el('lightbox').querySelector('.ibtn').focus();
+  }
+
+  var tq = null;
+  window.RQP = {
+    status:function(k){ var f = parseHash(); f.status = k; delete f.request; setQueue(f); render(); },
+    type:function(v){ var f = parseHash(); f.type = v; setQueue(f); },
+    search:function(v){ clearTimeout(tq); tq = setTimeout(function(){ var f = parseHash(); f.q = v.trim(); setQueue(f); }, 180); },
+    clear:function(){ setQueue({}); render(); },
+    open:function(id, ev){
+      if(ev && ev.target && ev.target.closest && ev.target.closest('a')) return;   /* the link handles itself */
+      location.hash = 'request=' + encodeURIComponent(id);
+    },
+    draft:function(v){ if(ROUTE.request) DRAFT[ROUTE.request] = v; UI.err = null; },
+    ask:function(k){
+      var v = (DRAFT[ROUTE.request] || '').trim();
+      if(k === 'reject' && !v){ UI.err = T('سبب الرفض مطلوب.','A rejection reason is required.'); UI.confirm = null; render(); var t = el('decNote'); if(t) t.focus(); return; }
+      UI.err = null; UI.confirm = k; render(); var b = el('btnConfirm'); if(b) b.focus();
+    },
+    cancel:function(){ UI.confirm = null; render(); },
+    commit:function(k){
+      var id = ROUTE.request, v = (DRAFT[id] || '').trim();
+      var r = RQ.decide(id, k === 'approve' ? RQ.DECISION.APPROVE : RQ.DECISION.REJECT, k === 'approve' ? { note:v } : { reason:v });
+      UI.confirm = null;
+      if(!r.ok){ UI.err = r.message || T('تعذّر تنفيذ القرار.','The decision could not be carried out.'); render(); return; }
+      delete DRAFT[id]; UI.err = null;
+      UI.msg = k === 'approve' ? T('تم الاعتماد، ونفّذت الجهة المسؤولة النتيجة.','Approved — the owning authority carried out the result.')
+                               : T('تم رفض الطلب.','The request was rejected.');
+      A.refresh();
+    },
+    zoom:function(i){ lightbox(i); },
+    unzoom:function(){ el('lightbox').innerHTML = ''; }
+  };
+  window.addEventListener('hashchange', function(){ UI.confirm = null; UI.err = null; UI.msg = null; render(); el('view').focus(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && el('lightbox').innerHTML) RQP.unzoom(); });
+
+  A.start({ active:'requests', title:{ ar:'الطلبات والموافقات', en:'Requests & Approvals' },
+            canEnter:function(){ return !!(RQ && RQ.canAccess()); },
+            denied:['لا تملك صلاحية الوصول','You do not have access','الطلبات والموافقات غير متاحة لحسابك.','Requests & Approvals is not available to your account.'],
+            refresh:render });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl" data-ui="admin">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>رف — تفعيل حساب التاجر</title>
+<script src="raf_admin_theme.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_logistics.css">
+<link rel="stylesheet" href="raf_admin.css">
+<style>
+body{ min-height:100vh; display:flex; flex-direction:column; }
+.top{ display:flex; align-items:center; justify-content:space-between; padding:14px 18px; }
+.brand{ display:flex; align-items:center; gap:10px; color:var(--ink); text-decoration:none; font-weight:800; }
+.brand .mk{ width:34px; height:34px; border-radius:var(--r-sm); background:var(--gold); color:#15130F; display:grid; place-items:center; font-size:18px; }
+.wrap{ flex:1; display:grid; place-items:start center; padding:24px 16px 40px; }
+.card{ width:min(460px, 100%); background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); box-shadow:var(--shadow); overflow:hidden; }
+.card-h{ display:block; padding:18px 20px 14px; border-block-end:1px solid var(--line); background:transparent; }
+.card-h h1{ margin:0; font-size:19px; color:var(--ink); font-weight:800; }
+.card-h p{ margin:4px 0 0; color:var(--muted); font-size:12.5px; }
+.card-b{ padding:16px 20px 20px; display:flex; flex-direction:column; gap:12px; }
+.who{ display:grid; grid-template-columns:auto minmax(0,1fr); gap:4px 12px; font-size:13px; padding:10px 12px; border:1px solid var(--line); border-radius:var(--r); background:var(--surface-2); }
+.who dt{ color:var(--faint); font-weight:700; } .who dd{ margin:0; color:var(--ink); font-weight:800; overflow-wrap:anywhere; }
+label{ font-size:12.5px; font-weight:800; color:var(--ink); }
+.fld{ display:flex; flex-direction:column; gap:5px; }
+.fld input{ min-height:44px; padding:0 12px; border:1px solid var(--line-2); border-radius:var(--r); background:var(--surface); color:var(--ink); font:inherit; font-size:14px; }
+.fld input:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:transparent; }
+.rule{ font-size:11.5px; color:var(--faint); }
+.btn.go{ min-height:46px; background:var(--gold); border-color:var(--gold); color:#15130F; font-size:14px; }
+.btn.go:disabled{ opacity:.6; cursor:progress; }
+.msg{ display:flex; gap:10px; align-items:flex-start; padding:12px; border-radius:var(--r); font-size:13px; line-height:1.55; }
+.msg i{ font-size:20px; flex-shrink:0; }
+.msg.bad{ background:var(--alert-bg); color:var(--alert); } .msg.ok{ background:var(--done-bg); color:var(--done); } .msg.info{ background:var(--surface-2); color:var(--muted); border:1px solid var(--line); }
+.err{ color:var(--alert); font-size:12.5px; font-weight:700; }
+.note{ font-size:11.5px; color:var(--faint); text-align:center; padding:0 20px 16px; }
+</style>
+</head>
+<body>
+<div class="top">
+  <a class="brand" href="raf_homepage.html"><span class="mk" aria-hidden="true"><i class="ti ti-building-store"></i></span><span data-ar="رف" data-en="RAF">رف</span></a>
+  <button class="ibtn lang" type="button" id="langBtn" onclick="ACT.toggleLang()">EN</button>
+</div>
+<main class="wrap"><section class="card" aria-labelledby="h1"><div class="card-h"><h1 id="h1"></h1><p id="sub"></p></div><div class="card-b" id="body"></div></section></main>
+<p class="note" id="foot"></p>
+
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_merchant_auth.js"></script>
+<script>
+/* ============================================================================
+   MERCHANT ACCOUNT ACTIVATION — raf_merchant_activate.html#token=<token>
+   The token is the ONLY key to the account: it is never looked up by email,
+   name or store. Opening the page reads the token's state and writes nothing;
+   only a successful "Activate" changes anything (RAFMerchantAuth.activate).
+   ==========================================================================*/
+(function(){
+  'use strict';
+  var MA = window.RAFMerchantAuth;
+  var STATE = null, DONE = false, BUSY = false, ERR = null;
+  function root(){ return document.getElementById('htmlRoot'); }
+  function isEn(){ return root().lang === 'en'; }
+  function T(ar, en){ return isEn() ? en : ar; }
+  function L(o){ return o && typeof o === 'object' ? (isEn() ? (o.en || o.ar) : (o.ar || o.en)) : (o || ''); }
+  function el(id){ return document.getElementById(id); }
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function token(){ var m = /(?:^|[#&])token=([a-f0-9]{64})(?:&|$)/.exec(location.hash || ''); return m ? m[1] : ''; }
+
+  function msg(cls, icon, ar, en){ return '<div class="msg ' + cls + '" role="' + (cls === 'bad' ? 'alert' : 'status') + '"><i class="ti ' + icon + '" aria-hidden="true"></i><span>' + esc(T(ar, en)) + '</span></div>'; }
+  function render(){
+    el('langBtn').textContent = isEn() ? 'ع' : 'EN';
+    el('langBtn').setAttribute('aria-label', T('التبديل إلى الإنجليزية','Switch to Arabic'));
+    document.querySelectorAll('[data-ar][data-en]').forEach(function(e){ e.textContent = e.getAttribute('data-' + (isEn() ? 'en' : 'ar')); });
+    document.title = T('رف — تفعيل حساب التاجر','RAF — Activate your merchant account');
+    el('h1').textContent = T('تفعيل حساب التاجر','Activate your Merchant Account');
+    el('foot').textContent = T('نموذج أولي: لا تُرسل رسائل بريد إلكتروني، ويُسلَّم رابط التفعيل يدوياً.','Prototype: no email is sent; the activation link is handed over manually.');
+    var b = '';
+    if (!MA) { el('sub').textContent = ''; el('body').innerHTML = msg('bad','ti-alert-triangle','تعذّر تحميل التفعيل.','Activation could not be loaded.'); return; }
+    if (DONE) {
+      el('sub').textContent = T('تم التفعيل','Activated');
+      b = msg('ok','ti-circle-check','تم تفعيل حسابك. يمكنك الآن تسجيل الدخول بالبريد الإلكتروني وكلمة المرور التي اخترتها.','Your account is active. You can now sign in with your email and the password you chose.')
+        + '<a class="btn go" href="raf_login.html">' + esc(T('تسجيل الدخول','Sign in')) + '</a>';
+    } else if (!STATE || STATE.state === 'invalid') {
+      el('sub').textContent = '';
+      b = msg('bad','ti-link-off','رابط التفعيل غير صالح.','This activation link is not valid.');
+    } else if (STATE.state === 'used') {
+      el('sub').textContent = '';
+      b = msg('info','ti-circle-check','تم استخدام رابط التفعيل هذا من قبل. إن كان الحساب مفعّلاً فسجّل الدخول.','This activation link has already been used. If the account is active, sign in.')
+        + '<a class="btn" href="raf_login.html">' + esc(T('تسجيل الدخول','Sign in')) + '</a>';
+    } else if (STATE.state === 'expired') {
+      el('sub').textContent = '';
+      b = msg('bad','ti-clock-x','انتهت صلاحية رابط التفعيل. تواصل مع إدارة رف للحصول على رابط جديد.','This activation link has expired. Contact RAF Management for a new one.');
+    } else {
+      el('sub').textContent = T('اختر كلمة مرور لحسابك لإكمال التفعيل.','Choose a password for your account to finish activation.');
+      b = '<dl class="who"><dt>' + esc(T('التاجر','Merchant')) + '</dt><dd><bdi>' + esc(STATE.merchantName || '—') + '</bdi></dd>'
+        + '<dt>' + esc(T('المتجر','Store')) + '</dt><dd><bdi>' + esc(L(STATE.storeName) || '—') + '</bdi></dd></dl>'
+        + '<form id="f" novalidate onsubmit="return ACT.submit(event)">'
+        + '<div class="fld"><label for="pw">' + esc(T('كلمة المرور','Password')) + '</label><input id="pw" type="password" autocomplete="new-password" minlength="' + STATE.policy.minLength + '" required></div>'
+        + '<div class="fld" style="margin-top:10px"><label for="pw2">' + esc(T('تأكيد كلمة المرور','Confirm password')) + '</label><input id="pw2" type="password" autocomplete="new-password" required></div>'
+        + '<div class="rule" style="margin-top:6px">' + esc(T('8 أحرف على الأقل، ويجب أن تتطابق الكلمتان.','At least 8 characters; both entries must match.')) + '</div>'
+        + (ERR ? '<div class="err" role="alert" style="margin-top:8px">' + esc(ERR) + '</div>' : '')
+        + '<button class="btn go" type="submit" id="go" style="margin-top:12px;width:100%"' + (BUSY ? ' disabled' : '') + '>' + esc(BUSY ? T('جارٍ التفعيل…','Activating…') : T('تفعيل الحساب','Activate Account')) + '</button></form>';
+    }
+    el('body').innerHTML = b;
+  }
+  function load(){ STATE = MA ? MA.inspect(token()) : null; render(); }
+
+  window.ACT = {
+    submit:function(e){
+      if (e) e.preventDefault();
+      if (BUSY || DONE) return false;
+      var pw = el('pw').value, pw2 = el('pw2').value;
+      BUSY = true; ERR = null; render();
+      MA.activate(token(), pw, pw2).then(function(r){
+        BUSY = false;
+        if (r && r.ok) { DONE = true; render(); return; }
+        ERR = (r && r.message) || T('تعذّر التفعيل.','Activation failed.');
+        /* a used / invalid / expired token moves the page to that state */
+        if (r && (r.code === 'TOKEN_USED' || r.code === 'INVALID_TOKEN' || r.code === 'TOKEN_EXPIRED')) { ERR = null; STATE = MA.inspect(token()); }
+        render();
+        var p = el('pw'); if (p) { p.value = ''; el('pw2').value = ''; p.focus(); }
+      });
+      return false;
+    },
+    toggleLang:function(){
+      var r = root(), en = r.lang === 'en';
+      r.lang = en ? 'ar' : 'en'; r.dir = en ? 'rtl' : 'ltr';
+      try { localStorage.setItem('raf_lang', r.lang); } catch(e){}
+      render();
+    }
+  };
+  var l = null; try { l = localStorage.getItem('raf_lang'); } catch(e){}
+  if (l === 'en') { root().lang = 'en'; root().dir = 'ltr'; }
+  window.addEventListener('hashchange', function(){ DONE = false; ERR = null; load(); });
+  load();
+})();
+</script>
+</body>
+</html>

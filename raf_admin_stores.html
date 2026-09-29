@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl" data-ui="admin">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — إدارة المتاجر</title>
+<script src="raf_admin_theme.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_logistics.css">
+<link rel="stylesheet" href="raf_admin.css">
+<style>
+/* ══════════ STORES MANAGEMENT — the platform's stores, read from RAFSource ══════════ */
+.st-head{ display:flex; align-items:flex-end; gap:10px 16px; flex-wrap:wrap; margin-block-end:12px; }
+.st-head h1{ margin:0; font-size:19px; font-weight:800; color:var(--ink); }
+.st-head p{ margin:2px 0 0; color:var(--muted); font-size:12.5px; }
+.st-bar{ display:flex; align-items:center; gap:8px 12px; flex-wrap:wrap; padding:10px 12px; border-block-end:1px solid var(--line); }
+.seg{ display:inline-flex; border:1px solid var(--line-2); border-radius:var(--r); overflow:hidden; }
+.seg button{ min-height:36px; padding:0 12px; border:0; background:transparent; color:var(--muted); font-size:12.5px; font-weight:700; cursor:pointer;
+  display:inline-flex; align-items:center; gap:6px; border-inline-end:1px solid var(--line); }
+.seg button:last-child{ border-inline-end:0; }
+.seg button[aria-pressed="true"]{ background:var(--accent-soft); color:var(--accent); }
+.seg .c{ font-family:'DM Sans',var(--font); font-size:11.5px; color:var(--faint); }
+.seg button[aria-pressed="true"] .c{ color:var(--accent); }
+.search{ position:relative; flex:1 1 240px; max-width:380px; margin-inline-start:auto; }
+.search i{ position:absolute; inset-inline-start:10px; top:50%; transform:translateY(-50%); color:var(--faint); font-size:16px; }
+.search input{ width:100%; min-height:36px; padding-block:0; padding-inline:32px 10px; border:1px solid var(--line-2); border-radius:var(--r);
+  background:var(--surface); color:var(--ink); font-size:13px; }
+.search input:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:transparent; }
+.st-bar select{ min-height:36px; border:1px solid var(--line-2); border-radius:var(--r); background:var(--surface); color:var(--ink); padding:0 8px; font-size:12.5px; }
+
+/* the stores table */
+.qt{ width:100%; border-collapse:collapse; }
+.qt th{ background:var(--surface-2); color:var(--muted); font-size:10.5px; letter-spacing:.08em; padding:9px 14px; border-block-end:1px solid var(--line); text-align:start; white-space:nowrap; }
+.qt td{ padding:10px 14px; border-block-end:1px solid var(--line); font-size:13px; color:var(--text); vertical-align:middle; }
+.qt.rows tbody tr{ cursor:pointer; }
+.qt.rows tbody tr:hover td{ background:var(--surface-2); }
+.qt tbody tr:last-child td{ border-block-end:0; }
+.qt .sub{ display:block; color:var(--faint); font-size:11px; margin-block-start:2px; }
+.qt .strong{ font-weight:800; color:var(--ink); }
+.qt .go{ display:inline-flex; align-items:center; gap:5px; min-height:32px; padding:0 11px; border-radius:var(--r); border:1px solid var(--line-2);
+  color:var(--ink); text-decoration:none; font-size:12px; font-weight:700; white-space:nowrap; }
+.qt .go:hover{ filter:brightness(.97); }
+.sname{ display:flex; align-items:center; gap:10px; min-width:0; }
+.logo{ width:36px; height:36px; flex-shrink:0; border-radius:var(--r-sm); border:1px solid var(--line); background:var(--surface-2); overflow:hidden;
+  display:grid; place-items:center; color:var(--muted); font-size:18px; }
+.logo img{ width:100%; height:100%; object-fit:cover; display:block; }
+.logo.lg{ width:56px; height:56px; font-size:26px; border-radius:var(--r); }
+.cfg{ font-size:12px; font-weight:700; color:var(--ink); white-space:nowrap; }
+.cfg.part{ color:var(--pend); }
+.b-done,.b-off,.b-hot,.b-wait,.b-plain{ font-size:11px; }
+.empty-q{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:18px 16px; color:var(--muted); font-size:13px; }
+.empty-q i{ font-size:18px; color:var(--faint); }
+.empty-q .btn{ margin-inline-start:auto; }
+.note-line{ padding:8px 16px; font-size:11.5px; color:var(--faint); border-block-end:1px solid var(--line); background:var(--surface-2); }
+.note-line.bottom{ border-block-end:0; border-block-start:1px solid var(--line); }
+
+/* ══════════ ONE STORE ══════════ */
+.back{ display:inline-flex; align-items:center; gap:6px; min-height:34px; color:var(--muted); text-decoration:none; font-size:12.5px; font-weight:700; margin-block-end:8px; }
+.back:hover{ color:var(--accent); }
+[dir="rtl"] .back i{ transform:scaleX(-1); }
+.case-h{ padding:14px 18px; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:10px 18px; align-items:start; }
+.case-h .t{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; min-width:0; }
+.case-h h1{ margin:0; font-size:20px; font-weight:800; color:var(--ink); }
+.case-h .slug{ display:block; font-size:11.5px; color:var(--faint); margin-block-start:2px; }
+.case-h .origin{ display:inline-flex; align-items:center; gap:6px; color:var(--accent); font-weight:700; font-size:12.5px; text-decoration:none; min-height:32px; }
+.case-h .origin:hover{ text-decoration:underline; }
+.meta-g{ grid-column:1 / -1; display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); border-block-start:1px solid var(--line); margin:4px -18px -14px; }
+.meta-g > div{ padding:10px 18px; border-inline-end:1px solid var(--line); min-width:0; }
+.meta-g > div:last-child{ border-inline-end:0; }
+.meta-g .k{ display:block; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); }
+.meta-g .v{ display:block; margin-block-start:3px; font-size:13px; font-weight:700; color:var(--ink); overflow-wrap:anywhere; }
+.meta-g .v a{ color:var(--accent); }
+
+.case{ display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:14px; align-items:start; margin-block-start:14px; }
+.case-main{ display:flex; flex-direction:column; gap:14px; min-width:0; }
+.case-side{ display:flex; flex-direction:column; gap:14px; min-width:0; }
+.dl{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); margin:0; }
+.dl > div{ padding:9px 16px; border-block-end:1px solid var(--line); min-width:0; }
+.dl > div:nth-child(odd){ border-inline-end:1px solid var(--line); }
+.dl > div.full{ grid-column:1 / -1; border-inline-end:0; }
+.dl dt{ font-size:11.5px; color:var(--faint); font-weight:700; }
+.dl dd{ margin:2px 0 0; font-size:13.5px; font-weight:700; color:var(--ink); overflow-wrap:anywhere; line-height:1.6; }
+.dl dd.na{ color:var(--faint); font-weight:500; }
+.media{ display:grid; grid-template-columns:120px minmax(0,1fr); gap:10px; padding:12px 16px; align-items:start; }
+.media figure{ margin:0; border:1px solid var(--line); border-radius:var(--r); background:var(--surface-2); overflow:hidden; }
+.media img{ display:block; width:100%; height:auto; object-fit:cover; aspect-ratio:1; }
+.media .cv img{ aspect-ratio:3/1; }
+.media figcaption{ padding:4px 8px; font-size:11px; color:var(--muted); border-block-start:1px solid var(--line); }
+.media .none{ display:grid; place-items:center; min-height:80px; color:var(--faint); font-size:12px; text-align:center; padding:8px; }
+.week{ list-style:none; margin:0; padding:6px 0; }
+.week li{ padding:6px 16px; font-size:13px; color:var(--ink); font-weight:700; }
+
+.pt td{ vertical-align:top; }
+.pthumb{ width:40px; height:40px; border-radius:var(--r-sm); border:1px solid var(--line); background:var(--surface-2); overflow:hidden; display:grid; place-items:center; color:var(--faint); flex-shrink:0; }
+.pthumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+.pname{ display:flex; gap:10px; align-items:flex-start; min-width:0; }
+.pname a{ color:var(--ink); text-decoration:none; font-weight:800; }
+.pname a:hover{ color:var(--accent); text-decoration:underline; }
+.old{ text-decoration:line-through; color:var(--faint); font-size:11px; display:block; }
+
+.cnt{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); }
+.cnt > div{ padding:12px 16px; border-inline-end:1px solid var(--line); }
+.cnt > div:last-child{ border-inline-end:0; }
+.cnt .k{ display:block; font-size:11.5px; color:var(--faint); font-weight:700; }
+.cnt .v{ display:block; font-size:20px; font-weight:800; color:var(--ink); margin-block-start:2px; }
+
+.hist{ list-style:none; margin:0; padding:6px 0; }
+.hist li{ display:grid; grid-template-columns:18px minmax(0,1fr) auto; gap:2px 12px; padding:7px 16px; }
+.hist .dot{ width:10px; height:10px; border-radius:50%; margin:5px 4px 0; background:var(--line-2); }
+.hist b{ font-size:13px; color:var(--ink); }
+.hist .who{ display:block; font-size:11.5px; color:var(--muted); }
+.hist time{ font-size:11px; color:var(--faint); white-space:nowrap; }
+
+.acc{ list-style:none; margin:0; padding:0; }
+.acc li{ padding:12px 16px; border-block-end:1px solid var(--line); display:grid; gap:6px; }
+.acc li:last-child{ border-block-end:0; }
+.acc .n{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.acc .n b{ font-size:14px; color:var(--ink); }
+.acc .r{ font-size:11.5px; color:var(--muted); }
+.acc dl{ display:grid; grid-template-columns:auto minmax(0,1fr); gap:3px 10px; margin:0; font-size:12.5px; }
+.acc dt{ color:var(--faint); font-weight:700; } .acc dd{ margin:0; color:var(--ink); font-weight:700; overflow-wrap:anywhere; }
+.acc a{ color:var(--accent); font-size:12.5px; font-weight:700; }
+.chk{ list-style:none; margin:0; padding:4px 0; }
+.chk li{ display:flex; align-items:center; gap:8px; padding:7px 16px; font-size:13px; color:var(--ink); }
+.chk li i{ font-size:17px; }
+.chk li.ok i{ color:var(--done); } .chk li.no i{ color:var(--faint); } .chk li.no{ color:var(--muted); }
+.una{ list-style:none; margin:0; padding:4px 0; }
+.una li{ display:grid; grid-template-columns:20px minmax(0,1fr); gap:2px 8px; padding:9px 16px; border-block-end:1px solid var(--line); }
+.una li:last-child{ border-block-end:0; }
+.una i{ color:var(--faint); font-size:16px; margin-top:1px; }
+.una b{ font-size:13px; color:var(--ink); }
+.una span{ grid-column:2; font-size:11.5px; color:var(--faint); line-height:1.55; }
+.ro{ display:flex; gap:8px; align-items:flex-start; font-size:12.5px; color:var(--muted); padding:12px 16px; }
+.ro i{ color:var(--accent); font-size:16px; }
+
+#lBody{ overflow-x:auto; }
+/* tablet: the store number and created date move to the store page */
+.qt a.sl{ display:block; min-height:0; padding:0; margin:0; color:inherit; text-decoration:none; } .sl:hover .strong{ color:var(--accent); text-decoration:underline; }
+@media (min-width:761px) and (max-width:1100px){ #lBody .qt .opt, #lBody .qt .act{ display:none; } }
+@media (max-width:1199px){
+  .case{ grid-template-columns:minmax(0,1fr); }
+}
+@media (max-width:760px){
+  .meta-g{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .meta-g > div:nth-child(2n){ border-inline-end:0; }
+  .meta-g > div{ border-block-end:1px solid var(--line); }
+  .qt, .qt thead, .qt tbody, .qt tr, .qt td{ display:block; width:100%; }
+  .qt thead{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+  .qt tbody tr{ border-block-end:1px solid var(--line); padding:6px 0; }
+  .qt td{ border:0; display:flex; gap:12px; padding:4px 14px; }
+  .qt td::before{ content:attr(data-l); flex:0 0 34%; color:var(--faint); font-size:11.5px; font-weight:700; }
+  .qt td.act{ justify-content:flex-end; }
+  .qt td.act::before, .qt td.lead::before{ display:none; }
+  .search{ max-width:none; flex-basis:100%; margin-inline-start:0; }
+  .seg{ width:100%; } .seg button{ flex:1; justify-content:center; padding:0 6px; }
+  .st-bar select{ flex:1 1 100%; }
+  .dl{ grid-template-columns:minmax(0,1fr); }
+  .dl > div:nth-child(odd){ border-inline-end:0; }
+  .case-h{ grid-template-columns:minmax(0,1fr); }
+  .cnt{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .cnt > div:nth-child(2n){ border-inline-end:0; }
+  .cnt > div{ border-block-end:1px solid var(--line); }
+  .media{ grid-template-columns:90px minmax(0,1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-c" role="alert">
+    <div class="ic"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
+    <h1 id="gateT"></h1>
+    <p id="gateP"></p>
+    <a class="btn" href="raf_login.html" id="gateSignIn"><i class="ti ti-login" aria-hidden="true"></i><span data-ar="تسجيل الدخول" data-en="Sign in">تسجيل الدخول</span></a>
+    <button class="btn" type="button" id="gateSignOut" onclick="RAFSignOut()" hidden><i class="ti ti-logout" aria-hidden="true"></i><span data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span></button>
+  </div>
+</div>
+
+<div class="ops" id="shell" hidden>
+  <aside class="ops-nav" id="opsNav" aria-label="إدارة رف">
+    <div class="ops-brand">
+      <span class="ops-brand-mark" aria-hidden="true"><i class="ti ti-building-community"></i></span>
+      <span class="ops-brand-t"><b data-ar="إدارة رف" data-en="RAF Management">إدارة رف</b>
+        <span data-ar="مركز التحكم" data-en="Control Center">مركز التحكم</span></span>
+      <button class="ibtn ops-nav-x" type="button" onclick="ADM.closeNav()" aria-label="إغلاق القائمة"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <nav class="ops-nav-scroll" id="navTree" aria-label="التنقل"></nav>
+  </aside>
+  <div class="scrim" onclick="ADM.closeNav()" aria-hidden="true"></div>
+
+  <div class="ops-main">
+    <header class="ops-head">
+      <button class="ibtn ops-burger" type="button" aria-controls="opsNav" aria-expanded="false" onclick="ADM.openNav()" aria-label="القائمة"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+      <div class="ops-crumb"><small id="crumbGroup"></small><b id="crumbPage"></b></div>
+      <div class="ops-tools">
+        <button class="ibtn" type="button" id="refreshBtn" onclick="ADM.refresh()" aria-label="تحديث"><i class="ti ti-refresh" aria-hidden="true"></i></button>
+        <button class="ibtn" type="button" id="themeBtn" onclick="ADM.toggleTheme()" aria-pressed="false"><i class="ti ti-moon" aria-hidden="true"></i></button>
+        <button class="ibtn lang" type="button" id="langBtn" onclick="ADM.toggleLang()"></button>
+        <span class="ops-sep" aria-hidden="true"></span>
+        <div class="ops-user"><span class="ops-av" id="userAv" aria-hidden="true"></span>
+          <span class="ops-user-t"><b id="userName"></b><span id="userRole"></span></span></div>
+        <button class="ibtn signout" type="button" id="signOutBtn" onclick="RAFSignOut()">
+          <i class="ti ti-logout" aria-hidden="true"></i>
+          <span class="signout-t" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span>
+        </button>
+      </div>
+    </header>
+    <main class="ops-content" id="view" tabindex="-1"></main>
+  </div>
+</div>
+
+<!-- Read-only. Stores and the catalogue come from RAFSource; accounts from
+     RAFPerm; opening schedule from RAFStoreSchedule; stock from RAFInventory;
+     activity from RAFAudit; orders exactly as the Home reads them.
+     RAFStoreOps and RAFOrderEngine are NOT loaded: both write on load. -->
+<script src="raf_source.js"></script>
+<script src="raf_data.js"></script>
+<script src="raf_order_snapshot.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_inventory.js"></script>
+<script src="raf_store_schedule.js"></script>
+<script src="raf_merchant_variants.js"></script>
+<script src="raf_merchant_media.js"></script>
+<script src="raf_customer_service.js"></script>
+<script src="raf_logistics_authority.js"></script>
+<script src="raf_merchant_applications.js"></script>
+<script src="raf_merchant_auth.js"></script>
+<script src="raf_requests.js"></script>
+<script src="raf_admin_shell.js"></script>
+<script>
+/* ============================================================================
+   RAF MANAGEMENT — STORES MANAGEMENT (إدارة المتاجر)
+   Every store RAF holds, read from the authorities that own each fact. This
+   page keeps no storage, writes nothing, and records no audit event.
+
+   There is NO authority that changes a store's status, deletes a store or
+   edits it on Management's behalf (RAFStoreProfile / RAFStoreSchedule are
+   scoped to the merchant's own store). Those actions are therefore listed as
+   unavailable — never simulated.
+
+   ROUTES (hash):  #store=<slug>                 one store, in full
+                   #status=…&cat=…&q=…           the list with its filters
+   ==========================================================================*/
+(function(){
+  'use strict';
+
+  var A = window.RAFAdmin, SRC = window.RAFSource, P = window.RAFPerm;
+  var T = A.T, L = A.L, esc = A.esc, clockOf = A.clockOf, isoOf = A.isoOf, el = A.el,
+      NEWTAB = A.NEWTAB, srNew = A.srNew, ext = A.ext;
+  var ROUTE = {}, LASTQ = '';
+  var STATUSES = ['open', 'closed', 'suspended'];
+  var ST_LABEL = { open:['مفتوح','Open','b-done'], closed:['مغلق','Closed','b-off'], suspended:['موقوف','Suspended','b-hot'] };
+
+  /* ───────── routing ───────── */
+  function parseHash(){
+    var o = {};
+    (location.hash || '').replace(/^#\/?/, '').split('&').forEach(function(p){
+      var i = p.indexOf('='); if(i > 0){ try { o[p.slice(0, i)] = decodeURIComponent(p.slice(i + 1)); } catch(e){} }
+    });
+    return o;
+  }
+  function listHash(f){
+    var parts = [];
+    if(f.status) parts.push('status=' + encodeURIComponent(f.status));
+    if(f.cat) parts.push('cat=' + encodeURIComponent(f.cat));
+    if(f.q) parts.push('q=' + encodeURIComponent(f.q));
+    return parts.join('&');
+  }
+  function setList(f){
+    var h = listHash(f);
+    try { history.replaceState(null, '', h ? '#' + h : location.pathname + location.search); } catch(e){ location.hash = h; }
+    ROUTE = parseHash(); renderListBody();
+  }
+
+  /* ───────── reads (authoritative only) ───────── */
+  function allStores(){ try { return SRC.allStores() || []; } catch(e){ return []; } }
+  function canUsers(){ return A.can('users.view'); }
+  function canOrders(){ return A.can('orders.view'); }
+  /* accounts linked to a store — the canonical storeSlug, never a name match */
+  var USERS = null;
+  function users(){
+    if(USERS) return USERS;
+    try { USERS = canUsers() ? (P.getUsers() || []) : []; } catch(e){ USERS = []; }
+    return USERS;
+  }
+  function accountsOf(slug){ return users().filter(function(u){ return u && u.storeSlug === slug; }); }
+  function productsOf(slug){ try { return SRC.products({ visibleOnly:false, store:slug }) || []; } catch(e){ return []; } }
+  function catKey(c){ return c ? String(c.ar || c.en || '') : ''; }
+  function scheduleOf(s){
+    if(!s || !s.schedule || !window.RAFStoreSchedule) return null;
+    try { return RAFStoreSchedule.normalize(s.schedule); } catch(e){ return null; }
+  }
+  function hasText(o){ return !!(o && typeof o === 'object' && ((o.ar && String(o.ar).trim()) || (o.en && String(o.en).trim()))); }
+  /* configuration facts of the store record itself — each one checkable */
+  function configOf(s, prods){
+    var items = [
+      { k:'desc', ok:hasText(s.desc), ar:'وصف المتجر', en:'Store description' },
+      { k:'logo', ok:!!s.logo, ar:'الشعار', en:'Logo' },
+      { k:'cover', ok:!!s.cover, ar:'صورة الغلاف', en:'Cover image' },
+      { k:'schedule', ok:!!scheduleOf(s), ar:'جدول العمل', en:'Opening schedule' },
+      { k:'products', ok:prods.some(function(p){ return p.status === SRC.PRODUCT_STATUS.ACTIVE; }), ar:'منتج نشط واحد على الأقل', en:'At least one active product' }
+    ];
+    return { items:items, done:items.filter(function(i){ return i.ok; }).length, total:items.length };
+  }
+  function rowOf(s){
+    var prods = productsOf(s.slug);
+    return { s:s, prods:prods, cfg:configOf(s, prods), accounts:canUsers() ? accountsOf(s.slug) : null };
+  }
+  function roleName(id){ var r = null; try { r = P.getRole(id); } catch(e){} return r ? T(r.nameAr, r.nameEn) : '—'; }
+  function reqHref(appId){ return A.requestsView() && appId ? 'raf_admin_requests.html#request=' + encodeURIComponent('merchant_join:' + appId) : null; }
+
+  /* ───────── formatting ───────── */
+  function badge(status){
+    var l = ST_LABEL[status];
+    return l ? '<span class="badge ' + l[2] + '">' + esc(T(l[0], l[1])) + '</span>' : '<span class="badge b-plain">' + esc(status || '—') + '</span>';
+  }
+  function accBadge(st){
+    var m = { active:['مفعّل','Active','b-done'], pending_activation:['بانتظار التفعيل','Pending activation','b-wait'], suspended:['موقوف','Suspended','b-hot'] }[st];
+    return '<span class="badge ' + (m ? m[2] : 'b-plain') + '">' + esc(m ? T(m[0], m[1]) : (st || '—')) + '</span>';
+  }
+  function dateOf(ms){
+    if(!ms) return '—';
+    try { return new Date(ms).toLocaleDateString(A.isEn() ? 'en-GB' : 'ar-KW-u-nu-latn', { day:'2-digit', month:'short', year:'numeric', timeZone:'Asia/Kuwait' }); }
+    catch(e){ return new Date(ms).toISOString().slice(0, 10); }
+  }
+  /* an image is shown only if it loads; a missing file falls back to the icon */
+  function logoBox(s, lg){
+    var ic = '<i class="ti ' + esc(s.ic || 'ti-building-store') + '" aria-hidden="true"' + (s.logo ? ' hidden' : '') + '></i>';
+    return '<span class="logo' + (lg ? ' lg' : '') + '">' + (s.logo ? '<img src="' + esc(s.logo) + '" alt="" loading="lazy" onerror="this.nextElementSibling.hidden=false;this.remove()">' : '') + ic + '</span>';
+  }
+  function money(v){ return v != null && String(v).trim() !== '' ? '<span class="num">' + esc(v) + '</span> ' + esc(T('د.ك','KWD')) : '—'; }
+  function na(){ return '<dd class="na">—</dd>'; }
+
+  /* ───────── the list ───────── */
+  function matches(r, f){
+    var s = r.s;
+    if(f.status && s.status !== f.status) return false;
+    if(f.cat && catKey(s.cat) !== f.cat) return false;
+    if(f.q){
+      var q = f.q.toLowerCase();
+      var hay = [s.name && s.name.ar, s.name && s.name.en, s.slug, s.num, s.cat && s.cat.ar, s.cat && s.cat.en, s.origin && s.origin.ref]
+        .concat((r.accounts || []).map(function(u){ return u.name; }), (r.accounts || []).map(function(u){ return u.email; }))
+        .filter(Boolean).join(' ').toLowerCase();
+      if(hay.indexOf(q) < 0) return false;
+    }
+    return true;
+  }
+  function viewList(){
+    var rows = allStores().map(rowOf), n = { all:rows.length, open:0, closed:0, suspended:0 }, cats = {};
+    rows.forEach(function(r){ if(n.hasOwnProperty(r.s.status)) n[r.s.status]++; var k = catKey(r.s.cat); if(k) cats[k] = r.s.cat; });
+    var st = STATUSES.indexOf(ROUTE.status) > -1 ? ROUTE.status : '';
+    function seg(k, ar, en, c){
+      return '<button type="button" aria-pressed="' + (st === k) + '" onclick="STP.status(\'' + k + '\')">' + esc(T(ar, en)) + ' <span class="c num">' + c + '</span></button>';
+    }
+    var ck = Object.keys(cats);
+    /* a category filter only once more than one real category exists */
+    var catSel = ck.length > 1
+      ? '<label class="sr-only" for="fCat">' + esc(T('التصنيف','Category')) + '</label><select id="fCat" onchange="STP.cat(this.value)">'
+        + '<option value="">' + esc(T('كل التصنيفات','All categories')) + '</option>'
+        + ck.map(function(k){ return '<option value="' + esc(k) + '"' + (ROUTE.cat === k ? ' selected' : '') + '>' + esc(L(cats[k]) || k) + '</option>'; }).join('')
+        + '</select>' : '';
+    return '<div class="st-head"><div><h1>' + esc(T('إدارة المتاجر','Stores Management')) + '</h1>'
+      + '<p>' + esc(T('جميع متاجر رف كما يسجّلها مصدر بيانات المتاجر.','Every RAF store, as the store authority records it.')) + '</p></div></div>'
+      + '<section class="pn" aria-label="' + esc(T('قائمة المتاجر','Store list')) + '">'
+      + '<div class="st-bar"><div class="seg" role="group" aria-label="' + esc(T('الحالة','Status')) + '">'
+      + seg('', 'الكل', 'All', n.all) + seg('open', 'مفتوحة', 'Open', n.open) + seg('closed', 'مغلقة', 'Closed', n.closed) + seg('suspended', 'موقوفة', 'Suspended', n.suspended) + '</div>'
+      + catSel
+      + '<div class="search"><i class="ti ti-search" aria-hidden="true"></i><label class="sr-only" for="fQ">' + esc(T('بحث','Search')) + '</label>'
+      + '<input id="fQ" type="search" value="' + esc(ROUTE.q || '') + '" autocomplete="off" placeholder="' + esc(canUsers()
+          ? T('اسم المتجر، المعرّف، الرقم، التصنيف، التاجر','Store name, ID, number, category, merchant')
+          : T('اسم المتجر، المعرّف، الرقم، التصنيف','Store name, ID, number, category')) + '" oninput="STP.search(this.value)"></div></div>'
+      + '<div id="lBody">' + listBody(rows) + '</div></section>';
+  }
+  function listBody(rows){
+    rows = rows || allStores().map(rowOf);
+    if(!rows.length) return '<div class="empty-q"><i class="ti ti-building-store" aria-hidden="true"></i>' + esc(T('لا توجد متاجر حالياً','No stores right now')) + '</div>';
+    var f = { status:STATUSES.indexOf(ROUTE.status) > -1 ? ROUTE.status : '', cat:ROUTE.cat || '', q:(ROUTE.q || '').trim() };
+    var list = rows.filter(function(r){ return matches(r, f); });
+    if(!list.length) return '<div class="empty-q"><i class="ti ti-filter-off" aria-hidden="true"></i>' + esc(T('لا توجد متاجر مطابقة.','No matching stores.'))
+      + '<button class="btn sm" type="button" onclick="STP.clear()">' + esc(T('مسح التصفية','Clear filters')) + '</button></div>';
+    var withAcc = canUsers();
+    function th(ar, en, c){ return '<th scope="col"' + (c ? ' class="' + c + '"' : '') + '>' + esc(T(ar, en)) + '</th>'; }
+    return '<table class="qt rows"><caption class="sr-only">' + esc(T('المتاجر','Stores')) + '</caption><thead><tr>'
+      + th('المتجر','Store') + th('رقم المتجر','Store no.', 'opt') + th('التصنيف','Category') + th('الحالة','Status')
+      + (withAcc ? th('حساب التاجر','Merchant account') : '') + th('المنتجات','Products') + th('تاريخ الإنشاء','Created', 'opt') + th('الإعداد','Setup')
+      + '<th scope="col" class="act"><span class="sr-only">' + esc(T('إجراء','Action')) + '</span></th></tr></thead><tbody>'
+      + list.map(function(r){
+          var s = r.s, href = '#store=' + encodeURIComponent(s.slug), acc = r.accounts || [];
+          var missing = r.cfg.items.filter(function(i){ return !i.ok; }).map(function(i){ return T(i.ar, i.en); });
+          return '<tr onclick="STP.open(\'' + esc(s.slug) + '\', event)">'
+            + '<td class="lead" data-l="' + esc(T('المتجر','Store')) + '"><span class="sname">' + logoBox(s) + '<span><a class="sl" href="' + href + '"><bdi class="strong">' + esc(L(s.name) || '—') + '</bdi></a><span class="sub num">' + esc(s.slug) + '</span></span></span></td>'
+            + '<td class="opt" data-l="' + esc(T('رقم المتجر','Store no.')) + '"><span class="num">' + esc(s.num || '—') + '</span></td>'
+            + '<td data-l="' + esc(T('التصنيف','Category')) + '">' + esc(L(s.cat) || '—') + '</td>'
+            + '<td data-l="' + esc(T('الحالة','Status')) + '">' + badge(s.status) + '</td>'
+            + (withAcc ? '<td data-l="' + esc(T('حساب التاجر','Merchant account')) + '">' + (acc.length
+                ? '<span><bdi class="strong">' + esc(acc[0].name || '—') + '</bdi>' + (acc.length > 1 ? ' <span class="num">+' + (acc.length - 1) + '</span>' : '')
+                  + '<span class="sub">' + accBadge(acc[0].status) + '</span></span>'
+                : '<span class="sub" style="margin:0">' + esc(T('لا يوجد حساب مرتبط','No linked account')) + '</span>') + '</td>' : '')
+            + '<td data-l="' + esc(T('المنتجات','Products')) + '"><span class="num">' + r.prods.length + '</span></td>'
+            + '<td class="opt" data-l="' + esc(T('تاريخ الإنشاء','Created')) + '"><span class="num">' + esc(dateOf(s.createdAt)) + '</span></td>'
+            + '<td data-l="' + esc(T('الإعداد','Setup')) + '"><span class="cfg' + (missing.length ? ' part' : '') + '" title="' + esc(missing.length ? T('ناقص: ','Missing: ') + missing.join(T('، ',', ')) : '') + '">'
+            + '<span class="num">' + r.cfg.done + '/' + r.cfg.total + '</span> ' + esc(missing.length ? T('غير مكتمل','Incomplete') : T('مكتمل','Complete')) + '</span></td>'
+            + '<td class="act"><a class="go" href="' + href + '">' + esc(T('عرض','View')) + '</a></td></tr>';
+        }).join('') + '</tbody></table>';
+  }
+  function renderListBody(){ var b = el('lBody'); if(b){ USERS = null; b.innerHTML = listBody(); } else render(); }
+
+  /* ───────── one store ───────── */
+  function secBlock(id, icon, ar, en, body, meta){
+    return '<section class="pn" aria-labelledby="' + id + '"><div class="pn-h"><h2 id="' + id + '"><i class="ti ' + icon + '" aria-hidden="true"></i>' + T(ar, en) + '</h2>'
+      + (meta ? '<span class="meta">' + meta + '</span>' : '') + '</div>' + body + '</section>';
+  }
+  function emptyLine(icon, ar, en){ return '<div class="empty-q" style="padding:12px 16px"><i class="ti ' + icon + '" aria-hidden="true"></i>' + esc(T(ar, en)) + '</div>'; }
+
+  function secProfile(s){
+    function txt(o, lang){ var v = o && o[lang]; return v && String(v).trim() ? '<dd><bdi dir="' + (lang === 'ar' ? 'rtl' : 'ltr') + '">' + esc(v) + '</bdi></dd>' : na(); }
+    var d = s.desc || null;
+    function fig(src, cls, ar, en){
+      return '<figure class="' + cls + '">' + (src
+        ? '<img src="' + esc(src) + '" alt="' + esc(T(ar, en)) + '" loading="lazy" onerror="this.nextElementSibling.hidden=false;this.remove()">'
+          + '<div class="none" hidden>' + esc(T('تعذّر تحميل الصورة','Image could not be loaded')) + '</div>'
+        : '<div class="none">' + esc(T('غير مضاف','Not added')) + '</div>') + '<figcaption>' + esc(T(ar, en)) + '</figcaption></figure>';
+    }
+    return secBlock('h-prof', 'ti-id-badge-2', 'ملف المتجر', 'Store profile',
+      '<div class="media">' + fig(s.logo, 'lg', 'الشعار', 'Logo') + fig(s.cover, 'cv', 'صورة الغلاف', 'Cover image') + '</div>'
+      + '<dl class="dl" style="border-block-start:1px solid var(--line)">'
+      + '<div><dt>' + esc(T('الاسم (عربي)','Name (Arabic)')) + '</dt>' + txt(s.name, 'ar') + '</div>'
+      + '<div><dt>' + esc(T('الاسم (إنجليزي)','Name (English)')) + '</dt>' + txt(s.name, 'en') + '</div>'
+      + '<div class="full"><dt>' + esc(T('الوصف (عربي)','Description (Arabic)')) + '</dt>' + txt(d, 'ar') + '</div>'
+      + '<div class="full"><dt>' + esc(T('الوصف (إنجليزي)','Description (English)')) + '</dt>' + txt(d, 'en') + '</div>'
+      + '</dl>');
+  }
+  function secSchedule(s){
+    var n = scheduleOf(s), rows = null;
+    if(n){ try { var w = RAFStoreSchedule.formatWeek(n, A.isEn() ? 'en' : 'ar'); rows = w ? w.split(' · ') : null; } catch(e){ rows = null; } }
+    return secBlock('h-sch', 'ti-clock', 'جدول العمل', 'Opening schedule', rows && rows.length
+      ? '<ul class="week">' + rows.map(function(r){ return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>'
+        + (s.scheduleUpdatedAt ? '<div class="note-line bottom">' + esc(T('آخر تعديل: ','Last updated: ')) + '<span class="num">' + esc(clockOf(s.scheduleUpdatedAt)) + '</span></div>' : '')
+      : emptyLine('ti-clock-off', 'جدول العمل غير مهيأ.', 'The opening schedule is not configured.'));
+  }
+  function stockOf(p){
+    var I = window.RAFInventory; if(!I) return '—';
+    try {
+      if(I.isCombinationMode(p.id)){
+        var c = I.combinationsOf(p.id).filter(function(x){ return x.configured; });
+        return esc(T('حسب التركيبة','By combination')) + '<span class="sub"><span class="num">' + c.length + '</span> ' + esc(T('تركيبة مهيأة','configured')) + '</span>';
+      }
+      return '<span class="num">' + I.onHand(p.id) + '</span>';
+    } catch(e){ return '—'; }
+  }
+  function variantsOf(p){
+    var g = []; try { g = window.RAFMerchantVariants ? RAFMerchantVariants.groups(p.id) : (p.variants || []); } catch(e){ g = []; }
+    if(!g || !g.length) return '—';
+    return g.map(function(x){ return esc(L(x.label) || '—') + ': <span class="num">' + ((x.options || []).length) + '</span>'; }).join('<br>');
+  }
+  function secCatalogue(s, prods){
+    var cats = {}; try { SRC.categories({ populatedOnly:false }).forEach(function(c){ cats[c.k] = c; }); } catch(e){}
+    var PS = SRC.PRODUCT_STATUS, pl = { active:['نشط','Active','b-done'], hidden:['مخفي','Hidden','b-off'], deleted:['محذوف','Deleted','b-hot'] };
+    var body = prods.length
+      ? '<div class="note-line">' + esc(T('عرض فقط. إدارة المنتجات تتم من حساب التاجر؛ المخزون هو الكمية المسجّلة ولا يشمل الحجوزات المؤقتة.',
+                                         'View only. Products are managed from the merchant account; stock is the recorded quantity and excludes temporary holds.')) + '</div>'
+        + '<table class="qt pt"><caption class="sr-only">' + esc(T('منتجات المتجر','Store products')) + '</caption><thead><tr>'
+        + '<th scope="col">' + esc(T('المنتج','Product')) + '</th><th scope="col">' + esc(T('التصنيف','Category')) + '</th><th scope="col">' + esc(T('السعر','Price')) + '</th>'
+        + '<th scope="col">' + esc(T('المخزون','Stock')) + '</th><th scope="col">' + esc(T('الخيارات','Options')) + '</th><th scope="col">' + esc(T('الحالة','Status')) + '</th></tr></thead><tbody>'
+        + prods.map(function(p){
+            var img = null, n = 0;
+            try { var m = window.RAFMerchantMedia ? RAFMerchantMedia.list(p.id) : []; n = m.length; img = m[0] || null; } catch(e){}
+            var th = '<span class="pthumb">' + (img ? '<img src="' + esc(img) + '" alt="" loading="lazy" onerror="this.nextElementSibling.hidden=false;this.remove()">' : '')
+              + '<i class="ti ' + esc(p.ic || 'ti-box') + '" aria-hidden="true"' + (img ? ' hidden' : '') + '></i></span>';
+            var nm = esc(L(p.name) || p.id);
+            /* the public product page exists only for a public (active) product */
+            var link = p.status === PS.ACTIVE ? '<a href="raf_product.html?id=' + encodeURIComponent(p.id) + '"' + NEWTAB + '><bdi>' + nm + '</bdi>' + srNew() + '</a>' : '<b><bdi>' + nm + '</bdi></b>';
+            var c = cats[p.cat], l = pl[p.status];
+            return '<tr><td class="lead" data-l="' + esc(T('المنتج','Product')) + '"><span class="pname">' + th + '<span>' + link
+              + '<span class="sub num">' + esc(p.id) + (n > 1 ? ' · ' + n + ' ' + esc(T('صور','images')) : '') + '</span></span></span></td>'
+              + '<td data-l="' + esc(T('التصنيف','Category')) + '">' + esc(c ? T(c.ar, c.en) : (p.cat || '—')) + '</td>'
+              + '<td data-l="' + esc(T('السعر','Price')) + '"><span>' + money(p.price) + (p.old ? '<span class="old num">' + esc(p.old) + '</span>' : '') + '</span></td>'
+              + '<td data-l="' + esc(T('المخزون','Stock')) + '"><span>' + stockOf(p) + '</span></td>'
+              + '<td data-l="' + esc(T('الخيارات','Options')) + '"><span>' + variantsOf(p) + '</span></td>'
+              + '<td data-l="' + esc(T('الحالة','Status')) + '"><span class="badge ' + (l ? l[2] : 'b-plain') + '">' + esc(l ? T(l[0], l[1]) : (p.status || '—')) + '</span></td></tr>';
+          }).join('') + '</tbody></table>'
+      : emptyLine('ti-box-off', 'لا توجد منتجات في هذا المتجر.', 'This store has no products.');
+    return secBlock('h-cat', 'ti-box', 'المنتجات', 'Catalogue', body, prods.length ? '<span class="num">' + prods.length + '</span>' : null);
+  }
+  /* orders exactly as the Home reads them: only when the order store exists
+     (reading it otherwise would seed it), attributed by the order snapshot's
+     storeSlug — never by name */
+  function secOrders(s){
+    if(!canOrders()) return '';
+    var rows = [], unattributed = 0;
+    var exists = false; try { exists = localStorage.getItem('raf_orders') !== null; } catch(e){}
+    if(exists && window.RAFShop){
+      var all = []; try { all = RAFShop.Orders.all() || []; } catch(e){ all = []; }
+      all.forEach(function(o){
+        var snap = null; try { snap = window.RAFOrderSnapshot ? RAFOrderSnapshot.of(o.id) : null; } catch(e){}
+        if(!snap || !snap.storeSlug){ unattributed++; return; }
+        if(snap.storeSlug === s.slug) rows.push(o);
+      });
+    }
+    var c = { total:rows.length, progress:0, delivered:0, cancelled:0 };
+    rows.forEach(function(o){ if(c.hasOwnProperty(o.status) && o.status !== 'total') c[o.status]++; });
+    function cell(n, ar, en){ return '<div><span class="k">' + esc(T(ar, en)) + '</span><span class="v num">' + n + '</span></div>'; }
+    return secBlock('h-ord', 'ti-shopping-bag', 'الطلبات', 'Orders',
+      '<div class="cnt">' + cell(c.total, 'الإجمالي', 'Total') + cell(c.progress, 'قيد التنفيذ', 'In progress') + cell(c.delivered, 'تم التوصيل', 'Delivered') + cell(c.cancelled, 'ملغاة', 'Cancelled') + '</div>'
+      + '<div class="note-line bottom">' + esc(T('أعداد فقط، منسوبة إلى المتجر من سجل الطلب. لا توجد صفحة طلبات في إدارة رف بعد.','Counts only, attributed to the store by the order record. RAF Management has no Orders page yet.'))
+      + (unattributed ? ' ' + esc(T('طلبات بلا سجل متجر (غير محتسبة): ','Orders without a store record (not counted): ')) + '<span class="num">' + unattributed + '</span>' : '') + '</div>');
+  }
+  /* store-level management history from RAFAudit: the store record, its
+     onboarding, its catalogue and its stock adjustments. Order-bound events,
+     customer experience and support threads belong to their own surfaces. */
+  function isStoreLevel(e){
+    if(!e || e.orderId) return false;
+    var a = e.action || '';
+    return a.indexOf('store.') === 0 || a.indexOf('merchant.') === 0 || a.indexOf('variant.') === 0 || a.indexOf('size_guide.') === 0
+      || a === 'product.created' || a === 'product.updated' || a.indexOf('image.') === 0
+      || a === 'inventory.adjusted' || a === 'inventory.combination.adjusted';
+  }
+  function secActivity(s){
+    var list = [];
+    /* an account's onboarding event names the account, not the store: it is
+       attributed through that account's canonical storeSlug link — and only
+       for a viewer who may see accounts */
+    var ids = {}; if(canUsers()) accountsOf(s.slug).forEach(function(u){ ids[u.id] = 1; });
+    try {
+      list = RAFAudit.query({}).filter(function(e){
+        var md = e.metadata || {};
+        var mine = e.storeSlug === s.slug || md.storeSlug === s.slug
+          || (String(e.action || '').indexOf('merchant.') === 0 && md.accountId && ids[md.accountId]);
+        return mine && isStoreLevel(e);
+      });
+    } catch(e){ list = []; }
+    list = list.slice(-20).reverse();
+    var AC = (window.RAFAudit && RAFAudit.ACTIONS) || {};
+    return secBlock('h-act', 'ti-history', 'سجل المتجر', 'Store activity', list.length
+      ? '<ul class="hist">' + list.map(function(e){
+          var d = AC[e.action];
+          return '<li><span class="dot" aria-hidden="true"></span><span><b>' + esc(d ? T(d.ar, d.en) : e.action) + '</b>'
+            + '<span class="who"><bdi>' + esc(e.actorName || (e.automatic || e.systemGenerated ? T('تلقائي','Automatic') : '—')) + '</bdi></span></span>'
+            + '<time class="num" datetime="' + isoOf(e.timestamp) + '">' + esc(clockOf(e.timestamp) || '—') + '</time></li>';
+        }).join('') + '</ul><div class="note-line bottom">' + esc(T('آخر 20 حدثاً من سجل التدقيق.','The latest 20 events from the audit log.')) + '</div>'
+      : emptyLine('ti-history-off', 'لا توجد أحداث مسجّلة لهذا المتجر.', 'No events are recorded for this store.'));
+  }
+  function secAccounts(s){
+    if(!canUsers()) return secBlock('h-acc', 'ti-user-circle', 'حساب التاجر', 'Merchant account',
+      '<div class="ro"><i class="ti ti-lock" aria-hidden="true"></i><span>' + esc(T('لا تملك صلاحية عرض الحسابات.','You are not permitted to view accounts.')) + '</span></div>');
+    var acc = accountsOf(s.slug);
+    return secBlock('h-acc', 'ti-user-circle', 'حساب التاجر', 'Merchant account', acc.length
+      ? '<ul class="acc">' + acc.map(function(u){
+          var pf = u.provisionedFrom || null, rh = pf ? reqHref(pf.applicationId) : null;
+          return '<li><span class="n"><b><bdi>' + esc(u.name || '—') + '</bdi></b>' + accBadge(u.status) + '</span>'
+            + '<span class="r">' + esc(roleName(u.roleId)) + '</span>'
+            + '<dl><dt>' + esc(T('البريد','Email')) + '</dt><dd><bdi dir="ltr">' + esc(u.email || '—') + '</bdi></dd>'
+            + '<dt>' + esc(T('الهاتف','Phone')) + '</dt><dd><bdi dir="ltr" class="num">' + esc(u.phone || '—') + '</bdi></dd>'
+            + '<dt>' + esc(T('معرّف الحساب','Account ID')) + '</dt><dd class="num">' + esc(u.id) + '</dd>'
+            + (u.activatedAt ? '<dt>' + esc(T('تاريخ التفعيل','Activated')) + '</dt><dd class="num">' + esc(clockOf(u.activatedAt)) + '</dd>' : '')
+            + '</dl>'
+            + (u.status === 'pending_activation' ? '<span class="r">' + esc(T('لم يُفعَّل الحساب بعد؛ لا يمكنه تسجيل الدخول حتى يُفعَّل.','The account is not activated yet; it cannot sign in until it is.')) + '</span>' : '')
+            + (rh ? '<a href="' + esc(rh) + '">' + esc(T('طلب الانضمام ','Join application ')) + '<bdi class="num">' + esc(pf.ref || '') + '</bdi></a>' : '')
+            + '</li>';
+        }).join('') + '</ul>'
+      : emptyLine('ti-user-off', 'لا يوجد حساب تاجر مرتبط بهذا المتجر.', 'No merchant account is linked to this store.'));
+  }
+  function secConfig(cfg){
+    return secBlock('h-cfg', 'ti-list-check', 'اكتمال الإعداد', 'Setup', '<ul class="chk">' + cfg.items.map(function(i){
+      return '<li class="' + (i.ok ? 'ok' : 'no') + '"><i class="ti ' + (i.ok ? 'ti-circle-check' : 'ti-circle-dashed') + '" aria-hidden="true"></i><span>' + esc(T(i.ar, i.en))
+        + '<span class="sr-only">' + esc(i.ok ? T(': متوفر',': present') : T(': غير متوفر',': missing')) + '</span></span></li>';
+    }).join('') + '</ul>', '<span class="num">' + cfg.done + '/' + cfg.total + '</span>');
+  }
+  /* no authority performs these for RAF Management — shown, never simulated */
+  function secActions(){
+    var U = [
+      ['ti-toggle-left', 'تغيير حالة المتجر (فتح / إغلاق / إيقاف)', 'Change store status (open / close / suspend)',
+       'لا توجد جهة معتمدة في رف لتغيير حالة المتجر بعد.', 'No RAF authority changes a store\'s status yet.'],
+      ['ti-edit', 'تعديل ملف المتجر أو جدول العمل', 'Edit the store profile or schedule',
+       'التعديل متاح لحساب التاجر على متجره فقط؛ لا تملك إدارة رف جهة تعديل.', 'Editing is available to the merchant account for its own store only; RAF Management has no editing authority.'],
+      ['ti-trash', 'حذف المتجر', 'Delete the store',
+       'حذف المتاجر غير مُنفّذ.', 'Store deletion is not implemented.']
+    ];
+    return secBlock('h-acts', 'ti-settings', 'الإجراءات', 'Actions', '<ul class="una">' + U.map(function(u){
+      return '<li><i class="ti ' + u[0] + '" aria-hidden="true"></i><b>' + esc(T(u[1], u[2])) + ' — ' + esc(T('غير متاح','Unavailable')) + '</b><span>' + esc(T(u[3], u[4])) + '</span></li>';
+    }).join('') + '</ul>');
+  }
+  function viewDetail(slug){
+    var back = '<a class="back" href="#' + LASTQ + '"><i class="ti ti-arrow-left" aria-hidden="true"></i>' + esc(T('إدارة المتاجر','Stores Management')) + '</a>';
+    var s = null; try { s = SRC.store(slug); } catch(e){ s = null; }
+    if(!s || s.status === SRC.STORE_STATUS.DELETED) return back + '<section class="pn"><div class="empty-q"><i class="ti ti-building-store" aria-hidden="true" style="color:var(--alert)"></i>'
+      + esc(T('المتجر غير موجود.','The store could not be found.')) + '</div></section>';
+    var prods = productsOf(slug), cfg = configOf(s, prods), o = s.origin || null, rh = o ? reqHref(o.applicationId) : null;
+    var head = '<section class="pn case-h" aria-labelledby="h-store"><div class="t">' + logoBox(s, true)
+      + '<span><h1 id="h-store"><bdi>' + esc(L(s.name) || '—') + '</bdi></h1><span class="slug num">' + esc(s.slug) + '</span></span>' + badge(s.status) + '</div>'
+      + '<a class="origin" href="raf_store.html?store=' + encodeURIComponent(s.slug) + '"' + NEWTAB + '>' + esc(T('صفحة المتجر العامة','Public store page')) + srNew() + ext() + '</a>'
+      + '<div class="meta-g">'
+      + '<div><span class="k">' + esc(T('رقم المتجر','Store no.')) + '</span><span class="v num">' + esc(s.num || '—') + '</span></div>'
+      + '<div><span class="k">' + esc(T('التصنيف','Category')) + '</span><span class="v">' + esc(L(s.cat) || '—') + '</span></div>'
+      + '<div><span class="k">' + esc(T('تاريخ الإنشاء','Created')) + '</span><span class="v num">' + esc(s.createdAt ? clockOf(s.createdAt) : '—') + '</span></div>'
+      + '<div><span class="k">' + esc(T('طلب الانضمام','Join application')) + '</span><span class="v num">'
+      + (o && o.ref ? (rh ? '<a href="' + esc(rh) + '">' + esc(o.ref) + '</a>' : esc(o.ref)) : '—') + '</span></div>'
+      + '</div></section>';
+    return back + head + '<div class="case"><div class="case-main">' + secProfile(s) + secSchedule(s) + secCatalogue(s, prods) + secOrders(s) + secActivity(s) + '</div>'
+      + '<div class="case-side">' + secAccounts(s) + secConfig(cfg) + secActions() + '</div></div>';
+  }
+
+  /* ───────── render ───────── */
+  function render(){
+    var a = document.activeElement, keep = a && a.id ? { id:a.id, s:a.selectionStart, e:a.selectionEnd } : null;
+    USERS = null;
+    ROUTE = parseHash();
+    el('view').innerHTML = ROUTE.store ? viewDetail(ROUTE.store) : viewList();
+    if(!ROUTE.store) LASTQ = listHash(ROUTE);
+    if(keep){ var n = el(keep.id); if(n){ n.focus(); try { if(keep.s != null) n.setSelectionRange(keep.s, keep.e); } catch(e){} } }
+  }
+  var tq = null;
+  window.STP = {
+    status:function(k){ var f = parseHash(); f.status = k; delete f.store; setList(f); render(); },
+    cat:function(v){ var f = parseHash(); f.cat = v; setList(f); },
+    search:function(v){ clearTimeout(tq); tq = setTimeout(function(){ var f = parseHash(); f.q = v.trim(); setList(f); }, 180); },
+    clear:function(){ setList({}); render(); },
+    open:function(slug, ev){
+      if(ev && ev.target && ev.target.closest && ev.target.closest('a')) return;
+      location.hash = 'store=' + encodeURIComponent(slug);
+    }
+  };
+  window.addEventListener('hashchange', function(){ render(); el('view').focus(); });
+  A.start({ active:'stores', title:{ ar:'إدارة المتاجر', en:'Stores Management' },
+            canEnter:function(){ return A.storesView(); },
+            denied:['لا تملك صلاحية الوصول','You do not have access','إدارة المتاجر غير متاحة لحسابك.','Stores Management is not available to your account.'],
+            refresh:render });
+})();
+</script>
+</body>
+</html>

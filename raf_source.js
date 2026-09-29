@@ -339,7 +339,7 @@
   function addProduct(data){
     if (!data || typeof data !== 'object') return { ok:false, code:'INVALID_PRODUCT' };
     if (data.id) return { ok:false, code:'ID_NOT_ACCEPTED' };   /* never caller-supplied */
-    if (!data.store || !BY_SLUG[data.store]) return { ok:false, code:'INVALID_STORE', store:data.store || null };
+    if (!data.store || !baseStore(data.store)) return { ok:false, code:'INVALID_STORE', store:data.store || null };
 
     var id = nextProductId();
     var seen = knownIds();
@@ -388,9 +388,90 @@
     return out;
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     PROVISIONED STORES
+     ──────────────────────────────────────────────────────────────
+     A store created at runtime by the merchant-onboarding flow (an approved
+     merchant join application). Like a merchant-created product it is a new
+     ENTITY, not an override: it is kept in its own collection and read
+     through the same paths as a seeded store, so every reader treats the two
+     alike. It carries ONLY what was actually decided — no rating, order
+     count, follower count, image or catalogue category is invented; those
+     start empty and a surface shows them as not set.
+     ══════════════════════════════════════════════════════════════ */
+  var LS_CREATED_STORES = 'raf_created_stores';
+  function readCreatedStores(){
+    try { var a = JSON.parse(localStorage.getItem(LS_CREATED_STORES)); return Array.isArray(a) ? a : []; }
+    catch(e){ return []; }
+  }
+  function normaliseStore(r){
+    return {
+      schedule:r.schedule || null,
+      slug:r.slug, name:r.name, num:null, ic:'ti-building-store',
+      logo:null, cover:null, cat:r.cat || null,
+      rating:null, orders:null, followers:null, productCount:null,
+      satisfaction:null, reviewCount:null, reviewScore:null,
+      status:r.status, sponsored:false, hours:null, desc:r.desc || null, cats:[],
+      origin:r.origin || null, createdAt:r.createdAt || null
+    };
+  }
+  /* the base record for a slug, wherever it came from */
+  function baseStore(slug){
+    if (!slug) return null;
+    if (BY_SLUG[slug]) return BY_SLUG[slug];
+    var c = readCreatedStores();
+    for (var i = 0; i < c.length; i++) if (c[i] && c[i].slug === slug) return normaliseStore(c[i]);
+    return null;
+  }
+  function createdStores(){ return readCreatedStores().map(normaliseStore); }
+  /* Creates the store for ONE approved merchant application. Idempotent on
+     the application id: a retry returns the store already created, never a
+     second one. The slug is derived from the application's own reference, so
+     it is stable and unique without any name matching. The caller (the
+     merchant-application authority) proves the approval permission; this
+     re-checks it from the session when RAFPerm is present. */
+  function createStore(data){
+    data = data || {};
+    var origin = data.origin || {};
+    if (origin.type !== 'merchant_application' || !origin.applicationId || !origin.ref) return { ok:false, code:'ORIGIN_REQUIRED' };
+    if (global.RAFPerm){
+      var sid = null; try { sid = RAFPerm.sessionUserId ? RAFPerm.sessionUserId() : null; } catch(e){ sid = null; }
+      if (!sid || !RAFPerm.can(sid, 'stores.approve')) return { ok:false, code:'FORBIDDEN' };
+    }
+    var list = readCreatedStores();
+    for (var i = 0; i < list.length; i++) if (list[i] && list[i].origin && list[i].origin.applicationId === origin.applicationId)
+      return { ok:true, duplicate:true, slug:list[i].slug, store:store(list[i].slug) };
+    var name = String(data.name || '').trim();
+    if (!name) return { ok:false, code:'NAME_REQUIRED' };
+    if ([STORE_STATUS.OPEN, STORE_STATUS.CLOSED, STORE_STATUS.SUSPENDED].indexOf(data.status) < 0) return { ok:false, code:'INVALID_STATUS' };
+    var slug = 'st-' + String(origin.ref).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    if (BY_SLUG[slug] || baseStore(slug)) return { ok:false, code:'DUPLICATE_SLUG', slug:slug };
+    var row = {
+      slug:slug,
+      /* a store's name is a proper name: the one the applicant gave, in both languages */
+      name:{ ar:name, en:name },
+      /* the submitted category LABEL only — never mapped to a catalogue key */
+      cat:data.categoryLabel ? { ar:String(data.categoryLabel), en:null } : null,
+      desc:data.description ? { ar:String(data.description), en:null } : null,
+      status:data.status, schedule:null,
+      origin:{ type:'merchant_application', applicationId:String(origin.applicationId), ref:String(origin.ref) },
+      createdAt:Date.now()
+    };
+    list = readCreatedStores();            /* re-read immediately before writing */
+    for (var j = 0; j < list.length; j++) if (list[j] && (list[j].slug === slug || (list[j].origin && list[j].origin.applicationId === origin.applicationId)))
+      return { ok:true, duplicate:true, slug:list[j].slug, store:store(list[j].slug) };
+    list.push(row);
+    try { localStorage.setItem(LS_CREATED_STORES, JSON.stringify(list)); } catch(e){ return { ok:false, code:'PERSIST_FAILED' }; }
+    /* prove it reads back through the normal path before reporting success */
+    var back = store(slug);
+    if (!back) return { ok:false, code:'PERSIST_FAILED', reason:'not_readable' };
+    document.dispatchEvent(new CustomEvent('raf:source'));
+    return { ok:true, slug:slug, store:back };
+  }
+
   /* ---------- reads (base + overrides) ---------- */
   function store(slug){
-    var b = BY_SLUG[slug]; if (!b) return null;
+    var b = baseStore(slug); if (!b) return null;
     return merge(b, readOverrides().stores[slug]);
   }
   function product(id){
@@ -402,7 +483,7 @@
   function stores(opts){
     opts = opts || {};
     var ov = readOverrides().stores;
-    var list = STORES.map(function(s){ return merge(s, ov[s.slug]); })
+    var list = STORES.concat(createdStores()).map(function(s){ return merge(s, ov[s.slug]); })
       .filter(function(s){ return s.status !== STORE_STATUS.DELETED; });
     if (opts.visibleOnly !== false) list = list.filter(function(s){ return s.status === STORE_STATUS.OPEN; });
     /* sponsored stores rank first — visibility is a paid, clearly-badged option */
@@ -448,7 +529,7 @@
     var o = readOverrides(); o.products[id] = merge(o.products[id] || {}, patch); writeOverrides(o); return true;
   }
   function updateStore(slug, patch){
-    if (!BY_SLUG[slug]) return false;
+    if (!baseStore(slug)) return false;
     var o = readOverrides(); o.stores[slug] = merge(o.stores[slug] || {}, patch); writeOverrides(o); return true;
   }
   /* Discards EDITS only. Merchant-created products are separate entities and
@@ -466,6 +547,8 @@
     updateProduct:updateProduct, updateStore:updateStore, resetOverrides:resetOverrides,
     /* creation — identity and persistence are owned here, never by a page */
     addProduct:addProduct, nextProductId:nextProductId, createdProducts:createdProducts,
+    /* merchant onboarding — one store per approved application */
+    createStore:createStore, createdStores:createdStores,
     /* raw accessors for adapters/tests */
     all:function(){ return products({ visibleOnly:false }); },
     allStores:function(){ return stores({ visibleOnly:false }); },

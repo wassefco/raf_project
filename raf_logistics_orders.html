@@ -1031,8 +1031,20 @@ td.num{ font-family:'DM Sans',sans-serif; font-weight:700; white-space:nowrap; }
        account may already read (orders.view); nothing else of the customer is read */
     CAN.customer = (function(){ try { return !!P.can(u.id, PERM.orders); } catch(e){ return false; } })();
 
+    /* a link (e.g. from RAF Management) may name the view to open:
+       #scope=…&state=…&order=… — view state only, applied after the access
+       check above; unknown values are ignored */
+    var link = {};
+    (location.hash || '').replace(/^#\/?/, '').split('&').forEach(function(p){
+      var kv = p.split('='); if(kv[0]) link[kv[0]] = decodeURIComponent(kv[1] || ''); });
+    var STATES = { pending:1, preparing:1, unassigned:1, assigned:1, on_the_way:1, delivered:1, cancelled:1, rejected:1 };
+    if(link.scope){ for(var si=0; si<SCOPES.length; si++) if(SCOPES[si].k === link.scope) F.scope = link.scope; }
+    if(link.state && STATES[link.state]) F.state = link.state;
+    if(link.order){ F.scope = 'all'; F.state = ''; }
+
     el('gate').hidden = true; el('shell').hidden = false;
     refresh();
+    if(link.order){ OPEN = link.order; renderSheet(); }
 
     /* live updates through the mechanisms that already exist — no polling, no timer */
     if(window.RAFEventBus){

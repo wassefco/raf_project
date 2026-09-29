@@ -309,9 +309,12 @@ var CS = (function(){
   function parseHash(){
     var m = (location.hash || '').replace(/^#\/?/, '').split('?')[0].split('/');
     var q = (location.hash.split('?')[1] || '');
-    var id = null;
-    q.split('&').forEach(function(p){ var kv = p.split('='); if (kv[0] === 't') id = decodeURIComponent(kv[1] || ''); });
-    return { p:pageOf(m[0] || 'dashboard').k, id:id };
+    var id = null, queue = null;
+    q.split('&').forEach(function(p){ var kv = p.split('=');
+      if (kv[0] === 't') id = decodeURIComponent(kv[1] || '');
+      /* a named queue, from a link (e.g. RAF Management) — view state only */
+      if (kv[0] === 'q') queue = decodeURIComponent(kv[1] || ''); });
+    return { p:pageOf(m[0] || 'dashboard').k, id:id, q:queue };
   }
   function go(p, id){ location.hash = '#/' + p + (id ? '?t=' + encodeURIComponent(id) : ''); }
   function renderNav(){
@@ -399,8 +402,22 @@ var CS = (function(){
   }
 
   var FILTERS = { q:'', status:'', department:'', category:'', priority:'', assignedEmployeeId:'', orderId:'', customerId:'', from:'', to:'' };
+  /* named queues a link may open (#/tickets?q=…). Each is only a combination
+     of filters RAFCustomerService.listTickets already accepts. */
+  var QUEUES = {
+    open:       { f:{ active:true },                   ar:'التذاكر المفتوحة',  en:'Open tickets' },
+    unassigned: { f:{ active:true, unassigned:true },  ar:'غير مُستلمة',       en:'Unassigned' },
+    escalated:  { f:{ active:true, escalated:true },   ar:'مُصعّدة',           en:'Escalated' },
+    pending:    { f:{ status:'pending' },              ar:'معلّقة',            en:'Pending' }
+  };
+  function queueChip(label, back){
+    return '<div class="notice"><i class="ti ti-filter"></i><span>' + esc(T('القائمة: ','Queue: ')) + '<b>' + esc(label) + '</b></span>'
+      + ' <a class="btn sm" href="#/' + back + '"><i class="ti ti-x"></i>' + esc(T('إزالة','Clear')) + '</a></div>';
+  }
   function vTickets(){
     var f = {};
+    var queue = route.q && QUEUES.hasOwnProperty(route.q) ? QUEUES[route.q] : null;
+    if (queue) Object.keys(queue.f).forEach(function(k){ f[k] = queue.f[k]; });
     if (FILTERS.status) f.status = FILTERS.status;
     if (FILTERS.department) f.department = FILTERS.department;
     if (FILTERS.category) f.category = FILTERS.category;
@@ -432,7 +449,8 @@ var CS = (function(){
       + (CAPS.create ? '<button class="btn sm pri" onclick="CS.newTicket()"><i class="ti ti-plus"></i>' + esc(T('تذكرة جديدة','New ticket')) + '</button>' : '')
       + '</div></div>'
       + '<div class="card"><h2><i class="ti ti-ticket"></i>' + esc(T('التذاكر','Tickets'))
-      + ' <span class="badge b-plain">' + r.items.length + '</span></h2>' + ticketRows(r.items) + '</div>';
+      + ' <span class="badge b-plain">' + r.items.length + '</span></h2>'
+      + (queue ? queueChip(T(queue.ar, queue.en), 'tickets') : '') + ticketRows(r.items) + '</div>';
   }
   function fText(k, label){
     return '<div class="f"><label for="f_' + k + '">' + esc(label) + '</label>'
@@ -474,9 +492,13 @@ var CS = (function(){
     if (!fu.ok) return notAllowed(fu);
     var open = fu.items.filter(function(f){ return f.status === 'open'; });
     var done = fu.items.filter(function(f){ return f.status !== 'open'; });
+    /* #/followups?q=due — the due queue, as the authority marks it */
+    var dueOnly = route.q === 'due';
+    var shown = dueOnly ? open.filter(function(f){ return f.due; }) : open;
     return '<div class="tiles">' + tile(T('مفتوحة','Open'), open.length) + tile(T('مستحقة','Due'), open.filter(function(f){ return f.due; }).length)
       + tile(T('منتهية','Finished'), done.length) + '</div>'
-      + '<div class="card"><h2><i class="ti ti-clock-hour-4"></i>' + esc(T('متابعات مفتوحة','Open follow-ups')) + '</h2>' + followupRows(open) + '</div>'
+      + '<div class="card"><h2><i class="ti ti-clock-hour-4"></i>' + esc(dueOnly ? T('متابعات مستحقة','Follow-ups due') : T('متابعات مفتوحة','Open follow-ups')) + '</h2>'
+      + (dueOnly ? queueChip(T('مستحقة','Due'), 'followups') : '') + followupRows(shown) + '</div>'
       + '<div class="card"><h2><i class="ti ti-check"></i>' + esc(T('منتهية','Finished')) + '</h2>' + followupRows(done) + '</div>';
   }
 

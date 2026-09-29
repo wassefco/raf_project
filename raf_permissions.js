@@ -620,6 +620,85 @@
     return { ok: true, user: saved };
   }
 
+  /* ---- merchant onboarding: ONE narrow provisioning operation ----
+     Creates the dedicated MERCHANT operational account for an approved
+     merchant join application, already linked to the store provisioned for
+     it. It is deliberately not a general account-creation path:
+       · the role and account type are fixed here (merchant) — never passed in
+       · the store must already exist in RAFSource; the link is its stable slug
+       · the account starts PENDING ACTIVATION: it holds no effective
+         permission and cannot sign in until a real activation / password-set
+         flow activates it (not built yet). No password is accepted or stored.
+       · idempotent on the application id: a retry returns the account already
+         provisioned, never a second one
+       · an email that already belongs to ANY other account is refused — an
+         operational identity is never shared with, or attached to, a customer,
+         driver or staff account
+     The acting session must hold stores.approve (the approval permission the
+     calling authority also proves). */
+  var PENDING_ACTIVATION = 'pending_activation';
+  function provisionMerchantAccount(spec) {
+    spec = spec || {};
+    var allowed = ['name', 'email', 'phone', 'storeSlug', 'applicationId', 'applicationRef'];
+    var extra = Object.keys(spec).filter(function (k) { return allowed.indexOf(k) < 0; });
+    if (extra.length) return { ok: false, reason: 'field_not_accepted', fields: extra };
+    var a = actingUser();
+    if (!a) return { ok: false, reason: 'not_signed_in' };
+    if (a.status !== 'active' || !can(a, 'stores.approve')) return { ok: false, reason: 'forbidden' };
+    var appId = String(spec.applicationId || ''), slug = String(spec.storeSlug || '');
+    if (!appId) return { ok: false, reason: 'application_required' };
+    var users = getUsers();
+    var already = users.filter(function (x) { return x.provisionedFrom && x.provisionedFrom.applicationId === appId; })[0];
+    if (already) return { ok: true, duplicate: true, user: getUser(already.id) };
+    if (!slug || !global.RAFSource || !global.RAFSource.store(slug)) return { ok: false, reason: 'store_not_found' };
+    if (users.some(function (x) { return x.storeSlug === slug; })) return { ok: false, reason: 'store_already_linked' };
+    var email = String(spec.email || '').trim();
+    if (!email || email.indexOf('@') < 1) return { ok: false, reason: 'email_required' };
+    var clash = users.filter(function (x) { return String(x.email || '').toLowerCase() === email.toLowerCase(); })[0];
+    if (clash) return { ok: false, reason: 'email_in_use', accountType: clash.accountType || null };
+    var id = nextUserId();
+    var user = u(id, String(spec.name || ''), email, String(spec.phone || ''),
+                 'merchant', 'merchant', PENDING_ACTIVATION,
+                 new Date().toISOString().slice(0, 10), null, slug);
+    user.verified = false;
+    user.provisionedFrom = { type: 'merchant_application', applicationId: appId,
+                             ref: String(spec.applicationRef || '') || null, at: Date.now(), by: a.id };
+    users = getUsers();                      /* re-read immediately before writing */
+    if (users.some(function (x) { return x.id === id; })) return { ok: false, reason: 'id_collision' };
+    if (users.some(function (x) { return x.provisionedFrom && x.provisionedFrom.applicationId === appId; }))
+      return { ok: true, duplicate: true, user: users.filter(function (x) { return x.provisionedFrom && x.provisionedFrom.applicationId === appId; })[0] };
+    users.push(user);
+    write(LS.users, users);
+    var saved = getUser(id);
+    if (!saved || saved.storeSlug !== slug || saved.status !== PENDING_ACTIVATION) return { ok: false, reason: 'persist_failed' };
+    return { ok: true, user: saved };
+  }
+
+  /* ---- merchant onboarding: activation (pending_activation → active) ----
+     The ONLY way a provisioned merchant account becomes active. The proof is
+     a valid, unused activation token, resolved by RAFMerchantAuth (the owner
+     of activation and of the merchant credential) — there is no session yet.
+     It changes exactly three things on a pending MERCHANT account: status,
+     verified and activatedAt. Role, account type, overrides and the store
+     link are left exactly as provisioning set them. */
+  function completeMerchantActivation(token) {
+    var MA = global.RAFMerchantAuth;
+    var r = MA && MA.resolveActivationToken ? MA.resolveActivationToken(token) : null;
+    if (!r) return { ok: false, reason: 'invalid_token' };
+    var users = getUsers();
+    var i = users.findIndex(function (x) { return x.id === r.accountId; });
+    if (i < 0) return { ok: false, reason: 'user_not_found' };
+    var cur = users[i];
+    if (cur.roleId !== 'merchant' || cur.accountType !== 'merchant') return { ok: false, reason: 'not_a_merchant' };
+    if (cur.status !== PENDING_ACTIVATION) return { ok: false, reason: 'not_pending' };
+    var next = Object.assign({}, cur, { status: 'active', verified: true, activatedAt: Date.now() });
+    users[i] = next;
+    write(LS.users, users);
+    var saved = getUser(r.accountId);
+    if (!saved || saved.status !== 'active' || saved.storeSlug !== cur.storeSlug) return { ok: false, reason: 'persist_failed' };
+    return { ok: true, user: saved };
+  }
+
   /* -------------------------------------------------------------------------
    * 7) RESOLUTION  ——  can(user, key) = (role ∪ grants) − revokes
    * ---------------------------------------------------------------------- */
@@ -642,6 +721,9 @@
   }
 
   function can(userOrId, key) {
+    /* an account awaiting activation holds no effective permission at all */
+    var who = resolveUser(userOrId);
+    if (who && who.status === PENDING_ACTIVATION) return false;
     var o = originOf(userOrId, key);
     return o === 'role' || o === 'grant';
   }
@@ -1056,6 +1138,9 @@
     /* narrow, field-scoped account mutations (see section 6b) */
     PROFILE_FIELDS: PROFILE_FIELDS,
     updateProfile: updateProfile, setStatus: setStatus, createAccount: createAccount,
+    /* merchant onboarding only — see provisionMerchantAccount */
+    provisionMerchantAccount: provisionMerchantAccount, completeMerchantActivation: completeMerchantActivation,
+    PENDING_ACTIVATION: PENDING_ACTIVATION,
     saveTemplate: saveTemplate,
     setOverride: setOverride,
     /* permission administration (see section 7b) */
