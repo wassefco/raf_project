@@ -40,11 +40,14 @@
 
   /* the central lifecycle. A type maps its authority's states onto these and
      keeps its own label, so an authority with more states is never flattened */
-  var STATUS = { PENDING:'pending', APPROVED:'approved', REJECTED:'rejected' };
+  /* CANCELLED — withdrawn by the requester while pending (store closure and
+     extension requests). Final: not decidable, kept in history. */
+  var STATUS = { PENDING:'pending', APPROVED:'approved', REJECTED:'rejected', CANCELLED:'cancelled' };
   var STATUS_TXT = {
-    pending:  { ar:'قيد المراجعة', en:'Pending' },
-    approved: { ar:'مقبول',        en:'Approved' },
-    rejected: { ar:'مرفوض',        en:'Rejected' }
+    pending:   { ar:'قيد المراجعة', en:'Pending' },
+    approved:  { ar:'مقبول',        en:'Approved' },
+    rejected:  { ar:'مرفوض',        en:'Rejected' },
+    cancelled: { ar:'ملغى',         en:'Cancelled' }
   };
   var DECISION = { APPROVE:'approve', REJECT:'reject' };
 
@@ -123,7 +126,7 @@
   }
   function counts(){
     if (!canAccess()) return fail('FORBIDDEN');
-    var a = all(), c = { all:a.items.length, pending:0, approved:0, rejected:0, byType:{} };
+    var a = all(), c = { all:a.items.length, pending:0, approved:0, rejected:0, cancelled:0, byType:{} };
     a.items.forEach(function (r) {
       if (c.hasOwnProperty(r.status)) c[r.status]++;
       c.byType[r.type] = (c.byType[r.type] || 0) + 1;
@@ -389,6 +392,246 @@
         ? M.approveApplication(id, input.note ? { note:input.note } : {})
         : M.rejectApplication(id, { reason:input.reason });
       return r && r.ok ? { ok:true, result:r.provisioning ? copy(r.provisioning) : null } : r;
+    }
+  });
+
+  /* ══════════════════ TYPES · STORE FULL CLOSURE / CLOSURE EXTENSION ══════════════════
+     Owner: RAFStoreStatus. Two DISTINCT request types:
+       store_closure            a merchant asks to close its store for N days
+       store_closure_extension  a merchant asks to extend an ACTIVE approved
+                                closure by N more days
+     Permission: stores.manage, to read and to decide — enforced inside
+     RAFStoreStatus. Approving applies the request; rejecting leaves the store
+     and any approved closure as they are. A merchant may cancel its own
+     pending request: it then reads `cancelled` here, final and not decidable.
+     The requester IS a RAF merchant account, so its id is shown. */
+  var C_STORE = { open:{ ar:'مفتوح', en:'Open' }, closed:{ ar:'مغلق', en:'Closed' }, suspended:{ ar:'موقوف', en:'Suspended' } };
+  function SS(){ return global.RAFStoreStatus || null; }
+  function ssCaps(){ var S = SS(); if (!S) return null; try { var c = S.capabilities(); return c && c.ok ? c : null; } catch (e) { return null; } }
+  function when(ms){
+    if (!ms) return null;
+    try { return new Date(ms).toLocaleString(isEn() ? 'en-GB' : 'ar-KW-u-nu-latn', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kuwait' }); }
+    catch (e) { return new Date(ms).toISOString().slice(0, 16).replace('T', ' '); }
+  }
+  function storeClosureType(spec){
+    var kind = spec.kind, type = spec.type;
+    register({
+      key:type, label:copy(spec.label),
+      owner:{ key:'stores', ar:'إدارة رف — المتاجر', en:'RAF Management — Stores' },
+      icon:spec.icon,
+      canView:function(){ var c = ssCaps(); return !!(c && c.manage); },
+      canDecide:function(){ var c = ssCaps(); return !!(c && c.manage); },
+      records:function(){ var S = SS(); return S ? S.listRequests({ kind:kind }) : fail('UNAVAILABLE'); },
+      record:function(id){
+        var S = SS(); if (!S) return fail('UNAVAILABLE');
+        var r = S.getRequest(id);
+        if (r && r.ok && r.request.kind !== kind) return fail('NOT_FOUND');
+        return r && r.ok ? { ok:true, item:r.request } : (r && r.code === 'REQUEST_NOT_FOUND' ? fail('NOT_FOUND') : r);
+      },
+      present:function(q){
+        var st = null; try { st = global.RAFSource ? RAFSource.store(q.storeSlug) : null; } catch (e) { st = null; }
+        var name = st && st.name ? T(st.name.ar || st.name.en, st.name.en || st.name.ar) : null;
+        var status = q.status === 'approved' ? STATUS.APPROVED : q.status === 'rejected' ? STATUS.REJECTED
+                   : q.status === 'cancelled' ? STATUS.CANCELLED : STATUS.PENDING;
+        var cl = st && st.closure ? st.closure : null;
+        var fields = [
+          f('رقم الطلب', 'Reference', q.ref, { mono:true }),
+          f(kind === 'extension' ? 'الأيام الإضافية' : 'عدد الأيام', kind === 'extension' ? 'Additional days' : 'Number of days', q.days, { mono:true }),
+          f('السبب', 'Reason', q.reason),
+          f('حساب التاجر', 'Merchant account', (q.accountName || '—') + ' (' + (q.accountId || '—') + ')') ];
+        if (kind === 'extension') fields.push(
+          f('الإغلاق المعتمد', 'Approved closure', q.closureRef, { mono:true }),
+          f('نهاية الإغلاق عند الطلب', 'Closure end when requested', when(q.endsAtAtRequest)));
+        return {
+          id:type + ':' + q.requestId, type:type, typeLabel:copy(spec.label),
+          owner:{ key:'stores', authority:'RAFStoreStatus', ar:'إدارة رف — المتاجر', en:'RAF Management — Stores' },
+          origin:{ record:q.requestId, ref:q.ref || null, href:'raf_admin_stores.html#store=' + encodeURIComponent(q.storeSlug) },
+          reference:q.ref || null,
+          status:status, statusText:copy(q.statusText || STATUS_TXT[status]),
+          submittedAt:q.createdAt || null,
+          approveEffect:spec.effect(q),
+          requester:{ name:q.accountName || null, accountId:q.accountId || null },
+          summary:[name, q.days + ' ' + T('يوم', 'day(s)')].filter(Boolean).join(' · '),
+          sections:[
+            { key:'store', title:{ ar:'المتجر', en:'Store' }, fields:[
+              f('المتجر', 'Store', name), f('معرّف المتجر', 'Store ID', q.storeSlug, { mono:true, dir:'ltr' }),
+              f('الحالة الحالية', 'Current status', st && C_STORE[st.status] ? T(C_STORE[st.status].ar, C_STORE[st.status].en) : (st ? st.status : null)),
+              f('الحالة عند الطلب', 'Status when requested', C_STORE[q.storeStatusAtRequest] ? T(C_STORE[q.storeStatusAtRequest].ar, C_STORE[q.storeStatusAtRequest].en) : null),
+              f('نهاية الإغلاق المعتمد الحالي', 'Current approved closure ends', cl && cl.endsAt ? when(cl.endsAt) : null) ] },
+            { key:'closure', title:copy(spec.section), fields:fields }
+          ],
+          attachments:[], missingAttachments:[],
+          history:(q.history || []).map(function (e) {
+            return { kind:e.kind, label:copy(spec.events[e.kind] || { ar:e.kind, en:e.kind }), at:e.at || null,
+                     actorName:e.actorName || null, note:e.note || null, reason:e.reason || null };
+          }),
+          decision:status === STATUS.PENDING ? null : {
+            status:status, at:q.decidedAt || null, byName:q.decidedByName || null,
+            reason:q.rejectionReason || null, note:q.decisionNote || null,
+            result:status === STATUS.APPROVED ? spec.result(q) : status === STATUS.CANCELLED
+              ? { ar:'ألغى التاجر الطلب قبل البت فيه؛ لم تتغير حالة المتجر.', en:'The merchant cancelled the request before a decision; the store was not changed.' }
+              : spec.rejected
+          },
+          notices:status === STATUS.PENDING ? spec.notices(q, st) : [],
+          searchText:[q.requestId, type + ':' + q.requestId, q.ref, q.closureRef, q.accountName, q.storeSlug, name,
+                      spec.label.ar, spec.label.en, q.reason].filter(Boolean).join(' ').toLowerCase()
+        };
+      },
+      decide:function(id, decision, input){
+        var S = SS(); if (!S) return fail('UNAVAILABLE');
+        var r = decision === DECISION.APPROVE
+          ? S.approveRequest(id, input.note ? { note:input.note } : {})
+          : S.rejectRequest(id, { reason:input.reason });
+        return r && r.ok ? { ok:true, result:null } : r;
+      }
+    });
+  }
+  storeClosureType({
+    kind:'closure', type:'store_closure', icon:'ti-building-store',
+    label:{ ar:'طلب إغلاق متجر', en:'Store closure request' },
+    section:{ ar:'طلب الإغلاق', en:'Closure request' },
+    events:{ submitted:{ ar:'قدّم التاجر طلب الإغلاق', en:'Closure requested by the merchant' },
+             approved:{ ar:'تم قبول الطلب وإغلاق المتجر', en:'Request approved — store closed' },
+             rejected:{ ar:'تم رفض الطلب', en:'Request rejected' },
+             cancelled:{ ar:'ألغى التاجر الطلب', en:'Cancelled by the merchant' } },
+    effect:function(q){ return { ar:'إغلاق المتجر (الحالة: مغلق) لمدة ' + q.days + ' يوم تبدأ عند الاعتماد، ثم يعود مفتوحاً تلقائياً عند انتهائها',
+                                 en:'the store is closed (status: closed) for ' + q.days + ' day(s) from approval, then returns to open automatically when that period ends' }; },
+    result:function(q){ return { ar:'أُغلق المتجر (' + q.storeSlug + ') لمدة ' + q.days + ' يوم.', en:'Store (' + q.storeSlug + ') closed for ' + q.days + ' day(s).' }; },
+    rejected:{ ar:'لم تتغير حالة المتجر.', en:'The store status was not changed.' },
+    notices:function(q, st){ return st && st.status === 'suspended' ? [{ tone:'hot',
+      ar:'المتجر موقوف حالياً. قيد في التنفيذ الحالي: لا يُطبَّق اعتماد الإغلاق على متجر موقوف لأن قاعدة هذه الحالة لم تُحدَّد بعد.',
+      en:'The store is currently suspended. Current implementation limitation: a closure approval is not applied to a suspended store, because the rule for this case is not defined yet.' }] : []; }
+  });
+  storeClosureType({
+    kind:'extension', type:'store_closure_extension', icon:'ti-calendar-plus',
+    label:{ ar:'طلب تمديد إغلاق متجر', en:'Store closure extension' },
+    section:{ ar:'طلب التمديد', en:'Extension request' },
+    events:{ submitted:{ ar:'قدّم التاجر طلب التمديد', en:'Extension requested by the merchant' },
+             approved:{ ar:'تم قبول التمديد', en:'Extension approved' },
+             rejected:{ ar:'تم رفض التمديد', en:'Extension rejected' },
+             cancelled:{ ar:'ألغى التاجر الطلب', en:'Cancelled by the merchant' } },
+    effect:function(q){ return { ar:'تمديد الإغلاق المعتمد (' + (q.closureRef || '—') + ') ' + q.days + ' يوم إضافي',
+                                 en:'the approved closure (' + (q.closureRef || '—') + ') is extended by ' + q.days + ' more day(s)' }; },
+    result:function(q){ return { ar:'مُدِّد الإغلاق المعتمد ' + q.days + ' يوم.', en:'The approved closure was extended by ' + q.days + ' day(s).' }; },
+    rejected:{ ar:'بقي الإغلاق المعتمد كما هو.', en:'The approved closure was left unchanged.' },
+    notices:function(q, st){
+      if (st && st.status === 'suspended') return [{ tone:'hot', ar:'المتجر موقوف إدارياً؛ لا يُطبَّق التمديد على متجر موقوف.', en:'The store is administratively suspended; an extension is not applied to a suspended store.' }];
+      if (!st || st.status !== 'closed' || !st.closure || st.closure.requestId !== q.closureRequestId)
+        return [{ tone:'hot', ar:'الإغلاق المعتمد الذي يشير إليه هذا الطلب لم يعد نشطاً؛ لا يمكن تطبيق التمديد.', en:'The approved closure this request refers to is no longer active; the extension cannot be applied.' }];
+      return [];
+    }
+  });
+
+  /* ══════════════════════ TYPE · STORE PROFILE CHANGE ══════════════════════
+     Owner: RAFStoreProfile. A merchant's submitted change set for its own
+     store's profile; nothing is live until approved. Permission:
+     stores.approve, to read and to decide — enforced inside RAFStoreProfile.
+     Approving writes the requested TEXT fields to the store record; media is
+     metadata only (no file storage exists) and is never applied. */
+  var SP_EVENT = {
+    submitted: { ar:'قدّم التاجر طلب تعديل الملف', en:'Profile change submitted by the merchant' },
+    approved:  { ar:'تم قبول التعديل وتطبيقه',      en:'Change approved and applied' },
+    rejected:  { ar:'تم رفض الطلب',                en:'Request rejected' }
+  };
+  function SPA(){ return global.RAFStoreProfile || null; }
+  function spCaps(){ var A = SPA(); if (!A) return null; try { var c = A.capabilities(); return c && c.ok ? c : null; } catch (e) { return null; } }
+  function spLabel(f){ var A = SPA(), d = A && (A.FIELDS[f] || A.MEDIA[f]); return d ? d.label : { ar:f, en:f }; }
+  function spSize(b){ return typeof b === 'number' ? (b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(1) + ' MB') : null; }
+  register({
+    key:'store_profile_change',
+    label:{ ar:'تعديل ملف متجر', en:'Store profile change' },
+    owner:{ key:'stores', ar:'إدارة رف — المتاجر', en:'RAF Management — Stores' },
+    icon:'ti-id-badge-2',
+    canView:function(){ var c = spCaps(); return !!(c && c.decide); },
+    canDecide:function(){ var c = spCaps(); return !!(c && c.decide); },
+    records:function(){ var A = SPA(); return A ? A.listRequests({}) : fail('UNAVAILABLE'); },
+    record:function(id){
+      var A = SPA(); if (!A) return fail('UNAVAILABLE');
+      var r = A.getRequest(id);
+      return r && r.ok ? { ok:true, item:r.request } : (r && r.code === 'REQUEST_NOT_FOUND' ? fail('NOT_FOUND') : r);
+    },
+    present:function(q){
+      var st = null; try { st = global.RAFSource ? RAFSource.store(q.storeSlug) : null; } catch (e) { st = null; }
+      var liveName = st && st.name ? T(st.name.ar || st.name.en, st.name.en || st.name.ar) : null;
+      var status = q.status === 'approved' ? STATUS.APPROVED : q.status === 'rejected' ? STATUS.REJECTED : STATUS.PENDING;
+      var ch = q.changes || {}, keys = Object.keys(ch);
+      var textKeys = keys.filter(function (k) { return ch[k].kind === 'text'; }), mediaKeys = keys.filter(function (k) { return ch[k].kind === 'media'; });
+      /* field by field: the value when the request was submitted → the value requested */
+      var diff = [];
+      textKeys.forEach(function (k) {
+        var lb = spLabel(k), c = ch[k];
+        diff.push(f(lb.ar + ' (عربي) — الحالي', lb.en + ' (Arabic) — current', c.from.ar, { dir:'rtl' }));
+        diff.push(f(lb.ar + ' (عربي) — المطلوب', lb.en + ' (Arabic) — requested', c.to.ar, { dir:'rtl' }));
+        diff.push(f(lb.ar + ' (إنجليزي) — الحالي', lb.en + ' (English) — current', c.from.en, { dir:'ltr' }));
+        diff.push(f(lb.ar + ' (إنجليزي) — المطلوب', lb.en + ' (English) — requested', c.to.en, { dir:'ltr' }));
+      });
+      mediaKeys.forEach(function (k) {
+        var lb = spLabel(k), c = ch[k];
+        diff.push(f(lb.ar + ' — الحالي', lb.en + ' — current', c.from ? T('صورة حالية على المتجر', 'An image is set on the store') : null));
+        diff.push(f(lb.ar + ' — المطلوب', lb.en + ' — requested',
+          (c.to.name || '—') + (c.to.type ? ' · ' + c.to.type : '') + (spSize(c.to.size) ? ' · ' + spSize(c.to.size) : '') + T(' (بيانات الملف فقط)', ' (file details only)')));
+      });
+      /* live values that moved since submission — the approval refuses them */
+      var drift = textKeys.filter(function (k) {
+        var cur = (st && st[k]) || {}, fr = ch[k].from || {};
+        return (cur.ar || '') !== (fr.ar || '') || (cur.en || '') !== (fr.en || '');
+      });
+      var notices = [];
+      if (status === STATUS.PENDING && drift.length) notices.push({ tone:'hot',
+        ar:'تغيّر ملف المتجر منذ تقديم الطلب في: ' + drift.map(function (k) { return spLabel(k).ar; }).join('، ') + '. لا يُطبَّق الاعتماد فوق قيمة أحدث؛ ارفض الطلب ليُعاد تقديمه.',
+        en:'The store profile changed since submission in: ' + drift.map(function (k) { return spLabel(k).en; }).join(', ') + '. An approval is not applied over a newer value; reject it so it can be resubmitted.' });
+      if (status === STATUS.PENDING && mediaKeys.length) notices.push({ tone:'hot',
+        ar:'لا يوجد تخزين ملفات في هذا النموذج: تُحفظ بيانات الصورة المختارة فقط، ولا تُطبَّق على المتجر حتى عند الموافقة.',
+        en:'This prototype has no file storage: only the chosen image’s details are kept, and it is not applied to the store even when approved.' });
+      return {
+        id:'store_profile_change:' + q.requestId, type:'store_profile_change',
+        typeLabel:{ ar:'تعديل ملف متجر', en:'Store profile change' },
+        owner:{ key:'stores', authority:'RAFStoreProfile', ar:'إدارة رف — المتاجر', en:'RAF Management — Stores' },
+        origin:{ record:q.requestId, ref:q.ref || null, href:'raf_admin_stores.html#store=' + encodeURIComponent(q.storeSlug) },
+        reference:q.ref || null,
+        status:status, statusText:copy(q.statusText || STATUS_TXT[status]),
+        submittedAt:q.createdAt || null,
+        approveEffect:{ ar:'تطبيق التعديلات النصية المطلوبة (' + textKeys.map(function (k) { return spLabel(k).ar; }).join('، ') + ') على ملف المتجر' + (mediaKeys.length ? '؛ الصور لا تُطبَّق (لا يوجد تخزين ملفات)' : ''),
+                        en:'the requested text changes (' + textKeys.map(function (k) { return spLabel(k).en; }).join(', ') + ') are applied to the store profile' + (mediaKeys.length ? '; images are not applied (no file storage)' : '') },
+        requester:{ name:q.accountName || null, accountId:q.accountId || null },
+        summary:[liveName, keys.map(function (k) { return T(spLabel(k).ar, spLabel(k).en); }).join(T('، ', ', '))].filter(Boolean).join(' · '),
+        sections:[
+          { key:'store', title:{ ar:'المتجر', en:'Store' }, fields:[
+            f('المتجر (الاسم الحالي)', 'Store (current name)', liveName), f('معرّف المتجر', 'Store ID', q.storeSlug, { mono:true, dir:'ltr' }),
+            f('حساب التاجر', 'Merchant account', (q.accountName || '—') + ' (' + (q.accountId || '—') + ')') ] },
+          { key:'changes', title:{ ar:'التعديلات المطلوبة', en:'Requested changes' }, fields:diff }
+        ],
+        attachments:mediaKeys.map(function (k) {
+          var m = ch[k].to;
+          return { slot:k, label:copy(spLabel(k)), name:m.name || null, type:m.type || null, size:typeof m.size === 'number' ? m.size : null,
+                   ext:m.ext || null, at:m.at || null, storage:m.storage || 'metadata_only', url:null, image:!!(m.type && /^image\//.test(m.type)) };
+        }),
+        missingAttachments:[],
+        history:(q.history || []).map(function (e) {
+          return { kind:e.kind, label:copy(SP_EVENT[e.kind] || { ar:e.kind, en:e.kind }), at:e.at || null,
+                   actorName:e.actorName || null, note:e.note || null, reason:e.reason || null };
+        }),
+        decision:status === STATUS.PENDING ? null : {
+          status:status, at:q.decidedAt || null, byName:q.decidedByName || null,
+          reason:q.rejectionReason || null, note:q.decisionNote || null,
+          result:status === STATUS.APPROVED
+            ? { ar:'طُبّقت على ملف المتجر: ' + ((q.applied && q.applied.fields || []).map(function (k) { return spLabel(k).ar; }).join('، ') || '—')
+                  + ((q.applied && q.applied.mediaNotApplied || []).length ? '. لم تُطبَّق الصور (لا يوجد تخزين ملفات).' : '.'),
+                en:'Applied to the store profile: ' + ((q.applied && q.applied.fields || []).map(function (k) { return spLabel(k).en; }).join(', ') || '—')
+                  + ((q.applied && q.applied.mediaNotApplied || []).length ? '. Images were not applied (no file storage).' : '.') }
+            : { ar:'لم يتغير ملف المتجر.', en:'The store profile was not changed.' }
+        },
+        notices:notices,
+        searchText:[q.requestId, 'store_profile_change:' + q.requestId, q.ref, q.accountName, q.storeSlug, liveName,
+                    'تعديل ملف متجر', 'store profile change'].filter(Boolean).join(' ').toLowerCase()
+      };
+    },
+    decide:function(id, decision, input){
+      var A = SPA(); if (!A) return fail('UNAVAILABLE');
+      var r = decision === DECISION.APPROVE
+        ? A.approveRequest(id, input.note ? { note:input.note } : {})
+        : A.rejectRequest(id, { reason:input.reason });
+      return r && r.ok ? { ok:true, result:null } : r;
     }
   });
 

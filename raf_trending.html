@@ -257,9 +257,12 @@ function toggleWish(btn){
     function cols(grid){ try { return getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length || 4; } catch(e){ return 4; } }
     function lists(){
       var all = RAFCatalog.list({});
+      /* availability first (confirmed rule): buyable products before closed-store
+         / sold-out ones; the page's own order ranks each group */
+      var tier = {}; all.forEach(function(p){ tier[p.id] = (window.RAFSource && RAFSource.isPurchasable && RAFSource.isPurchasable(RAFSource.product(p.id))) ? 0 : 1; });
       return {
-        'view-trending': all.slice().sort(function(a,b){ return (parseInt(b.rev,10)||0) - (parseInt(a.rev,10)||0) || (parseFloat(b.rate)||0) - (parseFloat(a.rate)||0); }),
-        'view-top':      all.slice().sort(function(a,b){ return (parseFloat(b.rate)||0) - (parseFloat(a.rate)||0) || (parseInt(b.rev,10)||0) - (parseInt(a.rev,10)||0); }),
+        'view-trending': all.slice().sort(function(a,b){ return tier[a.id] - tier[b.id] || (parseInt(b.rev,10)||0) - (parseInt(a.rev,10)||0) || (parseFloat(b.rate)||0) - (parseFloat(a.rate)||0); }),
+        'view-top':      all.slice().sort(function(a,b){ return tier[a.id] - tier[b.id] || (parseFloat(b.rate)||0) - (parseFloat(a.rate)||0) || (parseInt(b.rev,10)||0) - (parseInt(a.rev,10)||0); }),
         total: all.length
       };
     }

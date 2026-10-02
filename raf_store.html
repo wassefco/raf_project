@@ -494,8 +494,9 @@
 <div class="closed-banner" id="closedBanner">
   <i class="ti ti-clock-off"></i>
   <div>
-    <div class="cb-t" data-ar="المحل مغلق حالياً" data-en="This store is currently closed">المحل مغلق حالياً</div>
-    <div class="cb-s" data-ar="يمكنك التصفح والإضافة للسلة، وسيتم تجهيز طلبك عند فتح المحل." data-en="You can still browse and add to cart — your order will be prepared once the store reopens.">يمكنك التصفح والإضافة للسلة، وسيتم تجهيز طلبك عند فتح المحل.</div>
+    <div class="cb-t" id="cbTitle">المتجر مغلق مؤقتاً</div>
+    <div class="cb-s" id="cbMsg">هذا المتجر مغلق مؤقتاً لأعمال الصيانة وسيعاود الفتح قريباً.</div>
+    <div class="cb-s" id="cbNote">يمكنك تصفّح المنتجات وحفظها في المفضلة، ولا يمكن إضافتها إلى السلة حتى يعاود المتجر الفتح.</div>
   </div>
 </div>
 
@@ -708,9 +709,10 @@ var SLUG  = new URLSearchParams(location.search).get('store') || 'casa-mode';
 var STORE = STORE_DATA[SLUG] || STORE_DATA['casa-mode'];
 
 /* ---------- Store Status Policy ----------
-   A suspended or deleted store is not browsable at all: the page shows the
-   reason instead of the storefront. A temporarily closed store stays
-   viewable (with its banner) but cannot be ordered from. */
+   Only a deleted (or unknown) store is not browsable: the page shows the
+   reason instead of the storefront. A closed or suspended store stays
+   fully browsable — products, details, Favorites — with the closed banner,
+   and nothing from it can be added to the cart (RAFShop.Cart, RAFRules). */
 function applyStorePolicy(){
   if (!window.RAFRules) return true;
   var notice = RAFRules.StorePolicy.guard(SLUG);
@@ -811,6 +813,19 @@ function renderStore(){
   st.className = 'stag ' + (open ? 'open' : 'closed');
   st.querySelector('span').textContent = open ? T('مفتوح الآن', 'Open now') : T('مغلق حالياً', 'Closed now');
   document.getElementById('closedBanner').classList.toggle('show', !open);
+  /* the customer-facing notice from the Store Status Policy — the same for a
+     closed and a suspended store, with a reopening time only when an
+     approved closure carries an authoritative end */
+  var nt = (!open && window.RAFRules) ? RAFRules.StorePolicy.notice(SLUG) : null;
+  if (nt){
+    document.getElementById('cbTitle').textContent = nt.title;
+    var when = '';
+    if (nt.reopensAt){
+      try { when = new Date(nt.reopensAt).toLocaleString(isEn() ? 'en-GB' : 'ar-KW-u-nu-latn', { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kuwait' }); } catch(e){ when = ''; }
+    }
+    document.getElementById('cbMsg').textContent = nt.msg + (when ? T(' موعد إعادة الفتح: ', ' Reopens: ') + when + '.' : '');
+    document.getElementById('cbNote').textContent = T('يمكنك تصفّح المنتجات وحفظها في المفضلة، ولا يمكن إضافتها إلى السلة حتى يعاود المتجر الفتح.', 'You can browse the products and save them to Favorites; they cannot be added to the cart until the store reopens.');
+  }
 
   document.getElementById('storeDesc').textContent = L(s.desc) || '—';
   /* opening hours — generated from the structured schedule only; a store

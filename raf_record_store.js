@@ -79,6 +79,21 @@
        when it is used; the token's state is derived, never rewritten. */
     merchant_activations:        { key:'raf_merchant_activations',         owner:'RAFMerchantAuth',
                           purpose:'append-only merchant activation tokens (issued / used) — account id, created, expires, used; the state is derived' },
+    /* Merchant FULL-CLOSURE requests — owned by RAFStoreStatus. The request
+       never changes the store; RAF Management decides it (RAFRequests), and
+       only an approval closes the store. One decision per request. */
+    store_closure_requests:       { key:'raf_store_closure_requests',       owner:'RAFStoreStatus',
+                          purpose:'append-only merchant full-closure and closure-extension requests (kind) — store, merchant account, number of days, reason, created; never rewritten' },
+    store_closure_request_events: { key:'raf_store_closure_request_events', owner:'RAFStoreStatus',
+                          purpose:'append-only request lifecycle (submitted / approved / rejected / cancelled — one final outcome per request); the status is derived' },
+    /* Merchant STORE PROFILE change requests — owned by RAFStoreProfile. A
+       request never changes the live profile; only RAF Management's approval
+       writes the requested fields to the store record. These are REQUESTS,
+       not a second profile source. */
+    store_profile_requests:       { key:'raf_store_profile_requests',       owner:'RAFStoreProfile',
+                          purpose:'append-only store profile change requests — store, merchant account, field-level change set (value at submission → requested value), media metadata only; never rewritten' },
+    store_profile_request_events: { key:'raf_store_profile_request_events', owner:'RAFStoreProfile',
+                          purpose:'append-only profile request lifecycle (submitted / approved / rejected — one decision per request); the status is derived' },
     /* Customer ↔ Driver communication — owned by RAFDriverCommunication.
        Who may take part is NEVER stored here: it is read, every time, from
        the order's own record (fulfilment.driverId, customer.id, status). */
@@ -88,6 +103,63 @@
                           purpose:'append-only delivered / read receipts, written only by the recipient’s own page; message status is derived from these' },
     communication_call_attempts: { key:'raf_communication_call_attempts', owner:'RAFDriverCommunication',
                           purpose:'append-only call ATTEMPTS used only to enforce the configured attempt limit — caller, callee, time; no phone number, no outcome, not a call record' },
+    /* Finance accounting record — owned by RAFAccounting. Every shape is
+       append-only: an account, a period and a journal entry are written once
+       and never edited; an account's active state and a period's open/closed
+       state are DERIVED from their event collections. Balances, the General
+       Ledger and the Trial Balance are never stored — always derived from
+       accounting_journals. */
+    accounting_accounts:         { key:'raf_accounting_accounts',         owner:'RAFAccounting',
+                          purpose:'append-only chart of accounts — the immutable account at creation (id, code, bilingual name, type, normal balance, parent, postable, created, by)' },
+    accounting_account_events:   { key:'raf_accounting_account_events',   owner:'RAFAccounting',
+                          purpose:'append-only account status changes (activated / deactivated); the current status is derived' },
+    accounting_periods:          { key:'raf_accounting_periods',          owner:'RAFAccounting',
+                          purpose:'append-only accounting periods — start and end Kuwait business dates, created, by; never overlapping' },
+    accounting_period_events:    { key:'raf_accounting_period_events',    owner:'RAFAccounting',
+                          purpose:'append-only period closures (one per period, never reopened); open / closed is derived' },
+    accounting_journals:         { key:'raf_accounting_journals',         owner:'RAFAccounting',
+                          purpose:'append-only, immutable posted journal entries (header + balanced lines in integer fils); the ledger and trial balance are derived from these' },
+    /* Money — owned by RAFMoney. Verified money EVIDENCE only; no balance is
+       stored anywhere. A payment's status and custody, a driver's outstanding
+       COD and a handover's state are all DERIVED from these records. */
+    money_payments:              { key:'raf_money_payments',              owner:'RAFMoney',
+                          purpose:'append-only customer payment records — one per order (source order:<orderId>): method, amount in fils, components, created; never a balance' },
+    money_payment_events:        { key:'raf_money_payment_events',        owner:'RAFMoney',
+                          purpose:'append-only payment evidence (received / failed / cancelled, per payment or component) — the status and custody are derived' },
+    money_cod_collections:       { key:'raf_money_cod_collections',       owner:'RAFMoney',
+                          purpose:'append-only COD cash collections — one per order: driver, expected and collected fils, time; the driver\'s custody starts here' },
+    money_cod_handovers:         { key:'raf_money_cod_handovers',         owner:'RAFMoney',
+                          purpose:'append-only COD cash handovers submitted by a driver — the exact collections handed in and their total' },
+    money_cod_handover_events:   { key:'raf_money_cod_handover_events',   owner:'RAFMoney',
+                          purpose:'append-only handover acceptance by Accounting (one per handover) — only this clears driver COD custody' },
+    /* Driver tips — owned by RAFDriverTips. OPERATIONAL records of a direct
+       customer → driver transaction: not RAF money, never in the General
+       Ledger. A tip is the driver's the moment the delivery completes; it is
+       completed when the driver confirms receipt of a handover (cash or bank
+       transfer). Outstanding tips are DERIVED — never a balance field. */
+    /* Purchased gift codes — owned by RAFGift. Customer value paid before it is
+       the recipient's wallet balance (not RAF revenue). Status is DERIVED from
+       these events and the purchase payment's evidence (RAFMoney). */
+    gift_codes:                  { key:'raf_gift_code_records',           owner:'RAFGift',
+                          purpose:'append-only purchased gift codes — one per purchase: code, value in fils, purchaser, purchase payment reference (RAFMoney)' },
+    gift_code_events:            { key:'raf_gift_code_events',            owner:'RAFGift',
+                          purpose:'append-only gift code events — activated (validity start + expiry), redeemed (recipient, wallet transaction), expired (recorded once); a code is redeemed once (there is no cancellation)' },
+    driver_tip_passthrough:      { key:'raf_driver_tip_passthrough',      owner:'RAFDriverTips',
+                          purpose:'append-only tip pass-through records — one per order (TIP-<orderId>), the tip as the customer paid it inside the grand total: order, customer, amount, payment method and reference, funding component (unresolved for Wallet + K-Net); not RAF money, never in the ledger' },
+    driver_tip_events:           { key:'raf_driver_tip_events',           owner:'RAFDriverTips',
+                          purpose:'append-only tip lifecycle events outside earn / hand / confirm — cancelled before delivery, returned to the customer (destination, reference), return unresolved' },
+    driver_tip_earnings:         { key:'raf_driver_tip_earnings',         owner:'RAFDriverTips',
+                          purpose:'append-only tip records — one per order (TIP-<orderId>), created when the delivery completes: order, driver, customer, amount in fils, delivery reference' },
+    driver_tip_handovers:        { key:'raf_driver_tip_handovers',        owner:'RAFDriverTips',
+                          purpose:'append-only tip handovers recorded by Accounting — method (CASH / BANK_TRANSFER), the exact tips handed, total, receipt number, reference, accountant; no journal; the receipt is reconstructed from these' },
+    driver_tip_handover_events:  { key:'raf_driver_tip_handover_events',  owner:'RAFDriverTips',
+                          purpose:'append-only driver confirmations of receipt (one per payout) — the tips are no longer outstanding once confirmed' },
+    /* Customer refunds — owned by RAFRefunds. A refund record never edits the
+       original payment; its completion is a separate event. */
+    refunds:                     { key:'raf_refunds',                     owner:'RAFRefunds',
+                          purpose:'append-only customer refunds — order, payment, amount in fils, reason / source (order change), destination CASH | BANK | WALLET, expected-by, actor' },
+    refund_events:               { key:'raf_refund_events',               owner:'RAFRefunds',
+                          purpose:'append-only refund completions (one per refund) with their evidence; the refund status is derived' },
     notifications:      { key:'raf_notifications',        owner:'RAFNotify',
                           purpose:'append-only per-recipient notifications' },
     notification_reads: { key:'raf_notification_reads',   owner:'RAFNotify',

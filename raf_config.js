@@ -48,7 +48,8 @@
     orders:        { ar:'الطلبات',                   en:'Orders' },
     store_ops:     { ar:'تشغيل المتجر',              en:'Store operations' },
     support:       { ar:'خدمة العملاء',              en:'Customer Service' },
-    communication: { ar:'التواصل مع السائق',         en:'Driver communication' }
+    communication: { ar:'التواصل مع السائق',         en:'Driver communication' },
+    gift:          { ar:'رموز الهدايا',              en:'Gift codes' }
   };
 
   /* ---------- the registry ----------
@@ -76,6 +77,11 @@
       { note:'How long a store has to accept or reject an order before the window closes.' }),
     k('orders.undoWindowSeconds',         'orders', 'seconds', 10,
       { note:'How long a merchant may undo the action just taken on an order.' }),
+    /* refunds to the ORIGINAL bank / payment method (RAFRefunds): the period
+       a BANK refund is expected to complete within. 7 days is RAF's current
+       prototype value; RAF Management may change it. */
+    k('orders.refundOriginalPaymentDays', 'orders', 'integer', 7,
+      { note:'Days within which a refund to the original bank / payment method is expected to complete (current prototype value).' }),
 
     /* checkout — the stock hold a checkout session keeps (RAFRules.Reserve).
        Moved here from a constant in raf_rules.js; the value is unchanged. */
@@ -98,6 +104,10 @@
     k('compensation.stepMinutes',         'compensation', 'minutes', 20),
     k('compensation.amountPerStepFils',   'compensation', 'fils', 1000, { note:'1 KD per completed step.' }),
     k('compensation.couponExpiryDays',    'compensation', 'integer', 7),
+    /* gift codes — a PURCHASED code is valid this many months from its
+       activation (the purchase payment received); approved default 6 */
+    k('gift.validityMonths',              'gift', 'integer', 6,
+      { note:'A purchased gift code can be redeemed for this many months after its payment is received; after that it expires.' }),
     /* Phase I — the customer-facing wording is configurable; no wording is approved */
     k('compensation.customerMessage',     'compensation', 'text', null,
       { prototype:{

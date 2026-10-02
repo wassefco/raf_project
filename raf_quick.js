@@ -21,6 +21,8 @@
     if(window.RAFShop && RAFShop.Stock) return RAFShop.Stock.isOOS(p);
     return !!p && (p.stock===0 || p.available===false);
   }
+  /* the product's store is closed or suspended: viewable, never addable */
+  function shut(p){ return !!(window.RAFShop && RAFShop.Stock && RAFShop.Stock.storeClosed && RAFShop.Stock.storeClosed(p)); }
 
   /* ---------- styles ---------- */
   function css(){
@@ -137,7 +139,7 @@
 
   /* ---------- render ---------- */
   function html(){
-    var out = isOOS(P);
+    var closed = shut(P), out = closed || isOOS(P);
     var saved = P.old ? (parseFloat(P.old) - parseFloat(P.price)) : 0;
     return '<div class="rq" role="dialog" aria-modal="true" aria-label="'+T('طلب سريع','Quick Order')+'">'
       + '<button class="rq-x" aria-label="'+T('إغلاق','Close')+'"><i class="ti ti-x"></i></button>'
@@ -167,10 +169,11 @@
       + '</div>'
       + '<div class="rq-f"><div class="rq-tot"><small>'+T('الإجمالي','Total')+'</small><b id="rqTot">'+money(parseFloat(P.price)*qty)+'</b></div>'
         + '<button class="rq-add" id="rqAdd" '+(out?'disabled':'')+'><i class="ti ti-shopping-cart-plus"></i> <span>'
-        + (out?T('نفدت الكمية','Sold Out'):T('أضف ومتابعة التسوق','Add & continue shopping'))+'</span></button></div>'
+        + (closed?T('المتجر مغلق','Store closed'):out?T('نفدت الكمية','Sold Out'):T('أضف ومتابعة التسوق','Add & continue shopping'))+'</span></button></div>'
       + '</div>';
   }
   function stockHTML(){
+    if(shut(P))     return '<div class="rq-stock out"><i class="ti ti-lock"></i> '+T('هذا المتجر مغلق مؤقتاً لأعمال الصيانة وسيعاود الفتح قريباً.','This store is temporarily closed for maintenance and will reopen soon.')+'</div>';
     if(isOOS(P))    return '<div class="rq-stock out"><i class="ti ti-ban"></i> '+T('نفدت الكمية','Sold Out')+'</div>';
     if(P.stock<=5)  return '<div class="rq-stock low"><i class="ti ti-flame"></i> '+T('بقي '+P.stock+' قطع فقط','Only '+P.stock+' left')+'</div>';
     return '<div class="rq-stock ok"><i class="ti ti-circle-check"></i> '+T('متوفر','In stock')+'</div>';
@@ -316,8 +319,8 @@
     var pending=comboPending();
     var max=pending?1:(window.RAFRules?RAFRules.maxQty(P.id, qtyOpts()):(P.stock||99));
     var minus=backEl.querySelector('[data-q="-1"]'), plus=backEl.querySelector('[data-q="1"]');
-    if(minus) minus.disabled=isOOS(P)||qty<=1;
-    if(plus)  plus.disabled=isOOS(P)||max<=0||qty>=max;
+    if(minus) minus.disabled=isOOS(P)||shut(P)||qty<=1;
+    if(plus)  plus.disabled=isOOS(P)||shut(P)||max<=0||qty>=max;
   }
   function hint(msg){
     var h=backEl&&backEl.querySelector('#rqHint'); if(!h) return;
@@ -326,7 +329,7 @@
   }
 
   function addAndGo(){
-    if(busy||!P||isOOS(P)) return;
+    if(busy||!P||isOOS(P)||shut(P)) return;
     var variant={}, vs=[];
     if(P.variants){
       for(var gi=0;gi<P.variants.length;gi++){

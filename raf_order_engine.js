@@ -230,6 +230,9 @@
     }
     audit('system.refunded', orderId, { automatic:true, systemGenerated:true, source:'automation',
       key:k, reason:why });
+    /* a driver tip inside the refunded order goes back with it and is never
+       earned (RAFDriverTips keeps its pass-through record; not RAF money) */
+    if (global.RAFDriverTips && RAFDriverTips.recordCancellationReturn) { try { RAFDriverTips.recordCancellationReturn(orderId); } catch (e) {} }
     if (global.RAFRules) { try { RAFRules.Reserve.release(); } catch (e) {} }
     /* the refund wording states the expected processing period, never a
        guaranteed settlement date from the card provider */

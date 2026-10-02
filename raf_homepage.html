@@ -787,16 +787,21 @@ function storeCard(s){ return RAFStoreCard.html(s,{promo:s.promo}); }
 function homeFollow(e,slug){ RAFStoreCard.follow(e,slug); }
 
 /* ─── Homepage ranking (comparators are algorithm/admin-ready) ─── */
+/* availability first (confirmed rule): what can be bought now comes before a
+   closed store / sold-out product; the existing comparator orders each group.
+   No score — a two-group partition only. */
+function buyableProduct(p){ return !!(window.RAFSource && RAFSource.isPurchasable && RAFSource.isPurchasable(RAFSource.product(p.id))); }
+function availTier(ok){ return ok ? 0 : 1; }
 function offerQuality(o){ return parseFloat(o.rate||0)*10 + Math.min(parseInt(o.rev||0),500)/120; }  /* quality = rating + review weight, NOT discount% */
-function recommendedStores(){ return STORES.slice().sort((a,b)=> parseFloat(b.rate)-parseFloat(a.rate) || b.prodN-a.prodN); }
-function featuredOffers(){ return OFFERS.slice().sort((a,b)=> offerQuality(b)-offerQuality(a)); }        /* ranked by quality, not discount */
+function recommendedStores(){ return STORES.slice().sort((a,b)=> availTier(a.open)-availTier(b.open) || parseFloat(b.rate)-parseFloat(a.rate) || b.prodN-a.prodN); }
+function featuredOffers(){ return OFFERS.slice().sort((a,b)=> availTier(buyableProduct(a))-availTier(buyableProduct(b)) || offerQuality(b)-offerQuality(a)); }        /* ranked by quality, not discount */
 /* only stores with a live promotion from the marketing authority — its own value */
 function dealStores(){
   if(!window.RAFMarketing||!RAFMarketing.activePromotion) return [];
   return STORES.map(function(s){var p=RAFMarketing.activePromotion(s.slug);return p&&p.value?Object.assign({},s,{promo:p.value}):null;})
-    .filter(Boolean).sort(function(a,b){return b.promo-a.promo;});
+    .filter(Boolean).sort(function(a,b){return availTier(a.open)-availTier(b.open)||b.promo-a.promo;});
 }
-function featuredProducts(){ return RAFCatalog.list({}).slice().sort((a,b)=> offerQuality(b)-offerQuality(a)).slice(0,14); }
+function featuredProducts(){ return RAFCatalog.list({}).slice().sort((a,b)=> availTier(buyableProduct(a))-availTier(buyableProduct(b)) || offerQuality(b)-offerQuality(a)).slice(0,14); }
 
 function renderCarousels(){
   document.getElementById('catTrack').innerHTML=CATEGORIES.filter(c=>c.active).sort((a,b)=>a.sort-b.sort).map(catCard).join('');

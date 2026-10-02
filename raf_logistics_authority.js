@@ -110,6 +110,8 @@
     APPROVAL_UNSUPPORTED:{ ar:'اعتماد السائق غير مدعوم في نموذج الحسابات الحالي.',
                            en:'Driver approval is not supported by the current account model.' },
     ENGINE_REFUSED:    { ar:'رفض سجل الطلب هذا الإجراء.',                  en:'The order record refused this operation.' },
+    /* a COD order completes only when RAFMoney can record its cash collection */
+    COD_COLLECTION_BLOCKED:{ ar:'تعذّر تسجيل تحصيل الدفع عند الاستلام لهذا الطلب؛ لم يُسجَّل التسليم.', en:'The cash-on-delivery collection for this order cannot be recorded; the delivery was not completed.' },
     /* driver applications */
     CONSENT_REQUIRED:  { ar:'يجب الموافقة على شروط وأحكام رف قبل الإرسال.',  en:'RAF’s terms must be accepted before submitting.' },
     DUPLICATE_APPLICATION:{ ar:'يوجد طلب انضمام قيد المراجعة بنفس البيانات.', en:'An application with these details is already under review.' },
@@ -1017,6 +1019,26 @@
     var E = Engine(), S = Snap();
     if (!E || !S) return fail('UNAVAILABLE');
 
+    /* CASH ON DELIVERY — RAFMoney (the money authority) decides, from the
+       order's own snapshot, whether this is a COD order and proves BEFORE the
+       delivery moves that it can record the collection: the assigned driver
+       (this session), the amount due, no conflicting payment or collection.
+       If it cannot, the delivery is refused while nothing has changed yet.
+       Logistics keeps no money record of its own. */
+    var MONEY = global.RAFMoney || null, cod = null;
+    if (MONEY && MONEY.codCollectionPrecheck) {
+      var pc = null;
+      try { pc = MONEY.codCollectionPrecheck(orderId); } catch (e) { pc = { ok:false, code:'MONEY_UNAVAILABLE' }; }
+      if (!pc || !pc.ok) return fail('COD_COLLECTION_BLOCKED', { moneyCode:pc && pc.code, moneyMessage:pc && pc.message });
+      cod = pc.cod ? pc : null;
+    } else {
+      /* the money authority is not loaded: a COD order cannot be completed
+         without recording its collection, so it is refused; any other order
+         completes exactly as before */
+      var pm = m.snapshot && m.snapshot.commercial && m.snapshot.commercial.paymentMethod;
+      if (pm && pm.id === 'cod') return fail('COD_COLLECTION_BLOCKED', { moneyCode:'MONEY_UNAVAILABLE' });
+    }
+
     var me = { id:a.id, name:a.name, roleId:a.roleId };
     var moved = null;
     try { moved = E.driverDelivered(orderId, me); } catch (e) { moved = null; }
@@ -1025,6 +1047,45 @@
     var f = m.fulfilment;
     f.deliveredAt = Date.now();
     try { S.update(orderId, 'fulfilment', f, 'driver_delivery', me); } catch (e) {}
+
+    /* the delivery is now confirmed: RAFMoney records the collection — by this
+       driver (the session, which the snapshot names as the assigned driver),
+       of the amount RAFMoney itself resolved as due. One collection per order
+       (RAFMoney is idempotent on cod:<orderId>). It cannot be undone if this
+       fails (the delivery has already moved), so a failure is returned and
+       audited, never hidden; the driver can retry through RAFMoney. */
+    var codResult = { applicable:false };
+    if (cod) {
+      var rc = null;
+      try { rc = MONEY.recordCodCollection(orderId, { collectedFils:cod.dueFils }); } catch (e) { rc = { ok:false, code:'MONEY_EXCEPTION' }; }
+      if (rc && rc.ok) {
+        codResult = { applicable:true, recorded:true, duplicate:!!rc.duplicate,
+                      collectionId:rc.collection.collectionId, amountFils:rc.collection.collectedFils };
+      } else {
+        codResult = { applicable:true, recorded:false, code:(rc && rc.code) || 'MONEY_UNAVAILABLE', message:(rc && rc.message) || null };
+        audit('logistics.cod_collection_not_recorded', a, { orderId:orderId, key:orderId + ':cod_not_recorded',
+          reason:codResult.code, metadata:{ orderId:orderId, driverId:a.id, dueFils:cod.dueFils, moneyCode:codResult.code } });
+      }
+    }
+
+    /* the driver's tip is payable the moment the delivery succeeds (confirmed
+       rule): RAFDriverTips records it from the order's own record — driver and
+       amount — idempotently (TIP-<orderId>). Logistics keeps no tip record. A
+       failure cannot undo the delivery; it is returned and audited, and
+       Accounting can record it later from the same delivery record. */
+    var tipResult = { applicable:false };
+    var TIPS = global.RAFDriverTips || null;
+    var tipAmt = m.snapshot && m.snapshot.commercial ? parseFloat(m.snapshot.commercial.driverTip) : 0;
+    if (tipAmt > 0 || TIPS) {
+      var rt = null;
+      try { rt = TIPS ? TIPS.recordFromDelivery(orderId) : { ok:false, code:'TIPS_UNAVAILABLE' }; } catch (e) { rt = { ok:false, code:'TIPS_EXCEPTION' }; }
+      if (rt && rt.ok) tipResult = rt.tip ? { applicable:true, recorded:true, duplicate:!!rt.duplicate, tipId:rt.entitlement.tipId, amountFils:rt.entitlement.amountFils } : { applicable:false };
+      else if (tipAmt > 0) {
+        tipResult = { applicable:true, recorded:false, code:(rt && rt.code) || 'TIPS_UNAVAILABLE' };
+        audit('logistics.driver_tip_not_recorded', a, { orderId:orderId, key:orderId + ':tip_not_recorded', reason:tipResult.code,
+          metadata:{ orderId:orderId, driverId:a.id, code:tipResult.code } });
+      }
+    }
 
     /* the trigger — one call, one authority, the order id it asks for */
     var compensation = { evaluated:false, issued:false, compensationId:null };
@@ -1040,7 +1101,7 @@
     }
     /* the driver is told the delivery is complete. What RAF decided about a
        compensation is not a driver matter and is not returned to the app. */
-    return { ok:true, orderId:orderId, delivered:true, compensation:compensation };
+    return { ok:true, orderId:orderId, delivered:true, compensation:compensation, cod:codResult, tip:tipResult };
   }
 
   /* ══════════════════════════════════════════════════════════════════════

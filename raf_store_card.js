@@ -34,8 +34,12 @@
     var href = 'raf_store.html?store=' + encodeURIComponent(m.slug);
     var cover = src.cover ? ' style="background-image:url(\'' + src.cover + '\')"' : '';
     var logo = src.logo ? '<img src="' + src.logo + '" alt="">' : '<i class="ti ' + (m.ic || 'ti-building-store') + '"></i>';
-    var tag = opts.promo ? '<span class="cx-store-promo"><i class="ti ti-discount"></i> -' + opts.promo + '%</span>'
-            : (opts.showStatus && m.open === false) ? '<span class="cx-store-tag closed">' + T('مغلق حالياً', 'Closed now') + '</span>'
+    /* a closed or suspended store stays discoverable, and says so on every
+       card — read live from the store record (the customer sees both as
+       closed; no administrative detail) */
+    var shut = src.status ? src.status !== 'open' : m.open === false;
+    var tag = (shut && opts.showStatus !== false) ? '<span class="cx-store-tag closed"><i class="ti ti-lock"></i> ' + T('مغلق مؤقتاً', 'Temporarily closed') + '</span>'
+            : opts.promo ? '<span class="cx-store-promo"><i class="ti ti-discount"></i> -' + opts.promo + '%</span>'
             : (opts.showPremium && m.sponsored) ? '<span class="cx-store-tag">' + T('بريميوم', 'Premium') + '</span>' : '';
     return '<article class="cx-store" data-slug="' + esc(m.slug) + '" onclick="window.location=\'' + href + '\'">' +
       '<div class="cx-store-cover"' + cover + '>' + tag + '</div>' +

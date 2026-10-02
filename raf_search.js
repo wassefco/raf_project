@@ -33,7 +33,10 @@
   function prodHref(p){ return p.sku ? 'raf_quick.html?id='+encodeURIComponent(p.sku) : 'raf_quick.html'; }
   /* availability from the shared rule, so search agrees with every listing */
   function isOOS(p){ return !!(window.RAFShop && RAFShop.Stock && RAFShop.Stock.isOOS({ id:p.sku, stock:p.stock })); }
-  function oosTag(p){ return isOOS(p) ? '<span class="rs-oos">'+(en()?'Sold Out':'نفدت الكمية')+'</span>' : ''; }
+  /* a closed / suspended store: still searchable, marked as closed (the
+     customer sees both the same way) */
+  function closedTag(){ return '<span class="rs-oos">'+(en()?'Store closed':'المتجر مغلق')+'</span>'; }
+  function oosTag(p){ return p.storeOpen === false ? closedTag() : isOOS(p) ? '<span class="rs-oos">'+(en()?'Sold Out':'نفدت الكمية')+'</span>' : ''; }
   function STORES(){ return (window.RAFShop && RAFShop.stores) || []; }
   var POPULAR = [{ar:'آيفون',en:'iPhone'},{ar:'عطر',en:'Perfume'},{ar:'ساعة ذكية',en:'Smart Watch'},{ar:'حذاء رياضي',en:'Sneakers'},{ar:'حقيبة',en:'Bag'},{ar:'سماعات',en:'Earbuds'}];
   var QUICK = [
@@ -114,7 +117,7 @@
     var html=quickHTML();
     html+=grp(en()?'Categories':'الفئات','ti-category',cats.map(function(c){return '<a class="rs-item" href="raf_offers.html?cat='+c.id+'"><div class="rs-thumb cat"><i class="ti '+c.icon+'"></i></div><div class="rs-info"><div class="rs-name">'+L(c)+'</div><div class="rs-meta">'+(en()?'Category':'فئة')+'</div></div><i class="ti ti-arrow-left rs-go"></i></a>';}));
     html+=grp(en()?'Products':'المنتجات','ti-box',prods.map(function(p){return '<a class="rs-item'+(isOOS(p)?' is-oos':'')+'" href="'+prodHref(p)+'"><div class="rs-thumb"><i class="ti '+p.ic+'"></i></div><div class="rs-info"><div class="rs-name">'+L(p)+oosTag(p)+'</div><div class="rs-meta">'+L(p.store)+' · '+p.price+' KWD</div></div><i class="ti ti-arrow-left rs-go"></i></a>';}));
-    html+=grp(en()?'Stores':'المحلات','ti-building-store',stores.map(function(s){return '<a class="rs-item" href="raf_store.html?store='+encodeURIComponent(s.slug||'')+'"><div class="rs-thumb store"><i class="ti '+s.ic+'"></i></div><div class="rs-info"><div class="rs-name">'+L(s)+'</div><div class="rs-meta">'+s.prod+' '+(en()?'products':'منتج')+' · ★ '+s.rate+'</div></div><i class="ti ti-arrow-left rs-go"></i></a>';}));
+    html+=grp(en()?'Stores':'المحلات','ti-building-store',stores.map(function(s){return '<a class="rs-item" href="raf_store.html?store='+encodeURIComponent(s.slug||'')+'"><div class="rs-thumb store"><i class="ti '+s.ic+'"></i></div><div class="rs-info"><div class="rs-name">'+L(s)+(s.open===false?closedTag():'')+'</div><div class="rs-meta">'+s.prod+' '+(en()?'products':'منتج')+' · ★ '+s.rate+'</div></div><i class="ti ti-arrow-left rs-go"></i></a>';}));
     if(!cats.length&&!prods.length&&!stores.length) html+='<div class="rs-none">'+(en()?'No matches found':'لا نتائج مطابقة')+'</div>';
     html+='<div class="rs-recent" style="background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.3);margin-top:6px;" onclick="RAFSearch.run(\''+encodeURIComponent(q)+'\')"><span><i class="ti ti-search" style="color:#A07828"></i> '+(en()?'Search for':'ابحث عن')+' &quot;'+q+'&quot;</span><i class="ti ti-arrow-left" style="color:#A07828"></i></div>';
     ov.innerHTML=html;

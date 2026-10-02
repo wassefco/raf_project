@@ -53,7 +53,24 @@
       p.available = !Stock.isOOS(p);
       return p;
     },
-    label: function (p) { return Stock.isOOS(p) ? (isEn() ? 'Sold Out' : 'نفدت الكمية') : ''; }
+    label: function (p) { return Stock.isOOS(p) ? (isEn() ? 'Sold Out' : 'نفدت الكمية') : ''; },
+    /* the product's STORE is not open (closed, or suspended — which the
+       customer only ever sees as closed). Resolved from the product id
+       through RAFSource, never from a store name; a product or store that
+       cannot be resolved is not claimed closed (the checkout re-proves all). */
+    storeClosed: function (p) {
+      if (!p || !window.RAFSource) return false;
+      var sp = RAFSource.product(p.id), slug = (sp && sp.store) || p.slug || null;
+      if (!slug) return false;
+      var s = RAFSource.store(slug);
+      return !!s && s.status !== 'open';
+    },
+    /* why this product cannot be added right now, or null */
+    blocked: function (p) {
+      if (Stock.storeClosed(p)) return 'store_closed';
+      if (Stock.isOOS(p)) return 'oos';
+      return null;
+    }
   };
 
   /* ─────────── CART ─────────── */
@@ -71,9 +88,10 @@
        deliberately unchanged, so existing lines, the multi-cart store and
        every Group A/C behaviour keep working byte-for-byte. */
     add: function (p, variant, vs) {
-      /* safety net: a sold-out product can never enter the cart, whichever
-         path calls this (listing, Quick Order, Favorites, Add All) */
-      if (Stock.isOOS(p)) return null;
+      /* safety net: a sold-out product, or one whose store is closed or
+         suspended, can never enter the cart — whichever path calls this
+         (listing, Quick Order, Favorites, Add All, product page) */
+      if (Stock.blocked(p)) return null;
       var a = Cart.read(), key = keyOf(p.id, variant), ex = a.find(function (l) { return l.key === key; });
       var combo = (vs && vs.length && window.RAFInventory)
         ? RAFInventory.combinationIdFor(p.id, vs) : null;
@@ -126,6 +144,7 @@
     tryAdd: function (p, variant, vs) {
       /* availability is checked before the store rule — a sold-out product must
          never trigger a "clear your cart" prompt */
+      if (Stock.storeClosed(p)) return Promise.resolve({ added: false, cleared: false, cancelled: false, closed: true });
       if (Stock.isOOS(p)) return Promise.resolve({ added: false, cleared: false, cancelled: false, oos: true });
       if (!Cart.conflicts(p)) { Cart.add(p, variant, vs); return Promise.resolve({ added: true, cleared: false, cancelled: false }); }
       var cur = Cart.storeLabelForKey(Cart.currentStore()), next = Cart.storeLabel(p);
@@ -527,7 +546,10 @@
         store: s ? { ar: s.name.ar, en: s.name.en } : null,
         slug: p.store, price: p.price, old: p.old || '', disc: p.disc || 0,
         ic: p.ic || 'ti-box', img: p.img || '', rate: p.rate || '', rev: p.rev || '',
-        stock: p.stock, cat: p.cat, sponsored: !!p.sponsored
+        stock: p.stock, cat: p.cat, sponsored: !!p.sponsored,
+        /* the store's live state — a closed / suspended store's products stay
+           searchable and are marked, never dropped */
+        storeOpen: !!(s && s.status === 'open')
       };
     });
   }
@@ -536,7 +558,8 @@
     return RAFSource.stores({}).map(function (s) {
       return { slug: s.slug, ar: s.name.ar, en: s.name.en, cat: s.cat, ic: s.ic,
                logo: s.logo || '', cover: s.cover || '',
-               rate: s.rating, prod: s.productCount, sponsored: !!s.sponsored };
+               rate: s.rating, prod: s.productCount, sponsored: !!s.sponsored,
+               open: s.status === 'open' };
     });
   }
   function search(q) {

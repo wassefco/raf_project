@@ -102,6 +102,7 @@
     .rc-card.is-oos .rc-img{filter:grayscale(1);opacity:.62;}
     .rc-oos-tag{position:absolute;top:10px;inset-inline-end:10px;display:inline-flex;align-items:center;gap:5px;background:var(--ink,#15130F);color:#F3EFE5;font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:20px;box-shadow:0 4px 12px -4px rgba(20,16,8,.5);}
     .rc-oos-tag i{font-size:13px;}
+    .rc-closed-tag{background:#5A3A1A;}
     .rc-qty{height:40px;border:1px solid var(--gold,#C9A84C);background:var(--gold-soft,rgba(201,168,76,.12));border-radius:12px;display:flex;align-items:center;justify-content:space-between;padding:0 3px;gap:2px;}
     .rc-qty .qb{width:32px;height:32px;min-height:32px;flex:0 0 32px;border:none;border-radius:9px;background:var(--gold,#C9A84C);color:#1C1606;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
     .rc-qty .qb:hover{background:var(--gold2,#A07828);color:#fff;}
@@ -160,6 +161,10 @@
         '<span class="rc-qn">' + line.qty + '</span>' +
         '<button class="qb qplus" onclick="RAFCard.inc(event,this)" aria-label="increase"><i class="ti ti-plus"></i></button></div>';
     }
+    if (closedStore(p)) {
+      return '<button class="rc-cart rc-oos" disabled aria-disabled="true" title="' + T('المتجر مغلق مؤقتاً', 'Store temporarily closed') + '"><i class="ti ti-lock"></i>' +
+        '<span class="rc-sr">' + T('المتجر مغلق مؤقتاً', 'Store temporarily closed') + '</span></button>';
+    }
     if (isOOS(p)) {
       return '<button class="rc-cart rc-oos" disabled aria-disabled="true" title="' + T('نفدت الكمية', 'Sold Out') + '"><i class="ti ti-ban"></i>' +
         '<span class="rc-sr">' + T('نفدت الكمية', 'Sold Out') + '</span></button>';
@@ -175,6 +180,14 @@
   function isOOS(p) {
     if (window.RAFShop && RAFShop.Stock) return RAFShop.Stock.isOOS(p);
     return !!p && (p.stock === 0 || p.available === false || p.outOfStock === true);
+  }
+  /* the product's store is closed or suspended (the customer sees both as
+     closed) — it stays visible, it just cannot be bought */
+  function closedStore(p) {
+    return !!(window.RAFShop && RAFShop.Stock && RAFShop.Stock.storeClosed && RAFShop.Stock.storeClosed(p));
+  }
+  function closedToast() {
+    if (window.RAFShop && RAFShop.toast) RAFShop.toast(T('هذا المتجر مغلق مؤقتاً — لا يمكن إضافة منتجاته إلى السلة الآن', 'This store is temporarily closed — its products cannot be added to the cart right now'), { icon: 'ti-lock' });
   }
 
   /* ---------- render one card ---------- */
@@ -202,10 +215,12 @@
     var priceNow = showPromo ? promo.final : p.price;
     var priceWas = showPromo ? promo.original : p.old;
     var badgePct = showPromo ? promo.pct : p.disc;
-    return '<article class="rc-card' + (isOOS(p) ? ' is-oos' : '') + '" data-id="' + p.id + '" data-href="' + o.href + '" onclick="RAFCard.go(this)">' +
+    var shut = closedStore(p);
+    return '<article class="rc-card' + (isOOS(p) ? ' is-oos' : '') + (shut ? ' is-closed' : '') + '" data-id="' + p.id + '" data-href="' + o.href + '" onclick="RAFCard.go(this)">' +
       '<div class="rc-img"' + imgStyle + '>' + imgInner +
-        (isOOS(p) ? '<span class="rc-oos-tag"><i class="ti ti-ban"></i> ' + T('نفدت الكمية', 'Sold Out') + '</span>' : '') +
-        (badgePct && !isOOS(p) ? '<span class="rc-disc' + (showPromo ? ' rc-promo' : '') + '">' + T('خصم ', '') + '<b>' + badgePct + '%</b>' + T('', ' off') + '</span>' : '') +
+        (shut ? '<span class="rc-oos-tag rc-closed-tag"><i class="ti ti-lock"></i> ' + T('المتجر مغلق', 'Store closed') + '</span>'
+              : isOOS(p) ? '<span class="rc-oos-tag"><i class="ti ti-ban"></i> ' + T('نفدت الكمية', 'Sold Out') + '</span>' : '') +
+        (badgePct && !isOOS(p) && !shut ? '<span class="rc-disc' + (showPromo ? ' rc-promo' : '') + '">' + T('خصم ', '') + '<b>' + badgePct + '%</b>' + T('', ' off') + '</span>' : '') +
         (o.wish ? (function(){ var w = (window.RAFShop && RAFShop.Wish.has(p.id)); return '<button class="rc-wish' + (w ? ' on' : '') + '" onclick="RAFCard.wish(event,this)" aria-label="' + T('المفضلة', 'Wishlist') + '" aria-pressed="' + (w ? 'true' : 'false') + '"><i class="ti ' + (w ? 'ti-heart-filled' : 'ti-heart') + '"></i></button>'; })() : '') +
       '</div>' +
       '<div class="rc-body">' +
@@ -246,7 +261,7 @@
     var Sh = window.RAFShop;
     /* a sold-out product can't be added, so it must never prompt to clear the
        cart — browsing it is still allowed */
-    if (Sh && Sh.Cart.conflicts && !isOOS(p) && Sh.Cart.conflicts(p)) {
+    if (Sh && Sh.Cart.conflicts && !isOOS(p) && !closedStore(p) && Sh.Cart.conflicts(p)) {
       var cur = Sh.Cart.storeLabelForKey(Sh.Cart.currentStore()), next = Sh.Cart.storeLabel(p);
       Sh.Cart.confirmSwitch(cur, next).then(function (choice) {
         if (!choice) return;                   /* cancelled → stay put, nothing opens */
@@ -288,6 +303,7 @@
   function addClick(e, btn) {
     e.preventDefault(); e.stopPropagation();
     var p = prodFromEl(btn); if (!p || isOOS(p)) return;   /* never add unavailable products */
+    if (closedStore(p)) { closedToast(); refresh(p.id); return; }
     /* on multi-store listings "Add to Cart" follows the same flow: land on the
        Store page with Quick Order open on top */
     var card = btn.closest('.rc-card');
@@ -298,6 +314,7 @@
 
   /* single funnel for every add — enforces availability + one-store-per-order */
   function guardedAdd(p, variant) {
+    if (closedStore(p)) { closedToast(); refresh(p.id); return Promise.resolve({ added: false, closed: true }); }
     if (isOOS(p)) {
       if (window.RAFShop && RAFShop.toast) RAFShop.toast(T('نفدت كمية هذا المنتج', 'This product is sold out'), { icon: 'ti-ban' });
       refresh(p.id);
@@ -305,6 +322,7 @@
     }
     if (Cart.tryAdd) {
       return Cart.tryAdd(p, variant).then(function (r) {
+        if (r && r.closed) closedToast();
         if (r.cleared || r.separate) refreshAll(); else refresh(p.id);
         if (r.separate && window.RAFShop && RAFShop.toast) {
           RAFShop.toast(T('تم إنشاء سلة منفصلة لهذا المتجر', 'A separate cart was created for this store'), { icon: 'ti-shopping-cart-plus' });
@@ -319,6 +337,9 @@
     e.preventDefault(); e.stopPropagation();
     var key = btn.closest('.rc-qty').dataset.key, l = Cart.line(key);
     if (!l) return;
+    /* a line whose store has since closed: nothing is added, and nothing is
+       taken away either — the cart page reports it */
+    if (closedStore({ id:l.id })) { closedToast(); return; }
     /* one shared ceiling: never take more units than are actually available */
     if (window.RAFRules) {
       var c = RAFRules.clampQty(l.id, l.qty + 1, { combinationId:l.combinationId, vs:l.vs });

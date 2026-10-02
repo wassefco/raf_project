@@ -115,6 +115,47 @@
        refused each one and the change history had no audit entry beside it.
        Registering it is what makes a settings change auditable. */
     'config.changed':       { tl:false, ar:'تم تغيير إعداد في النظام',            en:'A system setting was changed' },
+    /* the accounting record — RAFAccounting (Finance, phase 1). Technical
+       accounting events; never on an order timeline. */
+    'accounting.account_created':     { tl:false, ar:'أُنشئ حساب في دليل الحسابات',  en:'Chart of accounts: account created' },
+    'accounting.account_activated':   { tl:false, ar:'تم تفعيل حساب محاسبي',          en:'Accounting account activated' },
+    'accounting.account_deactivated': { tl:false, ar:'تم إيقاف حساب محاسبي',          en:'Accounting account deactivated' },
+    'accounting.period_created':      { tl:false, ar:'أُنشئت فترة محاسبية',           en:'Accounting period created' },
+    'accounting.period_closed':       { tl:false, ar:'أُقفلت فترة محاسبية',           en:'Accounting period closed' },
+    'accounting.journal_posted':      { tl:false, ar:'تم ترحيل قيد يومية',            en:'Journal entry posted' },
+    /* money evidence — RAFMoney */
+    'money.payment_recorded':         { tl:false, ar:'سُجّلت دفعة عميل',                  en:'Customer payment recorded' },
+    'money.payment_status_changed':   { tl:false, ar:'تغيّرت حالة دفعة عميل',             en:'Customer payment status changed' },
+    'money.cod_collected':            { tl:false, ar:'استلم السائق نقد الدفع عند الاستلام', en:'Driver collected COD cash' },
+    'money.cod_handover_submitted':   { tl:false, ar:'سلّم السائق نقداً إلى المحاسبة',    en:'Driver submitted a COD cash handover' },
+    'money.cod_handover_accepted':    { tl:false, ar:'قبلت المحاسبة تسليم النقد',          en:'Accounting accepted a COD cash handover' },
+    'money.operation_refused':        { tl:false, ar:'رُفضت عملية مالية',                  en:'Money operation refused' },
+    /* a delivery that completed but whose COD collection RAFMoney could not
+       record (the delivery cannot be rolled back) — explicit, never silent */
+    'logistics.cod_collection_not_recorded': { tl:false, ar:'اكتمل التسليم ولم يُسجَّل تحصيل الدفع عند الاستلام', en:'Delivery completed but the COD collection was not recorded' },
+    /* driver tips — RAFDriverTips */
+    'gift.created':                           { tl:false, ar:'إنشاء رمز هدية (إدارة)',            en:'Gift code created (management)' },
+    'gift.redeemed':                          { tl:false, ar:'استخدام رمز هدية وإضافته للمحفظة',  en:'Gift code redeemed to the wallet' },
+    'gift.activated':                         { tl:false, ar:'تفعيل رمز هدية (بدء مدة الصلاحية)',  en:'Gift code activated (validity started)' },
+    'gift.expired':                           { tl:false, ar:'انتهاء صلاحية رمز هدية دون استخدام',  en:'Gift code expired unredeemed' },
+    'gift.purchased':                         { tl:false, ar:'شراء رمز هدية (بانتظار تأكيد الدفع)', en:'Gift code purchased (awaiting payment confirmation)' },
+    'accounting.driver_tip_passthrough_recorded':{ tl:false, ar:'سُجّلت إكرامية سائق مدفوعة (أموال عابرة — ليست أموال رف)', en:'Driver tip recorded as paid (pass-through — not RAF money)' },
+    'accounting.driver_tip_handover_posted':  { tl:false, ar:'ترحيل تسليم إكراميات سائق (من حساب المقاصة)', en:'Driver tip handover posted (out of pass-through clearing)' },
+    'accounting.driver_tip_funded':          { tl:false, ar:'تحديد مكوّن الدفع الممول لإكرامية السائق (أموال عابرة)', en:'Driver tip funding component recorded (pass-through)' },
+    'accounting.driver_tip_cancelled':        { tl:false, ar:'أُلغي الطلب قبل التسليم؛ لن تُستحق الإكرامية', en:'Order cancelled before delivery; the tip will not be earned' },
+    'accounting.driver_tip_returned':         { tl:false, ar:'أُعيدت إكرامية السائق إلى العميل',  en:'Driver tip returned to the customer' },
+    'accounting.driver_tip_return_unresolved':{ tl:false, ar:'تعذّر تحديد طريقة إعادة إكرامية السائق (محفظة + كي-نت)', en:'Driver tip return unresolved (Wallet + K-Net)' },
+    'accounting.driver_tips_recognized':      { tl:false, ar:'سُجّلت إكرامية السائق (سجل تشغيلي — ليست أموال رف)', en:'Driver tip recorded (operational record — not RAF money)' },
+    'accounting.driver_tip_handover_recorded':{ tl:false, ar:'سُجّل تسليم إكراميات لسائق (نقداً أو تحويل بنكي)', en:'Driver tip handover recorded (cash or bank transfer)' },
+    'logistics.driver_tip_not_recorded':      { tl:false, ar:'اكتمل التسليم ولم تُسجَّل إكرامية السائق', en:'Delivery completed but the driver tip was not recorded' },
+    'accounting.driver_tip_receipt_confirmed':{ tl:false, ar:'أكّد السائق استلام الإكراميات',     en:'Driver confirmed receipt of tips' },
+    /* customer refunds — RAFRefunds */
+    'accounting.refund_recorded':             { tl:false, ar:'سُجّل مبلغ مسترد لعميل',           en:'Customer refund recorded' },
+    'accounting.refund_completed':            { tl:false, ar:'اكتمل استرداد مبلغ لعميل',          en:'Customer refund completed' },
+    'accounting.refund_refused':              { tl:false, ar:'رُفضت عملية استرداد',              en:'Refund operation refused' },
+    /* settlement → accounting integration (RAFSettlementPosting) */
+    'accounting.settlement_posted':           { tl:false, ar:'رُحّلت تسوية إلى المحاسبة',        en:'Settlement posted to accounting' },
+    'accounting.settlement_posting_refused':  { tl:false, ar:'رُفض ترحيل تسوية إلى المحاسبة',   en:'Settlement posting to accounting refused' },
     /* a department manager administering an account inside their declared
        scope, through RAFPerm's authorised path (never the raw override) */
     'permission.granted':   { tl:false, ar:'تمت إضافة صلاحية لحساب',              en:'A permission was added to an account' },
@@ -181,6 +222,26 @@
     /* store profile */
     'store.profile_updated':{ tl:false, ar:'تم تعديل ملف المتجر',         en:'Store profile updated' },
     'store.schedule_updated':{ tl:false, ar:'تم تعديل جدول العمل',        en:'Opening schedule updated' },
+    /* store profile — RAFStoreProfile: a merchant submits, RAF Management decides */
+    'store.profile_change_requested':{ tl:false, ar:'طلب التاجر تعديل ملف المتجر', en:'Merchant requested a store profile change' },
+    'store.profile_change_approved': { tl:false, ar:'تم قبول تعديل ملف المتجر وتطبيقه', en:'Store profile change approved and applied' },
+    'store.profile_change_rejected': { tl:false, ar:'تم رفض طلب تعديل ملف المتجر', en:'Store profile change request rejected' },
+    /* store status — RAFStoreStatus (each is a real status change, except the
+       request and its rejection, which leave the store untouched) */
+    'store.opened':           { tl:false, ar:'تم فتح المتجر',                 en:'Store opened' },
+    'store.closed':           { tl:false, ar:'تم إغلاق المتجر',               en:'Store closed' },
+    'store.suspended':        { tl:false, ar:'تم إيقاف المتجر من إدارة رف',    en:'Store suspended by RAF Management' },
+    'store.restored':         { tl:false, ar:'تمت استعادة المتجر من الإيقاف',  en:'Store restored from suspension' },
+    'store.closure_requested':{ tl:false, ar:'طلب التاجر إغلاق المتجر',       en:'Merchant requested a store closure' },
+    'store.closure_approved': { tl:false, ar:'تم قبول طلب إغلاق المتجر وإغلاقه', en:'Store closure request approved — store closed' },
+    'store.closure_rejected': { tl:false, ar:'تم رفض طلب إغلاق المتجر',       en:'Store closure request rejected' },
+    'store.closure_cancelled':{ tl:false, ar:'ألغى التاجر طلب إغلاق المتجر',  en:'Merchant cancelled a store closure request' },
+    /* the system, never a person: an approved closure period ended */
+    'store.closure_expired':  { tl:false, ar:'انتهت مدة الإغلاق المعتمد وأُعيد فتح المتجر تلقائياً', en:'Approved closure period ended — store reopened automatically' },
+    'store.extension_requested':{ tl:false, ar:'طلب التاجر تمديد إغلاق المتجر',   en:'Merchant requested a closure extension' },
+    'store.extension_approved': { tl:false, ar:'تم قبول تمديد إغلاق المتجر',     en:'Closure extension approved' },
+    'store.extension_rejected': { tl:false, ar:'تم رفض طلب تمديد الإغلاق',       en:'Closure extension request rejected' },
+    'store.extension_cancelled':{ tl:false, ar:'ألغى التاجر طلب تمديد الإغلاق',   en:'Merchant cancelled a closure extension request' },
     /* customer experience — recorded against the store (audit log, not the order timeline) */
     'customer_experience.review_created':       { tl:false, ar:'أضاف العميل تقييماً',        en:'Customer added a review' },
     'customer_experience.review_replied':       { tl:false, ar:'ردّ المتجر على تقييم',       en:'Store replied to a review' },

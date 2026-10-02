@@ -7,6 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Tajawal:wght@300;400;500;700;800&family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<!-- RAF's existing theme mechanism: the saved light / dark choice is applied
+     before first paint (no flash). Reading it writes nothing. -->
+<script src="raf_admin_theme.js"></script>
 <link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
 <link rel="apple-touch-icon" href="raf_appicon.png">
@@ -382,6 +385,170 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
   .mw-toast{bottom:90px;}
 }
 </style>
+<style>
+/* ══════════════════════════════════════════════════════════════
+   RAF MERCHANT — STORE PAGE DESIGN LAYER
+   Visual only: every class the page script renders is kept; this layer
+   restyles them and adds the header, the "store at a glance" strip, the
+   two-column grids and dark mode. Tokens are scoped to THIS page — the
+   shared raf_theme.css and every other page are untouched.
+   ══════════════════════════════════════════════════════════════ */
+:root{
+  --rail:#15130F; --rail-fg:#8E877A;
+  --inv:#15130F; --inv-fg:#F5F0E4;
+  --ok:#1F7A45;  --ok-bg:rgba(46,158,91,.11);
+  --bad:#A63A36; --bad-bg:rgba(217,83,79,.09);
+  --warn:#8F5410; --warn-bg:rgba(200,121,30,.11);
+  --r-card:12px; --r-ctl:10px;
+  --sh-card:0 1px 2px rgba(20,16,8,.04), 0 10px 28px -22px rgba(20,16,8,.35);
+}
+html[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#12110F; --bg2:#0D0C0B; --bg3:#201E1A; --card:#171614;
+  --ink:#F4F0E6; --text:#ECE7DB; --text2:#BCB5A7; --text3:#8C8578;
+  --border:#2A2721; --border2:#3A362E;
+  --gold2:#D9B85C; --gold-soft:rgba(201,168,76,.14);
+  --rail:#090908; --rail-fg:#7E786C;
+  --inv:#F4F0E6; --inv-fg:#15130F;
+  --ok:#63CC90;  --ok-bg:rgba(99,204,144,.12);
+  --bad:#F08985; --bad-bg:rgba(240,137,133,.11);
+  --warn:#E7B45E; --warn-bg:rgba(231,180,94,.12);
+  --red:#E0625D; --green:#3FB46E;
+  --sh-card:none;
+}
+body{background:var(--bg2);color:var(--text);}
+
+/* ---------- rail ---------- */
+.mw-rail{background:var(--rail);}
+html[data-theme="dark"] .mw-rail{border-inline-end:1px solid var(--border);}
+.mw-rail-b{color:var(--rail-fg);border-radius:12px;}
+
+/* ---------- header ---------- */
+.mw-head{background:var(--card);border-bottom:1px solid var(--border);padding:10px clamp(14px,2.4vw,28px);gap:12px;}
+.mw-store{gap:12px;}
+.mw-store-logo{width:42px;height:42px;border-radius:11px;border:1px solid var(--border);}
+.mw-store-t .kick{display:block;font-size:10.5px;font-weight:800;letter-spacing:.06em;color:var(--gold2);line-height:1.2;}
+.mw-store-t b{font-size:17px;line-height:1.35;}
+.mw-store-t .meta{display:block;font-size:11.5px;color:var(--text3);line-height:1.3;}
+.mw-store-t .meta bdi{font-family:var(--font-en);}
+.mw-ico-b{border-radius:var(--r-ctl);background:var(--card);border-color:var(--border2);color:var(--text2);}
+.mw-ico-b:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.mw-body{padding:16px clamp(14px,2.4vw,28px) 60px;}
+
+/* ---------- the store at a glance ---------- */
+.st-strip{max-width:1080px;margin:0 auto 14px;display:flex;flex-wrap:wrap;gap:8px;}
+.st-chip{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 13px;border-radius:999px;
+  border:1px solid var(--border2);background:var(--card);color:var(--text2);font-family:inherit;font-size:12.5px;
+  font-weight:800;line-height:1.3;text-decoration:none;cursor:pointer;max-width:100%;text-align:start;}
+.st-chip i{font-size:16px;flex:0 0 auto;}
+.st-chip span{min-width:0;overflow-wrap:anywhere;}
+.st-chip .go{font-size:13px;opacity:.55;}
+.st-chip:hover{border-color:var(--gold);}
+.st-chip:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.st-chip.ok{background:var(--ok-bg);border-color:transparent;color:var(--ok);}
+.st-chip.bad{background:var(--bad-bg);border-color:transparent;color:var(--bad);}
+.st-chip.warn{background:var(--warn-bg);border-color:transparent;color:var(--warn);}
+.st-chip.gold{background:var(--gold-soft);border-color:transparent;color:var(--gold2);}
+.st-chip.link{margin-inline-start:auto;background:transparent;}
+
+/* ---------- tabs: a flat underline bar, not a pill container ---------- */
+.sm-tabs{max-width:1080px;margin:0 auto 16px;border:0;border-bottom:1px solid var(--border2);border-radius:0;
+  background:transparent;padding:0;gap:2px;}
+.mw-body .sm-tabs button{min-height:46px;}
+.sm-tabs button{flex:0 0 auto;border-radius:0;padding:0 14px;color:var(--text3);font-size:13.5px;
+  box-shadow:inset 0 -2px 0 transparent;}
+.sm-tabs button:hover{background:transparent;color:var(--ink);}
+.sm-tabs button[aria-selected="true"]{background:transparent;color:var(--ink);box-shadow:inset 0 -2px 0 var(--gold);}
+.sm-tabs button[aria-selected="true"] i{color:var(--gold2);}
+
+/* ---------- sections ---------- */
+.sm-wrap{max-width:1080px;gap:14px;}
+.sm-grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start;}
+.sm-grid2 > .sm-sec{min-width:0;}
+/* operations: status + its closure workflow in the wide column, Busy Mode and
+   preparation time stacked beside it — no half-empty full-width panel */
+.sm-opsgrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:14px;align-items:start;}
+.sm-opsgrid > div{display:flex;flex-direction:column;gap:14px;min-width:0;}
+.sm-sec{border-radius:var(--r-card);padding:16px 18px;box-shadow:var(--sh-card);border-color:var(--border);}
+.sm-sec.editing{border-color:var(--gold);box-shadow:0 0 0 3px var(--gold-soft);}
+.sm-sec-h{min-height:40px;gap:10px;flex-wrap:wrap;}
+.sm-sec-h h3{font-size:14.5px;letter-spacing:.01em;}
+.sm-big{font-size:19px;}
+.sm-big.muted{font-size:15.5px;}
+.sm-small{font-size:12.5px;}
+.sm-edit-b,.sm-btn,.sm-link,.sm-nav-b,.sm-copy-b,.sm-chk,.sm-dur,.sm-lvl{border-radius:var(--r-ctl);}
+.sm-edit-b{background:transparent;color:var(--ink);}
+.sm-btn{background:var(--card);color:var(--text2);}
+.sm-btn.gold{background:var(--gold);border-color:var(--gold2);color:#1C1606;}
+.sm-btn.danger{background:var(--red);border-color:var(--red);color:#fff;}
+.sm-seg{border-radius:12px;background:var(--bg);}
+.sm-seg-b{border-radius:9px;}
+.sm-seg-b[aria-pressed="true"]{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.18);}
+.sm-field textarea,.sm-field input{border-radius:var(--r-ctl);background:var(--card);color:var(--ink);}
+.sm-hm select,.sm-nav-f select{border-radius:var(--r-ctl);background:var(--card);color:var(--ink);}
+.sm-ap{border-radius:var(--r-ctl);}
+.sm-ap-b[aria-pressed="true"]{background:var(--inv);color:var(--inv-fg);}
+
+/* status colours through tokens (both themes; never colour alone — every
+   status keeps its text) */
+.sm-tag.green{background:var(--ok-bg);color:var(--ok);}
+.sm-tag.red{background:var(--bad-bg);color:var(--bad);}
+.sm-tag.amber{background:var(--warn-bg);color:var(--warn);}
+.sm-tag.gold{background:var(--gold-soft);color:var(--gold2);}
+.sm-meta .err,.sm-derr,.sm-copy-b.rm{color:var(--bad);}
+.sm-msg{background:var(--bad-bg);border-color:transparent;color:var(--bad);border-radius:var(--r-ctl);}
+.sm-okbox{background:var(--ok-bg);border-color:transparent;color:var(--ok);border-radius:var(--r-ctl);}
+.sm-day .s.on{color:var(--ok);}
+.sm-st{font-weight:800;} .sm-st.ok{color:var(--ok);} .sm-st.bad{color:var(--bad);}
+
+/* operations: the live status reads first and large */
+.sm-now{gap:12px;padding:12px 14px;border-radius:var(--r-ctl);background:var(--bg);margin-top:4px;}
+.sm-now .t b{font-size:18px;}
+.sm-dot{width:12px;height:12px;}
+.sm-preview{background:var(--bg);border-radius:var(--r-ctl);padding:10px 12px;}
+
+/* profile identity */
+.sm-cover{height:110px;border-radius:10px;margin:0 0 12px;}
+.sm-lg{width:56px;height:56px;border-radius:12px;border:1px solid var(--border);}
+.sm-id h2{font-size:18px;}
+
+/* dialog + toast follow the theme */
+.sm-dlg-c{border-radius:14px;border:1px solid var(--border);}
+.mw-toast > div{background:var(--inv);color:var(--inv-fg);}
+.sm-copy{background:var(--bg);}
+.sm-nav-row{border-radius:var(--r-ctl);}
+
+@media (max-width:900px){
+  .sm-grid2{grid-template-columns:1fr;}
+  .sm-opsgrid{grid-template-columns:1fr;}
+}
+@media (max-width:640px){
+  .mw-head{padding:8px 12px;gap:8px;}
+  .mw-hact{gap:6px;}
+  .mw-hact .mw-ico-b{width:40px;min-height:40px;height:40px;}
+  .mw-ico-b.lang{padding:0 10px;}
+  .mw-store-t .kick{display:none;}
+  .mw-body{padding:12px 12px 90px;}
+  /* one scrollable row of chips — status first — instead of four wrapped rows */
+  .st-strip{flex-wrap:nowrap;overflow-x:auto;gap:6px;margin:0 -12px 12px;padding:0 12px 2px;scrollbar-width:none;}
+  .st-strip::-webkit-scrollbar{display:none;}
+  .st-chip{flex:0 0 auto;white-space:nowrap;}
+  .st-chip span{overflow-wrap:normal;}
+  /* short facts stay label / value side by side */
+  .sm-kv{grid-template-columns:minmax(88px,auto) minmax(0,1fr);gap:6px 12px;}
+  .sm-kv dt{margin-top:0;}
+  .st-chip{min-height:38px;padding:0 11px;font-size:12px;}
+  .st-chip.link{margin-inline-start:0;}
+  .sm-tabs button{padding:0 11px;font-size:13px;}
+  .sm-sec{padding:14px;}
+  .sm-big{font-size:17px;}
+}
+@media (max-width:360px){
+  .mw-store-logo{display:none;}
+  .sm-tabs button i{display:none;}
+  .sm-durs{grid-template-columns:1fr 1fr;}
+}
+</style>
 </head>
 <body>
 
@@ -398,17 +565,20 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
     <header class="mw-head">
       <div class="mw-store">
         <div class="mw-store-logo" id="stLogo"><i class="ti ti-building-store"></i></div>
-        <div class="mw-store-t"><b id="stName">—</b>
-          <span data-ar="إدارة المتجر" data-en="Store Management">إدارة المتجر</span></div>
+        <div class="mw-store-t"><span class="kick" data-ar="إدارة المتجر" data-en="Store Management">إدارة المتجر</span>
+          <b id="stName">—</b><span class="meta" id="stMeta"></span></div>
       </div>
       <div class="mw-head-sp"></div>
       <div class="mw-hact">
-        <button class="mw-ico-b" onclick="refreshAll()" aria-label="refresh"><i class="ti ti-refresh"></i></button>
+        <button class="mw-ico-b" id="refreshBtn" onclick="refreshAll()" aria-label="refresh"><i class="ti ti-refresh"></i></button>
+        <button class="mw-ico-b" id="themeBtn" onclick="toggleTheme()" aria-pressed="false"><i class="ti ti-moon"></i></button>
         <button class="mw-ico-b lang" onclick="toggleLang()"><span id="langLabel">EN</span></button>
       </div>
     </header>
 
     <div class="mw-body">
+      <!-- the store at a glance: status and anything waiting — all from real records -->
+      <div class="st-strip" id="stStrip" role="region" aria-live="polite"></div>
       <div class="sm-tabs" role="tablist" id="tabs"></div>
       <section id="panel" role="tabpanel" aria-live="polite"></section>
     </div>
@@ -440,6 +610,7 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
 <script src="raf_permissions.js"></script>
 <script src="raf_store_profile.js"></script>
 <script src="raf_store_schedule.js"></script>
+<script src="raf_store_status.js"></script>
 <script src="raf_merchant_prefs.js"></script>
 <script src="raf_merchant_nav.js"></script>
 <script>
@@ -447,6 +618,8 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
    STORE MANAGEMENT
    Profile    → RAFStoreProfile (stores.edit + own store)
    Operations → RAFStoreOps     (orders.manage + own store)
+                RAFStoreStatus  open / close (same check) and the full-
+                                closure request (stores.edit + own store)
    Team       → RAFPerm, read-only
    The page shows values, edits one thing at a time, and never
    writes storage or decides a rule itself.
@@ -456,8 +629,9 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
   var SP = window.RAFStoreProfile, OPS = window.RAFStoreOps;
   var PREF = 'raf_sm_view';
   var TABS = [
-    { k:'profile',    ic:'ti-building-store', ar:'ملف المتجر', en:'Store Profile' },
+    /* operations first: the store's live state is what a merchant checks first */
     { k:'operations', ic:'ti-activity',       ar:'التشغيل',    en:'Operations' },
+    { k:'profile',    ic:'ti-building-store', ar:'ملف المتجر', en:'Store Profile' },
     { k:'team',       ic:'ti-users',          ar:'الفريق',     en:'Team' },
     { k:'settings',   ic:'ti-settings',       ar:'الإعدادات',  en:'Settings' }
   ];
@@ -473,6 +647,8 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
     high:     { ar:'مزدحم',  en:'Heavy' }
   };
   var SECTIONS = {
+    name:  { ar:'اسم المتجر',  en:'Store name',        eAr:'تعديل الاسم',   eEn:'Edit name' },
+    cat:   { ar:'فئة المتجر',  en:'Store category',    eAr:'تعديل الفئة',   eEn:'Edit category' },
     desc:  { ar:'وصف المتجر',  en:'Store description', eAr:'تعديل الوصف',   eEn:'Edit description' }
   };
   var DAY_TXT = {
@@ -482,11 +658,18 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
   };
 
   var ME = null, SLUG = null, prof = null;
-  var st = { tab:'profile' };
+  var pdraft = {}, pkey = null, pmsg = null, psubmitting = false;   /* the unsent store-profile change set (memory only) */
+  var st = { tab:'operations' };
   var edit = null;      /* { section, lang, draft:{ar,en}, errors:{ar,en}, msg, base, focus } */
   var prepEdit = null;  /* { mode:'auto'|'manual', level, msg } */
   var busyPick = null;  /* { hours, msg } */
   var busyMsg = null;
+  var SST = window.RAFStoreStatus;
+  var closeDraft = null; /* { days, reason, msg, bad, busy } — the full-closure request form */
+  var closeMsg = null;
+  var statusAsk = null; /* { expect, busy } — the merchant open / close confirmation */
+  var statusMsg = null;
+  var cancelAsk = null; /* the pending request whose cancellation is being confirmed */
   var lastBusy = null;
   var SS = window.RAFStoreSchedule;
   var schedEdit = null; /* { days, base, original, errors, msg, touched, copyFrom, copySel } */
@@ -528,7 +711,7 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
   /* ---------- unsaved changes ---------- */
   function sectionDirty(){
     if (!edit || !prof || !prof.ok) return false;
-    var cur = prof.fields[edit.section];
+    var cur = edit.orig || prof.fields[edit.section];
     return edit.draft.ar !== cur.ar || edit.draft.en !== cur.en;
   }
   function prepTarget(){ return prepEdit ? (prepEdit.mode === 'auto' ? 'auto' : prepEdit.level) : null; }
@@ -542,8 +725,9 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
     var pr = PREFS.read({ actor:ME.id });
     return pr.ok && sndDirty(pr);
   }
-  function dirty(){ return sectionDirty() || prepDirty() || schedDirty() || soundsDirty(); }
-  function clearEdits(){ edit = null; prepEdit = null; busyPick = null; schedEdit = null; sndDraft = null; }
+  function closeDirty(){ return !!(closeDraft && (String(closeDraft.days).trim() || String(closeDraft.reason).trim())); }
+  function dirty(){ return sectionDirty() || prepDirty() || schedDirty() || soundsDirty() || closeDirty(); }
+  function clearEdits(){ edit = null; prepEdit = null; busyPick = null; schedEdit = null; sndDraft = null; closeDraft = null; statusAsk = null; cancelAsk = null; }
 
   var pending = null;
   function confirmDiscard(go){
@@ -559,6 +743,83 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
   window.dlgDiscard = function(){ el('dlg').hidden = true; var go = pending; pending = null; clearEdits(); if (go) go(); };
 
   /* ---------- chrome ---------- */
+  /* ════════════════════ HEADER + STORE AT A GLANCE ════════════════════
+     Everything here is read from the authorities that own it — the store
+     record (RAFSource), Busy Mode (RAFStoreOps), closure requests
+     (RAFStoreStatus), profile requests (RAFStoreProfile) and the schedule
+     (RAFStoreSchedule). Nothing is computed that they do not state. Each
+     item is text + icon (never colour alone) and jumps to where it is
+     handled. */
+  function renderHead(){
+    var s = RAFSource.store(SLUG) || {}, meta = [];
+    el('stName').textContent = L(s.name) || '—';
+    if (s.num) meta.push('<bdi>' + esc(s.num) + '</bdi>');
+    if (L(s.cat)) meta.push(esc(L(s.cat)));
+    el('stMeta').innerHTML = meta.join(' · ');
+    var lg = el('stLogo');
+    if (s.logo){ lg.style.backgroundImage = "url('" + s.logo + "')"; lg.innerHTML = ''; }
+    else { lg.style.backgroundImage = ''; lg.innerHTML = '<i class="ti ' + esc(s.ic || 'ti-building-store') + '"></i>'; }
+    renderThemeBtn();
+  }
+  function stChip(tone, icon, text, go, label){
+    var inner = '<i class="ti ' + icon + '" aria-hidden="true"></i><span>' + esc(text) + '</span>';
+    return go
+      ? '<button type="button" class="st-chip ' + tone + '" onclick="' + go + '"' + (label ? ' aria-label="' + esc(label) + '"' : '') + '>' + inner + '<i class="ti ti-chevron-' + (isEn() ? 'right' : 'left') + ' go" aria-hidden="true"></i></button>'
+      : '<span class="st-chip ' + tone + '">' + inner + '</span>';
+  }
+  function renderStrip(){
+    var box = el('stStrip'); if (!box || !ME) return;
+    var store = RAFSource.store(SLUG) || {}, busy = OPS.isBusy(SLUG), h = '';
+    /* the one status the customer experiences right now */
+    if (store.status === 'open' && busy)
+      h += stChip('warn', 'ti-player-pause', T('مشغول — الطلبات الجديدة متوقفة حتى ', 'Busy — new orders paused until ') + kwTime(OPS.busyUntil(SLUG)), "setTab('operations')");
+    else if (store.status === 'open')
+      h += stChip('ok', 'ti-circle-check', T('مفتوح — يستقبل الطلبات الجديدة', 'Open — accepting new orders'), "setTab('operations')");
+    else if (store.status === 'closed')
+      h += stChip('bad', 'ti-lock', T('مغلق — لا يستقبل طلبات جديدة', 'Closed — not accepting new orders'), "setTab('operations')");
+    else if (store.status === 'suspended')
+      h += stChip('bad', 'ti-ban', T('موقوف من إدارة رف', 'Suspended by RAF'), "setTab('operations')");
+    /* closures: the approved one running, and requests still waiting */
+    var cr = SST ? SST.myRequests() : null;
+    if (cr && cr.ok){
+      if (cr.activeClosure && cr.activeClosure.endsAt)
+        h += stChip('warn', 'ti-calendar-off', T('إغلاق معتمد حتى ', 'Approved closure until ') + fcDate(cr.activeClosure.endsAt), "setTab('operations')");
+      var pc = cr.items.filter(function(r){ return r.status === 'pending'; }).length;
+      if (pc) h += stChip('gold', 'ti-clock', T(pc === 1 ? 'طلب إغلاق قيد المراجعة' : pc + ' طلبات إغلاق قيد المراجعة', pc === 1 ? '1 closure request pending' : pc + ' closure requests pending'), "setTab('operations')");
+    }
+    /* profile: requests waiting, and changes not sent yet */
+    var pr = SP.myRequests ? SP.myRequests({ actor:ME.id }) : null;
+    if (pr && pr.ok){
+      var pp = pr.items.filter(function(r){ return r.status === 'pending'; }).length;
+      if (pp) h += stChip('gold', 'ti-id-badge-2', T(pp === 1 ? 'تعديل ملف قيد المراجعة' : pp + ' تعديلات ملف قيد المراجعة', pp === 1 ? '1 profile change pending' : pp + ' profile changes pending'), "setTab('profile')");
+    }
+    if (hasDraft()) h += stChip('gold', 'ti-pencil', T('تعديلات ملف غير مرسلة', 'Unsent profile changes'), "setTab('profile')");
+    /* the schedule is what customers see as opening hours */
+    var sr = SS ? SS.read({ actor:ME.id }) : null;
+    if (sr && sr.ok && !sr.configured) h += stChip('', 'ti-calendar-time', T('جدول العمل غير مُعدّ', 'Opening schedule not set up'), 'goSchedule()');
+    h += '<a class="st-chip link" href="raf_store.html?store=' + encodeURIComponent(SLUG) + '" target="_blank" rel="noopener"><i class="ti ti-external-link" aria-hidden="true"></i><span>'
+      + esc(T('صفحة المتجر للعملاء', 'Customer store page')) + '</span></a>';
+    box.innerHTML = h;
+    box.setAttribute('aria-label', T('المتجر في لمحة', 'Store at a glance'));
+  }
+  /* light / dark — RAF's existing theme preference (raf_admin_theme.js),
+     saved only when the merchant presses the control */
+  function curTheme(){ return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
+  function renderThemeBtn(){
+    var b = el('themeBtn'); if (!b) return;
+    var dark = curTheme() === 'dark';
+    b.setAttribute('aria-pressed', dark ? 'true' : 'false');
+    b.setAttribute('aria-label', T('الوضع الداكن', 'Dark mode'));
+    b.setAttribute('title', dark ? T('التبديل إلى الوضع الفاتح', 'Switch to light mode') : T('التبديل إلى الوضع الداكن', 'Switch to dark mode'));
+    b.innerHTML = '<i class="ti ' + (dark ? 'ti-sun' : 'ti-moon') + '" aria-hidden="true"></i>';
+  }
+  window.toggleTheme = function(){
+    var next = curTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('raf_admin_theme', next); } catch(e){}
+    renderThemeBtn(); var b = el('themeBtn'); if (b) b.focus();
+  };
+
   function renderTabs(){
     el('tabs').innerHTML = TABS.map(function(t){
       var on = st.tab === t.k;
@@ -568,6 +829,7 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
     el('panel').setAttribute('aria-labelledby', 'tab-' + st.tab);
   }
   function render(){
+    renderHead(); renderStrip();
     renderTabs();
     el('panel').innerHTML = st.tab === 'operations' ? renderOps()
                           : st.tab === 'team'       ? renderTeam()
@@ -582,7 +844,21 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
     if (st.tab === 'settings') navAfterRender();
   }
 
-  /* ════════════════════ STORE PROFILE ════════════════════ */
+  /* ════════════════════ STORE PROFILE ════════════════════
+     CONFIRMED RULE: nothing edited here is live immediately. Every change
+     (name, category, description, logo, cover) is collected into ONE change
+     set on this page and submitted as ONE Store Profile Change Request —
+     RAFStoreProfile.submitChange → Requests & Approvals. The live profile
+     shown here stays as it is until RAF Management approves. The unsent
+     change set lives only in this page's memory: it is not a profile. */
+  function draftKeys(){ return Object.keys(pdraft); }
+  function hasDraft(){ return draftKeys().length > 0; }
+  function fieldLabel(f){ var d = SP.FIELDS[f] || SP.MEDIA[f]; return d ? T(d.label.ar, d.label.en) : f; }
+  function fmtSize(b){ return typeof b === 'number' ? (b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(1) + ' MB') : ''; }
+  function pDate(ms){
+    try { return new Date(ms).toLocaleString(isEn() ? 'en-GB' : 'ar-KW-u-nu-latn', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kuwait' }); }
+    catch(e){ return new Date(ms).toISOString().slice(0,16).replace('T',' '); }
+  }
   function renderProfile(){
     if (!prof) loadProfile();
     if (!prof.ok) return '<div class="sm-wrap"><section class="sm-sec"><div class="sm-empty">'+esc(prof.message)+'</div></section></div>';
@@ -594,24 +870,60 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
         + '<div class="t"><h2>'+esc(L(fx.name))+'</h2><div class="sub">'+esc(L(fx.cat))
           + (fx.num ? ' · <bdi>'+esc(fx.num)+'</bdi>' : '')+'</div></div>'
         + statusTag(fx.status) + '</div>'
-      + '<div class="sm-id-foot"><span class="sm-ro-note"><i class="ti ti-lock"></i>'
-          + esc(T('الاسم والشعار والفئة والحالة تديرها رف','Name, logo, category and status are managed by RAF'))+'</span>'
+      + '<div class="sm-id-foot"><span class="sm-ro-note"><i class="ti ti-shield-check"></i>'
+          + esc(T('أي تعديل على ملف المتجر يُرسل إلى إدارة رف للموافقة، ولا يظهر للعملاء قبل اعتماده.','Every store-profile change is sent to RAF Management for approval and is not shown to customers until approved.'))+'</span>'
         + '<a class="sm-link" href="raf_store.html?store='+encodeURIComponent(SLUG)+'" target="_blank" rel="noopener">'
           + '<i class="ti ti-external-link"></i>'+esc(T('صفحة المتجر','Store page'))+'</a></div>'
       + '</section>';
     /* opening hours are read-only here — generated from the Opening schedule */
-    return '<div class="sm-wrap">' + id + textSection('desc') + hoursSection() + '</div>';
+    return '<div class="sm-wrap">' + id + requestsPanel() + draftBar()
+      + '<div class="sm-grid2">' + textSection('name') + textSection('cat') + '</div>'
+      + textSection('desc') + '<div class="sm-grid2">' + mediaSection() + hoursSection() + '</div></div>';
   }
+  /* the merchant's real profile requests — pending ones, and the last decision */
+  function requestsPanel(){
+    var mine = SP.myRequests({ actor:ME.id }); if (!mine || !mine.ok || !mine.items.length) return '';
+    var pending = mine.items.filter(function(r){ return r.status === 'pending'; });
+    var last = mine.items.filter(function(r){ return r.status !== 'pending'; })[0] || null;
+    var h = '<section class="sm-sec"><div class="sm-sec-h"><h3>'+esc(T('طلبات تعديل الملف','Profile change requests'))+'</h3></div>';
+    pending.forEach(function(r){
+      h += '<div class="sm-big" style="font-size:16px;margin-top:6px">'+esc(T('طلب قيد المراجعة','Request pending review'))+' <bdi>'+esc(r.ref)+'</bdi></div>'
+        + '<div class="sm-small">'+esc(T('التعديلات المرسلة غير مطبّقة بعد؛ الملف المعروض هو الحالي حتى تعتمد إدارة رف الطلب.','The submitted changes are not live yet; the profile shown is the current one until RAF Management approves.'))+'</div>'
+        + '<dl class="sm-kv"><dt>'+esc(T('الحقول','Fields'))+'</dt><dd>'+esc(Object.keys(r.changes || {}).map(fieldLabel).join(T('، ',', ')))+'</dd>'
+        + '<dt>'+esc(T('تاريخ الإرسال','Submitted'))+'</dt><dd><bdi>'+esc(pDate(r.createdAt))+'</bdi></dd></dl>';
+    });
+    if (last){
+      var ap = last.status === 'approved', notApplied = ap && last.applied && (last.applied.mediaNotApplied || []).length;
+      h += '<div class="sm-small" style="margin-top:12px">'+esc(T('آخر طلب ','Last request '))+'<bdi>'+esc(last.ref)+'</bdi>: <b>'
+        + esc(ap ? T('مقبول','Approved') : T('مرفوض','Rejected'))+'</b>'
+        + (last.rejectionReason ? ' — '+esc(last.rejectionReason) : '')+' · <bdi>'+esc(pDate(last.decidedAt))+'</bdi>'
+        + (notApplied ? '<br>'+esc(T('لم تُطبَّق الصور المرفقة: لا يوجد تخزين ملفات في هذا النموذج.','The attached images were not applied: this prototype has no file storage.')) : '')+'</div>';
+    }
+    return h + '</section>';
+  }
+  /* the unsent change set — submitted together, as one request */
+  function draftBar(){
+    if (!hasDraft()) return '';
+    return '<section class="sm-sec editing"><div class="sm-sec-h"><h3>'+esc(T('تعديلات غير مرسلة','Unsent changes'))+'</h3></div>'
+      + '<div class="sm-small">'+esc(draftKeys().map(fieldLabel).join(T('، ',', ')))+'</div>'
+      + '<div class="sm-small">'+esc(T('لن تظهر هذه التعديلات قبل إرسالها وموافقة إدارة رف عليها.','These changes are not live until you submit them and RAF Management approves.'))+'</div>'
+      + (pmsg ? '<div class="sm-msg" role="alert">'+esc(pmsg)+'</div>' : '')
+      + '<div class="sm-acts"><button class="sm-btn" onclick="discardDraft()"'+(psubmitting ? ' disabled' : '')+'>'+esc(T('تجاهل','Discard'))+'</button>'
+      + '<button class="sm-btn gold" id="spSubmit" onclick="submitProfile()"'+(psubmitting ? ' disabled' : '')+'><i class="ti ti-send"></i>'
+      + esc(psubmitting ? T('جارٍ الإرسال…','Sending…') : T('إرسال للموافقة','Submit for approval'))+'</button></div></section>';
+  }
+  function shownValue(f){ return pdraft[f] || prof.fields[f]; }
   function textSection(f){
-    var S = SECTIONS[f], cur = prof.fields[f], editing = !!(edit && edit.section === f);
+    var S = SECTIONS[f], cur = shownValue(f), editing = !!(edit && edit.section === f), inDraft = !!pdraft[f];
     var h = '<section class="sm-sec'+(editing ? ' editing' : '')+'" id="sec-'+f+'"><div class="sm-sec-h"><h3>'+esc(T(S.ar,S.en))+'</h3>'
+      + (inDraft && !editing ? '<span class="sm-tag gold">'+esc(T('تعديل غير مرسل','Unsent change'))+'</span>' : '')
       + (prof.editable && !editing
           ? '<button class="sm-edit-b" onclick="startEdit(\''+f+'\')"><i class="ti ti-pencil"></i>'+esc(T(S.eAr,S.eEn))+'</button>'
           : '')
       + '</div>';
     if (!editing){
-      return h + '<div class="sm-val"><span class="lg">العربية</span><p dir="rtl" lang="ar">'+esc(cur.ar)+'</p></div>'
-               + '<div class="sm-val"><span class="lg">English</span><p dir="ltr" lang="en">'+esc(cur.en)+'</p></div>'
+      return h + '<div class="sm-val"><span class="lg">العربية</span><p dir="rtl" lang="ar">'+esc(cur.ar || '—')+'</p></div>'
+               + '<div class="sm-val"><span class="lg">English</span><p dir="ltr" lang="en">'+esc(cur.en || '—')+'</p></div>'
                + '</section>';
     }
     var rule = SP.FIELDS[f], l = edit.lang, v = edit.draft[l];
@@ -629,9 +941,30 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
       + '<div class="sm-meta"><span class="err" id="smErr">'+esc(edit.errors[l] || '')+'</span>'
       + '<span class="cnt" id="smCount">'+v.length+' / '+rule.max+'</span></div></div>';
     if (edit.msg) h += '<div class="sm-msg">'+esc(edit.msg)+'</div>';
-    h += '<div class="sm-acts"><button class="sm-btn" onclick="cancelEdit()">'+esc(T('إلغاء','Cancel'))+'</button>'
+    h += '<div class="sm-small">'+esc(T('يُضاف التعديل إلى «تعديلات غير مرسلة»، ثم ترسلها كلها معاً للموافقة.','The change is added to “Unsent changes”; you then submit them all together for approval.'))+'</div>'
+      + '<div class="sm-acts"><button class="sm-btn" onclick="cancelEdit()">'+esc(T('إلغاء','Cancel'))+'</button>'
       + '<button class="sm-btn gold" id="smSave" onclick="saveEdit()"'+(sectionDirty() ? '' : ' disabled')+'>'
-      + '<i class="ti ti-check"></i>'+esc(T('حفظ التغييرات','Save changes'))+'</button></div>';
+      + '<i class="ti ti-check"></i>'+esc(T('إضافة إلى التعديلات','Add to changes'))+'</button></div>';
+    return h + '</section>';
+  }
+  /* logo / cover — the chosen file's details only; there is no file storage */
+  function mediaSection(){
+    var h = '<section class="sm-sec" id="sec-media"><div class="sm-sec-h"><h3>'+esc(T('الشعار وصورة الغلاف','Logo and cover image'))+'</h3></div>'
+      + '<div class="sm-small">'+esc(T('لا يوجد تخزين ملفات في هذا النموذج: تُرسل بيانات الصورة المختارة فقط (الاسم والنوع والحجم) لتراها إدارة رف، ولا تُطبَّق على المتجر حتى عند الموافقة.',
+                                        'This prototype has no file storage: only the chosen image’s details (name, type, size) are sent for RAF Management to see, and it is not applied to the store even when approved.'))+'</div>';
+    ['logo','cover'].forEach(function(m){
+      var cur = prof.media[m], d = pdraft[m];
+      h += '<div class="sm-val" style="margin-top:12px"><span class="lg">'+esc(fieldLabel(m))+'</span>'
+        + '<p>'+esc(cur ? T('صورة حالية على المتجر','An image is set on the store') : T('لا توجد صورة','No image'))+'</p>'
+        + (d ? '<p style="margin-top:6px"><span class="sm-tag gold">'+esc(T('تعديل غير مرسل','Unsent change'))+'</span></p>'
+               + '<p dir="ltr" style="overflow-wrap:anywhere;text-align:start">'+esc(d.name)
+               + (d.type ? ' · '+esc(d.type) : '')+(fmtSize(d.size) ? ' · '+esc(fmtSize(d.size)) : '')+'</p>'
+               + '<button class="sm-edit-b" onclick="dropMedia(\''+m+'\')"><i class="ti ti-x"></i>'+esc(T('إزالة','Remove'))+'</button>' : '')
+        + (prof.editable ? '<label class="sm-btn" style="margin-top:8px;display:inline-flex;cursor:pointer"><i class="ti ti-photo"></i>'
+            + esc(T('اختيار صورة','Choose image'))
+            + '<input type="file" accept="image/*" style="position:absolute;width:1px;height:1px;opacity:0" onchange="pickMedia(\''+m+'\', this)"></label>' : '')
+        + '</div>';
+    });
     return h + '</section>';
   }
   function dotOf(k){
@@ -641,8 +974,8 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
   }
   window.startEdit = function(f){
     confirmDiscard(function(){
-      var cur = prof.fields[f];
-      edit = { section:f, lang:isEn() ? 'en' : 'ar', draft:{ ar:cur.ar, en:cur.en },
+      var cur = shownValue(f);
+      edit = { section:f, lang:isEn() ? 'en' : 'ar', draft:{ ar:cur.ar, en:cur.en }, orig:{ ar:cur.ar, en:cur.en },
                errors:{ ar:'', en:'' }, msg:null, base:prof.version, focus:true };
       render();
     });
@@ -660,22 +993,46 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
     });
   };
   window.cancelEdit = function(){ edit = null; render(); };
+  /* the edited field joins the unsent change set — nothing is written */
   window.saveEdit = function(){
     if (!edit || !sectionDirty()) return;
-    var patch = {}; patch[edit.section] = { ar:edit.draft.ar, en:edit.draft.en };
-    var res = SP.update(patch, { actor:ME.id, baseVersion:edit.base });
-    if (!res.ok){
+    var f = edit.section, val = { ar:edit.draft.ar, en:edit.draft.en }, patch = {}; patch[f] = val;
+    var v = SP.validate(patch);
+    if (!v.ok){
       edit.errors = { ar:'', en:'' }; edit.msg = null;
-      (res.errors || []).forEach(function(e){
+      (v.errors || []).forEach(function(e){
         var p = String(e.field || '').split('.');
-        if (p[0] === edit.section && (p[1] === 'ar' || p[1] === 'en') && !edit.errors[p[1]]) edit.errors[p[1]] = e.message;
+        if (p[0] === f && (p[1] === 'ar' || p[1] === 'en') && !edit.errors[p[1]]) edit.errors[p[1]] = e.message;
       });
-      if (!edit.errors.ar && !edit.errors.en) edit.msg = res.message;
-      else if (!edit.errors[edit.lang]) edit.lang = edit.errors.ar ? 'ar' : 'en';   /* show the language with the problem */
+      if (!edit.errors.ar && !edit.errors.en) edit.msg = T('البيانات غير صالحة.','The details are not valid.');
+      else if (!edit.errors[edit.lang]) edit.lang = edit.errors.ar ? 'ar' : 'en';
       edit.focus = true; render();
       return;
     }
-    edit = null; loadProfile(); render(); toast(T('تم الحفظ','Saved'));
+    var live = prof.fields[f];
+    if (val.ar.trim() === live.ar && val.en.trim() === live.en) delete pdraft[f];
+    else pdraft[f] = { ar:val.ar.trim(), en:val.en.trim() };
+    pmsg = null; edit = null; render();
+    toast(T('أُضيف إلى التعديلات غير المرسلة','Added to unsent changes'));
+  };
+  window.pickMedia = function(m, input){
+    var file = input && input.files && input.files[0]; if (!file) return;
+    if (file.type && !/^image\//.test(file.type)){ pmsg = T('يجب أن يكون الملف صورة.','The file must be an image.'); render(); return; }
+    /* the file's own details only — its content is never read */
+    pdraft[m] = { name:file.name, type:file.type || null, size:typeof file.size === 'number' ? file.size : null };
+    pmsg = null; render();
+  };
+  window.dropMedia = function(m){ delete pdraft[m]; render(); };
+  window.discardDraft = function(){ pdraft = {}; pmsg = null; pkey = null; render(); };
+  window.submitProfile = function(){
+    if (!hasDraft() || psubmitting) return;
+    if (!pkey) pkey = 'sp-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+    psubmitting = true; render();
+    var res = SP.submitChange(pdraft, { actor:ME.id, baseVersion:prof.version, key:pkey });
+    psubmitting = false;
+    if (!res.ok){ pmsg = res.message || T('تعذّر إرسال الطلب.','The request could not be sent.'); render(); return; }
+    pdraft = {}; pmsg = null; pkey = null; loadProfile(); render();
+    toast(T('أُرسلت التعديلات إلى إدارة رف للموافقة','Changes sent to RAF Management for approval'));
   };
 
   /* ════════════════════ OPERATIONS ════════════════════ */
@@ -694,6 +1051,7 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
     var status = '<section class="sm-sec"><div class="sm-sec-h"><h3>'+esc(T('حالة المتجر','Store status'))+'</h3>'
         + (may ? '' : '<span class="sm-tag">'+esc(T('للعرض فقط','View only'))+'</span>') + '</div>'
       + '<div class="sm-now" style="margin-top:8px"><span class="sm-dot '+dot+'"></span><div class="t"><b>'+esc(big)+'</b><span>'+esc(sub)+'</span></div></div>'
+      + renderOpenClose(store)
       + '</section>';
 
     /* busy mode */
@@ -759,8 +1117,141 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
     /* the structured weekly schedule — its own view / edit section */
     var sched = renderSchedule();
 
-    return '<div class="sm-wrap">' + status + busy + prep + sched + '</div>';
+    /* status and its closure workflow first; Busy Mode and preparation time
+       side by side; the weekly schedule below */
+    return '<div class="sm-wrap"><div class="sm-opsgrid"><div class="c1">' + status + '</div><div class="c2">' + busy + prep + '</div></div>' + sched + '</div>';
   }
+
+  /* ════════════════════ STORE STATUS ACTIONS ════════════════════
+     ONE full-closure entry point: "Close Store Now" opens the closure
+     REQUEST form (days + reason) — RAFStoreStatus → Requests & Approvals.
+     The store is fully closed only once RAF Management approves; a merchant
+     has no direct close at all — RAFStoreStatus.close refuses it. A closed store can be opened again here
+     (RAFStoreStatus.open). A suspended store is RAF Management's. Busy Mode
+     (1 / 2 / 4 / 8 h) is its own section below and is unaffected. */
+  function fcDate(ms){
+    try { return new Date(ms).toLocaleString(isEn() ? 'en-GB' : 'ar-KW-u-nu-latn', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Kuwait' }); }
+    catch(e){ return new Date(ms).toISOString().slice(0,16).replace('T',' '); }
+  }
+  function renderOpenClose(store){
+    if (!SST) return '';
+    var caps = SST.capabilities() || {}, mine = SST.myRequests(), h = '';
+    var reqOk = !!(mine && mine.ok), mayReq = reqOk && mine.canRequest && !mine.suspended;
+    var cl = reqOk ? mine.activeClosure : null;
+    var pending = reqOk ? mine.items.filter(function(r){ return r.status === 'pending'; }) : [];
+    var last = reqOk ? (mine.items.filter(function(r){ return r.status !== 'pending'; })[0] || null) : null;
+
+    if (store.status === 'suspended')
+      h += '<div class="sm-small" style="margin-top:10px">'+esc(T('الإيقاف إجراء من إدارة رف، ويُرفع من إدارة رف. لا يمكن تقديم طلب إغلاق أو تمديد أثناء الإيقاف.','Suspension is a RAF Management action and is lifted by RAF Management. A closure or extension request cannot be submitted while suspended.'))+'</div>';
+
+    if (closeDraft){
+      /* the full-closure (or extension) request form */
+      var ext = closeDraft.kind === 'extension';
+      h += '<div class="sm-small" style="margin-top:12px">'+esc(ext
+            ? T('تمديد الإغلاق المعتمد الحالي بعدد إضافي من الأيام. لا يتغير الإغلاق الحالي إلا بعد موافقة إدارة رف.','Extend the current approved closure by additional days. The current closure does not change until RAF Management approves.')
+            : T('إغلاق كامل للمتجر لعدد من الأيام. يُرسل الطلب إلى إدارة رف، ولا يُغلق المتجر إلا بعد موافقتها.','A full closure of the store for a number of days. The request goes to RAF Management; the store closes only once it is approved.'))+'</div>'
+        + '<div class="sm-field'+(closeDraft.bad === 'days' ? ' bad' : '')+'"><label class="sm-choose-l" for="fcDays">'+esc(ext ? T('عدد الأيام الإضافية','Additional days') : T('مدة الإغلاق (بالأيام)','Closure duration (days)'))+'</label>'
+        + '<input id="fcDays" type="number" inputmode="numeric" min="1" step="1" dir="ltr" value="'+esc(closeDraft.days)+'" oninput="fcInput(\'days\', this.value)"></div>'
+        + '<div class="sm-field'+(closeDraft.bad === 'reason' ? ' bad' : '')+'"><label class="sm-choose-l" for="fcReason">'+esc(T('السبب','Reason'))+'</label>'
+        + '<textarea id="fcReason" maxlength="300" oninput="fcInput(\'reason\', this.value)">'+esc(closeDraft.reason)+'</textarea></div>'
+        + (closeDraft.msg ? '<div class="sm-msg" role="alert">'+esc(closeDraft.msg)+'</div>' : '')
+        + '<div class="sm-acts"><button class="sm-btn" onclick="cancelClose()"'+(closeDraft.busy ? ' disabled' : '')+'>'+esc(T('إلغاء','Cancel'))+'</button>'
+        + '<button class="sm-btn gold" id="fcSubmit" onclick="submitClose()"'+(closeDraft.busy ? ' disabled' : '')+'><i class="ti ti-send"></i>'
+        + esc(closeDraft.busy ? T('جارٍ الإرسال…','Sending…') : T('إرسال الطلب','Submit request'))+'</button></div>';
+    } else if (statusAsk && store.status === 'closed'){
+      h += '<div class="sm-preview" style="margin-top:12px"><i class="ti ti-lock-open"></i>'
+        + esc(T('سيُفتح المتجر ويستقبل الطلبات الجديدة وفق جدول عمله.','The store opens and accepts new orders within its schedule.'))+'</div>'
+        + '<div class="sm-acts"><button class="sm-btn" onclick="cancelStatus()">'+esc(T('إلغاء','Cancel'))+'</button>'
+        + '<button class="sm-btn gold" id="stConfirm" onclick="confirmStatus()">'+esc(T('تأكيد','Confirm'))+'</button></div>';
+    } else {
+      var acts = '';
+      if (store.status === 'closed' && caps.operate)
+        acts += '<button class="sm-btn gold" onclick="askStatus()"><i class="ti ti-lock-open"></i>'+esc(T('فتح المتجر','Open store'))+'</button>';
+      if (store.status === 'open' && mayReq)
+        acts += '<button class="sm-btn" onclick="openClose(\'closure\')"><i class="ti ti-lock"></i>'+esc(T('إغلاق المتجر الآن','Close store now'))+'</button>';
+      if (cl && mayReq)
+        acts += '<button class="sm-btn" onclick="openClose(\'extension\')"><i class="ti ti-calendar-plus"></i>'+esc(T('طلب تمديد الإغلاق','Request an extension'))+'</button>';
+      if (acts) h += '<div class="sm-acts" style="justify-content:flex-start">'+acts+'</div>';
+    }
+
+    if (!closeDraft){
+      /* the approved closure now running */
+      if (cl)
+        h += '<div class="sm-big" style="font-size:17px;margin-top:14px">'+esc(T('إغلاق معتمد','Approved closure'))+'</div>'
+          + '<dl class="sm-kv"><dt>'+esc(T('رقم الطلب','Reference'))+'</dt><dd><bdi>'+esc(cl.ref || '—')+'</bdi></dd>'
+          + '<dt>'+esc(T('المدة','Duration'))+'</dt><dd><bdi>'+esc(cl.totalDays || cl.days)+'</bdi> '+esc(T('يوم','day(s)'))+'</dd>'
+          + '<dt>'+esc(T('يبدأ','Starts'))+'</dt><dd><bdi>'+esc(cl.startsAt ? fcDate(cl.startsAt) : '—')+'</bdi></dd>'
+          + '<dt>'+esc(T('ينتهي','Ends'))+'</dt><dd><bdi>'+esc(cl.endsAt ? fcDate(cl.endsAt) : '—')+'</bdi></dd></dl>'
+          + '<div class="sm-small">'+esc(T('يعود المتجر مفتوحاً تلقائياً عند انتهاء المدة.','The store returns to open automatically when the period ends.'))+'</div>';
+      /* every request still waiting — none of them changes the store */
+      pending.forEach(function(p){
+        var ext = p.kind === 'extension', asking = cancelAsk === p.requestId;
+        h += '<div class="sm-big" style="font-size:17px;margin-top:14px">'+esc(ext ? T('طلب تمديد قيد المراجعة','Extension request pending review') : T('طلب إغلاق قيد المراجعة','Closure request pending review'))+'</div>'
+          + '<div class="sm-small">'+esc(T('لا يتغير المتجر بهذا الطلب قبل موافقة إدارة رف.','This request does not change the store before RAF Management approves it.'))+'</div>'
+          + '<dl class="sm-kv"><dt>'+esc(T('رقم الطلب','Reference'))+'</dt><dd><bdi>'+esc(p.ref)+'</bdi></dd>'
+          + '<dt>'+esc(ext ? T('الأيام الإضافية','Additional days') : T('عدد الأيام','Days'))+'</dt><dd><bdi>'+esc(p.days)+'</bdi></dd>'
+          + '<dt>'+esc(T('السبب','Reason'))+'</dt><dd>'+esc(p.reason)+'</dd>'
+          + '<dt>'+esc(T('تاريخ الطلب','Requested'))+'</dt><dd><bdi>'+esc(fcDate(p.createdAt))+'</bdi></dd></dl>';
+        if (mine.canRequest)
+          h += asking
+            ? '<div class="sm-acts"><button class="sm-btn" onclick="cancelReqNo()">'+esc(T('تراجع','Back'))+'</button>'
+              + '<button class="sm-btn danger" id="crConfirm" onclick="cancelReqYes(\''+esc(p.requestId)+'\')">'+esc(T('تأكيد إلغاء الطلب','Confirm cancelling'))+'</button></div>'
+            : '<div class="sm-acts"><button class="sm-btn" onclick="cancelReqAsk(\''+esc(p.requestId)+'\')"><i class="ti ti-x"></i>'+esc(T('إلغاء الطلب','Cancel request'))+'</button></div>';
+      });
+      if (last && !(cl && cl.requestId === last.requestId))
+        h += '<div class="sm-small" style="margin-top:10px">'+esc(T('آخر طلب ','Last request '))+'<bdi>'+esc(last.ref)+'</bdi>: <b>'
+          + esc(last.status === 'approved' ? T('مقبول','Approved') : last.status === 'cancelled' ? T('ملغى','Cancelled') : T('مرفوض','Rejected'))+'</b>'
+          + (last.rejectionReason ? ' — '+esc(last.rejectionReason) : '')+' · <bdi>'+esc(fcDate(last.decidedAt))+'</bdi></div>';
+    }
+    if (closeMsg) h += '<div class="sm-msg">'+esc(closeMsg)+'</div>';
+    if (statusMsg) h += '<div class="sm-msg" role="alert">'+esc(statusMsg)+'</div>';
+    return h;
+  }
+  window.askStatus = function(){
+    confirmDiscard(function(){ var s = RAFSource.store(SLUG) || {}; statusAsk = { expect:s.status }; statusMsg = null; render(); var b = el('stConfirm'); if (b) b.focus(); });
+  };
+  window.cancelStatus = function(){ statusAsk = null; render(); };
+  /* opening a closed store — the only direct status change on this page */
+  window.confirmStatus = function(){
+    if (!statusAsk || statusAsk.busy || statusAsk.expect !== 'closed') return;
+    statusAsk.busy = true;
+    var res = SST.open(SLUG, { expect:statusAsk.expect });
+    statusAsk = null;
+    statusMsg = res.ok ? null : (res.message || T('تعذّر تنفيذ التغيير.','The change could not be applied.'));
+    render();
+    if (res.ok) toast(T('تم فتح المتجر','The store is open'));
+  };
+
+  function closeKey(kind){
+    var name = 'raf_sclose_key_' + kind, k = null; try { k = sessionStorage.getItem(name); } catch(e){}
+    if (!k){ k = 'sc-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10); try { sessionStorage.setItem(name, k); } catch(e){} }
+    return k;
+  }
+  window.openClose = function(kind){ confirmDiscard(function(){ closeDraft = { kind:kind === 'extension' ? 'extension' : 'closure', days:'', reason:'', msg:null, bad:null, busy:false }; closeMsg = null; cancelAsk = null; render(); var d = el('fcDays'); if (d) d.focus(); }); };
+  window.cancelClose = function(){ closeDraft = null; render(); };
+  window.fcInput = function(k, v){ if (!closeDraft) return; closeDraft[k] = v; closeDraft.msg = null; closeDraft.bad = null; };
+  window.submitClose = function(){
+    if (!closeDraft || closeDraft.busy) return;
+    var days = String(closeDraft.days).trim(), reason = String(closeDraft.reason).trim(), kind = closeDraft.kind;
+    if (!/^\d+$/.test(days) || Number(days) < 1){ closeDraft.bad = 'days'; closeDraft.msg = T('عدد الأيام مطلوب (رقم صحيح أكبر من صفر).','The number of days is required (a whole number above zero).'); render(); el('fcDays').focus(); return; }
+    if (!reason){ closeDraft.bad = 'reason'; closeDraft.msg = T('السبب مطلوب.','A reason is required.'); render(); el('fcReason').focus(); return; }
+    closeDraft.busy = true; render();
+    var input = { days:Number(days), reason:reason, key:closeKey(kind) };
+    var res = kind === 'extension' ? SST.requestExtension(input) : SST.requestClosure(input);
+    if (!res.ok){ closeDraft.busy = false; closeDraft.msg = res.message || T('تعذّر إرسال الطلب.','The request could not be sent.'); render(); return; }
+    try { sessionStorage.removeItem('raf_sclose_key_' + kind); } catch(e){}
+    closeDraft = null; render();
+    toast(kind === 'extension' ? T('أُرسل طلب التمديد إلى إدارة رف','Extension request sent to RAF Management') : T('أُرسل طلب الإغلاق إلى إدارة رف','Closure request sent to RAF Management'));
+  };
+  window.cancelReqAsk = function(id){ cancelAsk = id; closeMsg = null; render(); var b = el('crConfirm'); if (b) b.focus(); };
+  window.cancelReqNo = function(){ cancelAsk = null; render(); };
+  window.cancelReqYes = function(id){
+    if (cancelAsk !== id) return;
+    cancelAsk = null;
+    var res = SST.cancelRequest(id, {});
+    closeMsg = res.ok ? null : (res.message || T('تعذّر إلغاء الطلب.','The request could not be cancelled.'));
+    render(); if (res.ok) toast(T('أُلغي الطلب','The request was cancelled'));
+  };
   function opsError(res){
     if (res && res.reason === 'offline') return T('لا يوجد اتصال — لم يتم حفظ التغيير.','No connection — the change was not saved.');
     return (res && res.message) || T('تعذّر تنفيذ التغيير.','The change could not be applied.');
@@ -1077,7 +1568,7 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
       return '<div class="sm-mem"><div class="sm-av">'+esc(String(u.name || '?').trim().charAt(0))+'</div><div class="who">'
         + '<b>'+esc(u.name)+(u.id === ME.id ? '<span class="sm-tag gold">'+esc(T('أنت','You'))+'</span>' : '')+'</b>'
         + '<div class="sub">'+esc(role ? T(role.nameAr, role.nameEn) : '—')+' · '
-          + '<span style="color:'+(active ? '#1F7A45' : '#A63A36')+';font-weight:800">'+esc(active ? T('نشط','Active') : T('موقوف','Suspended'))+'</span></div>'
+          + '<span class="sm-st '+(active ? 'ok' : 'bad')+'">'+esc(active ? T('نشط','Active') : T('موقوف','Suspended'))+'</span></div>'
         + '<details class="sm-perm"><summary><i class="ti ti-key"></i>'+esc(T('الصلاحيات الحالية (' + perms.length + ')','Current permissions (' + perms.length + ')'))+'</summary>'
           + '<ul>'+perms.map(function(k){ return '<li>'+esc(labelOf[k] || k)+'</li>'; }).join('')+'</ul></details>'
         + '</div></div>';
@@ -1464,11 +1955,13 @@ html[dir="rtl"] .sm-val p[dir="ltr"]{text-align:left;}
     document.addEventListener('raf:source', onExternal);
     window.addEventListener('storage', function(e){
       if (e.key === 'raf_source_overrides') onExternal();
+      else if ((e.key === 'raf_store_profile_requests' || e.key === 'raf_store_profile_request_events') && st.tab === 'profile' && !edit) render();
+      else if ((e.key === 'raf_store_closure_requests' || e.key === 'raf_store_closure_request_events') && st.tab === 'operations' && !closeDraft) render();
       else if ((e.key === 'raf_users' || e.key === 'raf_roles') && st.tab === 'team') render();
     });
     /* Busy Mode ends by time — reflect it when it does */
     setInterval(function(){ if (st.tab === 'operations' && lastBusy !== null && OPS.isBusy(SLUG) !== lastBusy) render(); }, 15000);
-    window.addEventListener('beforeunload', function(e){ if (dirty()){ e.preventDefault(); e.returnValue = ''; } });
+    window.addEventListener('beforeunload', function(e){ if (dirty() || hasDraft()){ e.preventDefault(); e.returnValue = ''; } });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();

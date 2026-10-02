@@ -101,6 +101,7 @@ html[dir="ltr"] .cp-terms{border-radius:0 8px 8px 0;}
 <script src="raf_data.js"></script>
 <script src="raf_permissions.js"></script>
 <script src="raf_payment_methods.js"></script>
+<script src="raf_money.js"></script>
 <script src="raf_wallet.js"></script>
 <script src="raf_gift.js"></script>
 <script src="raf_compensation.js"></script>
@@ -116,7 +117,7 @@ html[dir="ltr"] .cp-terms{border-radius:0 8px 8px 0;}
    WALLET — a view over the financial authorities. It keeps no balance and
    does no arithmetic on money:
      · balance, lots, transactions ....... RAFWallet
-     · top-up (prototype payment) ........ RAFWallet.topUp + RAFPaymentMethods.online
+     · top-up (pending until the payment is confirmed) RAFWallet.topUp → RAFMoney
      · compensation entitlements ......... RAFCompensation (mine / addToWallet)
      · gift codes ........................ RAFGift.redeem → RAFWallet.redeemGift
    Refunds to the wallet are credited automatically by the order flows
@@ -273,7 +274,9 @@ html[dir="ltr"] .cp-terms{border-radius:0 8px 8px 0;}
     if (act === 'tu-back'){ S.step = 1; S.msg = null; render(); return; }
     if (act === 'tu-pay'){
       var r = RAFWallet.topUp({ amount:S.amount, methodId:S.method, paymentRef:'P' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) });
-      if (r.ok){ say('ok', T('تمت إعادة التعبئة. رصيدك الآن ' + r.balance + ' د.ك.','Top-up complete. Your balance is now ' + r.balance + ' KWD.')); S.step = 1; S.amount = ''; S.method = null; }
+      /* a top-up adds value only once the payment is confirmed (RAFMoney evidence) */
+      if (r.ok && r.pending){ say('ok', T('تم تسجيل طلب إعادة التعبئة (' + r.amount + ' د.ك). سيُضاف المبلغ إلى رصيدك بعد تأكيد الدفع.','Top-up request recorded (' + r.amount + ' KWD). It is added to your balance once the payment is confirmed.')); S.step = 1; S.amount = ''; S.method = null; }
+      else if (r.ok){ say('ok', T('تمت إعادة التعبئة. رصيدك الآن ' + r.balance + ' د.ك.','Top-up complete. Your balance is now ' + r.balance + ' KWD.')); S.step = 1; S.amount = ''; S.method = null; }
       else say('err', r.message || T('تعذّرت إعادة التعبئة.','The top-up failed.'));
       render(); return;
     }

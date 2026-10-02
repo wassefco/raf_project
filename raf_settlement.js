@@ -474,8 +474,60 @@
       shape(computePeriod(ctx.slug, cur, st.econ, st.closed), STATUS.OPEN, st.econ));
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     ACCOUNTING READ — the frozen closed record, for the accounting
+     integration (RAFSettlementPosting) only. Read-only: it never closes a
+     month, never recomputes anything and writes nothing; a closed record is
+     returned exactly as it was closed. The reader must be an active RAF
+     Management account (not a store account) holding accounting.view — a
+     merchant keeps reading its own store through periods() / statement().
+     ══════════════════════════════════════════════════════════════ */
+  var ACCOUNTING_ERRORS = {
+    SETTLEMENT_NOT_FOUND:  { ar:'لا توجد تسوية بهذا المعرّف.',          en:'No settlement exists with this ID.' },
+    SETTLEMENT_NOT_CLOSED: { ar:'التسوية لم تُقفل بعد.',                 en:'The settlement has not been closed yet.' }
+  };
+  function accountingReader(){
+    if (!global.RAFPerm) return fail('AUTHORITY_MISSING', { missing:['RAFPerm'] });
+    var sid = null; try { sid = RAFPerm.sessionUserId ? RAFPerm.sessionUserId() : null; } catch (e) { sid = null; }
+    var u = sid ? RAFPerm.getUser(sid) : null;
+    if (!u || u.status !== 'active' || u.accountType !== 'staff' || RAFPerm.isMerchant(u.id) || !RAFPerm.can(u.id, 'accounting.view')) return fail('FORBIDDEN');
+    return { ok:true, id:u.id };
+  }
+  function accountingFail(code){
+    var m = ACCOUNTING_ERRORS[code];
+    return { ok:false, code:code, message:T(m.ar, m.en) };
+  }
+  function closedForAccounting(settlementId){
+    var a = accountingReader(); if (!a.ok) return a;
+    if (typeof settlementId !== 'string' || !/^STL-.+-\d{4}-\d{2}$/.test(settlementId)) return accountingFail('SETTLEMENT_NOT_FOUND');
+    var all = readSettlements(), found = null;
+    Object.keys(all).forEach(function (slug) {
+      var months = all[slug] || {};
+      Object.keys(months).forEach(function (p) { if (months[p] && months[p].id === settlementId) found = months[p]; });
+    });
+    if (found) return { ok:true, settlement:JSON.parse(JSON.stringify(found)) };
+    /* no record: a month that has not ended — or not been closed yet — is not a settlement */
+    var period = settlementId.slice(-7), cur = null;
+    try { cur = global.RAFMarketing ? currentPeriod() : null; } catch (e) { cur = null; }
+    return accountingFail(cur && isPeriod(period) && period >= cur ? 'SETTLEMENT_NOT_CLOSED' : 'SETTLEMENT_NOT_FOUND');
+  }
+  function closedListForAccounting(){
+    var a = accountingReader(); if (!a.ok) return a;
+    var all = readSettlements(), items = [];
+    Object.keys(all).sort().forEach(function (slug) {
+      var months = all[slug] || {};
+      Object.keys(months).sort().forEach(function (p) {
+        var r = months[p]; if (!r) return;
+        items.push({ settlementId:r.id, storeSlug:r.storeSlug, period:r.period, status:r.status, closedAt:r.closedAt });
+      });
+    });
+    return { ok:true, items:items };
+  }
+
   global.RAFSettlement = {
     STATUS:STATUS, PAYOUT:PAYOUT, ERRORS:ERRORS,
+    /* the frozen closed record, for the accounting integration (read-only) */
+    closedForAccounting:closedForAccounting, closedListForAccounting:closedListForAccounting,
     /* rate */
     currentRate:currentRate, rateSchedule:rateSchedule, scheduleRate:scheduleRate,
     /* periods */

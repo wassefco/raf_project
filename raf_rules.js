@@ -35,10 +35,13 @@
   function L(o){ return (o && typeof o === 'object') ? (isEn() ? (o.en||o.ar) : (o.ar||o.en)) : (o || ''); }
 
   /* ══════════════════════════════════════════════════════════════
-     1 · STORE STATUS POLICY
-     open       → fully visible, highest priority
-     closed     → store + products hidden from listings until reopened
-     suspended  → store + products hidden until reactivated (admin)
+     1 · STORE STATUS POLICY  (customer-facing)
+     Visibility ≠ purchasability (confirmed rule):
+     open       → visible, browsable, purchasable; listed first
+     closed     → visible, browsable, NOT purchasable; listed after open stores
+     suspended  → the same as closed for the customer. It is an
+                  administrative suspension, but nothing of it is shown to
+                  the customer — only that the store is temporarily closed.
      deleted    → gone entirely; not even reachable by direct link
      ══════════════════════════════════════════════════════════════ */
   var StorePolicy = {
@@ -46,23 +49,28 @@
       var s = S() && S().store(slug);
       return s ? s.status : null;
     },
-    /* may this store appear in listings/search/recommendations? */
-    isListable: function (slug) { return StorePolicy.of(slug) === 'open'; },
-    /* may this store's storefront (and therefore its products) be browsed?
-       Only an open store may: closed and suspended both hide their products
-       until reopened/reactivated, and deleted is gone entirely. */
-    isReachable: function (slug) { return StorePolicy.of(slug) === 'open'; },
-    /* human explanation used by store pages and validation messages */
+    /* may this store appear in listings / search / recommendations? */
+    isListable: function (slug) { var st = StorePolicy.of(slug); return !!st && st !== 'deleted'; },
+    /* may this store's storefront (and therefore its products) be browsed? */
+    isReachable: function (slug) { var st = StorePolicy.of(slug); return !!st && st !== 'deleted'; },
+    /* may its products be bought right now? */
+    isPurchasable: function (slug) { return StorePolicy.of(slug) === 'open'; },
+    /* the customer-facing explanation. Closed and suspended read the same:
+       no administrative detail (reason, actor, request) is ever exposed. A
+       reopening time is given only from an approved closure's authoritative
+       end — never guessed, and never for a suspension. */
     notice: function (slug) {
-      switch (StorePolicy.of(slug)) {
-        case 'closed':    return { level:'warn', title:T('المتجر مغلق مؤقتاً','Store temporarily closed'),
-                                   msg:T('لا يمكن الطلب من هذا المتجر حتى إعادة فتحه.','Ordering is unavailable until this store reopens.') };
-        case 'suspended': return { level:'error', title:T('المتجر موقوف','Store suspended'),
-                                   msg:T('تم إيقاف هذا المتجر مؤقتاً من قبل الإدارة.','This store has been suspended by RAF administration.') };
-        case 'deleted':   return { level:'error', title:T('المتجر غير موجود','Store not found'),
-                                   msg:T('لم يعد هذا المتجر متاحاً على رف.','This store is no longer available on RAF.') };
-        default:          return null;
+      var st = StorePolicy.of(slug);
+      if (st === 'closed' || st === 'suspended') {
+        var s = S() && S().store(slug), until = null;
+        if (st === 'closed' && s && s.closure && typeof s.closure.endsAt === 'number') until = s.closure.endsAt;
+        return { level:'warn', closed:true, reopensAt:until,
+                 title:T('المتجر مغلق مؤقتاً','Store temporarily closed'),
+                 msg:T('هذا المتجر مغلق مؤقتاً لأعمال الصيانة وسيعاود الفتح قريباً.','This store is temporarily closed for maintenance and will reopen soon.') };
       }
+      if (st === 'deleted') return { level:'error', title:T('المتجر غير موجود','Store not found'),
+                                     msg:T('لم يعد هذا المتجر متاحاً على رف.','This store is no longer available on RAF.') };
+      return null;
     },
     /* guard a store page: returns null when fine, or a notice to render */
     guard: function (slug) {
@@ -106,7 +114,8 @@
     if (p.status !== 'active')  return fail(REASONS.PRODUCT_HIDDEN);
 
     var st = StorePolicy.of(p.store);
-    if (st === 'closed')  return fail(REASONS.STORE_CLOSED, { store:p.store });
+    /* suspended reads as closed to the customer — no administrative detail */
+    if (st === 'closed' || st === 'suspended') return fail(REASONS.STORE_CLOSED, { store:p.store });
     if (st !== 'open')    return fail(REASONS.STORE_BLOCKED, { store:p.store });
 
     if (p.stock === 0) return fail(REASONS.OUT_OF_STOCK);
@@ -260,7 +269,7 @@
     if (!S()) return 0;
     var p = S().product(productId);
     if (!p) return 0;
-    if (p.status !== 'active' || !StorePolicy.isListable(p.store)) return 0;
+    if (p.status !== 'active' || !StorePolicy.isPurchasable(p.store)) return 0;
     if (p.stock == null) return 0;
     if (global.RAFInventory && RAFInventory.isCombinationMode(productId)) {
       var cid = combinationOf(productId, opts);
@@ -301,7 +310,7 @@
         removed.push({ id:l.id, name:name, line:l, code:'NOT_FOUND', message:T('لم يعد متاحاً','No longer available') });
         return;
       }
-      if (p.status !== 'active' || !StorePolicy.isListable(p.store)) {
+      if (p.status !== 'active' || !StorePolicy.isPurchasable(p.store)) {
         removed.push({ id:l.id, name:name, line:l,
           code: p.status !== 'active' ? 'PRODUCT_HIDDEN' : 'STORE_CLOSED',
           message: p.status !== 'active' ? T('لم يعد معروضاً','No longer listed') : T('متجره مغلق','Its store is closed') });
@@ -414,6 +423,13 @@
          Instant availability, the next opening and any scheduled window come
          from RAFStoreOps, and whatever the page sent for them is replaced */
       opts = opts || {};
+      /* confirmed: a driver tip only exists with an online-type payment — a
+         cash-on-delivery order carrying one is refused, never silently changed */
+      var payId0 = opts.payment && opts.payment.id, tip0 = parseFloat(opts.totals && opts.totals.tip) || 0;
+      if (tip0 > 0 && !(global.RAFPaymentMethods && RAFPaymentMethods.tipAllowed && RAFPaymentMethods.tipAllowed(payId0))) {
+        placing = false;
+        return resolve({ ok:false, errors:[{ code:'TIP_NOT_ALLOWED', message:T('لا يمكن إضافة إكرامية السائق مع الدفع عند الاستلام','A driver tip cannot be added with cash on delivery') }] });
+      }
       if (global.RAFStoreOps && RAFStoreOps.checkDeliveryChoice && global.RAFCatalog) {
         var l0 = RAFShop.Cart.read()[0], p0 = l0 ? RAFCatalog.get(l0.id) : null;
         var dc = RAFStoreOps.checkDeliveryChoice(p0 && p0.slug, { timing:opts.deliveryTiming,
@@ -450,6 +466,9 @@
                              message:T('الكمية المطلوبة غير متوفرة','The requested quantity is not available') }] });
         }
       }
+      /* the tip's pass-through record starts with the paid order (RAFDriverTips —
+         operational, never the ledger); a missing authority is caught up later */
+      if (global.RAFDriverTips && RAFDriverTips.recordFromCheckout) { try { RAFDriverTips.recordFromCheckout(order.id); } catch (e) {} }
       Reserve.commit();                       /* drops this session's checkout hold */
       RAFShop.Cart.clear();
       resetCartState();

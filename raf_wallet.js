@@ -64,11 +64,15 @@
     COMPENSATION_REVERSAL:         'COMPENSATION_REVERSAL',
     /* customer-initiated value — reserved: only topUp() and redeemGift() below may use them */
     WALLET_TOPUP:                  'WALLET_TOPUP',
-    GIFT_REDEMPTION:               'GIFT_REDEMPTION'
+    GIFT_REDEMPTION:               'GIFT_REDEMPTION',
+    /* spending — the customer pays (part of) an order from the wallet */
+    ORDER_PAYMENT:                 'ORDER_PAYMENT',
+    /* reserved: the reversal of a wallet-funded driver tip (cancelled before delivery) */
+    DRIVER_TIP_REVERSAL:           'DRIVER_TIP_REVERSAL'
   };
   var LOT_REASONS = { COMPENSATION_CREDIT:true, COMPENSATION_EXPIRY:true, COMPENSATION_REVERSAL:true };
   /* reasons that only one internal path may post (checked in post()) */
-  var PATH_REASONS = { WALLET_TOPUP:'topup', GIFT_REDEMPTION:'gift' };
+  var PATH_REASONS = { WALLET_TOPUP:'topup', GIFT_REDEMPTION:'gift', DRIVER_TIP_REVERSAL:'tipreversal' };
   var LOT_SOURCE = { COMPENSATION:'compensation' };
   /* customer-facing wording for each reason; the customer never sees the key */
   var REASON_TEXT = {
@@ -79,7 +83,9 @@
     COMPENSATION_EXPIRY:            { ar:'انتهاء صلاحية رصيد تعويض غير مستخدم', en:'Unused compensation credit expired' },
     COMPENSATION_REVERSAL:          { ar:'إلغاء رصيد تعويض غير مستخدم',   en:'Unused compensation credit reversed' },
     WALLET_TOPUP:                   { ar:'إعادة تعبئة المحفظة',            en:'Wallet top-up' },
-    GIFT_REDEMPTION:                { ar:'استخدام رمز هدية',              en:'Gift code redeemed' }
+    GIFT_REDEMPTION:                { ar:'استخدام رمز هدية',              en:'Gift code redeemed' },
+    ORDER_PAYMENT:                  { ar:'الدفع لطلب',                    en:'Order payment' },
+    DRIVER_TIP_REVERSAL:            { ar:'إعادة إكرامية السائق (أُلغي الطلب قبل التسليم)', en:'Driver tip returned (order cancelled before delivery)' }
   };
   var SOURCE = { ORDER_CHANGE:'order_change', REFUND:'refund',
                  CUSTOMER_PAYMENT:'customer_payment', SYSTEM:'system', MANUAL:'manual', GIFT:'gift' };
@@ -103,7 +109,19 @@
     PAYMENT_METHOD_INVALID:       { ar:'طريقة الدفع غير متاحة لإعادة التعبئة.', en:'That payment method cannot be used for a top-up.' },
     GIFT_NOT_FOUND:               { ar:'رمز الهدية غير صحيح.',                en:'That gift code is not valid.' },
     GIFT_USED:                    { ar:'تم استخدام رمز الهدية من قبل.',        en:'That gift code has already been used.' },
-    GIFT_EXPIRED:                 { ar:'انتهت صلاحية رمز الهدية.',             en:'That gift code has expired.' }
+    GIFT_EXPIRED:                 { ar:'انتهت صلاحية رمز الهدية.',             en:'That gift code has expired.' },
+    GIFT_NOT_AVAILABLE:           { ar:'رمز الهدية غير متاح للاستخدام.',      en:'That gift code is not available.' },
+    PAYMENT_UNAVAILABLE:          { ar:'تعذّر تسجيل الدفع.',                  en:'The payment could not be recorded.' },
+    PAYMENT_NOT_RECEIVED:         { ar:'لم يُستلم الدفع بعد؛ لا يُضاف رصيد.',  en:'The payment has not been received; no value is added.' },
+    PAYMENT_NOT_TOPUP:            { ar:'هذا الدفع ليس إعادة تعبئة للمحفظة.',   en:'That payment is not a wallet top-up.' },
+    FORBIDDEN:                    { ar:'لا تملك صلاحية تنفيذ هذا الإجراء.',   en:'You do not have permission for this action.' },
+    TRANSACTION_NOT_FOUND:        { ar:'عملية المحفظة غير موجودة.',           en:'The wallet transaction does not exist.' },
+    NOT_A_CREDIT:                 { ar:'هذه العملية ليست إضافة رصيد.',         en:'That transaction is not a credit.' },
+    RECOGNIZED_BY_REFUND:         { ar:'يُسجَّل هذا الرصيد محاسبياً مع الاسترداد (RAFRefunds).', en:'This credit is recognised by its refund posting (RAFRefunds).' },
+    RECOGNIZED_BY_GIFT:           { ar:'يُسجَّل هذا الرصيد محاسبياً مع استخدام رمز الهدية (RAFGift).', en:'This credit is recognised by its gift code redemption posting (RAFGift).' },
+    ACCOUNTING_UNRESOLVED:        { ar:'المعالجة المحاسبية لهذا المصدر غير محددة بعد.', en:'The accounting treatment for this source is not defined yet.' },
+    SOURCE_NOT_VERIFIED:          { ar:'تعذّر التحقق من مصدر الرصيد.',         en:'The source of this credit could not be verified.' },
+    ACCOUNTING_REFUSED:           { ar:'رفض السجل المحاسبي القيد.',            en:'The accounting record refused the journal.' }
   };
 
   function isEn(){ var r = document.getElementById('htmlRoot') || document.documentElement; return r.lang === 'en'; }
@@ -512,13 +530,18 @@
 
   /* what a customer surface may see — no keys, no actor ids, no wallet id */
   /* ---------- customer-initiated credits (reserved reasons) ----------
-     TOP-UP (prototype): RAF has no payment gateway. A top-up names one of
-     RAF's online payment methods (RAFPaymentMethods.online) and is treated
-     as a confirmed payment — exactly as checkout treats an online payment
-     today — and is recorded as a PROTOTYPE payment on the ledger entry.
-     GIFT: a gift code issued through RAFGift; the wallet reads the code's
-     record, credits its value once (idempotency key per code) and RAFGift
-     marks the code used. Both only for the signed-in customer's own wallet. */
+     TOP-UP (confirmed: K-Net → wallet; Dr 1200 / Cr 2200). A top-up is first
+     a PENDING customer payment in RAFMoney (purpose wallet_topup). No wallet
+     value exists until Accounting records the gateway's evidence (provider +
+     reference) through RAFMoney.recordOnlineReceipt; RAFMoney then calls
+     settleTopUp, which credits exactly once (key TOPUP-<paymentId>) with the
+     payment reference on the entry. A failed payment never becomes value.
+     (Ledger entries written before this rule carry prototypePayment:true and
+     stay as history; they have no evidence and cannot be posted.)
+     GIFT: a gift code from RAFGift — purchased (value paid by the purchaser,
+     available only once that payment is received) or issued by management
+     (the earlier path, kept). The wallet reads the record, credits its exact
+     value once (key per code) and RAFGift records the redemption. */
   function topUp(p){
     p = p || {};
     var sid = sessionUserId();
@@ -529,9 +552,51 @@
     var minor = toMinor(p.amount);
     if (minor === null || minor <= 0) return fail('INVALID_AMOUNT', { amount:p.amount });
     if (!p.paymentRef) return fail('IDEMPOTENCY_KEY_REQUIRED');
-    return post(TYPE.CREDIT, { customerId:sid, actor:{ id:sid, type:ACTOR.CUSTOMER }, amount:fmt(minor), reason:REASON.WALLET_TOPUP,
-      source:SOURCE.CUSTOMER_PAYMENT, idempotencyKey:'TOPUP-' + p.paymentRef },
-      { via:'topup', meta:{ method:m.id, methodAr:m.ar, methodEn:m.en, prototypePayment:true, paymentRef:String(p.paymentRef) } });
+    var M = global.RAFMoney; if (!M || !M.recordExternalPayment) return fail('PAYMENT_UNAVAILABLE');
+    var r = M.recordExternalPayment({ purpose:'wallet_topup', purposeRef:'TOPUP-' + String(p.paymentRef), amountFils:minor, methodId:m.id });
+    if (!r || !r.ok) return Object.assign(fail('PAYMENT_UNAVAILABLE'), { paymentCode:r && r.code });
+    var w = walletOf(sid), bal = w ? balanceMinorOf(w.walletId) : 0;
+    return { ok:true, pending:r.payment.status !== 'received', paymentId:r.payment.paymentId, paymentStatus:r.payment.status,
+             amount:fmt(minor), amountMinor:minor, balance:fmt(bal), balanceMinor:bal, duplicate:!!r.duplicate };
+  }
+  /* the received top-up payment becomes wallet value — once. Any signed-in
+     session may ask (RAFMoney calls it right after the evidence); the value,
+     the customer and the evidence come only from the payment record. */
+  function settleTopUp(paymentId){
+    if (!sessionUserId()) return fail('WALLET_FORBIDDEN');
+    var M = global.RAFMoney; if (!M || !M.getPayment) return fail('PAYMENT_UNAVAILABLE');
+    var g = M.getPayment(paymentId); if (!g || !g.ok) return fail('PAYMENT_UNAVAILABLE', { paymentCode:g && g.code });
+    var pay = g.payment;
+    if (pay.purpose !== 'wallet_topup') return fail('PAYMENT_NOT_TOPUP');
+    var c = pay.components[0] || {};
+    if (pay.status !== 'received' || !c.evidence || c.evidence.type !== 'external') return fail('PAYMENT_NOT_RECEIVED', { paymentStatus:pay.status });
+    return post(TYPE.CREDIT, { customerId:pay.customerId, actor:SYSTEM_ACTOR, amount:fmt(pay.totalAmountFils), reason:REASON.WALLET_TOPUP,
+      source:SOURCE.CUSTOMER_PAYMENT, idempotencyKey:'TOPUP-' + paymentId },
+      { via:'topup', meta:{ paymentId:paymentId, method:'online', provider:c.evidence.provider, paymentReference:c.evidence.reference, purposeRef:pay.purposeRef } });
+  }
+  /* DRIVER TIP REVERSAL (confirmed): a tip paid from the wallet, on an order
+     cancelled before delivery, goes back by REVERSING the original wallet
+     movement — exactly the wallet-funded tip, linked to the original wallet
+     debit and to the cancellation refund, once (key TIPREV-<tipId>). Not new
+     value, not revenue, not compensation. Everything is read from the
+     records: the order must be cancelled, its payment's tip funding must be
+     the wallet component, and that component's debit must exist. */
+  function reverseTipFunding(orderId){
+    if (!sessionUserId()) return fail('WALLET_FORBIDDEN');
+    var o = null; try { o = global.RAFShop ? RAFShop.Orders.get(orderId) : null; } catch (e) { o = null; }
+    if (!o || o.status !== 'cancelled') return fail('SOURCE_NOT_VERIFIED', { detail:'order_not_cancelled' });
+    /* the ORIGINAL recorded allocation (RAFDriverTips 'funded' record, written
+       when the payment was received) — never recalculated from balances */
+    var tipId = 'TIP-' + orderId, fe = null;
+    try { fe = RAFRecordStore.collection('driver_tip_events').all().filter(function (e) { return e.tipId === tipId && e.kind === 'funded'; })[0] || null; } catch (e0) { fe = null; }
+    var wTip = fe ? (fe.walletTipFils != null ? fe.walletTipFils : (fe.allocation || []).filter(function (x) { return x.method === 'wallet'; }).reduce(function (s0, x) { return s0 + x.tipFils; }, 0)) : 0;
+    if (!fe || !(wTip > 0) || !fe.walletTransactionId) return fail('SOURCE_NOT_VERIFIED', { detail:'no_wallet_funded_tip' });
+    var orig = txById(fe.walletTransactionId);
+    if (!orig || orig.type !== TYPE.DEBIT || orig.orderId !== orderId || orig.amountMinor < wTip) return fail('SOURCE_NOT_VERIFIED', { detail:'original_debit' });
+    return post(TYPE.CREDIT, { customerId:orig.customerId, actor:SYSTEM_ACTOR, amount:fmt(wTip), reason:REASON.DRIVER_TIP_REVERSAL,
+      source:SOURCE.REFUND, orderId:orderId, idempotencyKey:'TIPREV-' + tipId },
+      { via:'tipreversal', meta:{ tipId:tipId, reversalOf:orig.transactionId, paymentId:fe.paymentId, fundedEventId:fe.eventId,
+                                  cancellationReference:'order-cancel-refund:' + orderId } });
   }
   function redeemGift(code){
     var sid = sessionUserId();
@@ -548,12 +613,221 @@
       if (prior.customerId !== sid) return fail('GIFT_USED');
       return { ok:true, duplicate:true, transaction:publicTx(prior), balance:fmt(balanceMinorOf(prior.walletId)), balanceMinor:balanceMinorOf(prior.walletId) };
     }
-    if (rec.status !== 'active') return fail('GIFT_USED');
+    if (rec.kind === 'purchased') {
+      if (rec.status === 'expired') return fail('GIFT_EXPIRED');
+      if (rec.status === 'redeemed') return fail('GIFT_USED');
+      if (rec.status !== 'available') return fail('GIFT_NOT_AVAILABLE', { giftStatus:rec.status });
+    } else if (rec.status !== 'active') return fail('GIFT_USED');
     if (rec.expiresAt && Date.now() >= rec.expiresAt) return fail('GIFT_EXPIRED');
     var r = post(TYPE.CREDIT, { customerId:sid, actor:{ id:sid, type:ACTOR.CUSTOMER }, amount:fmt(rec.amountMinor), reason:REASON.GIFT_REDEMPTION,
-      source:SOURCE.GIFT, idempotencyKey:key }, { via:'gift', meta:{ giftCode:rec.code } });
+      source:SOURCE.GIFT, idempotencyKey:key }, { via:'gift', meta:{ giftCode:rec.code, giftId:rec.giftId || null, giftKind:rec.kind || 'issued',
+        purchaserId:rec.purchaserId || null, paymentId:rec.paymentId || null } });
     if (r.ok && G._markUsed) G._markUsed(rec.code, sid, r.transaction.id);
     return r;
+  }
+
+  /* ══════════ ACCOUNTING VIEW of the wallet (customer funds — 2200) ══════════
+     Every credit is classified by its confirmed SOURCE; each source has one
+     recognition in the General Ledger, or is reported UNRESOLVED (never a
+     guessed account):
+       TOPUP         Dr 1200 Payment Gateway Receivable / Cr 2200   (postFunding)
+       REFUND        Dr 2300 Customer Refund Payable / Cr 2200      (RAFRefunds.postRefund)
+       COMPENSATION  Dr 5300 Customer Compensation / Cr 2200        (postFunding)
+       GIFT          purchased: Dr 2700 Gift Code Liability / Cr 2200 (RAFGift.postRedemption);
+                     management-issued: funding not defined (unresolved)
+       TIP_REVERSAL  a wallet-funded tip given back (cancelled before delivery):
+                     the order was cancelled before delivery, so neither its wallet
+                     debit (Dr 2200) nor its clearing credit (Cr 2800) was ever
+                     posted — the reversal restores the wallet; nothing to undo in GL
+       TIP_RETURN    (earlier tip returns, history) unresolved
+     Debits:
+       ORDER_PAYMENT recognised by the order's settlement (Dr 2200); the slice
+                     that funded a driver tip goes Cr 2800 Pass-through Clearing
+                     (Customer Wallet → Clearing → Driver) — never RAF P&L
+       COMPENSATION_EXPIRY / _REVERSAL  Dr 2200 / Cr 5300 (reverses the credit)
+     Nothing here keeps a balance: it is all read from the ledger. */
+  var WALLET_ACC = 'acc-customer-wallet', ACC_OF = { TOPUP:'acc-gateway-receivable', COMPENSATION:'acc-customer-compensation' };
+  var REFUND_REASONS = { PRODUCT_REMOVAL_REFUND:true, PRODUCT_REPLACEMENT_DIFFERENCE:true };
+  function staffWith(keys){
+    var sid = sessionUserId(); if (!sid || !global.RAFPerm) return null;
+    try {
+      var u = RAFPerm.getUser(sid);
+      if (!u || u.accountType !== 'staff' || RAFPerm.isMerchant(sid)) return null;
+      return keys.some(function (k) { return RAFPerm.can(sid, k); }) ? { id:u.id, name:u.name || null } : null;
+    } catch (e) { return null; }
+  }
+  function sourceOf(t){
+    var m = t.meta || {};
+    if (t.type === TYPE.CREDIT) {
+      if (t.reason === REASON.WALLET_TOPUP) return m.paymentId ? { type:'TOPUP', reference:m.paymentId, evidence:{ provider:m.provider || null, reference:m.paymentReference || null } }
+                                                                 : { type:'TOPUP', reference:m.paymentRef || null, unresolved:'TOPUP_EVIDENCE_MISSING' };
+      if (t.reason === REASON.COMPENSATION_CREDIT) return { type:'COMPENSATION', reference:(t.lot && t.lot.sourceId) || null };
+      /* purchased code: recognised by RAFGift's redemption journal (Dr 2700 / Cr 2200); a management-issued code is not customer money and its funding is not defined */
+      if (t.reason === REASON.GIFT_REDEMPTION) return m.giftKind === 'purchased' ? { type:'GIFT', reference:m.giftId, giftKind:'purchased' }
+                                                                       : { type:'GIFT_ISSUED', reference:m.giftId || m.giftCode || null, giftKind:'issued', unresolved:'GIFT_ISSUED_FUNDING_UNDEFINED' };
+      if (REFUND_REASONS[t.reason] && (t.relatedChangeId || m.refundId)) return { type:'REFUND', reference:m.refundId || ('RF-' + t.relatedChangeId), orderId:t.orderId || null };
+      /* the reversal of a wallet-funded tip: it undoes its own debit's tip slice,
+         which never reached the ledger (pass-through) — nothing to post */
+      if (t.reason === REASON.DRIVER_TIP_REVERSAL) return { type:'TIP_REVERSAL', reference:m.reversalOf || null, tipId:m.tipId || null, orderId:t.orderId || null, passThrough:true };
+      /* earlier tip returns (before the reversal rule) — kept as history */
+      if (/^tip-return\|/.test(t.idempotencyKey || '')) return { type:'TIP_RETURN', reference:t.idempotencyKey.split('|')[1], orderId:t.orderId || null, unresolved:'TIP_RETURN_ACCOUNTING_UNRESOLVED' };
+      return { type:'UNCLASSIFIED', reference:null, unresolved:'FUNDING_SOURCE_UNRESOLVED' };
+    }
+    /* unused compensation expired / reversed: reverses its credit (Dr 2200 / Cr 5300) */
+    if (t.reason === REASON.COMPENSATION_EXPIRY || t.reason === REASON.COMPENSATION_REVERSAL)
+      return { type:t.reason, reference:(t.lotEvent && t.lotEvent.lotId) || null };
+    return { type:t.orderId ? 'ORDER_PAYMENT' : 'UNCLASSIFIED_DEBIT', reference:t.orderId || null };
+  }
+  function journalOf(system, ref){
+    var A = global.RAFAccounting; if (!A || !A.journalBySource) return null;
+    try { var j = A.journalBySource(system, ref); return j && j.ok ? j.journal.journalId : null; } catch (e) { return null; }
+  }
+  /* the GL journal that recognised this credit, if any */
+  function recognitionOf(t, src){
+    if (src.type === 'TOPUP' || src.type === 'COMPENSATION') return journalOf('wallet', 'wallet-credit:' + t.transactionId);
+    if (src.type === 'REFUND') return journalOf('refunds', 'refund:' + src.reference);
+    if (src.type === REASON.COMPENSATION_EXPIRY || src.type === REASON.COMPENSATION_REVERSAL) return journalOf('wallet', 'wallet-debit:' + t.transactionId);
+    if (src.type === 'GIFT' && src.giftKind === 'purchased') return journalOf('gifts', 'gift-redemption:' + src.reference);
+    if (src.type === 'TIP_REVERSAL') return 'PASS_THROUGH';
+    if (t.type === TYPE.DEBIT && src.type === 'ORDER_PAYMENT') return settlementJournalFor(t.orderId);
+    return null;
+  }
+  /* the posted settlement journal that debited 2200 for this order, if any */
+  function settlementJournalFor(orderId){
+    var S = global.RAFSettlement, A = global.RAFAccounting; if (!S || !A || !orderId) return null;
+    try {
+      var l = S.closedListForAccounting(); if (!l || !l.ok) return null;
+      for (var i = 0; i < l.items.length; i++) {
+        var st = S.closedForAccounting(l.items[i].settlementId); if (!st.ok || !(st.settlement.orders || {})[orderId]) continue;
+        var j = A.journalBySource('settlement', st.settlement.id);
+        if (j && j.ok && j.journal.lines.some(function (x) { return x.accountId === WALLET_ACC && x.debit > 0; })) return j.journal.journalId;
+      }
+    } catch (e) { return null; }
+    return null;
+  }
+  function txById(id){ return ledger().filter(function (t) { return t.transactionId === id; })[0] || null; }
+  function accountingTx(t){
+    var s = sourceOf(t);
+    return { transactionId:t.transactionId, customerId:t.customerId, type:t.type, amountMinor:t.amountMinor, currency:t.currency,
+             reason:t.reason, sourceType:s.type, sourceReference:s.reference, orderId:t.orderId || null, at:t.timestamp,
+             actorType:t.actorType, actorId:t.actorId || null, status:'posted', evidence:s.evidence || null,
+             unresolved:s.unresolved || null, recognizedBy:t.type === TYPE.CREDIT ? recognitionOf(t, s) : null };
+  }
+  /* Accounting reads one wallet transaction (accounting.view) */
+  function transactionForAccounting(transactionId){
+    if (!staffWith(['accounting.view'])) return fail('FORBIDDEN');
+    var t = txById(transactionId); if (!t) return fail('TRANSACTION_NOT_FOUND');
+    return { ok:true, transaction:accountingTx(t) };
+  }
+  function transactionByKey(idempotencyKey){
+    if (!staffWith(['accounting.view', 'accounting.post'])) return fail('FORBIDDEN');
+    var t = findByKey(idempotencyKey); return t ? { ok:true, transaction:accountingTx(t) } : fail('TRANSACTION_NOT_FOUND');
+  }
+  /* post the GL recognition of ONE credit (accounting.post) — idempotent by
+     source reference wallet:wallet-credit:<transactionId>; the date is the
+     posting date (an open period — closed periods are refused by RAFAccounting) */
+  function postFunding(transactionId){
+    var a = staffWith(['accounting.post']); if (!a) return fail('FORBIDDEN');
+    var t = txById(transactionId); if (!t) return fail('TRANSACTION_NOT_FOUND');
+    if (t.type !== TYPE.CREDIT) return postLotReversal(t);
+    var s = sourceOf(t);
+    if (s.type === 'TIP_REVERSAL') return fail('ACCOUNTING_UNRESOLVED', { unresolved:null, sourceType:s.type, passThrough:true, detail:'pass_through_no_journal' });
+    if (s.type === 'REFUND') return fail('RECOGNIZED_BY_REFUND', { refundId:s.reference });
+    if (s.type === 'GIFT' && s.giftKind === 'purchased') return fail('RECOGNIZED_BY_GIFT', { giftId:s.reference });
+    if (s.unresolved) return fail('ACCOUNTING_UNRESOLVED', { unresolved:s.unresolved, sourceType:s.type });
+    if (s.type === 'TOPUP') {
+      var g = global.RAFMoney && RAFMoney.getPayment ? RAFMoney.getPayment(s.reference) : null;
+      if (!g || !g.ok || g.payment.status !== 'received' || g.payment.purpose !== 'wallet_topup' || g.payment.customerId !== t.customerId || g.payment.totalAmountFils !== t.amountMinor)
+        return fail('SOURCE_NOT_VERIFIED', { sourceType:'TOPUP' });
+    } else if (s.type === 'COMPENSATION') {
+      var rec = null; try { rec = RAFRecordStore.collection('compensations').byId('compensationId', s.reference); } catch (e) { rec = null; }
+      if (!rec || rec.customerId !== t.customerId || rec.amountFils !== t.amountMinor) return fail('SOURCE_NOT_VERIFIED', { sourceType:'COMPENSATION' });
+    }
+    var A = global.RAFAccounting; if (!A) return fail('ACCOUNTING_REFUSED');
+    var ref = 'wallet-credit:' + transactionId;
+    var memo = s.type === 'TOPUP' ? 'Wallet top-up ' + s.reference + ' (' + (s.evidence.provider || '') + ' ' + (s.evidence.reference || '') + ')'
+                                  : 'Compensation ' + s.reference + ' credited to the wallet';
+    var w = A.postFromSource('wallet', ref, { date:A.todayKuwait(),
+      description:'Wallet ' + s.type.toLowerCase() + ' · ' + t.customerId + ' · ' + transactionId + ' | محفظة العميل',
+      lines:[{ accountId:ACC_OF[s.type], debit:t.amountMinor, memo:memo, ref:s.reference },
+             { accountId:WALLET_ACC, credit:t.amountMinor, memo:'Customer wallet funds (' + t.customerId + ')', ref:transactionId }] });
+    if (!w.ok) return fail('ACCOUNTING_REFUSED', { accountingCode:w.code, accountingMessage:w.message, errors:w.errors || null });
+    return { ok:true, duplicate:!!w.duplicate, journalId:w.journal.journalId, sourceType:s.type, sourceReference:s.reference };
+  }
+  /* COMPENSATION EXPIRED / REVERSED (confirmed): the unused remainder RAF no
+     longer owes reverses the original recognition — Dr 2200 / Cr 5300. The
+     amount is exactly the lot's expiry / reversal debit, which RAFWallet only
+     ever takes from the UNUSED remainder (spent value is never reversed). The
+     original credit must itself have been posted; the reversal names it.
+     Posted in the current open period (closed periods are refused). */
+  function postLotReversal(t){
+    if (t.reason !== REASON.COMPENSATION_EXPIRY && t.reason !== REASON.COMPENSATION_REVERSAL) return fail('NOT_A_CREDIT');
+    var lotId = t.lotEvent && t.lotEvent.lotId, L = lotsOf(t.walletId).filter(function (x) { return x.lotId === lotId; })[0];
+    if (!L || !L.creditTransactionId) return fail('SOURCE_NOT_VERIFIED', { detail:'lot_not_found' });
+    var origJ = journalOf('wallet', 'wallet-credit:' + L.creditTransactionId);
+    if (!origJ) return fail('SOURCE_NOT_VERIFIED', { detail:'original_compensation_not_posted', originalTransactionId:L.creditTransactionId });
+    if (t.amountMinor > L.originalMinor - L.consumedMinor) return fail('SOURCE_NOT_VERIFIED', { detail:'exceeds_unused_remainder' });
+    var A = global.RAFAccounting; if (!A) return fail('ACCOUNTING_REFUSED');
+    var kind = t.reason === REASON.COMPENSATION_EXPIRY ? 'expired' : 'reversed';
+    var w = A.postFromSource('wallet', 'wallet-debit:' + t.transactionId, { date:A.todayKuwait(),
+      description:'Unused compensation ' + kind + ' · ' + L.sourceId + ' · ' + t.customerId + ' · reverses ' + origJ + ' | تعويض غير مستخدم',
+      lines:[{ accountId:WALLET_ACC, debit:t.amountMinor, memo:'Unused compensation ' + kind + ' (' + L.sourceId + ')', ref:t.transactionId },
+             { accountId:ACC_OF.COMPENSATION, credit:t.amountMinor, memo:'Reverses ' + origJ + ' (credit ' + L.creditTransactionId + ')', ref:L.sourceId }] });
+    if (!w.ok) return fail('ACCOUNTING_REFUSED', { accountingCode:w.code, accountingMessage:w.message, errors:w.errors || null });
+    return { ok:true, duplicate:!!w.duplicate, journalId:w.journal.journalId, sourceType:t.reason, sourceReference:L.sourceId,
+             reversesJournalId:origJ, originalTransactionId:L.creditTransactionId };
+  }
+  /* is this wallet SPEND backed by recognised value? Recognised credits up to
+     the debit, minus every debit up to and including it, must not be negative
+     (ledger order). Used by the settlement mapping before it debits 2200. */
+  function spendCoverage(transactionId){
+    if (!staffWith(['accounting.view'])) return fail('FORBIDDEN');
+    var all = ledger(), t = null, i;
+    for (i = 0; i < all.length; i++) if (all[i].transactionId === transactionId) { t = all[i]; break; }
+    if (!t) return fail('TRANSACTION_NOT_FOUND');
+    if (t.type !== TYPE.DEBIT) return fail('NOT_A_CREDIT');
+    var rec = 0, deb = 0, unrec = [];
+    for (var k = 0; k <= i; k++) {
+      var x = all[k]; if (x.walletId !== t.walletId) continue;
+      if (x.type === TYPE.DEBIT) { deb += x.amountMinor; continue; }
+      var s = sourceOf(x);
+      if (recognitionOf(x, s)) rec += x.amountMinor; else unrec.push({ transactionId:x.transactionId, sourceType:s.type, amountMinor:x.amountMinor, unresolved:s.unresolved || 'NOT_POSTED' });
+    }
+    return { ok:true, covered:rec - deb >= 0, recognizedCreditsMinor:rec, debitsMinor:deb, unrecognized:unrec };
+  }
+  /* customer funds overview for Accounting: every wallet, by source, against 2200 */
+  function accountingSummary(){
+    if (!staffWith(['accounting.view'])) return fail('FORBIDDEN');
+    var bySource = {}, totalBalance = 0, wl = wallets();
+    Object.keys(wl).forEach(function (k) { totalBalance += balanceMinorOf(wl[k].walletId); });
+    ledger().forEach(function (t) {
+      var s = sourceOf(t), b = bySource[s.type] || (bySource[s.type] = { type:t.type, totalMinor:0, recognizedMinor:0, count:0, unresolved:s.unresolved || null });
+      b.totalMinor += t.amountMinor; b.count++;
+      if (recognitionOf(t, s)) b.recognizedMinor += t.amountMinor;
+    });
+    var gl = null; try { var L = global.RAFAccounting && RAFAccounting.ledger(WALLET_ACC); gl = L && L.ok ? L.closingBalance : null; } catch (e) { gl = null; }
+    /* wallet value that went to a driver tip (pass-through, RAFDriverTips
+       'funded' records) — it leaves the customers' wallets but no RAF ledger
+       account receives it; reversals of such tips bring it back */
+    var tipOut = 0; try { RAFRecordStore.collection('driver_tip_events').all().forEach(function (e) { if (e.kind === 'funded') tipOut += e.walletTipFils != null ? e.walletTipFils : (e.method === 'wallet' ? e.amountFils : 0); }); } catch (e3) { tipOut = 0; }
+    /* 2200 as it should stand: every journal-backed credit less every
+       journal-backed debit (a tip reversal and its cancelled order's payment
+       were never posted — both stay outside, together) */
+    var expected = 0;
+    ledger().forEach(function (t) { var s = sourceOf(t), r = recognitionOf(t, s); if (!r || r === 'PASS_THROUGH') return; expected += t.type === TYPE.CREDIT ? t.amountMinor : -t.amountMinor; });
+    return { ok:true, currency:CURRENCY, walletBalancesMinor:totalBalance, ledger2200Minor:gl, expected2200Minor:expected, reconciles2200:gl === expected,
+             notYetPostedMinor:totalBalance - expected, bySource:bySource,
+             passThrough:{ walletFundedTipsMinor:tipOut, tipReversalsMinor:(bySource.TIP_REVERSAL || { totalMinor:0 }).totalMinor, clearingAccountId:'acc-passthrough-clearing' },
+             unresolved:Object.keys(bySource).filter(function (k) { return bySource[k].unresolved; }).map(function (k) { return { sourceType:k, code:bySource[k].unresolved, totalMinor:bySource[k].totalMinor }; }) };
+  }
+  /* a customer's balance for Accounting (read-only, derived) */
+  function balanceFor(customerId){
+    if (!staffWith(['accounting.view'])) return fail('FORBIDDEN');
+    var w = walletOf(customerId); if (!w) return { ok:true, customerId:customerId, balanceMinor:0, exists:false };
+    var b = breakdownOf(w.walletId);
+    return { ok:true, customerId:customerId, exists:true, balanceMinor:b.totalMinor, ordinaryMinor:b.ordinaryMinor, compensationMinor:b.compensationMinor,
+             creditsMinor:entriesOf(w.walletId).filter(function (t) { return t.type === TYPE.CREDIT; }).reduce(function (s, t) { return s + t.amountMinor; }, 0),
+             debitsMinor:entriesOf(w.walletId).filter(function (t) { return t.type === TYPE.DEBIT; }).reduce(function (s, t) { return s + t.amountMinor; }, 0) };
   }
 
   function publicTx(t){
@@ -626,7 +900,10 @@
     credit: credit, debit: debit,
     /* expiring credit lots (Phase I) */
     creditLot: creditLot, reverseLot: reverseLot, expireDue: expireDue,
-    topUp: topUp, redeemGift: redeemGift,
+    topUp: topUp, settleTopUp: settleTopUp, redeemGift: redeemGift, reverseTipFunding: reverseTipFunding,
+    /* accounting (customer funds — 2200; reads derived, postings by source) */
+    postFunding: postFunding, spendCoverage: spendCoverage, accountingSummary: accountingSummary,
+    transactionForAccounting: transactionForAccounting, transactionByKey: transactionByKey, balanceFor: balanceFor,
     /* reads */
     balance: balance, history: history, rawLedger: rawLedger, lots: lots, lotBySource: lotBySource,
     /* helpers */

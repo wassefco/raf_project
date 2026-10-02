@@ -747,6 +747,11 @@ function buildOpts(){
 }
 
 /* ---------- availability (shared rule) ---------- */
+/* the product's store is closed or suspended: the product stays fully
+   visible (details, media, options, Favorites) but cannot be bought */
+function storeClosed(){
+  return !!(window.RAFShop && RAFShop.Stock && RAFShop.Stock.storeClosed && RAFShop.Stock.storeClosed({ id:PID }));
+}
 function isOOS(){
   /* on combination stock the selected combination decides, not the product
      total — "20 in stock" must not offer a sold-out Black / M */
@@ -1025,7 +1030,8 @@ function renderStock(){
      total is never presented as if it were this colour-and-size's stock. */
   var a = selectedAvailable();
   var s = (a === null) ? P.stock : a;
-  if (isOOS()){ el.className = 'stock-l out'; el.innerHTML = '<i class="ti ti-ban"></i> ' + T('نفدت الكمية','Sold out'); }
+  if (storeClosed()){ el.className = 'stock-l out'; el.innerHTML = '<i class="ti ti-lock"></i> ' + T('هذا المتجر مغلق مؤقتاً لأعمال الصيانة وسيعاود الفتح قريباً.','This store is temporarily closed for maintenance and will reopen soon.'); }
+  else if (isOOS()){ el.className = 'stock-l out'; el.innerHTML = '<i class="ti ti-ban"></i> ' + T('نفدت الكمية','Sold out'); }
   else if (s != null && s <= 5){ el.className = 'stock-l low'; el.innerHTML = '<i class="ti ti-flame"></i> ' + T('بقي ' + s + ' قطع فقط','Only ' + s + ' left'); }
   else { el.className = 'stock-l ok'; el.innerHTML = '<i class="ti ti-circle-check"></i> ' + T('متوفر — ' + s + ' قطعة','In stock — ' + s + ' available'); }
   syncQtyBtns();
@@ -1117,13 +1123,14 @@ function renderRelated(){
 
 /* ---------- Sold Out state on the primary actions ---------- */
 function applyAvailability(){
-  var out = isOOS();
+  var shut = storeClosed(), out = shut || isOOS();
   var cart = document.getElementById('btnCart'), buy = document.getElementById('btnBuy');
   var sbc = document.getElementById('sbCart'), sbb = document.getElementById('sbBuy');
   [cart, sbc].forEach(function(b){
     if (!b) return;
     b.disabled = out; b.classList.toggle('is-oos', out);
-    b.innerHTML = out ? '<i class="ti ti-ban"></i> <span>' + T('نفدت الكمية','Sold Out') + '</span>'
+    b.innerHTML = shut ? '<i class="ti ti-lock"></i> <span>' + T('المتجر مغلق','Store closed') + '</span>'
+                : out ? '<i class="ti ti-ban"></i> <span>' + T('نفدت الكمية','Sold Out') + '</span>'
                       : '<i class="ti ti-shopping-cart"></i> <span>' + T('أضف للسلة','Add to Cart') + '</span>';
   });
   [buy, sbb].forEach(function(b){
@@ -1172,14 +1179,21 @@ function cartProduct(){
 
 /* Add to cart — one store per order enforced centrally by tryAdd */
 function addToCart(then){
-  if (isOOS() || !window.RAFShop) return;
+  if (!window.RAFShop) return;
+  if (storeClosed()){ RAFShop.toast(T('هذا المتجر مغلق مؤقتاً — لا يمكن إضافة منتجاته إلى السلة الآن','This store is temporarily closed — its products cannot be added to the cart right now'), { icon:'ti-lock' }); return; }
+  if (isOOS()) return;
   var variant = buildVariant();
   if (!variant) return;
   var q = qtyVal();
   var prod = cartProduct();
   var vs = buildVs();
   RAFShop.Cart.tryAdd(prod, variant, vs).then(function(r){
-    if (!r.added) return;
+    if (!r.added){
+      if (r.closed) RAFShop.toast(T('هذا المتجر مغلق مؤقتاً — لا يمكن إضافة منتجاته إلى السلة الآن','This store is temporarily closed — its products cannot be added to the cart right now'), { icon:'ti-lock' });
+      else if (r.oos) RAFShop.toast(T('نفدت كمية هذا المنتج','This product is sold out'), { icon:'ti-ban' });
+      applyAvailability();
+      return;
+    }
     for (var i = 1; i < q; i++) RAFShop.Cart.add(prod, variant, vs);
     RAFShop.Cart.badge();
     if (typeof then === 'function') { then(); return; }
@@ -1197,7 +1211,7 @@ function flash(btn){
 /* Buy Now — same guarded add, then the Cart page so the customer always
    reviews the order before entering checkout */
 function buyNow(){
-  if (isOOS()) return;
+  if (isOOS() && !storeClosed()) return;
   addToCart(function(){ location.href = 'raf_cart.html'; });
 }
 

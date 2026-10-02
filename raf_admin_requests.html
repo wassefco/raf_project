@@ -220,6 +220,8 @@
 <script src="raf_logistics_authority.js"></script>
 <script src="raf_merchant_applications.js"></script>
 <script src="raf_merchant_auth.js"></script>
+<script src="raf_store_profile.js"></script>
+<script src="raf_store_status.js"></script>
 <script src="raf_requests.js"></script>
 <script src="raf_admin_shell.js"></script>
 <script>
@@ -273,7 +275,7 @@
     return (b / 1048576).toFixed(1) + ' MB';
   }
   function badge(status, txt){
-    var cls = status === 'approved' ? 'b-done' : status === 'rejected' ? 'b-off' : 'b-wait';
+    var cls = status === 'approved' ? 'b-done' : status === 'rejected' ? 'b-off' : status === 'cancelled' ? 'b-plain' : 'b-wait';
     return '<span class="badge ' + cls + '">' + esc(L(txt) || status) + '</span>';
   }
   function fileIcon(a){

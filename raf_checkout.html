@@ -86,8 +86,8 @@
         <div class="panel-b" id="dlvBody"></div>
       </div>
 
-      <!-- DRIVER TIP -->
-      <div class="panel">
+      <!-- DRIVER TIP — online-type payments only; hidden for cash on delivery -->
+      <div class="panel" id="tipPanel">
         <div class="panel-h"><i class="ti ti-coin"></i> <span data-ar="إكرامية السائق" data-en="Driver tip">إكرامية السائق</span><span class="side" data-ar="اختياري" data-en="Optional">اختياري</span></div>
         <div class="panel-b">
           <div class="tips" id="tipRow"></div>
@@ -193,6 +193,7 @@
 <script src="raf_rules.js"></script>
 <script src="raf_marketing.js"></script>
 <script src="raf_payment_methods.js"></script>
+<script src="raf_driver_tips.js"></script>
 <script src="raf_checkout.js"></script>
 <script>
 /* ============================================================
@@ -281,6 +282,8 @@
   /* "Other" stays selected while the customer types their own amount */
   var tipOther=false;
   function renderTips(){
+    var tp=document.getElementById('tipPanel');
+    if(tp) tp.style.display = tipOn() ? '' : 'none';
     var cur=RAFCO.getTip();
     var preset=TIPS.some(function(v){ return Math.abs(cur-v)<0.0001; });
     var otherOn = tipOther || (cur>0 && !preset);
@@ -481,12 +484,15 @@
         + '<div><div class="pay-n">'+T(p.ar,p.en)+'</div><div class="pay-s">'+T(p.sAr,p.sEn)+'</div></div></div>';
     }).join('');
   }
-  window.pickPay=function(id){ RAFCO.set('raf_pay_sel',id); renderPayments(); renderSummary(); };
+  window.pickPay=function(id){ RAFCO.set('raf_pay_sel',id); renderPayments(); renderTips(); renderSummary(); };
+  /* confirmed: a driver tip exists only with an online-type payment — with
+     cash on delivery there is no tip field and no tip in the total */
+  function tipOn(){ return RAFPaymentMethods.tipAllowed(RAFCO.get('raf_pay_sel','cod')); }
 
   function renderSummary(){
     var items=RAFShop.Cart.items();
     var showTip = RAFCO.get('raf_tip_invoice','1')==='1';
-    var t=RAFCO.totals(items,{withTip:true});
+    var t=RAFCO.totals(items,{withTip:tipOn()});
     document.getElementById('sumItems').innerHTML = items.map(function(l){
       return '<div class="sum-row"><span style="max-width:70%">'+L(l.name)+' <b style="color:var(--text3)">×'+l.qty+'</b></span><span>'+money(RAFCO.price(l)*l.qty)+'</span></div>';
     }).join('');
@@ -533,7 +539,7 @@
     return new Promise(function(resolve){
       if(document.getElementById('qcBack')) return resolve(true);
       var items=RAFShop.Cart.items();
-      var totals=RAFCO.totals(items,{withTip:true});
+      var totals=RAFCO.totals(items,{withTip:tipOn()});
       var count=items.reduce(function(s,l){ return s+(l.qty||1); },0);
       var isCash=/cod|cash/i.test((pay&&pay.id)||'');
       var storeName=(RAFCO.groupByStore(items)[0]||{}).name||'';
@@ -640,7 +646,7 @@
       var btn=document.getElementById('payBtn');
       if(btn){ btn.disabled=true; btn.dataset.busy='1'; }
 
-      var totals=RAFCO.totals(RAFShop.Cart.items(),{withTip:true});
+      var totals=RAFCO.totals(RAFShop.Cart.items(),{withTip:tipOn()});
       /* the store this order belongs to, by slug — never by display name */
       var firstLine=RAFShop.Cart.items()[0];
       var cat=(firstLine && window.RAFCatalog) ? RAFCatalog.get(firstLine.id) : null;

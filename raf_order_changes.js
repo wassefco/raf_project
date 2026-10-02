@@ -152,6 +152,24 @@
     if (!global.RAFOrderSnapshot) return null;
     try { return RAFOrderSnapshot.of(orderId); } catch (e) { return null; }
   }
+  /* confirmed rule: money can go back (original payment or wallet) only when
+     it was actually taken. Cash on delivery is taken when the driver collects
+     it (RAFMoney's COD collection; with no money authority on the page, no
+     collection can exist before the delivery completes). Online orders are
+     paid at checkout (the order's own payment status). */
+  function moneyNotTaken(orderId){
+    var s = snapOf(orderId), c = (s && s.commercial) || {};
+    var pm = c.paymentMethod && c.paymentMethod.id;
+    if (pm === 'cod') {
+      var collected = false;
+      try {
+        if (global.RAFMoney && RAFMoney.codCollected) collected = !!RAFMoney.codCollected(orderId);
+        else collected = !!(global.RAFOrderEngine && RAFOrderEngine.deliveredAt && RAFOrderEngine.deliveredAt(orderId));
+      } catch (e) { collected = false; }
+      return !collected;
+    }
+    return !!(pm && c.paymentStatus && c.paymentStatus !== 'paid');
+  }
   function slugOf(orderId){
     if (!global.RAFOrderSnapshot) return null;
     try { return RAFOrderSnapshot.storeSlugOf(orderId) || null; } catch (e) { return null; }
@@ -321,6 +339,10 @@
     var key = 'chg-' + change.id + '-refund';
     var reason = change.kind === KIND.REMOVAL
       ? 'PRODUCT_REMOVAL_REFUND' : 'PRODUCT_REPLACEMENT_DIFFERENCE';
+
+    /* money never taken (COD before collection): nothing moves anywhere — the
+       amount is recorded as not collected so the history stays complete */
+    if (moneyNotTaken(change.orderId)) return { ok:true, destination:'not_collected', amount:money(amount) };
 
     if (change.refundDestination === REFUND_DESTINATION.WALLET) {
       if (!global.RAFWallet) return fail('REFUND_FAILED', { reason:'wallet_unavailable' });
@@ -644,7 +666,9 @@
         replacementNameAr: c.replacementNameAr, replacementNameEn: c.replacementNameEn,
         replacementImage: c.replacementImage, replacementPayable: c.replacementPayable,
         refundAmount: c.refundAmount,
-        needsDestination: num(c.refundAmount) > 0,
+        /* nothing was taken (COD before collection): nothing to send back,
+           the customer simply pays the adjusted total — no choice to offer */
+        needsDestination: num(c.refundAmount) > 0 && !moneyNotTaken(orderId),
         reasonAr: c.reasonAr, reasonEn: c.reasonEn,
         createdAt: c.createdAt
       };
@@ -908,7 +932,7 @@
         var r = issueRefund(c, amt, actor);
         if (!r.ok) return r;                    /* stays resumable; nothing claimed */
         c.refundResult = { destination:r.destination, amount:r.amount };
-        audit('refund.created', c.orderId, {
+        if (r.destination !== 'not_collected') audit('refund.created', c.orderId, {
           automatic:true, systemGenerated:true, source:'automation', key:'refund:' + c.id,
           reason: c.kind === KIND.REMOVAL ? 'product_removal' : 'replacement_difference',
           metadata:{ changeId:c.id, amount:r.amount, currency:'KWD',
@@ -932,7 +956,11 @@
 
     /* the destination is the customer's, is required when money moves, and
        has no default anywhere in this file */
-    if (num(c.refundAmount) > 0) {
+    if (num(c.refundAmount) > 0 && !c.refundDone && moneyNotTaken(orderId)) {
+      /* nothing was taken: no destination, no refund, no wallet credit —
+         whatever was sent. The removed value is simply not charged. */
+      c.refundDestination = null;
+    } else if (num(c.refundAmount) > 0) {
       /* An explicit choice always wins while the money has not moved: if a
          first attempt failed (wallet unavailable, say) the customer must be
          able to pick the other destination. Once the refund IS done the
@@ -1199,6 +1227,9 @@
       if (!cat || cat.slug !== slug) return;
       if (cat.id === item.productId) return;
       if (cat.status && cat.status !== 'active') return;
+      /* a replacement is only offered from a store that can sell now — the
+         meaning this kept when closed stores became discoverable */
+      if (RAFSource.storeOpen && !RAFSource.storeOpen(cat.slug)) return;
       /* §27 — not offerable while its stock is held per combination */
       if (global.RAFInventory && RAFInventory.isCombinationMode(cat.id)) return;
       var payable = num(cat.price) * pay.qty;
@@ -1213,7 +1244,66 @@
     return { ok:true, candidates:out, paidAmount:money(pay.paid), qty:pay.qty };
   }
 
+  /* ══════════ INVOICE HISTORY (read-only) ══════════
+     The financial record of an order with every line it ever had. A removed
+     product is NEVER dropped: it stays as a CANCELLED line with its identity,
+     original quantity, unit price and line value, the reason, the time and the
+     order-change reference. The totals:
+       original total  = the immutable snapshot's grand total
+       cancelled       = the paid value of each removed line (the change's own figure)
+       adjusted total  = the live order total, recomputed by applyInvoice() from
+                         the surviving lines — the one authoritative total
+     Nothing here is a second total source; `consistent` reports whether
+     original − cancelled − replacement differences = adjusted. */
+  function invoiceViewer(orderId, snap){
+    var R = global.RAFPerm; if (!R) return false;
+    var sid = null; try { sid = R.sessionUserId ? R.sessionUserId() : null; } catch (e) { sid = null; }
+    var u = sid ? R.getUser(sid) : null;
+    if (!u || u.status !== 'active') return false;
+    if (u.accountType === 'customer') return !!(snap && snap.customer && snap.customer.id === u.id);
+    if (R.isMerchant(u.id)) return !!(snap && R.storeSlugOf(u.id) === snap.storeSlug && R.can(u.id, 'orders.view'));
+    return u.accountType === 'staff' && (R.can(u.id, 'orders.view') || R.can(u.id, 'accounting.view'));
+  }
+  function invoiceHistory(orderId){
+    var o = null; try { o = global.RAFShop ? RAFShop.Orders.get(orderId) : null; } catch (e) { o = null; }
+    if (!o) return { ok:false, code:'ORDER_NOT_FOUND' };
+    var snap = snapOf(orderId);
+    if (!invoiceViewer(orderId, snap)) return { ok:false, code:'FORBIDDEN' };
+    var hist = historyOf(orderId), F = function (v) { return Math.round(num(v) * 1000); };
+    var cancelled = 0, replacedDiff = 0;
+    var lines = (o.items || []).map(function (l, i) {
+      var si = snap && snap.items ? snap.items[i] : null;
+      var ch = hist.filter(function (c) { return c && c.lineIndex === i && c.state === STATE.APPLIED && (c.kind === KIND.REMOVAL || c.kind === KIND.REPLACEMENT); })[0] || null;
+      var qty = (si && si.qty) || l.qty || 1, unit = si ? num(si.unitPrice) : num(l.price);
+      var status = l.removed ? 'cancelled' : (l.replacedFrom ? 'replaced' : 'active');
+      if (status === 'cancelled') cancelled += F(ch ? ch.refundAmount : (si ? si.finalPrice : l.price));
+      if (status === 'replaced' && ch) replacedDiff += F(ch.refundAmount);
+      return {
+        index:i, productId:si ? si.productId : (l.replacedFrom || l.id),
+        name:si ? { ar:si.nameAr, en:si.nameEn } : l.name, qty:qty,
+        unitPrice:money(unit), lineValue:money(unit * qty),
+        discount:si ? money(num(si.discount)) : money(num(l.lineDiscount)),
+        paidValue:si ? money(num(si.finalPrice)) : money(unit * qty),
+        status:status,
+        cancelledAt:l.removed ? (l.removedAt || (ch && ch.appliedAt) || null) : null,
+        reason:ch ? { id:ch.reasonId || null, ar:ch.reasonAr || null, en:ch.reasonEn || null } : null,
+        changeId:ch ? ch.id : null, changeKind:ch ? ch.kind : null,
+        replacement:status === 'replaced' ? { productId:l.id, name:l.name, unitPrice:l.price } : null,
+        refund:ch && ch.refundResult ? { amount:ch.refundResult.amount, destination:ch.refundResult.destination } : null
+      };
+    });
+    var original = snap && snap.commercial ? F(snap.commercial.grandTotal) : null, adjusted = F(o.total);
+    return { ok:true, orderId:orderId, currency:'KWD',
+      paymentMethodId:(snap && snap.commercial && snap.commercial.paymentMethod && snap.commercial.paymentMethod.id) || null,
+      lines:lines,
+      originalTotal:original === null ? null : money(original / 1000), cancelledTotal:money(cancelled / 1000),
+      replacementDifference:money(replacedDiff / 1000), adjustedTotal:money(adjusted / 1000),
+      consistent:original !== null && original - cancelled - replacedDiff === adjusted };
+  }
+
   global.RAFOrderChanges = {
+    /* read-only: the order's financial record with cancelled lines kept */
+    invoiceHistory: invoiceHistory,
     STATE: STATE, KIND: KIND, REASONS: REASONS, ERRORS: ERRORS,
     REFUND_DESTINATION: REFUND_DESTINATION, REFUND_DESTINATION_TEXT: REFUND_DESTINATION_TEXT,
     isRefundDestination: isRefundDestination,

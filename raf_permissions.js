@@ -37,8 +37,14 @@
   var MODULES = [
     { id: 'users',       labelAr: 'المستخدمون',       labelEn: 'Users',                icon: 'ti-users',
       actions: ['view', 'create', 'edit', 'delete', 'suspend'] },
+    /* Store status (RAFStoreStatus). `stores.edit` is held by merchants for
+       their own store's profile, so it cannot also mean "run any store".
+         · stores.manage  — open / close a store, and decide a merchant's
+                            full-closure request (approving it closes the store)
+         · stores.suspend — suspend a store administratively, and restore it
+       Neither is held by a merchant role. */
     { id: 'stores',      labelAr: 'المتاجر',          labelEn: 'Stores',               icon: 'ti-building-store',
-      actions: ['view', 'approve', 'edit', 'delete'] },
+      actions: ['view', 'approve', 'edit', 'delete', 'manage', 'suspend'] },
     { id: 'products',    labelAr: 'المنتجات',         labelEn: 'Products',             icon: 'ti-box',
       actions: ['view', 'create', 'edit', 'delete'] },
     { id: 'orders',      labelAr: 'الطلبات',          labelEn: 'Orders',               icon: 'ti-shopping-bag',
@@ -71,7 +77,17 @@
     { id: 'settings',    labelAr: 'إعدادات النظام',   labelEn: 'System Settings',      icon: 'ti-settings',
       actions: ['view', 'edit'] },
     { id: 'permissions', labelAr: 'إدارة الصلاحيات',  labelEn: 'Permissions Mgmt',     icon: 'ti-shield-lock',
-      actions: ['view', 'edit'] }
+      actions: ['view', 'edit'] },
+    /* Finance accounting record (RAFAccounting). No existing key fits:
+       `reports.*` is held by merchants for their own store and `orders.refund`
+       is an order operation. The four actions are the separation the
+       accounting core needs, and nothing more:
+         · accounting.view   — read the chart, periods, journals, ledger, trial balance
+         · accounting.post   — post a balanced journal entry into an open period
+         · accounting.manage — maintain the chart of accounts and create periods
+         · accounting.close  — close a period (irreversible in this phase) */
+    { id: 'accounting',  labelAr: 'المحاسبة',         labelEn: 'Accounting',           icon: 'ti-calculator',
+      actions: ['view', 'post', 'manage', 'close'] }
   ];
 
   var ACTION_LABELS = {
@@ -86,7 +102,9 @@
     refund:  { ar: 'استرجاع',  en: 'Refund' },
     export:  { ar: 'تصدير',    en: 'Export' },
     resolve: { ar: 'إنهاء',    en: 'Resolve' },
-    escalate:{ ar: 'تصعيد',    en: 'Escalate' }
+    escalate:{ ar: 'تصعيد',    en: 'Escalate' },
+    post:    { ar: 'ترحيل',    en: 'Post' },
+    close:   { ar: 'إقفال',    en: 'Close' }
   };
 
   /* A module's name reads differently as the OBJECT of an action: the label is
@@ -104,7 +122,8 @@
     reports:     'التقارير',
     support:     'تذاكر خدمة العملاء',
     settings:    'إعدادات النظام',
-    permissions: 'الصلاحيات'
+    permissions: 'الصلاحيات',
+    accounting:  'المحاسبة'
   };
 
   function buildCatalog() {
@@ -415,11 +434,28 @@
        this decision, and a migration that has run is never re-applied. */
     { id:'settings_edit_ops_manager_v1', roleId:'ops_manager',
       add:['settings.edit', 'permissions.view', 'permissions.edit'] },
+    /* Store status control (RAFStoreStatus) added stores.manage and
+       stores.suspend. The seeds already reach them (Super Admin and Higher
+       Management hold every key, Operations holds the whole stores module);
+       a browser seeded earlier holds the old role records — hence these.
+       No merchant, Customer Service, Finance or Marketing role is touched. */
+    { id:'store_status_super_admin_v1', roleId:'super_admin', add:['stores.manage', 'stores.suspend'] },
+    { id:'store_status_higher_mgmt_v1', roleId:'higher_mgmt', add:['stores.manage', 'stores.suspend'] },
+    { id:'store_status_ops_manager_v1', roleId:'ops_manager', add:['stores.manage', 'stores.suspend'] },
     { id:'support_finance_v1',      roleId:'finance',      add:['support.view', 'support.manage'] },
     { id:'support_higher_mgmt_v1',  roleId:'higher_mgmt',
       add:['support.view', 'support.create', 'support.manage', 'support.resolve', 'support.escalate'] },
     { id:'support_super_admin_v1',  roleId:'super_admin',
-      add:['support.view', 'support.create', 'support.manage', 'support.resolve', 'support.escalate'] }
+      add:['support.view', 'support.create', 'support.manage', 'support.resolve', 'support.escalate'] },
+    /* The accounting module (RAFAccounting). The seeds already reach it —
+       Super Admin holds every key and Higher Management every key but the two
+       sensitive edits — so these bring browsers seeded earlier level with the
+       seed. No other role is touched: which department works the accounting
+       record (Finance or otherwise) is a decision RAF has not made yet. */
+    { id:'accounting_super_admin_v1', roleId:'super_admin',
+      add:['accounting.view', 'accounting.post', 'accounting.manage', 'accounting.close'] },
+    { id:'accounting_higher_mgmt_v1', roleId:'higher_mgmt',
+      add:['accounting.view', 'accounting.post', 'accounting.manage', 'accounting.close'] }
   ];
   function migrateRoles() {
     try {

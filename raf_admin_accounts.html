@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html id="htmlRoot" lang="ar" dir="rtl" data-ui="admin">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رف — إدارة الحسابات</title>
+<script src="raf_admin_theme.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<link rel="icon" type="image/png" sizes="64x64" href="raf_favicon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="raf_favicon_32.png">
+<link rel="apple-touch-icon" href="raf_appicon.png">
+<script src="raf_features.js"></script>
+<script src="raf_config.js"></script>
+<script src="raf_event_bus.js"></script>
+<script src="raf_record_store.js"></script>
+<script src="raf_notify_core.js"></script>
+<link rel="stylesheet" href="raf_theme.css">
+<link rel="stylesheet" href="raf_logistics.css">
+<link rel="stylesheet" href="raf_admin.css">
+<style>
+/* ══════════ ACCOUNTS MANAGEMENT — read-only, from the account authorities ══════════ */
+.ac-head{ display:flex; align-items:flex-end; gap:10px 16px; flex-wrap:wrap; margin-block-end:12px; }
+.ac-head h1{ margin:0; font-size:19px; font-weight:800; color:var(--ink); }
+.ac-head p{ margin:2px 0 0; color:var(--muted); font-size:12.5px; }
+.ac-head .ro-tag{ margin-inline-start:auto; display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--muted);
+  border:1px solid var(--line-2); border-radius:999px; padding:4px 11px; }
+.ac-head .ro-tag i{ color:var(--accent); font-size:15px; }
+
+/* the four account environments: a flat underline bar that scrolls on its own */
+.ac-tabs{ display:flex; gap:2px; border-block-end:1px solid var(--line-2); margin-block-end:14px; overflow-x:auto; scrollbar-width:none; }
+.ac-tabs::-webkit-scrollbar{ display:none; }
+.ac-tabs a{ flex:0 0 auto; display:inline-flex; align-items:center; gap:7px; min-height:44px; padding:0 14px; color:var(--muted); text-decoration:none;
+  font-size:13.5px; font-weight:700; box-shadow:inset 0 -2px 0 transparent; white-space:nowrap; }
+.ac-tabs a i{ font-size:17px; }
+.ac-tabs a:hover{ color:var(--ink); }
+.ac-tabs a[aria-current="page"]{ color:var(--ink); box-shadow:inset 0 -2px 0 var(--gold); }
+.ac-tabs a[aria-current="page"] i{ color:var(--accent); }
+.ac-tabs .c{ font-family:'DM Sans',var(--font); font-size:11.5px; color:var(--faint); font-weight:700; }
+.ac-tabs a:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+
+.ac-bar{ display:flex; align-items:center; gap:8px 12px; flex-wrap:wrap; padding:10px 12px; border-block-end:1px solid var(--line); }
+.seg{ display:inline-flex; border:1px solid var(--line-2); border-radius:var(--r); overflow:hidden; max-width:100%; }
+.seg button{ min-height:36px; padding:0 12px; border:0; background:transparent; color:var(--muted); font-size:12.5px; font-weight:700; cursor:pointer;
+  display:inline-flex; align-items:center; gap:6px; border-inline-end:1px solid var(--line); font-family:inherit; }
+.seg button:last-child{ border-inline-end:0; }
+.seg button[aria-pressed="true"]{ background:var(--accent-soft); color:var(--accent); }
+.seg button:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+.seg .c{ font-family:'DM Sans',var(--font); font-size:11.5px; color:var(--faint); }
+.seg button[aria-pressed="true"] .c{ color:var(--accent); }
+.ac-bar select{ min-height:36px; border:1px solid var(--line-2); border-radius:var(--r); background:var(--surface); color:var(--ink); padding:0 8px; font-size:12.5px; font-family:inherit; }
+.search{ position:relative; flex:1 1 240px; max-width:380px; margin-inline-start:auto; }
+.search i{ position:absolute; inset-inline-start:10px; top:50%; transform:translateY(-50%); color:var(--faint); font-size:16px; }
+.search input{ width:100%; min-height:36px; padding-block:0; padding-inline:32px 10px; border:1px solid var(--line-2); border-radius:var(--r);
+  background:var(--surface); color:var(--ink); font-size:13px; font-family:inherit; }
+.search input:focus{ outline:2px solid var(--accent); outline-offset:0; border-color:transparent; }
+
+.qt{ width:100%; border-collapse:collapse; }
+.qt th{ background:var(--surface-2); color:var(--muted); font-size:10.5px; letter-spacing:.08em; padding:9px 14px; border-block-end:1px solid var(--line); text-align:start; white-space:nowrap; }
+.qt td{ padding:10px 14px; border-block-end:1px solid var(--line); font-size:13px; color:var(--text); vertical-align:middle; }
+.qt tbody tr{ cursor:pointer; }
+.qt tbody tr:hover td{ background:var(--surface-2); }
+.qt tbody tr:last-child td{ border-block-end:0; }
+.qt .sub{ display:block; color:var(--faint); font-size:11px; margin-block-start:2px; }
+.qt .strong{ font-weight:800; color:var(--ink); }
+.qt a.nm{ color:inherit; text-decoration:none; }
+.qt a.nm:hover .strong{ color:var(--accent); text-decoration:underline; }
+.qt .go{ display:inline-flex; align-items:center; gap:5px; min-height:32px; padding:0 11px; border-radius:var(--r); border:1px solid var(--line-2);
+  color:var(--ink); text-decoration:none; font-size:12px; font-weight:700; white-space:nowrap; }
+.qt .go:hover{ border-color:var(--accent); color:var(--accent); }
+.qt .ltr{ direction:ltr; unicode-bidi:isolate; }
+.qt .na{ color:var(--faint); }
+.who{ display:flex; align-items:center; gap:10px; min-width:0; }
+.av{ width:32px; height:32px; flex-shrink:0; border-radius:50%; display:grid; place-items:center; background:var(--surface-2); border:1px solid var(--line);
+  color:var(--ink); font-weight:800; font-size:13px; }
+.kind{ font-size:12px; font-weight:700; color:var(--ink); white-space:nowrap; }
+.kind.emp{ color:var(--muted); }
+.demo{ display:inline-block; margin-inline-start:6px; font-size:10.5px; font-weight:800; color:var(--pend); border:1px solid currentColor; border-radius:4px; padding:0 5px; vertical-align:middle; }
+.badge{ font-size:11px; }
+.empty-q{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:18px 16px; color:var(--muted); font-size:13px; }
+.empty-q i{ font-size:18px; color:var(--faint); }
+.empty-q .btn{ margin-inline-start:auto; }
+.note-line{ display:flex; gap:8px; align-items:flex-start; padding:8px 16px; font-size:11.5px; color:var(--faint); border-block-end:1px solid var(--line); background:var(--surface-2); line-height:1.6; }
+.note-line i{ font-size:14px; margin-top:1px; color:var(--accent); }
+.note-line.bottom{ border-block-end:0; border-block-start:1px solid var(--line); }
+.note-line a{ color:var(--accent); font-weight:700; }
+.lock{ display:flex; gap:10px; align-items:flex-start; padding:16px; color:var(--muted); font-size:13px; line-height:1.6; }
+.lock i{ color:var(--accent); font-size:18px; }
+
+/* ══════════ ONE ACCOUNT ══════════ */
+.back{ display:inline-flex; align-items:center; gap:6px; min-height:34px; color:var(--muted); text-decoration:none; font-size:12.5px; font-weight:700; margin-block-end:8px; }
+.back:hover{ color:var(--accent); }
+[dir="rtl"] .back i{ transform:scaleX(-1); }
+.case-h{ padding:14px 18px; display:grid; grid-template-columns:minmax(0,1fr); gap:10px 18px; }
+.case-h .t{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; min-width:0; }
+.case-h .av{ width:48px; height:48px; font-size:19px; }
+.case-h h1{ margin:0; font-size:20px; font-weight:800; color:var(--ink); overflow-wrap:anywhere; }
+.case-h .idl{ display:block; font-size:11.5px; color:var(--faint); margin-block-start:2px; }
+.meta-g{ display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); border-block-start:1px solid var(--line); margin:4px -18px -14px; }
+.meta-g > div{ padding:10px 18px; border-inline-end:1px solid var(--line); min-width:0; }
+.meta-g > div:last-child{ border-inline-end:0; }
+.meta-g .k{ display:block; font-size:10.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); }
+.meta-g .v{ display:block; margin-block-start:3px; font-size:13px; font-weight:700; color:var(--ink); overflow-wrap:anywhere; }
+.case{ display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:14px; align-items:start; margin-block-start:14px; }
+.case-main, .case-side{ display:flex; flex-direction:column; gap:14px; min-width:0; }
+.dl{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); margin:0; }
+.dl > div{ padding:9px 16px; border-block-end:1px solid var(--line); min-width:0; }
+.dl > div:nth-child(odd){ border-inline-end:1px solid var(--line); }
+.dl > div.full{ grid-column:1 / -1; border-inline-end:0; }
+.dl > div:last-child, .dl > div.full:last-child{ border-block-end:0; }
+.dl dt{ font-size:11.5px; color:var(--faint); font-weight:700; }
+.dl dd{ margin:2px 0 0; font-size:13.5px; font-weight:700; color:var(--ink); overflow-wrap:anywhere; line-height:1.6; }
+.dl dd.na{ color:var(--faint); font-weight:500; }
+.dl dd .hint{ display:block; font-size:11.5px; color:var(--muted); font-weight:500; }
+.dl dd a{ color:var(--accent); }
+.pmod{ list-style:none; margin:0; padding:4px 0; }
+.pmod li{ display:grid; grid-template-columns:minmax(0,150px) minmax(0,1fr); gap:4px 12px; padding:8px 16px; border-block-end:1px solid var(--line); align-items:start; }
+.pmod li:last-child{ border-block-end:0; }
+.pmod b{ font-size:12.5px; color:var(--ink); display:flex; align-items:center; gap:6px; }
+.pmod b i{ color:var(--accent); font-size:15px; }
+.chips{ display:flex; flex-wrap:wrap; gap:5px; min-width:0; }
+.chip{ font-size:11.5px; font-weight:700; color:var(--text); background:var(--surface-2); border:1px solid var(--line); border-radius:5px; padding:2px 7px; overflow-wrap:anywhere; }
+.chip.g{ color:var(--done); border-color:var(--done); background:var(--done-bg); }
+.chip.r{ color:var(--alert); border-color:var(--alert); background:var(--alert-bg); text-decoration:line-through; }
+.una{ list-style:none; margin:0; padding:4px 0; }
+.una li{ display:grid; grid-template-columns:20px minmax(0,1fr); gap:2px 8px; padding:9px 16px; border-block-end:1px solid var(--line); }
+.una li:last-child{ border-block-end:0; }
+.una i{ color:var(--faint); font-size:16px; margin-top:1px; }
+.una b{ font-size:13px; color:var(--ink); }
+.una span{ grid-column:2; font-size:11.5px; color:var(--faint); line-height:1.55; }
+
+#lBody{ overflow-x:auto; }
+@media (min-width:761px) and (max-width:1100px){ #lBody .qt .opt{ display:none; } }
+@media (max-width:1199px){ .case{ grid-template-columns:minmax(0,1fr); } }
+@media (max-width:760px){
+  .meta-g{ grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .meta-g > div:nth-child(2n){ border-inline-end:0; }
+  .meta-g > div{ border-block-end:1px solid var(--line); }
+  /* the list becomes one card per account — never a squeezed table */
+  .qt, .qt thead, .qt tbody, .qt tr, .qt td{ display:block; width:100%; }
+  .qt thead{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+  .qt tbody tr{ border-block-end:1px solid var(--line); padding:8px 0; }
+  .qt tbody tr:last-child{ border-block-end:0; }
+  .qt td{ border:0; display:flex; gap:12px; padding:4px 14px; min-width:0; }
+  .qt td::before{ content:attr(data-l); flex:0 0 34%; color:var(--faint); font-size:11.5px; font-weight:700; }
+  .qt td > *{ min-width:0; overflow-wrap:anywhere; }
+  .qt td.lead::before, .qt td.act::before{ display:none; }
+  .qt td.act{ justify-content:flex-end; }
+  .qt td.act .go{ min-height:40px; }
+  .search{ max-width:none; flex-basis:100%; margin-inline-start:0; }
+  .seg{ width:100%; } .seg button{ flex:1; justify-content:center; padding:0 6px; }
+  .ac-bar select{ flex:1 1 100%; }
+  .ac-head .ro-tag{ margin-inline-start:0; }
+  .dl{ grid-template-columns:minmax(0,1fr); }
+  .dl > div:nth-child(odd){ border-inline-end:0; }
+  .pmod li{ grid-template-columns:minmax(0,1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate" hidden>
+  <div class="gate-c" role="alert">
+    <div class="ic"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
+    <h1 id="gateT"></h1>
+    <p id="gateP"></p>
+    <a class="btn" href="raf_login.html" id="gateSignIn"><i class="ti ti-login" aria-hidden="true"></i><span data-ar="تسجيل الدخول" data-en="Sign in">تسجيل الدخول</span></a>
+    <button class="btn" type="button" id="gateSignOut" onclick="RAFSignOut()" hidden><i class="ti ti-logout" aria-hidden="true"></i><span data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span></button>
+  </div>
+</div>
+
+<div class="ops" id="shell" hidden>
+  <aside class="ops-nav" id="opsNav" aria-label="إدارة رف">
+    <div class="ops-brand">
+      <span class="ops-brand-mark" aria-hidden="true"><i class="ti ti-building-community"></i></span>
+      <span class="ops-brand-t"><b data-ar="إدارة رف" data-en="RAF Management">إدارة رف</b>
+        <span data-ar="مركز التحكم" data-en="Control Center">مركز التحكم</span></span>
+      <button class="ibtn ops-nav-x" type="button" onclick="ADM.closeNav()" aria-label="إغلاق القائمة"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>
+    <nav class="ops-nav-scroll" id="navTree" aria-label="التنقل"></nav>
+  </aside>
+  <div class="scrim" onclick="ADM.closeNav()" aria-hidden="true"></div>
+
+  <div class="ops-main">
+    <header class="ops-head">
+      <button class="ibtn ops-burger" type="button" aria-controls="opsNav" aria-expanded="false" onclick="ADM.openNav()" aria-label="القائمة"><i class="ti ti-menu-2" aria-hidden="true"></i></button>
+      <div class="ops-crumb"><small id="crumbGroup"></small><b id="crumbPage"></b></div>
+      <div class="ops-tools">
+        <button class="ibtn" type="button" id="refreshBtn" onclick="ADM.refresh()" aria-label="تحديث"><i class="ti ti-refresh" aria-hidden="true"></i></button>
+        <button class="ibtn" type="button" id="themeBtn" onclick="ADM.toggleTheme()" aria-pressed="false"><i class="ti ti-moon" aria-hidden="true"></i></button>
+        <button class="ibtn lang" type="button" id="langBtn" onclick="ADM.toggleLang()"></button>
+        <span class="ops-sep" aria-hidden="true"></span>
+        <div class="ops-user"><span class="ops-av" id="userAv" aria-hidden="true"></span>
+          <span class="ops-user-t"><b id="userName"></b><span id="userRole"></span></span></div>
+        <button class="ibtn signout" type="button" id="signOutBtn" onclick="RAFSignOut()">
+          <i class="ti ti-logout" aria-hidden="true"></i>
+          <span class="signout-t" data-ar="تسجيل الخروج" data-en="Sign Out">تسجيل الخروج</span>
+        </button>
+      </div>
+    </header>
+    <main class="ops-content" id="view" tabindex="-1"></main>
+  </div>
+</div>
+
+<!-- Read-only. Accounts come from RAFPerm (the one account authority); driver
+     accounts are read through RAFLogistics (the driver authority, which owns
+     the driver privacy rules); store links resolve through RAFPerm.storeLinkOf
+     → RAFSource. The remaining modules are loaded only so the shared sidebar
+     answers exactly as on the other RAF Management pages. The order modules
+     (raf_data.js / raf_order_snapshot.js) are deliberately NOT loaded: this
+     page shows no order data, and RAFShop seeds the order store on its first
+     read, so loading it would let a read-only view write. -->
+<script src="raf_source.js"></script>
+<script src="raf_audit.js"></script>
+<script src="raf_permissions.js"></script>
+<script src="raf_store_schedule.js"></script>
+<script src="raf_merchant_variants.js"></script>
+<script src="raf_merchant_media.js"></script>
+<script src="raf_customer_service.js"></script>
+<script src="raf_logistics_authority.js"></script>
+<script src="raf_merchant_applications.js"></script>
+<script src="raf_merchant_auth.js"></script>
+<script src="raf_store_profile.js"></script>
+<script src="raf_store_status.js"></script>
+<script src="raf_requests.js"></script>
+<script src="raf_admin_shell.js"></script>
+<script>
+/* ============================================================================
+   RAF MANAGEMENT — ACCOUNTS MANAGEMENT (إدارة الحسابات) · READ-ONLY
+   A Management view over the accounts RAF already holds. It is not an
+   identity system: it keeps no storage, copies no account, writes nothing and
+   offers no account action other than View.
+
+   SOURCES
+     · Customers, Store Accounts, Management Accounts → RAFPerm.getUsers(),
+       classified by the record's own accountType (and, inside Store Accounts,
+       its roleId). Nothing is classified by name, email or position.
+     · Drivers → RAFLogistics.listDrivers() / getDriver(): the driver
+       authority, under its own drivers.view check and its contact rule
+       (email / phone only for drivers.edit). Operational driver work —
+       assignment, deliveries, availability — stays in Logistics.
+   PERMISSIONS (existing keys only)
+     · users.view       — the page (re-checked on every render)
+     · drivers.view     — the Drivers tab (enforced by RAFLogistics itself)
+     · permissions.view — role permissions, grants / revokes and effective
+                          permissions on an account (the key RAF's permission
+                          screen already requires to read them)
+   NEVER RENDERED — every field is picked from a fixed list, so credential
+   material (demo passwords, hashes, salts, activation or reset tokens) can
+   never reach the page, whatever a record happens to carry.
+
+   ROUTES (hash):  #tab=customers|store|management|drivers&seg=…&status=…&q=…
+                   #account=<id>                one account, in full
+   ==========================================================================*/
+(function(){
+  'use strict';
+
+  var A = window.RAFAdmin, P = window.RAFPerm, SRC = window.RAFSource, LG = window.RAFLogistics;
+  var T = A.T, L = A.L, esc = A.esc, el = A.el, clockOf = A.clockOf, NEWTAB = A.NEWTAB, srNew = A.srNew, ext = A.ext;
+  var ROUTE = {};
+
+  /* the four environments — membership comes from the record's accountType */
+  var TABS = [
+    { k:'customers',  type:'customer', icon:'ti-user',            ar:'العملاء',          en:'Customers' },
+    { k:'store',      type:'merchant', icon:'ti-building-store',  ar:'حسابات المتاجر',   en:'Store Accounts' },
+    { k:'management', type:'staff',    icon:'ti-shield-half',     ar:'حسابات الإدارة',   en:'Management Accounts' },
+    { k:'drivers',    type:'driver',   icon:'ti-motorbike',       ar:'السائقون',         en:'Drivers' }
+  ];
+  /* inside Store Accounts: the record's roleId */
+  var SEGS = [
+    { k:'',          ar:'الكل',      en:'All' },
+    { k:'merchant',  ar:'التجار',    en:'Merchants', role:'merchant' },
+    { k:'employee',  ar:'الموظفون',  en:'Employees', role:'merchant_employee' }
+  ];
+  var STORE_ROLES = ['merchant', 'merchant_employee'];
+  /* labels for the statuses RAF's account authority actually uses; any other
+     value is shown exactly as stored, never folded into another state */
+  var ST = { active:['نشط','Active','b-done'], suspended:['موقوف','Suspended','b-hot'],
+             pending_activation:['بانتظار التفعيل','Pending activation','b-wait'] };
+  var TYPE_TXT = { customer:['عميل','Customer'], merchant:['حساب متجر','Store account'], staff:['إدارة رف','RAF Management'], driver:['سائق','Driver'] };
+  function typeTxt(t){ var x = TYPE_TXT[t]; return x ? T(x[0], x[1]) : (t || '—'); }
+
+  function canView(){ return A.can('users.view'); }
+  function canPerms(){ return A.can('permissions.view'); }
+
+  /* ───────── routing ───────── */
+  function parseHash(){
+    var o = {};
+    (location.hash || '').replace(/^#\/?/, '').split('&').forEach(function(p){
+      var i = p.indexOf('='); if(i > 0){ try { o[p.slice(0, i)] = decodeURIComponent(p.slice(i + 1)); } catch(e){} }
+    });
+    return o;
+  }
+  function tabOf(k){ for(var i = 0; i < TABS.length; i++) if(TABS[i].k === k) return TABS[i]; return TABS[0]; }
+  function listHash(f){
+    var parts = ['tab=' + encodeURIComponent(f.tab || 'customers')];
+    if(f.seg) parts.push('seg=' + encodeURIComponent(f.seg));
+    if(f.status) parts.push('status=' + encodeURIComponent(f.status));
+    if(f.q) parts.push('q=' + encodeURIComponent(f.q));
+    return parts.join('&');
+  }
+  function setList(f, full){
+    try { history.replaceState(null, '', '#' + listHash(f)); } catch(e){ location.hash = listHash(f); }
+    ROUTE = parseHash();
+    if(full) render(); else { var b = el('lBody'); if(b) b.innerHTML = listBody(); else render(); }
+  }
+
+  /* ───────── reads (authoritative only) ───────── */
+  function users(){ if(!canView()) return []; try { return P.getUsers() || []; } catch(e){ return []; } }
+  function inTab(u, tab){
+    if(!u || u.accountType !== tab.type) return false;
+    if(tab.k === 'store') return STORE_ROLES.indexOf(u.roleId) > -1;
+    return true;
+  }
+  function accountsOf(tab){ return users().filter(function(u){ return inTab(u, tab); }); }
+  /* drivers through the driver authority — it proves drivers.view itself */
+  function drivers(q){
+    if(!LG || !LG.listDrivers) return { ok:false, code:'UNAVAILABLE' };
+    try { return LG.listDrivers(q ? { q:q } : {}) || { ok:false, code:'UNAVAILABLE' }; } catch(e){ return { ok:false, code:'UNAVAILABLE' }; }
+  }
+  /* records RAFPerm holds that belong to none of the four environments —
+     reported, never placed somewhere */
+  function unplaced(){
+    return users().filter(function(u){
+      if(!u) return false;
+      if(u.roleId === 'driver') return false;                       /* read through Logistics */
+      for(var i = 0; i < TABS.length - 1; i++) if(inTab(u, TABS[i])) return false;
+      return true;
+    });
+  }
+  function roleName(id){ var r = null; try { r = P.getRole(id); } catch(e){} return r ? T(r.nameAr, r.nameEn) : (id || '—'); }
+  function storeLink(u){ try { return P.storeLinkOf(u); } catch(e){ return { slug:null, store:null, ok:false, reason:'unassigned' }; } }
+
+  /* ───────── formatting ───────── */
+  function badge(st){
+    var m = ST[st];
+    return '<span class="badge ' + (m ? m[2] : 'b-plain') + '">' + esc(m ? T(m[0], m[1]) : (st || '—')) + '</span>';
+  }
+  function stTxt(st){ var m = ST[st]; return m ? T(m[0], m[1]) : (st || '—'); }
+  function initial(n){ return esc(String(n || '?').trim().charAt(0) || '?'); }
+  function dateTxt(v){
+    if(v == null || v === '') return null;
+    if(typeof v === 'number'){
+      try { return new Date(v).toLocaleDateString(A.isEn() ? 'en-GB' : 'ar-KW-u-nu-latn', { day:'2-digit', month:'short', year:'numeric', timeZone:'Asia/Kuwait' }); }
+      catch(e){ return new Date(v).toISOString().slice(0, 10); }
+    }
+    return String(v);                                               /* regDate is stored as a date string */
+  }
+  function dash(){ return '<span class="na">—</span>'; }
+  function ltr(v, cls){ return v ? '<bdi dir="ltr" class="ltr' + (cls ? ' ' + cls : '') + '">' + esc(v) + '</bdi>' : dash(); }
+  function digits(s){ return String(s || '').replace(/\D/g, ''); }
+  function hit(q, fields){
+    if(!q) return true;
+    var ql = q.toLowerCase(), qd = digits(q);
+    return fields.some(function(f){
+      if(f == null || f === '') return false;
+      if(String(f).toLowerCase().indexOf(ql) > -1) return true;
+      return qd.length >= 3 && digits(f).indexOf(qd) > -1;
+    });
+  }
+  function th(ar, en, c){ return '<th scope="col"' + (c ? ' class="' + c + '"' : '') + '>' + esc(T(ar, en)) + '</th>'; }
+  function td(ar, en, html, c){ return '<td' + (c ? ' class="' + c + '"' : '') + ' data-l="' + esc(T(ar, en)) + '">' + html + '</td>'; }
+  function viewCell(id){
+    return '<td class="act"><a class="go" href="#account=' + encodeURIComponent(id) + '">' + esc(T('عرض','View'))
+      + '<span class="sr-only"> ' + esc(id) + '</span></a></td>';
+  }
+  function nameCell(u, id){
+    return '<td class="lead" data-l="' + esc(T('الحساب','Account')) + '"><span class="who"><span class="av" aria-hidden="true">' + initial(u.name) + '</span>'
+      + '<span><a class="nm" href="#account=' + encodeURIComponent(id) + '"><bdi class="strong">' + esc(u.name || '—') + '</bdi></a>'
+      + (u.demo === true ? '<span class="demo">' + esc(T('تجريبي','Demo')) + '</span>' : '')
+      + '<span class="sub num">' + esc(id) + '</span></span></span></td>';
+  }
+
+  /* ───────── the list ───────── */
+  function viewList(){
+    var tab = tabOf(ROUTE.tab);
+    var counts = {};
+    TABS.forEach(function(t){
+      if(t.k === 'drivers'){ var d = drivers(''); counts[t.k] = d.ok ? d.items.length : null; }
+      else counts[t.k] = accountsOf(t).length;
+    });
+    var tabs = '<nav class="ac-tabs" aria-label="' + esc(T('أنواع الحسابات','Account types')) + '">' + TABS.map(function(t){
+      return '<a href="#' + listHash({ tab:t.k }) + '"' + (t.k === tab.k ? ' aria-current="page"' : '') + '><i class="ti ' + t.icon + '" aria-hidden="true"></i>'
+        + esc(T(t.ar, t.en)) + (counts[t.k] != null ? ' <span class="c">' + counts[t.k] + '</span>' : '') + '</a>';
+    }).join('') + '</nav>';
+    var un = unplaced();
+    var unNote = un.length ? '<div class="note-line"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+      + esc(T(un.length + ' حساب لا ينتمي إلى أيٍّ من هذه الأنواع ولم يُدرج في أي تبويب.', un.length + ' account(s) belong to none of these types and are not listed in any tab.')) + '</span></div>' : '';
+    return '<div class="ac-head"><div><h1>' + esc(T('إدارة الحسابات','Accounts Management')) + '</h1>'
+      + '<p>' + esc(T('جميع حسابات رف المسجلة، مصنفة حسب نوع الحساب كما يسجّله نظام الحسابات.','Every registered RAF account, grouped by the account type RAF records.')) + '</p></div>'
+      + '<span class="ro-tag"><i class="ti ti-eye" aria-hidden="true"></i>' + esc(T('عرض فقط','View only')) + '</span></div>'
+      + tabs
+      + '<section class="pn" aria-label="' + esc(T(tab.ar, tab.en)) + '">' + unNote + toolbar(tab) + '<div id="lBody">' + listBody() + '</div></section>';
+  }
+  function toolbar(tab){
+    var q = ROUTE.q || '', bar = '';
+    if(tab.k === 'store'){
+      var all = accountsOf(tab), seg = ROUTE.seg || '';
+      bar += '<div class="seg" role="group" aria-label="' + esc(T('نوع حساب المتجر','Store account type')) + '">' + SEGS.map(function(s){
+        var n = all.filter(function(u){ return !s.role || u.roleId === s.role; }).length;
+        return '<button type="button" aria-pressed="' + (seg === s.k) + '" onclick="ACP.seg(\'' + s.k + '\')">' + esc(T(s.ar, s.en)) + ' <span class="c num">' + n + '</span></button>';
+      }).join('') + '</div>';
+    }
+    /* a status filter offers only the statuses that exist in this tab */
+    var sts = statusesOf(tab);
+    if(sts.length > 1){
+      bar += '<label class="sr-only" for="fSt">' + esc(T('الحالة','Status')) + '</label><select id="fSt" onchange="ACP.status(this.value)">'
+        + '<option value="">' + esc(T('كل الحالات','All statuses')) + '</option>'
+        + sts.map(function(s){ return '<option value="' + esc(s) + '"' + (ROUTE.status === s ? ' selected' : '') + '>' + esc(stTxt(s)) + '</option>'; }).join('')
+        + '</select>';
+    }
+    var ph = { customers:['المعرّف، الاسم، البريد، الهاتف','ID, name, email, phone'],
+               store:['المعرّف، الاسم، البريد، الهاتف، المتجر','ID, name, email, phone, store'],
+               management:['المعرّف، الاسم، البريد، الهاتف، الدور','ID, name, email, phone, role'],
+               drivers:['الاسم أو المعرّف','Name or ID'] }[tab.k];
+    bar += '<div class="search"><i class="ti ti-search" aria-hidden="true"></i><label class="sr-only" for="fQ">' + esc(T('بحث','Search')) + '</label>'
+      + '<input id="fQ" type="search" value="' + esc(q) + '" autocomplete="off" placeholder="' + esc(T(ph[0], ph[1])) + '" oninput="ACP.search(this.value)"></div>';
+    return '<div class="ac-bar">' + bar + '</div>';
+  }
+  function statusesOf(tab){
+    var seen = {}, list = [];
+    var src = tab.k === 'drivers' ? ((drivers('').items) || []) : accountsOf(tab);
+    src.forEach(function(u){ var s = u.status || ''; if(s && !seen[s]){ seen[s] = 1; list.push(s); } });
+    var order = ['active', 'pending_activation', 'suspended'];
+    return list.sort(function(a, b){ var x = order.indexOf(a), y = order.indexOf(b); return (x < 0 ? 9 : x) - (y < 0 ? 9 : y); });
+  }
+  function emptyFor(filtered){
+    return filtered
+      ? '<div class="empty-q"><i class="ti ti-filter-off" aria-hidden="true"></i>' + esc(T('لا توجد حسابات مطابقة.','No matching accounts.'))
+        + '<button class="btn sm" type="button" onclick="ACP.clear()">' + esc(T('مسح التصفية','Clear filters')) + '</button></div>'
+      : '<div class="empty-q"><i class="ti ti-users" aria-hidden="true"></i>' + esc(T('لا توجد حسابات حالياً','No accounts found')) + '</div>';
+  }
+  function listBody(){
+    if(!canView()) return lockBox(T('لا تملك صلاحية عرض الحسابات.','You are not permitted to view accounts.'));
+    var tab = tabOf(ROUTE.tab), q = (ROUTE.q || '').trim(), st = ROUTE.status || '';
+    if(tab.k === 'drivers') return driversBody(q, st);
+    var all = accountsOf(tab), seg = null;
+    if(tab.k === 'store') SEGS.forEach(function(s){ if(s.k && s.k === ROUTE.seg) seg = s; });
+    if(!all.length) return emptyFor(false);
+    var list = all.filter(function(u){
+      if(seg && u.roleId !== seg.role) return false;
+      if(st && u.status !== st) return false;
+      if(!q) return true;
+      var extra = [];
+      if(tab.k === 'store'){ var lk = storeLink(u); if(lk.slug) extra.push(lk.slug); if(lk.store) extra.push(lk.store.name && lk.store.name.ar, lk.store.name && lk.store.name.en); }
+      if(tab.k === 'management'){ var r = null; try { r = P.getRole(u.roleId); } catch(e){} if(r) extra.push(r.nameAr, r.nameEn); }
+      return hit(q, [u.id, u.name, u.email, u.phone].concat(extra));
+    }).sort(function(a, b){ return String(a.name || '').localeCompare(String(b.name || '')); });
+    if(!list.length) return emptyFor(true);
+    var head, row;
+    if(tab.k === 'customers'){
+      head = th('العميل','Customer') + th('البريد','Email') + th('الهاتف','Phone') + th('الحالة','Status') + th('تاريخ التسجيل','Registered', 'opt');
+      row = function(u){ return nameCell(u, u.id) + td('البريد','Email', ltr(u.email)) + td('الهاتف','Phone', ltr(u.phone, 'num'))
+        + td('الحالة','Status', badge(u.status)) + td('تاريخ التسجيل','Registered', '<span class="num">' + esc(dateTxt(u.regDate) || '—') + '</span>', 'opt'); };
+    } else if(tab.k === 'store'){
+      head = th('الحساب','Account') + th('النوع','Type') + th('المتجر المرتبط','Linked store') + th('البريد','Email', 'opt') + th('الحالة','Status') + th('تاريخ التسجيل','Registered', 'opt');
+      row = function(u){
+        var lk = storeLink(u);
+        var store = lk.ok ? '<span><bdi class="strong">' + esc(L(lk.store.name) || '—') + '</bdi><span class="sub num">' + esc(lk.slug) + '</span></span>'
+          : lk.reason === 'store_not_found' ? '<span><span class="num">' + esc(lk.slug) + '</span><span class="sub">' + esc(T('غير موجود في سجل المتاجر','Not found in the store records')) + '</span></span>'
+          : dash();
+        return nameCell(u, u.id) + td('النوع','Type', '<span class="kind' + (u.roleId === 'merchant_employee' ? ' emp' : '') + '">' + esc(roleName(u.roleId)) + '</span>')
+          + td('المتجر المرتبط','Linked store', store) + td('البريد','Email', ltr(u.email), 'opt')
+          + td('الحالة','Status', badge(u.status)) + td('تاريخ التسجيل','Registered', '<span class="num">' + esc(dateTxt(u.regDate) || '—') + '</span>', 'opt');
+      };
+    } else {
+      head = th('الحساب','Account') + th('الدور','Role') + th('البريد','Email') + th('الهاتف','Phone', 'opt') + th('الحالة','Status') + th('تاريخ التسجيل','Registered', 'opt');
+      row = function(u){ return nameCell(u, u.id) + td('الدور','Role', '<span class="kind">' + esc(roleName(u.roleId)) + '</span>')
+        + td('البريد','Email', ltr(u.email)) + td('الهاتف','Phone', ltr(u.phone, 'num'), 'opt')
+        + td('الحالة','Status', badge(u.status)) + td('تاريخ التسجيل','Registered', '<span class="num">' + esc(dateTxt(u.regDate) || '—') + '</span>', 'opt'); };
+    }
+    return table(tab, head, list.map(function(u){ return '<tr onclick="ACP.open(\'' + esc(u.id) + '\', event)">' + row(u) + viewCell(u.id) + '</tr>'; }).join(''));
+  }
+  function table(tab, head, rows){
+    return '<table class="qt"><caption class="sr-only">' + esc(T(tab.ar, tab.en)) + '</caption><thead><tr>' + head
+      + '<th scope="col" class="act"><span class="sr-only">' + esc(T('إجراء','Action')) + '</span></th></tr></thead><tbody>' + rows + '</tbody></table>';
+  }
+  function lockBox(msg){ return '<div class="lock"><i class="ti ti-lock" aria-hidden="true"></i><span>' + esc(msg) + '</span></div>'; }
+  function logisticsNote(){
+    var href = null; try { var d = A.destinations().filter(function(x){ return x.d.k === 'logistics'; })[0]; href = d ? d.href : null; } catch(e){}
+    return '<div class="note-line bottom"><i class="ti ti-route" aria-hidden="true"></i><span>'
+      + esc(T('هذا سجل حساب السائق فقط. إدارة السائقين التشغيلية (التعيين والتوصيل والتوفر) تبقى في اللوجستيات.',
+              'This is the driver\'s account record only. Operational driver management (assignment, deliveries, availability) stays in Logistics.'))
+      + (href ? ' <a href="' + esc(href) + '"' + NEWTAB + '>' + esc(T('فتح اللوجستيات','Open Logistics')) + srNew() + '</a>' : '') + '</span></div>';
+  }
+  function driversBody(q, st){
+    /* the authority searches by name only (a driver is never findable by a
+       private contact detail); an exact account ID is matched here */
+    var all = drivers('');
+    if(!all.ok) return lockBox(all.code === 'FORBIDDEN'
+      ? T('حسابات السائقين تُقرأ عبر اللوجستيات وتتطلب صلاحية عرض السائقين.','Driver accounts are read through Logistics and need the view-drivers permission.')
+      : T('تعذّر قراءة حسابات السائقين.','Driver accounts could not be read.'));
+    if(!all.items.length) return emptyFor(false) + logisticsNote();
+    var byName = q ? drivers(q) : all, ids = {};
+    (byName.ok ? byName.items : []).forEach(function(d){ ids[d.driverId] = 1; });
+    var list = all.items.filter(function(d){
+      if(st && d.status !== st) return false;
+      return !q || ids[d.driverId] || String(d.driverId).toLowerCase() === q.toLowerCase();
+    });
+    if(!list.length) return emptyFor(true) + logisticsNote();
+    var contact = !!all.contactVisible;
+    var head = th('السائق','Driver') + (contact ? th('البريد','Email', 'opt') + th('الهاتف','Phone') : '') + th('الحالة','Status') + th('تاريخ التسجيل','Registered', 'opt');
+    var rows = list.map(function(d){
+      return '<tr onclick="ACP.open(\'' + esc(d.driverId) + '\', event)">' + nameCell({ name:d.name }, d.driverId)
+        + (contact ? td('البريد','Email', ltr(d.email), 'opt') + td('الهاتف','Phone', ltr(d.phone, 'num')) : '')
+        + td('الحالة','Status', badge(d.status)) + td('تاريخ التسجيل','Registered', '<span class="num">' + esc(dateTxt(d.regDate) || '—') + '</span>', 'opt')
+        + viewCell(d.driverId) + '</tr>';
+    }).join('');
+    return table(tabOf('drivers'), head, rows)
+      + (contact ? '' : '<div class="note-line bottom"><i class="ti ti-lock" aria-hidden="true"></i><span>' + esc(T('بيانات التواصل مع السائقين تظهر فقط لمن يملك صلاحية تعديل السائقين (قاعدة اللوجستيات).','Driver contact details are shown only to accounts that may edit drivers (the Logistics rule).')) + '</span></div>')
+      + logisticsNote();
+  }
+
+  /* ───────── one account ───────── */
+  function secBlock(id, icon, ar, en, body, meta){
+    return '<section class="pn" aria-labelledby="' + id + '"><div class="pn-h"><h2 id="' + id + '"><i class="ti ' + icon + '" aria-hidden="true"></i>' + esc(T(ar, en)) + '</h2>'
+      + (meta ? '<span class="meta">' + meta + '</span>' : '') + '</div>' + body + '</section>';
+  }
+  function row(ar, en, html, full){ return '<div' + (full ? ' class="full"' : '') + '><dt>' + esc(T(ar, en)) + '</dt>' + html + '</div>'; }
+  function dd(v, ltrv){ return v == null || v === '' ? '<dd class="na">—</dd>' : '<dd>' + (ltrv ? '<bdi dir="ltr">' + esc(v) + '</bdi>' : esc(v)) + '</dd>'; }
+  function ddh(html){ return '<dd>' + html + '</dd>'; }
+
+  function viewDetail(id){
+    var u = null; if(canView()){ try { u = P.getUser(id); } catch(e){ u = null; } }
+    var tab = null; if(u) TABS.forEach(function(t){ if(t.k !== 'drivers' && inTab(u, t)) tab = t; });
+    /* back to the list it came from, or — opened directly — to its own tab */
+    var to = LASTLIST || listHash({ tab:(u && u.roleId === 'driver') ? 'drivers' : (tab ? tab.k : 'customers') });
+    var back = '<a class="back" href="#' + esc(to) + '"><i class="ti ti-arrow-left" aria-hidden="true"></i>' + esc(T('إدارة الحسابات','Accounts Management')) + '</a>';
+    if(!canView()) return back + '<section class="pn">' + lockBox(T('لا تملك صلاحية عرض الحسابات.','You are not permitted to view accounts.')) + '</section>';
+    if(u && u.roleId === 'driver') return back + viewDriver(id);
+    if(!u || !tab) return back + '<section class="pn">' + '<div class="empty-q"><i class="ti ti-user-question" aria-hidden="true"></i>'
+      + esc(T('لا يوجد حساب بهذا المعرّف ضمن أنواع الحسابات المعروضة.','No account with this ID exists among the account types shown here.')) + '</div></section>';
+    return back + head(u.name, id, u.status, u.demo === true, [
+        [T('نوع الحساب','Account type'), esc(typeTxt(tab.type))],
+        [T('الدور','Role'), esc(roleName(u.roleId))],
+        [T('تاريخ التسجيل','Registered'), '<span class="num">' + esc(dateTxt(u.regDate) || '—') + '</span>'],
+        [T('الحالة','Status'), esc(stTxt(u.status))]
+      ])
+      + '<div class="case"><div class="case-main">' + secIdentity(u, tab) + (tab.k === 'store' ? secStore(u) : '') + secPermissions(u) + '</div>'
+      + '<div class="case-side">' + secStatus(u, tab) + secDates(u) + secAudit() + secReadOnly() + '</div></div>';
+  }
+  function head(name, id, status, demo, meta){
+    return '<section class="pn case-h" aria-labelledby="h-acc"><div class="t"><span class="av" aria-hidden="true">' + initial(name) + '</span>'
+      + '<span style="min-width:0"><h1 id="h-acc"><bdi>' + esc(name || '—') + '</bdi>' + (demo ? '<span class="demo">' + esc(T('حساب تجريبي','Demo account')) + '</span>' : '') + '</h1>'
+      + '<span class="idl num">' + esc(id) + '</span></span>' + badge(status) + '</div>'
+      + '<div class="meta-g">' + meta.map(function(m){ return '<div><span class="k">' + esc(m[0]) + '</span><span class="v">' + m[1] + '</span></div>'; }).join('') + '</div></section>';
+  }
+  function secIdentity(u, tab){
+    return secBlock('h-id', 'ti-id', 'الهوية', 'Identity', '<dl class="dl">'
+      + row('الاسم','Name', dd(u.name)) + row('معرّف الحساب','Account ID', dd(u.id, true))
+      + row('البريد الإلكتروني','Email', dd(u.email, true)) + row('الهاتف','Phone', dd(u.phone, true))
+      + row('نوع الحساب','Account type', dd(typeTxt(tab.type))) + row('الدور','Role', dd(roleName(u.roleId)))
+      + '</dl>');
+  }
+  function verifiedTxt(v){ return v === true ? T('موثّق','Verified') : v === false ? T('غير موثّق','Not verified') : null; }
+  function activationOf(u){
+    if(u.status === 'pending_activation') return T('بانتظار التفعيل — لا يمكنه تسجيل الدخول حتى يُفعَّل','Awaiting activation — cannot sign in until activated');
+    if(u.activatedAt) return T('مُفعَّل','Activated');
+    return null;                                                   /* no activation record exists for this account */
+  }
+  function secStatus(u, tab){
+    return secBlock('h-st', 'ti-shield-check', 'الحالة', 'Status', '<dl class="dl">'
+      + row('حالة الحساب','Account status', ddh(badge(u.status)), true)
+      + row('التوثيق','Verification', dd(verifiedTxt(u.verified)), true)
+      + row('التفعيل','Activation', dd(activationOf(u)), true)
+      + '</dl>');
+  }
+  function secStore(u){
+    var lk = storeLink(u), body;
+    if(lk.ok){
+      var sh = A.storesView() ? 'raf_admin_stores.html#store=' + encodeURIComponent(lk.slug) : null;
+      body = row('المتجر','Store', ddh((sh ? '<a href="' + esc(sh) + '">' : '') + '<bdi>' + esc(L(lk.store.name) || '—') + '</bdi>' + (sh ? '</a>' : '')))
+        + row('معرّف المتجر','Store identifier', dd(lk.slug, true))
+        + row('رقم المتجر','Store no.', dd(lk.store.num || null, true))
+        + row('حالة المتجر','Store status', dd(lk.store.status ? ({ open:T('مفتوح','Open'), closed:T('مغلق','Closed'), suspended:T('موقوف','Suspended') }[lk.store.status] || lk.store.status) : null));
+    } else if(lk.reason === 'store_not_found'){
+      body = row('معرّف المتجر','Store identifier', ddh('<bdi dir="ltr">' + esc(lk.slug) + '</bdi><span class="hint">' + esc(T('هذا المعرّف غير موجود في سجل المتاجر.','This identifier does not exist in the store records.')) + '</span>'), true);
+    } else {
+      body = row('المتجر','Store', ddh('<span class="na">—</span><span class="hint">' + esc(T('لا يرتبط هذا الحساب بأي متجر.','This account is not linked to any store.')) + '</span>'), true);
+    }
+    var pf = u.provisionedFrom || null;
+    if(pf){
+      var rh = A.requestsView() && pf.applicationId ? 'raf_admin_requests.html#request=' + encodeURIComponent('merchant_join:' + pf.applicationId) : null;
+      var by = null; if(pf.by){ try { var b = P.getUser(pf.by); by = b ? b.name : pf.by; } catch(e){ by = pf.by; } }
+      body += row('طلب الانضمام','Join application', pf.ref ? ddh(rh ? '<a href="' + esc(rh) + '"><bdi dir="ltr">' + esc(pf.ref) + '</bdi></a>' : '<bdi dir="ltr">' + esc(pf.ref) + '</bdi>') : dd(null))
+        + row('أُنشئ بواسطة','Provisioned by', dd(by));
+    }
+    return secBlock('h-store', 'ti-building-store', 'المتجر المرتبط', 'Linked store', '<dl class="dl">' + body + '</dl>');
+  }
+  function secDates(u){
+    var pf = u.provisionedFrom || null;
+    return secBlock('h-dt', 'ti-calendar', 'التواريخ', 'Dates', '<dl class="dl">'
+      + row('تاريخ التسجيل','Registered', dd(dateTxt(u.regDate)), true)
+      + (pf ? row('تاريخ الإنشاء من الطلب','Provisioned', dd(pf.at ? clockOf(pf.at) : null), true) : '')
+      + row('تاريخ التفعيل','Activated', dd(u.activatedAt ? clockOf(u.activatedAt) : null), true)
+      + row('آخر تسجيل دخول','Last sign-in', ddh('<span class="na">—</span><span class="hint">' + esc(T('لا يسجّل رف أوقات تسجيل الدخول.','RAF does not record sign-in times.')) + '</span>'), true)
+      + '</dl>');
+  }
+  /* permissions as RAFPerm resolves them: (role ∪ grants) − revokes */
+  function secPermissions(u){
+    if(!canPerms()) return secBlock('h-perm', 'ti-key', 'الصلاحيات', 'Permissions',
+      '<dl class="dl">' + row('الدور','Role', dd(roleName(u.roleId)), true) + '</dl>'
+      + lockBox(T('تفاصيل الصلاحيات تتطلب صلاحية عرض الصلاحيات.','Permission details need the view-permissions permission.')));
+    var eff = [], cat = [], mods = [];
+    try { eff = P.effectivePermissions(u.id) || []; cat = P.getCatalog() || []; mods = P.getModules() || []; } catch(e){}
+    var ov = u.overrides || {}, grants = [], revokes = [];
+    Object.keys(ov).forEach(function(k){ if(ov[k] === 'grant') grants.push(k); else if(ov[k] === 'revoke') revokes.push(k); });
+    function label(k){ var c = cat.filter(function(p){ return p.key === k; })[0]; return c ? T(c.labelAr, c.labelEn) : k; }
+    var set = {}; eff.forEach(function(k){ set[k] = 1; });
+    var body = mods.map(function(m){
+      var keys = cat.filter(function(p){ return p.module === m.id && (set[p.key] || ov[p.key] === 'revoke'); });
+      if(!keys.length) return '';
+      return '<li><b><i class="ti ' + esc(m.icon || 'ti-key') + '" aria-hidden="true"></i>' + esc(T(m.labelAr, m.labelEn)) + '</b><span class="chips">'
+        + keys.map(function(p){
+            var o = ov[p.key];
+            return '<span class="chip' + (o === 'grant' ? ' g' : o === 'revoke' ? ' r' : '') + '" title="' + esc(p.key) + '">' + esc(label(p.key))
+              + (o === 'grant' ? '<span class="sr-only"> ' + esc(T('(ممنوحة إضافياً)','(granted)')) + '</span>' : o === 'revoke' ? '<span class="sr-only"> ' + esc(T('(مسحوبة)','(revoked)')) + '</span>' : '') + '</span>';
+          }).join('') + '</span></li>';
+    }).join('');
+    var meta = '<span class="num">' + eff.length + '</span> ' + esc(T('صلاحية فعّالة','effective'));
+    return secBlock('h-perm', 'ti-key', 'الصلاحيات', 'Permissions',
+      '<dl class="dl">' + row('الدور','Role', dd(roleName(u.roleId)))
+      + row('تعديلات على الدور','Overrides', dd(grants.length || revokes.length
+          ? T(grants.length + ' ممنوحة · ' + revokes.length + ' مسحوبة', grants.length + ' granted · ' + revokes.length + ' revoked') : T('لا يوجد','None'))) + '</dl>'
+      + (body ? '<ul class="pmod" style="border-block-start:1px solid var(--line)">' + body + '</ul>'
+              : '<div class="empty-q" style="border-block-start:1px solid var(--line)"><i class="ti ti-key-off" aria-hidden="true"></i>' + esc(T('لا يملك هذا الحساب أي صلاحية إدارية.','This account holds no administrative permission.')) + '</div>')
+      + ((grants.length || revokes.length) ? '<div class="note-line bottom"><i class="ti ti-info-circle" aria-hidden="true"></i><span>'
+          + esc(T('الأخضر: ممنوحة إضافياً لهذا الحساب. المشطوب: مسحوبة من صلاحيات الدور.','Green: granted to this account on top of its role. Struck through: revoked from its role.')) + '</span></div>' : ''),
+      meta);
+  }
+  function secAudit(){
+    return secBlock('h-aud', 'ti-history', 'سجل الحساب', 'Account history',
+      '<div class="lock"><i class="ti ti-history-off" aria-hidden="true"></i><span>' + esc(T('سجل تدقيق الحساب غير متاح حالياً.','Account audit history is not currently available.')) + '</span></div>');
+  }
+  function secReadOnly(){
+    return secBlock('h-ro', 'ti-eye', 'عرض فقط', 'View only', '<ul class="una">'
+      + '<li><i class="ti ti-lock" aria-hidden="true"></i><b>' + esc(T('لا توجد إجراءات على الحساب هنا','No account actions here')) + '</b>'
+      + '<span>' + esc(T('تعديل البيانات وتغيير الحالة وإدارة كلمة المرور والصلاحيات غير متاحة في إدارة الحسابات حالياً.','Editing details, changing status, password handling and permission changes are not available in Accounts Management yet.')) + '</span></li></ul>');
+  }
+
+  /* a driver's account record — read through the driver authority */
+  function viewDriver(id){
+    var r = null; try { r = LG ? LG.getDriver(id) : null; } catch(e){ r = null; }
+    if(!r || !r.ok) return '<section class="pn">' + lockBox(r && r.code === 'FORBIDDEN'
+      ? T('حسابات السائقين تُقرأ عبر اللوجستيات وتتطلب صلاحية عرض السائقين.','Driver accounts are read through Logistics and need the view-drivers permission.')
+      : T('تعذّر قراءة حساب السائق.','The driver account could not be read.')) + '</section>';
+    var d = r.driver, contact = d.hasOwnProperty('email') || d.hasOwnProperty('phone');
+    var dt = tabOf('drivers');
+    var appHref = d.applicationId && A.driversView() ? 'raf_logistics_drivers.html#app=' + encodeURIComponent(d.applicationId) : null;
+    var idBody = '<dl class="dl">' + row('الاسم','Name', dd(d.name)) + row('معرّف الحساب','Account ID', dd(d.driverId, true))
+      + (contact ? row('البريد الإلكتروني','Email', dd(d.email, true)) + row('الهاتف','Phone', dd(d.phone, true))
+                 : row('بيانات التواصل','Contact details', ddh('<span class="na">—</span><span class="hint">' + esc(T('تظهر فقط لمن يملك صلاحية تعديل السائقين (قاعدة اللوجستيات).','Shown only to accounts that may edit drivers (the Logistics rule).')) + '</span>'), true))
+      + row('نوع الحساب','Account type', dd(typeTxt(dt.type))) + row('الدور','Role', dd(roleName('driver')))
+      + '</dl>';
+    var link = '<dl class="dl">'
+      + row('طلب الانضمام','Join application', d.applicationId ? ddh(appHref ? '<a href="' + esc(appHref) + '"' + NEWTAB + '><bdi dir="ltr">' + esc(d.applicationId) + '</bdi>' + srNew() + '</a>' : '<bdi dir="ltr">' + esc(d.applicationId) + '</bdi>') : dd(null), true)
+      + '</dl>' + logisticsNote();
+    var permUser = null; try { permUser = P.getUser(id); } catch(e){}
+    return head(d.name, d.driverId, d.status, false, [
+        [T('نوع الحساب','Account type'), esc(typeTxt(dt.type))],
+        [T('الدور','Role'), esc(roleName('driver'))],
+        [T('تاريخ التسجيل','Registered'), '<span class="num">' + esc(dateTxt(d.regDate) || '—') + '</span>'],
+        [T('الحالة','Status'), esc(stTxt(d.status))]
+      ])
+      + '<div class="case"><div class="case-main">' + secBlock('h-id', 'ti-id', 'الهوية', 'Identity', idBody)
+      + secBlock('h-lnk', 'ti-link', 'الارتباطات', 'Relationships', link)
+      + (permUser ? secPermissions(permUser) : '') + '</div>'
+      + '<div class="case-side">' + secBlock('h-st', 'ti-shield-check', 'الحالة', 'Status', '<dl class="dl">'
+          + row('حالة الحساب','Account status', ddh(badge(d.status)), true)
+          + row('التوثيق','Verification', dd(null), true) + row('التفعيل','Activation', dd(null), true) + '</dl>')
+      + secBlock('h-dt', 'ti-calendar', 'التواريخ', 'Dates', '<dl class="dl">' + row('تاريخ التسجيل','Registered', dd(dateTxt(d.regDate)), true)
+          + row('آخر تسجيل دخول','Last sign-in', ddh('<span class="na">—</span><span class="hint">' + esc(T('لا يسجّل رف أوقات تسجيل الدخول.','RAF does not record sign-in times.')) + '</span>'), true) + '</dl>')
+      + secAudit() + secReadOnly() + '</div></div>';
+  }
+
+  /* ───────── render ───────── */
+  var LASTLIST = '';
+  function render(){
+    var a = document.activeElement, keep = a && a.id ? { id:a.id, s:a.selectionStart, e:a.selectionEnd } : null;
+    ROUTE = parseHash();
+    if(ROUTE.account) el('view').innerHTML = viewDetail(ROUTE.account);
+    else {
+      if(!ROUTE.tab) ROUTE.tab = 'customers';
+      LASTLIST = listHash(ROUTE);
+      el('view').innerHTML = viewList();
+      /* on a narrow screen the tab strip scrolls: keep the current tab in sight */
+      var bar = document.querySelector('.ac-tabs'), cur = bar && bar.querySelector('[aria-current]');
+      if(bar && cur && bar.scrollWidth > bar.clientWidth){
+        var b = bar.getBoundingClientRect(), c = cur.getBoundingClientRect();
+        if(c.left < b.left) bar.scrollLeft -= (b.left - c.left) + 8;
+        else if(c.right > b.right) bar.scrollLeft += (c.right - b.right) + 8;
+      }
+    }
+    if(keep){ var n = el(keep.id); if(n){ n.focus(); try { if(keep.s != null) n.setSelectionRange(keep.s, keep.e); } catch(e){} } }
+  }
+  var tq = null;
+  window.ACP = {
+    seg:function(k){ var f = parseHash(); f.seg = k; setList(f, true); },
+    status:function(v){ var f = parseHash(); f.status = v; setList(f); },
+    search:function(v){ clearTimeout(tq); tq = setTimeout(function(){ var f = parseHash(); f.q = v.trim(); setList(f); }, 180); },
+    clear:function(){ var f = parseHash(); setList({ tab:f.tab }, true); },
+    open:function(id, ev){
+      if(ev && ev.target && ev.target.closest && ev.target.closest('a')) return;
+      location.hash = 'account=' + encodeURIComponent(id);
+    }
+  };
+  window.addEventListener('hashchange', function(){ render(); el('view').focus(); });
+  A.start({ active:'accounts', title:{ ar:'إدارة الحسابات', en:'Accounts Management' },
+            canEnter:function(){ return A.accountsView(); },
+            denied:['لا تملك صلاحية الوصول','You do not have access','إدارة الحسابات غير متاحة لحسابك.','Accounts Management is not available to your account.'],
+            refresh:render });
+})();
+</script>
+</body>
+</html>

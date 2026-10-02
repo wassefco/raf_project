@@ -141,6 +141,21 @@
 .una i{ color:var(--faint); font-size:16px; margin-top:1px; }
 .una b{ font-size:13px; color:var(--ink); }
 .una span{ grid-column:2; font-size:11.5px; color:var(--faint); line-height:1.55; }
+.dec{ padding:12px 16px; display:flex; flex-direction:column; gap:10px; }
+.dec .row{ display:flex; gap:8px; }
+.dec .row .btn{ flex:1 1 140px; min-height:44px; font-size:13px; }
+.btn.approve{ background:var(--gold); border-color:var(--gold); color:#15130F; }
+.btn.approve:hover{ filter:brightness(.96); background:var(--gold); }
+.btn.reject{ background:transparent; border-color:var(--alert); color:var(--alert); }
+.btn.reject:hover{ background:var(--alert-bg); }
+.btn.ghost{ background:transparent; }
+.dec .confirm{ border:1px solid var(--line-2); border-radius:var(--r); padding:10px 12px; background:var(--surface-2); font-size:12.5px; color:var(--text); display:flex; flex-direction:column; gap:8px; line-height:1.6; }
+.dec .confirm.rej{ border-color:var(--alert); background:var(--alert-bg); }
+.dec .err{ color:var(--alert); font-size:12.5px; font-weight:700; }
+.dec .ok{ color:var(--done); font-size:12.5px; font-weight:700; }
+.sdl{ display:grid; grid-template-columns:auto minmax(0,1fr); gap:6px 12px; margin:0; padding:12px 16px; font-size:12.5px; align-items:center; }
+.sdl dt{ color:var(--faint); font-weight:700; } .sdl dd{ margin:0; color:var(--ink); font-weight:700; overflow-wrap:anywhere; }
+.sdl a{ color:var(--accent); }
 .ro{ display:flex; gap:8px; align-items:flex-start; font-size:12.5px; color:var(--muted); padding:12px 16px; }
 .ro i{ color:var(--accent); font-size:16px; }
 
@@ -150,6 +165,8 @@
 @media (min-width:761px) and (max-width:1100px){ #lBody .qt .opt, #lBody .qt .act{ display:none; } }
 @media (max-width:1199px){
   .case{ grid-template-columns:minmax(0,1fr); }
+  /* the operational status and its controls come first on a narrower screen */
+  .case-side{ order:-1; }
 }
 @media (max-width:760px){
   .meta-g{ grid-template-columns:repeat(2, minmax(0,1fr)); }
@@ -237,18 +254,22 @@
 <script src="raf_logistics_authority.js"></script>
 <script src="raf_merchant_applications.js"></script>
 <script src="raf_merchant_auth.js"></script>
+<script src="raf_store_profile.js"></script>
+<script src="raf_store_status.js"></script>
 <script src="raf_requests.js"></script>
 <script src="raf_admin_shell.js"></script>
 <script>
 /* ============================================================================
    RAF MANAGEMENT — STORES MANAGEMENT (إدارة المتاجر)
    Every store RAF holds, read from the authorities that own each fact. This
-   page keeps no storage, writes nothing, and records no audit event.
+   page keeps no storage and writes nothing on load.
 
-   There is NO authority that changes a store's status, deletes a store or
-   edits it on Management's behalf (RAFStoreProfile / RAFStoreSchedule are
-   scoped to the merchant's own store). Those actions are therefore listed as
-   unavailable — never simulated.
+   STORE STATUS is changed only through RAFStoreStatus (open / close with
+   stores.manage, suspend / restore with stores.suspend), which proves the
+   permission itself and records the audit. Deleting a store and editing its
+   profile or schedule have no Management authority (RAFStoreProfile /
+   RAFStoreSchedule are scoped to the merchant.s own store), so those stay
+   listed as unavailable — never simulated.
 
    ROUTES (hash):  #store=<slug>                 one store, in full
                    #status=…&cat=…&q=…           the list with its filters
@@ -259,7 +280,8 @@
   var A = window.RAFAdmin, SRC = window.RAFSource, P = window.RAFPerm;
   var T = A.T, L = A.L, esc = A.esc, clockOf = A.clockOf, isoOf = A.isoOf, el = A.el,
       NEWTAB = A.NEWTAB, srNew = A.srNew, ext = A.ext;
-  var ROUTE = {}, LASTQ = '';
+  var ROUTE = {}, LASTQ = '', UI = { confirm:null, expect:null, err:null, msg:null, busy:false };
+  var SS = window.RAFStoreStatus;
   var STATUSES = ['open', 'closed', 'suspended'];
   var ST_LABEL = { open:['مفتوح','Open','b-done'], closed:['مغلق','Closed','b-off'], suspended:['موقوف','Suspended','b-hot'] };
 
@@ -579,18 +601,96 @@
     }).join('') + '</ul>', '<span class="num">' + cfg.done + '/' + cfg.total + '</span>');
   }
   /* no authority performs these for RAF Management — shown, never simulated */
-  function secActions(){
+  /* ───────── status & operational control (RAFStoreStatus) ───────── */
+  var OPS = {
+    open:    { fn:'open',    key:'manage',  icon:'ti-lock-open',     ar:'فتح المتجر',      en:'Open store',
+               cAr:'سيُفتح المتجر ويستقبل الطلبات الجديدة وفق جدول عمله.', cEn:'The store opens and accepts new orders within its schedule.' },
+    close:   { fn:'close',   key:'manage',  icon:'ti-lock',          ar:'إغلاق المتجر',    en:'Close store',
+               cAr:'سيُغلق المتجر ولن يستقبل طلبات جديدة.', cEn:'The store closes and takes no new orders.' },
+    suspend: { fn:'suspend', key:'suspend', icon:'ti-ban',           ar:'إيقاف المتجر',    en:'Suspend store', danger:true,
+               cAr:'إيقاف إداري من إدارة رف: لا يستقبل المتجر طلبات جديدة حتى تتم استعادته.', cEn:'Administrative suspension by RAF Management: no new orders until the store is restored.' },
+    /* restore: Management chooses the status — nothing is assumed */
+    restore_open:   { fn:'restore', to:'open',   key:'suspend', icon:'ti-arrow-back-up', ar:'استعادة (مفتوح)', en:'Restore (open)',
+               cAr:'سيُرفع الإيقاف ويعود المتجر مفتوحاً.', cEn:'The suspension is lifted and the store returns open.' },
+    restore_closed: { fn:'restore', to:'closed', key:'suspend', icon:'ti-arrow-back-up', ar:'استعادة (مغلق)', en:'Restore (closed)',
+               cAr:'سيُرفع الإيقاف ويعود المتجر مغلقاً.', cEn:'The suspension is lifted and the store returns closed.' }
+  };
+  var ST_TXT = { open:['مفتوح','Open'], closed:['مغلق','Closed'], suspended:['موقوف','Suspended'] };
+  function stTxt(k){ var x = ST_TXT[k]; return x ? T(x[0], x[1]) : (k || '—'); }
+  var OP_TXT = { open:['فتح المتجر','Store opened'], close:['إغلاق المتجر','Store closed'],
+                 suspend:['إيقاف إداري','Administrative suspension'], restore:['استعادة من الإيقاف','Restored from suspension'],
+                 closure_approved:['قبول طلب إغلاق التاجر','Merchant closure request approved'],
+                 closure_expired:['إعادة فتح تلقائية بعد انتهاء مدة الإغلاق','Reopened automatically when the closure period ended'] };
+  function kv(k, v){ return '<dt>' + esc(k) + '</dt><dd>' + v + '</dd>'; }
+  function secActions(s){
+    var caps = null; try { caps = SS ? SS.capabilities() : null; } catch(e){ caps = null; }
+    var info = SS ? SS.statusOf(s.slug) : null, cur = s.status;
+    /* what is recorded about the current status — nothing is inferred */
+    var lc = info && info.lastChange, cl = info && info.closure, sp = info && info.suspension;
+    var body = '<dl class="sdl">'
+      + kv(T('الحالة الحالية','Current status'), badge(cur))
+      + kv(T('آخر تغيير','Last change'), lc ? esc(OP_TXT[lc.op] ? T(OP_TXT[lc.op][0], OP_TXT[lc.op][1]) : lc.op) + ' · <bdi>' + esc(lc.byName || (lc.automatic ? T('النظام (تلقائي)','System (automatic)') : '—')) + '</bdi> · <span class="num">' + esc(clockOf(lc.at) || '—') + '</span>' : '—')
+      + '</dl>';
+    if(cl) body += '<div class="note-line" style="border-block-start:1px solid var(--line)"><b>' + esc(T('إغلاق معتمد بطلب التاجر','Approved merchant closure')) + '</b></div>'
+      + '<dl class="sdl">'
+      + kv(T('رقم الطلب','Request'), reqLink(cl.requestId, cl.ref))
+      + kv(T('المدة المعتمدة','Approved duration'), '<span class="num">' + esc(cl.totalDays || cl.days) + '</span> ' + esc(T('يوم','day(s)'))
+          + ((cl.extensions || []).length ? ' <span style="color:var(--faint);font-weight:600">(' + esc(T('منها تمديد: ','incl. extensions: ')) + '<span class="num">' + esc(cl.extensions.reduce(function(n, x){ return n + x.days; }, 0)) + '</span>)</span>' : ''))
+      + kv(T('يبدأ','Starts'), '<span class="num">' + esc(cl.startsAt ? clockOf(cl.startsAt) : '—') + '</span>')
+      + kv(T('ينتهي','Ends'), '<span class="num">' + esc(cl.endsAt ? clockOf(cl.endsAt) : '—') + '</span>')
+      + kv(T('السبب','Reason'), esc(cl.reason || '—'))
+      + kv(T('طلبه','Requested by'), '<bdi>' + esc(cl.requestedByName || '—') + '</bdi>')
+      + kv(T('اعتمده','Approved by'), '<bdi>' + esc(cl.approvedByName || '—') + '</bdi> · <span class="num">' + esc(clockOf(cl.approvedAt) || '—') + '</span>')
+      + (cl.extensions || []).map(function(x){ return kv(T('تمديد','Extension'), reqLink(x.requestId, x.ref, 'extension') + ' · +<span class="num">' + esc(x.days) + '</span> ' + esc(T('يوم','day(s)')) + ' · <bdi>' + esc(x.approvedByName || '—') + '</bdi>'); }).join('')
+      + '</dl><div class="note-line">' + esc(T('يعود المتجر مفتوحاً تلقائياً عند نهاية المدة المعتمدة (ما لم يكن موقوفاً).','The store returns to open automatically when the approved period ends (unless it is suspended).')) + '</div>';
+    if(sp) body += '<div class="note-line" style="border-block-start:1px solid var(--line)"><b>' + esc(T('الإيقاف الإداري','Administrative suspension')) + '</b></div>'
+      + '<dl class="sdl">'
+      + kv(T('أوقفه','Suspended by'), '<bdi>' + esc(sp.byName || '—') + '</bdi> · <span class="num">' + esc(clockOf(sp.at) || '—') + '</span>')
+      + kv(T('الحالة قبل الإيقاف','Status before'), esc(stTxt(sp.previousStatus)))
+      + '</dl>';
+    /* a closure request still waiting for a decision */
+    var pend = [];
+    if(caps && caps.manage){ try { var lr = SS.listRequests({ status:'pending', storeSlug:s.slug }); pend = lr.ok ? lr.items : []; } catch(e){ pend = []; } }
+    pend.forEach(function(p){
+      body += '<div class="note-line" style="border-block-start:1px solid var(--line);color:var(--pend)"><i class="ti ti-clock" aria-hidden="true"></i> '
+        + esc(p.kind === 'extension' ? T('طلب تمديد من التاجر بانتظار القرار: ','A merchant extension request awaits a decision: ') : T('طلب إغلاق من التاجر بانتظار القرار: ','A merchant closure request awaits a decision: ')) + reqLink(p.requestId, p.ref, p.kind)
+        + ' · <span class="num">' + esc(p.days) + '</span> ' + esc(T('يوم','day(s)')) + '</div>';
+    });
+
+    /* the operations this status allows, each shown only with its permission */
+    var avail = cur === 'open' ? ['close', 'suspend'] : cur === 'closed' ? ['open', 'suspend'] : cur === 'suspended' ? ['restore_open', 'restore_closed'] : [];
+    var mine = avail.filter(function(k){ return caps && caps[OPS[k].key]; });
+    var ctl = '';
+    if(UI.confirm && mine.indexOf(UI.confirm) > -1){
+      var o = OPS[UI.confirm];
+      ctl = '<div class="dec"><div class="confirm' + (o.danger ? ' rej' : '') + '" role="alertdialog" aria-label="' + esc(T(o.ar, o.en)) + '"><span>'
+        + esc(T(o.cAr, o.cEn)) + '</span>'
+        + '<div class="row"><button class="btn ' + (o.danger ? 'reject' : 'approve') + '" type="button" id="btnConfirm" onclick="STP.commit()"' + (UI.busy ? ' disabled' : '') + '>'
+        + esc(T('تأكيد','Confirm')) + '</button><button class="btn ghost" type="button" onclick="STP.cancel()">' + esc(T('إلغاء','Cancel')) + '</button></div></div></div>';
+    } else if(mine.length){
+      ctl = '<div class="dec"><div class="row" style="flex-wrap:wrap">' + mine.map(function(k){
+        var o = OPS[k];
+        return '<button class="btn ' + (o.danger ? 'reject' : 'approve') + '" type="button" onclick="STP.ask(\'' + k + '\')"><i class="ti ' + o.icon + '" aria-hidden="true"></i>' + esc(T(o.ar, o.en)) + '</button>';
+      }).join('') + '</div></div>';
+    } else {
+      ctl = '<div class="ro"><i class="ti ti-eye" aria-hidden="true"></i><span>' + esc(T('عرض فقط — لا تملك صلاحية تغيير حالة المتجر.','View only — you are not permitted to change the store status.')) + '</span></div>';
+    }
+    if(UI.err) ctl += '<div class="dec" style="padding-top:0"><div class="err" role="alert">' + esc(UI.err) + '</div></div>';
+    if(UI.msg) ctl += '<div class="dec" style="padding-top:0"><div class="ok" role="status">' + esc(UI.msg) + '</div></div>';
+
     var U = [
-      ['ti-toggle-left', 'تغيير حالة المتجر (فتح / إغلاق / إيقاف)', 'Change store status (open / close / suspend)',
-       'لا توجد جهة معتمدة في رف لتغيير حالة المتجر بعد.', 'No RAF authority changes a store\'s status yet.'],
-      ['ti-edit', 'تعديل ملف المتجر أو جدول العمل', 'Edit the store profile or schedule',
-       'التعديل متاح لحساب التاجر على متجره فقط؛ لا تملك إدارة رف جهة تعديل.', 'Editing is available to the merchant account for its own store only; RAF Management has no editing authority.'],
+      ['ti-edit', 'تعديل ملف المتجر أو جدول العمل مباشرة', 'Edit the store profile or schedule directly',
+       'يرسل التاجر تعديلات ملف المتجر طلباً يُعتمد أو يُرفض في «الطلبات والموافقات»؛ جدول العمل يعدّله التاجر لمتجره.', 'The merchant submits store-profile changes as a request that is approved or rejected in Requests & Approvals; the merchant edits its own schedule.'],
       ['ti-trash', 'حذف المتجر', 'Delete the store',
        'حذف المتاجر غير مُنفّذ.', 'Store deletion is not implemented.']
     ];
-    return secBlock('h-acts', 'ti-settings', 'الإجراءات', 'Actions', '<ul class="una">' + U.map(function(u){
+    return secBlock('h-acts', 'ti-settings', 'الحالة والإجراءات', 'Status & actions', body + ctl + '<ul class="una" style="border-block-start:1px solid var(--line)">' + U.map(function(u){
       return '<li><i class="ti ' + u[0] + '" aria-hidden="true"></i><b>' + esc(T(u[1], u[2])) + ' — ' + esc(T('غير متاح','Unavailable')) + '</b><span>' + esc(T(u[3], u[4])) + '</span></li>';
     }).join('') + '</ul>');
+  }
+  function reqLink(id, ref, kind){
+    var h = A.requestsView() && id ? 'raf_admin_requests.html#request=' + encodeURIComponent((kind === 'extension' ? 'store_closure_extension:' : 'store_closure:') + id) : null;
+    return h ? '<a href="' + esc(h) + '" class="num">' + esc(ref || id) + '</a>' : '<span class="num">' + esc(ref || id || '—') + '</span>';
   }
   function viewDetail(slug){
     var back = '<a class="back" href="#' + LASTQ + '"><i class="ti ti-arrow-left" aria-hidden="true"></i>' + esc(T('إدارة المتاجر','Stores Management')) + '</a>';
@@ -609,7 +709,7 @@
       + (o && o.ref ? (rh ? '<a href="' + esc(rh) + '">' + esc(o.ref) + '</a>' : esc(o.ref)) : '—') + '</span></div>'
       + '</div></section>';
     return back + head + '<div class="case"><div class="case-main">' + secProfile(s) + secSchedule(s) + secCatalogue(s, prods) + secOrders(s) + secActivity(s) + '</div>'
-      + '<div class="case-side">' + secAccounts(s) + secConfig(cfg) + secActions() + '</div></div>';
+      + '<div class="case-side">' + secActions(s) + secAccounts(s) + secConfig(cfg) + '</div></div>';
   }
 
   /* ───────── render ───────── */
@@ -630,9 +730,29 @@
     open:function(slug, ev){
       if(ev && ev.target && ev.target.closest && ev.target.closest('a')) return;
       location.hash = 'store=' + encodeURIComponent(slug);
+    },
+    /* a status change: choose → confirm → RAFStoreStatus. The status the
+       page showed travels with the call, so a second click or another tab's
+       change is refused instead of applied twice. */
+    ask:function(k){
+      if(UI.busy) return;
+      var s = null; try { s = SRC.store(ROUTE.store); } catch(e){ s = null; }
+      /* the status the manager is looking at when choosing the action */
+      UI.confirm = k; UI.expect = s ? s.status : null; UI.err = null; UI.msg = null; render(); var b = el('btnConfirm'); if(b) b.focus();
+    },
+    cancel:function(){ UI.confirm = null; render(); },
+    commit:function(){
+      var k = UI.confirm, slug = ROUTE.store; if(!k || !slug || UI.busy || !SS) return;
+      UI.busy = true;
+      var arg = { expect:UI.expect || undefined }; if(OPS[k].to) arg.to = OPS[k].to;
+      var r = SS[OPS[k].fn](slug, arg);
+      UI.busy = false; UI.confirm = null;
+      if(!r || !r.ok){ UI.err = (r && r.message) || T('تعذّر تنفيذ الإجراء.','The action could not be carried out.'); UI.msg = null; render(); return; }
+      UI.err = null; UI.msg = T('تم. حالة المتجر الآن: ','Done. The store is now: ') + stTxt(r.to);
+      A.refresh();
     }
   };
-  window.addEventListener('hashchange', function(){ render(); el('view').focus(); });
+  window.addEventListener('hashchange', function(){ UI.confirm = null; UI.err = null; UI.msg = null; render(); el('view').focus(); });
   A.start({ active:'stores', title:{ ar:'إدارة المتاجر', en:'Stores Management' },
             canEnter:function(){ return A.storesView(); },
             denied:['لا تملك صلاحية الوصول','You do not have access','إدارة المتاجر غير متاحة لحسابك.','Stores Management is not available to your account.'],

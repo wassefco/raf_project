@@ -470,9 +470,21 @@
   }
 
   /* ---------- reads (base + overrides) ---------- */
+  /* APPROVED CLOSURE PERIOD. An approved full closure carries its authoritative
+     end (closure.endsAt, written by RAFStoreStatus). Past that end the store
+     IS open again: every reader sees `open` at once, whether or not
+     RAFStoreStatus has yet persisted and audited the automatic reopening
+     (it does so exactly once — see RAFStoreStatus.sweepExpired). Only a
+     `closed` store is affected; a suspended store is never touched. */
+  function effective(s){
+    if (!s || s.status !== STORE_STATUS.CLOSED || !s.closure || typeof s.closure.endsAt !== 'number' || Date.now() < s.closure.endsAt) return s;
+    var o = {}; for (var k in s) if (s.hasOwnProperty(k)) o[k] = s[k];
+    o.status = STORE_STATUS.OPEN; o.closure = null; o.closureEnded = s.closure;
+    return o;
+  }
   function store(slug){
     var b = baseStore(slug); if (!b) return null;
-    return merge(b, readOverrides().stores[slug]);
+    return effective(merge(b, readOverrides().stores[slug]));
   }
   function product(id){
     var b = baseOf(id); if (!b) return null;      /* seeded or merchant-created */
@@ -480,38 +492,60 @@
     p.storeRef = store(p.store);
     return p;
   }
+  /* ══════════ CUSTOMER DISCOVERY — visibility ≠ purchasability ══════════
+     Confirmed rule: a CLOSED or SUSPENDED store stays discoverable, and so do
+     its public products; a SOLD-OUT product stays discoverable. What they
+     lose is PURCHASABILITY only — refused at the cart (RAFShop.Cart) and at
+     checkout (RAFRules). Only a DELETED store (or a hidden / deleted product)
+     leaves the customer catalogue.
+     Discovery lists what can be bought first: open stores before closed /
+     suspended ones, purchasable products before the rest. Inside each group
+     the existing order is kept (sponsored first, then catalogue order). No
+     score is computed. */
+  function storeOpen(slug){ var s = store(slug); return !!s && s.status === STORE_STATUS.OPEN; }
+  function storeTier(s){ return s && s.status === STORE_STATUS.OPEN ? 0 : 1; }
   function stores(opts){
     opts = opts || {};
     var ov = readOverrides().stores;
-    var list = STORES.concat(createdStores()).map(function(s){ return merge(s, ov[s.slug]); })
+    var list = STORES.concat(createdStores()).map(function(s){ return effective(merge(s, ov[s.slug])); })
       .filter(function(s){ return s.status !== STORE_STATUS.DELETED; });
-    if (opts.visibleOnly !== false) list = list.filter(function(s){ return s.status === STORE_STATUS.OPEN; });
-    /* sponsored stores rank first — visibility is a paid, clearly-badged option */
-    return list.sort(function(a,b){ return (b.sponsored?1:0) - (a.sponsored?1:0); });
+    var customer = opts.visibleOnly !== false;
+    /* sponsored stores rank first inside a group — visibility is a paid, clearly-badged option */
+    return list.sort(function(a,b){
+      return (customer ? storeTier(a) - storeTier(b) : 0) || ((b.sponsored?1:0) - (a.sponsored?1:0));
+    });
   }
   /* a product the public may see at all: active (not hidden, not deleted).
      Whether its store is currently open is a separate, store-level fact. */
   function isPublic(p){ return !!p && p.status === PRODUCT_STATUS.ACTIVE; }
-  /* a product is listable only when it is active AND its store is open */
+  /* discoverable by customers: public, in a store that still exists (open,
+     closed or suspended — never deleted) */
   function isVisible(p){
     if (!isPublic(p)) return false;
     var s = store(p.store);
-    return !!s && s.status === STORE_STATUS.OPEN;
+    return !!s && s.status !== STORE_STATUS.DELETED;
   }
+  /* purchasable right now: discoverable, its store OPEN, and not sold out
+     (the catalogue's stock figure — the same rule as RAFShop.Stock) */
+  function isPurchasable(p){ return isVisible(p) && storeOpen(p.store) && p.stock !== 0; }
   function products(opts){
     opts = opts || {};
     var ov = readOverrides().products;
     /* seeded and merchant-created entries are one catalogue to every reader */
     var list = PRODUCTS.concat(createdProducts()).map(function(p){ return merge(p, ov[p.id]); });
+    var customer = opts.visibleOnly !== false || !!opts.publicOnly;
     if (opts.visibleOnly !== false) list = list.filter(isVisible);
-    /* a store's own listing: its public products, open or temporarily closed
-       (a closed store stays browsable — the Store Status Policy) */
+    /* a store's own listing: its public products, whatever the store's status */
     else if (opts.publicOnly) list = list.filter(isPublic);
     if (opts.cat) list = list.filter(function(p){ return p.cat === opts.cat; });
     if (opts.store) list = list.filter(function(p){ return p.store === opts.store; });
     if (opts.onSale) list = list.filter(function(p){ return (p.disc || 0) > 0; });
     if (opts.inStock) list = list.filter(function(p){ return p.stock !== 0; });
-    return list.sort(function(a,b){ return (b.sponsored?1:0) - (a.sponsored?1:0); });
+    var tier = {};
+    if (customer) list.forEach(function(p){ tier[p.id] = isPurchasable(p) ? 0 : 1; });
+    return list.sort(function(a,b){
+      return (customer ? tier[a.id] - tier[b.id] : 0) || ((b.sponsored?1:0) - (a.sponsored?1:0));
+    });
   }
   function categories(opts){
     opts = opts || {};
@@ -543,7 +577,7 @@
   global.RAFSource = {
     STORE_STATUS:STORE_STATUS, PRODUCT_STATUS:PRODUCT_STATUS,
     product:product, products:products, store:store, stores:stores,
-    categories:categories, isVisible:isVisible, isPublic:isPublic,
+    categories:categories, isVisible:isVisible, isPublic:isPublic, isPurchasable:isPurchasable, storeOpen:storeOpen,
     updateProduct:updateProduct, updateStore:updateStore, resetOverrides:resetOverrides,
     /* creation — identity and persistence are owned here, never by a page */
     addProduct:addProduct, nextProductId:nextProductId, createdProducts:createdProducts,

@@ -77,10 +77,17 @@
   function storesView(){
     try { return can('stores.view') && !!ME && !P().isMerchant(ME.id); } catch(e){ return false; }
   }
+  /* Accounts Management reads every account RAFPerm holds, so it is listed for
+     an account that holds users.view (the existing account-view key) and is
+     NOT store-scoped — the same rule Stores Management applies. */
+  function accountsView(){
+    try { return can('users.view') && !!ME && !P().isMerchant(ME.id); } catch(e){ return false; }
+  }
   var PAGES = [
     { k:'home', icon:'ti-home-2', ar:'الرئيسية', en:'Home', href:'raf_admin.html', show:function(){ return true; } },
     { k:'requests', icon:'ti-checklist', ar:'الطلبات والموافقات', en:'Requests & Approvals', href:'raf_admin_requests.html', show:requestsView },
-    { k:'stores', icon:'ti-building-store', ar:'إدارة المتاجر', en:'Stores Management', href:'raf_admin_stores.html', show:storesView }
+    { k:'stores', icon:'ti-building-store', ar:'إدارة المتاجر', en:'Stores Management', href:'raf_admin_stores.html', show:storesView },
+    { k:'accounts', icon:'ti-users', ar:'إدارة الحسابات', en:'Accounts Management', href:'raf_admin_accounts.html', show:accountsView }
   ];
 
   /* ───────── shell rendering ───────── */
@@ -223,7 +230,7 @@
     start:start, refresh:refresh,
     me:function(){ return ME ? { id:ME.id, name:ME.name, roleId:ME.roleId } : null; },
     can:can, caps:function(){ return CAP; }, logisticsOps:logisticsOps, driversView:driversView, csView:csView,
-    destinations:destinations, requestsView:requestsView, storesView:storesView,
+    destinations:destinations, requestsView:requestsView, storesView:storesView, accountsView:accountsView,
     T:T, L:L, esc:esc, clockOf:clockOf, isoOf:isoOf, isEn:isEn, el:el,
     NEWTAB:NEWTAB, srNew:srNew, ext:ext
   };

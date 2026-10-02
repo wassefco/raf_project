@@ -347,6 +347,9 @@
       return RAFCatalog.list({ cat:cat, inStock:true }).filter(function(x){
         if(x.id === id) return false;
         if(mine && x.slug === mine) return false;         /* other stores only */
+        /* an alternative is offered to BUY instead — so only what can be
+           bought now (open store, not sold out); discovery pages list the rest */
+        if(window.RAFSource && RAFSource.isPurchasable && !RAFSource.isPurchasable(RAFSource.product(x.id))) return false;
         if(!mine && storeKey && L(x.store) === storeKey) return false;
         return true;
       });

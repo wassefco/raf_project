@@ -41,6 +41,8 @@
 .od2-ib{flex:1 1 auto;min-width:0;}
 .od2-ib b{display:block;font-size:14px;font-weight:800;color:var(--ink);line-height:1.45;overflow-wrap:anywhere;}
 .od2-ib span{display:block;font-size:12px;color:var(--od-mute);margin-top:2px;overflow-wrap:anywhere;}
+.od2-cx{color:#A63A36;font-weight:700;}
+.od2-pr.od2-pr-cx{text-decoration:line-through;color:var(--od-mute);}
 .od2-pr{flex:0 0 auto;text-align:end;font-size:14px;font-weight:800;color:var(--ink);white-space:nowrap;font-variant-numeric:tabular-nums;}
 .od2-pr small{font-size:11px;font-weight:700;color:var(--od-mute);}
 .od2-pr .od2-each{display:block;font-size:11px;font-weight:600;color:var(--od-mute);}
@@ -465,9 +467,14 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
   function kwd(v){ return '<bdi dir="ltr">'+esc(v)+'</bdi> <small>'+T('د.ك','KWD')+'</small>'; }
   function itemsSection(o){
     var items=o.items||[];
+    /* the order's financial record (RAFOrderChanges.invoiceHistory): a removed
+       product stays visible as a cancelled line — never silently dropped */
+    var IH=null; try { IH = window.RAFOrderChanges && RAFOrderChanges.invoiceHistory ? RAFOrderChanges.invoiceHistory(o.id) : null; } catch(e){ IH=null; }
+    var cancelledAt = function(i){ var l = IH && IH.ok && IH.lines[i]; return l && l.status==='cancelled' ? l : null; };
     var count=items.reduce(function(n,it){ return n + (parseInt(it.qty,10)||1); },0);
     var COMPACT=3, shown=(SHOWALL || items.length<=COMPACT) ? items : items.slice(0,COMPACT);
-    var rows=shown.map(function(it){
+    var rows=shown.map(function(it, ix){
+      var cx = cancelledAt(ix);
       var qty=parseInt(it.qty,10)||1, v=it.variant||{};
       /* the chosen options only (their values), else the item's own stored description */
       var opts=Object.keys(v).map(function(k){ return v[k]; }).filter(Boolean);
@@ -475,8 +482,9 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
       var media = it.img ? ' style="background-image:url(\''+esc(it.img)+'\')"' : '';
       return '<div class="od2-it"><span class="od2-img"'+media+' aria-hidden="true">'+(it.img ? '' : '<i class="ti '+esc(it.ic||'ti-box')+'"></i>')+'</span>'
         + '<span class="od2-ib"><b>'+esc(L(it.name))+'</b>'
-          + '<span>'+(sub ? esc(sub)+' · ' : '')+T('الكمية: ','Qty: ')+'<bdi>'+qty+'</bdi></span></span>'
-        + (it.price ? '<span class="od2-pr">'+kwd(it.price)+(qty>1 ? '<span class="od2-each">'+T('للقطعة','each')+'</span>' : '')+'</span>' : '')
+          + '<span>'+(sub ? esc(sub)+' · ' : '')+T('الكمية: ','Qty: ')+'<bdi>'+qty+'</bdi>'
+          + (cx ? ' · <span class="od2-cx">'+T('ملغى','Cancelled')+(cx.reason && L(cx.reason) ? ' — '+esc(L(cx.reason)) : '')+'</span>' : '')+'</span></span>'
+        + (it.price ? '<span class="od2-pr'+(cx ? ' od2-pr-cx' : '')+'">'+kwd(it.price)+(qty>1 ? '<span class="od2-each">'+T('للقطعة','each')+'</span>' : '')+'</span>' : '')
         + '</div>';
     }).join('');
     var more = (!SHOWALL && items.length>COMPACT)
@@ -512,12 +520,22 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
       + (disc>0 ? row(T('الخصم','Discount')+(o.coupon?' ('+esc(o.coupon)+')':''), '− '+kwd(money(disc)), 'minus') : '')
       + (ship>0 ? row(T('التوصيل','Delivery'), kwd(money(ship))) : '')
       + (tip>0 ? row(T('إكرامية السائق','Driver tip'), kwd(money(tip))) : '')
-      + (tax>0 ? row(T('الضريبة','Tax'), kwd(money(tax))) : '')
-      + '<div class="od2-tot"><span>'+T('الإجمالي','Total')+'</span><b>'+kwd(money(total))+'</b></div>';
+      + (tax>0 ? row(T('الضريبة','Tax'), kwd(money(tax))) : '');
+    /* a cancelled product stays in the record: original total, the cancelled
+       amount and the adjusted total, from RAFOrderChanges.invoiceHistory */
+    var IH=null; try { IH = window.RAFOrderChanges && RAFOrderChanges.invoiceHistory ? RAFOrderChanges.invoiceHistory(o.id) : null; } catch(e){ IH=null; }
+    var hasCx = !!(IH && IH.ok && parseFloat(IH.cancelledTotal) > 0);
+    if (hasCx) h += row(T('الإجمالي الأصلي','Original total'), kwd(IH.originalTotal))
+      + row(T('منتجات ملغاة','Cancelled products'), '− '+kwd(IH.cancelledTotal), 'minus');
+    h += '<div class="od2-tot"><span>'+(hasCx ? T('الإجمالي بعد التعديل','Adjusted total') : T('الإجمالي','Total'))+'</span><b>'+kwd(money(total))+'</b></div>';
+    var isCod = !!(IH && IH.ok && IH.paymentMethodId === 'cod');
     var after=[];
     try {
       var hist = window.RAFOrderChanges && RAFOrderChanges.historyOf ? (RAFOrderChanges.historyOf(o.id) || []) : [];
       hist.forEach(function(c){ var r=c && c.refundResult; if(!r || !r.amount) return;
+        /* cash on delivery: a product removed before payment was simply not
+           collected — no refund to a payment method ever happened */
+        if (r.destination === 'not_collected' || (isCod && r.destination !== 'wallet')) return;
         after.push(row(r.destination==='wallet' ? T('مسترد إلى محفظة رف','Refunded to RAF Wallet') : T('مسترد إلى وسيلة الدفع','Refunded to your payment method'), '+ '+kwd(r.amount))); });
     } catch(e){}
     try {
@@ -731,7 +749,9 @@ html[dir="ltr"] .cc-arrow{transform:rotate(180deg);}
       /* re-render first so the card survives, then show why */
       render(); ccFail(res); return;
     }
-    var msg = res.refund
+    var msg = res.refund && res.refund.destination === 'not_collected'
+      ? T('تم تطبيق التعديل. ستدفع الإجمالي بعد التعديل عند الاستلام.','The change has been applied. You will pay the adjusted total on delivery.')
+      : res.refund
       ? (res.refund.destination === 'wallet'
           ? T('تمت الموافقة. أُضيف ' + res.refund.amount + ' د.ك إلى محفظتك.',
               'Approved. ' + res.refund.amount + ' KWD was added to your wallet.')
